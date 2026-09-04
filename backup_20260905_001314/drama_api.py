@@ -180,19 +180,10 @@ class Handler(BaseHTTPRequestHandler):
 
         elif path == "/api/orchestrate":
             length = int(self.headers.get("Content-Length",0))
-            raw = self.rfile.read(length) if length else b"{}"
-            try:
-                body = json.loads(raw) if raw else {}
-            except json.JSONDecodeError:
-                self._json({"error":"invalid JSON body"}, 400)
-                return
+            body = json.loads(self.rfile.read(length)) if length else {}
             ep = body.get("episode","EP01")
             topic = body.get("topic","昆仑洞天·太阴月神觉醒")
             stage = body.get("stage","full")
-            valid_stages = ["full","storyboard","keyframes","videos","compose","status"]
-            if stage not in valid_stages:
-                self._json({"error":f"invalid stage, must be one of {valid_stages}"}, 400)
-                return
             image_api = body.get("image_api")
             video_api = body.get("video_api")
             def run():
@@ -215,15 +206,9 @@ class Handler(BaseHTTPRequestHandler):
 
         elif path == "/api/reset":
             length = int(self.headers.get("Content-Length",0))
-            raw = self.rfile.read(length) if length else b"{}"
-            try:
-                body = json.loads(raw) if raw else {}
-            except json.JSONDecodeError:
-                self._json({"error":"invalid JSON body"}, 400); return
+            body = json.loads(self.rfile.read(length)) if length else {}
             ep = body.get("episode","EP01")
             state = load_state()
-            if ep not in state["episodes"]:
-                self._json({"error":"episode not found","existing":list(state["episodes"].keys())}, 404); return
             state["episodes"].pop(ep, None)
             save_state(state); sync_web()
             self._json({"status":"reset","episode":ep})

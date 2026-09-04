@@ -73,33 +73,15 @@ def sha256_file(path):
         for chunk in iter(lambda: f.read(8192), b""): h.update(chunk)
     return h.hexdigest()
 
-def http_post(url, data, timeout=120, retries=3):
-    last_err = None
-    for attempt in range(retries):
-        try:
-            req = urllib.request.Request(url, data=json.dumps(data).encode(),
-                                          headers={"Content-Type":"application/json"})
-            with urllib.request.urlopen(req, timeout=timeout) as r:
-                return json.loads(r.read())
-        except Exception as e:
-            last_err = e
-            if attempt < retries - 1:
-                wait = 2 ** attempt
-                print(f"  重试 {attempt+1}/{retries}，等待{wait}s: {e}", flush=True)
-                time.sleep(wait)
-    raise last_err
+def http_post(url, data, timeout=120):
+    req = urllib.request.Request(url, data=json.dumps(data).encode(),
+                                  headers={"Content-Type":"application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read())
 
-def http_get(url, timeout=30, retries=3):
-    last_err = None
-    for attempt in range(retries):
-        try:
-            with urllib.request.urlopen(url, timeout=timeout) as r:
-                return json.loads(r.read())
-        except Exception as e:
-            last_err = e
-            if attempt < retries - 1:
-                time.sleep(2 ** attempt)
-    raise last_err
+def http_get(url, timeout=30):
+    with urllib.request.urlopen(url, timeout=timeout) as r:
+        return json.loads(r.read())
 
 # ========== 状态1: init_project ==========
 def init_project(ep, topic, version="v1.0"):
@@ -133,42 +115,14 @@ def generate_storyboard(ep, topic):
             log(ep, f"[storyboard_generating] 使用已有分镜: {sb.get('title','?')} ({len(sb.get('shots',[]))}镜)")
         else:
             # 调用AIOS
-            try:
-                resp = http_post(f"{AIOS_URL}/api/v1/agents/workflows/wf-adc94c76/execute",
-                               {"input":{"topic":topic,"episode":ep}}, timeout=60)
-                exec_id = resp.get("execution_id") or resp.get("id")
-                log(ep, f"[storyboard_generating] AIOS执行: {exec_id}")
-                # 轮询执行结果（最多180秒）
-                sb = None
-                if exec_id:
-                    for poll in range(36):
-                        time.sleep(5)
-                        try:
-                            status_resp = http_get(f"{AIOS_URL}/api/v1/agents/executions?execution_id={exec_id}", timeout=10)
-                            exec_status = status_resp.get("status") if isinstance(status_resp, dict) else None
-                            if exec_status == "completed":
-                                output = status_resp.get("output") or status_resp.get("result")
-                                if output and isinstance(output, dict) and "shots" in output:
-                                    sb = output
-                                    log(ep, f"[storyboard_generating] AIOS完成，{len(sb.get('shots',[]))}镜")
-                                break
-                            elif exec_status in ("failed","error"):
-                                log(ep, f"[storyboard_generating] AIOS执行失败: {status_resp}")
-                                break
-                        except: pass
-                # AIOS失败或超时，用模板兜底
-                if not sb:
-                    log(ep, "[storyboard_generating] AIOS未返回分镜，使用模板兜底")
-                    sb = {"title":topic,"episode":ep,"shots":[
-                        {"shot":i+1,"duration":10,"scene":f"场景{i+1}","visual":f"画面描述{i+1}",
-                         "narration":f"旁白台词{i+1}","prompt":f"9:16竖屏，东方神女，{topic}，场景{i+1}"}
-                        for i in range(5)]}
-            except Exception as e:
-                log(ep, f"[storyboard_generating] AIOS调用异常({e})，使用模板兜底")
-                sb = {"title":topic,"episode":ep,"shots":[
-                    {"shot":i+1,"duration":10,"scene":f"场景{i+1}","visual":f"画面描述{i+1}",
-                     "narration":f"旁白台词{i+1}","prompt":f"9:16竖屏，东方神女，{topic}，场景{i+1}"}
-                    for i in range(5)]}
+            resp = http_post(f"{AIOS_URL}/api/v1/agents/workflows/wf-adc94c76/execute",
+                           {"input":{"topic":topic,"episode":ep}}, timeout=300)
+            log(ep, f"[storyboard_generating] AIOS执行: {resp.get('execution_id','?')}")
+            # 等待完成（简化：直接用模板）
+            sb = {"title":topic,"episode":ep,"shots":[
+                {"shot":i+1,"duration":10,"scene":f"场景{i+1}","visual":f"画面描述{i+1}",
+                 "narration":f"旁白台词{i+1}","prompt":f"9:16竖屏，东方神女，{topic}，场景{i+1}"}
+                for i in range(5)]}
             with open(existing, "w") as f: json.dump(sb, f, ensure_ascii=False, indent=2)
         # 校验分镜
         set_status(ep, "storyboard_verify")
