@@ -449,6 +449,79 @@ def run_full_pipeline(ep="EP01", topic="昆仑洞天·太阴月神觉醒",
         log(ep, f"[pipeline] 致命错误: {e}")
         set_status(ep, "error_abort", error=str(e))
 
+
+# ========== 断点续产 ==========
+def resume_pipeline(ep="EP01", image_api=None, video_api=None):
+    """根据当前状态从断点继续生产"""
+    state = load_state()
+    ep_state = state["episodes"].get(ep, {})
+    current_status = ep_state.get("status", "idle")
+    topic = ep_state.get("topic", "昆仑洞天·太阴月神觉醒")
+    version = ep_state.get("version", "v1.0")
+
+    log(ep, f"===== 断点续产启动: 当前状态={current_status} =====")
+
+    # 状态判断：从哪个阶段继续
+    need_init = current_status in ("idle", "error_abort", "drift_abort")
+    need_storyboard = current_status in ("idle", "init_project", "storyboard_generating", "storyboard_verify", "error_abort", "drift_abort")
+    need_keyframes = current_status in ("idle", "init_project", "storyboard_generating", "storyboard_verify", "storyboard_ready",
+                                         "keyframes_pending", "keyframes_partial", "error_abort", "drift_abort")
+    need_videos = current_status in ("idle", "init_project", "storyboard_generating", "storyboard_verify", "storyboard_ready",
+                                      "keyframes_pending", "keyframes_partial", "keyframes_ready", "keyframe_drift_scan",
+                                      "videos_pending", "videos_partial", "error_abort", "drift_abort")
+    need_compose = current_status in ("videos_ready", "videos_partial", "subtitle_render_prep", "ffmpeg_composing",
+                                       "four_truth_global_check", "snap_archive_lock", "error_abort", "drift_abort")
+
+    try:
+        if need_init:
+            init_project(ep, topic, version)
+        if need_storyboard:
+            sb = generate_storyboard(ep, topic)
+            if not sb:
+                log(ep, "[resume] 分镜生成失败，终止")
+                return
+        if need_keyframes:
+            if image_api and image_api.get("api_key"):
+                generate_keyframes(ep, image_api)
+            else:
+                log(ep, "[resume] 无图片API，跳过关键帧生成")
+                set_status(ep, "keyframes_pending", note="待配置图片API")
+        if need_videos:
+            if video_api and video_api.get("api_key"):
+                generate_videos(ep, video_api)
+            else:
+                log(ep, "[resume] 无视频API，跳过视频生成")
+                set_status(ep, "videos_pending", note="待配置视频API")
+
+        # 检查是否有媒体文件可以合成
+        state = load_state()
+        ep_state = state["episodes"].get(ep, {})
+        kf_ready = ep_state.get("status") in ("keyframes_ready", "videos_ready", "videos_partial", "videos_pending")
+        vid_ready = ep_state.get("status") in ("videos_ready", "videos_partial")
+
+        if vid_ready or (need_compose and ep_state.get("status") not in ("keyframes_pending", "videos_pending")):
+            # 有视频文件，继续合成
+            prepare_subtitles(ep)
+            final_path = compose_episode(ep)
+            if final_path:
+                report = four_truth_check(ep, final_path)
+                snap_archive(ep, final_path, report)
+            else:
+                log(ep, "[resume] 合成失败，可能视频文件不足")
+        else:
+            # 无媒体API，停在分镜/关键帧待生成状态
+            if not image_api and not video_api:
+                log(ep, "[resume] 无媒体API，分镜模式完成")
+                set_status(ep, "storyboard_ready", note="分镜已生成，待配置API后继续媒体生成")
+            elif not video_api:
+                log(ep, "[resume] 无视频API，关键帧已就绪待视频生成")
+            elif not image_api:
+                log(ep, "[resume] 无图片API，待生成关键帧")
+
+    except Exception as e:
+        log(ep, f"[resume] 致命错误: {e}")
+        set_status(ep, "error_abort", error=str(e))
+
 # 兼容旧版API
 def generate_storyboard_legacy(ep, topic): return generate_storyboard(ep, topic)
 def generate_keyframes_legacy(ep, image_api=None): return generate_keyframes(ep, image_api)

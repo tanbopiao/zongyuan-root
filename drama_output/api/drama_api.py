@@ -200,7 +200,7 @@ class Handler(BaseHTTPRequestHandler):
                 _s.path.insert(0, "/opt/ZONGYUAN-ROOT/drama_output/orchestrator")
                 import orchestrator as orch
                 if stage == "full":
-                    orch.run_full_pipeline(ep, topic, image_api=image_api, video_api=video_api)
+                    orch.resume_pipeline(ep, image_api=image_api, video_api=video_api)
                 elif stage == "storyboard":
                     orch.generate_storyboard(ep, topic)
                 elif stage == "keyframes":
