@@ -1,0 +1,128 @@
+{
+  "truth_layer": "code_truth",
+  "version": "v1.0-FROZEN",
+  "did": "DID-BR-000002",
+  "updated_at": "2026-09-05",
+
+  "adapters": {
+    "seedream": {
+      "role": "图片生成（关键帧）",
+      "endpoint": "https://ark.cn-beijing.volces.com/api/v3",
+      "default_model": "seedream-4-0-250828",
+      "ratio": "9:16",
+      "call_path": "ai_proxy:8021/image/generate",
+      "status_path": "ai_proxy:8021/image/status"
+    },
+    "seedance": {
+      "role": "图生视频",
+      "endpoint": "https://ark.cn-beijing.volces.com/api/v3",
+      "default_model": "seedance-1-0-pro-250528",
+      "duration": "10",
+      "call_path": "ai_proxy:8021/video/generate",
+      "status_path": "ai_proxy:8021/video/status"
+    },
+    "kling": {
+      "role": "备选视频生成",
+      "endpoint": "https://api.klingai.com/v1",
+      "call_path": "ai_proxy:8021/video/generate"
+    },
+    "generic_openai": {
+      "role": "通用文本/兼容格式",
+      "call_path": "ai_proxy:8021/chat"
+    }
+  },
+
+  "ffmpeg_templates": {
+    "subtitle_burn": {
+      "font": "/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttf",
+      "fontsize": "18",
+      "fontcolor": "white",
+      "borderw": "2",
+      "bordercolor": "black",
+      "alignment": "2",
+      "margin_v": "60"
+    },
+    "concat": {
+      "method": "concat demuxer",
+      "output_codec": "libx264",
+      "preset": "medium",
+      "crf": "23",
+      "audio_codec": "aac",
+      "pix_fmt": "yuv420p"
+    },
+    "output_spec": {
+      "short_drama": {"ratio": "9:16", "resolution": "1080x1920", "fps": "30"},
+      "cinema_pv": {"ratio": "2.39:1", "resolution": "1920x804", "fps": "24"}
+    }
+  },
+
+  "path_rules": {
+    "kernel_root": "/opt/ZONGYUAN-ROOT",
+    "drama_root": "/opt/ZONGYUAN-ROOT/drama_output",
+    "truth_dir": "/opt/ZONGYUAN-ROOT/drama_output/truth",
+    "storyboard_dir": "/opt/ZONGYUAN-ROOT/drama_output/storyboards",
+    "media_dir": "/opt/ZONGYUAN-ROOT/drama_output/media",
+    "archive_dir": "/opt/ZONGYUAN-ROOT/drama_output/archive",
+    "web_root": "/www/wwwroot/huodouai.com",
+    "web_drama": "/www/wwwroot/huodouai.com/drama",
+    "web_videos": "/www/wwwroot/huodouai.com/drama/videos",
+    "web_keyframes": "/www/wwwroot/huodouai.com/drama/keyframes"
+  },
+
+  "naming_convention": {
+    "format": "{IP_ABBR}-EP{NUM}-{VERSION}",
+    "suffixes": {
+      "storyboard": "-storyboard.json",
+      "plan_truth": "-plan_truth.json",
+      "keyframe": "-keyframe-{NNN:03d}.png",
+      "clip": "-clip-{NNN:03d}.mp4",
+      "subtitle": "-subtitle.srt",
+      "final_render": "-final_render.mp4",
+      "verify_report": "-verify_report.json",
+      "snap_meta": "-snap_meta.json"
+    },
+    "ip_abbr_map": {
+      "昆仑洞天": "KL",
+      "太阴月神": "TY",
+      "九天玄女": "XT",
+      "绯灵汐": "FLX",
+      "九尾狐": "JWH",
+      "女娲": "NW",
+      "绝地天通": "JDTT",
+      "石猴余脉": "SHYM"
+    },
+    "example": "KL-EP01-v1.0-storyboard.json"
+  },
+
+  "permissions": {
+    "env_file": "600",
+    "script_files": "755",
+    "config_files": "644",
+    "media_files": "644",
+    "owner": "root:root"
+  },
+
+  "archive_scripts": {
+    "compose": "compose_episode.sh",
+    "status": "drama_status.sh",
+    "sync_web": "sync_web.sh",
+    "archive_video": "archive_video.sh（SHA256确权）"
+  },
+
+  "services": {
+    "drama_api": {"port": 8012, "unit": "drama-api.service"},
+    "ai_proxy": {"port": 8021, "unit": "zongyuan-aiproxy.service"},
+    "aios": {"port": 8765, "unit": "aios.service"}
+  },
+
+  "state_machine": {
+    "states": [
+      "idle", "init_project", "storyboard_generating", "storyboard_verify",
+      "keyframe_generating", "keyframe_drift_scan", "video_clip_generating",
+      "subtitle_render_prep", "ffmpeg_composing", "four_truth_global_check",
+      "snap_archive_lock", "complete", "drift_abort", "error_abort"
+    ],
+    "terminal_states": ["complete", "drift_abort", "error_abort"],
+    "constraint": "不允许跳过校验直接流转；终止状态必须人工确认或快照回滚后才可重启"
+  }
+}

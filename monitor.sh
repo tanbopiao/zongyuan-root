@@ -22,7 +22,7 @@ ALERTS=""
 [ "$DISK" -gt "$THRESHOLD_DISK" ] && ALERTS="$ALERTS [磁盘高:${DISK}%]"
 
 # 检查关键服务
-SERVICES="zongyuan-aiproxy zongyuan-omega nginx frps"
+SERVICES="zongyuan-aiproxy zongyuan-omega frps"
 for svc in $SERVICES; do
   if ! systemctl is-active --quiet $svc 2>/dev/null; then
     ALERTS="$ALERTS [服务异常:$svc]"
@@ -30,6 +30,11 @@ for svc in $SERVICES; do
     systemctl restart $svc 2>/dev/null && ALERTS="$ALERTS(已重启)"
   fi
 done
+# nginx由宝塔管理，用pgrep检测
+if ! pgrep -x nginx > /dev/null 2>&1; then
+    ALERTS="$ALERTS [服务异常:nginx]"
+    nginx 2>/dev/null && ALERTS="$ALERTS(已重启)"
+fi
 
 LOG_LINE="$TIMESTAMP | CPU:${CPU}% MEM:${MEM}% DISK:${DISK}%$ALERTS"
 echo "$LOG_LINE" >> "$LOG_FILE"
