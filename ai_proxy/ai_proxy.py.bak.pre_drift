@@ -12,32 +12,6 @@ DID-BR-000002 | Ω₀⊂⊙∞⊂Ω
 import json, urllib.request, urllib.error, urllib.parse, argparse, os, time, uuid, glob
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# ============ L0漂移检测前置拦截（v2.0语义引擎） ============
-import urllib.request as _drift_req
-def _drift_check(text, task_type="keyframe"):
-    """调用本地漂移检测服务，返回(drift_level, result_dict)"""
-    try:
-        payload = json.dumps({"text": text, "task_type": task_type}).encode()
-        req = _drift_req.Request("http://127.0.0.1:8022/check", data=payload,
-                                  headers={"Content-Type": "application/json"})
-        with _drift_req.urlopen(req, timeout=5) as resp:
-            result = json.loads(resp.read())
-            return result.get("drift_level", 0), result
-    except Exception as e:
-        return -1, {"error": str(e)}
-
-def _drift_correction_prompt(result):
-    """根据漂移检测结果生成修正提示词追加"""
-    suggestions = result.get("suggestions", [])
-    violations = result.get("violations", [])
-    correction = ""
-    if violations:
-        correction += "【L0铁律修正】严禁：" + "、".join(violations[:3]) + "。"
-    if suggestions:
-        correction += "【本体特征强化】" + "；".join(suggestions[:2]) + "。"
-    return correction
-
-
 MODELS = {
     "doubao": {
         "base": "https://ark.cn-beijing.volces.com/api/v3",
@@ -453,21 +427,11 @@ class Handler(BaseHTTPRequestHandler):
             if not prompt:
                 self._send(400, {"error": "prompt required"})
                 return
-            # L0漂移检测前置拦截
-            drift_level, drift_result = _drift_check(prompt, "video")
-            if drift_level == 3:
-                self._send(422, {"error": "L0铁律拦截", "drift_level": 3,
-                    "reason": drift_result.get("violations", []),
-                    "message": "违反《阴阳分立·雌雄纯一定序篇》"}); return
-            elif drift_level == 2:
-                prompt = prompt + _drift_correction_prompt(drift_result)
             if not api_config.get("api_key"):
                 self._send(400, {"error": "api_config.api_key required"})
                 return
             task_id = call_video_generation(api_config, prompt, duration, ratio)
-            self._send(200, {"status": "submitted", "task_id": task_id,
-                "poll_url": f"/video/status?task_id={task_id}",
-                "drift_check": {"level": drift_level, "passed": True, "engine": "L0-semantic-v2.0"}})
+            self._send(200, {"status": "submitted", "task_id": task_id, "poll_url": f"/video/status?task_id={task_id}"})
 
         elif self.path.startswith("/video/status"):
             """轮询视频生成状态"""
@@ -578,19 +542,10 @@ class Handler(BaseHTTPRequestHandler):
             image_url = data.get("image_url", None)
             if not prompt:
                 self._send(400, {"error": "prompt required"}); return
-            # L0漂移检测前置拦截
-            drift_level, drift_result = _drift_check(prompt, "keyframe")
-            if drift_level == 3:
-                self._send(422, {"error": "L0铁律拦截", "drift_level": 3,
-                    "reason": drift_result.get("violations", []),
-                    "message": "违反《阴阳分立·雌雄纯一定序篇》"}); return
-            elif drift_level == 2:
-                prompt = prompt + _drift_correction_prompt(drift_result)
             if not api_config.get("api_key"):
                 self._send(400, {"error": "api_config.api_key required"}); return
             task_id = call_image_generation(api_config, prompt, ratio)
-            self._send(200, {"status": "submitted", "task_id": task_id,
-                "drift_check": {"level": drift_level, "passed": True, "engine": "L0-semantic-v2.0"}})
+            self._send(200, {"status": "submitted", "task_id": task_id})
 
         elif self.path.startswith("/image/status"):
             """图片生成状态轮询"""
