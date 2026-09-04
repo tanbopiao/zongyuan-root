@@ -7,9 +7,9 @@
   "locked_at": "2026-09-04T01:31:09.266909",
   "efuse_state": "blown_permanent",
   "merkle_root": "c6b7027ba692168a01ca8bea9d09d1c74c00293cabd8251613e65b19250eadfe",
-  "asset_count": 668,
+  "asset_count": 669,
   "protocol_count": 81,
-  "truth_count": 166,
+  "truth_count": 167,
   "cloud_control": {
     "status": "deployed",
     "endpoints": 5,
@@ -27,9 +27,10 @@
     "SNAPSHOT-V9.7-BIDIRECTIONAL-LOCK"
   ],
   "last_lock": {
-    "lock_id": "LOCK-ZR-DRAMA-TRUTH-001",
-    "timestamp": "2026-09-05T00:05:32.175840",
-    "type": "drama_truth_deploy"
+    "lock_id": "LOCK-ZR-OPT-002",
+    "name": "短剧生产线优化闭环·断点续产+手机端+参数校验",
+    "wiki_url": "https://my.feishu.cn/wiki/Uei9wN93oicO7tkTQ9Sc2eC1nBc",
+    "timestamp": "2026-09-05T00:51:55.981443"
   },
   "consecutive_locks": 14,
   "truth_tables": [
@@ -785,10 +786,110 @@
       },
       "conflicts": [],
       "hash": "0dee63555ccd057254068390dea7132b5546dd1fdd5736cc60b9167e76c6e5f3"
+    },
+    {
+      "snapshot_id": "SNAP-A-CONCURRENT-TEST-A",
+      "type": "test",
+      "window": "A",
+      "module": "test",
+      "timestamp": "2026-09-05T00:44:31+08:00",
+      "did": "DID-BR-000002",
+      "sovereign_root": "Ω-TAN-7-001",
+      "lock_level": "META-003",
+      "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+      "desc": "并发测试A",
+      "vector_clock": {
+        "A": 2,
+        "B": 0,
+        "C": 0,
+        "arbiter": 1
+      },
+      "conflicts": [],
+      "hash": "41b9eb7a14cf20a8251ba4037ca3e981dbd121c8ee9ee48a1dd100465dc6312b"
+    },
+    {
+      "snapshot_id": "SNAP-B-CONCURRENT-TEST-B",
+      "type": "test",
+      "window": "B",
+      "module": "test",
+      "timestamp": "2026-09-05T00:44:31+08:00",
+      "did": "DID-BR-000002",
+      "sovereign_root": "Ω-TAN-7-001",
+      "lock_level": "META-003",
+      "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+      "desc": "并发测试B",
+      "vector_clock": {
+        "A": 2,
+        "B": 1,
+        "C": 0,
+        "arbiter": 1
+      },
+      "conflicts": [
+        {
+          "snapshot_id": "SNAP-A-CONCURRENT-TEST-A",
+          "window": "A",
+          "module": "test",
+          "type": "concurrent_module_edit"
+        }
+      ],
+      "hash": "cca0b219354b6a56b93f5b4925f968212416594b4b2a26906706341e2a5ef35a"
+    },
+    {
+      "snapshot_id": "SNAP-C-CONCURRENT-TEST-C",
+      "type": "test",
+      "window": "C",
+      "module": "test",
+      "timestamp": "2026-09-05T00:44:31+08:00",
+      "did": "DID-BR-000002",
+      "sovereign_root": "Ω-TAN-7-001",
+      "lock_level": "META-003",
+      "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+      "desc": "并发测试C",
+      "vector_clock": {
+        "A": 2,
+        "B": 1,
+        "C": 1,
+        "arbiter": 1
+      },
+      "conflicts": [
+        {
+          "snapshot_id": "SNAP-A-CONCURRENT-TEST-A",
+          "window": "A",
+          "module": "test",
+          "type": "concurrent_module_edit"
+        },
+        {
+          "snapshot_id": "SNAP-B-CONCURRENT-TEST-B",
+          "window": "B",
+          "module": "test",
+          "type": "concurrent_module_edit"
+        }
+      ],
+      "hash": "7fa5f1bcd3232267b70f0af7aa3ec5ced940b78f4e164c64c9eb40a728de4a70"
+    },
+    {
+      "snapshot_id": "SNAP-arbiter-P0-DRIFT-ENERGY-OPTIMIZE",
+      "type": "p0_optimization",
+      "window": "arbiter",
+      "module": "drift_detection+energy",
+      "timestamp": "2026-09-05T01:02:10+08:00",
+      "did": "DID-BR-000002",
+      "sovereign_root": "Ω-TAN-7-001",
+      "lock_level": "META-003",
+      "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+      "desc": "P0稳核阶段完成：漂移检测运行时激活（独立服务8022端口，四层校验L1-L4，漂移等级0-3，外网/drift/check）+ cron错峰能量治理（3个*/5任务分散到00/02/04，CPU突刺消除）",
+      "vector_clock": {
+        "A": 2,
+        "B": 1,
+        "C": 1,
+        "arbiter": 2
+      },
+      "conflicts": [],
+      "hash": "cfcb4e91e6c67053a5b48ade3c065428317821ca3c85e3fc3f787a4ccd162ebc"
     }
   ],
-  "last_updated": "2026-09-05T00:44:30+08:00",
-  "snapshot_count": 41,
+  "last_updated": "2026-09-05T01:02:10+08:00",
+  "snapshot_count": 45,
   "global_merkle_root": "339a7514dcc3cd7ae1156a031ab36272db583a473d7ca3b9a155e9b613d76525",
   "optimization_baseline": "OPT-BASELINE-V1.0",
   "system_state_protocol": "STATE-V1.0",
@@ -864,6 +965,12 @@
       "name": "短剧产线体系全量溯源+第一阶段落地",
       "wiki_url": "https://my.feishu.cn/wiki/ZPJMwFoLgizKUxkhIRqcD7C0nee",
       "locked_at": "2026-09-05T00:05:32.175844"
+    },
+    {
+      "lock_id": "LOCK-ZR-OPT-002",
+      "type": "optimization",
+      "status": "FROZEN",
+      "timestamp": "2026-09-05T00:51:55.981445"
     }
   ],
   "drama_pipeline": {
@@ -879,20 +986,32 @@
     "naming_convention": "{IP_ABBR}-EP{NUM}-{VERSION}{suffix}",
     "ip_characters": 8,
     "episode_baselines": 10,
-    "deployed_at": "2026-09-05T00:05:32.175826"
+    "deployed_at": "2026-09-05T00:05:32.175826",
+    "resume_pipeline": "active",
+    "mobile_panel": "active",
+    "param_validation": "active",
+    "last_optimization": "LOCK-ZR-OPT-002"
   },
   "current_energy_level": "Lv7.5",
   "meta_cognitive_score": 53.8,
   "vector_clock": {
-    "A": 1,
-    "B": 0,
-    "C": 0,
-    "arbiter": 1
+    "A": 2,
+    "B": 1,
+    "C": 1,
+    "arbiter": 2
   },
   "multi_agent_mode": true,
   "multi_agent_branches": [
     "agent/alpha",
     "agent/beta",
     "agent/gamma"
-  ]
+  ],
+  "evolution_loop": {
+    "last_run": "2026-09-05T01:01:40.340382",
+    "truth_verify": "PASS",
+    "arch_issues": 0,
+    "run_count": 3,
+    "status": "ACTIVE",
+    "alert": false
+  }
 }

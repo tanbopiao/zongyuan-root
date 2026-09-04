@@ -1,0 +1,22 @@
+*/5 * * * * flock -xn /tmp/stargate.lock -c '/usr/local/qcloud/stargate/admin/start.sh > /dev/null 2>&1 &'
+# ZONGYUAN-ROOT 自动化运维
+0 2 * * 0 find /var/log -name "*.log" -mtime +7 -delete 2>/dev/null
+*/30 * * * * cd /opt/ZONGYUAN-ROOT && python3 alert_monitor.py >> /opt/ZONGYUAN-ROOT/logs/alert_monitor_cron.log 2>&1
+# SSL证书到期检查 - 每月1号9点
+# ZONGYUAN-ROOT 云服务器健康检查 - 每5分钟
+0 3 1 * * /opt/ZONGYUAN-ROOT/ssl_check.sh >> /var/log/ssl_check.log 2>&1
+*/10 * * * * /usr/local/bin/ssh_ban.sh >> /var/log/ssh_ban.log 2>&1
+*/15 * * * * /usr/bin/python3 /opt/ZONGYUAN-ROOT/alert/feishu_alert.py >> /opt/ZONGYUAN-ROOT/logs/alerts.log 2>&1
+0 3 * * * /opt/ZONGYUAN-ROOT/backup.sh >> /var/log/zongyuan-backup.log 2>&1
+# ZONGYUAN-ROOT 自动化任务
+0 4 * * * /usr/bin/python3 /opt/ZONGYUAN-ROOT/cron_jobs/daily_truth_extract.py >> /opt/ZONGYUAN-ROOT/logs/cron_truth.log 2>&1
+0 5 * * * /usr/bin/python3 /opt/ZONGYUAN-ROOT/cron_jobs/asset_health_check.py >> /opt/ZONGYUAN-ROOT/logs/cron_asset.log 2>&1
+0 6 * * * /usr/bin/python3 /opt/ZONGYUAN-ROOT/cron_jobs/backup_verify.py >> /opt/ZONGYUAN-ROOT/logs/cron_backup.log 2>&1
+0 7 * * * /opt/ZONGYUAN-ROOT/ssl_check.sh >> /var/log/ssl_check.log 2>&1
+0 * * * * echo "$(date): CPU=$(top -bn1 | grep Cpu | awk '{print $2}') MEM=$(free | grep Mem | awk '{print $7}')" >> /opt/ZONGYUAN-ROOT/logs/performance_baseline.log 2>&1
+0 */6 * * * /usr/bin/python3 /opt/ZONGYUAN-ROOT/news_collector/tech_news_collector.py >> /opt/ZONGYUAN-ROOT/logs/news_collector.log 2>&1
+30 */6 * * * /usr/bin/python3 /opt/ZONGYUAN-ROOT/news_collector/high_value_evolution.py >> /opt/ZONGYUAN-ROOT/logs/evolution_analysis.log 2>&1
+10 */6 * * * /usr/bin/python3 /opt/ZONGYUAN-ROOT/news_collector/news_truth_sync.py >> /opt/ZONGYUAN-ROOT/news_collector/sync.log 2>&1
+*/5 * * * * /opt/ZONGYUAN-ROOT/monitor.sh >> /opt/ZONGYUAN-ROOT/monitor_cron.log 2>&1
+*/5 * * * * /usr/bin/python3 /opt/ZONGYUAN-ROOT/zongyuan_monitor.py >> /var/log/zongyuan_monitor_cron.log 2>&1
+*/15 * * * * /opt/ZONGYUAN-ROOT/global_monitor.sh >> /var/log/global_monitor.log 2>&1
