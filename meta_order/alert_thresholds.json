@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "thresholds": {
+    "cpu_usage_pct": {"warning": 70, "critical": 85, "action": "P0_alert"},
+    "memory_usage_pct": {"warning": 75, "critical": 90, "action": "P0_alert"},
+    "disk_usage_pct": {"warning": 80, "critical": 90, "action": "P1_alert"},
+    "service_unhealthy_count": {"warning": 1, "critical": 3, "action": "P0_alert"},
+    "truth_drift_score": {"warning": 0.1, "critical": 0.3, "action": "P1_rollback"},
+    "constitution_hash_match": {"expected": true, "action": "P0_block"},
+    "license_days_remaining": {"warning": 7, "critical": 1, "action": "P2_notify"}
+  },
+  "alert_channels": ["event_engine_P0", "log", "console"],
+  "auto_remediation": {
+    "service_crash": "auto_restart",
+    "memory_high": "gc_trigger",
+    "truth_drift": "auto_rollback_to_last_snapshot"
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "run_id": "RUNTIME-TRUTH-20260831-001",
+  "engine_version": "1.0.0",
+  "operator": "system",
+  "operator_role": "system",
+  "started_at": "2026-08-31T01:32:46.494532+00:00",
+  "total_stages": 8,
+  "executed_stages": 8,
+  "success_stages": 5,
+  "failed_stages": 1,
+  "blocked_stages": 2,
+  "total_duration_ms": 18193.08,
+  "pipeline_merkle_root": "38a80618842fdf5c17087036f46445577913c8c0061777e559023d824e32d426",
+  "execution_chain_valid": true,
+  "execution_chain_total": 8,
+  "stages": [
+    {
+      "stage_id": "L1_cas",
+      "name": "CAS内容寻址存储",
+      "action": "tpc_cas_write",
+      "started_at": "2026-08-31T01:32:28.278335+00:00",
+      "status": "success",
+      "result": {
+        "committed": true,
+        "result": {
+          "content_id": "2753363171e0fe0f3f406346ab7032d2c6b3bf46cc1339d65af33f9971040518",
+          "size": 59
+        },
+        "prepare_duration_ms": 0.03,
+        "commit_duration_ms": 194.04
+      },
+      "error": null,
+      "rollback_performed": false,
+      "duration_ms": 264.79,
+      "completed_at": "2026-08-31T01:32:28.706599+00:00"
+    },
+    {
+      "stage_id": "L2_merkle",
+      "name": "Merkle哈希链",
+      "action": "tpc_snapshot",
+      "started_at": "2026-08-31T01:32:28.706611+00:00",
+      "status": "success",
+      "result": {
+        "committed": true,
+        "result": {
+          "snapshot_id": "RUNTIME-TRUTH-20260831-001_L2_merkle",
+          "merkle_root": "c31475937930512b5e8cd1bd41e16c5fb513e986d5f3a59b091072d52bf4eb4c",
+          "save_path": "lock_archive/RUNTIME-TRUTH-20260831-001_L2_merkle.json"
+        },
+        "prepare_duration_ms": 13994.12,
+        "commit_duration_ms": 42.85
+      },
+      "error": null,
+      "rollback_performed": false,
+      "duration_ms": 14235.0,
+      "completed_at": "2026-08-31T01:32:43.053904+00:00"
+    },
+    {
+      "stage_id": "L3_timestamp",
+      "name": "RFC3161时间戳",
+      "action": "api_call",
+      "started_at": "2026-08-31T01:32:43.053961+00:00",
+      "status": "blocked",
+      "result": "None",
+      "error": "pre_check failed: missing 'url' param",
+      "rollback_performed": false,
+      "duration_ms": 182.08,
+      "completed_at": "2026-08-31T01:32:43.315204+00:00"
+    },
+    {
+      "stage_id": "L4_consensus",
+      "name": "BFT共识",
+      "action": "audit_write",
+      "started_at": "2026-08-31T01:32:43.315220+00:00",
+      "status": "success",
+      "result": {
+        "seq": 24,
+        "hash": "244bd3467a5a1a5c7db1f53791b14e68d8c5dd20ad569bc813ca102666ed9197"
+      },
+      "error": null,
+      "rollback_performed": false,
+      "duration_ms": 291.04,
+      "completed_at": "2026-08-31T01:32:43.710913+00:00"
+    },
+    {
+      "stage_id": "L5_compute_audit",
+      "name": "计算审计",
+      "action": "audit_write",
+      "started_at": "2026-08-31T01:32:43.710930+00:00",
+      "status": "success",
+      "result": {
+        "seq": 25,
+        "hash": "432dde6181e6d72aada115a372ea56b4819227a982722177cccdd999915ccc44"
+      },
+      "error": null,
+      "rollback_performed": false,
+      "duration_ms": 323.6,
+      "completed_at": "2026-08-31T01:32:44.141267+00:00"
+    },
+    {
+      "stage_id": "L6_append_audit",
+      "name": "append-only审计",
+      "action": "audit_write",
+      "started_at": "2026-08-31T01:32:44.141285+00:00",
+      "status": "success",
+      "result": {
+        "seq": 26,
+        "hash": "ca475d1c24a6510650de654420151859431999cbeed78238442aa45ad4628621"
+      },
+      "error": null,
+      "rollback_performed": false,
+      "duration_ms": 339.12,
+      "completed_at": "2026-08-31T01:32:44.602568+00:00"
+    },
+    {
+      "stage_id": "L7_blockchain",
+      "name": "区块链锚定",
+      "action": "api_call",
+      "started_at": "2026-08-31T01:32:44.602583+00:00",
+      "status": "blocked",
+      "result": "None",
+      "error": "pre_check failed: missing 'url' param",
+      "rollback_performed": false,
+      "duration_ms": 184.98,
+      "completed_at": "2026-08-31T01:32:44.861021+00:00"
+    },
+    {
+      "stage_id": "L8_vector_sync",
+      "name": "向量库同步",
+      "action": "vector_sync",
+      "started_at": "2026-08-31T01:32:44.861036+00:00",
+      "status": "failed",
+      "result": "None",
+      "error": "attempt 2/2: No module named 'vector_truth_adapter'\nr: No module named 'vector_truth_adapter_v2'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/sandboxdata/workspace/file/ZONGYUAN-ROOT/omega_brain/action_base.py\", line 138, in run\n    exec_result = self.execute()\n  File \"/sandboxdata/workspace/file/ZONGYUAN-ROOT/omega_brain/actions/__init__.py\", line 134, in execute\n    from vector_truth_adapter import VectorTruthAdapter\nModuleNotFoundError: No module named 'vector_truth_adapter'\n",
+      "rollback_performed": false,
+      "duration_ms": 1527.22,
+      "completed_at": "2026-08-31T01:32:46.471208+00:00"
+    }
+  ],
+  "metrics_summary": {
+    "total_executions": 8,
+    "success_count": 5,
+    "failure_count": 3,
+    "rollback_count": 0,
+    "blocked_count": 0,
+    "success_rate_pct": 62.5,
+    "failure_rate_pct": 37.5,
+    "rollback_rate_pct": 0.0,
+    "tpc_prepare_count": 0,
+    "tpc_commit_count": 0,
+    "duration_p50_ms": 323.6,
+    "duration_p95_ms": 14235.0,
+    "duration_p99_ms": 14235.0,
+    "duration_avg_ms": 2168.48,
+    "queue_length": 8,
+    "circuit_breaker_state": "closed",
+    "drift_level": "none",
+    "action_count": 5,
+    "per_action": {
+      "tpc_cas_write": {
+        "total": 1,
+        "success": 1,
+        "failure": 0,
+        "success_rate": 100.0,
+        "avg_duration_ms": 264.8
+      },
+      "tpc_snapshot": {
+        "total": 1,
+        "success": 1,
+        "failure": 0,
+        "success_rate": 100.0,
+        "avg_duration_ms": 14235.0
+      },
+      "api_call": {
+        "total": 2,
+        "success": 0,
+        "failure": 2,
+        "success_rate": 0.0,
+        "avg_duration_ms": 183.5
+      },
+      "audit_write": {
+        "total": 3,
+        "success": 3,
+        "failure": 0,
+        "success_rate": 100.0,
+        "avg_duration_ms": 317.9
+      },
+      "vector_sync": {
+        "total": 1,
+        "success": 0,
+        "failure": 1,
+        "success_rate": 0.0,
+        "avg_duration_ms": 1527.2
+      }
+    }
+  },
+  "active_alerts": [
+    {
+      "level": "P2",
+      "type": "high_failure_rate",
+      "message": "failure rate 37.5% > threshold 5.0%",
+      "value": 37.5,
+      "threshold": 5.0,
+      "timestamp": "2026-08-31T01:32:46.471518+00:00"
+    },
+    {
+      "level": "P3",
+      "type": "high_p95_latency",
+      "message": "P95 duration 14235.0ms > 10000ms",
+      "value": 14235.0,
+      "threshold": 10000,
+      "timestamp": "2026-08-31T01:32:46.471522+00:00"
+    }
+  ],
+  "did": "DID-BR-000002",
+  "sovereign_root": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω"
+}

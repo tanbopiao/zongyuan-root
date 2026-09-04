@@ -1,0 +1,32 @@
+# LOIP 服务 docker-compose 配置
+# 用法: docker-compose up -d
+
+version: "3.8"
+
+services:
+  loip:
+    build: .
+    container_name: loip-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./audit:/app/audit
+    environment:
+      - LOIP_BACKEND=auto
+      - LOIP_PORT=8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+        reservations:
+          cpus: "0.5"
+          memory: 512M

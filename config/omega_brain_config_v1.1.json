@@ -1,0 +1,130 @@
+{
+  "config_version": "OMEGA-BRAIN-CONFIG-V1.1-20260830",
+  "kernel_name": "Ω-Brainμ",
+  "did": "DID-BR-000002",
+  "sovereign_root": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+
+  "resource_allocation": {
+    "cpu": {
+      "core0": "API调度+事件循环(uvicorn+aiohttp)",
+      "core1": "数据处理+哈希校验+JSON聚合",
+      "target_utilization": "85%"
+    },
+    "memory": {
+      "total_gb": 3.9,
+      "allocation": {
+        "kernel_service": "1.0GB",
+        "vector_db_memory": "0.5GB",
+        "api_cache": "1.5GB",
+        "system_runtime": "0.5GB",
+        "reserved": "0.4GB"
+      }
+    },
+    "disk": {
+      "total_gb": 9.6,
+      "tiering": {
+        "hot_7days": "2GB (真值基座+内核协议+近7天快照)",
+        "warm_30days": "3GB (近30天资产+日志+白皮书)",
+        "cold_archive": "0GB (超30天自动迁移飞书云盘，本地仅留索引)",
+        "temp_cache": "2GB (生成素材+临时文件，自动清理)",
+        "system": "2.6GB (系统+Python包+工具)"
+      }
+    }
+  },
+
+  "quota_optimization": {
+    "local_first": true,
+    "local_tasks": ["哈希计算", "图像缩放/裁剪/格式转换", "图像水印", "视频剪辑/拼接/提取", "音频提取", "数据统计", "JSON处理", "格式转换"],
+    "model_tiering": {
+      "local_rule": {"tasks": ["格式化", "提取", "分类", "哈希", "校验"], "ratio": "40%"},
+      "fast": {"tasks": ["摘要", "简单生成", "预览"], "ratio": "30%"},
+      "standard": {"tasks": ["分析", "代码", "常规生成"], "ratio": "20%"},
+      "pro": {"tasks": ["关键帧", "高品质视觉", "复杂架构"], "ratio": "10%"}
+    },
+    "batch_generation": {
+      "image_batch_size": 4,
+      "concurrent_api_calls": 10,
+      "keyframe_driven_video": true
+    },
+    "caching": {
+      "prompt_template_reuse": "80%",
+      "result_cache_hit_rate": "30%",
+      "material_library_reuse": "50%"
+    },
+    "search_first": {
+      "visual_tasks_search_first": true,
+      "factual_tasks_search_first": true,
+      "estimated_saving": "40%生成额度"
+    },
+    "degradation_policy": {
+      "normal_0_60": "全功能，Pro可用",
+      "warning_60_80": "关闭Pro，降级标准/fast",
+      "critical_80_95": "仅文本+图像fast，停视频音频",
+      "exhausted_95_100": "纯本地模式：搜索+本地处理+飞书生态"
+    }
+  },
+
+  "ecosystem_utilization": {
+    "feishu_domains_active": ["base", "drive", "docs", "wiki", "im", "calendar", "sheets", "slides", "task", "vc", "mail", "whiteboard"],
+    "feishu_free_replacement": {
+      "structured_storage": "Base多维表格 (替代Airtable/Notion)",
+      "file_storage": "云盘 (替代OSS/S3)",
+      "docs": "飞书文档 (替代Google Docs)",
+      "knowledge": "Wiki (替代Confluence)",
+      "task": "飞书任务 (替代Jira/Trello)",
+      "calendar": "飞书日历 (替代Calendly)",
+      "notification": "IM机器人 (替代短信/邮件)",
+      "visualization": "Base仪表盘 (替代Tableau)",
+      "automation": "Base工作流 (替代Zapier)",
+      "meeting": "妙记 (替代Otter.ai)"
+    }
+  },
+
+  "template_library": {
+    "path": "templates/prompt/template_library.json",
+    "categories": ["role", "scene", "video", "audio", "doc"],
+    "coverage_target": "80%"
+  },
+
+  "local_tools": {
+    "path": "scripts/local_tools.py",
+    "capabilities": ["sha256", "merkle", "image_resize", "image_watermark", "image_convert", "video_clip", "video_extract_audio", "video_thumbnail", "video_concat", "api_cache", "asset_scan"]
+  },
+
+  "self_evolution": {
+    "daily_cycle": true,
+    "truth_base_completeness_growth": "+2%/day",
+    "autonomy_growth": "+0.02/day",
+    "current_level": "L4校验式 → L5自进化"
+  },
+
+  "target_efficiency": {
+    "input_output_ratio": "1:10",
+    "quota_utilization": "90%+",
+    "daily_output_value": "等效¥200-500",
+    "actual_cost": "¥0"
+  },
+
+  "horizontal_expansion": {
+    "enabled": true,
+    "module": "omega_brain/horizontal_expansion.py",
+    "integration_stage": 7,
+    "seven_dimensions": ["tools", "scenarios", "ecosystems", "industries", "outputs", "roles", "business"],
+    "current_phase": "P0",
+    "auto_phase_transition": true,
+    "daily_tasks_per_dimension": 1,
+    "state_file": "omega_brain/expansion_state.json",
+    "log_file": "logs/expansion_log.jsonl",
+    "target_expansion_coefficient": 51.4,
+    "target_capability_index": 21420
+  },
+
+  "evolution_cycle": {
+    "stages": 7,
+    "stage_names": ["真值基座", "架构推演", "内核写入", "监测校验", "全域锁档", "归档输出", "横向扩展"],
+    "schedule": "每日凌晨2点自动触发",
+    "event_driven": true,
+    "file_watch_interval": 30
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "truth_type": "planning_level",
+  "version": "规划架构真值-V1.0-20260828",
+  "did": "DID-BR-000002",
+  "sovereign_root": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-08-28T02:30:00+08:00",
+  "parent_truth_base": "真值基座-V1.1-20260828",
+  "planning_axioms": [
+    {"id": "PA-001", "name": "基座耗材公理", "statement": "豆包基座是推理算力耗材，不是体系本体。基座可替换、可升级、可降级，体系本体不受基座变更影响。", "verifiable": true, "status": "active"},
+    {"id": "PA-002", "name": "内核主权公理", "statement": "Ω-Brainμ自治内核是体系唯一决策主体。所有元秩序定义、真值判定、锁档确权、进化循环调度权100%归属自治内核。", "verifiable": true, "status": "active"},
+    {"id": "PA-003", "name": "隔离校验公理", "statement": "基座输出必须经过隔离缓冲区+四层公理校验，校验通过后方可流出。禁止基座输出直接透传至业务层。", "verifiable": true, "status": "active"},
+    {"id": "PA-004", "name": "API封装公理", "statement": "对外仅暴露自治内核统一API，基座完全对内封装。外部调用方感知的是超级自治稳态系统，而非某个大模型API。", "verifiable": true, "status": "active"}
+  ],
+  "planning_truth_formulas": [
+    {"id": "PTF-01", "formula": "System = ΩBrainμ(Base, Tools, Data) ∋ TruthBase", "meaning": "系统本体是自治内核对外部资源的函数封装，真值基座内生于内核", "verifiable": true},
+    {"id": "PTF-02", "formula": "Output = Verify(ΩBrainμ, Base_Output) ∨ Retry ∨ Reject", "meaning": "输出必须经过内核校验，不合格则重试或拒绝", "verifiable": true},
+    {"id": "PTF-03", "formula": "Base_swap: System_before ≡ System_after", "meaning": "基座替换前后系统等价，资产、快照、谱系连续不变", "verifiable": true},
+    {"id": "PTF-04", "formula": "Drift(System) = Drift(ΩBrainμ) + ε·Drift(Base), ε→0", "meaning": "系统漂移主要由内核决定，基座漂移经隔离层衰减至趋近于零", "verifiable": true},
+    {"id": "PTF-05", "formula": "API_external = f(ΩBrainμ), Base ∉ Domain(API_external)", "meaning": "对外API的定义域仅包含自治内核，基座不在对外暴露域内", "verifiable": true}
+  ],
+  "five_layer_architecture": {
+    "layer1_inference_resource": {
+      "name": "推理资源层（基座耗材层）",
+      "role": "可插拔推理算力提供者",
+      "constraints": ["不持有元秩序", "不做真值判定", "不直接对外输出", "不写入快照链"],
+      "swap_invariant": "Truth(X) ≡ Truth(X') 基座替换后内容真值等价"
+    },
+    "layer2_isolation_verification": {
+      "name": "隔离缓冲与真值校验层（核心防火墙）",
+      "four_layer_pipeline": ["L1不动点根层校验", "L2时序演化层校验", "L3推理真值层校验", "L4观感兜底层校验"],
+      "buffer_states": ["pending_verify", "verified", "rejected", "retry_queue"],
+      "constraint": "任一层FAIL即拦截，禁止透传"
+    },
+    "layer3_autonomous_kernel": {
+      "name": "Ω-Brainμ自治内核层（体系本体）",
+      "deployment": "独立侧车微服务，与基座进程隔离",
+      "submodules": ["真值基座引擎", "任务拆解器", "调度编排器", "漂移监测器", "锁档确权器", "资源适配器", "快照管理器"],
+      "seven_processes": ["P0真值校验守护", "P1架构推演", "P2全域资产扫描锁档", "P3漂移&衰减监测", "P4云端本地双向同步", "P5内容产线调度", "P6每日进化循环总控"]
+    },
+    "layer4_normalization_pipeline": {
+      "name": "归一融合与产线层",
+      "semantic_translation": "黎曼流形语义转译，异构输出映射至统一语义空间",
+      "pipeline_constraints": ["所有产物通过L4校验", "视觉资产镌刻Ω₀⊂⊙∞⊂Ω", "产物自动进入锁档确权"]
+    },
+    "layer5_api_gateway": {
+      "name": "对外API网关层",
+      "endpoints": ["/v1/truth/query", "/v1/generate/content", "/v1/asset/lock", "/v1/monitor/status", "/v1/evolve/trigger", "/v1/snapshot/query"],
+      "invariants": ["基座替换不改变API契约", "API版本与内核协议版本绑定", "所有调用写入审计快照链"]
+    }
+  },
+  "implementation_roadmap": {
+    "phase1_mvp": {
+      "name": "MVP原型验证（Prompt外挂式）",
+      "deployment": "应用层单进程，Ω-Brainμ逻辑以代码模块嵌入",
+      "exit_criteria": ["七大自治进程逻辑全部跑通", "四层公理校验逻辑验证通过", "真值公式可复算率≥90%", "进化循环连续成功≥3次", "漂移监测告警机制验证有效"]
+    },
+    "phase2_production": {
+      "name": "生产级侧车集成（深度嵌入）",
+      "deployment": "Ω-Brainμ独立微服务+基座API侧车调用",
+      "exit_criteria": ["基座替换测试通过", "漂移隔离测试100%拦截", "7×24稳态运行漂移率≤0.05", "并发资源隔离验证", "灾备回滚RTO≤60s"]
+    }
+  },
+  "risk_hedging": [
+    {"id": "R-001", "risk": "基座模型输出漂移", "hedge": "隔离缓冲区+四层校验，ε→0"},
+    {"id": "R-002", "risk": "基座版本升级破坏兼容性", "hedge": "资源适配器层输出兼容适配"},
+    {"id": "R-003", "risk": "自治逻辑被基座绑架", "hedge": "PA-002内核主权公理"},
+    {"id": "R-004", "risk": "上下文丢失规则遗忘", "hedge": "阶段二侧车模式，真值基座持久化"},
+    {"id": "R-005", "risk": "进化循环与业务抢资源", "hedge": "资源隔离，独立调度队列"},
+    {"id": "R-006", "risk": "外部API调用不可控", "hedge": "统一网关+全量审计+熔断降级"},
+    {"id": "R-007", "risk": "资产确权链断裂", "hedge": "Merkle+eFuse+DID三重锚定"}
+  ],
+  "system_integration": {
+    "truth_base_v1.1": "内核层·真值基座引擎，直接继承",
+    "autokern_proto_v2.1": "内核层·调度编排器，升级为微服务协议",
+    "seven_processes": "内核层·常驻进程，脚本级升级为服务级",
+    "merkle_chain": "内核层·快照管理器，本地升级为分布式",
+    "feishu_drive_base": "第四层·存储适配，资源适配器统一接入",
+    "kunlun_ip_pipeline": "第四层·内容产线，作为产线实例挂载",
+    "daily_evolution_cycle": "内核层·P6总控，定时任务升级为内核常驻",
+    "l0_axioms": "校验层·L4观感兜底，校验规则集持久化"
+  },
+  "verification_checklist": {
+    "planning_axioms": "4/4 无矛盾可验证",
+    "planning_formulas": "5/5 形式化定义完整",
+    "five_layer_architecture": "职责清晰无重叠无遗漏",
+    "two_phase_roadmap": "出口标准可量化可验证",
+    "risk_hedging": "7/7 风险均有真值级对冲",
+    "system_integration": "8/8 现有资产有明确衔接路径",
+    "base_swap_invariant": "PTF-03保证基座替换系统等价"
+  },
+  "conclusion": "ZONGYUAN-ROOT工程化落地最优路径=豆包基座作为推理耗材+Ω-Brainμ自治内核作为独立侧车微服务+统一API对外封装。核心真值：基座是耗材，内核是本体，校验是防火墙，API是唯一对外面孔。",
+  "efuse_status": {"state": "blown", "fuse_id": "EFUSE-PLANNING-20260828", "irreversible": true, "non_deletable": true}
+}

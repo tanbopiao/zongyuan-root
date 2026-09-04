@@ -1,0 +1,548 @@
+{
+  "version": "V4.0",
+  "scenes": [
+    {
+      "id": "GOV-001",
+      "name": "公文智能拟稿场景",
+      "category": "公文处理",
+      "description": "公文自动拟稿、智能校对、合规审查、错漏纠错全流程",
+      "components": [
+        {
+          "type": "data-source",
+          "name": "公文数据源接入",
+          "config": {
+            "source": "政务OA系统",
+            "format": "docx/pdf"
+          }
+        },
+        {
+          "type": "data-mask",
+          "name": "敏感信息脱敏",
+          "config": {
+            "level": "L2-中度脱敏",
+            "fields": [
+              "身份证号",
+              "手机号",
+              "住址"
+            ]
+          }
+        },
+        {
+          "type": "ai-doc",
+          "name": "公文智能解析",
+          "config": {
+            "model": "doubao-seed-2.0-lite",
+            "extract": [
+              "标题",
+              "主送机关",
+              "正文",
+              "落款"
+            ]
+          }
+        },
+        {
+          "type": "ai-review",
+          "name": "合规审查",
+          "config": {
+            "rules": [
+              "格式规范",
+              "政策依据",
+              "敏感词",
+              "涉密检查"
+            ]
+          }
+        },
+        {
+          "type": "flow-approve",
+          "name": "人工审批",
+          "config": {
+            "approver_role": "办公室主任",
+            "timeout": 24
+          }
+        },
+        {
+          "type": "out-doc",
+          "name": "正式文书生成",
+          "config": {
+            "format": "docx",
+            "template": "党政机关公文格式GB/T 9704"
+          }
+        }
+      ],
+      "expected_output": "符合规范的正式公文文档",
+      "compliance_level": "L2"
+    },
+    {
+      "id": "GOV-002",
+      "name": "政策智能解读场景",
+      "category": "政策研究",
+      "description": "政策智能解读、新旧政策比对、条文差异分析",
+      "components": [
+        {
+          "type": "data-source",
+          "name": "政策文件接入",
+          "config": {
+            "source": "政府公报/政策库"
+          }
+        },
+        {
+          "type": "ai-policy",
+          "name": "政策智能比对",
+          "config": {
+            "compare": "新旧版本",
+            "dimension": [
+              "条文变更",
+              "权限调整",
+              "流程变化"
+            ]
+          }
+        },
+        {
+          "type": "ai-law",
+          "name": "法条关联检索",
+          "config": {
+            "source": "法律法规库"
+          }
+        },
+        {
+          "type": "ai-qa",
+          "name": "政策问答生成",
+          "config": {
+            "type": "FAQ",
+            "count": 10
+          }
+        },
+        {
+          "type": "out-report",
+          "name": "解读报告生成",
+          "config": {
+            "format": "pdf",
+            "include": [
+              "差异对照表",
+              "影响分析",
+              "实施建议"
+            ]
+          }
+        }
+      ],
+      "expected_output": "政策解读报告+FAQ问答库",
+      "compliance_level": "L1"
+    },
+    {
+      "id": "GOV-003",
+      "name": "办事事项预审场景",
+      "category": "政务服务",
+      "description": "事项智能预审、材料缺件提醒、自查纠错",
+      "components": [
+        {
+          "type": "data-source",
+          "name": "申报材料接入",
+          "config": {
+            "source": "政务服务网"
+          }
+        },
+        {
+          "type": "data-clean",
+          "name": "材料格式校验",
+          "config": {
+            "check": [
+              "完整性",
+              "格式",
+              "有效期"
+            ]
+          }
+        },
+        {
+          "type": "ai-review",
+          "name": "材料智能纠错",
+          "config": {
+            "rules": [
+              "必填项",
+              "逻辑一致性",
+              "格式规范"
+            ]
+          }
+        },
+        {
+          "type": "sec-fuse",
+          "name": "风险熔断",
+          "config": {
+            "trigger": "材料缺失>3项",
+            "action": "退回补正"
+          }
+        },
+        {
+          "type": "out-report",
+          "name": "预审结论输出",
+          "config": {
+            "include": [
+              "缺件清单",
+              "修改建议",
+              "通过/不通过"
+            ]
+          }
+        }
+      ],
+      "expected_output": "预审结论+缺件清单+修改建议",
+      "compliance_level": "L2"
+    },
+    {
+      "id": "GOV-004",
+      "name": "政务舆情研判场景",
+      "category": "舆情监测",
+      "description": "舆情智能抓取、风险分级、态势研判、台账生成",
+      "components": [
+        {
+          "type": "data-source",
+          "name": "多源舆情接入",
+          "config": {
+            "sources": [
+              "微博",
+              "微信",
+              "新闻",
+              "论坛"
+            ]
+          }
+        },
+        {
+          "type": "data-filter",
+          "name": "舆情筛选",
+          "config": {
+            "keywords": "政务相关",
+            "dedup": true
+          }
+        },
+        {
+          "type": "ai-qa",
+          "name": "舆情智能研判",
+          "config": {
+            "dimension": [
+              "情感倾向",
+              "传播热度",
+              "风险等级"
+            ]
+          }
+        },
+        {
+          "type": "sec-fuse",
+          "name": "高风险预警",
+          "config": {
+            "trigger": "P0级舆情",
+            "action": "即时上报"
+          }
+        },
+        {
+          "type": "out-screen",
+          "name": "舆情大屏展示",
+          "config": {
+            "charts": [
+              "趋势图",
+              "热点词云",
+              "风险分布"
+            ]
+          }
+        }
+      ],
+      "expected_output": "舆情研判报告+大屏可视化+预警台账",
+      "compliance_level": "L3"
+    },
+    {
+      "id": "GOV-005",
+      "name": "知识库智能问答场景",
+      "category": "知识服务",
+      "description": "政务知识库问答、办事指南生成、政策咨询应答",
+      "components": [
+        {
+          "type": "data-source",
+          "name": "知识库接入",
+          "config": {
+            "source": "VectorDB向量库",
+            "type": "RAG"
+          }
+        },
+        {
+          "type": "ai-qa",
+          "name": "智能问答",
+          "config": {
+            "model": "doubao-seed-2.0-lite",
+            "top_k": 5,
+            "threshold": 0.7
+          }
+        },
+        {
+          "type": "flow-if",
+          "name": "置信度判断",
+          "config": {
+            "condition": "置信度<0.7",
+            "action": "转人工"
+          }
+        },
+        {
+          "type": "flow-approve",
+          "name": "人工复核",
+          "config": {
+            "trigger": "低置信度/敏感问题"
+          }
+        },
+        {
+          "type": "out-doc",
+          "name": "问答记录归档",
+          "config": {
+            "audit": true,
+            "retention": "3年"
+          }
+        }
+      ],
+      "expected_output": "智能问答服务+知识沉淀",
+      "compliance_level": "L2"
+    },
+    {
+      "id": "GOV-006",
+      "name": "会议材料汇总场景",
+      "category": "会议服务",
+      "description": "会议材料自动汇总、内容综述、问题提炼、重点萃取",
+      "components": [
+        {
+          "type": "data-source",
+          "name": "会议材料接入",
+          "config": {
+            "source": "会议系统/邮件",
+            "formats": [
+              "docx",
+              "pdf",
+              "pptx"
+            ]
+          }
+        },
+        {
+          "type": "data-clean",
+          "name": "材料去重整理",
+          "config": {
+            "dedup": true,
+            "classify": "按议题"
+          }
+        },
+        {
+          "type": "ai-doc",
+          "name": "内容智能综述",
+          "config": {
+            "extract": [
+              "核心观点",
+              "数据支撑",
+              "争议点"
+            ]
+          }
+        },
+        {
+          "type": "flow-if",
+          "name": "议题分类",
+          "config": {
+            "branches": [
+              "决策类",
+              "汇报类",
+              "讨论类"
+            ]
+          }
+        },
+        {
+          "type": "out-report",
+          "name": "会议纪要生成",
+          "config": {
+            "format": "docx",
+            "include": [
+              "议题",
+              "结论",
+              "待办",
+              "责任人"
+            ]
+          }
+        }
+      ],
+      "expected_output": "会议纪要+议题汇总+待办清单",
+      "compliance_level": "L1"
+    },
+    {
+      "id": "gov-16",
+      "name": "政策文件智能解读",
+      "category": "政策服务",
+      "description": "上传政策文件，AI自动提取核心要点、适用范围、时间节点、申报条件",
+      "workflow": [
+        "文件上传",
+        "OCR/解析",
+        "要点提取",
+        "结构化输出",
+        "合规校验"
+      ],
+      "ai_prompt": "请作为政务政策专家，解读以下政策文件，提取：1.核心要点 2.适用对象 3.申报条件 4.时间节点 5.所需材料 6.注意事项"
+    },
+    {
+      "id": "gov-17",
+      "name": "公文写作辅助",
+      "category": "办公效率",
+      "description": "根据主题和要求自动生成通知、请示、报告、函等标准公文",
+      "workflow": [
+        "选择文种",
+        "输入要点",
+        "AI生成初稿",
+        "格式校验",
+        "人工审核"
+      ],
+      "ai_prompt": "请作为政务公文写作专家，按照党政机关公文格式标准，撰写以下公文："
+    },
+    {
+      "id": "gov-18",
+      "name": "会议纪要智能生成",
+      "category": "办公效率",
+      "description": "上传会议录音/文字，自动生成结构化会议纪要",
+      "workflow": [
+        "录音转写",
+        "议题识别",
+        "决议提取",
+        "待办分配",
+        "纪要生成"
+      ],
+      "ai_prompt": "请作为政务会议秘书，根据以下会议内容生成结构化纪要：1.会议概况 2.议题讨论 3.决议事项 4.待办任务(含责任人/时限) 5.下次会议安排"
+    },
+    {
+      "id": "gov-19",
+      "name": "舆情监测分析",
+      "category": "社会治理",
+      "description": "多渠道舆情采集+情感分析+风险预警+应对建议",
+      "workflow": [
+        "数据采集",
+        "情感分析",
+        "热点聚类",
+        "风险评级",
+        "应对建议"
+      ],
+      "ai_prompt": "请作为政务舆情分析师，对以下舆情数据进行分析：1.情感分布 2.热点话题 3.风险等级 4.传播路径 5.应对建议"
+    },
+    {
+      "id": "gov-20",
+      "name": "行政审批智能预审",
+      "category": "行政审批",
+      "description": "企业/群众提交申请材料前，AI自动预审材料完整性和合规性",
+      "workflow": [
+        "材料上传",
+        "清单比对",
+        "完整性检查",
+        "合规性校验",
+        "补正提示"
+      ],
+      "ai_prompt": "请作为行政审批预审专家，检查以下申请材料：1.材料清单完整性 2.格式规范性 3.内容合规性 4.缺失项提示 5.修改建议"
+    },
+    {
+      "id": "gov-21",
+      "name": "民生政策匹配推荐",
+      "category": "民生服务",
+      "description": "根据用户画像(年龄/职业/收入/家庭)智能匹配可享受的政策福利",
+      "workflow": [
+        "用户画像",
+        "政策库检索",
+        "条件匹配",
+        "优先级排序",
+        "推荐说明"
+      ],
+      "ai_prompt": "请作为民生政策顾问，根据用户画像匹配可享受的政策：1.匹配政策列表 2.申请条件 3.补贴金额 4.申请流程 5.截止时间"
+    },
+    {
+      "id": "gov-22",
+      "name": "数据报表自动生成",
+      "category": "数据治理",
+      "description": "根据原始数据自动生成政务统计报表、分析报告和可视化建议",
+      "workflow": [
+        "数据导入",
+        "指标计算",
+        "趋势分析",
+        "异常识别",
+        "报表生成"
+      ],
+      "ai_prompt": "请作为政务数据分析专家，根据以下数据生成分析报告：1.核心指标 2.趋势分析 3.同比环比 4.异常预警 5.对策建议"
+    },
+    {
+      "id": "gov-23",
+      "name": "应急预案智能推演",
+      "category": "应急管理",
+      "description": "基于突发事件类型，自动推演应急响应流程和资源调度方案",
+      "workflow": [
+        "事件类型",
+        "等级评估",
+        "预案匹配",
+        "资源调度",
+        "推演模拟"
+      ],
+      "ai_prompt": "请作为应急管理专家，针对以下突发事件制定应急响应方案：1.事件等级 2.响应级别 3.指挥体系 4.资源调度 5.处置流程 6.善后恢复"
+    },
+    {
+      "id": "ENT-001",
+      "name": "企业知识库问答",
+      "category": "企业",
+      "description": "基于企业内部文档的智能问答系统",
+      "icon": "🏢"
+    },
+    {
+      "id": "ENT-002",
+      "name": "合同审查助手",
+      "category": "企业",
+      "description": "AI辅助合同条款审查与风险识别",
+      "icon": "📋"
+    },
+    {
+      "id": "ENT-003",
+      "name": "会议纪要生成",
+      "category": "企业",
+      "description": "自动生成结构化会议纪要与行动项",
+      "icon": "📝"
+    },
+    {
+      "id": "ENT-004",
+      "name": "竞品分析报告",
+      "category": "企业",
+      "description": "多维度竞品对比分析与策略建议",
+      "icon": "📊"
+    },
+    {
+      "id": "PER-001",
+      "name": "个人知识管理",
+      "category": "个人",
+      "description": "个人笔记/文章的智能整理与检索",
+      "icon": "📚"
+    },
+    {
+      "id": "PER-002",
+      "name": "学习规划助手",
+      "category": "个人",
+      "description": "个性化学习路径规划与进度跟踪",
+      "icon": "🎓"
+    },
+    {
+      "id": "PER-003",
+      "name": "写作润色助手",
+      "category": "个人",
+      "description": "文章润色、风格转换、错别字检测",
+      "icon": "✍️"
+    },
+    {
+      "id": "AI-001",
+      "name": "Prompt工程优化",
+      "category": "AI",
+      "description": "提示词优化、测试、版本管理",
+      "icon": "🤖"
+    },
+    {
+      "id": "AI-002",
+      "name": "数据洞察分析",
+      "category": "AI",
+      "description": "结构化数据自动分析与可视化建议",
+      "icon": "📈"
+    },
+    {
+      "id": "AI-003",
+      "name": "代码审查助手",
+      "category": "AI",
+      "description": "代码质量审查、安全漏洞检测、重构建议",
+      "icon": "💻"
+    }
+  ],
+  "total": 14
+}
