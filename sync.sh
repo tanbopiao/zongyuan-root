@@ -62,7 +62,7 @@ payload = json.dumps({
         'data': {
             'timestamp': '$TIMESTAMP',
             'commit': '$LATEST_COMMIT',
-            'github': 'https://github.com/tanbopiao/ZONGYUAN-ROOT',
+            'github': 'https://github.com/tanbopiao/zongyuan-root',
             'gitee': 'https://gitee.com/huodou-cloud-intelligence-aios/ZONGYUAN-ROOT',
             'did': 'DID-BR-000002',
             'sovereign_root': 'Ω-TAN-7-001',
