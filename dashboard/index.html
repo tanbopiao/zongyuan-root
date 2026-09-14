@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT 全维度进化仪表盘 | Gen2</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+  background: #0a0a0f;
+  color: #e8e6e3;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(212,175,55,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(139,92,246,0.06) 0%, transparent 50%);
+}
+.container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+/* 顶部标题栏 */
+.header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #d4af37, #f0e68c, #d4af37);
+}
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #d4af37 0%, #f0e68c 50%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.header .subtitle { color: #a0a0b0; font-size: 14px; margin-bottom: 16px; }
+.header .meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  font-size: 13px;
+  color: #888;
+}
+.header .meta-item { display: flex; align-items: center; gap: 6px; }
+.header .meta-label { color: #666; }
+.header .meta-value { color: #d4af37; font-family: monospace; }
+.header .gen-badge {
+  position: absolute;
+  top: 24px; right: 32px;
+  background: linear-gradient(135deg, #d4af37, #b8941f);
+  color: #0a0a0f;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 20px rgba(212,175,55,0.4);
+}
+
+/* 概览卡片 */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.overview-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.overview-card:hover {
+  border-color: rgba(212,175,55,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(212,175,55,0.15);
+}
+.overview-card .value {
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #d4af37, #f0e68c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+.overview-card .label { font-size: 12px; color: #888; }
+.overview-card.health .value {
+  background: linear-gradient(135deg, #52c41a, #95de64);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 区块标题 */
+.section {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #d4af37;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, #d4af37, #b8941f);
+  border-radius: 2px;
+}
+
+/* 双列布局 */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+/* 模型排名柱状图 */
+.rank-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+.rank-num {
+  width: 24px;
+  text-align: center;
+  font-weight: 700;
+  color: #d4af37;
+  font-size: 13px;
+}
+.rank-name {
+  width: 200px;
+  font-size: 12px;
+  color: #ccc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rank-bar {
+  flex: 1;
+  height: 24px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.rank-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d4af37, #f0e68c);
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+.rank-p {
+  width: 60px;
+  text-align: right;
+  font-family: monospace;
+  font-size: 13px;
+  color: #d4af37;
+  font-weight: 600;
+}
+.rank-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(82,196,26,0.2);
+  color: #52c41a;
+}
+.rank-tag.paid { background: rgba(250,173,20,0.2); color: #faad14; }
+
+/* 三维制衡公式 */
+.formula-box {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.formula-box .formula {
+  font-size: 24px;
+  font-weight: 700;
+  color: #d4af37;
+  font-family: 'Times New Roman', serif;
+  margin-bottom: 8px;
+}
+.formula-box .formula-desc { font-size: 12px; color: #888; }
+.weight-row {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 16px;
+}
+.weight-item { text-align: center; }
+.weight-item .w-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+.weight-item .w-value { font-size: 20px; font-weight: 700; }
+.weight-item.u .w-value { color: #52c41a; }
+.weight-item.r .w-value { color: #ff4d4f; }
+.weight-item.c .w-value { color: #1890ff; }
+
+.threshold-list { list-style: none; }
+.threshold-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 13px;
+}
+.threshold-list li:last-child { border-bottom: none; }
+.threshold-list .t-level { color: #ccc; }
+.threshold-list .t-range { font-family: monospace; color: #d4af37; }
+
+/* 路由决策表 */
+.route-table { width: 100%; border-collapse: collapse; }
+.route-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #888;
+  border-bottom: 2px solid rgba(212,175,55,0.3);
+  font-weight: 600;
+}
+.route-table td {
+  padding: 10px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.route-table tr:hover { background: rgba(212,175,55,0.05); }
+.route-table .cap { color: #d4af37; font-weight: 600; }
+.route-table .model { color: #ccc; font-family: monospace; font-size: 12px; }
+.route-table .p-val { color: #52c41a; font-family: monospace; font-weight: 600; }
+.route-table .urc { font-size: 11px; color: #666; }
+
+/* 性能指标 */
+.perf-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.perf-item {
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+.perf-item .p-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #d4af37;
+  margin-bottom: 4px;
+}
+.perf-item .p-label { font-size: 12px; color: #888; }
+
+/* SELF-TRIAD */
+.triad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.triad-item {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(82,196,26,0.3);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+.triad-item .t-icon { font-size: 28px; margin-bottom: 8px; }
+.triad-item .t-name { font-size: 14px; font-weight: 600; color: #52c41a; margin-bottom: 4px; }
+.triad-item .t-status { font-size: 11px; color: #888; }
+.triad-closed {
+  background: linear-gradient(135deg, rgba(82,196,26,0.1), rgba(82,196,26,0.05));
+  border: 1px solid rgba(82,196,26,0.4);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #52c41a;
+}
+
+/* 能力分布 */
+.cap-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+.cap-name { width: 120px; font-size: 12px; color: #ccc; }
+.cap-bar {
+  flex: 1;
+  height: 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.cap-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  border-radius: 3px;
+}
+.cap-count { width: 30px; text-align: right; font-family: monospace; color: #a78bfa; font-weight: 600; }
+
+/* 进化历史 */
+.history-timeline { position: relative; padding-left: 30px; }
+.history-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #d4af37, rgba(212,175,55,0.2));
+}
+.history-item { position: relative; margin-bottom: 20px; }
+.history-item::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 4px;
+  width: 12px; height: 12px;
+  background: #d4af37;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(212,175,55,0.5);
+}
+.history-item .h-gen { font-size: 14px; font-weight: 700; color: #d4af37; margin-bottom: 4px; }
+.history-item .h-date { font-size: 11px; color: #666; margin-bottom: 6px; }
+.history-item .h-desc { font-size: 12px; color: #aaa; }
+.history-item .h-stats { display: flex; gap: 16px; margin-top: 6px; font-size: 11px; color: #888; }
+.history-item .h-stat span { color: #d4af37; font-weight: 600; }
+
+/* 底部 */
+.footer {
+  text-align: center;
+  padding: 24px;
+  color: #555;
+  font-size: 12px;
+  border-top: 1px solid rgba(212,175,55,0.1);
+  margin-top: 24px;
+}
+.footer .trace { color: #d4af37; font-family: monospace; font-size: 14px; margin-bottom: 8px; }
+.footer .hash { font-family: monospace; color: #666; font-size: 11px; }
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .header h1 { font-size: 20px; }
+  .header .gen-badge { position: static; margin-top: 12px; display: inline-block; }
+  .rank-name { width: 120px; font-size: 11px; }
+  .overview-grid { grid-template-columns: repeat(2, 1fr); }
+  .triad-grid { grid-template-columns: 1fr; }
+  .perf-grid { grid-template-columns: 1fr; }
+}
+</style>
+    <link rel="canonical" href="https://huodouai.comdashboard/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="container">
+
+<!-- 顶部标题栏 -->
+<div class="header">
+  <div class="gen-badge">Gen2 全维度进化</div>
+  <h1>ZONGYUAN-ROOT 全维度进化仪表盘</h1>
+  <div class="subtitle">元极恒一自治体系 · 算力路由引擎</div>
+  <div class="meta-row">
+    <div class="meta-item"><span class="meta-label">进化ID:</span><span class="meta-value">EVOL-FULL-DIMENSION-GEN2-1788648099</span></div>
+    <div class="meta-item"><span class="meta-label">时间:</span><span class="meta-value">2026-09-06 06:41:39</span></div>
+    <div class="meta-item"><span class="meta-label">DID:</span><span class="meta-value">DID-BR-000002</span></div>
+    <div class="meta-item"><span class="meta-label">报告哈希:</span><span class="meta-value">4684E5B8CA2CB7B0...</span></div>
+  </div>
+</div>
+
+<!-- 概览卡片 -->
+<div class="overview-grid">
+  <div class="overview-card"><div class="value">13</div><div class="label">模型总数</div></div>
+  <div class="overview-card"><div class="value">8</div><div class="label">厂商数</div></div>
+  <div class="overview-card"><div class="value">12</div><div class="label">免费模型</div></div>
+  <div class="overview-card"><div class="value">0.9132</div><div class="label">平均P值</div></div>
+  <div class="overview-card"><div class="value">8/8</div><div class="label">路由成功率</div></div>
+  <div class="overview-card health"><div class="value">EXCELLENT</div><div class="label">整体健康</div></div>
+</div>
+
+<!-- 双列：模型排名 + 三维制衡 -->
+<div class="two-col">
+  <div class="section">
+    <div class="section-title">模型P值排名（三维制衡综合得分）</div>
+    <div class="rank-item">
+      <div class="rank-num">1</div>
+      <div class="rank-name" title="volcengine/doubao-pro">doubao-pro</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:86.33333333333309%"></div></div>
+      <div class="rank-p">0.9259</div>
+      <div class="rank-tag ">免费额度</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">2</div>
+      <div class="rank-name" title="agnes/omni-free">omni-free</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:55.333333333333165%"></div></div>
+      <div class="rank-p">0.9166</div>
+      <div class="rank-tag ">免费</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">3</div>
+      <div class="rank-name" title="ollama/qwen2.5-7b">qwen2.5-7b</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:51.99999999999982%"></div></div>
+      <div class="rank-p">0.9156</div>
+      <div class="rank-tag ">免费</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">4</div>
+      <div class="rank-name" title="ollama/llama3.1-8b">llama3.1-8b</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:48.99999999999979%"></div></div>
+      <div class="rank-p">0.9147</div>
+      <div class="rank-tag ">免费</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">5</div>
+      <div class="rank-name" title="minimax/abab6.5">abab6.5</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:44.99999999999986%"></div></div>
+      <div class="rank-p">0.9135</div>
+      <div class="rank-tag ">免费额度</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">6</div>
+      <div class="rank-name" title="volcengine/seedance-2.0-mini">seedance-2.0-mini</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:44.66666666666656%"></div></div>
+      <div class="rank-p">0.9134</div>
+      <div class="rank-tag ">免费额度</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">7</div>
+      <div class="rank-name" title="zhipu/glm-4-flash">glm-4-flash</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:34.33333333333326%"></div></div>
+      <div class="rank-p">0.9103</div>
+      <div class="rank-tag ">免费</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">8</div>
+      <div class="rank-name" title="zhipu/glm-4">glm-4</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:34.33333333333326%"></div></div>
+      <div class="rank-p">0.9103</div>
+      <div class="rank-tag paid">付费</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">9</div>
+      <div class="rank-name" title="siliconflow/deepseek-v3">deepseek-v3</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:34.33333333333326%"></div></div>
+      <div class="rank-p">0.9103</div>
+      <div class="rank-tag ">免费额度</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">10</div>
+      <div class="rank-name" title="siliconflow/qwen2.5-72b">qwen2.5-72b</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:34.33333333333326%"></div></div>
+      <div class="rank-p">0.9103</div>
+      <div class="rank-tag ">免费额度</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">11</div>
+      <div class="rank-name" title="aliyun/qwen-max">qwen-max</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:34.33333333333326%"></div></div>
+      <div class="rank-p">0.9103</div>
+      <div class="rank-tag ">免费额度</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">12</div>
+      <div class="rank-name" title="aliyun/wan3.0-video">wan3.0-video</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:34.33333333333326%"></div></div>
+      <div class="rank-p">0.9103</div>
+      <div class="rank-tag ">免费额度</div>
+    </div>
+    <div class="rank-item">
+      <div class="rank-num">13</div>
+      <div class="rank-name" title="kimi/k2">k2</div>
+      <div class="rank-bar"><div class="rank-fill" style="width:34.33333333333326%"></div></div>
+      <div class="rank-p">0.9103</div>
+      <div class="rank-tag ">免费额度</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">三维制衡决策公式</div>
+    <div class="formula-box">
+      <div class="formula">P = 0.3U − 0.4R − 0.3C</div>
+      <div class="formula-desc">收益最大 · 风险最小 · 成本最小 · 形式化证明 FULLY PROVEN</div>
+    </div>
+    <div class="weight-row">
+      <div class="weight-item u"><div class="w-label">U 收益 (θ)</div><div class="w-value">0.3</div></div>
+      <div class="weight-item r"><div class="w-label">R 风险 (λ)</div><div class="w-value">0.4</div></div>
+      <div class="weight-item c"><div class="w-label">C 成本 (μ)</div><div class="w-value">0.3</div></div>
+    </div>
+    <div style="font-size:12px;color:#888;margin-bottom:10px;">决策阈值分级：</div>
+    <ul class="threshold-list">
+      <li><span class="t-level">🔴 强制回滚</span><span class="t-range">P &lt; 0.3</span></li>
+      <li><span class="t-level">🟡 持续监控</span><span class="t-range">0.3 ≤ P &lt; 0.5</span></li>
+      <li><span class="t-level">🔵 计划优化</span><span class="t-range">0.5 ≤ P &lt; 0.7</span></li>
+      <li><span class="t-level">🟢 立即自愈</span><span class="t-range">P ≥ 0.7</span></li>
+    </ul>
+    <div style="margin-top:16px;padding:12px;background:rgba(82,196,26,0.1);border-radius:6px;font-size:12px;color:#52c41a;">
+      ✅ 权重防篡改指纹校验通过 | 非线性修正已启用 | 数据源自检通过
+    </div>
+  </div>
+</div>
+
+<!-- 路由决策结果 -->
+<div class="section">
+  <div class="section-title">路由决策结果（8大能力自动路由）</div>
+  <table class="route-table">
+    <thead>
+      <tr><th>能力</th><th>选中模型</th><th>P值</th><th>U/R/C</th><th>降级链</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="cap">文本对话</td>
+        <td class="model">volcengine/doubao-pro</td>
+        <td class="p-val">0.9259</td>
+        <td class="urc">U=0.93 R=0.10 C=0.04</td>
+        <td class="model" style="font-size:11px;">agnes/omni-free → ollama/qwen2.5-7b → siliconflow/qwen2.5-72b</td>
+      </tr>
+      <tr>
+        <td class="cap">代码生成</td>
+        <td class="model">volcengine/doubao-pro</td>
+        <td class="p-val">0.9259</td>
+        <td class="urc">U=0.93 R=0.10 C=0.04</td>
+        <td class="model" style="font-size:11px;">ollama/llama3.1-8b → ollama/qwen2.5-7b → siliconflow/qwen2.5-72b</td>
+      </tr>
+      <tr>
+        <td class="cap">视频生成</td>
+        <td class="model">volcengine/seedance-2.0-mini</td>
+        <td class="p-val">0.9168</td>
+        <td class="urc">U=0.93 R=0.11 C=0.40</td>
+        <td class="model" style="font-size:11px;">aliyun/wan3.0-video</td>
+      </tr>
+      <tr>
+        <td class="cap">图像生成</td>
+        <td class="model">agnes/omni-free</td>
+        <td class="p-val">0.9167</td>
+        <td class="urc">U=0.84 R=0.11 C=0.08</td>
+        <td class="model" style="font-size:11px;">—</td>
+      </tr>
+      <tr>
+        <td class="cap">向量嵌入</td>
+        <td class="model">ollama/qwen2.5-7b</td>
+        <td class="p-val">0.9173</td>
+        <td class="urc">U=0.84 R=0.03 C=0.02</td>
+        <td class="model" style="font-size:11px;">—</td>
+      </tr>
+      <tr>
+        <td class="cap">RAG推理</td>
+        <td class="model">siliconflow/deepseek-v3</td>
+        <td class="p-val">0.9172</td>
+        <td class="urc">U=0.96 R=0.11 C=0.06</td>
+        <td class="model" style="font-size:11px;">kimi/k2 → aliyun/qwen-max</td>
+      </tr>
+      <tr>
+        <td class="cap">函数调用</td>
+        <td class="model">volcengine/doubao-pro</td>
+        <td class="p-val">0.9214</td>
+        <td class="urc">U=0.91 R=0.10 C=0.04</td>
+        <td class="model" style="font-size:11px;">aliyun/qwen-max → zhipu/glm-4-flash</td>
+      </tr>
+      <tr>
+        <td class="cap">长文本</td>
+        <td class="model">volcengine/doubao-pro</td>
+        <td class="p-val">0.9214</td>
+        <td class="urc">U=0.91 R=0.10 C=0.04</td>
+        <td class="model" style="font-size:11px;">kimi/k2 → siliconflow/qwen2.5-72b → siliconflow/deepseek-v3</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 双列：性能基准 + SELF-TRIAD -->
+<div class="two-col">
+  <div class="section">
+    <div class="section-title">性能基准统计</div>
+    <div class="perf-grid">
+      <div class="perf-item"><div class="p-value">0.7969</div><div class="p-label">平均质量评分</div></div>
+      <div class="perf-item"><div class="p-value">14838ms</div><div class="p-label">平均延迟</div></div>
+      <div class="perf-item"><div class="p-value">3.4%</div><div class="p-label">平均故障率</div></div>
+      <div class="perf-item"><div class="p-value">96.6%</div><div class="p-label">平均成功率</div></div>
+    </div>
+    <div style="margin-top:16px;">
+      <div style="font-size:12px;color:#888;margin-bottom:10px;">厂商平均质量对比：</div>
+      <div class="cap-item">
+        <div class="cap-name">aliyun_bailian</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:86.0%;background:linear-gradient(90deg,#d4af37,#f0e68c);"></div></div>
+        <div class="cap-count" style="color:#d4af37;">0.86</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">kimi</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:86.0%;background:linear-gradient(90deg,#d4af37,#f0e68c);"></div></div>
+        <div class="cap-count" style="color:#d4af37;">0.86</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">volcengine</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:86.0%;background:linear-gradient(90deg,#d4af37,#f0e68c);"></div></div>
+        <div class="cap-count" style="color:#d4af37;">0.86</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">siliconflow</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:84.0%;background:linear-gradient(90deg,#d4af37,#f0e68c);"></div></div>
+        <div class="cap-count" style="color:#d4af37;">0.84</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">zhipu</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:78.5%;background:linear-gradient(90deg,#d4af37,#f0e68c);"></div></div>
+        <div class="cap-count" style="color:#d4af37;">0.79</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">minimax</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:78.0%;background:linear-gradient(90deg,#d4af37,#f0e68c);"></div></div>
+        <div class="cap-count" style="color:#d4af37;">0.78</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">agnes</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:70.0%;background:linear-gradient(90deg,#d4af37,#f0e68c);"></div></div>
+        <div class="cap-count" style="color:#d4af37;">0.70</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">ollama</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:66.5%;background:linear-gradient(90deg,#d4af37,#f0e68c);"></div></div>
+        <div class="cap-count" style="color:#d4af37;">0.67</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">SELF-TRIAD 三自闭环</div>
+    <div class="triad-grid">
+      <div class="triad-item">
+        <div class="t-icon">📚</div>
+        <div class="t-name">自学习</div>
+        <div class="t-status">ACTIVE</div>
+      </div>
+      <div class="triad-item">
+        <div class="t-icon">🧬</div>
+        <div class="t-name">自进化</div>
+        <div class="t-status">ACTIVE</div>
+      </div>
+      <div class="triad-item">
+        <div class="t-icon">⚡</div>
+        <div class="t-name">自优化</div>
+        <div class="t-status">ACTIVE</div>
+      </div>
+    </div>
+    <div class="triad-closed">🔄 三自闭环状态：FULLY_CLOSED</div>
+
+    <div style="margin-top:20px;">
+      <div style="font-size:12px;color:#888;margin-bottom:12px;">能力标签分布：</div>
+      <div class="cap-item">
+        <div class="cap-name">chat</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:84.61538461538461%"></div></div>
+        <div class="cap-count">11</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">code</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:76.92307692307693%"></div></div>
+        <div class="cap-count">10</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">long_context</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:61.53846153846154%"></div></div>
+        <div class="cap-count">8</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">function_call</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:30.76923076923077%"></div></div>
+        <div class="cap-count">4</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">reasoning</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:30.76923076923077%"></div></div>
+        <div class="cap-count">4</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">video_generation</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:15.384615384615385%"></div></div>
+        <div class="cap-count">2</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">vision</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:15.384615384615385%"></div></div>
+        <div class="cap-count">2</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">embedding</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:7.6923076923076925%"></div></div>
+        <div class="cap-count">1</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">image_generation</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:7.6923076923076925%"></div></div>
+        <div class="cap-count">1</div>
+      </div>
+      <div class="cap-item">
+        <div class="cap-name">audio</div>
+        <div class="cap-bar"><div class="cap-fill" style="width:7.6923076923076925%"></div></div>
+        <div class="cap-count">1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 进化历史 -->
+<div class="section">
+  <div class="section-title">进化历史时间线</div>
+  <div class="history-timeline">
+    <div class="history-item">
+      <div class="h-gen">Gen2 · 全维度（6大维度）</div>
+      <div class="h-date">2026-09-06</div>
+      <div class="h-stats"><div class="h-stat">模型评估: <span>13</span></div><div class="h-stat">进化维度: <span>6</span></div></div>
+    </div>
+    <div class="history-item">
+      <div class="h-gen">Gen1 · 算力路由引擎</div>
+      <div class="h-date">2026-09-06</div>
+      <div class="h-stats"><div class="h-stat">模型评估: <span>13</span></div><div class="h-stat">优先级优化: <span>12</span></div><div class="h-stat">基准调整: <span>2</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 底部 -->
+<div class="footer">
+  <div class="trace">Ω₀⊂⊙∞⊂Ω</div>
+  <div>ZONGYUAN-ROOT 元极恒一自治体系 · 算力路由引擎 · 全维度进化仪表盘</div>
+  <div class="hash" style="margin-top:8px;">报告哈希: 4684E5B8CA2CB7B0... | 进化ID: EVOL-FULL-DIMENSION-GEN2-1788648099</div>
+  <div class="hash" style="margin-top:4px;">DID: DID-BR-000002 | 锁档等级: LV8 永久自治锁档</div>
+</div>
+
+</div>
+</body>
+</html>

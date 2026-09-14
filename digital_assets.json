@@ -1,0 +1,808 @@
+{
+  "generated_at": "2026-09-14T22:30:02.341701",
+  "version": "v1.1",
+  "truths": {
+    "total": 7073,
+    "nodes": 10,
+    "audit_logs": 12474,
+    "by_category": {
+      "uncategorized": 343,
+      "anomaly_detection": 1,
+      "axiom": 138,
+      "case": 736,
+      "compute_injection": 5,
+      "creative": 173,
+      "data": 2502,
+      "decision": 85,
+      "evolution_record": 1,
+      "guardian_report": 2,
+      "lock": 149,
+      "log_summary": 1,
+      "meta_rule": 353,
+      "method": 896,
+      "observation": 6,
+      "other": 1,
+      "protocol": 312,
+      "risk": 162,
+      "stability_measure": 6,
+      "theorem": 530,
+      "unclassified": 673
+    },
+    "daily_growth": [
+      {
+        "day": "2026-09-08",
+        "count": 0
+      },
+      {
+        "day": "2026-09-09",
+        "count": 0
+      },
+      {
+        "day": "2026-09-10",
+        "count": 0
+      },
+      {
+        "day": "2026-09-11",
+        "count": 0
+      },
+      {
+        "day": "2026-09-12",
+        "count": 0
+      },
+      {
+        "day": "2026-09-13",
+        "count": 0
+      },
+      {
+        "day": "2026-09-14",
+        "count": 346
+      }
+    ]
+  },
+  "media": {
+    "images": 3197,
+    "videos": 83,
+    "total_size_mb": 3976.0,
+    "storage_path": "/opt/storage"
+  },
+  "documents": {
+    "total": 30,
+    "recent": [
+      {
+        "name": "SOP-生产通道隔离全域标准-V1.1.md",
+        "size_kb": 1.7,
+        "updated": "2026-09-14"
+      },
+      {
+        "name": "官网部署SOP.md",
+        "size_kb": 10.0,
+        "updated": "2026-09-14"
+      },
+      {
+        "name": "全域SOP手册.md",
+        "size_kb": 17.4,
+        "updated": "2026-09-14"
+      },
+      {
+        "name": "SOP-生产通道隔离全域标准-V1.2.md",
+        "size_kb": 2.4,
+        "updated": "2026-09-14"
+      },
+      {
+        "name": "ENGINEERING_OPS_WHITEPAPER_v1.0.md",
+        "size_kb": 8.5,
+        "updated": "2026-09-13"
+      },
+      {
+        "name": "KUNLUN-4END-ARCHIVE-SOP-V1.md",
+        "size_kb": 4.2,
+        "updated": "2026-09-13"
+      },
+      {
+        "name": "VERIFY-REPORT-20260913.md",
+        "size_kb": 1.4,
+        "updated": "2026-09-13"
+      },
+      {
+        "name": "KUNLUN-4END-ARCHIVE-SOP-V1.1.md",
+        "size_kb": 5.1,
+        "updated": "2026-09-13"
+      },
+      {
+        "name": "TRUTH-SECURITY-CLASSIFICATION-20260913.md",
+        "size_kb": 3.7,
+        "updated": "2026-09-13"
+      },
+      {
+        "name": "model_distillation_engine_prompt_v2.md",
+        "size_kb": 4.3,
+        "updated": "2026-09-13"
+      }
+    ]
+  },
+  "meta_rules": {
+    "total": 78,
+    "latest": [
+      {
+        "rule_id": "META-RULE.VIDEO-PRODUCTION-FAILOVER-V1.0",
+        "rule_name": "视频量产通道自动故障转移",
+        "content": "视频通道优先级: ①豆包seedance(免费开通后最高质量优先) ②Agnes免费(限流窗口内) ③硅基流动(有余额)。额度/限流/未开通错误自动切下一通道; 全部不可用→manifest记录失败原因，等待通道恢复后由crontab补产。ffprobe本地质检(竖屏+时长≥4s)兜底，本机对象存储入库(bucket=videos)。",
+        "category": "生产自治",
+        "priority": "A",
+        "status": "ACTIVE",
+        "created_at": "2026-09-14T10:20:00+08:00",
+        "efuse": true,
+        "enforcement": "drama-admin-api/video_production.py"
+      },
+      {
+        "rule_id": "MR-083",
+        "rule_name": "数字资产可视化基准架构与扩展规范",
+        "content": {
+          "purpose": "锁定数字资产可视化全流程为基准架构，定义标准化扩展规范，所有新增模块在基准上叠加，禁止推翻重构",
+          "baseline_architecture": {
+            "layer1_data_collection": {
+              "name": "数据采集层",
+              "components": [
+                "记忆网关9120 (真值接收)",
+                "media_auto_archive_daemon (媒体自动归档)",
+                "feishu_media_archive_bot (飞书媒体归档)",
+                "asset_scanner (资产扫描，每小时)",
+                "feishu_base_sync (飞书Base同步，每30分钟)"
+              ],
+              "status": "locked"
+            },
+            "layer2_processing": {
+              "name": "数据处理层",
+              "components": [
+                "global_asset_visualizer.py (全域资产统计，每15分钟)",
+                "asset_visualizer.py (短剧资产统计，每30分钟)"
+              ],
+              "output": "/digital_assets.json (HTTPS可访问)",
+              "status": "locked"
+            },
+            "layer3_visualization": {
+              "name": "可视化展示层",
+              "components": [
+                "/digital-assets.html (全域资产可视化页面)",
+                "首页导航入口 (数字资产)",
+                "动态加载: fetch + 5分钟自动刷新"
+              ],
+              "status": "locked"
+            },
+            "layer4_integration": {
+              "name": "官网集成层",
+              "components": [
+                "两个root目录同步部署 (huodouai.com + www.huodouai.com)",
+                "Nginx静态文件服务",
+                "HTTPS访问"
+              ],
+              "status": "locked"
+            }
+          },
+          "extension_spec": {
+            "principle": "在基准架构上叠加扩展，禁止修改/删除已有层，只能新增数据源、新增展示模块、新增页面",
+            "how_to_add_datasource": {
+              "step1": "在global_asset_visualizer.py中新增get_xxx_stats()函数",
+              "step2": "在main()的data字典中新增对应字段",
+              "step3": "在digital-assets.html的render()中新增展示模块",
+              "step4": "测试验证后更新基准快照"
+            },
+            "how_to_add_module": {
+              "step1": "新增独立页面 /xxx.html",
+              "step2": "在首页导航添加入口",
+              "step3": "两个root目录同步部署",
+              "step4": "写入元法则，更新基准"
+            },
+            "how_to_add_whitepaper": {
+              "step1": "文档放入 /opt/ZONGYUAN-ROOT/docs/",
+              "step2": "global_asset_visualizer自动统计",
+              "step3": "在官网whitepapers目录部署HTML版",
+              "step4": "导航添加入口"
+            },
+            "how_to_add_api": {
+              "step1": "API服务绑定127.0.0.1（非白名单端口）",
+              "step2": "Nginx反代到公网路径（如需对外）",
+              "step3": "在global_asset_visualizer的services列表中新增监控",
+              "step4": "更新端口台账"
+            },
+            "how_to_add_system": {
+              "step1": "新系统部署到独立目录/端口",
+              "step2": "纳入unified_service_guard自愈监控",
+              "step3": "在global_asset_visualizer中新增统计",
+              "step4": "官网新增展示页面+导航入口",
+              "step5": "写入元法则，更新基准快照"
+            }
+          },
+          "locked_files": [
+            "/opt/ZONGYUAN-ROOT/scripts/global_asset_visualizer.py",
+            "/www/wwwroot/www.huodouai.com/digital-assets.html",
+            "/www/wwwroot/huodouai.com/digital-assets.html"
+          ],
+          "modification_rule": "基准架构文件修改必须走MR-080变更审批(P0级)，扩展新增走P2/P3级",
+          "verification": "每日基准验证自动检查架构完整性"
+        },
+        "category": "protocol",
+        "priority": "L1",
+        "status": "active",
+        "created_at": "2026-09-14T10:38:23.589660"
+      },
+      {
+        "rule_id": "MR-084",
+        "rule_name": "已固化成果变更审批（LOCKED-CHANGE-APPROVAL）",
+        "content": {
+          "purpose": "视频量产通道等已固化成果默认eFuse锁定，不允许未经审批的修改",
+          "locked_assets": [
+            {
+              "path": "/opt/ZONGYUAN-ROOT/drama-admin-api/video_production.py",
+              "md5": "8ddc851e049ba8b38278818ae04418a3",
+              "note": "视频量产执行器：seedance-1.0免费优先/i2v/poll兼容/URL统一"
+            },
+            {
+              "path": "/opt/ZONGYUAN-ROOT/drama-admin-api/app.py",
+              "md5": "7a117196a277ce7d317d4c7d1e6cb6b5",
+              "note": "8100上传服务：subdir路径修复，本地磁盘对象存储"
+            }
+          ],
+          "approval_flow": "用户审批通过 → chattr -i 解锁 → 修改 → py_compile验证 → 重启服务 → 更新md5基准 → 重新eFuse锁定",
+          "violation": "未审批修改触发M1真值不变告警并自动回滚至最后锁定版本",
+          "effective_from": "2026-09-14 16:04:18"
+        }
+      }
+    ]
+  },
+  "services": [
+    {
+      "name": "记忆网关",
+      "port": 9120,
+      "status": "online"
+    },
+    {
+      "name": "通信网关",
+      "port": 9122,
+      "status": "offline"
+    },
+    {
+      "name": "希尔伯特镜像态",
+      "port": 9125,
+      "status": "online"
+    },
+    {
+      "name": "GEO晶格",
+      "port": 9151,
+      "status": "online"
+    },
+    {
+      "name": "量子纠缠层",
+      "port": 9160,
+      "status": "offline"
+    },
+    {
+      "name": "飞书网关",
+      "port": 8001,
+      "status": "online"
+    },
+    {
+      "name": "本地LLM",
+      "port": 8081,
+      "status": "online"
+    },
+    {
+      "name": "自愈引擎",
+      "port": 8161,
+      "status": "online"
+    },
+    {
+      "name": "向量数据库",
+      "port": 8014,
+      "status": "online"
+    },
+    {
+      "name": "RAG服务",
+      "port": 8085,
+      "status": "online"
+    }
+  ],
+  "web_assets": {
+    "total_html": 446,
+    "main_site_pages": 110,
+    "main_site_list": [
+      "404.html",
+      "about-line.html",
+      "achievements.html",
+      "agent-embodiment.html",
+      "agent-network.html",
+      "agent-studio.html",
+      "ai-asset-lock.html",
+      "ai-gateway.html",
+      "aios-image.html",
+      "architecture-deep.html",
+      "architecture.html",
+      "asset-center.html",
+      "auto-ops.html",
+      "auto-pipeline.html",
+      "blog.html",
+      "book-demo.html",
+      "brain-strategy.html",
+      "cases.html",
+      "central-brain.html",
+      "change-ledger.html",
+      "character-ai.html",
+      "characters.html",
+      "commercial.html",
+      "content-line.html",
+      "decision-intelligence.html",
+      "delivery-standard.html",
+      "developer-center.html",
+      "developers.html",
+      "digital-assets.html",
+      "digital-gallery-v3.html",
+      "dlp-gateway.html",
+      "docs.html",
+      "drama-factory.html",
+      "drift.html",
+      "ecosystem-line.html",
+      "edu-ai-teacher.html",
+      "edu-chat.html",
+      "edu-knowledge-graph.html",
+      "education-line.html",
+      "education.html",
+      "emergence.html",
+      "engines.html",
+      "enterprise-system.html",
+      "evolution-strategy.html",
+      "experience-kb.html",
+      "global-audit-report.html",
+      "global-learning.html",
+      "gov-line.html",
+      "governance.html",
+      "high-capabilities.html",
+      "high-order-state.html",
+      "index.html",
+      "kb-saas.html",
+      "kernel-lock-visual.html",
+      "kernel-memory.html",
+      "kernel-status.html",
+      "keyframe-gallery.html",
+      "knowledge.html",
+      "kunlun-drama.html",
+      "learning-evolution.html",
+      "ledger.html",
+      "lightweight-strategy-v2.html",
+      "lightweight-strategy.html",
+      "lightweight-v2.html",
+      "lightweight-v3.html",
+      "logo-design.html",
+      "memory-gateway.html",
+      "meta-rules-v2.html",
+      "microkernel-architecture.html",
+      "model-compare-lab.html",
+      "monitor.html",
+      "notary-api.html",
+      "opensource.html",
+      "ops-center.html",
+      "ops-line.html",
+      "ops-monitor.html",
+      "performance.html",
+      "philosophy.html",
+      "portal.html",
+      "pricing.html",
+      "product-map.html",
+      "product-matrix.html",
+      "product.html",
+      "products.html",
+      "prometheus-api-docs.html",
+      "research.html",
+      "roadmap.html",
+      "roi-calculator.html",
+      "safe-evolution.html",
+      "search.html",
+      "sec-tower-roadmap.html",
+      "sec-tower-v1.html",
+      "security-compliance.html",
+      "security-line.html",
+      "semantic-dashboard.html",
+      "server-monitor.html",
+      "sitemap.html",
+      "solutions.html",
+      "standard-sop.html",
+      "standardization-center.html",
+      "startup-loop-defense-whitepaper.html",
+      "status-center.html",
+      "status.html",
+      "system-dashboard.html",
+      "token-gateway.html",
+      "truth-transmutation.html",
+      "vector.html",
+      "whitepaper.html",
+      "workbench.html",
+      "works-gallery-v2.html"
+    ],
+    "subdirectories": {
+      "gov-monitor": 1,
+      "notification-config": 1,
+      "domains": 12,
+      "gov": 3,
+      "console": 1,
+      "internal": 14,
+      "gov-canvas": 1,
+      "docs": 5,
+      "platform": 1,
+      "ai": 1,
+      "ops": 3,
+      "philosophy": 1,
+      "knowledge": 1,
+      "education": 1,
+      "research": 1,
+      "agent-admin": 1,
+      "architecture": 15,
+      "drama": 26,
+      "aios": 22,
+      "workbench": 1,
+      "api-usage-dashboard": 1,
+      "template-market": 1,
+      "apps": 5,
+      "alert-center": 1,
+      "score-trend": 1,
+      "gov-api-docs": 1,
+      "experience": 1,
+      "gov-mobile": 1,
+      "gov-ai": 1,
+      "gov-agents": 1,
+      "archive": 1,
+      "products": 23,
+      "blog": 7,
+      "solutions": 9,
+      "cases": 1,
+      "partners": 1,
+      "about": 7,
+      "pricing": 1,
+      "whitepaper": 1,
+      "privacy": 1,
+      "terms": 1,
+      "contact": 1,
+      "changelog": 1,
+      "showcase": 1,
+      "status": 1,
+      "drift": 1,
+      "whitepapers": 5,
+      "pages": 13,
+      "portal": 2,
+      "gov-admin": 1,
+      "api-platform": 1,
+      "drama-internal": 5,
+      "gov-operator-admin": 1,
+      "dashboard": 1,
+      "rbac-admin": 1,
+      "gov-dashboard": 1,
+      "api-docs": 1,
+      "security": 1,
+      "sovereignty": 3,
+      "identity-console": 1,
+      "gov-pricing": 1,
+      "gov-sales": 1,
+      "gov-cases": 1,
+      "gov-compete": 1,
+      "identity-market": 1,
+      "kernel-console": 1,
+      "capability-orchestrator": 1,
+      "capability-scoring": 1,
+      "agent-experience": 1,
+      "kunlun": 4,
+      "assets": 18,
+      "kernel": 1,
+      "evolution": 3,
+      "theory": 1
+    },
+    "subdomains": [
+      {
+        "domain": "drama.huodouai.com",
+        "pages": 30,
+        "size_mb": 574.1,
+        "status": "online"
+      },
+      {
+        "domain": "gov.huodouai.com",
+        "pages": 16,
+        "size_mb": 169.9,
+        "status": "online"
+      },
+      {
+        "domain": "docs.huodouai.com",
+        "pages": 9,
+        "size_mb": 0.3,
+        "status": "online"
+      },
+      {
+        "domain": "status.huodouai.com",
+        "pages": 8,
+        "size_mb": 0.1,
+        "status": "online"
+      },
+      {
+        "domain": "api.huodouai.com",
+        "pages": 4,
+        "size_mb": 0.1,
+        "status": "online"
+      },
+      {
+        "domain": "console.huodouai.com",
+        "pages": 12,
+        "size_mb": 1.9,
+        "status": "online"
+      }
+    ],
+    "total_subdomains": 6
+  },
+  "classification": [
+    {
+      "id": "kunlun_drama",
+      "name": "昆仑洞天·短剧生产",
+      "icon": "🎬",
+      "pages": 40,
+      "docs": 3,
+      "media": 967,
+      "subdomains": [
+        "drama.huodouai.com",
+        "kunlun.huodouai.com"
+      ],
+      "page_list": [
+        "drama-factory.html",
+        "character-ai.html",
+        "kunlun-drama.html",
+        "keyframe-gallery.html",
+        "characters.html",
+        "/drama/",
+        "/drama/",
+        "/drama/",
+        "/drama/",
+        "/drama/"
+      ],
+      "doc_list": [
+        "KUNLUN-4END-ARCHIVE-SOP-V1.md",
+        "KUNLUN-4END-ARCHIVE-SOP-V1.1.md",
+        "DRAMA-PRODUCTION-SOP-V1.0.md"
+      ]
+    },
+    {
+      "id": "meta_kernel",
+      "name": "元极恒一内核",
+      "icon": "🧠",
+      "pages": 80,
+      "docs": 3,
+      "media": 0,
+      "subdomains": [],
+      "page_list": [
+        "drift.html",
+        "404.html",
+        "sitemap.html",
+        "index.html",
+        "dlp-gateway.html",
+        "architecture.html",
+        "vector.html",
+        "kernel-lock-visual.html",
+        "knowledge.html",
+        "experience-kb.html"
+      ],
+      "doc_list": [
+        "META_RULES.md",
+        "GLOBAL_TRUTH_INTEGRATION_V2.0.md",
+        "TRUTH-SECURITY-CLASSIFICATION-20260913.md"
+      ]
+    },
+    {
+      "id": "developer",
+      "name": "开发者中心",
+      "icon": "👨‍💻",
+      "pages": 16,
+      "docs": 20,
+      "media": 0,
+      "subdomains": [
+        "docs.huodouai.com",
+        "api.huodouai.com",
+        "console.huodouai.com"
+      ],
+      "page_list": [
+        "developers.html",
+        "notary-api.html",
+        "digital-assets.html",
+        "docs.html",
+        "developer-center.html",
+        "prometheus-api-docs.html",
+        "digital-gallery-v3.html",
+        "standard-sop.html",
+        "/docs/",
+        "/docs/"
+      ],
+      "doc_list": [
+        "CLOUD_ALIGNMENT.md",
+        "INDEX.md",
+        "同源节点全面对账架构规则协议V1.0.md",
+        "VOLCENGINE_ARK_SETUP_GUIDE.md",
+        "GITHUB_REMOVAL_RECORD.md",
+        "GIT_SYNC_OPTIMIZATION.md",
+        "P0_PHASE_COMPLETE_REPORT.md",
+        "HOMO_NODE_RECONCILIATION_PROTOCOL_V1.0.md",
+        "P1_PHASE_COMPLETE_REPORT.md",
+        "CLOUD_BRAIN_RECONCILIATION_REPORT.md"
+      ]
+    },
+    {
+      "id": "product",
+      "name": "产品与商业化",
+      "icon": "🚀",
+      "pages": 33,
+      "docs": 0,
+      "media": 2,
+      "subdomains": [],
+      "page_list": [
+        "workbench.html",
+        "products.html",
+        "product.html",
+        "portal.html",
+        "agent-studio.html",
+        "product-matrix.html",
+        "product-map.html",
+        "/workbench/",
+        "/products/",
+        "/products/"
+      ],
+      "doc_list": []
+    },
+    {
+      "id": "asset_ledger",
+      "name": "资产与台账",
+      "icon": "📦",
+      "pages": 21,
+      "docs": 0,
+      "media": 7,
+      "subdomains": [],
+      "page_list": [
+        "ledger.html",
+        "achievements.html",
+        "change-ledger.html",
+        "/assets/",
+        "/assets/",
+        "/assets/",
+        "/assets/",
+        "/assets/",
+        "/assets/",
+        "/assets/"
+      ],
+      "doc_list": []
+    },
+    {
+      "id": "research_thought",
+      "name": "研究与思想",
+      "icon": "💡",
+      "pages": 20,
+      "docs": 3,
+      "media": 0,
+      "subdomains": [],
+      "page_list": [
+        "philosophy.html",
+        "research.html",
+        "global-learning.html",
+        "safe-evolution.html",
+        "emergence.html",
+        "high-order-state.html",
+        "whitepaper.html",
+        "learning-evolution.html",
+        "evolution-strategy.html",
+        "/philosophy/"
+      ],
+      "doc_list": [
+        "SHANHAIJING_FRAMEWORK.md",
+        "FULL_EVOLUTION_ROADMAP.md",
+        "ENGINEERING_OPS_WHITEPAPER_v1.0.md"
+      ]
+    },
+    {
+      "id": "gov_ai",
+      "name": "政务AI中台",
+      "icon": "🏛️",
+      "pages": 18,
+      "docs": 0,
+      "media": 0,
+      "subdomains": [
+        "gov.huodouai.com"
+      ],
+      "page_list": [
+        "governance.html",
+        "gov-line.html",
+        "/gov-monitor/",
+        "/gov/",
+        "/gov/",
+        "/gov/",
+        "/gov-canvas/",
+        "/gov-api-docs/",
+        "/gov-mobile/",
+        "/gov-ai/"
+      ],
+      "doc_list": []
+    },
+    {
+      "id": "governance_security",
+      "name": "治理与安全",
+      "icon": "🛡️",
+      "pages": 9,
+      "docs": 1,
+      "media": 0,
+      "subdomains": [],
+      "page_list": [
+        "auto-ops.html",
+        "ai-asset-lock.html",
+        "security-line.html",
+        "security-compliance.html",
+        "startup-loop-defense-whitepaper.html",
+        "/security/",
+        "/sovereignty/",
+        "/sovereignty/",
+        "/sovereignty/"
+      ],
+      "doc_list": [
+        "SECURITY_HARDENING_CHECKLIST.md"
+      ]
+    },
+    {
+      "id": "status_monitor",
+      "name": "状态与监控",
+      "icon": "📊",
+      "pages": 6,
+      "docs": 0,
+      "media": 0,
+      "subdomains": [
+        "status.huodouai.com"
+      ],
+      "page_list": [
+        "monitor.html",
+        "status.html",
+        "status-center.html",
+        "ops-monitor.html",
+        "server-monitor.html",
+        "/status/"
+      ],
+      "doc_list": []
+    },
+    {
+      "id": "education",
+      "name": "普惠教育",
+      "icon": "📚",
+      "pages": 3,
+      "docs": 0,
+      "media": 0,
+      "subdomains": [],
+      "page_list": [
+        "education.html",
+        "education-line.html",
+        "/education/"
+      ],
+      "doc_list": []
+    },
+    {
+      "id": "decision_intel",
+      "name": "决策智能",
+      "icon": "⚖️",
+      "pages": 1,
+      "docs": 0,
+      "media": 0,
+      "subdomains": [],
+      "page_list": [
+        "decision-intelligence.html"
+      ],
+      "doc_list": []
+    }
+  ],
+  "system": {
+    "memory": {
+      "total_mb": 3654,
+      "available_mb": 1701,
+      "used_mb": 1953,
+      "usage_percent": 53.4
+    },
+    "disk": {
+      "total_gb": 59.9,
+      "used_gb": 26.8,
+      "usage_percent": 44.7
+    }
+  }
+}

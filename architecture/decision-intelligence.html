@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智 AIOS · 三维稳态决策元规则体系 V2.0</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+  background: #0a0a0f;
+  color: #e8e6e3;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+/* 黑金暗纹背景 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(212,175,55,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(212,175,55,0.06) 0%, transparent 50%),
+    repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(212,175,55,0.015) 35px, rgba(212,175,55,0.015) 36px);
+  pointer-events: none;
+  z-index: 0;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; position: relative; z-index: 1; }
+
+/* 头部 */
+.header {
+  text-align: center;
+  padding: 60px 0 50px;
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+  margin-bottom: 50px;
+}
+.header .brand {
+  font-size: 14px;
+  letter-spacing: 6px;
+  color: #d4af37;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-size: 38px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f5e6a3 0%, #d4af37 50%, #b8941f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+}
+.header .subtitle {
+  font-size: 16px;
+  color: #9a978f;
+  letter-spacing: 2px;
+}
+.header .meta {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.header .meta-item {
+  font-size: 13px;
+  color: #7a7770;
+}
+.header .meta-item span {
+  color: #d4af37;
+  font-weight: 600;
+}
+
+/* 章节标题 */
+.section { margin-bottom: 56px; }
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #f5e6a3;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(180deg, #d4af37, #b8941f);
+  border-radius: 2px;
+}
+.section-desc {
+  font-size: 14px;
+  color: #8a8780;
+  margin-bottom: 28px;
+  padding-left: 16px;
+}
+
+/* 核心公式卡片 */
+.formula-card {
+  background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.03) 100%);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 16px;
+  padding: 36px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+.formula-card .label {
+  font-size: 13px;
+  color: #d4af37;
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+}
+.formula-card .formula {
+  font-size: 32px;
+  font-weight: 700;
+  color: #f5e6a3;
+  font-family: 'Georgia', serif;
+  margin-bottom: 16px;
+}
+.formula-card .formula .u { color: #6dd5a7; }
+.formula-card .formula .r { color: #f0a868; }
+.formula-card .formula .c { color: #7ab8e8; }
+.formula-card .explain {
+  font-size: 14px;
+  color: #9a978f;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.formula-card .explain span { color: #c8c5bf; }
+
+/* 五层架构图 */
+.layers { display: flex; flex-direction: column; gap: 12px; }
+.layer {
+  display: flex;
+  align-items: stretch;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(212,175,55,0.15);
+  transition: all 0.3s;
+}
+.layer:hover {
+  border-color: rgba(212,175,55,0.4);
+  transform: translateX(4px);
+}
+.layer-num {
+  width: 60px;
+  background: linear-gradient(180deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #d4af37;
+}
+.layer-content {
+  flex: 1;
+  padding: 18px 24px;
+  background: rgba(255,255,255,0.02);
+}
+.layer-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #f5e6a3;
+  margin-bottom: 6px;
+}
+.layer-desc {
+  font-size: 13px;
+  color: #9a978f;
+}
+.layer-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: rgba(212,175,55,0.15);
+  color: #d4af37;
+  margin-left: 10px;
+}
+
+/* 决策矩阵表格 */
+.matrix-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(212,175,55,0.2);
+}
+table.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.matrix th, table.matrix td {
+  padding: 14px 12px;
+  text-align: center;
+  border: 1px solid rgba(212,175,55,0.1);
+}
+table.matrix th {
+  background: linear-gradient(180deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+  color: #f5e6a3;
+  font-weight: 600;
+}
+table.matrix td.risk-label {
+  background: rgba(255,255,255,0.03);
+  color: #c8c5bf;
+  font-weight: 600;
+  text-align: left;
+  padding-left: 16px;
+}
+.cell-auto { background: rgba(109,213,167,0.1); color: #6dd5a7; }
+.cell-confirm { background: rgba(240,168,104,0.1); color: #f0a868; }
+.cell-review { background: rgba(122,184,232,0.1); color: #7ab8e8; }
+.cell-reject { background: rgba(234,102,104,0.1); color: #ea6668; }
+
+/* 风险等级卡片 */
+.risk-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.risk-card {
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid;
+  transition: transform 0.3s;
+}
+.risk-card:hover { transform: translateY(-4px); }
+.risk-card.l0 { border-color: rgba(109,213,167,0.3); background: rgba(109,213,167,0.05); }
+.risk-card.l1 { border-color: rgba(149,200,120,0.3); background: rgba(149,200,120,0.05); }
+.risk-card.l2 { border-color: rgba(240,168,104,0.3); background: rgba(240,168,104,0.05); }
+.risk-card.l3 { border-color: rgba(234,102,104,0.3); background: rgba(234,102,104,0.05); }
+.risk-card.l4 { border-color: rgba(180,80,80,0.4); background: rgba(180,80,80,0.08); }
+.risk-level {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.risk-card.l0 .risk-level { color: #6dd5a7; }
+.risk-card.l1 .risk-level { color: #95c878; }
+.risk-card.l2 .risk-level { color: #f0a868; }
+.risk-card.l3 .risk-level { color: #ea6668; }
+.risk-card.l4 .risk-level { color: #b45050; }
+.risk-name { font-size: 15px; font-weight: 600; color: #e8e6e3; margin-bottom: 8px; }
+.risk-desc { font-size: 12px; color: #8a8780; line-height: 1.6; }
+
+/* 场景权重 */
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.scenario-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 12px;
+  padding: 20px;
+}
+.scenario-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f5e6a3;
+  margin-bottom: 12px;
+}
+.weight-bars { display: flex; flex-direction: column; gap: 8px; }
+.weight-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.weight-bar .label { width: 40px; color: #9a978f; }
+.weight-bar .bar-bg {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.weight-bar .bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+.weight-bar .val { width: 36px; text-align: right; color: #c8c5bf; }
+.scenario-use { font-size: 11px; color: #7a7770; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(212,175,55,0.1); }
+
+/* 案例评估 */
+.case-card {
+  background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 16px;
+  padding: 32px;
+}
+.case-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.case-title { font-size: 20px; font-weight: 700; color: #f5e6a3; }
+.case-verdict {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(240,168,104,0.15);
+  color: #f0a868;
+  border: 1px solid rgba(240,168,104,0.3);
+}
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.case-item {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+.case-item .ci-label { font-size: 12px; color: #7a7770; margin-bottom: 6px; }
+.case-item .ci-value { font-size: 22px; font-weight: 700; }
+.case-item .ci-value.u { color: #6dd5a7; }
+.case-item .ci-value.r { color: #f0a868; }
+.case-item .ci-value.c { color: #7ab8e8; }
+.case-item .ci-value.p { color: #d4af37; }
+.case-item .ci-sub { font-size: 11px; color: #6a6760; margin-top: 4px; }
+.case-notes {
+  font-size: 13px;
+  color: #9a978f;
+  line-height: 1.8;
+  padding: 16px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 10px;
+  border-left: 3px solid #d4af37;
+}
+.case-notes strong { color: #f5e6a3; }
+
+/* 铁律 */
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(234,102,104,0.05);
+  border: 1px solid rgba(234,102,104,0.15);
+  border-radius: 10px;
+}
+.rule-num {
+  width: 28px;
+  height: 28px;
+  background: rgba(234,102,104,0.2);
+  color: #ea6668;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.rule-text { font-size: 14px; color: #c8c5bf; line-height: 1.6; }
+.rule-text strong { color: #f5e6a3; }
+
+/* 页脚 */
+.footer {
+  text-align: center;
+  padding: 40px 0 20px;
+  border-top: 1px solid rgba(212,175,55,0.15);
+  margin-top: 60px;
+}
+.footer .brand-mark {
+  font-size: 16px;
+  color: #d4af37;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+.footer .copyright {
+  font-size: 12px;
+  color: #5a5750;
+}
+.footer .did {
+  font-size: 11px;
+  color: #4a4740;
+  margin-top: 6px;
+  font-family: monospace;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .header h1 { font-size: 26px; }
+  .formula-card .formula { font-size: 22px; }
+  .container { padding: 20px 16px; }
+  .section-title { font-size: 20px; }
+}
+</style>
+
+<meta name="description" content="火斗云智AIOS三维稳态决策元规则体系V2.0 - 基于利益最大化、风险最小化、成本最优化的三维决策模型，为企业提供智能决策支持。">
+<meta name="keywords" content="决策智能,三维稳态,决策模型,元规则,企业决策,火斗云智AIOS">
+<meta property="og:type" content="website">
+<meta property="og:title" content="火斗云智AIOS三维稳态决策元规则体系V2.0 - 基于利益最大化、风险最小化、成本最优化的三维决策模型，为企业提供智能">
+<meta property="og:description" content="火斗云智AIOS三维稳态决策元规则体系V2.0 - 基于利益最大化、风险最小化、成本最优化的三维决策模型，为企业提供智能决策支持。">
+<meta property="og:url" content="https://huodouai.com/decision-intelligence.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="火斗云智AIOS三维稳态决策元规则体系V2.0 - 基于利益最大化、风险最小化、成本最优化的三维决策模型，为企业提供智能">
+<meta name="twitter:description" content="火斗云智AIOS三维稳态决策元规则体系V2.0 - 基于利益最大化、风险最小化、成本最优化的三维决策模型，为企业提供智能决策支持。">
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/architecture/decision-intelligence.html">
+</head>
+<body><nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products/">产品中心</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">技术架构</a>
+<a href="/whitepapers/aios-v1.html">技术白皮书</a>
+<a href="/blog/">技术博客</a>
+<a href="/docs/">开发者文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+<div class="container">
+
+  <!-- 头部 -->
+  <div class="header">
+    <div class="brand">HUODOU AIOS · DECISION INTELLIGENCE</div>
+    <h1>三维稳态决策元规则体系</h1>
+    <div class="subtitle">V2.0 · 五层校准 · 风险分级 · 决策矩阵 · 动态自进化</div>
+    <div class="meta">
+      <div class="meta-item">体系版本 <span>V2.0</span></div>
+      <div class="meta-item">元法则 <span>12条</span></div>
+      <div class="meta-item">决策记录 <span>永久归档</span></div>
+      <div class="meta-item">校准机制 <span>自动动态</span></div>
+    </div>
+  </div>
+
+  <!-- 核心公式 -->
+  <div class="section">
+    <div class="section-title">核心决策公式</div>
+    <div class="section-desc">所有方案决策的底层操作系统，量化评估收益、风险、成本三维稳态</div>
+    <div class="formula-card">
+      <div class="label">THREE-DIMENSIONAL STEADY-STATE DECISION</div>
+      <div class="formula">
+        P = <span class="u">0.4U</span> + <span class="r">0.35R</span> + <span class="c">0.25C</span>
+      </div>
+      <div class="explain">
+        <div><span class="u">U 收益</span> · 价值最大化 (0-100)</div>
+        <div><span class="r">R 风险</span> · 风险最小化 (0-100)</div>
+        <div><span class="c">C 成本</span> · 成本最小化 (0-100)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 五层校准架构 -->
+  <div class="section">
+    <div class="section-title">五层校准架构</div>
+    <div class="section-desc">从底层评分到元决策动态调整，解决不同窗口基准不一致、权重固化、低信息场景等核心问题</div>
+    <div class="layers">
+      <div class="layer">
+        <div class="layer-num">L5</div>
+        <div class="layer-content">
+          <div class="layer-title">元决策动态校准 <span class="layer-tag">公式自进化</span></div>
+          <div class="layer-desc">每10个决策自动校准权重/阈值；准确率&lt;70%立即校准；影子模式验证后切换；A级成功率&gt;90%阈值降至78分，&lt;75%升至82分</div>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">L4</div>
+        <div class="layer-content">
+          <div class="layer-title">跨窗口一致性校验 <span class="layer-tag">不可比问题</span></div>
+          <div class="layer-desc">A级决策需≥2窗口独立评估，P值差异&lt;10分才生效；不一致自动降为B级；D级拒绝需2窗口一致确认</div>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">L3</div>
+        <div class="layer-content">
+          <div class="layer-title">置信度加权 <span class="layer-tag">低信息场景</span></div>
+          <div class="layer-desc">置信度C=0.4×信息完整度+0.3×历史准确率+0.3×方案成熟度；高置信(≥0.8)直接使用，中置信×0.9降半级，低置信×0.75降一级，极低置信拒绝自动决策</div>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">L2</div>
+        <div class="layer-content">
+          <div class="layer-title">场景权重适配 <span class="layer-tag">权重固化</span></div>
+          <div class="layer-desc">5种场景自动适配权重：安全敏感型(R=55%)、成本敏感型(C=45%)、创新探索型(U=50%)、生产运维型(R=45%)、默认标准型(40/35/25)；根据操作关键词自动识别</div>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">L1</div>
+        <div class="layer-content">
+          <div class="layer-title">基准锚定 <span class="layer-tag">评分基准不一致</span></div>
+          <div class="layer-desc">5个标准锚点(ANCHOR-001~005)固定评分，所有新方案与最接近锚点对比评分，消除窗口基准差异，确保P值跨窗口可比</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作风险五级分级 -->
+  <div class="section">
+    <div class="section-title">操作风险五级分级</div>
+    <div class="section-desc">P值高不代表可以自动执行——风险等级优先于P值等级，高风险操作自主权更受限</div>
+    <div class="risk-cards">
+      <div class="risk-card l0">
+        <div class="risk-level">L0</div>
+        <div class="risk-name">无风险</div>
+        <div class="risk-desc">只读查询、状态读取、统计分析<br>完全可逆 · 无影响<br><strong>全部自动执行</strong></div>
+      </div>
+      <div class="risk-card l1">
+        <div class="risk-level">L1</div>
+        <div class="risk-name">低风险</div>
+        <div class="risk-desc">新增非核心配置、临时端口、日志添加<br>分钟级回滚 · 单服务影响<br>A/B级自动执行</div>
+      </div>
+      <div class="risk-card l2">
+        <div class="risk-level">L2</div>
+        <div class="risk-name">中风险</div>
+        <div class="risk-desc">开放端口、重启服务、修改核心配置<br>小时级回滚 · 多服务影响<br><strong>即使A级也必须人工确认</strong></div>
+      </div>
+      <div class="risk-card l3">
+        <div class="risk-level">L3</div>
+        <div class="risk-name">高风险</div>
+        <div class="risk-desc">删除数据、修改权限、架构重构、外部付费<br>天级回滚/部分不可逆 · 全系统影响<br>必须人工审批+方案评审</div>
+      </div>
+      <div class="risk-card l4">
+        <div class="risk-level">L4</div>
+        <div class="risk-name">极高风险</div>
+        <div class="risk-desc">不可逆操作、安全策略变更、生产核心变更<br>不可逆 · 全系统+外部影响<br><strong>永远禁止自动执行，必须人工+多签</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 决策矩阵 -->
+  <div class="section">
+    <div class="section-title">决策矩阵 · P值等级 × 风险等级</div>
+    <div class="section-desc">核心创新——不是P值达到A级就自动执行，而是P值与风险等级的交叉矩阵决定最终执行方式</div>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th style="width:140px">风险等级 \ P值等级</th>
+            <th>A级 (P≥80)</th>
+            <th>B级 (65≤P&lt;80)</th>
+            <th>C级 (50≤P&lt;65)</th>
+            <th>D级 (P&lt;50)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="risk-label">L0 · 无风险</td>
+            <td class="cell-auto">✅ 自动执行</td>
+            <td class="cell-auto">✅ 自动执行</td>
+            <td class="cell-auto">⚡ 自动+记录</td>
+            <td class="cell-review">📋 记录不执行</td>
+          </tr>
+          <tr>
+            <td class="risk-label">L1 · 低风险</td>
+            <td class="cell-auto">✅ 自动执行</td>
+            <td class="cell-auto">⚡ 自动+通知</td>
+            <td class="cell-confirm">📋 人工确认</td>
+            <td class="cell-reject">❌ 拒绝</td>
+          </tr>
+          <tr>
+            <td class="risk-label">L2 · 中风险</td>
+            <td class="cell-confirm">⚡ 人工确认</td>
+            <td class="cell-confirm">📋 人工审批</td>
+            <td class="cell-review">📋 纳入规划</td>
+            <td class="cell-reject">❌ 拒绝</td>
+          </tr>
+          <tr>
+            <td class="risk-label">L3 · 高风险</td>
+            <td class="cell-review">📋 人工+评审</td>
+            <td class="cell-review">📋 人工审批</td>
+            <td class="cell-reject">❌ 拒绝</td>
+            <td class="cell-reject">❌ 拒绝</td>
+          </tr>
+          <tr>
+            <td class="risk-label">L4 · 极高风险</td>
+            <td class="cell-reject">❌ 禁止自动</td>
+            <td class="cell-reject">❌ 禁止自动</td>
+            <td class="cell-reject">❌ 拒绝</td>
+            <td class="cell-reject">❌ 拒绝</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 场景权重适配 -->
+  <div class="section">
+    <div class="section-title">场景权重适配</div>
+    <div class="section-desc">不同操作类型自动调整U/R/C权重——安全相关操作风险权重提升至55%，避免盲目自动执行</div>
+    <div class="scenario-grid">
+      <div class="scenario-card">
+        <div class="scenario-name">🛡️ 安全敏感型</div>
+        <div class="weight-bars">
+          <div class="weight-bar"><span class="label">U</span><div class="bar-bg"><div class="bar-fill" style="width:25%;background:#6dd5a7"></div></div><span class="val">25%</span></div>
+          <div class="weight-bar"><span class="label">R</span><div class="bar-bg"><div class="bar-fill" style="width:55%;background:#f0a868"></div></div><span class="val">55%</span></div>
+          <div class="weight-bar"><span class="label">C</span><div class="bar-bg"><div class="bar-fill" style="width:20%;background:#7ab8e8"></div></div><span class="val">20%</span></div>
+        </div>
+        <div class="scenario-use">端口/权限/安全/防火墙操作</div>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-name">💰 成本敏感型</div>
+        <div class="weight-bars">
+          <div class="weight-bar"><span class="label">U</span><div class="bar-bg"><div class="bar-fill" style="width:30%;background:#6dd5a7"></div></div><span class="val">30%</span></div>
+          <div class="weight-bar"><span class="label">R</span><div class="bar-bg"><div class="bar-fill" style="width:25%;background:#f0a868"></div></div><span class="val">25%</span></div>
+          <div class="weight-bar"><span class="label">C</span><div class="bar-bg"><div class="bar-fill" style="width:45%;background:#7ab8e8"></div></div><span class="val">45%</span></div>
+        </div>
+        <div class="scenario-use">付费/采购/资源/大规模部署</div>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-name">🚀 创新探索型</div>
+        <div class="weight-bars">
+          <div class="weight-bar"><span class="label">U</span><div class="bar-bg"><div class="bar-fill" style="width:50%;background:#6dd5a7"></div></div><span class="val">50%</span></div>
+          <div class="weight-bar"><span class="label">R</span><div class="bar-bg"><div class="bar-fill" style="width:30%;background:#f0a868"></div></div><span class="val">30%</span></div>
+          <div class="weight-bar"><span class="label">C</span><div class="bar-bg"><div class="bar-fill" style="width:20%;background:#7ab8e8"></div></div><span class="val">20%</span></div>
+        </div>
+        <div class="scenario-use">重构/新技术验证/原型开发</div>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-name">⚙️ 生产运维型</div>
+        <div class="weight-bars">
+          <div class="weight-bar"><span class="label">U</span><div class="bar-bg"><div class="bar-fill" style="width:30%;background:#6dd5a7"></div></div><span class="val">30%</span></div>
+          <div class="weight-bar"><span class="label">R</span><div class="bar-bg"><div class="bar-fill" style="width:45%;background:#f0a868"></div></div><span class="val">45%</span></div>
+          <div class="weight-bar"><span class="label">C</span><div class="bar-bg"><div class="bar-fill" style="width:25%;background:#7ab8e8"></div></div><span class="val">25%</span></div>
+        </div>
+        <div class="scenario-use">重启/配置变更/故障修复</div>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-name">📐 默认标准型</div>
+        <div class="weight-bars">
+          <div class="weight-bar"><span class="label">U</span><div class="bar-bg"><div class="bar-fill" style="width:40%;background:#6dd5a7"></div></div><span class="val">40%</span></div>
+          <div class="weight-bar"><span class="label">R</span><div class="bar-bg"><div class="bar-fill" style="width:35%;background:#f0a868"></div></div><span class="val">35%</span></div>
+          <div class="weight-bar"><span class="label">C</span><div class="bar-bg"><div class="bar-fill" style="width:25%;background:#7ab8e8"></div></div><span class="val">25%</span></div>
+        </div>
+        <div class="scenario-use">通用场景，无特殊属性</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 案例评估 -->
+  <div class="section">
+    <div class="section-title">实战案例 · 安全组9140端口开放评估</div>
+    <div class="section-desc">用完整决策体系评估"开放腾讯云安全组9140端口"操作，展示从风险分级到最终裁决的全流程</div>
+    <div class="case-card">
+      <div class="case-header">
+        <div class="case-title">开放腾讯云安全组 9140 端口</div>
+        <div class="case-verdict">⚡ 人工确认后执行</div>
+      </div>
+      <div class="case-grid">
+        <div class="case-item">
+          <div class="ci-label">风险等级</div>
+          <div class="ci-value" style="color:#f0a868">L2</div>
+          <div class="ci-sub">中风险 · 配置变更</div>
+        </div>
+        <div class="case-item">
+          <div class="ci-label">场景权重</div>
+          <div class="ci-value" style="color:#d4af37">安全型</div>
+          <div class="ci-sub">U25% / R55% / C20%</div>
+        </div>
+        <div class="case-item">
+          <div class="ci-label">U 收益</div>
+          <div class="ci-value u">85</div>
+          <div class="ci-sub">WebSocket可用，SSH减少80%+</div>
+        </div>
+        <div class="case-item">
+          <div class="ci-label">R 风险</div>
+          <div class="ci-value r">65</div>
+          <div class="ci-sub">攻击面增加，Token+HMAC可控</div>
+        </div>
+        <div class="case-item">
+          <div class="ci-label">C 成本</div>
+          <div class="ci-value c">95</div>
+          <div class="ci-sub">零成本，控制台操作</div>
+        </div>
+        <div class="case-item">
+          <div class="ci-label">P 值 (安全型权重)</div>
+          <div class="ci-value p">76.0</div>
+          <div class="ci-sub">B级 · 默认权重下为82.25(A级)</div>
+        </div>
+        <div class="case-item">
+          <div class="ci-label">置信度</div>
+          <div class="ci-value" style="color:#6dd5a7">0.87</div>
+          <div class="ci-sub">高置信 · 不降级</div>
+        </div>
+        <div class="case-item">
+          <div class="ci-label">最终裁决</div>
+          <div class="ci-value" style="color:#f0a868">人工确认</div>
+          <div class="ci-sub">L2×B级 → 决策矩阵</div>
+        </div>
+      </div>
+      <div class="case-notes">
+        <strong>关键发现：</strong>如果用默认权重(40/35/25)，P=82.25→A级，可能误判为可自动执行；但<strong>安全敏感型权重</strong>自动将风险权重提升到55%，P降到76→B级，正确识别为需要人工确认。这正是场景权重适配的核心价值——安全相关操作自动收紧自主权，避免高风险操作被误判为可自动执行。<br><br>
+        <strong>回滚预案：</strong>随时可在腾讯云控制台关闭9140端口，分钟级恢复，不影响其他服务。
+      </div>
+    </div>
+  </div>
+
+  <!-- 自主决策铁律 -->
+  <div class="section">
+    <div class="section-title">自主决策四条铁律</div>
+    <div class="section-desc">体系可自主决策的边界与不可逾越的红线</div>
+    <div class="rules-list">
+      <div class="rule-item">
+        <div class="rule-num">1</div>
+        <div class="rule-text"><strong>风险等级优先于P值等级</strong>——高风险操作即使P值达到A级，也必须按照风险等级对应的执行方式处理，不得因P值高而越级自动执行。</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-num">2</div>
+        <div class="rule-text"><strong>L2及以上风险，即使A级也必须人工确认</strong>——开放端口、重启服务、修改核心配置等中风险操作，无论P值多高，都需要人工一句话确认后才能执行。</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-num">3</div>
+        <div class="rule-text"><strong>L4极高风险，永远禁止自动执行</strong>——不可逆操作、安全策略变更、生产环境核心变更，无论P值多高、置信度多足，都必须人工+多签审批，体系不得自主执行。</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-num">4</div>
+        <div class="rule-text"><strong>自动执行边界 = L0全部 + L1的A/B级</strong>——这是体系可自主决策的范围。只读查询、状态监控、新增非核心配置等低风险操作，体系可自动执行并记录；超出此范围的操作均需人工介入。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <div class="footer">
+    <div class="brand-mark">火斗云智 AIOS · DECISION INTELLIGENCE</div>
+    <div class="copyright">三维稳态决策元规则体系 V2.0 · 五层校准 · 风险分级 · 决策矩阵 · 动态自进化</div>
+    <div class="did">DID-BR-000002 · Ω-TAN-7-001 · 永久锁档归档</div>
+  </div>
+
+</div>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products/">产品</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">架构</a>
+<a href="/whitepapers/aios-v1.html">白皮书</a>
+<a href="/docs/">文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

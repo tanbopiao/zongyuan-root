@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生产工作台·昆仑洞天内部控制台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Courier New',monospace;font-size:13px}
+.header{background:linear-gradient(90deg,#1a1a2e,#16213e);padding:14px 24px;border-bottom:1px solid #c9a227;display:flex;justify-content:space-between;align-items:center}
+.header h1{color:#c9a227;font-size:16px;letter-spacing:2px}
+.badge{background:#4ade80;color:#0a0a0f;padding:4px 10px;border-radius:4px;font-size:11px;font-weight:bold}
+.nav{display:flex;gap:8px;padding:10px 24px;background:#111;border-bottom:1px solid #222}
+.nav a{color:#888;text-decoration:none;padding:6px 14px;border-radius:4px;font-size:12px}
+.nav a:hover,.nav a.active{background:#c9a227;color:#0a0a0f}
+.container{padding:20px;max-width:1400px;margin:0 auto}
+/* 9阶段流水线 */
+.pipeline{display:flex;gap:4px;margin-bottom:20px;overflow-x:auto;padding-bottom:10px}
+.stage{flex:1;min-width:100px;background:#111;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;position:relative;cursor:pointer;transition:all .2s}
+.stage:hover{border-color:#c9a227}
+.stage.active{border-color:#c9a227;background:#1a1a2e}
+.stage.completed{border-color:#4ade80}
+.stage.completed .stage-num{background:#4ade80}
+.stage.processing{border-color:#fbbf24;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.stage-num{width:24px;height:24px;border-radius:50%;background:#333;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;margin-bottom:6px}
+.stage-name{font-size:11px;color:#aaa}
+.stage-status{font-size:10px;margin-top:4px;color:#666}
+/* 工作区 */
+.workspace{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{background:#111;border:1px solid #222;border-radius:8px;padding:16px}
+.panel h3{color:#c9a227;font-size:13px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #222}
+textarea{width:100%;background:#000;border:1px solid #333;color:#e0e0e0;padding:10px;border-radius:4px;font-family:inherit;font-size:12px;resize:vertical;min-height:120px}
+input,select{background:#000;border:1px solid #333;color:#e0e0e0;padding:8px;border-radius:4px;font-family:inherit;font-size:12px;width:100%;margin-bottom:8px}
+.btn{background:#c9a227;color:#0a0a0f;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:bold;margin:4px}
+.btn:hover{background:#e0b830}
+.btn-secondary{background:#222;color:#c9a227;border:1px solid #c9a227}
+.btn:disabled{background:#333;color:#666;cursor:not-allowed}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.result-box{background:#000;border:1px solid #222;border-radius:4px;padding:12px;min-height:100px;font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-all}
+.result-box img{max-width:100%;border-radius:4px;margin:8px 0}
+.result-box video{max-width:100%;border-radius:4px;margin:8px 0}
+.tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;margin:2px}
+.tag-free{background:#4ade80;color:#0a0a0f}
+.tag-paid{background:#666;color:#999;text-decoration:line-through}
+.progress-bar{height:6px;background:#222;border-radius:3px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,#c9a227,#e0b830);transition:width .3s}
+.log-box{background:#000;border:1px solid #222;border-radius:4px;padding:10px;font-size:11px;max-height:200px;overflow-y:auto;line-height:1.5}
+.log-line{color:#888}
+.log-line.success{color:#4ade80}
+.log-line.error{color:#f87171}
+.log-line.warn{color:#fbbf24}
+.footer{text-align:center;padding:16px;color:#444;font-size:11px;border-top:1px solid #222;margin-top:20px}
+</style>
+    <link rel="canonical" href="https://huodouai.com/drama-internal/production.html">
+</head>
+<body>
+<div class="header">
+  <h1>🎬 生产工作台·9阶段全链路</h1>
+  <span class="badge">全免费模式 · Agnes/zhipu</span>
+</div>
+<div class="nav">
+  <a href="index.html">📊 主控台</a>
+  <a href="production.html" class="active">🎬 生产工作台</a>
+  <a href="batch.html">📦 批量生产线</a>
+  <a href="assets.html">🗂️ 资产管理</a>
+  <a href="system.html">⚙️ 系统监控</a>
+</div>
+<div class="container">
+  <!-- 9阶段流水线 -->
+  <div class="pipeline" id="pipeline">
+    <div class="stage active" data-stage="0" onclick="goStage(0)"><div class="stage-num">1</div><div class="stage-name">剧本</div><div class="stage-status" id="s0-status">待开始</div></div>
+    <div class="stage" data-stage="1" onclick="goStage(1)"><div class="stage-num">2</div><div class="stage-name">分镜</div><div class="stage-status" id="s1-status">待开始</div></div>
+    <div class="stage" data-stage="2" onclick="goStage(2)"><div class="stage-num">3</div><div class="stage-name">角色</div><div class="stage-status" id="s2-status">待开始</div></div>
+    <div class="stage" data-stage="3" onclick="goStage(3)"><div class="stage-num">4</div><div class="stage-name">关键帧</div><div class="stage-status" id="s3-status">待开始</div></div>
+    <div class="stage" data-stage="4" onclick="goStage(4)"><div class="stage-num">5</div><div class="stage-name">视频</div><div class="stage-status" id="s4-status">待开始</div></div>
+    <div class="stage" data-stage="5" onclick="goStage(5)"><div class="stage-num">6</div><div class="stage-name">配音</div><div class="stage-status" id="s5-status">待开始</div></div>
+    <div class="stage" data-stage="6" onclick="goStage(6)"><div class="stage-num">7</div><div class="stage-name">字幕</div><div class="stage-status" id="s6-status">待开始</div></div>
+    <div class="stage" data-stage="7" onclick="goStage(7)"><div class="stage-num">8</div><div class="stage-name">合成</div><div class="stage-status" id="s7-status">待开始</div></div>
+    <div class="stage" data-stage="8" onclick="goStage(8)"><div class="stage-num">9</div><div class="stage-name">归档</div><div class="stage-status" id="s8-status">待开始</div></div>
+  </div>
+
+  <div class="workspace">
+    <!-- 左侧：输入区 -->
+    <div class="panel">
+      <h3 id="panel-title">📝 阶段1：剧本生成</h3>
+      <div id="input-area">
+        <label style="font-size:11px;color:#888">短剧主题/创意</label>
+        <textarea id="script-input" placeholder="例如：纯乌黑长发东方神女下凡渡劫，在人间遇到真爱，最终回归神位。纯东方审美，零雄性化，零西方铠甲。">纯乌黑长发东方神女下凡渡劫，在人间遇到真爱，最终回归神位。纯东方审美，零雄性化，零西方铠甲。</textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <select id="template-select" style="flex:1">
+            <option value="gufeng">古风短剧模板</option>
+            <option value="taiyin">太阴月神IP</option>
+            <option value="xuannv">九天玄女IP</option>
+            <option value="chengshi">都市短剧</option>
+            <option value="zhongcao">种草带货</option>
+            <option value="custom">自定义</option>
+          </select>
+          <select id="duration-select" style="flex:1">
+            <option value="3">3分镜（30秒）</option>
+            <option value="5" selected>5分镜（50秒）</option>
+            <option value="10">10分镜（100秒）</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="generateScript()">🤖 AI生成剧本</button>
+        <button class="btn btn-secondary" onclick="nextStage()">下一步 →</button>
+        <button class="btn btn-secondary" onclick="autoRunAll()">⚡ 一键全流程</button>
+      </div>
+      <div style="margin-top:16px">
+        <h3 style="font-size:12px;color:#888;border:none;padding:0">📋 执行日志</h3>
+        <div class="log-box" id="log-box">
+          <div class="log-line">[系统] 生产工作台就绪，全免费模式</div>
+          <div class="log-line success">[元法则] 付费模型已禁用，仅使用zhipu/agnes免费模型</div>
+        </div>
+      </div>
+    </div>
+    <!-- 右侧：结果区 -->
+    <div class="panel">
+      <h3>📤 输出结果</h3>
+      <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+      <div style="font-size:11px;color:#888;margin-bottom:12px" id="progress-text">进度：0/9 阶段</div>
+      <div class="result-box" id="result-box">
+        <div style="color:#666;text-align:center;padding:40px">
+          点击左侧"AI生成剧本"开始<br><br>
+          <span class="tag tag-free">zhipu 文本</span>
+          <span class="tag tag-free">agnes 图片</span>
+          <span class="tag tag-free">agnes 视频</span>
+          <span class="tag tag-free">edge-tts 配音</span>
+        </div>
+      </div>
+      <div class="btn-group" id="result-actions" style="display:none">
+        <button class="btn btn-secondary" onclick="downloadResult()">💾 下载结果</button>
+        <button class="btn btn-secondary" onclick="copyResult()">📋 复制</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer">Ω₀⊂⊙∞⊂Ω｜生产工作台｜全免费模式｜DID-BR-000002｜Ω-TAN-7-001</div>
+<script src="js/internal-core.js"></script>
+<script src="js/production.js"></script>
+
+<!-- P3新增：异步生产任务监控面板 -->
+<div style="margin-top:30px;padding:20px;background:#1a1a2e;border-radius:12px;">
+  <h3 style="color:#e94560;margin-bottom:15px;">异步生产任务监控</h3>
+  <div style="margin-bottom:10px;">
+    <input id="async-device-id" placeholder="设备ID（默认anonymous）" style="padding:8px;width:250px;background:#16213e;color:#eee;border:1px solid #0f3460;border-radius:6px;">
+    <button onclick="loadAsyncTasks()" style="padding:8px 20px;background:#e94560;color:#fff;border:none;border-radius:6px;cursor:pointer;">刷新任务</button>
+    <button onclick="startAsyncMonitor()" style="padding:8px 20px;background:#0f3460;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-left:10px;">自动监控</button>
+  </div>
+  <div id="async-tasks-list" style="color:#aaa;font-size:14px;">点击刷新查看异步生产任务</div>
+</div>
+<script>
+let asyncMonitorTimer = null;
+function loadAsyncTasks() {
+  const did = document.getElementById("async-device-id").value || "anonymous";
+  fetch("/ai-proxy/drama/production/list", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({device_id: did})
+  }).then(r => r.json()).then(d => {
+    const list = document.getElementById("async-tasks-list");
+    if (!d.tasks || d.tasks.length === 0) {
+      list.innerHTML = "<span style=\"color:#666\">暂无任务</span>";
+      return;
+    }
+    let html = "<table style=\"width:100%;border-collapse:collapse;\"><tr style=\"color:#888;border-bottom:1px solid #0f3460;\"><th style=\"padding:8px;text-align:left;\">任务ID</th><th>名称</th><th>状态</th><th>阶段</th><th>进度</th><th>视频</th></tr>";
+    d.tasks.forEach(t => {
+      const statusColor = t.status === "completed" ? "#4ecca3" : t.status === "failed" ? "#e94560" : "#f9ed69";
+      const videoLink = t.video_url ? "<a href=\"" + t.video_url + "\" target=\"_blank\" style=\"color:#4ecca3;\">查看</a>" : "-";
+      html += "<tr style=\"border-bottom:1px solid #0f3460;\"><td style=\"padding:8px;\">" + t.task_id + "</td><td>" + t.template_name + "</td><td style=\"color:" + statusColor + "\">" + t.status + "</td><td>" + t.stage + "</td><td>" + t.progress + "%</td><td>" + videoLink + "</td></tr>";
+    });
+    html += "</table>";
+    list.innerHTML = html;
+  }).catch(e => {
+    document.getElementById("async-tasks-list").innerHTML = "<span style=\"color:#e94560\">加载失败: " + e + "</span>";
+  });
+}
+function startAsyncMonitor() {
+  if (asyncMonitorTimer) {
+    clearInterval(asyncMonitorTimer);
+    asyncMonitorTimer = null;
+    alert("已停止自动监控");
+    return;
+  }
+  loadAsyncTasks();
+  asyncMonitorTimer = setInterval(loadAsyncTasks, 5000);
+  alert("已启动自动监控，每5秒刷新");
+}
+</script>
+
+</body>
+</html>

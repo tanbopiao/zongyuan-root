@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS - 引擎集群按需激活监控</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Noto Sans SC', -apple-system, sans-serif;
+  background: #0a0a0f;
+  color: #e8dcc8;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(180,140,60,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(120,80,40,0.06) 0%, transparent 50%);
+}
+.header {
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(180,140,60,0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #d4a843, #f0d68a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.header .meta { font-size: 12px; color: #8a7a5a; }
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 20px 32px;
+}
+.stat-card {
+  background: linear-gradient(135deg, rgba(30,25,15,0.9), rgba(20,15,10,0.95));
+  border: 1px solid rgba(180,140,60,0.25);
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+.stat-card .label { font-size: 11px; color: #8a7a5a; text-transform: uppercase; letter-spacing: 1px; }
+.stat-card .value { font-size: 28px; font-weight: 700; color: #d4a843; margin-top: 4px; }
+.stat-card .sub { font-size: 11px; color: #6a5a4a; margin-top: 2px; }
+.engine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  padding: 0 32px 32px;
+}
+.engine-card {
+  background: linear-gradient(135deg, rgba(25,20,12,0.9), rgba(15,12,8,0.95));
+  border: 1px solid rgba(180,140,60,0.2);
+  border-radius: 10px;
+  padding: 18px 20px;
+  transition: all 0.3s;
+}
+.engine-card:hover { border-color: rgba(180,140,60,0.5); transform: translateY(-2px); }
+.engine-card.sleeping { opacity: 0.6; border-color: rgba(100,100,100,0.3); }
+.engine-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.engine-name { font-size: 15px; font-weight: 600; color: #e8dcc8; }
+.engine-status {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.status-active { background: rgba(60,180,80,0.15); color: #4ade80; border: 1px solid rgba(60,180,80,0.3); }
+.status-sleeping { background: rgba(180,140,60,0.1); color: #d4a843; border: 1px solid rgba(180,140,60,0.3); }
+.engine-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.metric { }
+.metric .m-label { font-size: 10px; color: #6a5a4a; }
+.metric .m-value { font-size: 16px; font-weight: 600; color: #c8b898; }
+.engine-bar { margin-top: 12px; height: 4px; background: rgba(180,140,60,0.1); border-radius: 2px; overflow: hidden; }
+.engine-bar-fill { height: 100%; background: linear-gradient(90deg, #d4a843, #f0d68a); border-radius: 2px; transition: width 0.5s; }
+.footer {
+  padding: 16px 32px;
+  border-top: 1px solid rgba(180,140,60,0.15);
+  font-size: 11px;
+  color: #5a4a3a;
+  display: flex;
+  justify-content: space-between;
+}
+.trace { color: #8a7a5a; font-family: monospace; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+.refreshing { animation: pulse 1s infinite; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>火斗云智AIOS · 引擎集群按需激活监控</h1>
+  <div class="meta" id="updateTime">加载中...</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="label">托管引擎</div>
+    <div class="value" id="totalEngines">-</div>
+    <div class="sub">Socket代理层管理</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">运行中</div>
+    <div class="value" id="activeEngines" style="color:#4ade80">-</div>
+    <div class="sub">当前活跃引擎数</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">休眠中</div>
+    <div class="value" id="sleepingEngines" style="color:#d4a843">-</div>
+    <div class="sub">空闲自动休眠释放内存</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">总调用次数</div>
+    <div class="value" id="totalCalls">-</div>
+    <div class="sub">代理层累计转发</div>
+  </div>
+</div>
+
+<div class="engine-grid" id="engineGrid"></div>
+
+<div class="footer">
+  <span>Engine Proxy V1.2 · 智能超时自适应 · DID-BR-000002</span>
+  <span class="trace">Ω₀⊂⊙∞⊂Ω</span>
+</div>
+
+<script>
+// 自适应: 通过/engine-monitor/子路径访问时自动加前缀
+const _path = window.location.pathname;
+const API_BASE = _path.startsWith('/engine-monitor') ? '/engine-monitor' : window.location.origin;
+let refreshInterval = null;
+
+async function fetchStatus() {
+  try {
+    const resp = await fetch(API_BASE + '/status');
+    const data = await resp.json();
+    render(data);
+  } catch(e) {
+    document.getElementById('updateTime').textContent = '连接失败: ' + e.message;
+  }
+}
+
+function render(data) {
+  const engines = data.engines || {};
+  const names = Object.keys(engines);
+  let active = 0, sleeping = 0, totalCalls = 0;
+
+  names.forEach(n => {
+    const e = engines[n];
+    if (e.sleeping) sleeping++; else active++;
+    totalCalls += e.count || 0;
+  });
+
+  document.getElementById('totalEngines').textContent = names.length;
+  document.getElementById('activeEngines').textContent = active;
+  document.getElementById('sleepingEngines').textContent = sleeping;
+  document.getElementById('totalCalls').textContent = totalCalls.toLocaleString();
+  document.getElementById('updateTime').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+
+  const grid = document.getElementById('engineGrid');
+  grid.innerHTML = names.map(n => {
+    const e = engines[n];
+    const isSleeping = e.sleeping;
+    const count = e.count || 0;
+    const timeout = e.idle_timeout || 300;
+    const lastCall = e.last_call ? new Date(e.last_call).toLocaleTimeString('zh-CN') : '无';
+    const barWidth = Math.min(100, count * 5);
+    return `
+      <div class="engine-card ${isSleeping ? 'sleeping' : ''}">
+        <div class="engine-header">
+          <div class="engine-name">${n}</div>
+          <div class="engine-status ${isSleeping ? 'status-sleeping' : 'status-active'}">
+            ${isSleeping ? '休眠' : '运行'}
+          </div>
+        </div>
+        <div class="engine-metrics">
+          <div class="metric">
+            <div class="m-label">调用次数</div>
+            <div class="m-value">${count}</div>
+          </div>
+          <div class="metric">
+            <div class="m-label">休眠超时</div>
+            <div class="m-value">${timeout}s</div>
+          </div>
+          <div class="metric">
+            <div class="m-label">最后调用</div>
+            <div class="m-value" style="font-size:12px">${lastCall}</div>
+          </div>
+          <div class="metric">
+            <div class="m-label">传输字节</div>
+            <div class="m-value">${(e.total_bytes || 0).toLocaleString()}</div>
+          </div>
+        </div>
+        <div class="engine-bar"><div class="engine-bar-fill" style="width:${barWidth}%"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+fetchStatus();
+refreshInterval = setInterval(fetchStatus, 10000);
+</script>
+</body>
+</html>

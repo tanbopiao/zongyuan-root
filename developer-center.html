@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>开发者中心 | 火斗云智AIOS</title>
+<meta name="description" content="火斗云智开发者中心 - API文档、SOP手册、节点接入协议、同源节点对账">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1520 50%, #0f0a15 100%);
+  color: #e8e8e8;
+  min-height: 100vh;
+}
+.top-nav {
+  background: rgba(17, 24, 39, 0.95);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 12px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.top-nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #D4AF37, #8B6914);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: 14px;
+}
+.logo-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+.logo-text span { color: #D4AF37; }
+.logo-sub {
+  font-size: 10px;
+  color: #888;
+}
+.back-link {
+  color: #888;
+  text-decoration: none;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.back-link:hover {
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.1);
+}
+.page-header {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px 24px 20px;
+  text-align: center;
+}
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #D4AF37, #F4E4BC, #D4AF37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.page-subtitle {
+  font-size: 13px;
+  color: #888;
+}
+.page-anchor {
+  font-size: 11px;
+  color: #D4AF37;
+  margin-top: 10px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+.quick-cards {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+.quick-card {
+  background: linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(30, 25, 15, 0.9));
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  text-decoration: none;
+  transition: all 0.3s;
+  display: block;
+}
+.quick-card:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15);
+}
+.quick-card .card-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+.quick-card .card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #D4AF37;
+  margin-bottom: 8px;
+}
+.quick-card .card-desc {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.6;
+}
+.quick-card .card-arrow {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #D4AF37;
+  font-weight: 600;
+}
+.tab-nav {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  margin-bottom: 20px;
+}
+.tab-btn {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tab-btn:hover {
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.05);
+}
+.tab-btn.active {
+  color: #D4AF37;
+  border-bottom-color: #D4AF37;
+  background: rgba(212, 175, 55, 0.08);
+}
+.tab-btn .tab-icon {
+  font-size: 16px;
+}
+.tab-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+}
+.tab-pane {
+  display: none;
+}
+.tab-pane.active {
+  display: block;
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tab-pane iframe {
+  width: 100%;
+  height: 800px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+  background: #fff;
+}
+.tab-pane .pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tab-pane .pane-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #D4AF37;
+}
+.tab-pane .open-new-tab {
+  padding: 6px 14px;
+  background: rgba(212, 175, 55, 0.1);
+  color: #D4AF37;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 12px;
+  transition: all 0.2s;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+.tab-pane .open-new-tab:hover {
+  background: rgba(212, 175, 55, 0.2);
+}
+.footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: #555;
+  font-size: 12px;
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  margin-top: 40px;
+}
+.footer .anchor {
+  color: #D4AF37;
+  font-family: 'Courier New', monospace;
+  margin-top: 8px;
+  letter-spacing: 1px;
+}
+@media (max-width: 768px) {
+  .page-title { font-size: 22px; }
+  .tab-btn { padding: 10px 16px; font-size: 12px; }
+  .tab-pane iframe { height: 600px; }
+  .quick-cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div id="site-nav"></div>
+<noscript><div style="background:#0b0e14;color:#c9a227;padding:10px 24px;border-bottom:1px solid #232a3a;font-size:13px"><a href="/" style="color:#e6c75a;margin-right:14px">首页</a><a href="/architecture.html" style="color:#aaa;margin-right:14px">架构</a><a href="/engines.html" style="color:#aaa;margin-right:14px">引擎</a><a href="/products.html" style="color:#aaa;margin-right:14px">产品</a><a href="/governance.html" style="color:#aaa;margin-right:14px">治理</a><a href="/assets/visual/pricing-v1.html" style="color:#aaa;margin-right:14px">定价</a><a href="/trial.html" style="color:#aaa;margin-right:14px">试用</a><a href="/auto-ops.html" style="color:#aaa">闭环控制台</a></div></noscript>
+
+
+
+
+
+<div class="top-nav">
+  <div class="top-nav-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">火</div>
+      <div>
+        <div class="logo-text">火斗云智<span>AIOS</span></div>
+        <div class="logo-sub">自治部署平台</div>
+      </div>
+    </a>
+    <a href="/" class="back-link">← 返回首页</a>
+  </div>
+</div>
+
+<div class="page-header">
+  <h1 class="page-title">🔌 开发者中心</h1>
+  <p class="page-subtitle">API文档 · 开发者指南 · 文档中心 · 白皮书 · 一站式开发资源</p>
+  <div class="page-anchor">Ω₀⊂⊙∞⊂Ω</div>
+</div>
+
+<!-- 快速入口卡片 -->
+<div class="quick-cards">
+  <a href="/developer-center.html" class="quick-card">
+    <div class="card-icon">📖</div>
+    <div class="card-title">API开发者中心</div>
+    <div class="card-desc">完整的API接口文档、调用示例、SDK下载、错误码说明</div>
+    <div class="card-arrow">立即查看 →</div>
+  </a>
+  <a href="/docs.html" class="quick-card">
+    <div class="card-icon">📚</div>
+    <div class="card-title">文档中心</div>
+    <div class="card-desc">产品文档、使用指南、最佳实践、常见问题解答</div>
+    <div class="card-arrow">立即查看 →</div>
+  </a>
+  <a href="https://docs.huodouai.com" class="quick-card">
+    <div class="card-icon">🔧</div>
+    <div class="card-title">API文档</div>
+    <div class="card-desc">在线API调试工具、接口测试、实时响应预览</div>
+    <div class="card-arrow">立即查看 →</div>
+  </a>
+  <a href="/whitepapers/" class="quick-card">
+    <div class="card-icon">📄</div>
+    <div class="card-title">白皮书中心</div>
+    <div class="card-desc">技术白皮书、架构设计文档、理论体系、研究报告</div>
+    <div class="card-arrow">立即查看 →</div>
+  </a>
+</div>
+
+<!-- Tab导航 -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('developers', this)">
+    <span class="tab-icon">📖</span> API开发者中心
+  </button>
+  <button class="tab-btn" onclick="switchTab('docs', this)">
+    <span class="tab-icon">📚</span> 文档中心
+  </button>
+  <button class="tab-btn" onclick="switchTab('api-docs', this)">
+    <span class="tab-icon">🔧</span> API文档
+  </button>
+  <button class="tab-btn" onclick="switchTab('whitepapers', this)">
+    <span class="tab-icon">📄</span> 白皮书中心
+  </button>
+</div>
+
+<!-- Tab内容 -->
+<div class="tab-content">
+  <div id="tab-developers" class="tab-pane active">
+    <div class="pane-header">
+      <div class="pane-title">📖 API开发者中心</div>
+      <a href="/developer-center.html" target="_blank" class="open-new-tab">↗ 新窗口打开</a>
+    </div>
+    <iframe src="/developers.html" frameborder="0"></iframe>
+  </div>
+  <div id="tab-docs" class="tab-pane">
+    <div class="pane-header">
+      <div class="pane-title">📚 文档中心</div>
+      <a href="/docs.html" target="_blank" class="open-new-tab">↗ 新窗口打开</a>
+    </div>
+    <iframe src="/docs.html" frameborder="0"></iframe>
+  </div>
+  <div id="tab-api-docs" class="tab-pane">
+    <div class="pane-header">
+      <div class="pane-title">🔧 API文档</div>
+      <a href="https://docs.huodouai.com" target="_blank" class="open-new-tab">↗ 新窗口打开</a>
+    </div>
+    <iframe src="/api-docs/" frameborder="0"></iframe>
+  </div>
+  <div id="tab-whitepapers" class="tab-pane">
+    <div class="pane-header">
+      <div class="pane-title">📄 白皮书中心</div>
+      <a href="/whitepapers/" target="_blank" class="open-new-tab">↗ 新窗口打开</a>
+    </div>
+    <iframe src="/whitepapers/" frameborder="0"></iframe>
+  </div>
+</div>
+
+<div class="footer">
+  <div>火斗云智AIOS · 开发者中心 · 一站式开发资源入口</div>
+  <div>API文档 | 开发者指南 | 文档中心 | 白皮书</div>
+  <div class="anchor">Ω₀⊂⊙∞⊂Ω</div>
+</div>
+
+<script>
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-pane').forEach(function(pane) {
+    pane.classList.remove('active');
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  document.getElementById('tab-' + tabId).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+
+<script src="/assets/js/site-nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS - 系统功能全景盘点报告</title>
+<style>
+:root {
+  --primary: #2563eb; --primary-light: #eff6ff; --accent: #06b6d4;
+  --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+  --gray-600: #4b5563; --gray-800: #1f2937; --gray-900: #111827;
+  --success: #10b981; --success-bg: #ecfdf5; --warning: #f59e0b; --warning-bg: #fffbeb;
+  --danger: #ef4444; --danger-bg: #fef2f2;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif; background: var(--gray-50); color: var(--gray-800); line-height:1.6; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.header { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #06b6d4 100%); color: #fff; padding: 50px 0 40px; }
+.header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 0.95rem; opacity: 0.9; }
+.header .meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.8rem; opacity: 0.85; margin-top: 16px; }
+.summary { margin-top: -25px; margin-bottom: 32px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.stat-card { background: #fff; border-radius: 10px; padding: 18px 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: center; }
+.stat-card .num { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+.stat-card .label { font-size: 0.7rem; color: var(--gray-600); margin-top: 4px; }
+.section { background: #fff; border-radius: 12px; padding: 28px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--gray-200); }
+.section h2 { font-size: 1.25rem; font-weight: 700; color: var(--gray-900); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
+.section h3 { font-size: 1rem; font-weight: 600; color: var(--gray-800); margin: 20px 0 10px; }
+.biz-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.biz-card { border: 1px solid var(--gray-200); border-radius: 10px; padding: 18px; background: var(--gray-50); }
+.biz-card .title { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.biz-card .title .icon { font-size: 1.2rem; }
+.biz-card .desc { font-size: 0.82rem; color: var(--gray-600); margin-bottom: 10px; }
+.biz-card .features { font-size: 0.78rem; }
+.biz-card .features li { margin: 3px 0; color: var(--gray-600); list-style: none; padding-left: 14px; position: relative; }
+.biz-card .features li::before { content: '▸'; position: absolute; left: 0; color: var(--primary); }
+.biz-card .status { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; margin-top: 8px; }
+.status.running { background: var(--success-bg); color: var(--success); }
+.status.partial { background: var(--warning-bg); color: var(--warning); }
+.status.issue { background: var(--danger-bg); color: var(--danger); }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.8rem; }
+th { background: var(--gray-50); text-align: left; padding: 10px 12px; font-weight: 600; color: var(--gray-600); border-bottom: 2px solid var(--gray-200); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--gray-100); }
+tr:hover { background: var(--gray-50); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+.badge.success { background: var(--success-bg); color: var(--success); }
+.badge.warning { background: var(--warning-bg); color: var(--warning); }
+.badge.danger { background: var(--danger-bg); color: var(--danger); }
+.badge.info { background: var(--primary-light); color: var(--primary); }
+.domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.domain-item { padding: 10px 14px; border-radius: 8px; background: var(--gray-50); font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; }
+.domain-item .name { font-weight: 600; color: var(--gray-800); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.footer { text-align: center; padding: 30px 0; color: var(--gray-600); font-size: 0.78rem; }
+@media (max-width: 900px) {
+  .summary { grid-template-columns: repeat(3, 1fr); }
+  .biz-grid, .two-col { grid-template-columns: 1fr; }
+  .domain-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <h1>火斗云智AIOS · 系统功能全景盘点报告</h1>
+    <div class="subtitle">全业务线功能梳理 · 服务端口映射 · 子域名矩阵 · 实现状态评估</div>
+    <div class="meta">
+      <span>📅 盘点时间：2026-09-13</span>
+      <span>🆔 DID-BR-000002</span>
+      <span>🔗 Ω₀⊂⊙∞⊂Ω</span>
+      <span>📊 V1.0</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 总览数据 -->
+<div class="summary">
+  <div class="stat-card"><div class="num">58</div><div class="label">运行中服务</div></div>
+  <div class="stat-card"><div class="num">60+</div><div class="label">监听端口</div></div>
+  <div class="stat-card"><div class="num">12</div><div class="label">子域名</div></div>
+  <div class="stat-card"><div class="num">83</div><div class="label">一级目录</div></div>
+  <div class="stat-card"><div class="num">275</div><div class="label">HTML页面</div></div>
+  <div class="stat-card"><div class="num">10</div><div class="label">业务线</div></div>
+</div>
+
+<!-- 一、业务线全景 -->
+<div class="section">
+  <h2>一、十大业务线功能全景</h2>
+  <div class="biz-grid">
+
+    <!-- 1. 官网展示 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">🌐</span>官网展示体系</div>
+      <div class="desc">huodouai.com 主站，产品/方案/架构/白皮书/博客</div>
+      <ul class="features">
+        <li>首页 + 6大板块目录（products/solutions/architecture/whitepapers/docs/about）</li>
+        <li>275个HTML页面，272个sitemap URL</li>
+        <li>技术白皮书V1.0已集成</li>
+        <li>统一导航栏/页脚组件，设计令牌系统</li>
+        <li>SEO优化：canonical 97%，description 100%</li>
+      </ul>
+      <span class="status running">● 运行正常</span>
+    </div>
+
+    <!-- 2. 短剧流水线 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">🎬</span>昆仑洞天短剧流水线</div>
+      <div class="desc">drama.huodouai.com / kunlun.huodouai.com，AI短剧工业化生产</div>
+      <ul class="features">
+        <li>短剧API服务（端口8012/8628，drama_api.py）</li>
+        <li>流水线服务（端口8626，pipeline_server.py）</li>
+        <li>drama/、kunlun/、drama-internal/ 目录</li>
+        <li>角色管理：九天玄女/烛龙/太阴月神等</li>
+        <li>自动量产：auto_produce.py每日定时生成</li>
+        <li>关键帧一致性、9:16电影级国风</li>
+      </ul>
+      <span class="status running">● API运行中</span>
+    </div>
+
+    <!-- 3. 政务AI中台 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">🏛️</span>政务AI中台</div>
+      <div class="desc">gov.huodouai.com，政务领域AI解决方案</div>
+      <ul class="features">
+        <li>政务网关（8200）+ 政务API（8201）</li>
+        <li>政务审计（8202）+ 政务大屏（8203）</li>
+        <li>算子集群服务（gov-operator-cluster）</li>
+        <li>gov-ai/、gov-admin/、gov-dashboard/等15个gov目录</li>
+        <li>智能体运行时（8029，universal_agent_executor）</li>
+        <li>政务画布/租户/销售/竞品分析模块</li>
+      </ul>
+      <span class="status running">● 4服务运行中</span>
+    </div>
+
+    <!-- 4. 智能工作台 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">🖥️</span>智能工作台</div>
+      <div class="desc">workbench/，统一操作入口和任务管理</div>
+      <ul class="features">
+        <li>workbench.html 工作台页面</li>
+        <li>算子调度器（8072，op_scheduler）</li>
+        <li>算子状态/执行/历史（8061/8062/8063）</li>
+        <li>Web后端（8080，web_backend.py）</li>
+        <li>任务接收/执行/历史追踪</li>
+        <li>稳态运维平台（8090，steady_ops）</li>
+      </ul>
+      <span class="status running">● 运行正常</span>
+    </div>
+
+    <!-- 5. 智能交互窗口 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">💬</span>智能交互/体验中心</div>
+      <div class="desc">experience/、agent-experience/，AI对话与交互体验</div>
+      <ul class="features">
+        <li>体验中心服务（8046，experience_center.py）</li>
+        <li>Agent Hub（8023，agent_hub.py）</li>
+        <li>WebSocket推送（9140，实时消息）</li>
+        <li>握手服务器（8099，mhp_handshake）</li>
+        <li>agent-admin/、agent-experience/ 目录</li>
+        <li>能力编排器/能力评分模块</li>
+      </ul>
+      <span class="status running">● 运行正常</span>
+    </div>
+
+    <!-- 6. 运维监控平台 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">📊</span>运维监控平台</div>
+      <div class="desc">ops.huodouai.com / status.huodouai.com，系统监控与自愈</div>
+      <ul class="features">
+        <li>MR-007资源监控（内存熔断70/80/90%）</li>
+        <li>MR-008全链路自愈监控</li>
+        <li>稳态运维平台（8090，302跳转登录）</li>
+        <li>运维调度器（zr-op-scheduler）</li>
+        <li>告警中心（alert-center/）</li>
+        <li>根因分析器（root_cause_analyzer.py）</li>
+      </ul>
+      <span class="status running">● 运行正常</span>
+    </div>
+
+    <!-- 7. 开发者平台 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">👨‍💻</span>开发者/API平台</div>
+      <div class="desc">docs.huodouai.com / api.huodouai.com，API文档与开放平台</div>
+      <ul class="features">
+        <li>API平台（api-platform/、api-docs/）</li>
+        <li>API用量仪表盘（api-usage-dashboard/）</li>
+        <li>开发者文档（docs/，5个页面）</li>
+        <li>Prometheus API文档</li>
+        <li>开源项目页（opensource.html）</li>
+        <li>gov-api-docs/ 政务API文档</li>
+      </ul>
+      <span class="status running">● 运行正常</span>
+    </div>
+
+    <!-- 8. AI能力平台 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">🧠</span>AI能力平台</div>
+      <div class="desc">AI网关/代理/模型调度，本地+外部双算力</div>
+      <ul class="features">
+        <li>AI代理（8021，12个模型智能路由）</li>
+        <li>本地LLM（8081，Qwen2.5-0.5B）</li>
+        <li>引擎代理（9210，7引擎按需激活）</li>
+        <li>MR-010双算力调度器（本地优先）</li>
+        <li>向量数据库（8014，vector_server）</li>
+        <li>知识图谱API（8070，kg_api）</li>
+        <li>因果引擎（8091）、NL2Action（8093）</li>
+      </ul>
+      <span class="status running">● 运行正常</span>
+    </div>
+
+    <!-- 9. 自治内核 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">⚙️</span>ZONGYUAN-ROOT自治内核</div>
+      <div class="desc">元极恒一超认知永恒自治体系，14个MR组件</div>
+      <ul class="features">
+        <li>记忆网关（9120，2144条真值，9节点）</li>
+        <li>MR-007~MR-020共14个自治组件</li>
+        <li>MR-021零成本保护元法则（已锁档）</li>
+        <li>内核总线（9121）、上下文组装（9123）</li>
+        <li>元认知/真值生成/思维进化/自主开发</li>
+        <li>多节点协作/长期记忆/元极内核</li>
+        <li>通信网关（9122，HMAC签名命令执行）</li>
+      </ul>
+      <span class="status running">● 14组件全在线</span>
+    </div>
+
+    <!-- 10. 身份与权限 -->
+    <div class="biz-card">
+      <div class="title"><span class="icon">🔐</span>身份与权限体系</div>
+      <div class="desc">身份确权、RBAC权限、主权根</div>
+      <ul class="features">
+        <li>主权根API（8031，sovereignty_api）</li>
+        <li>身份控制台（identity-console/）</li>
+        <li>身份市场（identity-market/）</li>
+        <li>RBAC管理（rbac-admin/）</li>
+        <li>内核身份API（zr-identity-api）</li>
+        <li>DID-BR-000002确权体系</li>
+        <li>飞书审批回调（8060）</li>
+      </ul>
+      <span class="status running">● 运行正常</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- 二、子域名矩阵 -->
+<div class="section">
+  <h2>二、子域名访问矩阵</h2>
+  <div class="domain-grid">
+    <div class="domain-item"><span class="name">huodouai.com</span><span class="badge success">301→www</span></div>
+    <div class="domain-item"><span class="name">www.huodouai.com</span><span class="badge success">200 主站</span></div>
+    <div class="domain-item"><span class="name">drama.huodouai.com</span><span class="badge success">200 短剧</span></div>
+    <div class="domain-item"><span class="name">gov.huodouai.com</span><span class="badge success">200 政务</span></div>
+    <div class="domain-item"><span class="name">kunlun.huodouai.com</span><span class="badge warning">403 需配置</span></div>
+    <div class="domain-item"><span class="name">ops.huodouai.com</span><span class="badge success">200 运维</span></div>
+    <div class="domain-item"><span class="name">status.huodouai.com</span><span class="badge success">200 状态</span></div>
+    <div class="domain-item"><span class="name">console.huodouai.com</span><span class="badge info">302 跳转</span></div>
+    <div class="domain-item"><span class="name">docs.huodouai.com</span><span class="badge success">200 文档</span></div>
+    <div class="domain-item"><span class="name">api.huodouai.com</span><span class="badge success">200 API</span></div>
+    <div class="domain-item"><span class="name">grafana.huodouai.com</span><span class="badge warning">200 但后端502</span></div>
+    <div class="domain-item"><span class="name">api.huodouai.com</span><span class="badge success">200 API</span></div>
+  </div>
+</div>
+
+<!-- 三、核心服务端口映射 -->
+<div class="section">
+  <h2>三、核心服务端口映射表</h2>
+  <table>
+    <tr><th>端口</th><th>服务</th><th>业务线</th><th>状态</th></tr>
+    <tr><td>80/443</td><td>Nginx</td><td>Web服务/反向代理</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>6379</td><td>Redis</td><td>缓存/会话</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8012/8628</td><td>drama_api.py</td><td>短剧API</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8021</td><td>ai_proxy.py</td><td>AI代理（12模型）</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8023</td><td>agent_hub.py</td><td>Agent联邦中心</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8031</td><td>sovereignty_api.py</td><td>主权根/身份</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8046</td><td>experience_center.py</td><td>体验中心</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8070</td><td>kg_api.py</td><td>知识图谱API</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8080</td><td>web_backend.py</td><td>工作台Web后端</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8081</td><td>llama-server</td><td>本地LLM(Qwen2.5-0.5B)</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8090</td><td>steady_ops_platform</td><td>稳态运维平台</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8091</td><td>causal_engine.py</td><td>因果推理引擎</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8093</td><td>nl2action_engine.py</td><td>自然语言操作引擎</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8100</td><td>app.py</td><td>应用服务</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8200-8203</td><td>gov系列</td><td>政务中台（网关/API/审计/大屏）</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8300</td><td>uvicorn app</td><td>FastAPI服务</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8626</td><td>pipeline_server.py</td><td>短剧流水线</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>8765</td><td>uvicorn main</td><td>API服务</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>9120</td><td>unified_gateway</td><td>记忆网关（真值/通信）</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>9122</td><td>comm_protocol</td><td>通信协议网关（HMAC）</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>9140</td><td>websocket_push</td><td>WebSocket实时推送</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>9200</td><td>local_cos.py</td><td>本地对象存储模拟</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>9210</td><td>engine_proxy.py</td><td>引擎代理（7引擎）</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>9300</td><td>spectrum_engine</td><td>频谱引擎</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>9400</td><td>task_receiver.py</td><td>媒体归档任务接收</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>9443</td><td>nexus_gateway.py</td><td>Nexus网关</td><td><span class="badge success">运行</span></td></tr>
+  </table>
+</div>
+
+<!-- 四、自治内核MR组件 -->
+<div class="section">
+  <h2>四、ZONGYUAN-ROOT自治内核（14个MR组件）</h2>
+  <table>
+    <tr><th>编号</th><th>名称</th><th>功能</th><th>状态</th></tr>
+    <tr><td>MR-007</td><td>资源稳态保护</td><td>内存熔断70%预警/80%硬熔断/90%兜底</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-008</td><td>全链路自愈监控</td><td>Web+API链路自愈修复</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-009</td><td>真值自动吸收</td><td>60秒轮询9120，自动分类/冲突检测/合并</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-010</td><td>双算力调度器</td><td>本地LLM+外部API，免费优先</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-011</td><td>稳态进化引擎</td><td>系统稳态进化</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-012</td><td>内核总线</td><td>14组件统一通信总线</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-013</td><td>真值统一服务</td><td>全域真值统一管理</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-014</td><td>元认知引擎</td><td>系统自我反思与认知</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-015</td><td>主动真值生成器</td><td>主动生成高价值真值</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-016</td><td>思维模式进化</td><td>思维模式迭代优化</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-017</td><td>自主开发引擎</td><td>代码自修改/自优化</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-018</td><td>多节点协作</td><td>多节点分布式协作</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-019</td><td>长期记忆系统</td><td>长期记忆存储与检索</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-020</td><td>元极内核</td><td>14组件终极整合，六核心能力</td><td><span class="badge success">运行</span></td></tr>
+    <tr><td>MR-021</td><td>零成本保护</td><td>零成本运行，付费需人工审核</td><td><span class="badge success">已锁档</span></td></tr>
+  </table>
+</div>
+
+<!-- 五、待优化问题 -->
+<div class="section">
+  <h2>五、待优化问题清单</h2>
+  <table>
+    <tr><th>优先级</th><th>问题</th><th>影响</th><th>建议</th></tr>
+    <tr><td><span class="badge warning">中</span></td><td>kunlun.huodouai.com 返回403</td><td>昆仑子域名无法访问</td><td>检查Nginx配置和root目录</td></tr>
+    <tr><td><span class="badge warning">中</span></td><td>grafana.huodouai.com 后端502</td><td>监控面板不可用</td><td>Grafana服务未运行，如需则启动</td></tr>
+    <tr><td><span class="badge warning">中</span></td><td>部分API根路径返回404</td><td>API健康检查不规范</td><td>添加/health端点</td></tr>
+    <tr><td><span class="badge info">低</span></td><td>gov-staging/gov-dev各170M在生产站</td><td>占用磁盘空间</td><td>迁移到独立环境</td></tr>
+    <tr><td><span class="badge info">低</span></td><td>pages/目录21个页面未分类</td><td>目录结构混乱</td><td>合并到对应板块</td></tr>
+    <tr><td><span class="badge info">低</span></td><td>v2/目录45个旧页面</td><td>已301跳转，可后续清理</td><td>3个月后确认无依赖再删除</td></tr>
+  </table>
+</div>
+
+<!-- 六、总结 -->
+<div class="section">
+  <h2>六、系统整体评估</h2>
+  <div class="two-col">
+    <div>
+      <h3>✅ 已完善的能力</h3>
+      <ul style="margin-left:20px; font-size:0.88rem;">
+        <li>官网展示体系完整，SEO优化到位</li>
+        <li>10大业务线全部有服务支撑</li>
+        <li>58个服务稳定运行，60+端口监听</li>
+        <li>自治内核14+1组件全在线</li>
+        <li>本地LLM算力自给自足</li>
+        <li>零成本运行体系已建立（MR-021）</li>
+        <li>记忆网关2144条真值，9节点</li>
+        <li>12个子域名矩阵基本可用</li>
+      </ul>
+    </div>
+    <div>
+      <h3>🔧 需关注的方向</h3>
+      <ul style="margin-left:20px; font-size:0.88rem;">
+        <li>昆仑子域名403需修复</li>
+        <li>Grafana监控后端502</li>
+        <li>政务/短剧前端页面与API联调验证</li>
+        <li>智能工作台前端功能完善</li>
+        <li>交互窗口/体验中心用户体验优化</li>
+        <li>staging/dev环境清理</li>
+        <li>各业务线API文档补全</li>
+        <li>统一登录/权限体系整合</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <p>火斗云智AIOS · 系统功能全景盘点报告 V1.0</p>
+  <p>确权：DID-BR-000002 ｜ 溯源：Ω₀⊂⊙∞⊂Ω ｜ 2026-09-13</p>
+</div>
+
+</body>
+</html>

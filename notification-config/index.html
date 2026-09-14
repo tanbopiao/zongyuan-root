@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONGYUAN-ROOT 告警通知配置</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); padding: 18px 30px; border-bottom: 2px solid #d4af37; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 20px; color: #d4af37; }
+        .header p { font-size: 12px; color: #888; margin-top: 3px; }
+        .btn { padding: 9px 18px; background: linear-gradient(135deg, #2a2a4a, #1a1a2e); border: 1px solid #3a3a5a; border-radius: 8px; color: #e0e0e0; font-size: 13px; cursor: pointer; }
+        .btn:hover { border-color: #d4af37; color: #d4af37; }
+        .btn.primary { background: linear-gradient(135deg, #d4af37, #f0c040); color: #1a1a2e; border-color: #d4af37; font-weight: 600; }
+        .container { padding: 24px 30px; max-width: 1200px; margin: 0 auto; }
+        .panel { background: linear-gradient(135deg, #111118, #1a1a2e); border: 1px solid #2a2a4a; border-radius: 12px; margin-bottom: 18px; overflow: hidden; }
+        .panel-header { padding: 14px 20px; border-bottom: 1px solid #2a2a4a; display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { font-size: 15px; font-weight: 600; color: #d4af37; }
+        .panel-body { padding: 16px 20px; }
+        .channel-card { background: rgba(255,255,255,0.02); border: 1px solid #2a2a4a; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+        .channel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .channel-name { font-size: 14px; font-weight: 600; }
+        .switch { position: relative; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #d4af37; }
+        input:checked + .slider:before { transform: translateX(20px); }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid #3a3a5a; border-radius: 6px; color: #e0e0e0; font-size: 13px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .rules-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .rule-item { background: rgba(255,255,255,0.02); border: 1px solid #2a2a4a; border-radius: 8px; padding: 12px; text-align: center; }
+        .rule-severity { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        .rule-severity.critical { color: #ff4d4f; }
+        .rule-severity.warning { color: #faad14; }
+        .rule-severity.info { color: #1890ff; }
+        .rule-channels { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+        .history-item { background: rgba(255,255,255,0.02); border: 1px solid #2a2a4a; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px; }
+        .empty { text-align: center; padding: 30px; color: #666; }
+        .loading { text-align: center; padding: 40px; }
+        .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid #2a2a4a; border-top-color: #d4af37; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+    <link rel="canonical" href="https://huodouai.comnotification-config/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+    <div class="header">
+        <div>
+            <h1>🔔 告警通知配置</h1>
+            <p>ZONGYUAN-ROOT 云内核 · 多渠道通知 · 实时告警</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <button class="btn" onclick="loadConfig()">🔄 刷新</button>
+            <button class="btn primary" onclick="saveConfig()">💾 保存配置</button>
+        </div>
+    </div>
+    <div class="container">
+        <div id="content"><div class="loading"><div class="spinner"></div><p style="margin-top:12px;">加载中...</p></div></div>
+    </div>
+    <script>
+        const API_BASE = "/api/identity/api/v1/identity";
+        const API_KEY = "zy-root-admin-2026-identity-api";
+        let currentConfig = null;
+
+        function apiCall(endpoint, method, body) {
+            const opts = { method: method || "GET", headers: { "X-API-Key": API_KEY, "Content-Type": "application/json" } };
+            if (body) opts.body = JSON.stringify(body);
+            return fetch(API_BASE + endpoint, opts).then(r => r.json());
+        }
+
+        async function loadConfig() {
+            try {
+                const [config, history] = await Promise.all([
+                    apiCall("/notifications/config"),
+                    apiCall("/notifications/history?limit=10")
+                ]);
+                currentConfig = config;
+                renderConfig(config);
+                renderHistory(history.history || []);
+            } catch (e) { console.error(e); }
+        }
+
+        function renderConfig(config) {
+            const channels = config.channels || {};
+            const rules = config.notification_rules || {};
+            
+            let html = "";
+            
+            // 渠道配置
+            html += `<div class="panel"><div class="panel-header"><div class="panel-title">📡 通知渠道配置</div></div><div class="panel-body">`;
+            
+            // Webhook
+            const wh = channels.webhook || {};
+            html += `<div class="channel-card">
+                <div class="channel-header">
+                    <div class="channel-name">🌐 Webhook 通知</div>
+                    <label class="switch"><input type="checkbox" id="webhook-enabled" ${wh.enabled?"checked":""}><span class="slider"></span></label>
+                </div>
+                <div class="form-group"><label>Webhook URL</label><input type="text" id="webhook-url" value="${wh.url||""}" placeholder="https://example.com/webhook"></div>
+                <button class="btn" onclick="testChannel("webhook")" style="margin-top:8px;">发送测试通知</button>
+            </div>`;
+            
+            // 飞书
+            const fs = channels.feishu || {};
+            html += `<div class="channel-card">
+                <div class="channel-header">
+                    <div class="channel-name">💬 飞书机器人通知</div>
+                    <label class="switch"><input type="checkbox" id="feishu-enabled" ${fs.enabled?"checked":""}><span class="slider"></span></label>
+                </div>
+                <div class="form-group"><label>飞书 Webhook URL</label><input type="text" id="feishu-url" value="${fs.webhook_url||""}" placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/xxx"></div>
+                <button class="btn" onclick="testChannel("feishu")" style="margin-top:8px;">发送测试通知</button>
+            </div>`;
+            
+            // 邮件
+            const em = channels.email || {};
+            html += `<div class="channel-card">
+                <div class="channel-header">
+                    <div class="channel-name">📧 邮件通知</div>
+                    <label class="switch"><input type="checkbox" id="email-enabled" ${em.enabled?"checked":""}><span class="slider"></span></label>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>SMTP 服务器</label><input type="text" id="email-host" value="${em.smtp_host||""}" placeholder="smtp.example.com"></div>
+                    <div class="form-group"><label>SMTP 端口</label><input type="number" id="email-port" value="${em.smtp_port||587}"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>用户名</label><input type="text" id="email-username" value="${em.username||""}"></div>
+                    <div class="form-group"><label>密码</label><input type="password" id="email-password" value="${em.password||""}"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>发件人</label><input type="text" id="email-from" value="${em.from_address||""}"></div>
+                    <div class="form-group"><label>收件人（逗号分隔）</label><input type="text" id="email-to" value="${(em.to_addresses||[]).join(",")}"></div>
+                </div>
+                <button class="btn" onclick="testChannel("email")" style="margin-top:8px;">发送测试通知</button>
+            </div>`;
+            
+            html += `</div></div>`;
+            
+            // 通知规则
+            html += `<div class="panel"><div class="panel-header"><div class="panel-title">⚙️ 通知规则配置</div></div><div class="panel-body">`;
+            html += `<p style="font-size:12px;color:#888;margin-bottom:12px;">配置不同级别告警触发哪些通知渠道</p>`;
+            html += `<div class="rules-grid">`;
+            
+            const severities = [
+                { key: "critical", name: "🔴 严重", color: "critical" },
+                { key: "warning", name: "🟡 警告", color: "warning" },
+                { key: "info", name: "🔵 提示", color: "info" }
+            ];
+            
+            severities.forEach(sev => {
+                const rule = rules[sev.key] || {};
+                html += `<div class="rule-item">
+                    <div class="rule-severity ${sev.color}">${sev.name}</div>
+                    <div class="rule-channels">
+                        <label><input type="checkbox" id="rule-${sev.key}-webhook" ${rule.webhook?"checked":""}> Webhook</label>
+                        <label><input type="checkbox" id="rule-${sev.key}-feishu" ${rule.feishu?"checked":""}> 飞书</label>
+                        <label><input type="checkbox" id="rule-${sev.key}-email" ${rule.email?"checked":""}> 邮件</label>
+                    </div>
+                </div>`;
+            });
+            
+            html += `</div></div></div>`;
+            
+            // 通知历史
+            html += `<div class="panel"><div class="panel-header"><div class="panel-title">📜 通知历史记录</div></div><div class="panel-body" id="history-container">`;
+            html += `<div class="empty">暂无通知历史</div>`;
+            html += `</div></div>`;
+            
+            document.getElementById("content").innerHTML = html;
+        }
+
+        function renderHistory(history) {
+            const container = document.getElementById("history-container");
+            if (!container) return;
+            if (!history.length) {
+                container.innerHTML = `<div class="empty">暂无通知历史</div>`;
+                return;
+            }
+            container.innerHTML = history.map(h => {
+                const channels = Object.entries(h.channels || {}).map(([k, v]) => 
+                    `${k}: ${v.success ? "✅" : "❌"}`
+                ).join(" | ");
+                return `<div class="history-item">
+                    <strong>${h.alert_id || "未知"}</strong> [${h.severity || "info"}] ${h.sent_at || ""}<br>
+                    <span style="color:#888;">${channels || "无渠道"}</span>
+                </div>`;
+            }).join("");
+        }
+
+        async function saveConfig() {
+            const config = {
+                channels: {
+                    webhook: { enabled: document.getElementById("webhook-enabled").checked, url: document.getElementById("webhook-url").value, method: "POST", headers: {"Content-Type": "application/json"} },
+                    feishu: { enabled: document.getElementById("feishu-enabled").checked, webhook_url: document.getElementById("feishu-url").value },
+                    email: { enabled: document.getElementById("email-enabled").checked, smtp_host: document.getElementById("email-host").value, smtp_port: parseInt(document.getElementById("email-port").value) || 587, username: document.getElementById("email-username").value, password: document.getElementById("email-password").value, from_address: document.getElementById("email-from").value, to_addresses: document.getElementById("email-to").value.split(",").map(s => s.trim()).filter(s => s) }
+                },
+                notification_rules: {
+                    critical: { webhook: document.getElementById("rule-critical-webhook").checked, feishu: document.getElementById("rule-critical-feishu").checked, email: document.getElementById("rule-critical-email").checked },
+                    warning: { webhook: document.getElementById("rule-warning-webhook").checked, feishu: document.getElementById("rule-warning-feishu").checked, email: document.getElementById("rule-warning-email").checked },
+                    info: { webhook: document.getElementById("rule-info-webhook").checked, feishu: document.getElementById("rule-info-feishu").checked, email: document.getElementById("rule-info-email").checked }
+                }
+            };
+            try {
+                const result = await apiCall("/notifications/config", "PUT", config);
+                alert(result.message || "配置保存成功");
+                loadConfig();
+            } catch (e) { alert("保存失败: " + e.message); }
+        }
+
+        async function testChannel(channel) {
+            try {
+                const result = await apiCall("/notifications/test/" + channel, "POST");
+                if (result.success) alert("测试通知发送成功！");
+                else alert("发送失败: " + (result.error || "未知错误"));
+            } catch (e) { alert("发送失败: " + e.message); }
+        }
+
+        loadConfig();
+    </script>
+</body>
+</html>

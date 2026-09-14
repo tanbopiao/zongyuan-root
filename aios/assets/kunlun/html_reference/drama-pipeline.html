@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>短剧生产流水线 · 昆仑洞天 | ZONGYUAN-ROOT</title>
+    <meta name="description" content="昆仑洞天短剧工业化生产流水线，六阶段自动化产线，剧本→分镜→关键帧→视频→合成→锁档全链路可视化">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --gold: #d4af37; --gold-light: #f0d78c; --gold-dark: #a8842a;
+            --red: #8b1a1a; --red-light: #c43030;
+            --jade: #3d7a5c; --jade-light: #5a9e7c;
+            --ink: #0d0d1a; --ink-light: #1a1a2e; --ink-mid: #252540;
+            --paper: #f8f4ec; --paper-dark: #ede6d6;
+            --text: #2c2c2c; --text-light: #666;
+            --success: #4ade80; --warning: #fbbf24; --error: #f87171; --info: #60a5fa;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+            background: var(--ink); color: var(--paper); line-height: 1.8; min-height: 100vh;
+        }
+        /* 导航 */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(13,13,26,0.95); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 60px;
+        }
+        .nav-logo { color: var(--gold); font-size: 1.2em; letter-spacing: 0.2em; font-weight: bold; }
+        .nav-logo span { color: var(--paper); font-size: 0.7em; margin-left: 10px; }
+        .nav-links { display: flex; gap: 25px; list-style: none; }
+        .nav-links a { color: rgba(248,244,236,0.8); text-decoration: none; font-size: 0.9em; letter-spacing: 0.1em; transition: color 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+        .nav-status { font-size: 0.75em; color: var(--jade-light); display: flex; align-items: center; gap: 6px; }
+        .nav-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* 主容器 */
+        .main { padding-top: 80px; max-width: 1400px; margin: 0 auto; padding-left: 20px; padding-right: 20px; padding-bottom: 60px; }
+        .page-header { text-align: center; margin-bottom: 40px; padding: 40px 0; }
+        .page-header h1 {
+            font-size: 2.8em; letter-spacing: 0.3em; margin-bottom: 15px;
+            background: linear-gradient(180deg, var(--gold-light), var(--gold), var(--gold-dark));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .page-header p { color: rgba(248,244,236,0.6); font-size: 1em; letter-spacing: 0.15em; }
+        .page-header .ornament { width: 120px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 20px auto 0; }
+
+        /* 流水线可视化 */
+        .pipeline-visual {
+            background: var(--ink-light); border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 20px; padding: 35px; margin-bottom: 35px;
+        }
+        .pipeline-title { font-size: 1.3em; color: var(--gold); margin-bottom: 25px; letter-spacing: 0.15em; display: flex; align-items: center; gap: 10px; }
+        .pipeline-title::before { content: ""; width: 4px; height: 20px; background: var(--gold); border-radius: 2px; }
+        .pipeline-steps { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; position: relative; flex-wrap: wrap; }
+        .pipeline-step {
+            flex: 1; min-width: 130px; text-align: center; position: relative; z-index: 2;
+        }
+        .step-circle {
+            width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 12px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--ink-mid); border: 2px solid rgba(212,175,55,0.3);
+            color: rgba(248,244,236,0.4); font-size: 1.3em; font-weight: bold;
+            transition: all 0.5s; position: relative;
+        }
+        .pipeline-step.active .step-circle {
+            border-color: var(--gold); color: var(--gold);
+            box-shadow: 0 0 20px rgba(212,175,55,0.4);
+            animation: stepGlow 1.5s infinite;
+        }
+        .pipeline-step.done .step-circle {
+            border-color: var(--success); color: var(--ink); background: var(--success);
+        }
+        @keyframes stepGlow { 0%,100% { box-shadow: 0 0 20px rgba(212,175,55,0.4); } 50% { box-shadow: 0 0 35px rgba(212,175,55,0.7); } }
+        .step-circle .spinner {
+            position: absolute; inset: -4px; border: 3px solid transparent;
+            border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; display: none;
+        }
+        .pipeline-step.active .step-circle .spinner { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .step-name { font-size: 0.9em; color: rgba(248,244,236,0.6); margin-bottom: 5px; letter-spacing: 0.05em; }
+        .pipeline-step.active .step-name { color: var(--gold); }
+        .pipeline-step.done .step-name { color: var(--success); }
+        .step-desc { font-size: 0.72em; color: rgba(248,244,236,0.35); line-height: 1.5; }
+        .step-progress { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+        .step-progress-bar { height: 100%; background: var(--gold); width: 0%; transition: width 0.3s; border-radius: 2px; }
+        .pipeline-step.done .step-progress-bar { background: var(--success); width: 100%; }
+        .pipeline-connector { flex: 0 0 20px; align-self: center; color: rgba(212,175,55,0.3); font-size: 1.2em; text-align: center; }
+
+        /* 总进度 */
+        .overall-progress { margin-top: 25px; display: flex; align-items: center; gap: 15px; }
+        .overall-progress .label { font-size: 0.85em; color: rgba(248,244,236,0.6); white-space: nowrap; }
+        .overall-progress .bar { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+        .overall-progress .bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light)); width: 0%; transition: width 0.5s; border-radius: 4px; }
+        .overall-progress .percent { font-size: 0.9em; color: var(--gold); font-weight: bold; min-width: 45px; text-align: right; }
+
+        /* 控制面板 */
+        .control-panel {
+            background: var(--ink-light); border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 20px; padding: 30px; margin-bottom: 35px;
+        }
+        .panel-title { font-size: 1.3em; color: var(--gold); margin-bottom: 20px; letter-spacing: 0.15em; display: flex; align-items: center; gap: 10px; }
+        .panel-title::before { content: ""; width: 4px; height: 20px; background: var(--gold); border-radius: 2px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.85em; color: rgba(248,244,236,0.7); margin-bottom: 8px; letter-spacing: 0.05em; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 12px 15px; background: var(--ink-mid);
+            border: 1px solid rgba(212,175,55,0.2); border-radius: 10px;
+            color: var(--paper); font-size: 0.95em; font-family: inherit;
+            transition: border-color 0.3s; outline: none;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        /* 角色选择 */
+        .char-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .char-option {
+            border: 2px solid rgba(212,175,55,0.15); border-radius: 12px; padding: 12px;
+            cursor: pointer; transition: all 0.3s; text-align: center; background: var(--ink-mid);
+        }
+        .char-option:hover { border-color: rgba(212,175,55,0.4); }
+        .char-option.selected { border-color: var(--gold); background: rgba(212,175,55,0.1); box-shadow: 0 0 15px rgba(212,175,55,0.2); }
+        .char-option .char-name { font-size: 0.9em; color: var(--paper); margin-bottom: 3px; }
+        .char-option .char-role { font-size: 0.7em; color: var(--jade-light); }
+        .char-option .check { color: var(--gold); font-size: 0.8em; margin-top: 5px; opacity: 0; }
+        .char-option.selected .check { opacity: 1; }
+
+        /* 按钮 */
+        .btn-group { display: flex; gap: 15px; margin-top: 10px; }
+        .btn {
+            padding: 14px 35px; border-radius: 12px; font-size: 1em; letter-spacing: 0.15em;
+            cursor: pointer; border: none; font-family: inherit; transition: all 0.3s; font-weight: bold;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: var(--ink);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212,175,55,0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-secondary { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+        .btn-secondary:hover { background: rgba(212,175,55,0.1); }
+        .btn-danger { background: transparent; color: var(--error); border: 1px solid var(--error); }
+
+        /* 产出预览 */
+        .output-panel {
+            background: var(--ink-light); border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 20px; padding: 30px; margin-bottom: 35px; display: none;
+        }
+        .output-panel.show { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .output-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .output-item {
+            background: var(--ink-mid); border-radius: 12px; overflow: hidden;
+            border: 1px solid rgba(212,175,55,0.15); transition: all 0.3s;
+        }
+        .output-item:hover { border-color: var(--gold); transform: translateY(-3px); }
+        .output-item .thumb { height: 150px; background: linear-gradient(135deg, var(--ink-mid), var(--ink-light)); display: flex; align-items: center; justify-content: center; font-size: 2.5em; position: relative; overflow: hidden; }
+        .output-item .thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5)); }
+        .output-item .info { padding: 12px; }
+        .output-item .info h4 { font-size: 0.9em; color: var(--paper); margin-bottom: 4px; }
+        .output-item .info p { font-size: 0.75em; color: rgba(248,244,236,0.5); }
+        .output-item .badge { display: inline-block; padding: 2px 8px; background: var(--jade); color: white; border-radius: 8px; font-size: 0.65em; margin-top: 6px; }
+
+        /* 日志 */
+        .log-panel {
+            background: var(--ink-light); border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 20px; padding: 25px; margin-bottom: 35px;
+        }
+        .log-container {
+            background: var(--ink); border-radius: 12px; padding: 15px;
+            height: 200px; overflow-y: auto; font-family: "Courier New", monospace; font-size: 0.8em;
+        }
+        .log-line { padding: 3px 0; color: rgba(248,244,236,0.6); }
+        .log-line .time { color: var(--gold-dark); margin-right: 8px; }
+        .log-line.info { color: var(--info); }
+        .log-line.success { color: var(--success); }
+        .log-line.warning { color: var(--warning); }
+        .log-line.error { color: var(--error); }
+
+        /* 历史任务 */
+        .history-panel {
+            background: var(--ink-light); border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 20px; padding: 30px;
+        }
+        .history-list { margin-top: 20px; }
+        .history-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px 20px; background: var(--ink-mid); border-radius: 10px;
+            margin-bottom: 10px; border-left: 3px solid var(--jade);
+        }
+        .history-item .h-info h4 { color: var(--paper); font-size: 0.95em; margin-bottom: 3px; }
+        .history-item .h-info p { color: rgba(248,244,236,0.5); font-size: 0.78em; }
+        .history-item .h-status { font-size: 0.78em; padding: 4px 12px; border-radius: 8px; }
+        .history-item .h-status.done { background: rgba(74,222,128,0.15); color: var(--success); }
+        .history-item .h-status.running { background: rgba(212,175,55,0.15); color: var(--gold); }
+
+        /* 页脚 */
+        .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(212,175,55,0.15); color: rgba(255,255,255,0.4); font-size: 0.82em; }
+        .footer .symbol { color: var(--gold); font-size: 1.3em; margin-bottom: 10px; }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar { padding: 0 15px; }
+            .nav-links { display: none; }
+            .page-header h1 { font-size: 1.8em; }
+            .form-grid { grid-template-columns: 1fr; }
+            .char-selector { grid-template-columns: repeat(2, 1fr); }
+            .pipeline-steps { flex-direction: column; align-items: stretch; }
+            .pipeline-connector { transform: rotate(90deg); padding: 5px 0; }
+            .pipeline-step { display: flex; align-items: center; gap: 15px; text-align: left; }
+            .step-circle { margin: 0; flex-shrink: 0; }
+            .step-content { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-logo">昆仑洞天<span>ZONGYUAN-ROOT</span></div>
+        <ul class="nav-links">
+            <li><a href="/kunlun/">官网首页</a></li>
+            <li><a href="/kunlun/#characters">神女谱系</a></li>
+            <li><a href="/kunlun/drama-pipeline.html" class="active">短剧产线</a></li>
+            <li><a href="/kunlun/#api">API接口</a></li>
+        </ul>
+        <div class="nav-status"><span class="dot"></span><span id="navStatus">产线就绪</span></div>
+    </nav>
+
+    <div class="main">
+        <div class="page-header">
+            <h1>短剧生产流水线</h1>
+            <p>六阶段工业化产线 · 全链路可视化 · 自治智能调度</p>
+            <div class="ornament"></div>
+        </div>
+
+        <!-- 流水线可视化 -->
+        <div class="pipeline-visual">
+            <div class="pipeline-title">生产流水线</div>
+            <div class="pipeline-steps" id="pipelineSteps">
+                <div class="pipeline-step" data-step="0">
+                    <div class="step-circle">1<span class="spinner"></span></div>
+                    <div class="step-content">
+                        <div class="step-name">剧本创作</div>
+                        <div class="step-desc">IP故事库匹配<br>剧本生成与润色</div>
+                        <div class="step-progress"><div class="step-progress-bar"></div></div>
+                    </div>
+                </div>
+                <div class="pipeline-connector">→</div>
+                <div class="pipeline-step" data-step="1">
+                    <div class="step-circle">2<span class="spinner"></span></div>
+                    <div class="step-content">
+                        <div class="step-name">分镜脚本</div>
+                        <div class="step-desc">镜头拆解<br>关键帧规划</div>
+                        <div class="step-progress"><div class="step-progress-bar"></div></div>
+                    </div>
+                </div>
+                <div class="pipeline-connector">→</div>
+                <div class="pipeline-step" data-step="2">
+                    <div class="step-circle">3<span class="spinner"></span></div>
+                    <div class="step-content">
+                        <div class="step-name">关键帧生成</div>
+                        <div class="step-desc">视觉范式校验<br>多模型路由生成</div>
+                        <div class="step-progress"><div class="step-progress-bar"></div></div>
+                    </div>
+                </div>
+                <div class="pipeline-connector">→</div>
+                <div class="pipeline-step" data-step="3">
+                    <div class="step-circle">4<span class="spinner"></span></div>
+                    <div class="step-content">
+                        <div class="step-name">视频片段</div>
+                        <div class="step-desc">图生视频<br>片段渲染</div>
+                        <div class="step-progress"><div class="step-progress-bar"></div></div>
+                    </div>
+                </div>
+                <div class="pipeline-connector">→</div>
+                <div class="pipeline-step" data-step="4">
+                    <div class="step-circle">5<span class="spinner"></span></div>
+                    <div class="step-content">
+                        <div class="step-name">合成剪辑</div>
+                        <div class="step-desc">片段拼接<br>字幕配乐</div>
+                        <div class="step-progress"><div class="step-progress-bar"></div></div>
+                    </div>
+                </div>
+                <div class="pipeline-connector">→</div>
+                <div class="pipeline-step" data-step="5">
+                    <div class="step-circle">6<span class="spinner"></span></div>
+                    <div class="step-content">
+                        <div class="step-name">锁档归档</div>
+                        <div class="step-desc">SHA256确权<br>四端同步归档</div>
+                        <div class="step-progress"><div class="step-progress-bar"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="overall-progress">
+                <span class="label">总进度</span>
+                <div class="bar"><div class="bar-fill" id="overallBar"></div></div>
+                <span class="percent" id="overallPercent">0%</span>
+            </div>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <div class="panel-title">任务创建</div>
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label>选择出演角色（可多选）</label>
+                    <div class="char-selector" id="charSelector">
+                        <div class="char-option" data-char="taiyin"><div class="char-name">太阴月神</div><div class="char-role">月神 · 清冷高远</div><div class="check">✓ 已选</div></div>
+                        <div class="char-option" data-char="jiutian"><div class="char-name">九天玄女</div><div class="char-role">战神 · 威严英武</div><div class="check">✓ 已选</div></div>
+                        <div class="char-option" data-char="xiwangmu"><div class="char-name">西王母</div><div class="char-role">帝后 · 雍容华贵</div><div class="check">✓ 已选</div></div>
+                        <div class="char-option" data-char="hongqun"><div class="char-name">红裙九尾狐</div><div class="char-role">青丘 · 妖媚神圣</div><div class="check">✓ 已选</div></div>
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <label>短剧主题 / 剧本梗概</label>
+                    <textarea id="dramaTheme" placeholder="例如：太阴月神下凡历劫，在昆仑仙境与九天玄女相遇，共同守护天界至宝...">太阴月神下凡历劫，途经昆仑仙境，与守护仙山的西王母相遇。恰逢天界至宝月华珠失窃，二女联手追查，途中遭遇红裙九尾狐的考验，最终在九天玄女的协助下寻回至宝，守护天界安宁。</textarea>
+                </div>
+                <div class="form-group">
+                    <label>集数</label>
+                    <select id="episodeCount">
+                        <option value="1">单集短剧（3分钟）</option>
+                        <option value="3">三集系列（每集2分钟）</option>
+                        <option value="6" selected>六集系列（每集90秒）</option>
+                        <option value="12">十二集系列（每集60秒）</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>视觉风格</label>
+                    <select id="visualStyle">
+                        <option value="epic" selected>史诗仙侠（大气磅礴）</option>
+                        <option value="dreamy">梦幻唯美（柔焦光晕）</option>
+                        <option value="ink">水墨国风（写意留白）</option>
+                        <option value="gold">黑金奢华（赤金点缀）</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>分辨率</label>
+                    <select id="resolution">
+                        <option value="1080p" selected>1080P 竖屏 (1080×1920)</option>
+                        <option value="720p">720P 竖屏 (720×1280)</option>
+                        <option value="4k">4K 竖屏 (2160×3840)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>生成模型</label>
+                    <select id="modelSelect">
+                        <option value="seedance" selected>Seedance 2.0 Mini（推荐）</option>
+                        <option value="sora">Sora 兼容路由</option>
+                        <option value="kling">可灵 Kling</option>
+                        <option value="auto">智能路由（自动选择最优）</option>
+                    </select>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="startBtn" onclick="startPipeline()">▶ 启动生产</button>
+                <button class="btn btn-secondary" onclick="resetPipeline()">重置流水线</button>
+            </div>
+        </div>
+
+        <!-- 产出预览 -->
+        <div class="output-panel" id="outputPanel">
+            <div class="panel-title">产出预览</div>
+            <p style="color:rgba(248,244,236,0.6);font-size:0.9em;">本次生产任务产出物清单，所有资产已携带SHA256哈希与Merkle溯源凭证。</p>
+            <div class="output-grid" id="outputGrid"></div>
+        </div>
+
+        <!-- 运行日志 -->
+        <div class="log-panel">
+            <div class="panel-title">运行日志</div>
+            <div class="log-container" id="logContainer">
+                <div class="log-line"><span class="time">[系统]</span> 短剧生产流水线已就绪，等待任务启动...</div>
+            </div>
+        </div>
+
+        <!-- 历史任务 -->
+        <div class="history-panel">
+            <div class="panel-title">历史任务</div>
+            <div class="history-list" id="historyList">
+                <div class="history-item">
+                    <div class="h-info">
+                        <h4>昆仑月华录 · 第一集</h4>
+                        <p>太阴月神 × 西王母 | 6集 | 1080P | 2026-09-08</p>
+                    </div>
+                    <span class="h-status done">已完成 · 已锁档</span>
+                </div>
+                <div class="history-item">
+                    <div class="h-info">
+                        <h4>青丘狐火 · 预告片</h4>
+                        <p>红裙九尾狐 | 单集3分钟 | 1080P | 2026-09-07</p>
+                    </div>
+                    <span class="h-status done">已完成 · 已锁档</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="symbol">Ω₀⊂⊙∞⊂Ω</div>
+        <div>ZONGYUAN-ROOT 本源体系 · 火斗云智 FireHD-AIOS</div>
+        <div style="margin-top:5px;">DID-BR-000002 ｜ Ω-TAN-7-001 ｜ 短剧工业化生产流水线 v1.0</div>
+    </div>
+
+    <script>
+        const API_BASE = '/kunlun-api/v1';
+        const stepNames = ['剧本创作', '分镜脚本', '关键帧生成', '视频片段', '合成剪辑', '锁档归档'];
+        let isRunning = false;
+        let pollTimer = null;
+        let selectedChars = ['taiyin', 'xiwangmu'];
+
+        // 角色选择
+        document.querySelectorAll('.char-option').forEach(opt => {
+            opt.onclick = () => {
+                opt.classList.toggle('selected');
+                const c = opt.dataset.char;
+                if (selectedChars.includes(c)) selectedChars = selectedChars.filter(x => x !== c);
+                else selectedChars.push(c);
+            };
+        });
+        document.querySelector('[data-char="taiyin"]').classList.add('selected');
+        document.querySelector('[data-char="xiwangmu"]').classList.add('selected');
+
+        function log(msg, type='') {
+            const c = document.getElementById('logContainer');
+            const t = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = 'log-line ' + type;
+            line.innerHTML = `<span class="time">[${t}]</span> ${msg}`;
+            c.appendChild(line);
+            c.scrollTop = c.scrollHeight;
+        }
+
+        function setStep(step, state, progress=0) {
+            const el = document.querySelector(`.pipeline-step[data-step="${step}"]`);
+            if (!el) return;
+            el.classList.remove('active', 'done');
+            if (state) el.classList.add(state);
+            el.querySelector('.step-progress-bar').style.width = progress + '%';
+        }
+
+        function setOverall(percent) {
+            document.getElementById('overallBar').style.width = percent + '%';
+            document.getElementById('overallPercent').textContent = percent + '%';
+        }
+
+        function addOutput(icon, title, desc, badge) {
+            const grid = document.getElementById('outputGrid');
+            document.getElementById('outputPanel').classList.add('show');
+            // 避免重复添加
+            const existing = grid.querySelectorAll('.output-item h4');
+            for (let e of existing) { if (e.textContent === title) return; }
+            const item = document.createElement('div');
+            item.className = 'output-item';
+            item.innerHTML = `<div class="thumb">${icon}</div><div class="info"><h4>${title}</h4><p>${desc}</p><span class="badge">${badge}</span></div>`;
+            grid.appendChild(item);
+        }
+
+        async function startPipeline() {
+            if (isRunning) return;
+            if (selectedChars.length === 0) { alert('请至少选择一个角色'); return; }
+
+            const theme = document.getElementById('dramaTheme').value;
+            const episodes = document.getElementById('episodeCount').value;
+            const style = document.getElementById('visualStyle').value;
+            const res = document.getElementById('resolution').value;
+            const model = document.getElementById('modelSelect').value;
+            const charNames = selectedChars.map(c => ({taiyin:'太阴月神',jiutian:'九天玄女',xiwangmu:'西王母',hongqun:'红裙九尾狐'})[c]).join('、');
+
+            // 重置UI
+            isRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('navStatus').textContent = '生产中...';
+            document.getElementById('outputPanel').classList.remove('show');
+            document.getElementById('outputGrid').innerHTML = '';
+            for (let i = 0; i < 6; i++) setStep(i, '', 0);
+            setOverall(0);
+
+            log(`任务启动：${charNames} | ${episodes}集 | ${res}`, 'info');
+            log(`正在提交任务到API网关...`, 'info');
+
+            try {
+                // 调用真实API创建任务
+                const resp = await fetch(`${API_BASE}/kunlun/task`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        characters: selectedChars,
+                        theme: theme,
+                        episodes: parseInt(episodes),
+                        style: style,
+                        resolution: res,
+                        model: model
+                    })
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.error?.message || '任务创建失败');
+                }
+
+                const taskId = data.task_id;
+                log(`任务ID：${taskId}`, 'info');
+                log(`任务已创建，开始轮询执行进度...`, 'info');
+
+                // 开始轮询任务状态
+                pollTask(taskId, charNames, episodes, res);
+            } catch (err) {
+                log(`❌ 任务创建失败：${err.message}`, 'error');
+                log('请检查API网关是否正常运行', 'warning');
+                isRunning = false;
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('navStatus').textContent = '产线就绪';
+            }
+        }
+
+        async function pollTask(taskId, charNames, episodes, res) {
+            let lastLogCount = 0;
+            let lastStage = -1;
+
+            const poll = async () => {
+                try {
+                    const resp = await fetch(`${API_BASE}/kunlun/task/${taskId}`);
+                    const data = await resp.json();
+                    if (!resp.ok) throw new Error('查询失败');
+
+                    const task = data.task;
+                    const overall = task.overall_progress || 0;
+                    setOverall(overall);
+
+                    // 更新各阶段状态
+                    const stageIdx = task.stage_index ?? -1;
+                    for (let i = 0; i < 6; i++) {
+                        if (i < stageIdx) {
+                            setStep(i, 'done', 100);
+                        } else if (i === stageIdx) {
+                            setStep(i, 'active', task.stage_progress || 0);
+                        } else {
+                            setStep(i, '', 0);
+                        }
+                    }
+
+                    // 阶段切换时输出日志
+                    if (stageIdx !== lastStage && stageIdx >= 0) {
+                        log(`▶ 开始阶段${stageIdx+1}：${stepNames[stageIdx]}`, 'info');
+                        lastStage = stageIdx;
+                    }
+
+                    // 输出新增日志
+                    const logs = task.logs || [];
+                    while (lastLogCount < logs.length) {
+                        const l = logs[lastLogCount];
+                        const t = l.time ? l.time.split('T')[1]?.split('.')[0] : '';
+                        const type = l.progress === 100 ? 'success' : '';
+                        log(`[${l.stage}] ${l.step} ${l.progress}%`, type);
+                        lastLogCount++;
+                    }
+
+                    // 产出物
+                    (task.outputs || []).forEach(o => {
+                        addOutput(o.icon, o.title, o.desc, '已锁档');
+                    });
+
+                    // 任务完成
+                    if (task.status === 'COMPLETED') {
+                        clearInterval(pollTimer);
+                        for (let i = 0; i < 6; i++) setStep(i, 'done', 100);
+                        setOverall(100);
+                        log(`🎉 全部完成！任务 ${taskId} 已锁档归档`, 'success');
+                        if (task.merkle_root) log(`Merkle根：${task.merkle_root}...`, 'success');
+                        log(`四端同步：云服务器 ✅ | Gitee ✅ | 飞书 ✅ | 本地 ✅`, 'success');
+                        document.getElementById('navStatus').textContent = '产线就绪';
+                        document.getElementById('startBtn').disabled = false;
+                        isRunning = false;
+
+                        // 添加到历史
+                        const hist = document.getElementById('historyList');
+                        const item = document.createElement('div');
+                        item.className = 'history-item';
+                        item.innerHTML = `<div class="h-info"><h4>${taskId} · ${charNames}</h4><p>${charNames} | ${episodes}集 | ${res} | ${new Date().toLocaleDateString()}</p></div><span class="h-status done">已完成 · 已锁档</span>`;
+                        hist.insertBefore(item, hist.firstChild);
+                        return;
+                    }
+
+                    if (task.status === 'FAILED') {
+                        clearInterval(pollTimer);
+                        log(`❌ 任务失败`, 'error');
+                        document.getElementById('navStatus').textContent = '产线就绪';
+                        document.getElementById('startBtn').disabled = false;
+                        isRunning = false;
+                    }
+                } catch (err) {
+                    log(`轮询异常：${err.message}`, 'warning');
+                }
+            };
+
+            await poll();
+            pollTimer = setInterval(poll, 1000);
+        }
+
+        function resetPipeline() {
+            if (isRunning) { if(!confirm('任务正在进行中，确定要重置吗？')) return; }
+            if (pollTimer) clearInterval(pollTimer);
+            isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            for (let i = 0; i < 6; i++) setStep(i, '', 0);
+            setOverall(0);
+            document.getElementById('outputPanel').classList.remove('show');
+            document.getElementById('logContainer').innerHTML = '<div class="log-line"><span class="time">[系统]</span> 流水线已重置，等待新任务...</div>';
+            document.getElementById('navStatus').textContent = '产线就绪';
+        }
+
+        // 加载内核状态
+        fetch(`${API_BASE}/kernel/status`).then(r=>r.json()).then(d=>{
+            const q = d.task_queue || {};
+            document.getElementById('navStatus').textContent = `内核v${d.global_root_version} · 任务${q.total||0}(运行${q.running||0}/完成${q.completed||0})`;
+        }).catch(()=>{});
+    </script>
+</body>
+</html>

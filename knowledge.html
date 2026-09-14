@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域知识图谱 | 火斗云智AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#e5e7eb;font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.hero{text-align:center;padding:40px 20px 30px;margin-bottom:30px;background:linear-gradient(180deg,rgba(212,175,55,0.08),transparent);border-radius:16px;border:1px solid rgba(212,175,55,0.15)}
+.hero h1{font-size:32px;font-weight:800;margin-bottom:10px;background:linear-gradient(90deg,#D4AF37,#F4E4BC,#D4AF37);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:14px;color:#9ca3af;max-width:700px;margin:0 auto}
+.hero-anchor{font-size:11px;color:#D4AF37;letter-spacing:2px;margin-top:12px}
+.section{margin-bottom:30px}
+.section-title{font-size:18px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#D4AF37}
+.section-title::before{content:"";width:4px;height:22px;background:linear-gradient(180deg,#D4AF37,#8B6914);border-radius:2px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s}
+.card:hover{border-color:rgba(212,175,55,0.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.1)}
+.card-icon{font-size:32px;margin-bottom:10px}
+.card-title{font-size:15px;font-weight:600;color:#D4AF37;margin-bottom:8px}
+.card-desc{font-size:12px;color:#9ca3af;line-height:1.7}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{font-size:10px;padding:3px 10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);border-radius:12px;color:#D4AF37}
+.timeline{position:relative;padding-left:30px}
+.timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#D4AF37,#8B6914)}
+.timeline-item{position:relative;margin-bottom:20px}
+.timeline-item::before{content:"";position:absolute;left:-26px;top:6px;width:12px;height:12px;border-radius:50%;background:#D4AF37;border:2px solid #0a0e17}
+.timeline-title{font-size:14px;font-weight:600;color:#D4AF37;margin-bottom:4px}
+.timeline-desc{font-size:12px;color:#9ca3af;line-height:1.6}
+.formula-box{background:rgba(212,175,55,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:16px;margin:12px 0;font-family:'Courier New',monospace;font-size:13px;color:#F4E4BC;overflow-x:auto}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.15);border-radius:10px;padding:16px;text-align:center}
+.stat-value{font-size:28px;font-weight:700;color:#D4AF37;margin-bottom:4px}
+.stat-label{font-size:11px;color:#6b7280}
+.footer{text-align:center;padding:30px 20px;border-top:1px solid rgba(212,175,55,0.15);margin-top:40px}
+.footer-text{font-size:11px;color:#6b7280}
+.footer-anchor{font-size:10px;color:#D4AF37;margin-top:8px;letter-spacing:1px}
+
+.graph-container{width:100%;height:500px;background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.15);border-radius:12px;position:relative;overflow:hidden}
+.node{position:absolute;width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;text-align:center;cursor:pointer;transition:all .3s;border:2px solid rgba(212,175,55,0.3)}
+.node:hover{transform:scale(1.1);border-color:#D4AF37;box-shadow:0 0 20px rgba(212,175,55,0.5)}
+.edge{position:absolute;height:2px;background:linear-gradient(90deg,rgba(212,175,55,0.3),rgba(212,175,55,0.1));transform-origin:left center;z-index:0}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="实体关系抽取，知识关联可视化，跨域知识融合。五大实体类型（人物/事件/概念/产品/文档），五种关系类型（因果/从属/时序/相似/对立），四大知识域（政务/短剧/技术/真值），知识检索与推理。">
+<meta name="keywords" content="知识图谱,实体关系抽取,知识关联,跨域融合,知识推理,语义检索,政务知识,短剧知识,技术知识">
+<meta property="og:title" content="全域知识图谱 | 火斗云智AIOS">
+<meta property="og:description" content="实体关系抽取，知识关联可视化，跨域知识融合。五大实体类型（人物/事件/概念/产品/文档），五种关系类型（因果/从属/时序/相似/对立），四大知识域（政务/短剧/技术/真值），知识检索与推理。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/knowledge.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="全域知识图谱 | 火斗云智AIOS">
+<meta name="twitter:description" content="实体关系抽取，知识关联可视化，跨域知识融合。五大实体类型（人物/事件/概念/产品/文档），五种关系类型（因果/从属/时序/相似/对立），四大知识域（政务/短剧/技术/真值），知识检索与推理。">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div id="site-nav"></div>
+<noscript><div style="background:#0b0e14;color:#c9a227;padding:10px 24px;border-bottom:1px solid #232a3a;font-size:13px"><a href="/" style="color:#e6c75a;margin-right:14px">首页</a><a href="/architecture.html" style="color:#aaa;margin-right:14px">架构</a><a href="/engines.html" style="color:#aaa;margin-right:14px">引擎</a><a href="/products.html" style="color:#aaa;margin-right:14px">产品</a><a href="/governance.html" style="color:#aaa;margin-right:14px">治理</a><a href="/assets/visual/pricing-v1.html" style="color:#aaa;margin-right:14px">定价</a><a href="/trial.html" style="color:#aaa;margin-right:14px">试用</a><a href="/auto-ops.html" style="color:#aaa">闭环控制台</a></div></noscript>
+
+
+
+
+<!-- 火斗云智AIOS Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">自治部署平台</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/philosophy.html" style="color:#D4AF37;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px;background:rgba(212,175,55,0.1)">思想</a>
+      <a href="/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/products.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/docs.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h1>🕸️ 全域知识图谱</h1>
+    <p>实体关系抽取 · 知识关联可视化 · 跨域知识融合 · 从碎片化信息到结构化知识体系</p>
+    <div class="hero-anchor">知识就是力量 · 图谱让知识互联</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">5类</div><div class="stat-label">实体类型</div></div>
+    <div class="stat-card"><div class="stat-value">5种</div><div class="stat-label">关系类型</div></div>
+    <div class="stat-card"><div class="stat-value">4个</div><div class="stat-label">向量集合</div></div>
+    <div class="stat-card"><div class="stat-value">669</div><div class="stat-label">总资产数</div></div>
+    <div class="stat-card"><div class="stat-value">167</div><div class="stat-label">真值条目</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌐 知识图谱可视化</div>
+    <div class="graph-container" id="graph">
+      <div class="edge" style="left:20%;top:30%;width:20%;transform:rotate(15deg)"></div>
+      <div class="edge" style="left:40%;top:30%;width:20%;transform:rotate(-15deg)"></div>
+      <div class="edge" style="left:20%;top:60%;width:20%;transform:rotate(-15deg)"></div>
+      <div class="edge" style="left:40%;top:60%;width:20%;transform:rotate(15deg)"></div>
+      <div class="edge" style="left:30%;top:45%;width:15%;transform:rotate(90deg)"></div>
+      <div class="node" style="left:10%;top:20%;background:linear-gradient(135deg,#D4AF37,#8B6914)">火斗云智</div>
+      <div class="node" style="left:35%;top:15%;background:linear-gradient(135deg,#8B5CF6,#6D28D9)">火斗云智AIOS</div>
+      <div class="node" style="left:60%;top:20%;background:linear-gradient(135deg,#3B82F6,#1D4ED8)">SM-BS流形</div>
+      <div class="node" style="left:10%;top:55%;background:linear-gradient(135deg,#10B981,#047857)">因果奇点</div>
+      <div class="node" style="left:35%;top:50%;background:linear-gradient(135deg,#EF4444,#B91C1C)">CTE闭环</div>
+      <div class="node" style="left:60%;top:55%;background:linear-gradient(135deg,#F59E0B,#D97706)">七层架构</div>
+      <div class="node" style="left:35%;top:75%;background:linear-gradient(135deg,#EC4899,#BE185D)">算子化架构</div>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:11px;color:#6b7280">点击节点查看详情 · 知识图谱持续扩展中</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏷️ 五大实体类型</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">👤</div><div class="card-title">人物实体</div><div class="card-desc">历史人物、神话角色、技术专家、组织成员等人物实体。九天玄女、女娲、烛龙、月神、真武大帝、伏羲等。</div></div>
+      <div class="card"><div class="card-icon">📋</div><div class="card-title">事件实体</div><div class="card-desc">历史事件、技术里程碑、产品发布、架构演进等事件实体。从V1.0到V9.11的完整演进历程。</div></div>
+      <div class="card"><div class="card-icon">💡</div><div class="card-title">概念实体</div><div class="card-desc">理论概念、技术术语、架构模式、算法模型等概念实体。火斗云智、SM-BS、因果奇点、HLC等。</div></div>
+      <div class="card"><div class="card-icon">📦</div><div class="card-title">产品实体</div><div class="card-desc">软件产品、技术服务、API接口、工具平台等产品实体。政务AI、短剧流水线、AIOS、向量库等。</div></div>
+      <div class="card"><div class="card-icon">📜</div><div class="card-title">文档实体</div><div class="card-desc">技术白皮书、API文档、研究论文、协议规范等文档实体。20+篇技术白皮书，33+API文档。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔗 五种关系类型</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">➡️</div><div class="card-title">因果关系</div><div class="card-desc">A导致B，因果链溯源，奇点识别，收敛路径规划。第七维因果域理论支撑。</div></div>
+      <div class="card"><div class="card-icon">📂</div><div class="card-title">从属关系</div><div class="card-desc">A属于B，层级归属，分类体系，组织架构。七层完备架构的层级从属关系。</div></div>
+      <div class="card"><div class="card-icon">⏰</div><div class="card-title">时序关系</div><div class="card-desc">A先于B，时间先后，演进历程，版本迭代。V1.0→V9.11完整时间线。</div></div>
+      <div class="card"><div class="card-icon">🔄</div><div class="card-title">相似关系</div><div class="card-desc">A相似于B，语义相似度，概念关联，类比推理。2560维语义向量计算。</div></div>
+      <div class="card"><div class="card-icon">⚔️</div><div class="card-title">对立关系</div><div class="card-desc">A对立于B，矛盾冲突，阴阳对立，辩证统一。元秩序层与源序层的对立统一。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧠 知识图谱引擎技术实现</div>
+    <div class="card">
+      <div class="card-title">entity_relation_extractor.py + kg_full_extractor.py</div>
+      <div class="card-desc">
+        <strong>实体关系抽取引擎：</strong>从非结构化文本中自动抽取实体(人/事/物/概念)与关系(因果/从属/时序/相似/对立)，构建知识图谱三元组。<br><br>
+        <strong>核心能力：</strong><br>
+        • 命名实体识别(NER)<br>
+        • 关系抽取与分类<br>
+        • 三元组存储(主语-谓语-宾语)<br>
+        • 跨文档实体归一化<br>
+        • 实体属性冲突检测<br>
+        • 知识图谱可视化导出<br><br>
+        <strong>技术规格：</strong>entity_relation_extractor.py 11.4KB，kg_full_extractor.py 13.3KB，支持批量处理与增量更新。
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📚 四大知识域</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">🏛️</div><div class="card-title">政务知识域</div><div class="card-desc">政策法规、公文模板、政务流程、治理架构、合规规则。国家主权根治理知识体系。</div></div>
+      <div class="card"><div class="card-icon">🎬</div><div class="card-title">短剧知识域</div><div class="card-desc">剧本结构、角色设定、视觉基准、分镜脚本、渲染参数。昆仑洞天短剧全链路知识。</div></div>
+      <div class="card"><div class="card-icon">🔬</div><div class="card-title">技术知识域</div><div class="card-desc">架构设计、核心引擎、算子库、API接口、运维手册。火斗云智AIOS完整技术体系。</div></div>
+      <div class="card"><div class="card-icon">💎</div><div class="card-title">真值知识域</div><div class="card-desc">元宪法、元公理、元法则、元规则、核心真值。经过交叉验证的高置信度知识。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔍 知识检索与推理</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">🔎</div><div class="card-title">语义检索</div><div class="card-desc">2560维高维向量语义召回，精准匹配知识资源，语义相似度计算，智能推荐相关知识。</div></div>
+      <div class="card"><div class="card-icon">🧩</div><div class="card-title">知识推理</div><div class="card-desc">基于知识图谱的多跳推理，路径发现，关联预测，缺失知识补全，链接预测。</div></div>
+      <div class="card"><div class="card-icon">📊</div><div class="card-title">知识可视化</div><div class="card-desc">知识图谱可视化展示，实体关系网络图，知识域分布统计，知识演进时间线。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🚀 知识图谱演进路线</div>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-title">阶段一：实体关系抽取</div><div class="timeline-desc">从非结构化文本中自动抽取实体和关系，构建基础知识图谱三元组。</div></div>
+      <div class="timeline-item"><div class="timeline-title">阶段二：跨域知识融合</div><div class="timeline-desc">政务/短剧/技术/真值四大知识域融合，跨文档实体归一化，知识冲突消解。</div></div>
+      <div class="timeline-item"><div class="timeline-title">阶段三：知识推理引擎</div><div class="timeline-desc">基于知识图谱的多跳推理，链接预测，缺失知识补全，知识发现。</div></div>
+      <div class="timeline-item"><div class="timeline-title">阶段四：全域知识中台</div><div class="timeline-desc">开放知识图谱API，构建知识开发者生态，让更多应用接入全域知识体系。</div></div>
+    </div>
+  </div>
+
+</div>
+<div class="footer">
+  <div class="footer-text">火斗云智AIOS · 全域知识图谱 · 实体关系抽取 · 跨域知识融合 · 知识推理</div>
+  <div class="footer-anchor">Ω₀⊂⊙∞⊂Ω · 知识资产全域溯源确权 · 永久锁档</div>
+</div>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+<script src="/assets/js/site-nav.js" defer></script>
+</body>
+</html>

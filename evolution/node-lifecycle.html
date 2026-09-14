@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同源节点全生命周期 | 火斗云智AIOS</title>
+<link rel="canonical" href="https://www.huodouai.com/evolution/node-lifecycle.html">
+<style>
+:root{--gold:#d4af37;--jade:#4a9d7e;--amber:#c9a84c;--ink:#0d1117;--ink2:#161b22;--card:#1b2330;--text:#e6edf3;--dim:#9ca3af;--line:rgba(212,175,55,.16)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--ink);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7}
+.navbar{background:rgba(22,27,34,.94);border-bottom:1px solid var(--line);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.nav-left{display:flex;align-items:center;gap:12px}
+.nav-logo{width:38px;height:38px;background:linear-gradient(135deg,#f0b429,#d4880f);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#0d1117;font-size:1.1em}
+.nav-title{font-weight:700;letter-spacing:1px}
+.nav-title span{color:var(--gold)}
+.nav-right{display:flex;gap:16px;flex-wrap:wrap}
+.nav-right a{color:var(--dim);text-decoration:none;font-size:.9em;padding:4px 10px;border-radius:8px;transition:.3s}
+.nav-right a:hover{color:var(--gold);background:rgba(212,175,55,.08)}
+.nav-right a.hl{color:var(--gold);border:1px solid var(--line)}
+.hero{text-align:center;padding:64px 20px 26px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -10%,rgba(212,175,55,.15),transparent 60%);pointer-events:none}
+.hero .kicker{color:var(--jade);letter-spacing:6px;font-size:.85em;margin-bottom:12px}
+.hero h1{font-size:2.1em;color:var(--gold);letter-spacing:4px;margin-bottom:12px}
+.hero p{color:var(--dim);font-size:1em;max-width:780px;margin:0 auto}
+.section{max-width:1120px;margin:0 auto;padding:40px 24px}
+.section-title{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.section-title .bar{width:4px;height:26px;background:linear-gradient(180deg,var(--gold),transparent);border-radius:2px}
+.section-title h2{font-size:1.35em;color:var(--gold);letter-spacing:3px}
+.section-title .sub{color:var(--dim);font-size:.85em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px}
+/* 生命周期主图 */
+.lifecycle{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:30px 20px 20px;overflow-x:auto}
+.lc-row{display:flex;align-items:stretch;gap:8px;min-width:880px;justify-content:center}
+.lc-node{flex:1;background:linear-gradient(180deg,rgba(212,175,55,.08),transparent);border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center;position:relative;transition:.3s}
+.lc-node:hover{border-color:var(--gold);transform:translateY(-2px)}
+.lc-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#f0b429,#d4880f);color:#0d1117;font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.lc-node h4{color:#f0d9a8;font-size:.95em;margin-bottom:5px}
+.lc-node p{color:var(--dim);font-size:.72em;line-height:1.5}
+.lc-arrow{display:flex;align-items:center;color:var(--gold);font-size:1.1em;padding:0 2px;flex-shrink:0}
+.lc-loop{text-align:center;color:var(--jade);font-size:.8em;letter-spacing:2px;margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+/* 阶段卡片 */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card h3{color:#f0d9a8;font-size:1em;margin-bottom:8px}
+.card .tag{font-size:.72em;letter-spacing:1px;padding:2px 10px;border-radius:20px;display:inline-block;margin-bottom:10px}
+.tag.done{color:var(--jade);border:1px solid rgba(74,157,126,.4)}
+.tag.new{color:var(--gold);border:1px solid var(--line)}
+.card code{display:block;background:#0d1117;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.72em;color:#7ee0c0;margin:6px 0;word-break:break-all}
+.card p{color:var(--dim);font-size:.83em}
+.card li{color:var(--dim);font-size:.82em;margin-left:18px}
+.card ul{margin:6px 0}
+.card .kv{font-size:.76em;color:var(--dim);border-top:1px solid rgba(212,175,55,.1);margin-top:10px;padding-top:8px}
+.kv b{color:var(--amber);font-weight:600}
+/* 铁律 */
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rule{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:.85em}
+.rule .n{color:var(--gold);font-weight:800;flex-shrink:0}
+.footer{text-align:center;padding:40px 20px;color:var(--dim);font-size:.85em;border-top:1px solid var(--line)}
+.footer .trace{color:var(--gold);letter-spacing:2px;margin-bottom:8px}
+@media(max-width:820px){.grid3{grid-template-columns:1fr}.rules{grid-template-columns:1fr}.hero h1{font-size:1.5em}.navbar{padding:12px 16px}}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="nav-logo">火</div>
+    <div><div class="nav-title">火斗云智<span>AIOS</span></div><div style="font-size:.75em;color:var(--dim)">同源节点全生命周期</div></div>
+  </div>
+  <div class="nav-right">
+    <a href="/">返回官网</a>
+    <a href="/evolution/index.html">集体进化</a>
+    <a href="/evolution/whitepaper.html" class="hl">技术白皮书</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="kicker">NODE LIFECYCLE</div>
+  <h1>同源节点全生命周期</h1>
+  <p>一个节点从注册到持续进化，走完整条闭环：注册身份 → 获取凭证 → 双向同步 → 指令执行 → 素材归档 → 实时推送 → 进化对账。全程可审计、可追溯。</p>
+</div>
+
+<div class="section">
+  <div class="section-title"><div class="bar"></div><h2>生命周期闭环</h2><div class="sub">七阶段 · 持续循环</div></div>
+  <div class="lifecycle">
+    <div class="lc-row">
+      <div class="lc-node"><div class="lc-num">1</div><h4>注册身份</h4><p>POST /api/gateway/node/register<br>主Token换节点凭证</p></div>
+      <div class="lc-arrow">→</div>
+      <div class="lc-node"><div class="lc-num">2</div><h4>获取凭证</h4><p>节点Token独立下发<br>与主Token完全隔离</p></div>
+      <div class="lc-arrow">→</div>
+      <div class="lc-node"><div class="lc-num">3</div><h4>双向同步</h4><p>拉取记忆 truths<br>上报真值 synced:1</p></div>
+      <div class="lc-arrow">→</div>
+      <div class="lc-node"><div class="lc-num">4</div><h4>指令执行</h4><p>POST /api/command/exec<br>白名单+签名防注入</p></div>
+      <div class="lc-arrow">→</div>
+      <div class="lc-node"><div class="lc-num">5</div><h4>素材归档</h4><p>POST /api/upload<br>本地磁盘→作品库</p></div>
+      <div class="lc-arrow">→</div>
+      <div class="lc-node"><div class="lc-num">6</div><h4>实时推送</h4><p>飞书内核群+webhook<br>事件队列兜底</p></div>
+      <div class="lc-arrow">→</div>
+      <div class="lc-node"><div class="lc-num">7</div><h4>进化对账</h4><p>对照中枢成果<br>防重复开发</p></div>
+    </div>
+    <div class="lc-loop">↻ 每次任务重复 3→7 · 持续循环 · 永续进化</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><div class="bar"></div><h2>阶段速查</h2><div class="sub">全部端点 · 已实测上线</div></div>
+  <div class="grid3">
+    <div class="card">
+      <span class="tag new">STAGE 1-2 · 身份</span>
+      <h3>注册与凭证</h3>
+      <code>POST /api/gateway/node/register<br>{"node_id","DID","webhook?"}</code>
+      <ul><li>幂等：重复注册返回 existing</li><li>webhook 可选，注册即记账审计</li></ul>
+      <div class="kv"><b>验证</b>：local-dev-001 注册成功，节点Token公网可上报</div>
+    </div>
+    <div class="card">
+      <span class="tag done">STAGE 3 · 同步</span>
+      <h3>记忆对账</h3>
+      <code>GET /api/gateway/truths?level=public<br>POST /api/gateway/report</code>
+      <ul><li>拉取中枢最新规则与成果</li><li>上报必须 synced:1 才算入库</li></ul>
+      <div class="kv"><b>验证</b>：真值总数 3100+，公网可读可写</div>
+    </div>
+    <div class="card">
+      <span class="tag done">STAGE 4 · 指令</span>
+      <h3>中枢指令执行</h3>
+      <code>POST /api/command/exec<br>{"command","argv","timeout"}</code>
+      <ul><li>命令白名单：date/echo/uptime/df/free/whoami/pwd/ls/git/tail/head</li><li>底层 COMM-PROTO：签名+防重放+审计</li></ul>
+      <div class="kv"><b>验证</b>：节点Token执行成功，越权rm被403拒绝</div>
+    </div>
+    <div class="card">
+      <span class="tag new">STAGE 5 · 归档</span>
+      <h3>素材入库作品库</h3>
+      <code>POST /api/upload<br>file + bucket + subdir</code>
+      <ul><li>本地磁盘 → 展示层 → 作品库自动登记</li><li>幂等去重，文件名防隐藏字符</li></ul>
+      <div class="kv"><b>验证</b>：节点Token上传自动入库，公网200</div>
+    </div>
+    <div class="card">
+      <span class="tag new">STAGE 6 · 推送</span>
+      <h3>实时推送广播</h3>
+      <code>POST /api/gateway/notify<br>GET /api/gateway/events</code>
+      <ul><li>飞书内核群 → 节点webhook → 事件队列</li><li>入库成功自动推送内核群</li></ul>
+      <div class="kv"><b>验证</b>：飞书推送 code:0，事件拉取正常</div>
+    </div>
+    <div class="card">
+      <span class="tag done">STAGE 7 · 进化</span>
+      <h3>进化对账闭环</h3>
+      <code>拉取记忆 → 对照 → 上报 → 复用</code>
+      <ul><li>已跑通的不重复开发</li><li>成果/反例/验证均上报为真值</li></ul>
+      <div class="kv"><b>验证</b>：SOP/反例/验证结果全部入库共享</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><div class="bar"></div><h2>五条铁律</h2><div class="sub">生命周期运行的底线</div></div>
+  <div class="rules">
+    <div class="rule"><span class="n">壹</span><span>不把完整主Token写入文档或消息——经握手向中枢申请下发</span></div>
+    <div class="rule"><span class="n">贰</span><span>未经授权不修改云端其他子系统——只走本SOP通道</span></div>
+    <div class="rule"><span class="n">叁</span><span>上报必带 DID 与溯源符号，确保可审计</span></div>
+    <div class="rule"><span class="n">肆</span><span>重复开发是最大浪费——先对账，再动手</span></div>
+    <div class="rule"><span class="n">伍</span><span>试错与规避路径同样是真值，必须上报</span></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="trace">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · ZONGYUAN-ROOT</div>
+  <div>同源节点全生命周期 SOP V1.0 · 2026-09-13 · 火斗云智 AIOS</div>
+</div>
+</body>
+</html>

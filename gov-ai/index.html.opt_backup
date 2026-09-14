@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>政务AI服务平台 V4.0</title>
+<link rel="stylesheet" href="css/gov-main.css">
+
+<!-- ============ 政务中台算子库 V3.2.0（17算子）============ -->
+<script src="js/operators/gov_api_operator.js"></script>
+<script>
+// ============ V2.0 答案反馈 ============
+function submitFeedback(query, type, btn){
+  // 取消同组其他按钮的active
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.feedback-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // 同时记录答案质量评分
+  var qualityScore = type === 'thumbs_up' ? 90 : 30;
+  fetch(GOV_API_BASE+'/api/gov/evolution/v2/quality/record', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({query: query, answer: '', score: qualityScore, source:'user_feedback'})
+  }).catch(()=>{});
+  fetch(GOV_API_BASE+'/api/gov/evolution/v2/feedback/record', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({query: query, type: type, comment: ''})
+  }).catch(()=>{});
+  showToast(type === 'thumbs_up' ? '感谢反馈！' : '已记录，我们会改进');
+}
+
+// ============ V2.0 预约评价 ============
+function rateAppointment(id, rating){
+  fetch(GOV_API_BASE+'/api/gov/user-actions/record', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({user_id:getUserId(), action_type:'rate', target_id:id, target_type:'appointment', metadata:{rating:rating}})
+  }).then(()=>{
+    showToast('感谢您的评价！'+rating+'星');
+  }).catch(()=>{});
+}
+
+// ============ 搜索体验增强 V1.0 ============
+const HOT_SEARCHES = [
+  {keyword: '社保缴费', count: 1286},
+  {keyword: '医保报销', count: 1024},
+  {keyword: '户口迁移', count: 892},
+  {keyword: '公积金提取', count: 756},
+  {keyword: '小学入学', count: 689},
+  {keyword: '身份证补办', count: 612},
+  {keyword: '营业执照', count: 543},
+  {keyword: '低保申请', count: 478},
+  {keyword: '失业金', count: 421},
+  {keyword: '养老金', count: 389}
+];
+
+function getSearchHistory() {
+  try { return JSON.parse(localStorage.getItem('gov_search_history') || '[]'); }
+  catch { return []; }
+}
+
+function addSearchHistory(keyword) {
+  if (!keyword || keyword.trim().length < 1) return;
+  let history = getSearchHistory();
+  history = history.filter(k => k !== keyword);
+  history.unshift(keyword);
+  if (history.length > 10) history = history.slice(0, 10);
+  localStorage.setItem('gov_search_history', JSON.stringify(history));
+}
+
+function clearSearchHistory() {
+  localStorage.removeItem('gov_search_history');
+  document.getElementById('searchHistory').style.display = 'none';
+}
+
+function showSearchPanel() {
+  showHotSearches();
+  showSearchHistory();
+}
+
+function showHotSearches() {
+  const container = document.getElementById('hotSearches');
+  if (!container) return;
+  const input = document.getElementById('searchInput');
+  if (input && input.value.length > 0) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'flex';
+  let html = '<span style="font-size:13px;color:#6b7280;align-self:center;margin-right:8px">🔥 热门搜索:</span>';
+  HOT_SEARCHES.slice(0, 6).forEach((item, i) => {
+    html += '<div class="hot-search-tag" onclick="doSearch(\'' + item.keyword + '\')"><span class="rank">' + (i+1) + '</span>' + item.keyword + '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function showSearchHistory() {
+  const container = document.getElementById('searchHistory');
+  const tags = document.getElementById('searchHistoryTags');
+  if (!container || !tags) return;
+  const history = getSearchHistory();
+  if (history.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'block';
+  tags.innerHTML = history.map(k => '<span class="history-tag" onclick="doSearch(\'' + k + '\')">' + k + '</span>').join('');
+}
+
+function handleSearchInput(value) {
+  const panel = document.getElementById('searchSuggestions');
+  if (!panel) return;
+  if (!value || value.trim().length < 1) {
+    panel.classList.remove('show');
+    showHotSearches();
+    showSearchHistory();
+    return;
+  }
+  document.getElementById('hotSearches').style.display = 'none';
+  document.getElementById('searchHistory').style.display = 'none';
+  
+  // 生成联想建议
+  const suggestions = [];
+  HOT_SEARCHES.forEach(item => {
+    if (item.keyword.includes(value) || value.includes(item.keyword.substring(0, 2))) {
+      suggestions.push({text: item.keyword, type: '热门'});
+    }
+  });
+  
+  // 政策标题匹配
+  if (window._policiesCache) {
+    window._policiesCache.forEach(p => {
+      if (p.title && p.title.includes(value) && suggestions.length < 8) {
+        suggestions.push({text: p.title, type: '政策'});
+      }
+    });
+  }
+  
+  if (suggestions.length === 0) {
+    suggestions.push({text: '搜索 "' + value + '"', type: '全部'});
+  }
+  
+  let html = '';
+  suggestions.slice(0, 6).forEach(s => {
+    html += '<div class="suggestion-item" onmousedown="doSearch(\'' + s.text.replace(/'/g, "\\'") + '\')"><span class="icon">🔍</span><span>' + s.text + '</span><span class="type">' + s.type + '</span></div>';
+  });
+  panel.innerHTML = html;
+  panel.classList.add('show');
+}
+
+function hideSearchSuggestions() {
+  const panel = document.getElementById('searchSuggestions');
+  if (panel) panel.classList.remove('show');
+}
+
+function doSearch(keyword) {
+  const input = document.getElementById('searchInput');
+  if (input) input.value = keyword;
+  addSearchHistory(keyword);
+  hideSearchSuggestions();
+  // 触发原搜索逻辑
+  if (typeof searchPolicies === 'function') searchPolicies();
+  if (typeof performSearch === 'function') performSearch();
+}
+
+
+function exportDocToWord(){
+  const text = document.getElementById('docResult').textContent;
+  if(!text || text.trim()===''){ alert('暂无公文内容可导出'); return; }
+  const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><style>body{font-family:SimSun,serif;font-size:16px;line-height:1.8}p{text-indent:2em;margin:8px 0}.title{text-align:center;font-size:22px;font-weight:bold;margin:20px 0}</style>
+</body></html>';
+  const blob = new Blob(['\ufeff' + html], {type:'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '政务公文_' + new Date().toISOString().slice(0,10) + '.doc';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  if(typeof showToast === 'function') showToast('公文已导出为Word文档');
+}
+</script>
+<!-- 骨架屏样式 -->
+<style>
+#skeleton-loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0f;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s ease;}
+#skeleton-loader.hidden{opacity:0;pointer-events:none;}
+.skeleton-header{width:80%;max-width:600px;margin-bottom:24px;}
+.skeleton-title{height:28px;background:linear-gradient(90deg,#1a1a2e 25%,#2a2a3e 50%,#1a1a2e 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:6px;margin-bottom:12px;width:60%;}
+.skeleton-subtitle{height:14px;background:linear-gradient(90deg,#1a1a2e 25%,#2a2a3e 50%,#1a1a2e 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:4px;width:40%;}
+.skeleton-cards{display:flex;gap:16px;width:80%;max-width:600px;margin-bottom:24px;flex-wrap:wrap;justify-content:center;}
+.skeleton-card{flex:1;min-width:120px;max-width:180px;height:100px;background:linear-gradient(90deg,#11111a 25%,#1a1a2e 50%,#11111a 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:10px;border:1px solid #2a2a3e;}
+.skeleton-content{width:80%;max-width:600px;}
+.skeleton-line{height:12px;background:linear-gradient(90deg,#11111a 25%,#1a1a2e 50%,#11111a 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:4px;margin-bottom:10px;}
+.skeleton-line:nth-child(1){width:100%}
+.skeleton-line:nth-child(2){width:85%}
+.skeleton-line:nth-child(3){width:92%}
+.skeleton-line:nth-child(4){width:70%}
+.skeleton-line:nth-child(5){width:88%}
+.skeleton-logo{font-size:32px;margin-bottom:16px;animation:skeleton-pulse 2s infinite;}
+.skeleton-text{color:#666;font-size:13px;margin-top:20px;font-family:monospace;}
+@keyframes skeleton-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes skeleton-pulse{0%,100%{opacity:1}50%{opacity:.5}}
+</style>
+
+
+<!-- 亮色主题样式 -->
+<style>
+/* 亮色主题变量覆盖 */
+body.light-theme {
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --primary: #1a73e8;
+  --primary-light: #e8f0fe;
+  --gold: #b8860b;
+  --text: #202124;
+  --text2: #5f6368;
+  --text3: #9aa0a6;
+  --border: #e0e0e0;
+  --success: #34a853;
+  --danger: #ea4335;
+  --warning: #fbbc04;
+  background: var(--bg);
+  color: var(--text);
+}
+body.light-theme .card,
+body.light-theme .modal-content,
+body.light-theme .panel,
+body.light-theme .workflow-container,
+body.light-theme .wf-editor,
+body.light-theme .wf-toolbar,
+body.light-theme .wf-palette,
+body.light-theme .wf-properties,
+body.light-theme .wf-log,
+body.light-theme .wf-node,
+body.light-theme .stat-card,
+body.light-theme .agent-card,
+body.light-theme .chat-message,
+body.light-theme .policy-item,
+body.light-theme .guide-item {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--text);
+}
+body.light-theme .btn,
+body.light-theme button {
+  color: var(--text2);
+}
+body.light-theme .btn-primary,
+body.light-theme button.primary {
+  background: var(--primary);
+  color: #fff;
+}
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea {
+  background: #fff;
+  border-color: var(--border);
+  color: var(--text);
+}
+body.light-theme .nav-item,
+body.light-theme .tab-item {
+  color: var(--text2);
+}
+body.light-theme .nav-item.active,
+body.light-theme .tab-item.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+/* 主题切换按钮 */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10000;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+/* 主题切换过渡 */
+body, .card, .panel, .modal-content {
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+}
+</style>
+
+
+<!-- 新手引导样式 -->
+<style>
+.guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 99998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.guide-overlay.active {
+  display: flex;
+}
+.guide-modal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #d4af37;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(212, 175, 55, 0.2);
+  animation: guideFadeIn .4s ease;
+}
+@keyframes guideFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.guide-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: guideBounce 2s infinite;
+}
+@keyframes guideBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.guide-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #d4af37;
+  margin-bottom: 12px;
+}
+.guide-desc {
+  font-size: 14px;
+  color: #aaa;
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+.guide-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.guide-feature {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12px;
+  color: #ccc;
+}
+.guide-feature .icon {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 4px;
+}
+.guide-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.guide-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #333;
+  transition: all .3s;
+}
+.guide-dot.active {
+  background: #d4af37;
+  width: 24px;
+  border-radius: 4px;
+}
+.guide-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.guide-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: transparent;
+  color: #aaa;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.guide-btn:hover {
+  border-color: #d4af37;
+  color: #d4af37;
+}
+.guide-btn.primary {
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  color: #000;
+  border: none;
+  font-weight: 600;
+}
+.guide-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+.guide-skip {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 20px;
+  cursor: pointer;
+}
+.guide-skip:hover {
+  color: #d4af37;
+}
+</style>
+
+    <link rel="canonical" href="https://huodouai.comgov-ai/">
+</head><body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+
+<!-- 加载骨架屏 -->
+<div id="skeleton-loader">
+  <div class="skeleton-logo">⚡</div>
+  <div class="skeleton-header">
+    <div class="skeleton-title"></div>
+    <div class="skeleton-subtitle"></div>
+  </div>
+  <div class="skeleton-cards">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </div>
+  <div class="skeleton-content">
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+  </div>
+  <div class="skeleton-text">ZONGYUAN-ROOT · 政务中台加载中...</div>
+</div>
+<script>
+// 骨架屏控制
+window.hideSkeleton = function() {
+  const loader = document.getElementById('skeleton-loader');
+  if (loader) {
+    loader.classList.add('hidden');
+    setTimeout(() => { if(loader.parentNode) loader.parentNode.removeChild(loader); }, 500);
+  }
+};
+// 页面加载完成后隐藏骨架屏
+if (document.readyState === 'complete') {
+  setTimeout(window.hideSkeleton, 300);
+} else {
+  window.addEventListener('load', () => setTimeout(window.hideSkeleton, 300));
+}
+// 最长5秒后强制隐藏（防止卡住）
+setTimeout(window.hideSkeleton, 5000);
+</script>
+
+<!-- 主题切换 -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切换主题">🌙</button>
+<script>
+// 主题切换功能
+function getCurrentTheme() {
+  return localStorage.getItem('gov_theme') || 'dark';
+}
+function applyTheme(theme) {
+  const body = document.body;
+  const btn = document.getElementById('themeToggle');
+  if (theme === 'light') {
+    body.classList.add('light-theme');
+    if (btn) btn.textContent = '☀️';
+  } else {
+    body.classList.remove('light-theme');
+    if (btn) btn.textContent = '🌙';
+  }
+  localStorage.setItem('gov_theme', theme);
+}
+function toggleTheme() {
+  const current = getCurrentTheme();
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+}
+// 页面加载时应用保存的主题
+(function() {
+  const theme = getCurrentTheme();
+  if (theme === 'light') {
+    // 延迟应用，确保DOM加载完成
+    if (document.body) {
+      applyTheme('light');
+    } else {
+      document.addEventListener('DOMContentLoaded', () => applyTheme('light'));
+    }
+  }
+})();
+</script>
+
+<!-- 新手操作引导 -->
+<div class="guide-overlay" id="guideOverlay">
+  <div class="guide-modal">
+    <button class="guide-skip" onclick="closeGuide()">×</button>
+    <div class="guide-icon" id="guideIcon">🏛️</div>
+    <div class="guide-title" id="guideTitle">欢迎使用政务AI服务平台</div>
+    <div class="guide-desc" id="guideDesc">您的智能政务助手，提供政策查询、办事指南、智能问答、公文写作等一站式服务。</div>
+    <div class="guide-features" id="guideFeatures">
+      <div class="guide-feature"><span class="icon">📋</span>政策库<br>190+条最新政策</div>
+      <div class="guide-feature"><span class="icon">🧭</span>办事指南<br>110+条办事流程</div>
+      <div class="guide-feature"><span class="icon">🤖</span>智能问答<br>8个AI模型可选</div>
+      <div class="guide-feature"><span class="icon">✍️</span>公文写作<br>24种公文模板</div>
+    </div>
+    <div class="guide-progress" id="guideProgress">
+      <div class="guide-dot active"></div>
+      <div class="guide-dot"></div>
+      <div class="guide-dot"></div>
+      <div class="guide-dot"></div>
+    </div>
+    <div class="guide-buttons">
+      <button class="guide-btn" onclick="prevGuide()" id="guidePrev" style="display:none">上一步</button>
+      <button class="guide-btn primary" onclick="nextGuide()" id="guideNext">开始体验</button>
+    </div>
+  </div>
+</div>
+<script>
+// 新手操作引导
+const GUIDE_STEPS = [
+  {
+    icon: '🏛️',
+    title: '欢迎使用政务AI服务平台',
+    desc: '您的智能政务助手，提供政策查询、办事指南、智能问答、公文写作等一站式服务。',
+    features: [
+      {icon: '📋', title: '政策库', desc: '190+条最新政策'},
+      {icon: '🧭', title: '办事指南', desc: '110+条办事流程'},
+      {icon: '🤖', title: '智能问答', desc: '8个AI模型可选'},
+      {icon: '✍️', title: '公文写作', desc: '24种公文模板'}
+    ],
+    nextText: '开始体验'
+  },
+  {
+    icon: '🔍',
+    title: '智能搜索与问答',
+    desc: '在搜索框输入关键词，自动匹配政策、办事指南和常见问题。点击"智能问答"可与AI对话，获取个性化解答。',
+    features: [
+      {icon: '💡', title: '智能联想', desc: '输入即提示'},
+      {icon: '🔥', title: '热门搜索', desc: '高频问题推荐'},
+      {icon: '📜', title: '搜索历史', desc: '快速回顾'},
+      {icon: '🎯', title: '真值召回', desc: '答案有据可查'}
+    ],
+    nextText: '下一步'
+  },
+  {
+    icon: '📝',
+    title: '公文智能写作',
+    desc: '选择公文类型，输入主题，AI自动生成规范公文。支持请示、报告、通知、函等24种公文模板，一键复制使用。',
+    features: [
+      {icon: '📄', title: '24种模板', desc: '覆盖常用公文'},
+      {icon: '✨', title: 'AI润色', desc: '一键优化表达'},
+      {icon: '☁️', title: '云端保存', desc: '历史记录可查'},
+      {icon: '📋', title: '一键复制', desc: '方便粘贴使用'}
+    ],
+    nextText: '下一步'
+  },
+  {
+    icon: '🔗',
+    title: '可视化工作流编程',
+    desc: '拖拽节点搭建自动化工作流，支持政策分析、公文写作、数据处理等场景。4个专业模板一键应用，工作流云端保存。',
+    features: [
+      {icon: '🎨', title: '可视化编排', desc: '拖拽连线'},
+      {icon: '📚', title: '模板库', desc: '4个专业模板'},
+      {icon: '☁️', title: '云端持久化', desc: '跨设备同步'},
+      {icon: '▶️', title: '一键执行', desc: '自动运行'}
+    ],
+    nextText: '完成'
+  }
+];
+let currentGuideStep = 0;
+
+function showGuide() {
+  document.getElementById('guideOverlay').classList.add('active');
+  renderGuideStep(0);
+}
+function closeGuide() {
+  document.getElementById('guideOverlay').classList.remove('active');
+  localStorage.setItem('gov_guide_completed', 'true');
+}
+function renderGuideStep(step) {
+  currentGuideStep = step;
+  const s = GUIDE_STEPS[step];
+  document.getElementById('guideIcon').textContent = s.icon;
+  document.getElementById('guideTitle').textContent = s.title;
+  document.getElementById('guideDesc').textContent = s.desc;
+  document.getElementById('guideNext').textContent = s.nextText;
+  document.getElementById('guidePrev').style.display = step > 0 ? 'inline-block' : 'none';
+  // 进度点
+  const dots = document.querySelectorAll('.guide-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === step));
+  // 功能卡片
+  const featuresHtml = s.features.map(f =>
+    `<div class="guide-feature"><span class="icon">${f.icon}</span>${f.title}<br>${f.desc}</div>`
+  ).join('');
+  document.getElementById('guideFeatures').innerHTML = featuresHtml;
+}
+function nextGuide() {
+  if (currentGuideStep < GUIDE_STEPS.length - 1) {
+    renderGuideStep(currentGuideStep + 1);
+  } else {
+    closeGuide();
+  }
+}
+function prevGuide() {
+  if (currentGuideStep > 0) {
+    renderGuideStep(currentGuideStep - 1);
+  }
+}
+// 首次访问自动显示引导
+(function() {
+  if (!localStorage.getItem('gov_guide_completed')) {
+    if (document.readyState === 'complete') {
+      setTimeout(showGuide, 1500);
+    } else {
+      window.addEventListener('load', () => setTimeout(showGuide, 1500));
+    }
+  }
+})();
+// 暴露重新查看引导的函数
+window.showGuide = showGuide;
+</script>
+
+
+<script>
+async function cancelAppointment(apptId){
+  if(!confirm('确定要取消这个预约吗？')) return;
+  try {
+    await fetch(GOV_API_BASE+'/api/gov/appointments/update', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:apptId,status:'cancelled',user_id:getUserId()})});
+    alert('预约已取消');
+    if(typeof showAppointmentList === 'function') showAppointmentList();
+    if(typeof updateAppointmentCount === 'function') updateAppointmentCount();
+  } catch(e){ alert('取消失败，请稍后重试'); }
+}
+function getApptStatusText(status){
+  const map = {pending:'待确认',confirmed:'已确认',cancelled:'已取消',completed:'已完成'};
+  return map[status] || status || '待确认';
+}
+</script>
+<script src="js/operators/gov_user_operator.js"></script>
+<script src="js/operators/gov_modal_operator.js"></script>
+<script src="js/operators/gov_loading_operator.js"></script>
+<script src="js/operators/gov_audit_operator.js"></script>
+<script src="js/operators/gov_chat_operator.js"></script>
+<script src="js/operators/gov_policy_operator.js"></script>
+<script src="js/operators/gov_doc_operator.js"></script>
+<script src="js/operators/gov_guide_operator.js"></script>
+<script src="js/operators/gov_verification_operator.js"></script>
+<script src="js/operators/gov_compliance_operator.js"></script>
+<script src="js/operators/gov_review_operator.js"></script>
+<script src="js/operators/gov_policy_lifecycle_operator.js"></script>
+<script src="js/operators/gov_session_timeout_operator.js"></script>
+<script src="js/operators/gov_export_operator.js"></script>
+<script src="js/operators/gov_notification_operator.js"></script>
+<script src="js/operators/gov_analytics_operator.js"></script>
+<script src="js/operators/index.js"></script>
+<style>
+.faq-suggestions { padding: 8px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+.faq-title { font-size: 11px; color: #64748b; margin-bottom: 6px; }
+.faq-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.faq-item { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 5px 12px; font-size: 12px; color: #3b82f6; cursor: pointer; transition: all .2s; }
+.faq-item:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
+.faq-categories{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.faq-cat{padding:4px 12px;background:#f0f0f0;border-radius:12px;font-size:12px;cursor:pointer;transition:all .3s}
+.faq-cat.active{background:#1a1a2e;color:#ffd700}
+.chat-history-bar{display:flex;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid #eee}
+.history-btn{font-size:12px;color:#666;cursor:pointer;padding:4px 8px;border-radius:4px}
+.history-btn:hover{background:#f0f0f0;color:#333}
+.chat-history-panel{margin-top:8px;padding:12px;background:#f9f9f9;border-radius:8px;max-height:200px;overflow-y:auto}
+.history-title{font-size:13px;font-weight:600;margin-bottom:8px;color:#333}
+.history-item{padding:8px;background:#fff;border-radius:6px;margin-bottom:6px;font-size:12px;color:#666;cursor:pointer}
+.history-item:hover{background:#f0f0f0}
+.export-btn { background: linear-gradient(135deg,#10b981,#059669); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-left: 8px; }
+.export-btn:hover { opacity: .9; }
+.appt-actions { display: flex; gap: 8px; margin-top: 8px; }
+.appt-btn { padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; border: none; }
+.appt-btn.confirm { background: #10b981; color: white; }
+.appt-btn.cancel { background: #ef4444; color: white; }
+.appt-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; display: inline-block; }
+.appt-status.pending { background: #fef3c7; color: #92400e; }
+.appt-status.confirmed { background: #d1fae5; color: #065f46; }
+.appt-status.cancelled { background: #fee2e2; color: #991b1b; }
+
+.rag-references { margin-top: 12px; padding: 12px; background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px; border-left: 3px solid #ffd700; }
+.rag-ref-title { font-size: 13px; font-weight: 600; color: #ffd700; margin-bottom: 8px; }
+.rag-ref-list { display: flex; flex-direction: column; gap: 6px; }
+.rag-ref-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: rgba(255,255,255,0.05); border-radius: 6px; }
+.rag-ref-type { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; flex-shrink: 0; }
+.rag-ref-name { font-size: 12px; color: #e0e0e0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rag-ref-score { font-size: 11px; color: #888; flex-shrink: 0; }
+
+.pd-actions{display:flex;gap:12px;margin:16px 0;flex-wrap:wrap}
+.pd-action-btn{flex:1;min-width:120px;padding:12px 16px;border:none;border-radius:10px;font-size:14px;cursor:pointer;background:linear-gradient(135deg,#1a1a2e,#16213e);color:#ffd700;font-weight:600;transition:all .3s}
+.pd-action-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.pd-action-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.pd-action-btn.pd-voice{background:linear-gradient(135deg,#2d5016,#4a7c23)}
+.policy-image-loading{text-align:center;padding:20px;color:#666}
+.policy-image-result{text-align:center;margin-top:16px}
+.policy-image-result img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.policy-audio-player{margin-top:16px;padding:16px;background:#f8f9fa;border-radius:12px}
+.policy-audio-player audio{width:100%}
+</style>
+  <link rel="manifest" href="/gov-ai/manifest.json">
+  <meta name="theme-color" content="#1e293b">
+
+<!-- 骨架屏样式 -->
+<style>
+#skeleton-loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0f;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s ease;}
+#skeleton-loader.hidden{opacity:0;pointer-events:none;}
+.skeleton-header{width:80%;max-width:600px;margin-bottom:24px;}
+.skeleton-title{height:28px;background:linear-gradient(90deg,#1a1a2e 25%,#2a2a3e 50%,#1a1a2e 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:6px;margin-bottom:12px;width:60%;}
+.skeleton-subtitle{height:14px;background:linear-gradient(90deg,#1a1a2e 25%,#2a2a3e 50%,#1a1a2e 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:4px;width:40%;}
+.skeleton-cards{display:flex;gap:16px;width:80%;max-width:600px;margin-bottom:24px;flex-wrap:wrap;justify-content:center;}
+.skeleton-card{flex:1;min-width:120px;max-width:180px;height:100px;background:linear-gradient(90deg,#11111a 25%,#1a1a2e 50%,#11111a 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:10px;border:1px solid #2a2a3e;}
+.skeleton-content{width:80%;max-width:600px;}
+.skeleton-line{height:12px;background:linear-gradient(90deg,#11111a 25%,#1a1a2e 50%,#11111a 75%);background-size:200% 100%;animation:skeleton-shimmer 1.5s infinite;border-radius:4px;margin-bottom:10px;}
+.skeleton-line:nth-child(1){width:100%}
+.skeleton-line:nth-child(2){width:85%}
+.skeleton-line:nth-child(3){width:92%}
+.skeleton-line:nth-child(4){width:70%}
+.skeleton-line:nth-child(5){width:88%}
+.skeleton-logo{font-size:32px;margin-bottom:16px;animation:skeleton-pulse 2s infinite;}
+.skeleton-text{color:#666;font-size:13px;margin-top:20px;font-family:monospace;}
+@keyframes skeleton-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes skeleton-pulse{0%,100%{opacity:1}50%{opacity:.5}}
+</style>
+
+
+<!-- 亮色主题样式 -->
+<style>
+/* 亮色主题变量覆盖 */
+body.light-theme {
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --primary: #1a73e8;
+  --primary-light: #e8f0fe;
+  --gold: #b8860b;
+  --text: #202124;
+  --text2: #5f6368;
+  --text3: #9aa0a6;
+  --border: #e0e0e0;
+  --success: #34a853;
+  --danger: #ea4335;
+  --warning: #fbbc04;
+  background: var(--bg);
+  color: var(--text);
+}
+body.light-theme .card,
+body.light-theme .modal-content,
+body.light-theme .panel,
+body.light-theme .workflow-container,
+body.light-theme .wf-editor,
+body.light-theme .wf-toolbar,
+body.light-theme .wf-palette,
+body.light-theme .wf-properties,
+body.light-theme .wf-log,
+body.light-theme .wf-node,
+body.light-theme .stat-card,
+body.light-theme .agent-card,
+body.light-theme .chat-message,
+body.light-theme .policy-item,
+body.light-theme .guide-item {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--text);
+}
+body.light-theme .btn,
+body.light-theme button {
+  color: var(--text2);
+}
+body.light-theme .btn-primary,
+body.light-theme button.primary {
+  background: var(--primary);
+  color: #fff;
+}
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea {
+  background: #fff;
+  border-color: var(--border);
+  color: var(--text);
+}
+body.light-theme .nav-item,
+body.light-theme .tab-item {
+  color: var(--text2);
+}
+body.light-theme .nav-item.active,
+body.light-theme .tab-item.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+/* 主题切换按钮 */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10000;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+/* 主题切换过渡 */
+body, .card, .panel, .modal-content {
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+}
+</style>
+
+
+<!-- 新手引导样式 -->
+<style>
+.guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 99998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.guide-overlay.active {
+  display: flex;
+}
+.guide-modal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #d4af37;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(212, 175, 55, 0.2);
+  animation: guideFadeIn .4s ease;
+}
+@keyframes guideFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.guide-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: guideBounce 2s infinite;
+}
+@keyframes guideBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.guide-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #d4af37;
+  margin-bottom: 12px;
+}
+.guide-desc {
+  font-size: 14px;
+  color: #aaa;
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+.guide-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.guide-feature {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12px;
+  color: #ccc;
+}
+.guide-feature .icon {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 4px;
+}
+.guide-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.guide-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #333;
+  transition: all .3s;
+}
+.guide-dot.active {
+  background: #d4af37;
+  width: 24px;
+  border-radius: 4px;
+}
+.guide-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.guide-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: transparent;
+  color: #aaa;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.guide-btn:hover {
+  border-color: #d4af37;
+  color: #d4af37;
+}
+.guide-btn.primary {
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  color: #000;
+  border: none;
+  font-weight: 600;
+}
+.guide-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+.guide-skip {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 20px;
+  cursor: pointer;
+}
+.guide-skip:hover {
+  color: #d4af37;
+}
+
+/* ===== 移动端适配（自动添加） ===== */
+@media(max-width:768px){
+  body{font-size:14px}
+  .container,.wrap{padding:0 12px!important}
+  .section-title{font-size:18px!important;margin:20px 0 12px!important}
+  /* 快速入口网格 */
+  .quick-grid,.grid-4,.grid-3{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}
+  .quick-item{padding:12px 8px!important}
+  .q-icon{width:36px!important;height:36px!important;font-size:18px!important}
+  .q-title{font-size:13px!important}
+  .q-desc{font-size:11px!important}
+  /* 引导功能 */
+  .guide-grid,.features-grid{grid-template-columns:1fr!important;gap:12px!important}
+  .guide-feature{padding:14px!important}
+  /* FAQ */
+  .faq-item{padding:12px!important}
+  .faq-question{font-size:14px!important}
+  .faq-answer{font-size:13px!important}
+  /* 模态框 */
+  .modal{padding:12px!important}
+  .modal-content{max-width:100%!important;margin:10px!important}
+  .modal-header{padding:12px 16px!important}
+  .modal-body{padding:16px!important;max-height:60vh!important}
+  /* 按钮 */
+  .btn{padding:10px 18px!important;font-size:13px!important}
+  .btn-group{flex-direction:column!important;gap:8px!important}
+  /* 标签 */
+  .label{font-size:11px!important;padding:2px 8px!important}
+  /* 页面切换 */
+  .page{padding:12px 0!important}
+  /* 头部 */
+  header,.header{padding:12px 0!important}
+  .logo{font-size:18px!important}
+  /* Hero */
+  .hero{padding:30px 0!important}
+  .hero h1{font-size:22px!important;line-height:1.3}
+  .hero p{font-size:14px!important}
+  /* 统计数据 */
+  .stats{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}
+  .stat-num{font-size:24px!important}
+  .stat-label{font-size:11px!important}
+}
+@media(max-width:480px){
+  .quick-grid,.grid-4,.grid-3{grid-template-columns:1fr!important}
+  .hero h1{font-size:20px!important}
+  .section-title{font-size:16px!important}
+}
+</style>
+
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,167,232,.2);padding:8px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:12px">
+  <span style="font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap">火斗云智·政务</span>
+  <a href="/gov-ai/" style="color:#c9a7e8;text-decoration:none;padding:4px 10px;border-radius:6px;background:rgba(201,167,232,.15)">政务服务</a>
+  <a href="/workbench/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">工作台</a>
+  <a href="/gov-admin/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">管理后台</a>
+  <a href="/gov-operator-admin/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">算子管理</a>
+<a href="/experience/" style="color:#d4af37;text-decoration:none;padding:4px 10px;border-radius:6px;background:rgba(212,175,55,.15)">✨ AI体验版</a>
+  <a href="/gov-mobile/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">移动版</a>
+  <a href="/gov-canvas/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">Canvas版</a>
+  <a href="/portal/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px;margin-left:auto">智能中台</a>
+</div>
+<div style="height:40px"></div>
+<div class="top-bar">
+  <h1>政务AI服务平台</h1>
+  <div class="sub">智能问答 · 公文助手 · 政策查询 · 办事指南 · 合规治理</div>
+  <div class="notify-badge" id="notifyBadge" onclick="showNotifications()" style="display:none">0</div>
+  <div class="user" onclick="switchPage('profile')">👤</div>
+</div>
+<div class="version-badge" onclick="showVersions()">🔧 V4.0算子版</div>
+
+<!-- 首页 -->
+<div class="page active" id="page-home">
+  <div class="banner"><h2>您好，我是政务AI助手 🤖</h2><p>7×24小时在线，为您提供政策咨询、公文写作、办事指南等智能服务</p></div>
+  <div class="func-grid">
+    <div class="func-card" onclick="switchPage('chat')"><div class="icon">💬</div><div class="title">智能问答</div><div class="desc">政策咨询、办事疑问即时解答</div></div>
+    <div class="func-card" onclick="switchPage('doc')"><div class="icon">📝</div><div class="title">公文助手</div><div class="desc">公文起草、润色、格式规范</div></div>
+    <div class="func-card" onclick="switchPage('policy')"><div class="icon">📋</div><div class="title">政策查询</div><div class="desc">法规政策精准检索解读</div></div>
+    <div class="func-card" onclick="switchPage('guide')"><div class="icon">📌</div><div class="title">办事指南</div><div class="desc">办事流程、材料清单一目了然</div></div>
+  </div>
+  <div class="section-title">🛡️ 合规治理</div>
+  <div class="func-grid">
+    <div class="func-card" onclick="switchPage('compliance')"><div class="icon">✅</div><div class="title">合规审查</div><div class="desc">敏感词过滤、涉密拦截</div></div>
+    <div class="func-card" onclick="switchPage('analytics')"><div class="icon">📊</div><div class="title">运营统计</div><div class="desc">访问量、功能使用统计</div></div>
+  </div>
+  <div class="section-title">🔥 热门服务</div>
+  <div class="quick-list">
+    <div class="quick-item" onclick="quickAsk('营业执照办理流程是什么？')"><div class="q-icon">🏢</div><div class="q-info"><div class="q-title">营业执照办理</div><div class="q-desc">企业注册登记全流程</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="quickAsk('社保缴费基数如何调整？')"><div class="q-icon">💰</div><div class="q-info"><div class="q-title">社保公积金</div><div class="q-desc">缴费、转移、查询指南</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="quickAsk('个人所得税专项附加扣除有哪些？')"><div class="q-icon">🧾</div><div class="q-info"><div class="q-title">税务服务</div><div class="q-desc">个税申报、发票、优惠政策</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="switchPage('doc')"><div class="q-icon">✍️</div><div class="q-info"><div class="q-title">通知公告起草</div><div class="q-desc">AI辅助生成规范公文</div></div><div class="q-arrow">›</div></div>
+  </div>
+</div>
+
+<!-- 智能问答 -->
+<div class="page" id="page-chat">
+  <div class="chat-container">
+    <div class="chat-messages" id="chatMessages"><div class="msg ai"><div class="avatar">🤖</div><div class="bubble">您好！我是政务AI助手，可以为您提供政策咨询、办事指南、公文写作等服务。请问有什么可以帮您？</div></div></div>
+    <div class="quick-questions">
+      <button class="quick-q" onclick="quickAsk('营业执照怎么办理？')">营业执照办理</button>
+      <button class="quick-q" onclick="quickAsk('社保转移流程')">社保转移</button>
+      <button class="quick-q" onclick="quickAsk('个税专项扣除')">个税扣除</button>
+      <button class="quick-q" onclick="quickAsk('帮我写一份会议通知')">写会议通知</button>
+    </div>
+    <div class="faq-suggestions" id="faqSuggestions">
+      <div class="faq-title">💡 常见问题 · 点击快速提问</div>
+      <div class="faq-categories">
+        <span class="faq-cat active" onclick="filterFaq(this,'all')">全部</span>
+        <span class="faq-cat" onclick="filterFaq(this,'social')">社保医保</span>
+        <span class="faq-cat" onclick="filterFaq(this,'cert')">证件办理</span>
+        <span class="faq-cat" onclick="filterFaq(this,'business')">企业服务</span>
+        <span class="faq-cat" onclick="filterFaq(this,'doc')">公文写作</span>
+      </div>
+      <div class="faq-list" id="faqList">
+        <button class="faq-item" data-cat="social" onclick="quickAsk(&quot;社保缴费比例是多少？&quot;)">社保缴费</button>
+        <button class="faq-item" data-cat="social" onclick="quickAsk(&quot;医保报销流程？&quot;)">医保报销</button>
+        <button class="faq-item" data-cat="social" onclick="quickAsk(&quot;公积金贷款条件？&quot;)">公积金贷款</button>
+        <button class="faq-item" data-cat="social" onclick="quickAsk(&quot;养老保险怎么转移？&quot;)">养老转移</button>
+        <button class="faq-item" data-cat="cert" onclick="quickAsk(&quot;身份证怎么办理？&quot;)">身份证办理</button>
+        <button class="faq-item" data-cat="cert" onclick="quickAsk(&quot;居住证怎么办理？&quot;)">居住证</button>
+        <button class="faq-item" data-cat="cert" onclick="quickAsk(&quot;护照办理需要什么材料？&quot;)">护照办理</button>
+        <button class="faq-item" data-cat="cert" onclick="quickAsk(&quot;户口本遗失怎么补办？&quot;)">户口本补办</button>
+        <button class="faq-item" data-cat="business" onclick="quickAsk(&quot;营业执照如何申请？&quot;)">营业执照</button>
+        <button class="faq-item" data-cat="business" onclick="quickAsk(&quot;小微企业有哪些税收优惠？&quot;)">税收优惠</button>
+        <button class="faq-item" data-cat="business" onclick="quickAsk(&quot;社保开户流程？&quot;)">社保开户</button>
+        <button class="faq-item" data-cat="doc" onclick="quickAsk(&quot;帮我写一份会议通知&quot;)">写会议通知</button>
+        <button class="faq-item" data-cat="doc" onclick="quickAsk(&quot;帮我写一份工作总结&quot;)">写工作总结</button>
+        <button class="faq-item" data-cat="doc" onclick="quickAsk(&quot;帮我写一份请示报告&quot;)">写请示报告</button>
+      </div>
+    </div>
+    <div class="chat-history-bar">
+      <span class="history-btn" onclick="toggleChatHistory()">📜 对话历史</span>
+      <span class="history-btn" onclick="clearChatHistory()">🗑️ 清空</span>
+    </div>
+    <div class="chat-history-panel" id="chatHistoryPanel" style="display:none">
+      <div class="history-title">历史对话</div>
+      <div id="historyList"></div>
+    </div>
+    <div class="chat-input"><input type="text" id="chatInput" placeholder="请输入您的问题..." onkeypress="if(event.key==='Enter')sendMessage()"><button onclick="sendMessage()">➤</button></div>
+  </div>
+</div>
+
+<!-- 公文助手 -->
+<div class="page" id="page-doc">
+  <div class="tool-card">
+    <h3>📝 公文智能写作</h3>
+    <textarea id="docInput" placeholder="请输入公文主题或要点，例如：关于开展2026年度安全生产检查的通知..."></textarea>
+    <div class="tool-actions">
+      <button class="tool-btn primary" onclick="generateDoc()">✨ AI生成</button>
+      <button class="tool-btn secondary" onclick="polishDoc()">🎯 润色优化</button>
+      <button class="tool-btn secondary" onclick="complianceCheckDoc()">🛡️ 合规审查</button>
+      <button class="tool-btn success" onclick="exportDoc()">📥 导出</button>
+    </div>
+    <div id="docResultWrap" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px">
+    <span style="font-size:13px;font-weight:600">📄 生成结果</span>
+    <button class="export-btn" onclick="exportDocToWord()">📥 导出Word</button>
+    <button class="export-btn" onclick="showEsignModal()" style="background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;margin-left:8px">🔖 电子签章</button>
+  </div>
+  <div class="result-box" id="docResult"></div>
+</div>
+  </div>
+  <div class="tool-card">
+    <h3>📂 常用公文模板</h3>
+    <div class="quick-list">
+      <div class="quick-item" onclick="useTemplate('通知')"><div class="q-icon">📢</div><div class="q-info"><div class="q-title">通知</div><div class="q-desc">传达事项、布置工作</div></div><div class="q-arrow">›</div></div>
+      <div class="quick-item" onclick="useTemplate('报告')"><div class="q-icon">📊</div><div class="q-info"><div class="q-title">报告</div><div class="q-desc">汇报工作、反映情况</div></div><div class="q-arrow">›</div></div>
+      <div class="quick-item" onclick="useTemplate('请示')"><div class="q-icon">🙋</div><div class="q-info"><div class="q-title">请示</div><div class="q-desc">请求指示、批准事项</div></div><div class="q-arrow">›</div></div>
+      <div class="quick-item" onclick="useTemplate('函')"><div class="q-icon">✉️</div><div class="q-info"><div class="q-title">函</div><div class="q-desc">不相隶属机关商洽工作</div></div><div class="q-arrow">›</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 政策查询 -->
+<div class="page" id="page-policy">
+  <div class="search-box"><input type="text" id="policySearch" placeholder="搜索政策法规..." onkeypress="if(event.key==='Enter')searchPolicy()"><button onclick="searchPolicy()">搜索</button></div>
+  <div class="guide-category" id="policyCategories" style="margin-top:12px"><div class="guide-cat active" onclick="filterPolicy(this,\'all\')">全部</div></div>
+  <div style="margin-bottom:12px;text-align:right">
+    <a href="/gov-ai/downloads/policy_images_all.zip" style="display:inline-block;padding:8px 16px;background:#f0f0f0;color:#333;border-radius:6px;text-decoration:none;font-size:12px;margin-right:8px">📦 批量下载配图(ZIP)</a>
+    <button class="tool-btn secondary" style="padding:8px 16px;font-size:12px" onclick="exportPolicies()">📥 导出政策</button>
+  </div>
+  <div id="policyResults"><div style="text-align:center;padding:40px;color:var(--text2)">加载中...</div></div>
+  <div class="policy-detail-modal" id="policyDetailModal" onclick="if(event.target===this)closePolicyDetail()"><div class="policy-detail-card"><button class="pd-close" onclick="closePolicyDetail()">&times;</button><div id="policyDetailContent"></div></div></div>
+</div>
+
+<!-- 办事指南 -->
+<div class="page" id="page-guide">
+  <div class="guide-category" id="guideCategories"><div class="guide-cat active" onclick="filterGuide(this,'all')">全部</div></div>
+  <div id="guideList" style="margin-top:12px"><div style="text-align:center;padding:40px;color:var(--text2)">加载中...</div></div>
+  <div class="modal" id="guideDetailModal"><div class="modal-content"><div class="modal-header"><span id="guideDetailTitle">办事指南</span><span class="modal-close" onclick="closeGuideDetail()">&times;</span></div><div class="modal-body" id="guideDetailContent"></div></div></div>
+<div class="modal" id="appointmentModal"><div class="modal-content"><div class="modal-header"><span>办事预约</span><span class="modal-close" onclick="closeAppointmentForm()">&times;</span></div><div class="modal-body" id="appointmentFormContent"></div></div></div>
+</div>
+
+<!-- 合规审查 -->
+<div class="page" id="page-compliance">
+  <div class="tool-card">
+    <h3>🛡️ 政务合规审查</h3>
+    <textarea id="complianceInput" placeholder="请输入需要审查的文本内容...支持敏感词过滤、涉密拦截、违规提问识别、行政用语校验"></textarea>
+    <div class="tool-actions">
+      <button class="tool-btn primary" onclick="runComplianceCheck()">🔍 开始审查</button>
+      <button class="tool-btn secondary" onclick="document.getElementById('complianceInput').value=''">🗑️ 清空</button>
+    </div>
+    <div id="complianceResult"></div>
+  </div>
+  <div class="tool-card">
+    <h3>📋 审查说明</h3>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8">
+      <p>• <strong>敏感词过滤</strong>：三级敏感词库（高/中/低）自动检测</p>
+      <p>• <strong>涉密拦截</strong>：密级、保密期限、内部资料自动识别拦截</p>
+      <p>• <strong>违规提问</strong>：行贿、逃避监管、泄露机密等模式识别</p>
+      <p>• <strong>用语规范</strong>：行政用语规范性校验，不规范用语提示替换</p>
+    </div>
+  </div>
+</div>
+
+<!-- 运营统计 -->
+<div class="page" id="page-analytics">
+  <div class="section-title">📊 运营概览</div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="num" id="statPV">0</div><div class="label">总访问量(PV)</div></div>
+    <div class="stat-card"><div class="num" id="statUV">0</div><div class="label">独立访客(UV)</div></div>
+    <div class="stat-card"><div class="num" id="statChat">0</div><div class="label">问答次数</div></div>
+    <div class="stat-card"><div class="num" id="statSession">0</div><div class="label">会话数</div></div>
+  </div>
+  <div class="section-title">📈 功能使用排行</div>
+  <div class="quick-list" id="functionRanking">
+    <div style="text-align:center;padding:20px;color:var(--text2)">加载中...</div>
+  </div>
+  <div class="section-title">📥 数据导出</div>
+  <div class="tool-card">
+    <div class="tool-actions">
+      <button class="tool-btn primary" onclick="exportAnalyticsReport()">📊 导出运营报表</button>
+      <button class="tool-btn secondary" onclick="refreshAnalytics()">🔄 刷新数据</button>
+    </div>
+  </div>
+</div>
+
+<!-- 个人中心 -->
+<div class="page" id="page-profile">
+  <div class="tool-card" style="text-align:center;padding:24px"><div style="font-size:48px;margin-bottom:12px">👤</div><div style="font-size:18px;font-weight:600;margin-bottom:4px">政务用户</div><div style="font-size:12px;color:var(--text2)">普通用户 · 已实名认证</div></div>
+  <div class="section-title">📋 我的服务</div>
+  <div class="quick-list">
+    <div class="quick-item" onclick="showHistoryList()"><div class="q-icon">🕐</div><div class="q-info"><div class="q-title">咨询历史</div><div class="q-desc" id="histCount">0条记录</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="showDraftList()"><div class="q-icon">📄</div><div class="q-info"><div class="q-title">我的公文</div><div class="q-desc" id="draftCount">0篇草稿</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="showFavList()"><div class="q-icon">⭐</div><div class="q-info"><div class="q-title">收藏政策</div><div class="q-desc" id="favCount">0条收藏</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="showAppointmentList()"><div class="q-icon">📅</div><div class="q-info"><div class="q-title">我的预约</div><div class="q-desc" id="apptCount">0条预约</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="showNotifications()"><div class="q-icon">🔔</div><div class="q-info"><div class="q-title">消息通知</div><div class="q-desc" id="notifyCount">0条未读</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="alert('办事预约功能即将上线')"><div class="q-icon">📅</div><div class="q-info"><div class="q-title">办事预约</div><div class="q-desc">窗口预约记录</div></div><div class="q-arrow">›</div></div>
+  </div>
+  <div class="section-title">⚙️ 设置</div>
+  <div class="quick-list">
+    <div class="quick-item" onclick="showVersions()"><div class="q-icon">🔧</div><div class="q-info"><div class="q-title">切换到运维版</div><div class="q-desc">系统监控与管理后台</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="showOperatorInfo()"><div class="q-icon">🧩</div><div class="q-info"><div class="q-title">算子库信息</div><div class="q-desc">V3.2.0 · 17个算子</div></div><div class="q-arrow">›</div></div>
+    <div class="quick-item" onclick="alert('ZONGYUAN-ROOT 政务AI中台 V4.0 算子化架构版')"><div class="q-icon">ℹ️</div><div class="q-info"><div class="q-title">关于平台</div><div class="q-desc">ZONGYUAN-ROOT 政务AI中台</div></div><div class="q-arrow">›</div></div>
+  </div>
+  <div class="modal" id="historyModal"><div class="modal-content"><div class="modal-header"><span>咨询历史</span><span class="modal-close" onclick="document.getElementById('historyModal').classList.remove('active')">&times;</span></div><div class="modal-body" id="historyListContent" style="max-height:400px;overflow-y:auto"></div></div></div>
+  <div class="modal" id="esignModal">
+  <div class="modal-content" style="max-width:500px">
+    <div class="modal-header">
+      <span>🔖 电子签章</span>
+      <span class="modal-close" onclick="document.getElementById('esignModal').classList.remove('active')">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">选择签章</label>
+        <select id="esignSelect" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)">
+          <option value="official">政务中台公章</option>
+          <option value="contract">合同专用章</option>
+        </select>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text2)">签章位置</label>
+        <select id="esignPosition" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)">
+          <option value="bottom-right">右下角</option>
+          <option value="bottom-left">左下角</option>
+          <option value="top-right">右上角</option>
+          <option value="end">文档末尾</option>
+        </select>
+      </div>
+      <div style="margin-bottom:16px;padding:12px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:6px">
+        <div style="font-size:12px;color:var(--text2)">
+          <div style="margin-bottom:4px">📋 签章信息</div>
+          <div>确权DID: DID-BR-000002</div>
+          <div>溯源标识: Ω₀⊂⊙∞⊂Ω</div>
+          <div>签章时间: <span id="esignTime"></span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button class="tool-btn primary" style="flex:1" onclick="applyEsign()">✅ 确认签章</button>
+        <button class="tool-btn secondary" style="flex:1" onclick="document.getElementById('esignModal').classList.remove('active')">取消</button>
+      </div>
+      <div id="esignResult" style="margin-top:16px;display:none"></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="draftModal"><div class="modal-content"><div class="modal-header"><span>我的公文</span><span class="modal-close" onclick="document.getElementById('draftModal').classList.remove('active')">&times;</span></div><div class="modal-body" id="draftListContent" style="max-height:400px;overflow-y:auto"></div></div></div>
+  <div class="modal" id="favModal"><div class="modal-content"><div class="modal-header"><span>收藏政策</span><span class="modal-close" onclick="document.getElementById('favModal').classList.remove('active')">&times;</span></div><div class="modal-body" id="favListContent" style="max-height:400px;overflow-y:auto"></div></div></div>
+  <div class="modal" id="notifyModal"><div class="modal-content"><div class="modal-header"><span>消息通知</span><span class="modal-close" onclick="document.getElementById('notifyModal').classList.remove('active')">&times;</span></div><div class="modal-body" id="notifyListContent" style="max-height:400px;overflow-y:auto"></div></div></div>
+</div>
+
+<!-- 底部导航 -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="switchPage('home')"><div class="icon">🏠</div><div class="label">首页</div></div>
+  <div class="nav-item" onclick="switchPage('chat')"><div class="icon">💬</div><div class="label">问答</div></div>
+  <div class="nav-item" onclick="switchPage('doc')"><div class="icon">📝</div><div class="label">公文</div></div>
+  <div class="nav-item" onclick="switchPage('policy')"><div class="icon">📋</div><div class="label">政策</div></div>
+  <div class="nav-item desktop-only" onclick="window.open('/gov-monitor/','_blank')">
+    <span class="icon">📊</span>监控
+  </div>
+  <div class="nav-item desktop-only" onclick="window.open('/rbac-admin/','_blank')">
+    <span class="icon">⚙️</span>管理
+  </div>
+  <div class="nav-item" onclick="switchPage('profile')"><div class="icon">👤</div><div class="label">我的</div></div>
+</div>
+
+<!-- Toast提示 -->
+<div class="toast" id="toast"></div>
+
+<script src="js/gov-utils.js"></script>
+<script src="js/gov-main-1.js"></script>
+<script src="../gov-ai/js/operator_tracker.js"></script>
+<div id="data-dashboard-entry" onclick="window.open('/gov-dashboard/','_blank')" style="position:fixed;bottom:80px;right:16px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(59,130,246,.4);cursor:pointer;z-index:99" title="数据看板">📊</div>
+<script src="js/gov-extra.js"></script>
+
+<!-- 新手操作引导 -->
+<div class="guide-overlay" id="guideOverlay">
+  <div class="guide-modal">
+    <button class="guide-skip" onclick="closeGuide()">×</button>
+    <div class="guide-icon" id="guideIcon">🏛️</div>
+    <div class="guide-title" id="guideTitle">欢迎使用政务AI服务平台</div>
+    <div class="guide-desc" id="guideDesc">您的智能政务助手，提供政策查询、办事指南、智能问答、公文写作等一站式服务。</div>
+    <div class="guide-features" id="guideFeatures">
+      <div class="guide-feature"><span class="icon">📋</span>政策库<br>190+条最新政策</div>
+      <div class="guide-feature"><span class="icon">🧭</span>办事指南<br>110+条办事流程</div>
+      <div class="guide-feature"><span class="icon">🤖</span>智能问答<br>8个AI模型可选</div>
+      <div class="guide-feature"><span class="icon">✍️</span>公文写作<br>24种公文模板</div>
+    </div>
+    <div class="guide-progress" id="guideProgress">
+      <div class="guide-dot active"></div>
+      <div class="guide-dot"></div>
+      <div class="guide-dot"></div>
+      <div class="guide-dot"></div>
+    </div>
+    <div class="guide-buttons">
+      <button class="guide-btn" onclick="prevGuide()" id="guidePrev" style="display:none">上一步</button>
+      <button class="guide-btn primary" onclick="nextGuide()" id="guideNext">开始体验</button>
+    </div>
+  </div>
+</div>
+<script>
+// 新手操作引导
+const GUIDE_STEPS = [
+  {
+    icon: '🏛️',
+    title: '欢迎使用政务AI服务平台',
+    desc: '您的智能政务助手，提供政策查询、办事指南、智能问答、公文写作等一站式服务。',
+    features: [
+      {icon: '📋', title: '政策库', desc: '190+条最新政策'},
+      {icon: '🧭', title: '办事指南', desc: '110+条办事流程'},
+      {icon: '🤖', title: '智能问答', desc: '8个AI模型可选'},
+      {icon: '✍️', title: '公文写作', desc: '24种公文模板'}
+    ],
+    nextText: '开始体验'
+  },
+  {
+    icon: '🔍',
+    title: '智能搜索与问答',
+    desc: '在搜索框输入关键词，自动匹配政策、办事指南和常见问题。点击"智能问答"可与AI对话，获取个性化解答。',
+    features: [
+      {icon: '💡', title: '智能联想', desc: '输入即提示'},
+      {icon: '🔥', title: '热门搜索', desc: '高频问题推荐'},
+      {icon: '📜', title: '搜索历史', desc: '快速回顾'},
+      {icon: '🎯', title: '真值召回', desc: '答案有据可查'}
+    ],
+    nextText: '下一步'
+  },
+  {
+    icon: '📝',
+    title: '公文智能写作',
+    desc: '选择公文类型，输入主题，AI自动生成规范公文。支持请示、报告、通知、函等24种公文模板，一键复制使用。',
+    features: [
+      {icon: '📄', title: '24种模板', desc: '覆盖常用公文'},
+      {icon: '✨', title: 'AI润色', desc: '一键优化表达'},
+      {icon: '☁️', title: '云端保存', desc: '历史记录可查'},
+      {icon: '📋', title: '一键复制', desc: '方便粘贴使用'}
+    ],
+    nextText: '下一步'
+  },
+  {
+    icon: '🔗',
+    title: '可视化工作流编程',
+    desc: '拖拽节点搭建自动化工作流，支持政策分析、公文写作、数据处理等场景。4个专业模板一键应用，工作流云端保存。',
+    features: [
+      {icon: '🎨', title: '可视化编排', desc: '拖拽连线'},
+      {icon: '📚', title: '模板库', desc: '4个专业模板'},
+      {icon: '☁️', title: '云端持久化', desc: '跨设备同步'},
+      {icon: '▶️', title: '一键执行', desc: '自动运行'}
+    ],
+    nextText: '完成'
+  }
+];
+let currentGuideStep = 0;
+
+function showGuide() {
+  document.getElementById('guideOverlay').classList.add('active');
+  renderGuideStep(0);
+}
+function closeGuide() {
+  document.getElementById('guideOverlay').classList.remove('active');
+  localStorage.setItem('gov_guide_completed', 'true');
+}
+function renderGuideStep(step) {
+  currentGuideStep = step;
+  const s = GUIDE_STEPS[step];
+  document.getElementById('guideIcon').textContent = s.icon;
+  document.getElementById('guideTitle').textContent = s.title;
+  document.getElementById('guideDesc').textContent = s.desc;
+  document.getElementById('guideNext').textContent = s.nextText;
+  document.getElementById('guidePrev').style.display = step > 0 ? 'inline-block' : 'none';
+  // 进度点
+  const dots = document.querySelectorAll('.guide-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === step));
+  // 功能卡片
+  const featuresHtml = s.features.map(f =>
+    `<div class="guide-feature"><span class="icon">${f.icon}</span>${f.title}<br>${f.desc}</div>`
+  ).join('');
+  document.getElementById('guideFeatures').innerHTML = featuresHtml;
+}
+function nextGuide() {
+  if (currentGuideStep < GUIDE_STEPS.length - 1) {
+    renderGuideStep(currentGuideStep + 1);
+  } else {
+    closeGuide();
+  }
+}
+function prevGuide() {
+  if (currentGuideStep > 0) {
+    renderGuideStep(currentGuideStep - 1);
+  }
+}
+// 首次访问自动显示引导
+(function() {
+  if (!localStorage.getItem('gov_guide_completed')) {
+    if (document.readyState === 'complete') {
+      setTimeout(showGuide, 1500);
+    } else {
+      window.addEventListener('load', () => setTimeout(showGuide, 1500));
+    }
+  }
+})();
+// 暴露重新查看引导的函数
+window.showGuide = showGuide;
+</script>
+
+</body>
+</html>

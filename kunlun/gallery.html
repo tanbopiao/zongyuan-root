@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天 · 作品集 | ZONGYUAN-ROOT</title>
+<style>
+:root {
+    --ink-deep: #0a0a0f; --ink: #12121a; --ink-light: #1a1a24;
+    --gold: #d4af37; --gold-light: #f0d78c; --jade: #4a9d7e;
+    --red: #c41e3a; --text: #f8f4ec; --text-dim: rgba(248,244,236,0.6);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'PingFang SC','Microsoft YaHei',sans-serif; background: var(--ink-deep); color: var(--text); min-height: 100vh; }
+/* 导航栏 */
+.navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(212,175,55,0.2); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+.nav-logo { font-size: 1.3em; font-weight: bold; color: var(--gold); letter-spacing: 2px; }
+.nav-links { display: flex; gap: 30px; align-items: center; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.95em; transition: color 0.3s; }
+.nav-links a:hover, .nav-links a.active { color: var(--gold); }
+.nav-status { font-size: 0.8em; color: var(--jade); padding: 5px 12px; border: 1px solid var(--jade); border-radius: 8px; }
+/* 主内容 */
+.main { padding: 100px 40px 60px; max-width: 1200px; margin: 0 auto; }
+.page-title { text-align: center; margin-bottom: 50px; }
+.page-title h1 { font-size: 2.5em; color: var(--gold); margin-bottom: 10px; letter-spacing: 4px; }
+.page-title p { color: var(--text-dim); font-size: 1.1em; }
+/* 视频网格 */
+.video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+.video-card { background: var(--ink-light); border: 1px solid rgba(212,175,55,0.15); border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; }
+.video-card:hover { transform: translateY(-5px); box-shadow: 0 10px 40px rgba(212,175,55,0.15); }
+.video-card video { width: 100%; aspect-ratio: 9/16; object-fit: cover; background: #000; display: block; cursor: pointer; }
+.video-card::after { content: "悬停预览"; position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #d4af37; font-size: 0.7em; padding: 3px 8px; border-radius: 4px; pointer-events: none; opacity: 0.8; }
+.video-card { position: relative; }
+.video-card-info { padding: 20px; }
+.video-card-info h3 { color: var(--gold); font-size: 1.1em; margin-bottom: 8px; }
+.video-card-info p { color: var(--text-dim); font-size: 0.85em; margin-bottom: 5px; }
+.video-card-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.tag { padding: 3px 10px; background: rgba(74,157,126,0.15); color: var(--jade); border-radius: 6px; font-size: 0.75em; }
+.tag.gold { background: rgba(212,175,55,0.15); color: var(--gold); }
+/* 空状态 */
+.empty-state { text-align: center; padding: 80px 20px; color: var(--text-dim); }
+.empty-state .icon { font-size: 4em; margin-bottom: 20px; opacity: 0.3; }
+/* 页脚 */
+.footer { text-align: center; padding: 40px; color: var(--text-dim); font-size: 0.85em; border-top: 1px solid rgba(212,175,55,0.1); }
+@media (max-width: 768px) {
+    .navbar { padding: 12px 20px; }
+    .nav-links { gap: 15px; }
+    .main { padding: 90px 20px 40px; }
+    .page-title h1 { font-size: 1.8em; }
+    .video-grid { grid-template-columns: 1fr; }
+}
+</style>
+    <link rel="canonical" href="https://huodouai.com/kunlun/gallery.html">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-logo">昆仑洞天</div>
+    <div class="nav-links">
+        <a href="/kunlun/index.html">首页</a>
+        <a href="/kunlun/drama-pipeline.html">短剧产线</a>
+        <a href="/kunlun/gallery.html" class="active">作品集</a>
+        <a href="/kunlun-api/health" target="_blank">API状态</a>
+        <span class="nav-status" id="navStatus">内核在线</span>
+    </div>
+</nav>
+
+<div class="main">
+    <div class="page-title">
+        <h1>作品集</h1>
+        <p>昆仑洞天IP短剧成片展示 · 所有作品均已Merkle锁档确权</p>
+    </div>
+    <div style="text-align:center;margin:20px 0"><a href="/keyframe-gallery.html" style="display:inline-block;padding:10px 24px;background:rgba(212,175,55,0.15);color:#d4af37;text-decoration:none;border-radius:8px;border:1px solid rgba(212,175,55,0.3);font-size:0.9em">浏览关键帧资产库（25张高质量） →</a></div>
+    <div class="video-grid" id="videoGrid">
+        <!-- 视频卡片由JS动态生成 -->
+    </div>
+</div>
+
+<div class="footer">
+    <p>ZONGYUAN-ROOT 本源体系 | DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω</p>
+    <p style="margin-top:8px;">火斗云智 FireHD-AIOS · 昆仑洞天东方神话IP产线</p>
+</div>
+
+<script>
+const API_BASE = '/kunlun-api';
+// 作品集数据（从API获取历史任务，展示已完成的视频）
+const demoVideos = [
+    {
+        id: 'WANXIANG-001',
+        title: '昆仑洞天·通义万相真实AI短剧',
+        desc: '阿里云wan3.0-video 图生视频 · 太阴月神+九天玄女 · 4镜头真实动态画面 · 电影级运镜',
+        url: '/kunlun/videos/kunlun_wanxiang_demo.mp4',
+        duration: '16秒',
+        model: '通义万相 wan3.0',
+        resolution: '480P竖屏',
+        tags: ['真实AI动态', '通义万相', '4镜头', '已锁档']
+    },
+    {
+        id: 'REAL-AI-001',
+        title: '昆仑洞天·Agnes真实AI动态短剧',
+        desc: 'Agnes agnes-video-v2.0 真实图生视频 · 太阴月神+九天玄女 · 角色衣袂飘动发丝轻扬云雾流转',
+        url: '/kunlun/videos/kunlun_real_ai_demo.mp4',
+        duration: '20秒',
+        model: 'Agnes Video v2.0',
+        resolution: '720P竖屏',
+        tags: ['真实AI动态', 'Agnes', '4镜头', '已锁档']
+    },
+    {
+        id: 'DEMO-001',
+        title: '昆仑洞天·神女群像',
+        desc: '太阴月神、九天玄女、西王母、红裙九尾狐 四神女轮播',
+        url: '/kunlun/videos/kunlun_demo_5s.mp4',
+        duration: '14秒',
+        model: 'ffmpeg关键帧动效',
+        resolution: '1080P',
+        tags: ['测试样片', '四神女', '关键帧动效']
+    }
+];
+
+function renderVideos(videos) {
+    const grid = document.getElementById('videoGrid');
+    if (!videos || videos.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="icon">🎬</div><p>暂无作品，前往短剧产线生成第一部成片</p><p style="margin-top:10px;font-size:0.9em;"><a href="/kunlun/drama-pipeline.html" style="color:var(--gold);">进入短剧产线 →</a></p></div>';
+        return;
+    }
+    grid.innerHTML = videos.map((v, i) => `
+        <div class="video-card">
+            <video controls poster="" playsinline preload="metadata" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <source src="${v.url}" type="video/mp4">
+            </video>
+            <div style="display:none;padding:40px 20px;text-align:center;color:rgba(248,244,236,0.5);">
+                <p style="margin-bottom:10px;">⚠️ 浏览器不支持此视频编码</p>
+                <a href="${v.url}" download style="color:var(--gold);font-size:0.9em;">点击下载视频 →</a>
+            </div>
+            <div class="video-card-info">
+                <h3>${v.title}</h3>
+                <p>${v.desc}</p>
+                <p>时长：${v.duration} · 分辨率：${v.resolution} · 模型：${v.model}</p>
+                <div class="video-card-tags">
+                    ${v.tags.map(t => `<span class="tag ${t.includes('锁档')?'gold':''}">${t}</span>`).join('')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 从API获取历史任务，合并展示
+async function loadGallery() {
+    let allVideos = [...demoVideos];
+    try {
+        const resp = await fetch(`${API_BASE}/v1/kunlun/tasks`);
+        const data = await resp.json();
+        const tasks = data.tasks || [];
+        const completed = tasks.filter(t => t.status === 'COMPLETED' && t.final_video_url);
+        completed.forEach(t => {
+            allVideos.push({
+                id: t.task_id,
+                title: `${t.task_id} 成片`,
+                desc: `${t.params?.theme || '昆仑洞天'} · ${t.params?.characters?.length || 0}角色 · ${t.params?.episodes || 1}集`,
+                url: t.final_video_url,
+                duration: `${t.final_video_duration || 5}秒`,
+                model: t.params?.model || 'seedance',
+                resolution: t.params?.resolution || '1080P',
+                tags: ['已锁档', t.params?.model || 'seedance', `${t.final_video_duration || 5}秒`]
+            });
+        });
+    } catch(e) { console.log('API任务加载失败，使用默认作品集'); }
+    renderVideos(allVideos);
+}
+
+loadGallery();
+
+// 悬停懒加载播放：鼠标进入才加载并播放，移出暂停
+document.addEventListener("mouseover", function(e) {
+    const video = e.target.closest(".lazy-video");
+    if (video && video.paused) {
+        video.preload = "auto";
+        video.play().catch(() => {});
+    }
+});
+document.addEventListener("mouseout", function(e) {
+    const video = e.target.closest(".lazy-video");
+    if (video && !video.paused) {
+        video.pause();
+        video.currentTime = 0;
+    }
+});
+
+// 移动端：点击播放/暂停
+document.addEventListener("click", function(e) {
+    const video = e.target.closest(".lazy-video");
+    if (video && "ontouchstart" in window) {
+        if (video.paused) {
+            video.preload = "auto";
+            video.muted = false;
+            video.play().catch(() => {});
+        } else {
+            video.pause();
+        }
+    }
+});
+
+// IntersectionObserver：进入视口才设置preload=metadata（获取首帧封面）
+const videoObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+            const v = entry.target;
+            if (v.preload === "none") v.preload = "metadata";
+            videoObserver.unobserve(v);
+        }
+    });
+}, {rootMargin: "200px"});
+
+// 监听动态添加的video
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+        m.addedNodes.forEach(function(node) {
+            if (node.nodeType === 1) {
+                const videos = node.querySelectorAll ? node.querySelectorAll(".lazy-video") : [];
+                videos.forEach(function(v) { videoObserver.observe(v); });
+                if (node.classList && node.classList.contains("lazy-video")) videoObserver.observe(node);
+            }
+        });
+    });
+});
+observer.observe(document.getElementById("videoGrid"), {childList: true, subtree: true});
+</script>
+</body>
+</html>

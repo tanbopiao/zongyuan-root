@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>核心引擎 | 火斗云智AIOS</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0e17 0%,#1a1f2e 50%,#0d1117 100%);color:#e2e8f0;min-height:100vh}
+.header{background:rgba(17,24,39,0.9);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(139,92,246,0.3);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+.logo-text{font-size:18px;font-weight:700;color:#8b5cf6}
+.logo-sub{font-size:10px;color:#888}
+.nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.nav a{color:#aaa;text-decoration:none;font-size:13px;transition:all .2s;padding:4px 10px;border-radius:6px}
+.nav a:hover{color:#8b5cf6;background:rgba(139,92,246,0.1)}
+.nav a.active{color:#8b5cf6;background:rgba(139,92,246,0.15)}
+.status-badge{display:flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:20px;font-size:11px;color:#10b981}
+.dot{width:6px;height:6px;border-radius:50%;background:#10b981;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero{text-align:center;padding:50px 20px 40px;background:radial-gradient(ellipse at center,rgba(139,92,246,0.1) 0%,transparent 70%)}
+.hero h1{font-size:36px;margin-bottom:10px;background:linear-gradient(90deg,#fff,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .subtitle{font-size:16px;color:#888;margin-bottom:16px;max-width:800px;margin:0 auto 16px}
+.hero .badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.badge{padding:5px 12px;border-radius:20px;font-size:11px;border:1px solid #333}
+.badge.purple{border-color:#8b5cf6;color:#8b5cf6}
+.badge.green{border-color:#10b981;color:#10b981}
+.badge.blue{border-color:#3b82f6;color:#3b82f6}
+.badge.gold{border-color:#d4af37;color:#d4af37}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:14px;text-align:center;transition:all .3s}
+.stat-card:hover{border-color:rgba(139,92,246,0.5);transform:translateY(-2px)}
+.stat-value{font-size:24px;font-weight:700;color:#8b5cf6;margin-bottom:2px}
+.stat-label{font-size:10px;color:#888}
+.section{margin-bottom:28px}
+.section-title{font-size:18px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#8b5cf6}
+.section-title::before{content:"";width:3px;height:18px;background:linear-gradient(180deg,#8b5cf6,#6d28d9);border-radius:2px}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;margin-bottom:16px}
+.chart-card{background:rgba(255,255,255,0.02);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:12px}
+.chart-card h3{font-size:12px;color:#8b5cf6;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(139,92,246,0.1)}
+.chart-container{width:100%;height:260px}
+.full-width{grid-column:1/-1}
+.engine-card{background:rgba(255,255,255,0.03);border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:20px;margin-bottom:16px;transition:all .3s}
+.engine-card:hover{border-color:#8b5cf6;box-shadow:0 8px 24px rgba(139,92,246,0.15)}
+.engine-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.engine-icon{width:48px;height:48px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.engine-info h3{font-size:16px;font-weight:600;color:#fff;margin-bottom:2px}
+.engine-info p{font-size:11px;color:#888}
+.engine-status{margin-left:auto;display:flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:20px;font-size:11px;color:#10b981}
+.engine-desc{font-size:12px;color:#aaa;line-height:1.6;margin-bottom:14px}
+.engine-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.engine-feature{background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:8px;padding:10px}
+.engine-feature-title{font-size:11px;font-weight:600;color:#8b5cf6;margin-bottom:4px}
+.engine-feature-desc{font-size:10px;color:#888;line-height:1.4}
+.healing-flow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:16px 0}
+.healing-step{flex:1;min-width:100px;text-align:center;padding:12px 8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:8px;transition:all .3s}
+.healing-step:hover{background:rgba(139,92,246,0.15);transform:translateY(-2px)}
+.healing-step-num{width:24px;height:24px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:50%;text-align:center;line-height:24px;font-size:12px;font-weight:700;color:#fff;margin:0 auto 6px}
+.healing-step-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:2px}
+.healing-step-desc{font-size:9px;color:#888}
+.healing-arrow{color:#8b5cf6;font-size:18px;font-weight:700}
+.operator-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:16px 0}
+.operator-card{background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:14px;text-align:center;transition:all .3s}
+.operator-card:hover{border-color:#8b5cf6;background:rgba(139,92,246,0.1);transform:translateY(-2px)}
+.operator-icon{font-size:24px;margin-bottom:6px}
+.operator-name{font-size:12px;font-weight:600;color:#8b5cf6;margin-bottom:4px}
+.operator-desc{font-size:10px;color:#888;line-height:1.4}
+.combo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0}
+.combo-card{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:12px;text-align:center;transition:all .3s}
+.combo-card:hover{border-color:#10b981;background:rgba(16,185,129,0.1)}
+.combo-name{font-size:12px;font-weight:600;color:#10b981;margin-bottom:4px}
+.combo-desc{font-size:10px;color:#888;line-height:1.4}
+.footer{text-align:center;padding:24px 20px;border-top:1px solid rgba(139,92,246,0.15);margin-top:30px;color:#666;font-size:11px}
+.footer .anchor{color:#8b5cf6;font-family:monospace;letter-spacing:1px}
+@media(max-width:768px){.header{padding:12px 16px;flex-direction:column;gap:10px}.nav{gap:8px}.hero h1{font-size:26px}.container{padding:12px}.healing-flow{flex-direction:column}.healing-arrow{transform:rotate(90deg)}}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="六大核心引擎详解，6层自愈流程，6标准算子+5组合模式，从代码堆叠升级到算子组合，自进化、自修复、自优化闭环。">
+<meta name="keywords" content="核心引擎,自愈流程,算子库,组合模式,自进化,自修复">
+<meta property="og:title" content="核心引擎 | 火斗云智AIOS">
+<meta property="og:description" content="六大核心引擎详解，6层自愈流程，6标准算子+5组合模式，从代码堆叠升级到算子组合，自进化、自修复、自优化闭环。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/engines.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="核心引擎 | 火斗云智AIOS">
+<meta name="twitter:description" content="六大核心引擎详解，6层自愈流程，6标准算子+5组合模式，从代码堆叠升级到算子组合，自进化、自修复、自优化闭环。">
+    <link rel="canonical" href="https://huodouai.com/products/engines.html">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<!-- ZONGYUAN-ROOT Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">ZONGYUAN-ROOT · DID-BR-000002</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/about/philosophy.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">思想</a>
+      <a href="/about/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/about/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/about/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/products/engines.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">引擎</a>
+      <a href="/architecture/governance.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">治理</a>
+      <a href="/internal/monitor.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">监控</a>
+      <a href="/products/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/gov/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">政务AI</a>
+      <a href="/drama/demo.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">短剧</a>
+      <a href="/sovereignty/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">主权根</a>
+      <a href="/products/vector-kb.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">向量库</a>
+      <a href="/docs/developers.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">开发者</a>
+      <a href="/docs/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /ZONGYUAN-ROOT Unified Navigation -->
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">⚙️</div>
+    <div>
+      <div class="logo-text">核心引擎</div>
+      <div class="logo-sub">火斗云智AIOS · 六大核心引擎</div>
+    </div>
+  </div>
+  <div class="nav">
+    <a href="/">首页</a>
+    <a href="/internal/portal.html">门户</a>
+    <a href="/architecture/">架构</a>
+    <a href="/products/engines.html" class="active">引擎</a>
+    <a href="/gov/">政务AI</a>
+    <a href="/drama/pipeline.html">短剧</a>
+    <a href="/sovereignty/">主权根</a>
+    <a href="/internal/status.html">状态</a>
+    <div class="status-badge"><div class="dot"></div>6大引擎</div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>⚙️ 火斗云智AIOS 核心引擎</h1>
+  <div class="subtitle">自进化引擎 · 自愈引擎6层闭环 · 知识图谱 · 配置中心 · 算子库+组合引擎 · 向量知识库</div>
+  <div class="badges">
+    <span class="badge purple">自进化</span>
+    <span class="badge green">6层自愈</span>
+    <span class="badge blue">知识图谱</span>
+    <span class="badge gold">算子组合</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">6</div><div class="stat-label">核心引擎</div></div>
+    <div class="stat-card"><div class="stat-value">6</div><div class="stat-label">标准算子</div></div>
+    <div class="stat-card"><div class="stat-value">5</div><div class="stat-label">组合模式</div></div>
+    <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">向量库集合</div></div>
+    <div class="stat-card"><div class="stat-value">2560</div><div class="stat-label">语义向量维度</div></div>
+    <div class="stat-card"><div class="stat-value">11</div><div class="stat-label">自愈子模块</div></div>
+    <div class="stat-card"><div class="stat-value">30+</div><div class="stat-label">运行服务</div></div>
+    <div class="stat-card"><div class="stat-value">99.4%</div><div class="stat-label">系统可用性</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 引擎能力可视化</div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>六大引擎能力雷达</h3><div class="chart-container" id="engineRadarChart"></div></div>
+      <div class="chart-card"><h3>引擎协同架构</h3><div class="chart-container" id="engineArchChart"></div></div>
+      <div class="chart-card full-width"><h3>自愈引擎6层闭环流程</h3><div class="chart-container" id="healingFlowChart" style="height:300px;"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔄 自进化引擎</div>
+    <div class="engine-card">
+      <div class="engine-header">
+        <div class="engine-icon">🧬</div>
+        <div class="engine-info">
+          <h3>事件驱动自进化引擎</h3>
+          <p>Event-Driven Self-Evolution Engine · 事件触发+沙箱仿真+闭环迭代</p>
+        </div>
+        <div class="engine-status"><div class="dot"></div>运行中</div>
+      </div>
+      <div class="engine-desc">
+        自进化引擎是系统自我迭代的核心。通过事件驱动机制，自动检测系统短板和优化机会，生成优化方案，在沙箱环境中仿真验证，验证通过后自动应用到生产环境。整个过程无需人工干预，实现系统的持续自我进化。
+      </div>
+      <div class="engine-features">
+        <div class="engine-feature">
+          <div class="engine-feature-title">📡 事件驱动</div>
+          <div class="engine-feature-desc">监听系统事件，自动触发进化流程，支持定时事件和异常事件</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🧪 沙箱仿真</div>
+          <div class="engine-feature-desc">优化方案先在隔离沙箱中验证，确保不影响生产环境稳定性</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🔄 闭环迭代</div>
+          <div class="engine-feature-desc">检测→生成→验证→应用→评估→再检测，形成完整进化闭环</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">📝 进化日志</div>
+          <div class="engine-feature-desc">所有进化操作完整记录，支持回溯和审计，进化经验沉淀入库</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🩹 自愈引擎（6层闭环）</div>
+    <div class="engine-card">
+      <div class="engine-header">
+        <div class="engine-icon">💊</div>
+        <div class="engine-info">
+          <h3>6层闭环自愈引擎</h3>
+          <p>6-Layer Closed-Loop Self-Healing Engine · 检测→分析→生成→执行→验证→学习</p>
+        </div>
+        <div class="engine-status"><div class="dot"></div>运行中</div>
+      </div>
+      <div class="engine-desc">
+        自愈引擎是系统稳定性的核心保障。通过6层闭环机制，自动检测系统故障和异常，进行根因分析，生成修复方案，执行修复操作，验证修复效果，并将修复经验沉淀到经验库中，实现系统的自我诊断和自我修复。
+      </div>
+      <div class="healing-flow">
+        <div class="healing-step">
+          <div class="healing-step-num">1</div>
+          <div class="healing-step-name">检测</div>
+          <div class="healing-step-desc">detectors<br>异常检测</div>
+        </div>
+        <div class="healing-arrow">→</div>
+        <div class="healing-step">
+          <div class="healing-step-num">2</div>
+          <div class="healing-step-name">分析</div>
+          <div class="healing-step-desc">analyzers<br>根因分析</div>
+        </div>
+        <div class="healing-arrow">→</div>
+        <div class="healing-step">
+          <div class="healing-step-num">3</div>
+          <div class="healing-step-name">生成</div>
+          <div class="healing-step-desc">generators<br>方案生成</div>
+        </div>
+        <div class="healing-arrow">→</div>
+        <div class="healing-step">
+          <div class="healing-step-num">4</div>
+          <div class="healing-step-name">执行</div>
+          <div class="healing-step-desc">executors<br>修复执行</div>
+        </div>
+        <div class="healing-arrow">→</div>
+        <div class="healing-step">
+          <div class="healing-step-num">5</div>
+          <div class="healing-step-name">验证</div>
+          <div class="healing-step-desc">verifiers<br>效果验证</div>
+        </div>
+        <div class="healing-arrow">→</div>
+        <div class="healing-step">
+          <div class="healing-step-num">6</div>
+          <div class="healing-step-name">学习</div>
+          <div class="healing-step-desc">learners<br>经验沉淀</div>
+        </div>
+      </div>
+      <div class="engine-features">
+        <div class="engine-feature">
+          <div class="engine-feature-title">🔍 11个子模块</div>
+          <div class="engine-feature-desc">analyzers/config/detectors/executors/experience/generators/learners/logs/verifiers等11个子目录</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">📚 经验库</div>
+          <div class="engine-feature-desc">修复经验自动沉淀，相似故障自动匹配历史方案，加速修复</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🛡️ 故障隔离</div>
+          <div class="engine-feature-desc">单任务故障隔离，不影响整体流水线，防止故障扩散</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">📊 自愈日志</div>
+          <div class="engine-feature-desc">完整自愈操作日志，支持回溯和审计，自愈成功率统计</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🕸️ 知识图谱引擎</div>
+    <div class="engine-card">
+      <div class="engine-header">
+        <div class="engine-icon">🕸️</div>
+        <div class="engine-info">
+          <h3>知识图谱引擎</h3>
+          <p>Knowledge Graph Engine · 实体关系抽取+三元组存储+链接预测</p>
+        </div>
+        <div class="engine-status"><div class="dot"></div>运行中</div>
+      </div>
+      <div class="engine-desc">
+        知识图谱引擎是系统知识结构化的核心。从非结构化文本中自动抽取实体（人/事/物/概念）和关系（因果/从属/时序/相似/对立），构建知识图谱三元组，支持跨文档实体归一化和链接预测，实现知识的结构化存储和智能检索。
+      </div>
+      <div class="engine-features">
+        <div class="engine-feature">
+          <div class="engine-feature-title">📝 实体关系抽取</div>
+          <div class="engine-feature-desc">entity_relation_extractor.py，从非结构化文本自动抽取实体和关系</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🔗 三元组存储</div>
+          <div class="engine-feature-desc">entities/relations/triples三个子目录，结构化存储知识图谱</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🔄 跨文档归一化</div>
+          <div class="engine-feature-desc">kg_full_extractor.py，支持跨文档实体归一化，消除实体歧义</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🔮 链接预测</div>
+          <div class="engine-feature-desc">基于已有三元组执行链接预测，补全缺失的实体关系</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ 配置中心</div>
+    <div class="engine-card">
+      <div class="engine-header">
+        <div class="engine-icon">⚙️</div>
+        <div class="engine-info">
+          <h3>统一配置中心</h3>
+          <p>Unified Configuration Center · 统一配置+版本管理+历史回溯</p>
+        </div>
+        <div class="engine-status"><div class="dot"></div>运行中</div>
+      </div>
+      <div class="engine-desc">
+        配置中心是系统配置管理的核心。解散落配置，全局唯一配置中心管控所有服务参数，修改一处全网生效。支持版本管理和历史回溯，配置变更自动记录，支持配置回滚和灰度发布。
+      </div>
+      <div class="engine-features">
+        <div class="engine-feature">
+          <div class="engine-feature-title">🎯 统一配置</div>
+          <div class="engine-feature-desc">config_center.py，全局唯一配置中心，管控所有服务参数</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">📦 版本管理</div>
+          <div class="engine-feature-desc">config_store.json，配置版本化存储，支持版本对比和回滚</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">📜 历史回溯</div>
+          <div class="engine-feature-desc">history/目录，完整配置变更历史，支持任意时间点回溯</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🚀 灰度发布</div>
+          <div class="engine-feature-desc">支持配置灰度发布，逐步生效，降低配置变更风险</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧩 算子库+组合引擎</div>
+    <div class="engine-card">
+      <div class="engine-header">
+        <div class="engine-icon">🧩</div>
+        <div class="engine-info">
+          <h3>标准算子库+组合引擎</h3>
+          <p>Operator Library + Composition Engine · 6标准算子+5组合模式</p>
+        </div>
+        <div class="engine-status"><div class="dot"></div>运行中</div>
+      </div>
+      <div class="engine-desc">
+        算子库+组合引擎是系统从代码堆叠到算子组合的架构升维。将常用能力封装为标准算子，通过组合引擎灵活组合，完成复杂任务。新任务不再是写新代码，而是组合现有算子。需要新能力时，只需要新增一个标准算子，自动纳入算子库，可被所有工作流复用。
+      </div>
+      <h4 style="font-size:13px;color:#8b5cf6;margin:16px 0 10px;">六大标准算子</h4>
+      <div class="operator-grid">
+        <div class="operator-card">
+          <div class="operator-icon">🔐</div>
+          <div class="operator-name">哈希锁档</div>
+          <div class="operator-desc">hash_lock<br>SHA256哈希确权+Merkle-DAG锁档</div>
+        </div>
+        <div class="operator-card">
+          <div class="operator-icon">✅</div>
+          <div class="operator-name">自动检查</div>
+          <div class="operator-desc">auto_check<br>自动化检查+验证+报告生成</div>
+        </div>
+        <div class="operator-card">
+          <div class="operator-icon">🚀</div>
+          <div class="operator-name">部署算子</div>
+          <div class="operator-desc">deploy<br>标准化部署SOP+环境检查+验证</div>
+        </div>
+        <div class="operator-card">
+          <div class="operator-icon">📡</div>
+          <div class="operator-name">API调用</div>
+          <div class="operator-desc">api_call<br>标准化API调用+重试+错误处理</div>
+        </div>
+        <div class="operator-card">
+          <div class="operator-icon">🔗</div>
+          <div class="operator-name">Merkle-DAG遍历</div>
+          <div class="operator-desc">merkle_dag_walk<br>手动栈遍历+哈希校验+溯源</div>
+        </div>
+        <div class="operator-card">
+          <div class="operator-icon">📁</div>
+          <div class="operator-name">文件操作</div>
+          <div class="operator-desc">file_operation<br>标准化文件读写+备份+恢复</div>
+        </div>
+      </div>
+      <h4 style="font-size:13px;color:#10b981;margin:16px 0 10px;">五种组合模式</h4>
+      <div class="combo-grid">
+        <div class="combo-card">
+          <div class="combo-name">串行管道</div>
+          <div class="combo-desc">SerialPipeline<br>算子按顺序依次执行</div>
+        </div>
+        <div class="combo-card">
+          <div class="combo-name">并行执行</div>
+          <div class="combo-desc">ParallelExecutor<br>多个算子同时并行执行</div>
+        </div>
+        <div class="combo-card">
+          <div class="combo-name">条件分支</div>
+          <div class="combo-desc">ConditionalBranch<br>根据条件选择执行分支</div>
+        </div>
+        <div class="combo-card">
+          <div class="combo-name">循环迭代</div>
+          <div class="combo-desc">LoopIterator<br>循环执行算子直到满足条件</div>
+        </div>
+        <div class="combo-card">
+          <div class="combo-name">异常捕获</div>
+          <div class="combo-desc">TryCatch<br>异常捕获+fallback降级处理</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧠 向量知识库</div>
+    <div class="engine-card">
+      <div class="engine-header">
+        <div class="engine-icon">🧠</div>
+        <div class="engine-info">
+          <h3>向量知识库引擎</h3>
+          <p>Vector Knowledge Base · 2560维语义向量+高维真值召回</p>
+        </div>
+        <div class="engine-status"><div class="dot"></div>运行中</div>
+      </div>
+      <div class="engine-desc">
+        向量知识库是系统AI语义理解的核心。基于Chroma向量数据库，支持2560维高维语义向量，实现高维真值召回。关闭降级哈希兜底，上线真实2560维语义向量校验，支持语义检索和智能匹配。
+      </div>
+      <div class="engine-features">
+        <div class="engine-feature">
+          <div class="engine-feature-title">📦 4个集合</div>
+          <div class="engine-feature-desc">4个独立向量集合，chroma.sqlite3 6.4MB，分类存储不同类型知识</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🔢 2560维向量</div>
+          <div class="engine-feature-desc">高维语义向量校验，关闭降级哈希兜底，实现真实语义召回</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🔍 语义检索</div>
+          <div class="engine-feature-desc">基于语义相似度的智能检索，支持模糊匹配和语义关联</div>
+        </div>
+        <div class="engine-feature">
+          <div class="engine-feature-title">🎯 高维真值召回</div>
+          <div class="engine-feature-desc">高维真值召回恢复，实现精准的真值匹配和验证</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📈 引擎协同与进化日志</div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>引擎协同工作流</h3><div class="chart-container" id="collabChart"></div></div>
+      <div class="chart-card"><h3>自进化/自愈日志趋势</h3><div class="chart-container" id="logChart"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  火斗云智AIOS 核心引擎 ｜ <span class="anchor">Ω₀⊂⊙∞⊂Ω</span> ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V9.11<br>
+  自进化 · 6层自愈 · 知识图谱 · 配置中心 · 算子组合 · 向量知识库 · 六大引擎协同自治
+</div>
+
+<script>
+const charts = {};
+function initCharts() {
+  ['engineRadarChart','engineArchChart','healingFlowChart','collabChart','logChart'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) charts[id] = echarts.init(el);
+  });
+}
+
+function updateEngineRadarChart() {
+  if (!charts.engineRadarChart) return;
+  charts.engineRadarChart.setOption({
+    tooltip: {},
+    radar: {
+      indicator: [
+        { name: '自进化', max: 100 },
+        { name: '自愈能力', max: 100 },
+        { name: '知识图谱', max: 100 },
+        { name: '配置管理', max: 100 },
+        { name: '算子组合', max: 100 },
+        { name: '向量检索', max: 100 }
+      ],
+      axisName: { color: '#888', fontSize: 10 },
+      splitArea: { areaStyle: { color: ['rgba(139,92,246,0.02)','rgba(139,92,246,0.05)'] } },
+      splitLine: { lineStyle: { color: 'rgba(139,92,246,0.2)' } },
+      axisLine: { lineStyle: { color: 'rgba(139,92,246,0.3)' } }
+    },
+    series: [{
+      type: 'radar',
+      data: [{ value: [88, 92, 75, 90, 85, 80], name: '当前能力', areaStyle: { color: 'rgba(139,92,246,0.3)' }, lineStyle: { color: '#8b5cf6', width: 2 }, itemStyle: { color: '#8b5cf6' } }]
+    }]
+  });
+}
+
+function updateEngineArchChart() {
+  if (!charts.engineArchChart) return;
+  charts.engineArchChart.setOption({
+    tooltip: {},
+    series: [{
+      type: 'tree',
+      data: [{
+        name: 'AIOS核心引擎',
+        children: [
+          { name: '自进化引擎', children: [{ name: '事件驱动' }, { name: '沙箱仿真' }, { name: '闭环迭代' }] },
+          { name: '自愈引擎', children: [{ name: '检测' }, { name: '分析' }, { name: '生成' }, { name: '执行' }, { name: '验证' }, { name: '学习' }] },
+          { name: '知识图谱', children: [{ name: '实体抽取' }, { name: '关系抽取' }, { name: '三元组' }, { name: '链接预测' }] },
+          { name: '配置中心', children: [{ name: '统一配置' }, { name: '版本管理' }, { name: '历史回溯' }] },
+          { name: '算子库', children: [{ name: '6标准算子' }, { name: '5组合模式' }] },
+          { name: '向量库', children: [{ name: '2560维' }, { name: '4集合' }, { name: '语义检索' }] }
+        ]
+      }],
+      top: '5%', left: '10%', bottom: '5%', right: '15%',
+      symbolSize: 7,
+      orient: 'LR',
+      label: { position: 'left', verticalAlign: 'middle', align: 'right', fontSize: 10, color: '#ccc' },
+      leaves: { label: { position: 'right', verticalAlign: 'middle', align: 'left' } },
+      lineStyle: { color: '#8b5cf6', width: 1.5, curveness: 0.5 },
+      itemStyle: { color: '#8b5cf6', borderColor: '#6d28d9' },
+      expandAndCollapse: true
+    }]
+  });
+}
+
+function updateHealingFlowChart() {
+  if (!charts.healingFlowChart) return;
+  charts.healingFlowChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { data: ['处理时长(秒)', '成功率(%)'], textStyle: { color: '#888' }, top: 0 },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+    xAxis: { type: 'category', data: ['检测','分析','生成','执行','验证','学习'], axisLabel: { color: '#888', fontSize: 11 } },
+    yAxis: [
+      { type: 'value', name: '时长(秒)', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+      { type: 'value', name: '成功率(%)', max: 100, axisLabel: { color: '#888' }, splitLine: { show: false } }
+    ],
+    series: [
+      { name: '处理时长(秒)', type: 'bar', data: [2,5,8,15,3,2], itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#8b5cf6'},{offset:1,color:'#6d28d9'}]), borderRadius: [4,4,0,0] }, barWidth: '40%' },
+      { name: '成功率(%)', type: 'line', yAxisIndex: 1, data: [98,95,92,88,96,99], lineStyle: { color: '#10b981', width: 2 }, itemStyle: { color: '#10b981' }, symbol: 'circle', symbolSize: 8 }
+    ]
+  });
+}
+
+function updateCollabChart() {
+  if (!charts.collabChart) return;
+  charts.collabChart.setOption({
+    tooltip: { trigger: 'item' },
+    legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{
+      type: 'pie', radius: ['35%', '65%'], center: ['50%', '45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0e17', borderWidth: 2 },
+      label: { show: false },
+      data: [
+        { value: 25, name: '自进化触发', itemStyle: { color: '#8b5cf6' } },
+        { value: 30, name: '自愈修复', itemStyle: { color: '#10b981' } },
+        { value: 15, name: '知识图谱查询', itemStyle: { color: '#3b82f6' } },
+        { value: 10, name: '配置变更', itemStyle: { color: '#d4af37' } },
+        { value: 20, name: '算子组合执行', itemStyle: { color: '#f59e0b' } }
+      ]
+    }]
+  });
+}
+
+function updateLogChart() {
+  if (!charts.logChart) return;
+  const days = ['周一','周二','周三','周四','周五','周六','周日'];
+  charts.logChart.setOption({
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['自进化事件','自愈操作','配置变更'], textStyle: { color: '#888' }, top: 0 },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+    xAxis: { type: 'category', data: days, axisLabel: { color: '#888', fontSize: 10 } },
+    yAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series: [
+      { name: '自进化事件', type: 'line', smooth: true, data: [3,5,4,7,6,8,5], lineStyle: { color: '#8b5cf6', width: 2 }, areaStyle: { color: 'rgba(139,92,246,0.1)' }, itemStyle: { color: '#8b5cf6' } },
+      { name: '自愈操作', type: 'line', smooth: true, data: [8,12,10,15,11,18,14], lineStyle: { color: '#10b981', width: 2 }, areaStyle: { color: 'rgba(16,185,129,0.1)' }, itemStyle: { color: '#10b981' } },
+      { name: '配置变更', type: 'line', smooth: true, data: [2,3,2,5,4,6,3], lineStyle: { color: '#d4af37', width: 2 }, areaStyle: { color: 'rgba(212,175,55,0.1)' }, itemStyle: { color: '#d4af37' } }
+    ]
+  });
+}
+
+window.addEventListener('load', () => {
+  initCharts();
+  updateEngineRadarChart();
+  updateEngineArchChart();
+  updateHealingFlowChart();
+  updateCollabChart();
+  updateLogChart();
+  window.addEventListener('resize', () => { Object.values(charts).forEach(c => c && c.resize()); });
+});
+</script>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/docs/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/internal/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/internal/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products/">产品</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">架构</a>
+<a href="/whitepapers/aios-v1.html">白皮书</a>
+<a href="/docs/">文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

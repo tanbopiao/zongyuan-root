@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI体验工作台 - 火斗云智</title>
+<link rel="stylesheet" href="css/style.css">
+    <link rel="canonical" href="https://huodouai.comexperience/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="app">
+  <!-- 侧边栏 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <div class="logo-title">AI体验工作台</div>
+        <div class="logo-sub">火斗云智 · 通用版</div>
+      </div>
+    </div>
+    <button class="new-chat-btn" onclick="newChat()">
+      <span class="plus">+</span> 新建对话
+    </button>
+    <div class="chat-list" id="chatList">
+      <div class="chat-list-title">历史对话</div>
+      <div id="chatListItems"></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="model-selector">
+        <label>当前模型</label>
+        <select id="modelSelect" onchange="switchModel(this.value)">
+          <option value="zhipu">智谱GLM-4-Flash（完全免费）</option>
+          <option value="kimi">Kimi K2.6（免费额度）</option>
+          <option value="doubao">豆包Seed-1.6（免费额度）</option>
+          <option value="agnes">Agnes 2.5-Flash（完全免费）</option>
+          <option value="siliconflow">Qwen2.5-7B（免费额度）</option>
+        </select>
+      </div>
+      <div class="footer-link">
+        <a href="/gov-ai/" target="_blank">🏛️ 政务服务版</a>
+        <a href="/workbench/" target="_blank">💼 政务工作台</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="main">
+    <header class="header">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="header-title">
+        <span id="currentChatTitle">新对话</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="clearCurrentChat()" title="清空当前对话">🗑️</button>
+        <button class="icon-btn" onclick="exportChat()" title="导出对话">📥</button>
+      </div>
+    </header>
+
+    <!-- 欢迎页 -->
+    <div class="welcome" id="welcomePage">
+      <div class="welcome-icon">🤖</div>
+      <h1>你好，我是AI助手</h1>
+      <p>我可以帮你写作、翻译、编程、分析问题，或者随便聊聊</p>
+      <div class="quick-prompts">
+        <div class="quick-title">💡 试试这些</div>
+        <div class="quick-grid">
+          <div class="quick-card" onclick="sendQuickPrompt('帮我写一封商务邮件，主题是项目进度汇报')">
+            <div class="quick-icon">✉️</div>
+            <div class="quick-text">写一封商务邮件</div>
+          </div>
+          <div class="quick-card" onclick="sendQuickPrompt('用简单的话解释什么是量子计算')">
+            <div class="quick-icon">🔬</div>
+            <div class="quick-text">解释复杂概念</div>
+          </div>
+          <div class="quick-card" onclick="sendQuickPrompt('帮我写一个Python快速排序算法')">
+            <div class="quick-icon">💻</div>
+            <div class="quick-text">写代码</div>
+          </div>
+          <div class="quick-card" onclick="sendQuickPrompt('给我三个周末去深圳玩的行程建议')">
+            <div class="quick-icon">✈️</div>
+            <div class="quick-text">旅行建议</div>
+          </div>
+          <div class="quick-card" onclick="sendQuickPrompt('帮我润色这段文字，让它更专业：今天天气不错，我们去公园玩吧')">
+            <div class="quick-icon">✨</div>
+            <div class="quick-text">文字润色</div>
+          </div>
+          <div class="quick-card" onclick="sendQuickPrompt('帮我分析一下这个问题：如何提高工作效率')">
+            <div class="quick-icon">🎯</div>
+            <div class="quick-text">问题分析</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 对话区域 -->
+    <div class="chat-area" id="chatArea" style="display:none">
+      <div id="messages"></div>
+    </div>
+
+    <!-- 输入区 -->
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea id="chatInput" placeholder="输入你的问题，Shift+Enter换行，Enter发送..." rows="1" onkeydown="handleKeyDown(event)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+          <span>发送</span>
+        </button>
+      </div>
+      <div class="input-tip">
+        <span id="modelTip">当前模型：智谱GLM-4-Flash</span>
+        <span class="tip-divider">·</span>
+        <span>AI生成内容仅供参考</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 遮罩层（移动端侧边栏） -->
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

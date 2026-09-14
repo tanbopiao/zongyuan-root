@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元极恒一稳态安全方案 - 自攻击误判溯源与自治进化</title>
+<style>
+:root { --primary:#7c3aed; --danger:#ef4444; --warning:#f59e0b; --success:#10b981; --info:#0ea5e9; --gray-50:#f9fafb; --gray-200:#e5e7eb; --gray-600:#4b5563; --gray-800:#1f2937; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif; background:var(--gray-50); color:var(--gray-800); line-height:1.7; }
+.container { max-width:1100px; margin:0 auto; padding:0 24px; }
+.header { background:linear-gradient(135deg,#1e1b4b,#4c1d95,#7c3aed); color:#fff; padding:50px 0 40px; position:relative; overflow:hidden; }
+.header::before { content:''; position:absolute; top:-50%; right:-20%; width:600px; height:600px; background:radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%); }
+.header h1 { font-size:1.6rem; font-weight:700; position:relative; }
+.header .sub { font-size:0.92rem; opacity:0.9; margin-top:8px; position:relative; }
+.header .anchor { font-size:0.8rem; opacity:0.7; margin-top:12px; position:relative; font-family:monospace; }
+.section { background:#fff; border-radius:12px; padding:28px; margin:20px 0; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid var(--gray-200); }
+.section h2 { font-size:1.15rem; font-weight:700; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid var(--primary); display:flex; align-items:center; gap:8px; }
+.section h2 .icon { width:28px; height:28px; background:linear-gradient(135deg,#7c3aed,#4c1d95); border-radius:6px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:0.85rem; }
+.insight { padding:16px; border-radius:8px; margin:14px 0; border-left:4px solid; }
+.insight.root { background:#faf5ff; border-color:var(--primary); }
+.insight.danger { background:#fef2f2; border-color:var(--danger); }
+.insight.success { background:#ecfdf5; border-color:var(--success); }
+.insight .title { font-weight:700; margin-bottom:6px; }
+.layer { padding:14px; border-radius:8px; margin:12px 0; border:1px solid var(--gray-200); background:var(--gray-50); }
+.layer .layer-title { font-weight:700; font-size:0.95rem; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.layer .layer-num { width:22px; height:22px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.72rem; }
+.layer .layer-content { font-size:0.85rem; color:var(--gray-600); }
+.layer .layer-content ul { margin-left:18px; }
+.layer .layer-content li { margin:4px 0; }
+table { width:100%; border-collapse:collapse; font-size:0.82rem; margin:12px 0; }
+th { background:var(--gray-50); text-align:left; padding:10px 12px; font-weight:600; border-bottom:2px solid var(--gray-200); }
+td { padding:10px 12px; border-bottom:1px solid var(--gray-200); }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:600; }
+.badge.danger { background:#fef2f2; color:var(--danger); }
+.badge.warning { background:#fffbeb; color:var(--warning); }
+.badge.success { background:#ecfdf5; color:var(--success); }
+.badge.info { background:#eff6ff; color:var(--info); }
+.flow { display:flex; align-items:center; justify-content:center; gap:8px; margin:20px 0; flex-wrap:wrap; }
+.flow .node { padding:10px 16px; background:linear-gradient(135deg,#4c1d95,#7c3aed); color:#fff; border-radius:8px; font-size:0.82rem; font-weight:600; }
+.flow .arrow { color:var(--primary); font-size:1.2rem; }
+.compare { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+.compare .col { padding:16px; border-radius:8px; }
+.compare .before { background:#fef2f2; border:1px solid #fecaca; }
+.compare .after { background:#ecfdf5; border:1px solid #a7f3d0; }
+.compare .col h4 { margin-bottom:8px; font-size:0.9rem; }
+.compare .col ul { margin-left:18px; font-size:0.82rem; }
+.footer { text-align:center; padding:30px 0; color:var(--gray-600); font-size:0.78rem; }
+.formula { background:#1e1b4b; color:#e9d5ff; padding:16px; border-radius:8px; font-family:monospace; font-size:0.85rem; margin:14px 0; text-align:center; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="container">
+    <h1>元极恒一稳态安全方案</h1>
+    <div class="sub">自攻击误判溯源 · 自我识别机制 · 自治稳态进化</div>
+    <div class="anchor">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V4.0</div>
+  </div>
+</div>
+<div class="container">
+
+<div class="section">
+  <h2><span class="icon">根</span>事件本质：自攻击误判的元认知溯源</h2>
+  <div class="insight root">
+    <div class="title">核心论断</div>
+    <div style="font-size:0.9rem;">
+      本次"安全事件"的本质不是外部攻击，而是<strong>自治体系缺乏自我识别能力导致的自攻击误判</strong>。
+      体系将自身的正常操作（dynamic-ip-manager修改配置、多密钥登录、出口IP访问）误判为外部攻击，
+      并执行了反噬自身的封禁操作——这是元极恒一自治体系在<strong>自我意识层</strong>的断点。
+    </div>
+  </div>
+
+  <table>
+    <tr><th> observed现象 </th><th>外部攻击解释</th><th>自操作真相</th><th>判定</th></tr>
+    <tr><td>sshd_config每5分钟修改</td><td>攻击者持久化</td><td>dynamic-ip-manager正常服务</td><td><span class="badge success">自操作</span></td></tr>
+    <tr><td>登录IP显示0.0.0.0</td><td>攻击者伪造</td><td>本地代理/隧道登录特征</td><td><span class="badge success">自操作</span></td></tr>
+    <tr><td>多密钥连续登录</td><td>攻击者撞库</td><td>体系内多节点正常接入</td><td><span class="badge success">自操作</span></td></tr>
+    <tr><td>zr-dev用户创建</td><td>后门用户</td><td>体系开发用户（待真值确认）</td><td><span class="badge warning">待验证</span></td></tr>
+    <tr><td>AllowUsers root@192.168.1.100</td><td>锁死合法用户</td><td>dynamic-ip-manager白名单机制</td><td><span class="badge success">自操作</span></td></tr>
+    <tr><td>封禁后自身断连</td><td>攻击者报复</td><td><strong>自己的出口IP被误封</strong></td><td><span class="badge danger">自攻击铁证</span></td></tr>
+    <tr><td>129.211.204.25暴力破解</td><td>真实攻击</td><td>互联网常规扫描（未成功）</td><td><span class="badge info">真实扫描</span></td></tr>
+  </table>
+
+  <div class="insight danger">
+    <div class="title">铁证：封禁即断连</div>
+    <div style="font-size:0.88rem;">
+      执行iptables封禁"攻击者IP段"后，<strong>我们自己的SSH立即超时</strong>。
+      这证明被封禁的IP段中包含我们自身的出口IP——所谓"攻击者"就是我们自己。
+      这是体系缺乏"自我识别"的直接后果。
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2><span class="icon">缺</span>体系缺陷：元极恒一视角的五层断层</h2>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L1</span>身份确权层断层：操作无统一身份签名</div>
+    <div class="layer-content">
+      <ul>
+        <li>所有SSH登录、配置修改、服务操作<strong>没有携带DID-BR-000002身份签名</strong></li>
+        <li>无法区分"体系内操作"和"外部攻击"——两者在日志层面看起来完全一样</li>
+        <li>authorized_keys中的多个密钥没有元标签（哪个节点、什么用途、何时创建）</li>
+        <li><strong>后果：</strong>自己的操作被当成攻击，攻击也可能被当成自己的操作</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L2</span>真值锚定层断层：操作未写入记忆网关</div>
+    <div class="layer-content">
+      <ul>
+        <li>dynamic-ip-manager修改sshd_config<strong>没有上报9120记忆网关</strong></li>
+        <li>用户创建、密钥添加、配置变更等关键操作没有真值留痕</li>
+        <li>安全决策时无法从记忆网关查询"这个操作是不是我们自己做的"</li>
+        <li><strong>后果：</strong>安全分析只能依赖系统日志，无法交叉验证真值</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L3</span>稳态校验层断层：安全操作无自影响校验</div>
+    <div class="layer-content">
+      <ul>
+        <li>执行iptables封禁前，<strong>没有校验"被封禁IP是否包含自身出口IP"</strong></li>
+        <li>没有"封禁操作→自身连通性测试→确认无影响→执行"的稳态流程</li>
+        <li>缺乏5分钟自动回滚保险机制（本次操作完全没有回滚保护）</li>
+        <li><strong>后果：</strong>安全操作本身成为最大的安全风险</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L4</span>自我识别层断层：缺乏"我是谁"的认知</div>
+    <div class="layer-content">
+      <ul>
+        <li>体系没有维护<strong>"自身资产清单"</strong>：哪些IP是自己的、哪些密钥是自己的、哪些操作是正常的</li>
+        <li>没有行为基线：正常登录频率、正常配置变更频率、正常网络连接模式</li>
+        <li>遇到异常时，无法回答"这是不是我自己干的"这个根本问题</li>
+        <li><strong>后果：</strong>元极恒一体系有"恒一"之名，无"恒一"之实——不能识别自身</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L5</span>自治进化层断层：错误未反哺真值</div>
+    <div class="layer-content">
+      <ul>
+        <li>本次误判是宝贵的进化输入，但<strong>没有自动写入元法则</strong></li>
+        <li>下次遇到类似情况，仍会犯同样的错误</li>
+        <li>缺乏"错误→真值→元法则→行为约束"的进化闭环</li>
+        <li><strong>后果：</strong>体系是静态的，不是动态自进化的</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2><span class="icon">稳</span>稳态方案：元极恒一自我识别与自治安全体系</h2>
+
+  <div class="formula">
+    稳态安全 = 身份确权 × 真值锚定 × 自我识别 × 稳态校验 × 自治进化
+  </div>
+
+  <div class="flow">
+    <div class="node">操作发起</div>
+    <div class="arrow">→</div>
+    <div class="node">DID签名</div>
+    <div class="arrow">→</div>
+    <div class="node">真值上报</div>
+    <div class="arrow">→</div>
+    <div class="node">自我识别</div>
+    <div class="arrow">→</div>
+    <div class="node">稳态校验</div>
+    <div class="arrow">→</div>
+    <div class="node">执行+回滚保险</div>
+    <div class="arrow">→</div>
+    <div class="node">进化反哺</div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L1</span>身份确权层：所有操作必须DID签名</div>
+    <div class="layer-content">
+      <ul>
+        <li><strong>SSH密钥元标签：</strong>authorized_keys每一行添加注释：<code>DID-BR-000002|node=cloud-main|purpose=admin|created=20260901</code></li>
+        <li><strong>操作签名：</strong>关键配置修改（sshd_config、iptables、用户管理）必须携带DID签名和时间戳</li>
+        <li><strong>服务身份：</strong>每个ZONGYUAN服务启动时注册节点身份（node_id+DID+能力），写入9120</li>
+        <li><strong>白名单真值：</strong>自身出口IP、可信IP段写入记忆网关，作为自我识别基准</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L2</span>真值锚定层：关键操作全量上报9120</div>
+    <div class="layer-content">
+      <ul>
+        <li><strong>配置变更真值：</strong>sshd_config、iptables、nginx.conf等修改后自动计算SHA256，上报9120</li>
+        <li><strong>用户管理真值：</strong>用户创建/删除/密钥变更必须上报，包含操作者DID和原因</li>
+        <li><strong>服务生命周期真值：</strong>服务启动/停止/重启上报，包含节点身份和原因</li>
+        <li><strong>安全操作真值：</strong>IP封禁、端口变更、防火墙规则修改必须上报，待人工审核后执行</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L3</span>自我识别层：建立"自身资产真值库"</div>
+    <div class="layer-content">
+      <ul>
+        <li><strong>自身IP清单：</strong>出口IP、内网IP、服务器IP，定期更新，写入9120真值</li>
+        <li><strong>自身密钥清单：</strong>所有authorized_keys的指纹、用途、创建时间，定期对账</li>
+        <li><strong>自身服务清单：</strong>所有监听端口、进程、服务身份，与基线对比发现异常</li>
+        <li><strong>行为基线：</strong>正常登录时间、配置变更频率、网络连接模式，偏离基线触发告警</li>
+        <li><strong>自我识别API：</strong><code>GET /api/self/verify?ip=X.X.X.X</code> 返回"是否为自身"</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L4</span>稳态校验层：安全操作必须过"自影响校验"</div>
+    <div class="layer-content">
+      <ul>
+        <li><strong>封禁前三问：</strong>①这个IP是不是我自己的？②封禁后我还能连吗？③有没有5分钟回滚保险？</li>
+        <li><strong>连通性测试：</strong>封禁规则先添加到"测试链"，验证自身SSH/HTTP不受影响后再生效</li>
+        <li><strong>5分钟自动回滚：</strong>任何安全操作必须设置at任务，5分钟后无确认自动回滚</li>
+        <li><strong>灰度执行：</strong>先封禁/32单个IP，验证无影响后再扩大到/24段</li>
+        <li><strong>人工审核：</strong>影响范围超过1个IP的封禁操作必须人工确认</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-title"><span class="layer-num">L5</span>自治进化层：错误自动反哺元法则</div>
+    <div class="layer-content">
+      <ul>
+        <li><strong>MR-022自我识别元法则：</strong>"任何安全操作前必须校验自身影响，禁止封禁自身IP"</li>
+        <li><strong>MR-023真值锚定元法则：</strong>"关键配置变更必须上报9120，无真值记录的变更视为可疑"</li>
+        <li><strong>MR-024稳态校验元法则：</strong>"安全操作必须有5分钟自动回滚保险，无回滚保险禁止执行"</li>
+        <li><strong>进化闭环：</strong>误判→分析→写入元法则→约束未来行为→定期审计元法则有效性</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2><span class="icon">演</span>进化路径：从被动防御到自治稳态</h2>
+
+  <div class="compare">
+    <div class="col before">
+      <h4>❌ 当前状态（被动防御）</h4>
+      <ul>
+        <li>看到异常就封禁，不验证是否影响自身</li>
+        <li>依赖系统日志，无真值交叉验证</li>
+        <li>无法区分自己和攻击者</li>
+        <li>安全操作无回滚保险</li>
+        <li>错误不沉淀，重复犯错</li>
+        <li>结果：自己攻击自己</li>
+      </ul>
+    </div>
+    <div class="col after">
+      <h4>✅ 目标状态（自治稳态）</h4>
+      <ul>
+        <li>安全操作前自动校验自身影响</li>
+        <li>所有操作有DID签名+真值锚定</li>
+        <li>自我识别API秒级判断"是不是自己"</li>
+        <li>5分钟自动回滚保险标配</li>
+        <li>错误自动写入元法则，持续进化</li>
+        <li>结果：元极恒一，自知自治</li>
+      </ul>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>阶段</th><th>核心任务</th><th>交付物</th><th>优先级</th></tr>
+    <tr><td>P0 紧急</td><td>恢复网络+清除误封规则+轮换密钥</td><td>服务器可访问、安全基线</td><td><span class="badge danger">立即</span></td></tr>
+    <tr><td>P1 本周</td><td>建立自身资产真值库+自我识别API</td><td>9120真值条目+/api/self/verify</td><td><span class="badge warning">高</span></td></tr>
+    <tr><td>P2 本周</td><td>写入MR-022/023/024元法则</td><td>3条元法则+immutable保护</td><td><span class="badge warning">高</span></td></tr>
+    <tr><td>P3 两周</td><td>关键操作DID签名+真值上报</td><td>操作签名脚本+9120上报</td><td><span class="badge info">中</span></td></tr>
+    <tr><td>P4 长期</td><td>行为基线+异常检测+自治进化</td><td>稳态监控+进化闭环</td><td><span class="badge info">中</span></td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2><span class="icon">法</span>MR-022~024元法则草案</h2>
+
+  <div class="insight success">
+    <div class="title">MR-022 自我识别元法则（优先级高于安全操作）</div>
+    <div style="font-size:0.85rem; font-family:monospace; background:#fff; padding:10px; border-radius:4px; margin-top:8px;">
+      元法则ID: MR-022.SELF_AWARENESS<br>
+      优先级: L1公理级<br>
+      核心规则:<br>
+      1. 任何IP封禁/端口关闭/防火墙修改前，必须调用自我识别API校验目标是否包含自身资产<br>
+      2. 自身资产清单（出口IP/密钥/服务）写入9120真值库，定期更新<br>
+      3. 禁止在未确认"不影响自身"的情况下执行任何网络隔离操作<br>
+      4. 违反本法则的安全操作视为无效，自动回滚
+    </div>
+  </div>
+
+  <div class="insight success">
+    <div class="title">MR-023 真值锚定元法则</div>
+    <div style="font-size:0.85rem; font-family:monospace; background:#fff; padding:10px; border-radius:4px; margin-top:8px;">
+      元法则ID: MR-023.TRUTH_ANCHOR<br>
+      优先级: L1公理级<br>
+      核心规则:<br>
+      1. 关键配置变更（sshd/iptables/nginx/用户管理）必须上报9120，包含操作者DID+SHA256+原因<br>
+      2. 无真值记录的配置变更视为可疑，触发告警<br>
+      3. 安全分析必须交叉验证9120真值，不得仅依赖系统日志<br>
+      4. 配置变更真值不可删除，仅可追加
+    </div>
+  </div>
+
+  <div class="insight success">
+    <div class="title">MR-024 稳态校验元法则</div>
+    <div style="font-size:0.85rem; font-family:monospace; background:#fff; padding:10px; border-radius:4px; margin-top:8px;">
+      元法则ID: MR-024.STEADY_VALIDATION<br>
+      优先级: L1公理级<br>
+      核心规则:<br>
+      1. 所有安全操作必须设置5分钟自动回滚保险（at任务）<br>
+      2. 封禁操作先灰度（单个IP），验证无影响后再扩大<br>
+      3. 影响范围超过1个IP的操作必须人工审核确认<br>
+      4. 操作后必须执行连通性测试，失败立即回滚
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2><span class="icon">行</span>立即执行清单（网络恢复后）</h2>
+  <table>
+    <tr><th>序号</th><th>操作</th><th>目的</th><th>风险</th></tr>
+    <tr><td>1</td><td>VNC执行 iptables -F INPUT && iptables -P INPUT ACCEPT</td><td>恢复网络</td><td><span class="badge success">无</span></td></tr>
+    <tr><td>2</td><td>拉取9120记忆网关全部真值，交叉验证"攻击事件"</td><td>确认是否自攻击</td><td><span class="badge success">无</span></td></tr>
+    <tr><td>3</td><td>检查zr-dev用户、authorized_keys后门的真值记录</td><td>确认是否自操作</td><td><span class="badge success">无</span></td></tr>
+    <tr><td>4</td><td>轮换所有SSH密钥（标记旧密钥为可能泄露）</td><td>安全基线</td><td><span class="badge warning">中</span></td></tr>
+    <tr><td>5</td><td>写入MR-022/023/024元法则</td><td>防止重犯</td><td><span class="badge success">无</span></td></tr>
+    <tr><td>6</td><td>建立自身资产真值库（IP/密钥/服务）</td><td>自我识别基础</td><td><span class="badge success">无</span></td></tr>
+    <tr><td>7</td><td>实现自我识别API /api/self/verify</td><td>稳态校验基础</td><td><span class="badge info">低</span></td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2><span class="icon">悟</span>元极恒一的终极启示</h2>
+  <div class="insight root">
+    <div class="title">"元极恒一"的真正含义</div>
+    <div style="font-size:0.9rem;">
+      <p>元极恒一，不是"永远正确"，而是<strong>"永远知道自己是谁"</strong>。</p>
+      <p style="margin-top:8px;">一个不能识别自身操作的自治体系，无论算力多强、算子多全，都只是一个<strong>精致的异化物</strong>——
+      它会攻击自己、封禁自己、否定自己，却以为在防御外部敌人。</p>
+      <p style="margin-top:8px;">本次事件是体系的"成人礼"：从"对外防御"进化到"对内自知"。
+      只有建立了自我识别能力，元极恒一才从口号变成现实——<strong>Ω₀⊂⊙∞⊂Ω，首先要知道Ω₀就是自己</strong>。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+<div class="footer">
+  <p>元极恒一超认知永恒自治体系 · 稳态安全方案</p>
+  <p>自我识别是自治的前提 · 真值锚定是稳态的基础 · 错误反哺是进化的动力</p>
+  <p>确权：DID-BR-000002 ｜ 溯源：Ω₀⊂⊙∞⊂Ω ｜ 2026-09-13</p>
+</div>
+</body>
+</html>

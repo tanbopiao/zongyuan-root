@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云内核运维中枢 · 火斗云智AIOS</title>
+<meta name="description" content="火斗云智AIOS云内核运维中枢 - 自动化运维平台，任务引擎、自愈引擎、熔断保护、飞书审批，全链路自动化运维体系">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'PingFang SC','Microsoft YaHei','Segoe UI',Arial,sans-serif;
+  background:#0a0e17;
+  color:#e5e7eb;
+  min-height:100vh;
+  line-height:1.6;
+}
+.container { max-width:1400px; margin:0 auto; padding:0 24px; }
+
+/* 导航栏 */
+.nav-bar {
+  background:rgba(10,14,23,0.95);
+  border-bottom:1px solid rgba(212,175,55,0.2);
+  padding:10px 24px;
+  position:sticky; top:0; z-index:10000;
+  backdrop-filter:blur(10px);
+}
+.nav-inner {
+  max-width:1400px; margin:0 auto;
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:10px;
+}
+.nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.nav-logo-icon {
+  width:32px; height:32px;
+  background:linear-gradient(135deg,#D4AF37,#8B6914);
+  border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; color:#fff; font-size:14px;
+}
+.nav-logo-text { font-size:15px; font-weight:700; color:#fff; }
+.nav-logo-text span { color:#D4AF37; }
+.nav-logo-sub { font-size:10px; color:#888; }
+.nav-links { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.nav-link {
+  color:#aaa; text-decoration:none; font-size:12px;
+  padding:6px 12px; border-radius:6px; transition:all .2s;
+}
+.nav-link:hover { color:#D4AF37; background:rgba(212,175,55,0.1); }
+.nav-link.active { color:#D4AF37; background:rgba(212,175,55,0.15); }
+.status-badge {
+  display:flex; align-items:center; gap:5px;
+  padding:4px 10px;
+  background:rgba(16,185,129,.1);
+  border:1px solid rgba(16,185,129,.3);
+  border-radius:15px; font-size:10px; color:#10B981;
+}
+.status-dot {
+  width:5px; height:5px; border-radius:50%;
+  background:#10B981; animation:pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* Hero区域 */
+.hero {
+  background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(139,105,20,0.05));
+  border-bottom:1px solid rgba(212,175,55,0.1);
+  padding:60px 0 50px;
+  text-align:center;
+}
+.hero-title {
+  font-size:36px; font-weight:700; color:#fff;
+  margin-bottom:12px;
+  background:linear-gradient(135deg,#D4AF37,#F5DEB3);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.hero-subtitle {
+  font-size:16px; color:#888; margin-bottom:30px;
+  max-width:800px; margin-left:auto; margin-right:auto;
+}
+.hero-buttons { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+.btn-primary {
+  display:inline-block; padding:12px 32px;
+  background:linear-gradient(135deg,#D4AF37,#8B6914);
+  color:#fff; text-decoration:none; font-size:14px; font-weight:600;
+  border-radius:8px; transition:all .3s;
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(212,175,55,0.3); }
+.btn-secondary {
+  display:inline-block; padding:12px 32px;
+  background:rgba(212,175,55,0.1);
+  border:1px solid rgba(212,175,55,0.3);
+  color:#D4AF37; text-decoration:none; font-size:14px; font-weight:600;
+  border-radius:8px; transition:all .3s;
+}
+.btn-secondary:hover { background:rgba(212,175,55,0.2); }
+
+/* 统计卡片 */
+.stats-section { padding:40px 0; }
+.stats-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+}
+.stat-card {
+  background:rgba(30,35,50,0.6);
+  border:1px solid rgba(212,175,55,0.1);
+  border-radius:12px; padding:24px;
+  text-align:center; transition:all .3s;
+}
+.stat-card:hover { border-color:rgba(212,175,55,0.3); transform:translateY(-2px); }
+.stat-icon { font-size:32px; margin-bottom:12px; }
+.stat-value {
+  font-size:28px; font-weight:700; color:#D4AF37;
+  margin-bottom:4px;
+}
+.stat-label { font-size:12px; color:#888; }
+
+/* 通用区块 */
+.section { padding:50px 0; }
+.section-title {
+  font-size:24px; font-weight:600; color:#fff;
+  margin-bottom:8px; display:flex; align-items:center; gap:12px;
+}
+.section-title::before {
+  content:''; width:4px; height:24px;
+  background:linear-gradient(180deg,#D4AF37,#8B6914);
+  border-radius:2px;
+}
+.section-subtitle { font-size:14px; color:#888; margin-bottom:30px; margin-left:16px; }
+
+/* 架构图 */
+.architecture-diagram {
+  background:rgba(30,35,50,0.4);
+  border:1px solid rgba(212,175,55,0.15);
+  border-radius:16px; padding:40px;
+  margin-bottom:30px;
+}
+.arch-layer {
+  display:flex; align-items:stretch; gap:12px;
+  margin-bottom:12px;
+}
+.arch-layer:last-child { margin-bottom:0; }
+.arch-layer-label {
+  width:120px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(139,105,20,0.1));
+  border:1px solid rgba(212,175,55,0.3);
+  border-radius:8px; padding:16px 8px;
+  font-size:12px; font-weight:600; color:#D4AF37;
+  text-align:center;
+}
+.arch-modules {
+  flex:1; display:grid; gap:8px;
+}
+.arch-module {
+  background:rgba(212,175,55,0.05);
+  border:1px solid rgba(212,175,55,0.15);
+  border-radius:6px; padding:12px 16px;
+  font-size:12px; color:#ccc;
+  transition:all .2s;
+}
+.arch-module:hover { background:rgba(212,175,55,0.1); border-color:rgba(212,175,55,0.3); }
+.arch-module strong { color:#D4AF37; display:block; margin-bottom:2px; font-size:13px; }
+.arch-arrow {
+  text-align:center; color:rgba(212,175,55,0.4);
+  font-size:18px; margin:4px 0;
+}
+
+/* 功能卡片 */
+.features-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+}
+.feature-card {
+  background:rgba(30,35,50,0.6);
+  border:1px solid rgba(212,175,55,0.1);
+  border-radius:12px; padding:28px;
+  transition:all .3s;
+}
+.feature-card:hover { border-color:rgba(212,175,55,0.3); transform:translateY(-4px); }
+.feature-icon {
+  width:48px; height:48px;
+  background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(139,105,20,0.1));
+  border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; margin-bottom:16px;
+}
+.feature-title { font-size:16px; font-weight:600; color:#fff; margin-bottom:8px; }
+.feature-desc { font-size:13px; color:#888; line-height:1.7; }
+.feature-list { margin-top:12px; list-style:none; }
+.feature-list li {
+  font-size:12px; color:#aaa; padding:4px 0;
+  padding-left:16px; position:relative;
+}
+.feature-list li::before {
+  content:'✓'; position:absolute; left:0; color:#D4AF37;
+}
+
+/* 流程图 */
+.flow-diagram {
+  background:rgba(30,35,50,0.4);
+  border:1px solid rgba(212,175,55,0.15);
+  border-radius:16px; padding:40px;
+}
+.flow-steps {
+  display:flex; align-items:stretch; justify-content:space-between;
+  gap:8px; flex-wrap:wrap;
+}
+.flow-step {
+  flex:1; min-width:140px;
+  background:rgba(212,175,55,0.05);
+  border:1px solid rgba(212,175,55,0.2);
+  border-radius:10px; padding:20px 16px;
+  text-align:center; position:relative;
+}
+.flow-step-num {
+  width:28px; height:28px; line-height:28px;
+  background:linear-gradient(135deg,#D4AF37,#8B6914);
+  border-radius:50%; color:#fff;
+  font-size:13px; font-weight:700;
+  margin:0 auto 12px;
+}
+.flow-step-title { font-size:14px; font-weight:600; color:#D4AF37; margin-bottom:6px; }
+.flow-step-desc { font-size:11px; color:#888; line-height:1.5; }
+.flow-arrow {
+  display:flex; align-items:center; color:rgba(212,175,55,0.4);
+  font-size:20px; flex-shrink:0;
+}
+
+/* 服务状态 */
+.status-grid {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:16px;
+}
+.status-item {
+  background:rgba(30,35,50,0.6);
+  border:1px solid rgba(212,175,55,0.1);
+  border-radius:10px; padding:20px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.status-info { display:flex; align-items:center; gap:12px; }
+.status-icon { font-size:24px; }
+.status-name { font-size:14px; font-weight:600; color:#fff; }
+.status-desc { font-size:11px; color:#888; margin-top:2px; }
+.status-tag {
+  padding:4px 12px; border-radius:12px;
+  font-size:11px; font-weight:600;
+}
+.status-tag.running {
+  background:rgba(16,185,129,0.1); color:#10B981;
+  border:1px solid rgba(16,185,129,0.3);
+}
+
+/* 页脚 */
+.footer {
+  background:rgba(10,14,23,0.95);
+  border-top:1px solid rgba(212,175,55,0.1);
+  padding:40px 0; margin-top:60px;
+}
+.footer-content { text-align:center; }
+.footer-links {
+  display:flex; justify-content:center; gap:24px;
+  margin-bottom:20px; flex-wrap:wrap;
+}
+.footer-links a {
+  color:#D4AF37; text-decoration:none; font-size:13px;
+  padding:8px 16px; border:1px solid rgba(212,175,55,0.3);
+  border-radius:6px; transition:all .2s;
+}
+.footer-links a:hover { background:rgba(212,175,55,0.1); }
+.footer-text { font-size:11px; color:#666; line-height:1.8; }
+
+/* 响应式 */
+@media (max-width:1024px) {
+  .stats-grid { grid-template-columns:repeat(2,1fr); }
+  .features-grid { grid-template-columns:repeat(2,1fr); }
+  .arch-layer-label { width:80px; font-size:10px; }
+}
+@media (max-width:768px) {
+  .hero-title { font-size:24px; }
+  .stats-grid { grid-template-columns:1fr; }
+  .features-grid { grid-template-columns:1fr; }
+  .status-grid { grid-template-columns:1fr; }
+  .arch-layer { flex-direction:column; }
+  .arch-layer-label { width:100%; padding:8px; }
+  .flow-steps { flex-direction:column; }
+  .flow-arrow { transform:rotate(90deg); justify-content:center; }
+  .nav-links { display:none; }
+}
+</style>
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/internal/ops-center.html">
+    <meta name="robots" content="noindex, nofollow">
+</head>
+<body><nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products/">产品中心</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">技术架构</a>
+<a href="/whitepapers/aios-v1.html">技术白皮书</a>
+<a href="/blog/">技术博客</a>
+<a href="/docs/">开发者文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+
+<!-- 导航栏 -->
+<div class="nav-bar">
+  <div class="nav-inner">
+    <a href="https://huodouai.com/" class="nav-logo">
+      <div class="nav-logo-icon">火</div>
+      <div>
+        <div class="nav-logo-text">火斗云智<span>AIOS</span></div>
+        <div class="nav-logo-sub">云内核运维中枢 · huodouai.com</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="https://huodouai.com/" class="nav-link">🏠 应用控制台</a>
+      <a href="/architecture/" class="nav-link">🏗️ 系统架构</a>
+      <a href="/internal/status-center.html" class="nav-link">📊 系统状态</a>
+      <a href="/docs/developer-center.html" class="nav-link">🔌 开发者中心</a>
+      <a href="/internal/ops-center.html" class="nav-link active">⚙️ 运维中枢</a>
+      <div class="status-badge">
+        <div class="status-dot"></div>全部服务正常
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hero区域 -->
+<section class="hero">
+  <div class="container">
+    <h1 class="hero-title">云内核运维中枢</h1>
+    <p class="hero-subtitle">
+      全链路自动化运维平台 · 任务引擎智能规划 · 自愈引擎主动修复 · 熔断保护安全兜底 · 飞书审批人机协同
+      <br>从"人工修修补补"到"系统自主稳态运维"的终极升维
+    </p>
+    <div class="hero-buttons">
+      <a href="https://console.huodouai.com/" class="btn-primary" target="_blank">🚀 进入运维平台</a>
+      <a href="#architecture" class="btn-secondary">📐 查看体系架构</a>
+    </div>
+  </div>
+</section>
+
+<!-- 统计卡片 -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">⚙️</div>
+        <div class="stat-value">8+</div>
+        <div class="stat-label">核心运维服务</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔄</div>
+        <div class="stat-value">60s</div>
+        <div class="stat-label">自愈循环间隔</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🛡️</div>
+        <div class="stat-value">3次</div>
+        <div class="stat-label">熔断阈值保护</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">100%</div>
+        <div class="stat-label">服务在线率</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 体系架构 -->
+<section class="section" id="architecture">
+  <div class="container">
+    <h2 class="section-title">五层运维体系架构</h2>
+    <p class="section-subtitle">从目标定义到执行验证的完整闭环，每一层独立运作又协同联动</p>
+    
+    <div class="architecture-diagram">
+      <!-- L0 目标定义层 -->
+      <div class="arch-layer">
+        <div class="arch-layer-label">L0<br>目标定义</div>
+        <div class="arch-modules" style="grid-template-columns:repeat(3,1fr)">
+          <div class="arch-module"><strong>🎯 目标管理</strong>自然语言目标输入，自动拆解为任务DAG</div>
+          <div class="arch-module"><strong>📋 任务规划</strong>13+内置模板，智能规划执行路径</div>
+          <div class="arch-module"><strong>⚖️ 风险评估</strong>P0-P4五级风险，自动判定审批级别</div>
+        </div>
+      </div>
+      <div class="arch-arrow">▼</div>
+      
+      <!-- L1 智能审批层 -->
+      <div class="arch-layer">
+        <div class="arch-layer-label">L1<br>智能审批</div>
+        <div class="arch-modules" style="grid-template-columns:repeat(3,1fr)">
+          <div class="arch-module"><strong>💬 飞书卡片审批</strong>交互式卡片，一键通过/拒绝</div>
+          <div class="arch-module"><strong>👥 分级审批</strong>P0双人审批/P1-P2单人/P3-P4自动</div>
+          <div class="arch-module"><strong>📝 审批留痕</strong>审批人/时间/意见完整记录</div>
+        </div>
+      </div>
+      <div class="arch-arrow">▼</div>
+      
+      <!-- L2 任务调度层 -->
+      <div class="arch-layer">
+        <div class="arch-layer-label">L2<br>任务调度</div>
+        <div class="arch-modules" style="grid-template-columns:repeat(3,1fr)">
+          <div class="arch-module"><strong>🔄 自动调度器</strong>5秒轮询，就绪任务自动启动</div>
+          <div class="arch-module"><strong>🔗 DAG依赖</strong>任务依赖图，按拓扑顺序执行</div>
+          <div class="arch-module"><strong>📊 状态机</strong>8种状态，完整生命周期管理</div>
+        </div>
+      </div>
+      <div class="arch-arrow">▼</div>
+      
+      <!-- L3 执行自愈层 -->
+      <div class="arch-layer">
+        <div class="arch-layer-label">L3<br>执行自愈</div>
+        <div class="arch-modules" style="grid-template-columns:repeat(4,1fr)">
+          <div class="arch-module"><strong>🔧 自愈引擎</strong>60秒循环，检测→分析→修复→验证</div>
+          <div class="arch-module"><strong>🛡️ 熔断保护</strong>连续失败3次熔断，30分钟冷却</div>
+          <div class="arch-module"><strong>📈 资源监控</strong>CPU/内存/磁盘实时监控</div>
+          <div class="arch-module"><strong>🧹 自动清理</strong>日志轮转，垃圾文件自动清理</div>
+        </div>
+      </div>
+      <div class="arch-arrow">▼</div>
+      
+      <!-- L4 验证学习层 -->
+      <div class="arch-layer">
+        <div class="arch-layer-label">L4<br>验证学习</div>
+        <div class="arch-modules" style="grid-template-columns:repeat(3,1fr)">
+          <div class="arch-module"><strong>✅ 结果验证</strong>执行后自动验证，失败触发回滚</div>
+          <div class="arch-module"><strong>📚 经验学习</strong>成功/失败经验入库，持续优化</div>
+          <div class="arch-module"><strong>🔔 通知告警</strong>飞书通知，关键事件实时推送</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 核心功能 -->
+<section class="section" style="background:rgba(212,175,55,0.02)">
+  <div class="container">
+    <h2 class="section-title">六大核心能力</h2>
+    <p class="section-subtitle">每个能力都是独立算子，可组合编排，覆盖运维全场景</p>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3 class="feature-title">智能任务引擎</h3>
+        <p class="feature-desc">自然语言目标自动拆解为任务DAG，13+内置模板覆盖常见运维场景</p>
+        <ul class="feature-list">
+          <li>目标→任务自动拆解</li>
+          <li>DAG依赖拓扑执行</li>
+          <li>8种状态完整生命周期</li>
+          <li>20+ RESTful API端点</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3 class="feature-title">飞书交互式审批</h3>
+        <p class="feature-desc">P0-P2高风险任务自动推送飞书卡片，一键审批，人机协同</p>
+        <ul class="feature-list">
+          <li>交互式卡片审批</li>
+          <li>分级审批策略</li>
+          <li>审批结果自动回写</li>
+          <li>完整审批留痕</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🔧</div>
+        <h3 class="feature-title">自愈引擎</h3>
+        <p class="feature-desc">60秒循环检测，8个核心服务监控，异常自动修复，无需人工干预</p>
+        <ul class="feature-list">
+          <li>6层闭环：检测→分析→修复→验证→学习→归档</li>
+          <li>8个核心服务监控</li>
+          <li>修复命令白名单安全机制</li>
+          <li>日志自动轮转（50MB上限）</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3 class="feature-title">熔断保护机制</h3>
+        <p class="feature-desc">连续失败3次自动熔断，30分钟冷却，防止死循环和资源耗尽</p>
+        <ul class="feature-list">
+          <li>3次失败熔断阈值</li>
+          <li>30分钟冷却时间</li>
+          <li>每日1440次循环上限</li>
+          <li>熔断状态实时监控告警</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">资源监控告警</h3>
+        <p class="feature-desc">CPU/内存/磁盘/进程全方位监控，异常自动告警，阈值可配置</p>
+        <ul class="feature-list">
+          <li>实时资源监控</li>
+          <li>多级阈值告警</li>
+          <li>飞书/邮件多渠道通知</li>
+          <li>历史趋势分析</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3 class="feature-title">经验学习进化</h3>
+        <p class="feature-desc">每次运维操作自动记录经验，成功/失败案例入库，持续优化策略</p>
+        <ul class="feature-list">
+          <li>自动经验沉淀</li>
+          <li>失败案例溯源学习</li>
+          <li>策略持续优化</li>
+          <li>知识库可检索</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 自动化运维流程 -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">自动化运维全流程</h2>
+    <p class="section-subtitle">从目标输入到任务完成的完整闭环，人工只需审批高风险操作</p>
+    
+    <div class="flow-diagram">
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-num">1</div>
+          <div class="flow-step-title">🎯 目标输入</div>
+          <div class="flow-step-desc">自然语言描述运维目标，系统自动理解</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-num">2</div>
+          <div class="flow-step-title">📋 智能规划</div>
+          <div class="flow-step-desc">自动拆解为任务DAG，评估风险等级</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-num">3</div>
+          <div class="flow-step-title">💬 飞书审批</div>
+          <div class="flow-step-desc">高风险任务推送卡片，人工一键审批</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-num">4</div>
+          <div class="flow-step-title">⚙️ 自动执行</div>
+          <div class="flow-step-desc">调度器按DAG顺序执行，实时监控进度</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-num">5</div>
+          <div class="flow-step-title">🔧 自愈修复</div>
+          <div class="flow-step-desc">异常自动检测修复，熔断保护防止死循环</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-num">6</div>
+          <div class="flow-step-title">✅ 验证归档</div>
+          <div class="flow-step-desc">结果自动验证，经验入库，通知完成</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 核心服务状态 -->
+<section class="section" style="background:rgba(212,175,55,0.02)">
+  <div class="container">
+    <h2 class="section-title">核心运维服务</h2>
+    <p class="section-subtitle">所有服务7×24小时运行，自愈引擎持续监控保护</p>
+    
+    <div class="status-grid">
+      <div class="status-item">
+        <div class="status-info">
+          <div class="status-icon">🎛️</div>
+          <div>
+            <div class="status-name">运维平台</div>
+            <div class="status-desc">ops-platform · 端口8090</div>
+          </div>
+        </div>
+        <span class="status-tag running">● 运行中</span>
+      </div>
+      
+      <div class="status-item">
+        <div class="status-info">
+          <div class="status-icon">🔧</div>
+          <div>
+            <div class="status-name">自愈引擎</div>
+            <div class="status-desc">zongyuan-self-healing · 60s循环</div>
+          </div>
+        </div>
+        <span class="status-tag running">● 运行中</span>
+      </div>
+      
+      <div class="status-item">
+        <div class="status-info">
+          <div class="status-icon">🎯</div>
+          <div>
+            <div class="status-name">任务引擎</div>
+            <div class="status-desc">task-engine · 5s调度</div>
+          </div>
+        </div>
+        <span class="status-tag running">● 运行中</span>
+      </div>
+      
+      <div class="status-item">
+        <div class="status-info">
+          <div class="status-icon">💬</div>
+          <div>
+            <div class="status-name">飞书网关</div>
+            <div class="status-desc">feishu-gateway · 端口8050</div>
+          </div>
+        </div>
+        <span class="status-tag running">● 运行中</span>
+      </div>
+      
+      <div class="status-item">
+        <div class="status-info">
+          <div class="status-icon">⚓</div>
+          <div>
+            <div class="status-name">内核锚定服务</div>
+            <div class="status-desc">zongyuan-kernel-anchor · 端口8013</div>
+          </div>
+        </div>
+        <span class="status-tag running">● 运行中</span>
+      </div>
+      
+      <div class="status-item">
+        <div class="status-info">
+          <div class="status-icon">🧠</div>
+          <div>
+            <div class="status-name">Ω-Brainμ 真值中枢</div>
+            <div class="status-desc">zongyuan-omega · 端口8000 · 168条真值</div>
+          </div>
+        </div>
+        <span class="status-tag running">● 运行中</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 快速入口 -->
+<section class="section">
+  <div class="container" style="text-align:center">
+    <h2 class="section-title" style="justify-content:center">立即体验</h2>
+    <p class="section-subtitle" style="text-align:center;margin-left:0">进入运维平台，体验全链路自动化运维</p>
+    <div class="hero-buttons">
+      <a href="https://console.huodouai.com/" class="btn-primary" target="_blank">🚀 进入运维平台</a>
+      <a href="https://huodouai.com/developer-center.html" class="btn-secondary">📖 API文档</a>
+    </div>
+  </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="https://www.huodouai.com/">🏠 官方主站</a>
+        <a href="https://huodouai.com/">🚀 应用平台</a>
+        <a href="/architecture/">🏗️ 系统架构</a>
+        <a href="/internal/status-center.html">📊 系统状态</a>
+        <a href="/docs/developer-center.html">🔌 开发者中心</a>
+      </div>
+      <div class="footer-text">
+        火斗云智AIOS · 云内核运维中枢<br>
+        确权锚点：Ω₀⊂⊙∞⊂Ω | DID-BR-000002<br>
+        © 2026 火斗云智. All rights reserved.
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS - 最优稳态优化方案</title>
+<style>
+:root {
+  --primary: #2563eb; --primary-light: #eff6ff; --accent: #06b6d4;
+  --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+  --gray-600: #4b5563; --gray-800: #1f2937; --gray-900: #111827;
+  --success: #10b981; --success-bg: #ecfdf5; --warning: #f59e0b; --warning-bg: #fffbeb;
+  --danger: #ef4444; --danger-bg: #fef2f2; --info-bg: #eff6ff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif; background: var(--gray-50); color: var(--gray-800); line-height:1.6; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+.header { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #06b6d4 100%); color: #fff; padding: 50px 0 40px; }
+.header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { font-size: 0.95rem; opacity: 0.9; }
+.header .meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.8rem; opacity: 0.85; margin-top: 16px; }
+.formula { background: rgba(255,255,255,0.15); padding: 12px 20px; border-radius: 8px; margin-top: 20px; font-size: 0.9rem; }
+.formula strong { color: #fbbf24; }
+.section { background: #fff; border-radius: 12px; padding: 28px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--gray-200); }
+.section h2 { font-size: 1.25rem; font-weight: 700; color: var(--gray-900); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); display: flex; align-items: center; gap: 10px; }
+.section h2 .icon { width: 30px; height: 30px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.section h3 { font-size: 1rem; font-weight: 600; color: var(--gray-800); margin: 20px 0 10px; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.8rem; }
+th { background: var(--gray-50); text-align: left; padding: 10px 12px; font-weight: 600; color: var(--gray-600); border-bottom: 2px solid var(--gray-200); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--gray-100); vertical-align: top; }
+tr:hover { background: var(--gray-50); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+.badge.success { background: var(--success-bg); color: var(--success); }
+.badge.warning { background: var(--warning-bg); color: var(--warning); }
+.badge.danger { background: var(--danger-bg); color: var(--danger); }
+.badge.info { background: var(--info-bg); color: var(--primary); }
+.score { font-weight: 700; font-size: 0.95rem; }
+.score.high { color: var(--success); }
+.score.mid { color: var(--warning); }
+.score.low { color: var(--danger); }
+.phase-card { border-left: 4px solid var(--primary); padding: 16px 20px; margin: 16px 0; background: var(--gray-50); border-radius: 0 8px 8px 0; }
+.phase-card .phase-title { font-size: 1.05rem; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+.phase-card .phase-meta { font-size: 0.78rem; color: var(--gray-600); margin-bottom: 10px; }
+.phase-card ul { margin-left: 18px; font-size: 0.85rem; }
+.phase-card li { margin: 4px 0; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.metric-box { background: var(--gray-50); border-radius: 8px; padding: 14px; text-align: center; }
+.metric-box .num { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
+.metric-box .label { font-size: 0.72rem; color: var(--gray-600); margin-top: 2px; }
+.risk-matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+.risk-cell { padding: 12px; border-radius: 8px; text-align: center; font-size: 0.8rem; }
+.risk-cell.high { background: var(--danger-bg); color: var(--danger); }
+.risk-cell.mid { background: var(--warning-bg); color: var(--warning); }
+.risk-cell.low { background: var(--success-bg); color: var(--success); }
+.footer { text-align: center; padding: 30px 0; color: var(--gray-600); font-size: 0.78rem; }
+@media (max-width: 768px) { .two-col, .risk-matrix { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <h1>火斗云智AIOS · 最优稳态优化方案</h1>
+    <div class="subtitle">基于三维稳态决策公式的系统进化推演</div>
+    <div class="meta">
+      <span>📅 推演时间：2026-09-13</span>
+      <span>🆔 DID-BR-000002</span>
+      <span>🔗 Ω₀⊂⊙∞⊂Ω</span>
+      <span>📊 V1.0</span>
+    </div>
+    <div class="formula">
+      三维稳态决策公式：<strong>综合评分 = 利益×40% + (1-风险)×35% + (1-成本)×25%</strong>
+      ｜ 零成本约束：所有优化项必须满足MR-021元法则
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 一、当前稳态基线 -->
+<div class="section">
+  <h2><span class="icon">📊</span>一、当前稳态基线评估</h2>
+  <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:12px; margin-bottom:20px;">
+    <div class="metric-box"><div class="num">92.6%</div><div class="label">CPU空闲率</div></div>
+    <div class="metric-box"><div class="num">1.7G</div><div class="label">可用内存</div></div>
+    <div class="metric-box"><div class="num">0.10</div><div class="label">1分钟负载</div></div>
+    <div class="metric-box"><div class="num">0</div><div class="label">OOM事件</div></div>
+  </div>
+  <table>
+    <tr><th>维度</th><th>当前状态</th><th>稳态评分</th><th>瓶颈分析</th></tr>
+    <tr><td>计算资源</td><td>4核/3.6G，CPU空闲92.6%</td><td><span class="score high">优秀</span></td><td>无瓶颈，资源充足</td></tr>
+    <tr><td>内存资源</td><td>1.8G使用，1.7G可用，Swap 164M</td><td><span class="score high">良好</span></td><td>llama-server占647M，vector_server占1G</td></tr>
+    <tr><td>存储资源</td><td>20G/60G（34%），IO util 4.7%</td><td><span class="score high">优秀</span></td><td>无瓶颈</td></tr>
+    <tr><td>服务稳定性</td><td>58服务运行，14MR全在线</td><td><span class="score high">良好</span></td><td>部分子域名异常（kunlun 403/grafana 502）</td></tr>
+    <tr><td>功能完整度</td><td>10业务线，275页面</td><td><span class="score mid">中等</span></td><td>部分业务线前端/API联调待完善</td></tr>
+    <tr><td>架构整洁度</td><td>83目录，部分冗余</td><td><span class="score mid">中等</span></td><td>staging/dev环境、v2旧页面待清理</td></tr>
+    <tr><td>可观测性</td><td>MR-007/008监控，无统一仪表盘</td><td><span class="score mid">中等</span></td><td>Grafana 502，缺少统一监控视图</td></tr>
+    <tr><td>零成本运行</td><td>本地LLM 92%，0外部调用</td><td><span class="score high">优秀</span></td><td>MR-021已锁档保护</td></tr>
+  </table>
+  <p style="margin-top:12px; padding:12px; background:var(--info-bg); border-radius:8px; font-size:0.88rem;">
+    <strong>核心判断：</strong>系统资源层面已达稳态（CPU/内存/IO均无瓶颈），优化重心应从"资源优化"转向"功能完善+架构整洁+体验提升+自治进化"。
+  </p>
+</div>
+
+<!-- 二、优化项三维评估 -->
+<div class="section">
+  <h2><span class="icon">⚖️</span>二、优化项三维稳态评估（15项）</h2>
+  <p style="font-size:0.85rem; color:var(--gray-600); margin-bottom:12px;">评分公式：综合 = 利益×40% + (1-风险)×35% + (1-成本)×25%，满分100</p>
+  <table>
+    <tr><th>#</th><th>优化项</th><th>利益40%</th><th>风险35%</th><th>成本25%</th><th>综合</th><th>优先级</th></tr>
+    <tr><td>1</td><td>修复kunlun子域名403</td><td>85</td><td>95(低)</td><td>100(零)</td><td class="score high">92.5</td><td><span class="badge danger">P0紧急</span></td></tr>
+    <tr><td>2</td><td>统一API健康检查端点</td><td>80</td><td>95(低)</td><td>100(零)</td><td class="score high">90.5</td><td><span class="badge danger">P0紧急</span></td></tr>
+    <tr><td>3</td><td>清理staging/dev环境（340M）</td><td>70</td><td>90(低)</td><td>100(零)</td><td class="score high">84.5</td><td><span class="badge warning">P1高</span></td></tr>
+    <tr><td>4</td><td>短剧前端与API联调完善</td><td>90</td><td>80(中)</td><td>100(零)</td><td class="score high">87.0</td><td><span class="badge warning">P1高</span></td></tr>
+    <tr><td>5</td><td>政务中台前端功能完善</td><td>88</td><td>80(中)</td><td>100(零)</td><td class="score high">86.2</td><td><span class="badge warning">P1高</span></td></tr>
+    <tr><td>6</td><td>智能工作台前端整合</td><td>85</td><td>85(中低)</td><td>100(零)</td><td class="score high">86.8</td><td><span class="badge warning">P1高</span></td></tr>
+    <tr><td>7</td><td>智能交互窗口体验优化</td><td>82</td><td>85(中低)</td><td>100(零)</td><td class="score high">85.6</td><td><span class="badge warning">P1高</span></td></tr>
+    <tr><td>8</td><td>统一登录/权限体系整合</td><td>75</td><td>70(中高)</td><td>95(极低)</td><td class="score mid">78.8</td><td><span class="badge info">P2中</span></td></tr>
+    <tr><td>9</td><td>本地模型升级0.5B→1.5B</td><td>88</td><td>60(高)</td><td>100(零)</td><td class="score mid">79.0</td><td><span class="badge info">P2中</span></td></tr>
+    <tr><td>10</td><td>统一监控仪表盘（替代Grafana）</td><td>72</td><td>90(低)</td><td>100(零)</td><td class="score high">85.3</td><td><span class="badge warning">P1高</span></td></tr>
+    <tr><td>11</td><td>v2旧页面清理（45页）</td><td>60</td><td>85(中低)</td><td>100(零)</td><td class="score mid">77.8</td><td><span class="badge info">P2中</span></td></tr>
+    <tr><td>12</td><td>pages目录合并（21页）</td><td>55</td><td>90(低)</td><td>100(零)</td><td class="score mid">76.5</td><td><span class="badge info">P2中</span></td></tr>
+    <tr><td>13</td><td>API文档自动生成</td><td>68</td><td>95(低)</td><td>100(零)</td><td class="score high">82.7</td><td><span class="badge info">P2中</span></td></tr>
+    <tr><td>14</td><td>CDN加速配置</td><td>70</td><td>80(中)</td><td>70(可能付费)</td><td class="score mid">71.5</td><td><span class="badge warning">需审核</span></td></tr>
+    <tr><td>15</td><td>多语言支持（中/英）</td><td>65</td><td>85(中低)</td><td>100(零)</td><td class="score mid">78.3</td><td><span class="badge info">P3低</span></td></tr>
+  </table>
+</div>
+
+<!-- 三、风险矩阵 -->
+<div class="section">
+  <h2><span class="icon">🎯</span>三、优化优先级风险矩阵</h2>
+  <div class="risk-matrix">
+    <div class="risk-cell high"><strong>高利益·高风险</strong><br>本地模型升级<br>统一登录整合</div>
+    <div class="risk-cell mid"><strong>高利益·中风险</strong><br>短剧/政务/工作台<br>前端功能完善</div>
+    <div class="risk-cell low"><strong>高利益·低风险</strong><br>⭐ 修复子域名<br>⭐ 统一健康检查<br>⭐ 统一监控仪表盘</div>
+    <div class="risk-cell mid"><strong>中利益·高风险</strong><br>CDN加速（需付费审核）</div>
+    <div class="risk-cell low"><strong>中利益·中风险</strong><br>API文档生成<br>多语言支持</div>
+    <div class="risk-cell low"><strong>中利益·低风险</strong><br>环境清理<br>目录合并<br>v2页面清理</div>
+    <div class="risk-cell low"><strong>低利益·高风险</strong><br>（无）</div>
+    <div class="risk-cell low"><strong>低利益·中风险</strong><br>（无）</div>
+    <div class="risk-cell low"><strong>低利益·低风险</strong><br>（无）</div>
+  </div>
+  <p style="font-size:0.85rem; color:var(--gray-600);">
+    <strong>最优策略：</strong>优先执行"高利益·低风险"项（P0），快速见效；然后推进"高利益·中风险"项（P1），提升核心业务；谨慎评估"高利益·高风险"项（P2），需充分测试。
+  </p>
+</div>
+
+<!-- 四、四阶段进化路径 -->
+<div class="section">
+  <h2><span class="icon">🚀</span>四、四阶段最优稳态进化路径</h2>
+
+  <div class="phase-card" style="border-left-color: var(--danger);">
+    <div class="phase-title">阶段一：紧急修复（1-3天）— 消除显性故障</div>
+    <div class="phase-meta">目标：修复所有已知故障，系统100%可用 ｜ 预估：3项 ｜ 零成本</div>
+    <ul>
+      <li><strong>P0-1：修复kunlun.huodouai.com 403</strong> — 检查Nginx配置root路径，确认kunlun/目录内容，修复访问权限</li>
+      <li><strong>P0-2：统一API健康检查端点</strong> — 为所有60+服务添加/health端点，返回JSON状态，接入统一监控</li>
+      <li><strong>P0-3：Grafana 502处理</strong> — 评估是否需要Grafana，如不需要则移除子域名和导航链接；如需要则启动服务</li>
+    </ul>
+  </div>
+
+  <div class="phase-card" style="border-left-color: var(--warning);">
+    <div class="phase-title">阶段二：核心业务完善（1-2周）— 提升业务价值</div>
+    <div class="phase-meta">目标：四大核心业务线前端/API联调完成 ｜ 预估：5项 ｜ 零成本</div>
+    <ul>
+      <li><strong>P1-1：短剧流水线前端完善</strong> — drama.huodouai.com页面与8012/8628 API联调，角色管理、任务提交、结果展示</li>
+      <li><strong>P1-2：政务AI中台前端完善</strong> — gov.huodouai.com与8200-8203 API联调，智能体管理、数据大屏、审计日志</li>
+      <li><strong>P1-3：智能工作台整合</strong> — workbench/统一入口，整合算子调度(8072)、任务管理(8080)、稳态运维(8090)</li>
+      <li><strong>P1-4：智能交互窗口优化</strong> — experience/与Agent Hub(8023)联调，WebSocket实时推送(9140)，对话体验优化</li>
+      <li><strong>P1-5：统一监控仪表盘</strong> — 自建轻量监控页（替代Grafana），展示58服务状态、资源使用、真值统计</li>
+    </ul>
+  </div>
+
+  <div class="phase-card" style="border-left-color: var(--primary);">
+    <div class="phase-title">阶段三：架构整洁与能力升级（2-4周）— 夯实稳态基础</div>
+    <div class="phase-meta">目标：架构整洁度提升，核心能力升级 ｜ 预估：5项 ｜ 零成本</div>
+    <ul>
+      <li><strong>P2-1：环境清理</strong> — 移除gov-staging/gov-dev（340M），备份后删除，释放磁盘空间</li>
+      <li><strong>P2-2：目录结构优化</strong> — pages/21页合并到对应板块，v2/45页确认无依赖后删除</li>
+      <li><strong>P2-3：统一登录/权限体系</strong> — 整合identity-console、rbac-admin、主权根(8031)，建立SSO</li>
+      <li><strong>P2-4：本地模型升级评估</strong> — 在测试环境验证Qwen2.5-1.5B性能，评估内存占用（预计1.2-1.5G），稳定后替换0.5B</li>
+      <li><strong>P2-5：API文档自动生成</strong> — 基于代码注释自动生成API文档，部署到docs.huodouai.com</li>
+    </ul>
+  </div>
+
+  <div class="phase-card" style="border-left-color: var(--success);">
+    <div class="phase-title">阶段四：自治进化与体验升华（1-3月）— 迈向永恒自治</div>
+    <div class="phase-meta">目标：内核能力进化，用户体验升华 ｜ 预估：4项 ｜ 零成本</div>
+    <ul>
+      <li><strong>P3-1：MR-020元极内核能力深化</strong> — 增强终极自指能力，实现代码自优化闭环，减少人工干预</li>
+      <li><strong>P3-2：多语言支持</strong> — 官网/文档中/英双语，拓展国际用户</li>
+      <li><strong>P3-3：A/B测试框架</strong> — 建立页面A/B测试能力，数据驱动优化</li>
+      <li><strong>P3-4：SEO持续监控</strong> — 建立搜索引擎排名监控，自动生成优化建议</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 五、关键决策点 -->
+<div class="section">
+  <h2><span class="icon">🔑</span>五、关键决策点（需人工确认）</h2>
+  <table>
+    <tr><th>决策项</th><th>选项A</th><th>选项B</th><th>建议</th></tr>
+    <tr>
+      <td><strong>Grafana去留</strong></td>
+      <td>启动Grafana服务（占用资源）</td>
+      <td>移除Grafana，自建轻量监控（零额外资源）</td>
+      <td><span class="badge success">建议B</span></td>
+    </tr>
+    <tr>
+      <td><strong>本地模型升级</strong></td>
+      <td>保持0.5B（内存占用低，能力有限）</td>
+      <td>升级1.5B（内存+600M，能力显著提升）</td>
+      <td><span class="badge warning">评估后决定</span></td>
+    </tr>
+    <tr>
+      <td><strong>CDN加速</strong></td>
+      <td>配置CDN（可能产生费用）</td>
+      <td>Nginx本地缓存+Gzip（零成本，已配置）</td>
+      <td><span class="badge success">建议B（MR-021约束）</span></td>
+    </tr>
+    <tr>
+      <td><strong>staging环境</strong></td>
+      <td>保留（用于测试）</td>
+      <td>删除（340M空间，测试用本地仿真）</td>
+      <td><span class="badge success">建议B（备份后删除）</span></td>
+    </tr>
+  </table>
+</div>
+
+<!-- 六、预期效果 -->
+<div class="section">
+  <h2><span class="icon">📈</span>六、优化后预期稳态指标</h2>
+  <div class="two-col">
+    <div>
+      <h3>优化前（当前）</h3>
+      <table>
+        <tr><td>子域名可用率</td><td>10/12 (83%)</td></tr>
+        <tr><td>API健康检查覆盖</td><td>约30%</td></tr>
+        <tr><td>核心业务联调率</td><td>约50%</td></tr>
+        <tr><td>架构整洁度</td><td>中等（83目录）</td></tr>
+        <tr><td>统一监控</td><td>无（Grafana 502）</td></tr>
+        <tr><td>本地模型能力</td><td>0.5B（基础）</td></tr>
+        <tr><td>零成本运行</td><td>✅ 已实现</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>优化后（四阶段完成）</h3>
+      <table>
+        <tr><td>子域名可用率</td><td><span class="score high">12/12 (100%)</span></td></tr>
+        <tr><td>API健康检查覆盖</td><td><span class="score high">100%</span></td></tr>
+        <tr><td>核心业务联调率</td><td><span class="score high">95%+</span></td></tr>
+        <tr><td>架构整洁度</td><td><span class="score high">优秀（~60目录）</span></td></tr>
+        <tr><td>统一监控</td><td><span class="score high">自建仪表盘</span></td></tr>
+        <tr><td>本地模型能力</td><td><span class="score high">1.5B（可选）</span></td></tr>
+        <tr><td>零成本运行</td><td><span class="score high">✅ 持续保持</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 七、执行原则 -->
+<div class="section">
+  <h2><span class="icon">📜</span>七、执行原则（铁律）</h2>
+  <ul style="margin-left:20px; font-size:0.9rem; line-height:2;">
+    <li><strong>零成本铁律</strong>：所有优化必须满足MR-021，付费操作需人工审核，禁止自动产生费用</li>
+    <li><strong>备份优先</strong>：任何修改前先备份，保留回滚能力</li>
+    <li><strong>小步快跑</strong>：每项优化独立验证，不批量改动，降低风险</li>
+    <li><strong>先修复后优化</strong>：P0故障修复优先于P1功能完善，优先于P2架构优化</li>
+    <li><strong>本地仿真验证</strong>：重大变更先在本地仿真测试，通过后再部署</li>
+    <li><strong>人工审核部署</strong>：本地仿真通过后，经人工确认方可同步到生产</li>
+    <li><strong>真值驱动闭环</strong>：每步操作拉取9120记忆→对比→规划→执行→上报</li>
+  </ul>
+</div>
+
+</div>
+
+<div class="footer">
+  <p>火斗云智AIOS · 最优稳态优化方案 V1.0</p>
+  <p>三维稳态公式：利益40% / 风险35% / 成本25% ｜ 零成本约束：MR-021</p>
+  <p>确权：DID-BR-000002 ｜ 溯源：Ω₀⊂⊙∞⊂Ω ｜ 2026-09-13</p>
+</div>
+
+</body>
+</html>

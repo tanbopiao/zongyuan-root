@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智 · AI Token网关 - 企业级多模型统一接入平台</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a0f; color:#e0e0e0; font-family:'PingFang SC','Microsoft YaHei',sans-serif; line-height:1.6; }
+.hero { background:linear-gradient(135deg,#1a1a2e 0%,#0f0f1a 50%,#1a1a2e 100%); padding:60px 30px; text-align:center; border-bottom:2px solid #d4af37; position:relative; overflow:hidden; }
+.hero::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle,rgba(212,175,55,0.05) 0%,transparent 70%); animation:pulse 4s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+.hero h1 { color:#d4af37; font-size:36px; letter-spacing:2px; margin-bottom:15px; position:relative; }
+.hero .subtitle { color:#aaa; font-size:16px; max-width:700px; margin:0 auto 20px; position:relative; }
+.hero .badges { display:flex; justify-content:center; gap:15px; flex-wrap:wrap; position:relative; }
+.hero .badge { padding:6px 16px; border:1px solid rgba(212,175,55,0.3); border-radius:20px; font-size:12px; color:#d4af37; background:rgba(212,175,55,0.05); }
+.container { max-width:1200px; margin:0 auto; padding:30px 20px; }
+.section { margin-bottom:50px; }
+.section-title { color:#d4af37; font-size:22px; margin-bottom:25px; padding-bottom:12px; border-bottom:1px solid #333; display:flex; align-items:center; gap:10px; }
+.section-title .icon { font-size:26px; }
+.grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(350px,1fr)); gap:20px; }
+.grid-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; }
+.grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px; }
+.card { background:#1a1a2e; border:1px solid #333; border-radius:10px; padding:22px; position:relative; transition:transform .2s,box-shadow .2s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(212,175,55,0.15); }
+.card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,#d4af37,transparent); }
+.card.featured { border-color:#d4af37; }
+.card h3 { color:#d4af37; font-size:16px; margin-bottom:12px; }
+.card .price { font-size:32px; font-weight:bold; color:#fff; margin:10px 0; }
+.card .price .unit { font-size:13px; color:#888; font-weight:normal; }
+.card .desc { color:#aaa; font-size:13px; margin-bottom:15px; }
+.card ul { list-style:none; }
+.card ul li { padding:7px 0; font-size:12px; color:#bbb; border-bottom:1px solid #222; }
+.card ul li:last-child { border-bottom:none; }
+.card ul li::before { content:'✓ '; color:#4ade80; }
+.card ul li.no::before { content:'✗ '; color:#666; }
+.tag { display:inline-block; padding:3px 10px; border-radius:12px; font-size:10px; font-weight:bold; }
+.tag.free { background:#166534; color:#4ade80; }
+.tag.basic { background:#1e3a5f; color:#60a5fa; }
+.tag.pro { background:#713f12; color:#fbbf24; }
+.tag.enterprise { background:#7f1d1d; color:#f87171; }
+.tag.hot { background:#d4af37; color:#0a0a0f; }
+.compare-table { width:100%; border-collapse:collapse; font-size:12px; }
+.compare-table th { background:#1e1e2e; color:#d4af37; padding:12px 10px; text-align:left; border-bottom:2px solid #d4af37; }
+.compare-table td { padding:10px; border-bottom:1px solid #222; color:#bbb; }
+.compare-table tr:hover { background:rgba(212,175,55,0.05); }
+.compare-table .yes { color:#4ade80; }
+.compare-table .no { color:#666; }
+.compare-table .highlight { background:rgba(212,175,55,0.1); }
+.price-table { width:100%; border-collapse:collapse; font-size:13px; }
+.price-table th { background:#1e1e2e; color:#d4af37; padding:12px; text-align:left; border-bottom:2px solid #d4af37; }
+.price-table td { padding:10px 12px; border-bottom:1px solid #222; }
+.price-table .model-name { color:#fff; font-weight:500; }
+.price-table .tier { font-size:10px; padding:2px 8px; border-radius:3px; }
+.tier-free { background:#166534; color:#4ade80; }
+.tier-mid { background:#1e3a5f; color:#60a5fa; }
+.tier-high { background:#713f12; color:#fbbf24; }
+.stat-box { text-align:center; padding:20px; }
+.stat-box .num { font-size:36px; font-weight:bold; color:#d4af37; }
+.stat-box .label { font-size:12px; color:#888; margin-top:5px; }
+.feature-icon { font-size:28px; margin-bottom:10px; }
+.workflow { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:20px 0; }
+.workflow .step { background:#1a1a2e; border:1px solid #333; border-radius:8px; padding:15px 20px; text-align:center; min-width:120px; }
+.workflow .step .num { color:#d4af37; font-size:20px; font-weight:bold; }
+.workflow .step .label { font-size:11px; color:#aaa; margin-top:5px; }
+.workflow .arrow { color:#d4af37; font-size:20px; }
+.highlight-box { background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.05)); border:1px solid rgba(212,175,55,0.3); border-radius:10px; padding:25px; margin:20px 0; }
+.highlight-box h4 { color:#d4af37; margin-bottom:12px; font-size:16px; }
+.highlight-box p { color:#ccc; font-size:13px; margin-bottom:8px; }
+.footer { text-align:center; padding:30px; color:#555; font-size:11px; border-top:1px solid #222; margin-top:40px; }
+.footer span { color:#d4af37; }
+.api-code { background:#0d0d15; border:1px solid #333; border-radius:8px; padding:15px; font-family:'Courier New',monospace; font-size:12px; color:#4ade80; overflow-x:auto; margin:10px 0; }
+.api-code .comment { color:#666; }
+.api-code .key { color:#d4af37; }
+</style>
+
+<meta name="description" content="火斗云智AI Token网关 - 企业级多模型统一接入平台，支持OpenAI、豆包、文心、通义等主流大模型，统一API、智能路由、成本管控、用量统计。">
+<meta name="keywords" content="Token网关,AI网关,多模型,统一API,大模型接入,成本管控,火斗云智">
+<meta property="og:type" content="website">
+<meta property="og:title" content="火斗云智AI Token网关 - 企业级多模型统一接入平台，支持OpenAI、豆包、文心、通义等主流大模型，统一API、">
+<meta property="og:description" content="火斗云智AI Token网关 - 企业级多模型统一接入平台，支持OpenAI、豆包、文心、通义等主流大模型，统一API、智能路由、成本管控、用量统计。">
+<meta property="og:url" content="https://huodouai.com/token-gateway.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="火斗云智AI Token网关 - 企业级多模型统一接入平台，支持OpenAI、豆包、文心、通义等主流大模型，统一API、">
+<meta name="twitter:description" content="火斗云智AI Token网关 - 企业级多模型统一接入平台，支持OpenAI、豆包、文心、通义等主流大模型，统一API、智能路由、成本管控、用量统计。">
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/products/token-gateway.html">
+</head>
+<body><nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products/">产品中心</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">技术架构</a>
+<a href="/whitepapers/aios-v1.html">技术白皮书</a>
+<a href="/blog/">技术博客</a>
+<a href="/docs/">开发者文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+<div class="hero">
+  <h1>⚡ 火斗云智 · AI Token网关</h1>
+  <div class="subtitle">企业级多模型统一接入与智能调度平台 — 一个API Key调用所有主流大模型，免费优先调度，成本降低60%+</div>
+  <div class="badges">
+    <span class="badge">🔗 5+主流模型</span>
+    <span class="badge">💰 免费优先调度</span>
+    <span class="badge">🔄 故障自动切换</span>
+    <span class="badge">📊 用量可视化</span>
+    <span class="badge">🔒 企业级权限</span>
+    <span class="badge">✅ 真值确权</span>
+  </div>
+</div>
+<div class="container">
+
+  <!-- 市场对标 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🔍</span> 市场对标分析</div>
+    <div class="grid-3">
+      <div class="card">
+        <h3>🏢 主流大厂</h3>
+        <p class="desc">OpenAI / Anthropic / 阿里 / 百度 / 腾讯</p>
+        <ul>
+          <li>单模型锁定，切换成本高</li>
+          <li>按token计费，价格透明</li>
+          <li>高端模型$2-$10/百万输入</li>
+          <li>企业版需单独谈判</li>
+          <li>无跨模型智能调度</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🔄 集成商/中转</h3>
+        <p class="desc">OpenRouter / 硅基流动 / JellyToken</p>
+        <ul>
+          <li>多模型统一API</li>
+          <li>平台手续费5%-10%</li>
+          <li>按量付费为主</li>
+          <li>缺乏企业级治理</li>
+          <li>无真值确权能力</li>
+        </ul>
+      </div>
+      <div class="card featured">
+        <h3>🔥 火斗云智</h3>
+        <p class="desc">企业级AI Token网关 + 元运维平台</p>
+        <ul>
+          <li>多模型统一API + 智能调度</li>
+          <li>免费优先调度，成本降60%+</li>
+          <li>包月+按量双模式</li>
+          <li>同源微内核企业治理</li>
+          <li>真值确权 + 审计日志</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 核心优势 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">💎</span> 六大核心优势</div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="feature-icon">💰</div>
+        <h3>免费优先调度</h3>
+        <p class="desc">智能识别免费模型端点，优先调度免费资源，大幅降低API调用成本</p>
+        <div class="stat-box"><div class="num">60%+</div><div class="label">成本降低</div></div>
+      </div>
+      <div class="card">
+        <div class="feature-icon">🔗</div>
+        <h3>一个Key通吃</h3>
+        <p class="desc">兼容OpenAI API格式，一个API Key调用所有主流模型，无需切换</p>
+        <div class="stat-box"><div class="num">5+</div><div class="label">主流模型接入</div></div>
+      </div>
+      <div class="card">
+        <div class="feature-icon">🔄</div>
+        <h3>故障自动切换</h3>
+        <p class="desc">实时监控模型可用性，故障自动切换到备用模型，保障业务连续性</p>
+        <div class="stat-box"><div class="num">99.9%</div><div class="label">服务可用性</div></div>
+      </div>
+      <div class="card">
+        <div class="feature-icon">📊</div>
+        <h3>用量可视化</h3>
+        <p class="desc">实时监控token消耗、调用次数、模型分布，预算控制与告警</p>
+        <div class="stat-box"><div class="num">实时</div><div class="label">用量监控</div></div>
+      </div>
+      <div class="card">
+        <div class="feature-icon">🔒</div>
+        <h3>企业级权限</h3>
+        <p class="desc">多团队/多项目额度分配，API Key权限管理，IP白名单，调用限流</p>
+        <div class="stat-box"><div class="num">RBAC</div><div class="label">权限模型</div></div>
+      </div>
+      <div class="card">
+        <div class="feature-icon">✅</div>
+        <h3>真值确权</h3>
+        <p class="desc">Merkle-DAG哈希确权，调用记录不可篡改，满足合规审计要求</p>
+        <div class="stat-box"><div class="num">100%</div><div class="label">可追溯</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 接入模型 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🤖</span> 已接入模型矩阵</div>
+    <table class="price-table">
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>厂商</th>
+          <th>定位</th>
+          <th>输入(元/百万)</th>
+          <th>输出(元/百万)</th>
+          <th>状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="model-name">GLM-4-Flash</td>
+          <td>智谱AI</td>
+          <td><span class="tier tier-free">免费主力</span></td>
+          <td>¥0.00</td>
+          <td>¥0.00</td>
+          <td class="yes">✓ 已连通</td>
+        </tr>
+        <tr>
+          <td class="model-name">通义千问Max</td>
+          <td>阿里百炼</td>
+          <td><span class="tier tier-mid">中端</span></td>
+          <td>¥2.00</td>
+          <td>¥6.00</td>
+          <td class="yes">✓ 已连通</td>
+        </tr>
+        <tr>
+          <td class="model-name">豆包Pro</td>
+          <td>火山方舟</td>
+          <td><span class="tier tier-high">高端</span></td>
+          <td>¥5.00</td>
+          <td>¥15.00</td>
+          <td class="yes">✓ 已连通</td>
+        </tr>
+        <tr>
+          <td class="model-name">通义万相视频</td>
+          <td>阿里百炼</td>
+          <td><span class="tier tier-mid">多模态</span></td>
+          <td colspan="2">按次计费 ¥0.5/次</td>
+          <td class="yes">✓ 已连通</td>
+        </tr>
+        <tr>
+          <td class="model-name">DeepSeek-V3</td>
+          <td>深度求索</td>
+          <td><span class="tier tier-mid">中端</span></td>
+          <td>¥1.00</td>
+          <td>¥2.00</td>
+          <td class="no">○ 规划中</td>
+        </tr>
+        <tr>
+          <td class="model-name">GPT-4o</td>
+          <td>OpenAI</td>
+          <td><span class="tier tier-high">高端</span></td>
+          <td>¥18.00</td>
+          <td>¥54.00</td>
+          <td class="no">○ 规划中</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="color:#888;font-size:11px;margin-top:10px;">* 价格为火斗云智平台售价，包含平台服务费。免费模型仅收极低通道费。</p>
+  </div>
+
+  <!-- 定价方案 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">💰</span> 包月套餐定价</div>
+    <div class="grid-4">
+      <div class="card">
+        <div style="text-align:center;margin-bottom:15px;">
+          <span class="tag free">免费版</span>
+        </div>
+        <div class="price" style="text-align:center;">¥0<span class="unit">/月</span></div>
+        <p class="desc" style="text-align:center;">个人开发者 / 体验测试</p>
+        <ul>
+          <li>100万 Token/月</li>
+          <li>基础模型（GLM-4-Flash）</li>
+          <li>1个 API Key</li>
+          <li>基础用量统计</li>
+          <li class="no">智能调度</li>
+          <li class="no">团队管理</li>
+          <li class="no">真值确权</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="text-align:center;margin-bottom:15px;">
+          <span class="tag basic">基础版</span>
+        </div>
+        <div class="price" style="text-align:center;">¥99<span class="unit">/月</span></div>
+        <p class="desc" style="text-align:center;">小微企业 / 独立开发者</p>
+        <ul>
+          <li>1000万 Token/月</li>
+          <li>全部已接入模型</li>
+          <li>5个 API Key</li>
+          <li>智能调度+故障切换</li>
+          <li>用量可视化+预算告警</li>
+          <li class="no">团队管理</li>
+          <li class="no">真值确权</li>
+        </ul>
+      </div>
+      <div class="card featured">
+        <div style="text-align:center;margin-bottom:15px;">
+          <span class="tag pro">专业版</span> <span class="tag hot">推荐</span>
+        </div>
+        <div class="price" style="text-align:center;">¥399<span class="unit">/月</span></div>
+        <p class="desc" style="text-align:center;">中型企业 / AI团队</p>
+        <ul>
+          <li>5000万 Token/月</li>
+          <li>全部模型+优先调度</li>
+          <li>20个 API Key</li>
+          <li>团队管理+额度分配</li>
+          <li>真值确权+审计日志</li>
+          <li>IP白名单+调用限流</li>
+          <li>7x24技术支持</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div style="text-align:center;margin-bottom:15px;">
+          <span class="tag enterprise">企业版</span>
+        </div>
+        <div class="price" style="text-align:center;">定制<span class="unit">/年</span></div>
+        <p class="desc" style="text-align:center;">大型企业 / 集团</p>
+        <ul>
+          <li>无限 Token</li>
+          <li>全部模型+专属通道</li>
+          <li>无限 API Key</li>
+          <li>私有化部署</li>
+          <li>SSO/SAML单点登录</li>
+          <li>SLA 99.99%</li>
+          <li>专属客户经理</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 按量付费 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">⚡</span> 按量付费（充值模式）</div>
+    <div class="highlight-box">
+      <h4>灵活充值，用多少付多少</h4>
+      <p>不设月费，余额永不过期。充值即享平台统一费率，免费模型仅收通道费。</p>
+      <p><strong>充值优惠：</strong>充¥500送¥50 | 充¥2000送¥300 | 充¥5000送¥1000</p>
+    </div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>模型档位</th>
+          <th>代表模型</th>
+          <th>输入(元/百万)</th>
+          <th>输出(元/百万)</th>
+          <th>适用场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight">
+          <td><span class="tier tier-free">免费档</span></td>
+          <td>GLM-4-Flash</td>
+          <td>¥0.00</td>
+          <td>¥0.00</td>
+          <td>轻量高频、子域校验、免费容灾</td>
+        </tr>
+        <tr>
+          <td><span class="tier tier-mid">中端档</span></td>
+          <td>通义千问Max / DeepSeek</td>
+          <td>¥2.00</td>
+          <td>¥6.00</td>
+          <td>中文深度理解、文档解析、通用任务</td>
+        </tr>
+        <tr>
+          <td><span class="tier tier-high">高端档</span></td>
+          <td>豆包Pro / GPT-4o</td>
+          <td>¥5.00</td>
+          <td>¥15.00</td>
+          <td>创意生成、复杂推理、高质量输出</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 工作流程 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🔧</span> 三步接入流程</div>
+    <div class="workflow">
+      <div class="step"><div class="num">1</div><div class="label">注册获取API Key</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">2</div><div class="label">配置模型路由</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">3</div><div class="label">开始调用</div></div>
+    </div>
+    <div class="api-code">
+<span class="comment"># 兼容OpenAI格式，一行代码切换</span>
+<span class="key">from</span> openai <span class="key">import</span> OpenAI
+
+client = OpenAI(
+    api_key=<span class="key">"你的火斗云智API-Key"</span>,
+    base_url=<span class="key">"https://api.huodouai.com/v1"</span>
+)
+
+response = client.chat.completions.create(
+    model=<span class="key">"glm-4-flash"</span>,  <span class="comment"># 自动免费优先调度</span>
+    messages=[{<span class="key">"role"</span>: <span class="key">"user"</span>, <span class="key">"content"</span>: <span class="key">"你好"</span>}]
+)
+    </div>
+  </div>
+
+  <!-- 企业版增值 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🏢</span> 企业版增值服务</div>
+    <div class="grid-3">
+      <div class="card">
+        <h3>🔐 私有化部署</h3>
+        <p class="desc">完整网关部署到企业内网，数据不出域，满足金融/政务合规要求</p>
+      </div>
+      <div class="card">
+        <h3>📈 SLA保障</h3>
+        <p class="desc">99.99%服务可用性承诺，故障赔偿机制，专属运维通道</p>
+      </div>
+      <div class="card">
+        <h3>👥 专属支持</h3>
+        <p class="desc">专属客户经理+技术架构师，7x24小时响应，年度架构优化</p>
+      </div>
+      <div class="card">
+        <h3>🔗 同源微内核</h3>
+        <p class="desc">企业多节点统一治理，自动巡检自愈，元运维平台集成</p>
+      </div>
+      <div class="card">
+        <h3>✅ 真值确权</h3>
+        <p class="desc">调用记录Merkle-DAG哈希上链，不可篡改，满足审计合规</p>
+      </div>
+      <div class="card">
+        <h3>🎯 定制模型</h3>
+        <p class="desc">接入企业私有模型，微调模型托管，专属推理通道</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 成本对比 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📊</span> 成本对比测算</div>
+    <div class="highlight-box">
+      <h4>以月消耗1000万token为例（输入:输出=3:1）</h4>
+      <p>• 直接调用大厂高端模型：约 ¥300/月（$5/$15档位）</p>
+      <p>• 通用集成商（+10%手续费）：约 ¥330/月</p>
+      <p>• <strong>火斗云智（免费优先调度）：约 ¥120/月</strong> — 节省60%+</p>
+      <p style="color:#d4af37;margin-top:10px;">核心逻辑：70%轻量任务自动调度免费模型，30%复杂任务使用高端模型</p>
+    </div>
+  </div>
+
+</div>
+<div class="footer">
+  Ω₀⊂⊙∞⊂Ω | <span>DID-BR-000002</span> | 火斗云智 · AI Token网关 V1.0 | 企业级多模型统一接入平台
+</div>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products/">产品</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">架构</a>
+<a href="/whitepapers/aios-v1.html">白皮书</a>
+<a href="/docs/">文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域资产体系 · 架构与目录详解</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#121722; --panel2:#0f1420; --line:#232c3d;
+    --gold:#c9a227; --gold-soft:#e6c86a; --gold-dim:#8a7326;
+    --ink:#e6edf3; --muted:#8b949e;
+    --blue:#58a6ff; --green:#7ee787; --purple:#a371f7; --red:#f85149; --cyan:#39c5cf;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;line-height:1.65;}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;opacity:.05;
+    background:repeating-linear-gradient(45deg,#c9a227 0,#c9a227 1px,transparent 1px,transparent 22px);}
+  .head{text-align:center;padding:50px 24px 28px;border-bottom:1px solid var(--line);
+    background:radial-gradient(ellipse at top,rgba(201,162,39,.10),transparent 70%);}
+  .badge{display:inline-block;border:1px solid var(--gold-dim);color:var(--gold-soft);font-size:12px;letter-spacing:3px;padding:4px 16px;border-radius:3px;margin-bottom:14px;}
+  h1{font-size:clamp(24px,4vw,34px);font-weight:800;color:#fff;letter-spacing:1px;}
+  h1 span{color:var(--gold);}
+  .sub{font-size:14px;color:var(--muted);margin-top:8px;}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:30px 22px 50px;}
+  .sec{font-size:18px;color:var(--gold-soft);font-weight:700;margin:36px 0 16px;display:flex;align-items:center;gap:10px;}
+  .sec::before{content:"";width:4px;height:18px;background:var(--gold);border-radius:2px;}
+
+  /* ===== 架构图 ===== */
+  .arch{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:6px;}
+  .layer{border-radius:14px;padding:16px;border:1px solid var(--line);background:var(--panel);}
+  .layer .lt{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .layer .lt::before{content:"";width:3px;height:14px;border-radius:1px;}
+  .layer.ontology{border-top:3px solid var(--purple);}.layer.ontology .lt::before{background:var(--purple);}.layer.ontology .lt{color:var(--purple);}
+  .layer.operator{border-top:3px solid var(--gold);}.layer.operator .lt::before{background:var(--gold);}.layer.operator .lt{color:var(--gold-soft);}
+  .layer.runtime{border-top:3px solid var(--blue);}.layer.runtime .lt::before{background:var(--blue);}.layer.runtime .lt{color:var(--blue);}
+  .layer ul{list-style:none;}
+  .layer li{font-size:12.5px;color:#c0c8d0;padding:5px 0;border-bottom:1px dashed rgba(35,44,61,.5);}
+  .layer li:last-child{border-bottom:none;}
+  .layer li b{color:var(--gold-soft);font-weight:600;}
+  .layer .file{font-family:Menlo,Consolas,monospace;font-size:11px;color:var(--muted);}
+
+  /* ===== KPI ===== */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:6px;}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;}
+  .kpi .n{font-size:26px;font-weight:800;color:var(--gold-soft);}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:4px;}
+
+  /* ===== 目录 ===== */
+  .cat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:8px;}
+  .cat-row{display:flex;align-items:center;gap:14px;padding:9px 6px;border-bottom:1px dashed rgba(35,44,61,.6);}
+  .cat-row:last-child{border-bottom:none;}
+  .cat-row .type{min-width:96px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .cat-row .bar{flex:1;height:10px;background:#1a2230;border-radius:6px;overflow:hidden;}
+  .cat-row .bar i{display:block;height:100%;border-radius:6px;}
+  .cat-row .num{min-width:42px;text-align:right;font-size:13px;font-weight:700;color:var(--gold-soft);}
+  .cat-row .pct{min-width:52px;text-align:right;font-size:12px;color:var(--muted);}
+
+  /* ===== 取用流程 ===== */
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin-top:8px;}
+  .fnode{flex:1;min-width:150px;background:var(--panel);border:1px solid var(--gold-dim);border-radius:12px;padding:14px;text-align:center;}
+  .fnode .n{font-size:11px;color:var(--gold);letter-spacing:1px;font-weight:700;}
+  .fnode .t{font-size:13.5px;color:#fff;font-weight:700;margin-top:3px;}
+  .fnode .d{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  .farrow{display:flex;align-items:center;color:var(--gold-dim);font-weight:800;font-size:16px;}
+
+  /* ===== 表 ===== */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  th{background:rgba(201,162,39,.10);color:var(--gold-soft);text-align:left;padding:10px 12px;border:1px solid var(--line);font-weight:600;}
+  td{padding:10px 12px;border:1px solid var(--line);color:#c0c8d0;vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  code{color:var(--cyan);background:rgba(57,197,207,.08);padding:1px 6px;border-radius:4px;font-family:Menlo,Consolas,monospace;font-size:12px;}
+
+  /* ===== 存储层 ===== */
+  .stores{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:8px;}
+  .store{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;border-top:3px solid;}
+  .store.s1{border-top-color:var(--gold);}.store.s2{border-top-color:var(--blue);}.store.s3{border-top-color:var(--green);}
+  .store .st{font-size:14px;font-weight:700;margin-bottom:6px;}
+  .store.s1 .st{color:var(--gold-soft);}.store.s2 .st{color:var(--blue);}.store.s3 .st{color:var(--green);}
+  .store ul{list-style:none;}
+  .store li{font-size:12.5px;color:#c0c8d0;padding:4px 0;border-bottom:1px dashed rgba(35,44,61,.4);}
+  .store li:last-child{border-bottom:none;}
+  .store .tag{display:inline-block;font-size:10.5px;padding:1px 8px;border-radius:8px;margin-top:8px;border:1px solid var(--gold-dim);color:var(--gold-soft);}
+
+  .note{background:linear-gradient(135deg,rgba(201,162,39,.06),rgba(163,113,247,.04));border:1px solid var(--gold-dim);border-radius:12px;padding:16px;margin-top:14px;font-size:13px;color:#c0c8d0;}
+  .note b{color:var(--gold-soft);}
+
+  .foot{text-align:center;color:var(--gold-dim);font-size:11px;letter-spacing:1px;padding:22px;border-top:1px solid var(--line);margin-top:30px;}
+  .foot .trace{color:var(--gold-dim);font-size:11px;margin-top:6px;}
+
+  @media(max-width:800px){.arch{grid-template-columns:1fr;}.farrow{transform:rotate(90deg);}}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="badge">全域资产体系 · 架构与目录详解</div>
+  <h1>全域资产 <span>架构 · 目录 · 取用</span></h1>
+  <div class="sub">全域资产 · 火斗云智 AIOS</div>
+</div>
+
+<div class="wrap">
+
+  <!-- ===== 一、核心指标 ===== -->
+  <div class="sec">一、核心指标</div>
+  <div class="kpis">
+    <div class="kpi"><div class="n">484</div><div class="l">IMA 资产</div></div>
+    <div class="kpi"><div class="n">380</div><div class="l">记忆网关真值</div></div>
+    <div class="kpi"><div class="n">762</div><div class="l">历史版本</div></div>
+    <div class="kpi"><div class="n">704</div><div class="l">审计日志</div></div>
+    <div class="kpi"><div class="n">3</div><div class="l">存储层</div></div>
+    <div class="kpi"><div class="n">5</div><div class="l">取用步骤</div></div>
+  </div>
+
+  <!-- ===== 二、体系架构 ===== -->
+  <div class="sec">二、体系架构（三层）</div>
+  <div class="arch">
+    <div class="layer ontology">
+      <div class="lt">逻辑本体层</div>
+      <ul>
+        <li>公理 · 规则 · 不变量</li>
+        <li>漂移检测 · 真值锚定</li>
+        <li class="file">ontology_loader.py</li>
+        <li class="file">ontology_evolve.py</li>
+        <li class="file">merkle_dag.py</li>
+      </ul>
+    </div>
+    <div class="layer operator">
+      <div class="lt">算子执行层</div>
+      <ul>
+        <li>原子算子 · 熔断控制</li>
+        <li>子域隔离 · 资源复用</li>
+        <li class="file">drift_detector.py(100行)</li>
+        <li class="file">fuse_controller.py(63行)</li>
+        <li class="file">pipeline_builder.py(64行)</li>
+        <li class="file">subspace_isolate.py(83行)</li>
+      </ul>
+    </div>
+    <div class="layer runtime">
+      <div class="lt">代码执行层</div>
+      <ul>
+        <li>脚本沙盒 · 结果校验</li>
+        <li>资源配额 · 资产入库</li>
+        <li class="file">sandbox_exec.py(64行)</li>
+        <li class="file">resource_quota.py(50行)</li>
+        <li class="file">api_client.py(56行)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== 三、IMA 资产目录 ===== -->
+  <div class="sec">三、IMA 资产目录（484）</div>
+  <div class="cat">
+    <div class="cat-row"><div class="type">📄 PDF</div><div class="bar"><i style="width:72%;background:linear-gradient(90deg,#8a7326,#c9a227)"></i></div><div class="num">349</div><div class="pct">72.1%</div></div>
+    <div class="cat-row"><div class="type">📝 Word</div><div class="bar"><i style="width:13%;background:linear-gradient(90deg,#3b5b8a,#58a6ff)"></i></div><div class="num">65</div><div class="pct">13.4%</div></div>
+    <div class="cat-row"><div class="type">📁 文件夹</div><div class="bar"><i style="width:5%;background:linear-gradient(90deg,#5a3b8a,#a371f7)"></i></div><div class="num">26</div><div class="pct">5.4%</div></div>
+    <div class="cat-row"><div class="type">📓 笔记</div><div class="bar"><i style="width:4%;background:linear-gradient(90deg,#3b6b5a,#7ee787)"></i></div><div class="num">19</div><div class="pct">3.9%</div></div>
+    <div class="cat-row"><div class="type">📄 TXT</div><div class="bar"><i style="width:3%;background:linear-gradient(90deg,#6b5a3b,#c9a227)"></i></div><div class="num">12</div><div class="pct">2.5%</div></div>
+    <div class="cat-row"><div class="type">📊 Excel</div><div class="bar"><i style="width:2%;background:linear-gradient(90deg,#3b5a6b,#39c5cf)"></i></div><div class="num">11</div><div class="pct">2.3%</div></div>
+    <div class="cat-row"><div class="type">📘 Markdown</div><div class="bar"><i style="width:1%;background:linear-gradient(90deg,#5a3b4b,#f85149)"></i></div><div class="num">2</div><div class="pct">0.4%</div></div>
+  </div>
+
+  <!-- ===== 四、取用流程 ===== -->
+  <div class="sec">四、同源节点取用流程</div>
+  <div class="flow">
+    <div class="fnode"><div class="n">STEP 1</div><div class="t">扫记忆网关</div><div class="d">查 catalog / asset 目录真值</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">STEP 2</div><div class="t">定位目录</div><div class="d">catalog.IMA-ASSETS-FULL</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">STEP 3</div><div class="t">按 media_id 取</div><div class="d">路径指纹定位资产</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">STEP 4</div><div class="t">SHA256 校验</div><div class="d">完整性核验</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">STEP 5</div><div class="t">归属登记</div><div class="d">DID + 溯源</div></div>
+  </div>
+
+  <!-- ===== 五、部署与存储 ===== -->
+  <div class="sec">五、部署与存储</div>
+  <div class="stores">
+    <div class="store s1">
+      <div class="st">记忆网关（数据层）</div>
+      <ul>
+        <li>端口 9120 · V2.0</li>
+        <li>真值 380 · 历史 762</li>
+        <li>审计 704 · 决策 30</li>
+      </ul>
+      <span class="tag">catalog + trace 已写入</span>
+    </div>
+    <div class="store s2">
+      <div class="st">官网（展示层）</div>
+      <ul>
+        <li>www.huodouai.com</li>
+        <li>assets/catalog/ 目录</li>
+        <li>公网 200 可达</li>
+      </ul>
+      <span class="tag">目录 JSON 部署</span>
+    </div>
+    <div class="store s3">
+      <div class="st">飞书云盘 · 确权层</div>
+      <ul>
+        <li>飞书云盘·真值镜像</li>
+        <li>资产确权登记</li>
+        <li>链式溯源确权</li>
+      </ul>
+      <span class="tag">三层锁档</span>
+    </div>
+  </div>
+
+  <!-- ===== 六、真值登记表 ===== -->
+  <div class="sec">六、真值登记表</div>
+  <table>
+    <thead><tr><th>真值键</th><th>类型</th><th>作用</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><code>catalog.IMA-ASSETS-FULL-20260911</code></td><td>目录索引</td><td>484 资产全量目录 + 取用路径</td><td>已写入</td></tr>
+      <tr><td><code>trace.IMA-CATALOG-DEPLOY-20260911</code></td><td>成功轨迹</td><td>部署六步 + 避坑经验</td><td>已写入</td></tr>
+      <tr><td><code>index.catalog.global_truth_directory</code></td><td>全局目录</td><td>全域真值总索引（388）</td><td>已收录本目录</td></tr>
+      <tr><td><code>architecture.three_layer</code></td><td>架构</td><td>本体-算子-执行 三层</td><td>已存在</td></tr>
+      <tr><td><code>deployment.public_web_root</code></td><td>部署</td><td>官网根 + 静态路径</td><td>已存在</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <b>关键经验：</b>① archive/ 目录被 nginx <code>deny all</code> 安全拦截，目录须放 <code>assets/</code> 可公开路径；
+    ② 做事先扫记忆网关确认有无现成真值/路径，无则创建并回写成功轨迹，避免重复生产。
+  </div>
+
+</div>
+
+<div class="foot">火斗云智 AIOS · 全域资产体系可视化 V2
+  <div class="trace">Ω₀⊂⊙∞⊂Ω · 全域资产溯源确权 · 永久锁档</div>
+</div>
+
+</body>
+</html>

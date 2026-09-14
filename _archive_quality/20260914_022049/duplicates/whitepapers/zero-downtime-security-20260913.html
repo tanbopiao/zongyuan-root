@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>零中断安全优化方案 - 火斗云智AIOS</title>
+<style>
+:root { --primary:#2563eb; --danger:#ef4444; --warning:#f59e0b; --success:#10b981; --gray-50:#f9fafb; --gray-200:#e5e7eb; --gray-600:#4b5563; --gray-800:#1f2937; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif; background:var(--gray-50); color:var(--gray-800); line-height:1.6; }
+.container { max-width:1100px; margin:0 auto; padding:0 24px; }
+.header { background:linear-gradient(135deg,#14532d,#16a34a,#84cc16); color:#fff; padding:50px 0 40px; }
+.header h1 { font-size:1.7rem; font-weight:700; }
+.header .sub { font-size:0.95rem; opacity:0.9; margin-top:6px; }
+.section { background:#fff; border-radius:12px; padding:28px; margin:20px 0; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid var(--gray-200); }
+.section h2 { font-size:1.2rem; font-weight:700; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid var(--success); }
+.principle { padding:16px; background:#f0fdf4; border-radius:8px; border-left:4px solid var(--success); margin:14px 0; }
+.principle .title { font-weight:700; color:#166534; margin-bottom:6px; }
+table { width:100%; border-collapse:collapse; font-size:0.82rem; margin:12px 0; }
+th { background:var(--gray-50); text-align:left; padding:10px 12px; font-weight:600; border-bottom:2px solid var(--gray-200); }
+td { padding:10px 12px; border-bottom:1px solid var(--gray-200); }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:600; }
+.badge.danger { background:#fef2f2; color:var(--danger); }
+.badge.warning { background:#fffbeb; color:var(--warning); }
+.badge.success { background:#ecfdf5; color:var(--success); }
+.badge.info { background:#eff6ff; color:var(--primary); }
+.step { padding:14px; border-radius:8px; margin:12px 0; border:1px solid var(--gray-200); }
+.step .num { display:inline-block; width:24px; height:24px; background:var(--primary); color:#fff; border-radius:50%; text-align:center; line-height:24px; font-size:0.8rem; font-weight:700; margin-right:8px; }
+.step .title { font-weight:700; display:inline; }
+.step .detail { font-size:0.85rem; color:var(--gray-600); margin-top:8px; margin-left:32px; }
+.compare { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+.compare .col { padding:16px; border-radius:8px; }
+.compare .before { background:#fef2f2; border:1px solid #fecaca; }
+.compare .after { background:#ecfdf5; border:1px solid #a7f3d0; }
+.compare .col h4 { margin-bottom:8px; }
+.compare .col ul { margin-left:18px; font-size:0.82rem; }
+.footer { text-align:center; padding:30px 0; color:var(--gray-600); font-size:0.78rem; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="container">
+    <h1>零中断安全优化方案</h1>
+    <div class="sub">优化过程中确保所有功能正常运行 · 防火墙隔离优先 · 渐进式收敛</div>
+  </div>
+</div>
+<div class="container">
+
+<div class="section">
+  <h2>核心原则</h2>
+  <div class="principle">
+    <div class="title">✅ 零中断保证</div>
+    <div style="font-size:0.88rem;">
+      1. <strong>先代理后收敛</strong>：确保所有需要对外的API都有Nginx代理后，再做端口收敛<br>
+      2. <strong>防火墙隔离优先</strong>：不修改任何服务配置、不重启服务，通过防火墙拦截外部访问<br>
+      3. <strong>渐进式执行</strong>：每步操作后立即验证，有问题秒级回滚<br>
+      4. <strong>服务间调用不受影响</strong>：所有服务间调用均使用127.0.0.1，防火墙不拦截本地回环
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>依赖关系梳理结果</h2>
+  <table>
+    <tr><th>类别</th><th>详情</th><th>端口收敛影响</th></tr>
+    <tr><td>服务间调用</td><td>全部使用127.0.0.1，无公网IP调用</td><td><span class="badge success">无影响</span></td></tr>
+    <tr><td>外部回调</td><td>8060飞书审批回调（目前pending，未配置）</td><td><span class="badge warning">需Nginx代理/callback</span></td></tr>
+    <tr><td>本地仿真上报</td><td>9120记忆网关（本地电脑通过SSH隧道或公网上报）</td><td><span class="badge warning">需保留代理或白名单</span></td></tr>
+    <tr><td>Nginx已代理</td><td>50个端口已有Nginx反向代理</td><td><span class="badge success">可直接收敛</span></td></tr>
+    <tr><td>Nginx未代理</td><td>29个端口（含6379 Redis、8081 LLM、9120等）</td><td><span class="badge danger">高危，应内部化</span></td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>优化前后对比</h2>
+  <div class="compare">
+    <div class="col before">
+      <h4>❌ 优化前（当前）</h4>
+      <ul>
+        <li>60+端口直接暴露公网</li>
+        <li>6379 Redis可被外部访问</li>
+        <li>8081本地LLM可被外部调用</li>
+        <li>9120记忆网关真值可被查询</li>
+        <li>8021 AI代理可被外部滥用</li>
+        <li>防火墙policy=ACCEPT（全开放）</li>
+        <li>仅靠ipset黑名单（3639IP）被动防御</li>
+      </ul>
+    </div>
+    <div class="col after">
+      <h4>✅ 优化后</h4>
+      <ul>
+        <li>仅80/443/22对外</li>
+        <li>所有内部服务仅127.0.0.1可访问</li>
+        <li>对外API全部经Nginx代理+认证</li>
+        <li>防火墙policy=DROP（默认拒绝）</li>
+        <li>白名单机制（主动防御）</li>
+        <li>服务间调用不受影响</li>
+        <li>所有功能正常运行</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>执行步骤（零中断）</h2>
+
+  <div class="step">
+    <span class="num">1</span><span class="title">补全Nginx代理（确保对外API不中断）</span>
+    <div class="detail">
+      为需要对外但尚未代理的API添加Nginx反向代理：<br>
+      - 9120记忆网关 → <code>/api/memory/</code>（本地仿真上报用）<br>
+      - 8060飞书回调 → <code>/feishu/callback</code>（预留，待飞书配置）<br>
+      - 其他需要对外的API按需添加<br>
+      <strong>验证：</strong>通过Nginx代理路径访问API，确认返回正常
+    </div>
+  </div>
+
+  <div class="step">
+    <span class="num">2</span><span class="title">防火墙规则配置（不立即生效）</span>
+    <div class="detail">
+      添加iptables规则，但暂不修改默认策略：<br>
+      - 允许已建立的连接（ESTABLISHED,RELATED）<br>
+      - 允许loopback（127.0.0.1）<br>
+      - 允许80/443（Web服务）<br>
+      - 允许22（SSH，已有白名单）<br>
+      - 允许腾讯云内部健康检查IP<br>
+      <strong>验证：</strong>规则添加后不影响当前连接
+    </div>
+  </div>
+
+  <div class="step">
+    <span class="num">3</span><span class="title">设置回滚保险（关键）</span>
+    <div class="detail">
+      - 保存当前iptables规则：<code>iptables-save > /root/iptables.backup</code><br>
+      - 设置5分钟后自动回滚的定时任务：<code>echo "iptables-restore < /root/iptables.backup" | at now + 5 minutes</code><br>
+      - 如果5分钟内SSH断开，自动恢复原规则<br>
+      <strong>验证：</strong>确认at任务已创建
+    </div>
+  </div>
+
+  <div class="step">
+    <span class="num">4</span><span class="title">切换防火墙默认策略为DROP（核心操作）</span>
+    <div class="detail">
+      执行：<code>iptables -P INPUT DROP</code><br>
+      此时所有未被允许的入站连接被拒绝，但：<br>
+      - 已建立的SSH连接不受影响（ESTABLISHED规则）<br>
+      - 80/443正常访问<br>
+      - 服务间127.0.0.1调用不受影响<br>
+      - Nginx代理的API正常对外<br>
+      <strong>验证：</strong>新开SSH连接测试、访问网站测试、API调用测试
+    </div>
+  </div>
+
+  <div class="step">
+    <span class="num">5</span><span class="title">全功能验证（5分钟内）</span>
+    <div class="detail">
+      验证清单：<br>
+      - ✅ 网站所有页面可访问（11个子域名）<br>
+      - ✅ 短剧API可调用（/api/production/status）<br>
+      - ✅ 政务API可调用（/gov-api/v1/health）<br>
+      - ✅ 记忆网关可访问（/api/memory/）<br>
+      - ✅ 本地LLM可被内部调用（8021代理）<br>
+      - ✅ 自治内核14组件正常运行<br>
+      - ✅ 定时任务正常执行<br>
+      全部通过后，取消自动回滚任务
+    </div>
+  </div>
+
+  <div class="step">
+    <span class="num">6</span><span class="title">持久化防火墙规则</span>
+    <div class="detail">
+      - 保存规则：<code>iptables-save > /etc/sysconfig/iptables</code><br>
+      - 设置开机自动加载<br>
+      - 写入MR-022安全元法则<br>
+      <strong>验证：</strong>重启后规则仍然生效
+    </div>
+  </div>
+
+  <div class="step">
+    <span class="num">7</span><span class="title">服务配置渐进式收敛（长期，可选）</span>
+    <div class="detail">
+      防火墙隔离后，服务仍监听0.0.0.0但外部无法访问。长期可逐个修改服务配置为127.0.0.1：<br>
+      - 每次只改1个服务，修改后重启验证<br>
+      - 有问题立即恢复配置<br>
+      - 优先级：6379 Redis → 8081 LLM → 9120记忆网关 → 其他<br>
+      <strong>注意：</strong>此步骤非必须，防火墙隔离已足够安全
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>回滚方案</h2>
+  <table>
+    <tr><th>场景</th><th>回滚操作</th><th>恢复时间</th></tr>
+    <tr><td>SSH连接断开</td><td>5分钟后at任务自动回滚</td><td>≤5分钟</td></tr>
+    <tr><td>网站无法访问</td><td>立即执行 <code>iptables -P INPUT ACCEPT</code></td><td>秒级</td></tr>
+    <tr><td>某个API不可用</td><td>检查Nginx代理配置，添加对应代理路径</td><td>≤1分钟</td></tr>
+    <tr><td>服务配置修改后异常</td><td>恢复服务配置文件，重启服务</td><td>≤30秒</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>必须保留对外的端口</h2>
+  <table>
+    <tr><th>端口</th><th>服务</th><th>对外方式</th><th>原因</th></tr>
+    <tr><td>80</td><td>Nginx HTTP</td><td>直接</td><td>Web服务，HTTP→HTTPS跳转</td></tr>
+    <tr><td>443</td><td>Nginx HTTPS</td><td>直接</td><td>Web服务，所有网站和API代理</td></tr>
+    <tr><td>22</td><td>SSH</td><td>直接+白名单</td><td>服务器管理，已有IP白名单</td></tr>
+  </table>
+  <p style="font-size:0.82rem; color:var(--gray-600); margin-top:8px;">其他所有端口均通过Nginx 443反向代理对外，不直接暴露。</p>
+</div>
+
+<div class="section">
+  <h2>功能影响评估</h2>
+  <table>
+    <tr><th>功能模块</th><th>优化前访问方式</th><th>优化后访问方式</th><th>影响</th></tr>
+    <tr><td>官网/子域名</td><td>80/443</td><td>80/443（不变）</td><td><span class="badge success">无影响</span></td></tr>
+    <tr><td>短剧API</td><td>8628直接 + Nginx代理</td><td>仅Nginx代理 /api/production/</td><td><span class="badge success">无影响</span></td></tr>
+    <tr><td>政务API</td><td>8200直接 + Nginx代理</td><td>仅Nginx代理 /gov-api/v1/</td><td><span class="badge success">无影响</span></td></tr>
+    <tr><td>AI代理</td><td>8021直接 + Nginx代理</td><td>仅Nginx代理</td><td><span class="badge success">无影响</span></td></tr>
+    <tr><td>本地LLM</td><td>8081直接暴露</td><td>仅内部8021调用</td><td><span class="badge success">更安全</span></td></tr>
+    <tr><td>记忆网关</td><td>9120直接暴露</td><td>Nginx代理 /api/memory/ + 白名单</td><td><span class="badge warning">需配置代理</span></td></tr>
+    <tr><td>飞书回调</td><td>8060直接（未配置）</td><td>Nginx代理 /feishu/callback</td><td><span class="badge warning">待配置</span></td></tr>
+    <tr><td>服务间调用</td><td>127.0.0.1</td><td>127.0.0.1（不变）</td><td><span class="badge success">无影响</span></td></tr>
+    <tr><td>自治内核</td><td>9120-9140直接</td><td>仅内部，外部经Nginx代理</td><td><span class="badge success">更安全</span></td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>执行确认清单</h2>
+  <div style="padding:14px; background:#eff6ff; border-radius:8px;">
+    <p style="font-weight:700; margin-bottom:10px;">执行前确认：</p>
+    <ul style="margin-left:18px; font-size:0.88rem;">
+      <li>☐ 所有需要对外的API都已配置Nginx代理</li>
+      <li>☐ 本地仿真上报9120的代理路径已确认</li>
+      <li>☐ 飞书回调8060的代理路径已预留</li>
+      <li>☐ iptables备份已保存</li>
+      <li>☐ 5分钟自动回滚任务已设置</li>
+      <li>☐ 当前SSH连接是活跃的（执行期间不关闭）</li>
+    </ul>
+    <p style="margin-top:12px; font-size:0.85rem; color:var(--warning);"><strong>⚠️ 注意：</strong>执行步骤4（切换DROP策略）后，请在5分钟内完成验证。如遇任何问题，当前SSH窗口执行 <code>iptables -P INPUT ACCEPT</code> 可立即恢复。</p>
+  </div>
+</div>
+
+</div>
+<div class="footer">
+  <p>火斗云智AIOS · 零中断安全优化方案</p>
+  <p>核心策略：防火墙隔离优先 · 不改服务配置 · 5分钟自动回滚保险</p>
+  <p>确权：DID-BR-000002 ｜ 溯源：Ω₀⊂⊙∞⊂Ω ｜ 2026-09-13</p>
+</div>
+</body>
+</html>

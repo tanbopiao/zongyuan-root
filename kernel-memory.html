@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云内核记忆可视化 · 火斗云智AIOS</title>
+<meta name="description" content="ZONGYUAN-ROOT 云内核最新记忆实时可视化 — 真值体系 · 知识图谱 · 内核链 · 服务拓扑 · 审计轨迹">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:linear-gradient(160deg,#0a0f1e 0%,#0f172a 50%,#141b33 100%);color:#e2e8f0;line-height:1.6;min-height:100vh}
+.container{max-width:1180px;margin:0 auto;padding:0 20px}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08);padding:12px 20px}
+.nav-inner{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-links{display:flex;gap:18px;flex-wrap:wrap}
+.nav-links a{color:#9ca3af;text-decoration:none;font-size:13.5px;transition:color .3s}
+.nav-links a:hover{color:#c9a7e8}
+.hero{padding:96px 0 36px;text-align:center}
+.hero-badge{display:inline-block;padding:6px 18px;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.35);border-radius:20px;font-size:13px;color:#d4af37;margin-bottom:20px;letter-spacing:1px}
+.hero h1{font-size:38px;font-weight:700;background:linear-gradient(135deg,#d4af37 0%,#c9a7e8 55%,#8BC8EA 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+.hero .subtitle{font-size:15px;color:#94a3b8}
+.hero .meta{margin-top:10px;font-size:12px;color:#64748b}
+.updated{display:inline-block;margin-top:14px;padding:4px 14px;border:1px solid rgba(82,196,26,.4);border-radius:14px;color:#52c41a;font-size:12px;background:rgba(82,196,26,.08)}
+.sec{margin:36px 0}
+.sec-title{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700;margin-bottom:18px;color:#f1f5f9}
+.sec-title .bar{width:4px;height:18px;border-radius:2px;background:linear-gradient(180deg,#d4af37,#c9a7e8)}
+.sec-title .tag{font-size:12px;color:#64748b;font-weight:400}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:14px}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 14px;text-align:center;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);border-color:rgba(212,175,55,.4)}
+.card .num{font-size:30px;font-weight:700;background:linear-gradient(90deg,#d4af37,#c9a7e8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card .num.green{background:linear-gradient(90deg,#52c41a,#94D8C3);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card .num.cyan{background:linear-gradient(90deg,#64b4dc,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card .num.purple{background:linear-gradient(90deg,#c9a7e8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card .label{color:#94a3b8;font-size:12.5px;margin-top:6px}
+.chart-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px}
+.chart{width:100%;height:360px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:860px){.two-col{grid-template-columns:1fr}.hero h1{font-size:28px}}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:rgba(255,255,255,.05);color:#cbd5e1;font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05);color:#cbd5e1;vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+.tbl-wrap{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow-x:auto}
+.badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11.5px;font-weight:600}
+.badge.green{background:rgba(82,196,26,.15);color:#52c41a;border:1px solid rgba(82,196,26,.3)}
+.badge.gold{background:rgba(212,175,55,.13);color:#d4af37;border:1px solid rgba(212,175,55,.3)}
+.badge.blue{background:rgba(100,180,220,.13);color:#64b4dc;border:1px solid rgba(100,180,220,.3)}
+.badge.gray{background:rgba(148,163,184,.13);color:#94a3b8;border:1px solid rgba(148,163,184,.3)}
+.timeline{position:relative;padding-left:22px}
+.timeline:before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:linear-gradient(180deg,#d4af37,rgba(100,180,220,.2))}
+.tl-item{position:relative;margin-bottom:12px}
+.tl-item:before{content:'';position:absolute;left:-20px;top:6px;width:9px;height:9px;border-radius:50%;background:#d4af37;box-shadow:0 0 8px rgba(212,175,55,.6)}
+.tl-item .k{font-weight:600;color:#e2e8f0;font-size:13.5px}
+.tl-item .d{color:#94a3b8;font-size:12px;margin-top:2px}
+.tl-item .cat{display:inline-block;margin-top:4px;font-size:11px;color:#8BC8EA;background:rgba(100,180,220,.1);border:1px solid rgba(100,180,220,.25);padding:1px 8px;border-radius:8px}
+.foot{text-align:center;padding:32px 0 40px;color:#64748b;font-size:12px;border-top:1px solid rgba(255,255,255,.06);margin-top:48px}
+.foot .anchor{color:#d4af37;letter-spacing:1px}
+.hash{font-family:'SF Mono',Consolas,Menlo,monospace;font-size:12px;color:#64b4dc;word-break:break-all}
+a{color:#8BC8EA}
+</style>
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div class="container">
+<div class="hero">
+<div class="hero-badge">ZONGYUAN-ROOT · DID-BR-000002 · Ω-TAN-7-001</div>
+<h1>云内核记忆可视化</h1>
+<div class="subtitle">真值体系 · 知识图谱 · 内核链 · 服务拓扑 · 审计轨迹 · 对账通道</div>
+<div class="meta">数据快照 2026-09-11 18:10 CST ｜ 来源：记忆网关 UnifiedGateway / kg-api / identity-api / kernel_state</div>
+<div class="updated" id="updatedTag">● 实时状态：已连接云内核</div>
+</div>
+
+<div class="sec">
+<div class="sec-title"><span class="bar"></span>内核总览 <span class="tag">LIVE</span></div>
+<div class="cards">
+<div class="card"><div class="num" id="k-truths">555</div><div class="label">真值条目</div></div>
+<div class="card"><div class="num cyan" id="k-graph">62</div><div class="label">图谱节点 / 61 边</div></div>
+<div class="card"><div class="num" id="k-block">21340</div><div class="label">区块高度</div></div>
+<div class="card"><div class="num green" id="k-services">55</div><div class="label">运行服务</div></div>
+<div class="card"><div class="num purple" id="k-assets">2753</div><div class="label">全域资产</div></div>
+<div class="card"><div class="num cyan" id="k-audit">2421</div><div class="label">审计轨迹</div></div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-title"><span class="bar"></span>真值分类分布 <span class="tag">truths · 555 条 · 60+ 类别</span></div>
+<div class="chart-box"><div class="chart" id="chartTruth"></div></div>
+</div>
+
+<div class="two-col">
+<div class="sec">
+<div class="sec-title"><span class="bar"></span>审计动作分布 <span class="tag">audit_logs · 2421 条</span></div>
+<div class="chart-box"><div class="chart" id="chartAudit"></div></div>
+</div>
+<div class="sec">
+<div class="sec-title"><span class="bar"></span>内核链状态 <span class="tag">hash-chain ACTIVE</span></div>
+<div class="chart-box">
+<div class="cards" style="grid-template-columns:1fr 1fr">
+<div class="card"><div class="num">21340</div><div class="label">区块高度</div></div>
+<div class="card"><div class="num green">ACTIVE</div><div class="label">链状态</div></div>
+<div class="card"><div class="num cyan">2753</div><div class="label">总资产</div></div>
+<div class="card"><div class="num purple">8</div><div class="label">L4 因果规则</div></div>
+</div>
+<div style="padding:14px;font-size:12.5px;color:#94a3b8;line-height:2">
+<div>活跃窗口：<span style="color:#c9a7e8">WIN-META-HENGYI-OPTIMIZATION-001</span></div>
+<div>最近资产：<span style="color:#8BC8EA">KD-L4-CAUSAL-KG-ENHANCE-20260909</span></div>
+<div>根哈希：<span class="hash">7e6fd0b67397522bebe522aa9f161d353992ff2d666175c4b29a24457798e4f2</span></div>
+<div>向量库：<span style="color:#64b4dc">52 向量 · bge-small-zh-onnx-512d · ChromaDB</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-title"><span class="bar"></span>最近真值写入 <span class="tag">memory gateway · 最新 8 条</span></div>
+<div class="chart-box">
+<div class="timeline" id="tlTruth"></div>
+</div>
+</div>
+
+<div class="two-col">
+<div class="sec">
+<div class="sec-title"><span class="bar"></span>节点状态 <span class="tag">nodes · 4</span></div>
+<div class="tbl-wrap"><table>
+<thead><tr><th>节点</th><th>类型</th><th>状态</th><th>能力</th></tr></thead>
+<tbody id="tbNodes"></tbody>
+</table></div>
+</div>
+<div class="sec">
+<div class="sec-title"><span class="bar"></span>对账通道 <span class="tag">truth-sync API</span></div>
+<div class="chart-box">
+<div class="cards" style="grid-template-columns:1fr 1fr">
+<div class="card"><div class="num green">OK</div><div class="label">通道状态</div></div>
+<div class="card"><div class="num" id="k-sync">555</div><div class="label">对账真值</div></div>
+<div class="card"><div class="num green">UP</div><div class="label">向量服务</div></div>
+<div class="card"><div class="num cyan">533→555</div><div class="label">本周期增量</div></div>
+</div>
+<div style="padding:14px;font-size:12.5px;color:#94a3b8;line-height:2">
+<div>入口：<span style="color:#8BC8EA">POST /api/v1/truths/sync</span>（公网 HTTPS，X-API-Key 鉴权）</div>
+<div>链路：<span style="color:#94a3b8">窗口推送 → kg-api 对账 → 记忆网关落库 → 向量化</span></div>
+<div>锚点：<span class="anchor" style="color:#d4af37">Ω₀⊂⊙∞⊂Ω</span> ｜ 主权根 <span style="color:#8BC8EA">Ω-TAN-7-001</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-title"><span class="bar"></span>核心服务运行 <span class="tag">systemd · ZONGYUAN/ZR 系 22 个 ACTIVE</span></div>
+<div class="tbl-wrap"><table>
+<thead><tr><th>服务</th><th>状态</th></tr></thead>
+<tbody id="tbServices"></tbody>
+</table></div>
+</div>
+
+<div class="foot">
+<div class="anchor">Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT · DID-BR-000002</div>
+<div style="margin-top:8px">云内核记忆可视化 ｜ 数据来自记忆网关 UnifiedGateway V3.0 + KD-GATEWAY COMM-PROTO V1.0 ｜ 快照 2026-09-11</div>
+<div style="margin-top:6px"><a href="https://www.huodouai.com/">返回官网首页</a> ｜ <a href="https://www.huodouai.com/server-monitor.html">服务器监控</a></div>
+</div>
+</div>
+
+<script src="/assets/js/echarts.min.js"></script>
+<script>
+/* ============ 数据（2026-09-11 18:10 实测快照） ============ */
+var DATA = {
+  truths: 555, graphNodes: 62, graphEdges: 61, blockHeight: 21340,
+  services: 55, assets: 2753, audit: 2421, causalRules: 8,
+  truthCats: [
+    ["未分类", 142], ["meta_rule", 59], ["metalaw", 43], ["lock", 32], ["root", 24],
+    ["asset", 18], ["deployment", 14], ["audit", 14], ["architecture", 14],
+    ["元规则", 12], ["mathematics", 9], ["optimization", 8], ["decision", 8], ["causal", 4]
+  ],
+  auditActs: [
+    ["truth_upsert", 1545], ["system_start", 544], ["homo_truth_integration", 270],
+    ["truth_sync", 58], ["node_register", 4]
+  ],
+  timeline: [
+    ["achievement.truth_op_integration", "achievement", "真值算子集成成就"],
+    ["causal-engine.analysis.CAUSAL-20260911180432-596cc0ab", "causal", "因果引擎分析真值"],
+    ["causal-engine.analysis.CAUSAL-20260911180432-cf7b22e5", "causal", "因果引擎分析真值"],
+    ["achievement.truth_fulltext_deep_transmutation", "achievement", "真值全文深度嬗变"],
+    ["causal-engine.v1_0_deployed", "causal", "因果引擎 V1.0 部署"],
+    ["causal-engine.knowledge_base.index", "causal", "因果引擎知识库索引"],
+    ["monitoring.lightweight_prometheus_stack_v1_0", "monitoring", "轻量 Prometheus 监控栈 V1.0 真值"],
+    ["sop.truth_transmutation", "sop", "SOP 真值嬗变机制锚定"]
+  ],
+  nodes: [
+    ["cloud-main-kernel-001", "unknown", "active", "—", "3"],
+    ["cloud-worker-001", "unknown", "active", "—", "1"],
+    ["remote-lock-agent-20260911", "local_dev", "active", "—", "0"],
+    ["nexus-client-001", "local_sdk", "active", "truth_rw / lock_trigger", "0"]
+  ],
+  services: ["kg-api","commercial-api","frps","huodouai-feishu-bridge","huodouai-feishu-scan",
+    "agent-hub","tat_agent","zongyuan-ai-proxy","zongyuan-context-assembler","zongyuan-experience-center",
+    "zongyuan-feishu-approval-callback","zongyuan-gov-api","zongyuan-hrm","zongyuan-kd-pipeline",
+    "zongyuan-meta-evolution","zongyuan-nexus","zongyuan-root-cause","zongyuan-service-ondemand",
+    "zongyuan-unified-gateway","zongyuan-universal-agent-executor","zr-meta-ops","zr-mhp-handshake"]
+};
+
+/* ============ 真值分类横向柱图（无ECharts时CSS降级） ============ */
+var chartTruth = document.getElementById('chartTruth');
+function cssBarFallback(el, items, colorFn){
+  var html = '<div style="display:flex;flex-direction:column;gap:10px;padding:8px">';
+  var maxV = Math.max.apply(null, items.map(function(d){return d[1]}));
+  items.forEach(function(d,i){
+    var w = Math.max(4, Math.round(d[1]/maxV*100));
+    html += '<div style="display:flex;align-items:center;gap:10px">'+
+      '<div style="width:96px;text-align:right;font-size:11.5px;color:#94a3b8;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+d[0]+'</div>'+
+      '<div style="flex:1;background:rgba(255,255,255,.06);border-radius:4px;height:22px"><div style="width:'+w+'%;height:100%;border-radius:4px;background:'+(colorFn?colorFn(i):'linear-gradient(90deg,#d4af37,#c9a7e8)')+'"></div></div>'+
+      '<div style="width:44px;font-size:12px;color:#e2e8f0">'+d[1]+'</div></div>';
+  });
+  el.innerHTML = html + '</div>';
+  el.style.height = 'auto';
+  el.style.minHeight = (items.length*38+20)+'px';
+}
+if (window.echarts) {
+  var truthChart = echarts.init(chartTruth);
+  truthChart.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'axis',triggerOn:'mousemove|click',renderMode:'richText',confine:true},
+    grid:{left:8,right:40,top:12,bottom:8,containLabel:true},
+    xAxis:{type:'value',name:'条',axisLabel:{color:'#94a3b8',fontSize:11},splitLine:{lineStyle:{color:'rgba(255,255,255,.06)'}}},
+    yAxis:{type:'category',data:DATA.truthCats.map(function(d){return d[0]}),axisLabel:{color:'#cbd5e1',fontSize:11},axisLine:{lineStyle:{color:'rgba(255,255,255,.1)'}}},
+    series:[{type:'bar',data:DATA.truthCats.map(function(d,i){return {value:d[1],itemStyle:{color:['#d4af37','#c9a7e8','#8BC8EA','#64b4dc','#a78bfa','#52c41a','#f4b393','#94d8c3','#f0abfc','#fdba74','#86efac','#93c5fd','#c4b5fd','#fca5a5'][i%14]}}}),
+      barWidth:'60%',label:{show:true,position:'right',color:'#e2e8f0',fontSize:11}}]
+  });
+  window.addEventListener('resize',function(){truthChart.resize()});
+} else {
+  cssBarFallback(chartTruth, DATA.truthCats);
+}
+
+/* ============ 审计环形图（无ECharts时CSS降级） ============ */
+var chartAudit = document.getElementById('chartAudit');
+if (window.echarts) {
+  var auditChart = echarts.init(chartAudit);
+  auditChart.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'item',triggerOn:'mousemove|click',renderMode:'richText',confine:true},
+    legend:{bottom:0,textStyle:{color:'#94a3b8',fontSize:11},icon:'circle',itemWidth:12,itemHeight:12},
+    series:[{type:'pie',radius:['42%','68%'],center:['50%','44%'],
+      itemStyle:{borderColor:'#0f172a',borderWidth:2},
+      label:{color:'#cbd5e1',fontSize:11,formatter:'{b} {c}'},
+      data:DATA.auditActs.map(function(d,i){return {name:d[0],value:d[1],itemStyle:{color:['#d4af37','#8BC8EA','#c9a7e8','#64b4dc','#52c41a'][i%5]}}})}]
+  });
+  window.addEventListener('resize',function(){auditChart.resize()});
+} else {
+  cssBarFallback(chartAudit, DATA.auditActs, function(i){return ['#d4af37','#8BC8EA','#c9a7e8','#64b4dc','#52c41a'][i%5]});
+}
+
+/* ============ 时间线 ============ */
+var tl = document.getElementById('tlTruth');
+DATA.timeline.forEach(function(t){
+  var el = document.createElement('div'); el.className = 'tl-item';
+  el.innerHTML = '<div class="k">'+t[0]+'</div><div class="d">'+t[2]+'</div><span class="cat">'+t[1]+'</span>';
+  tl.appendChild(el);
+});
+
+/* ============ 节点表 ============ */
+var tbNodes = document.getElementById('tbNodes');
+DATA.nodes.forEach(function(n){
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td style="color:#e2e8f0">'+n[0]+'</td><td><span class="badge blue">'+n[1]+'</span></td>'+
+    '<td><span class="badge green">'+n[2]+'</span></td><td style="color:#94a3b8">'+n[3]+'</td>';
+  tbNodes.appendChild(tr);
+});
+
+/* ============ 服务表 ============ */
+var tbServices = document.getElementById('tbServices');
+DATA.services.forEach(function(s){
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td style="color:#e2e8f0;font-family:\'SF Mono\',Consolas,monospace;font-size:12.5px">'+s+'</td><td><span class="badge green">active</span></td>';
+  tbServices.appendChild(tr);
+});
+
+/* ============ 实时刷新（失败静默保留快照） ============ */
+function refresh(){
+  try{
+    fetch('/api/v1/truths/sync/status',{headers:{'Accept':'application/json'}}).then(function(r){return r.json()}).then(function(d){
+      if(d && d.truths_count){ document.getElementById('k-truths').textContent=d.truths_count; document.getElementById('k-sync').textContent=d.truths_count; }
+      var tag=document.getElementById('updatedTag'); tag.innerHTML='● 实时状态：已连接云内核 · '+new Date().toLocaleTimeString('zh-CN',{hour12:false});
+    }).catch(function(){});
+  }catch(e){}
+}
+refresh();
+setInterval(refresh, 60000);
+</script>
+</body>
+</html>

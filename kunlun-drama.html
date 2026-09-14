@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天 · AI短剧工场 | 火斗云智AIOS</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --gold: #d4af37;
+  --gold-light: #f5e6a3;
+  --gold-dark: #b8941f;
+  --bg-dark: #050508;
+  --bg-card: rgba(20, 15, 10, 0.6);
+  --border-gold: rgba(212, 175, 55, 0.2);
+  --text-primary: #f0e6d2;
+  --text-secondary: #a89880;
+  --text-muted: #6b5d4f;
+}
+body {
+  font-family: 'Noto Serif SC', -apple-system, BlinkMacSystemFont, serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+/* 背景纹理 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(212,175,55,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.03) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(5,5,8,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-gold);
+  padding: 16px 32px;
+  transition: all 0.3s;
+}
+.nav.scrolled { background: rgba(5,5,8,0.95); padding: 12px 32px; }
+.nav-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+.nav-logo {
+  font-size: 20px; font-weight: 900; letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo::before {
+  content: '⚜'; font-size: 24px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.nav-links a {
+  color: var(--text-secondary); text-decoration: none; font-size: 14px;
+  transition: all 0.3s; position: relative; letter-spacing: 1px;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px;
+  background: var(--gold); transition: width 0.3s;
+}
+.nav-links a:hover { color: var(--gold-light); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  padding: 8px 24px; border: 1px solid var(--gold); border-radius: 4px;
+  color: var(--gold) !important; background: rgba(212,175,55,0.05);
+  transition: all 0.3s;
+}
+.nav-cta:hover { background: var(--gold); color: var(--bg-dark) !important; }
+.nav-cta::after { display: none; }
+
+/* Hero */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  align-items: center; text-align: center; padding: 120px 24px 60px;
+  position: relative; z-index: 1;
+}
+.hero-decoration {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 600px; height: 600px; opacity: 0.08; pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 20px; background: rgba(212,175,55,0.08);
+  border: 1px solid var(--border-gold); border-radius: 50px;
+  font-size: 13px; color: var(--gold); letter-spacing: 2px;
+  margin-bottom: 32px; animation: fadeInUp 0.8s ease;
+}
+.hero-badge::before { content: '◆'; font-size: 8px; }
+.hero h1 {
+  font-size: clamp(40px, 7vw, 72px); font-weight: 900; letter-spacing: 8px;
+  background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 20px; animation: fadeInUp 0.8s ease 0.1s both;
+  text-shadow: 0 0 60px rgba(212,175,55,0.3);
+}
+.hero-subtitle {
+  font-size: clamp(16px, 2vw, 20px); color: var(--text-secondary);
+  max-width: 680px; margin-bottom: 16px; letter-spacing: 2px;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+.hero-desc {
+  font-size: 14px; color: var(--text-muted); max-width: 560px;
+  margin-bottom: 48px; animation: fadeInUp 0.8s ease 0.3s both;
+}
+.cta-group {
+  display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+  animation: fadeInUp 0.8s ease 0.4s both;
+}
+.btn {
+  padding: 16px 40px; border-radius: 4px; font-size: 15px; font-weight: 600;
+  text-decoration: none; transition: all 0.4s; cursor: pointer; border: none;
+  display: inline-flex; align-items: center; gap: 8px; letter-spacing: 2px;
+  font-family: inherit;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--bg-dark); position: relative; overflow: hidden;
+}
+.btn-primary::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+.btn-primary:hover::before { left: 100%; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(212,175,55,0.4); }
+.btn-secondary {
+  background: transparent; color: var(--gold); border: 1px solid var(--gold);
+}
+.btn-secondary:hover { background: rgba(212,175,55,0.1); transform: translateY(-2px); }
+
+.hero-stats {
+  display: flex; gap: 60px; margin-top: 80px; flex-wrap: wrap; justify-content: center;
+  animation: fadeInUp 0.8s ease 0.5s both;
+}
+.stat-item { text-align: center; position: relative; }
+.stat-item:not(:last-child)::after {
+  content: ''; position: absolute; right: -30px; top: 50%; transform: translateY(-50%);
+  width: 1px; height: 40px; background: var(--border-gold);
+}
+.stat-num {
+  font-size: 42px; font-weight: 900; letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.stat-label { color: var(--text-muted); font-size: 13px; margin-top: 4px; letter-spacing: 1px; }
+
+/* Section */
+section { max-width: 1200px; margin: 0 auto; padding: 100px 24px; position: relative; z-index: 1; }
+.section-header { text-align: center; margin-bottom: 60px; }
+.section-tag {
+  display: inline-block; padding: 4px 16px; border: 1px solid var(--border-gold);
+  border-radius: 2px; font-size: 12px; color: var(--gold); letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: 4px;
+  background: linear-gradient(135deg, var(--text-primary), var(--gold-light));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+.section-desc { color: var(--text-secondary); font-size: 15px; max-width: 600px; margin: 0 auto; }
+
+/* Flow */
+.flow-container { position: relative; }
+.flow-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px;
+  position: relative;
+}
+.flow-grid::before {
+  content: ''; position: absolute; top: 40px; left: 5%; right: 5%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  z-index: 0;
+}
+.flow-step {
+  text-align: center; position: relative; z-index: 1;
+  background: var(--bg-card); border: 1px solid var(--border-gold);
+  border-radius: 8px; padding: 24px 12px; transition: all 0.4s;
+  backdrop-filter: blur(10px);
+}
+.flow-step:hover {
+  transform: translateY(-8px); border-color: var(--gold);
+  box-shadow: 0 20px 40px rgba(212,175,55,0.15);
+}
+.flow-icon {
+  width: 56px; height: 56px; margin: 0 auto 16px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+  border: 1px solid var(--border-gold); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; position: relative;
+}
+.flow-step-num {
+  position: absolute; top: -8px; right: -8px; width: 24px; height: 24px;
+  background: var(--gold); color: var(--bg-dark); border-radius: 50%;
+  font-size: 12px; font-weight: 700; display: flex; align-items: center;
+  justify-content: center;
+}
+.flow-step h4 { color: var(--gold-light); font-size: 14px; margin-bottom: 6px; letter-spacing: 1px; }
+.flow-step p { color: var(--text-muted); font-size: 11px; line-height: 1.5; }
+
+/* Features */
+.feature-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;
+}
+.feature-card {
+  background: var(--bg-card); border: 1px solid var(--border-gold);
+  border-radius: 12px; padding: 36px 32px; transition: all 0.4s;
+  position: relative; overflow: hidden; backdrop-filter: blur(10px);
+}
+.feature-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  transform: scaleX(0); transition: transform 0.4s;
+}
+.feature-card:hover { transform: translateY(-6px); border-color: rgba(212,175,55,0.5); }
+.feature-card:hover::before { transform: scaleX(1); }
+.feature-icon {
+  width: 64px; height: 64px; margin-bottom: 24px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.03));
+  border: 1px solid var(--border-gold); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 32px;
+}
+.feature-card h3 {
+  font-size: 20px; color: var(--gold-light); margin-bottom: 12px;
+  letter-spacing: 2px; font-weight: 600;
+}
+.feature-card p { color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
+
+/* Pricing */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px; max-width: 1000px; margin: 0 auto;
+}
+.price-card {
+  background: var(--bg-card); border: 1px solid var(--border-gold);
+  border-radius: 16px; padding: 40px 32px; transition: all 0.4s;
+  position: relative; backdrop-filter: blur(10px);
+}
+.price-card.featured {
+  border-color: var(--gold); background: linear-gradient(180deg, rgba(212,175,55,0.08), var(--bg-card));
+  transform: scale(1.05);
+}
+.price-card.featured::before {
+  content: '最受欢迎'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  padding: 4px 20px; background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--bg-dark); border-radius: 20px; font-size: 12px; font-weight: 700;
+  letter-spacing: 2px;
+}
+.price-card:hover { transform: translateY(-8px); }
+.price-card.featured:hover { transform: scale(1.05) translateY(-8px); }
+.price-tier { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+.price-name { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; letter-spacing: 2px; }
+.price-amount {
+  font-size: 48px; font-weight: 900; letter-spacing: 1px;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+.price-amount span { font-size: 16px; color: var(--text-muted); font-weight: 400; }
+.price-desc { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+.price-features { list-style: none; margin-bottom: 32px; }
+.price-features li {
+  padding: 10px 0; color: var(--text-secondary); font-size: 13px;
+  border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; align-items: center; gap: 10px;
+}
+.price-features li::before { content: '✓'; color: var(--gold); font-weight: 700; }
+.price-card .btn { width: 100%; justify-content: center; }
+
+/* Trial */
+.trial-section {
+  background: linear-gradient(135deg, rgba(212,175,55,0.06), rgba(139,92,246,0.04));
+  border: 1px solid var(--border-gold); border-radius: 24px;
+  padding: 80px 48px; text-align: center; max-width: 900px; margin: 0 auto;
+  position: relative; overflow: hidden;
+}
+.trial-section::before {
+  content: ''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(212,175,55,0.1), transparent 70%);
+  pointer-events: none;
+}
+.trial-section h2 {
+  font-size: 36px; font-weight: 700; letter-spacing: 4px;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 16px; position: relative;
+}
+.trial-section p { color: var(--text-secondary); margin-bottom: 40px; position: relative; }
+.trial-form {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  max-width: 600px; margin: 0 auto; position: relative;
+}
+.trial-form input {
+  flex: 1; min-width: 180px; padding: 16px 20px; border-radius: 6px;
+  border: 1px solid var(--border-gold); background: rgba(5,5,8,0.8);
+  color: var(--text-primary); font-size: 14px; font-family: inherit;
+  transition: all 0.3s;
+}
+.trial-form input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 20px rgba(212,175,55,0.2); }
+.trial-form input::placeholder { color: var(--text-muted); }
+
+footer {
+  text-align: center; padding: 60px 24px 40px; border-top: 1px solid var(--border-gold);
+  color: var(--text-muted); font-size: 13px; position: relative; z-index: 1;
+}
+footer .footer-logo {
+  font-size: 18px; font-weight: 700; letter-spacing: 3px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+footer .footer-meta { font-size: 11px; color: var(--text-muted); opacity: 0.7; margin-top: 8px; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 900px) {
+  .flow-grid { grid-template-columns: repeat(2, 1fr); }
+  .flow-grid::before { display: none; }
+  .stat-item:not(:last-child)::after { display: none; }
+  .hero-stats { gap: 32px; }
+  .price-card.featured { transform: none; }
+  .price-card.featured:hover { transform: translateY(-8px); }
+  .nav-links { display: none; }
+}
+@media (max-width: 600px) {
+  .flow-grid { grid-template-columns: 1fr; }
+  .trial-section { padding: 48px 24px; }
+}
+</style>
+
+<meta name="description" content="昆仑洞天AI短剧工场 - 火斗云智，AI驱动的短剧全流程生产平台，剧本生成、角色设计、分镜制作、视频渲染一站式完成，效率提升10倍。">
+<meta name="keywords" content="昆仑洞天,AI短剧,短剧工场,视频生成,剧本生成,火斗云智">
+<meta property="og:type" content="website">
+<meta property="og:title" content="昆仑洞天AI短剧工场 - 火斗云智，AI驱动的短剧全流程生产平台，剧本生成、角色设计、分镜制作、视频渲染一站式完成，效率">
+<meta property="og:description" content="昆仑洞天AI短剧工场 - 火斗云智，AI驱动的短剧全流程生产平台，剧本生成、角色设计、分镜制作、视频渲染一站式完成，效率提升10倍。">
+<meta property="og:url" content="https://huodouai.com/kunlun-drama.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="昆仑洞天AI短剧工场 - 火斗云智，AI驱动的短剧全流程生产平台，剧本生成、角色设计、分镜制作、视频渲染一站式完成，效率">
+<meta name="twitter:description" content="昆仑洞天AI短剧工场 - 火斗云智，AI驱动的短剧全流程生产平台，剧本生成、角色设计、分镜制作、视频渲染一站式完成，效率提升10倍。">
+    <link rel="canonical" href="https://huodouai.com/kunlun-drama.html">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">昆仑洞天</div>
+    <div class="nav-links">
+      <a href="/">首页</a>
+      <a href="/products.html">产品中心</a>
+      <a href="#flow">生产流程</a>
+      <a href="#features">核心能力</a>
+      <a href="#pricing">定价</a>
+      <a href="#trial" class="nav-cta">免费试用</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">P0 优先变现 · 已量产验证 · 工业化流水线</div>
+  <h1>昆仑洞天</h1>
+  <p class="hero-subtitle">AI 短剧工业化量产工场</p>
+  <p class="hero-desc">从剧本到成片的全链路自动化 · 9:16竖屏标准 · 黑金暗纹国风 · 角色一致性锁定 · 让短剧生产效率提升10倍</p>
+  <div class="cta-group">
+    <a href="#trial" class="btn btn-primary">立即免费试用 →</a>
+    <a href="#pricing" class="btn btn-secondary">查看定价方案</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item"><div class="stat-num">7步</div><div class="stat-label">全链路自动化</div></div>
+    <div class="stat-item"><div class="stat-num">9:16</div><div class="stat-label">竖屏标准</div></div>
+    <div class="stat-item"><div class="stat-num">10×</div><div class="stat-label">效率提升</div></div>
+    <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">角色一致性</div></div>
+  </div>
+</div>
+
+<section id="flow">
+  <div class="section-header reveal">
+    <div class="section-tag">PRODUCTION FLOW</div>
+    <h2 class="section-title">全链路工业化流水线</h2>
+    <p class="section-desc">从创意到成片，7步全自动闭环，无需人工干预</p>
+  </div>
+  <div class="flow-container">
+    <div class="flow-grid">
+      <div class="flow-step reveal"><div class="flow-icon">📜<div class="flow-step-num">1</div></div><h4>分集大纲</h4><p>剧情梗概→结构化大纲</p></div>
+      <div class="flow-step reveal"><div class="flow-icon">🎬<div class="flow-step-num">2</div></div><h4>分镜拆分</h4><p>每集独立分镜表</p></div>
+      <div class="flow-step reveal"><div class="flow-icon">🖼️<div class="flow-step-num">3</div></div><h4>关键帧</h4><p>锁定风格角色场景</p></div>
+      <div class="flow-step reveal"><div class="flow-icon">🎥<div class="flow-step-num">4</div></div><h4>视频渲染</h4><p>关键帧→视频生成</p></div>
+      <div class="flow-step reveal"><div class="flow-icon">🎙️<div class="flow-step-num">5</div></div><h4>配音台词</h4><p>分集配音脚本导出</p></div>
+      <div class="flow-step reveal"><div class="flow-icon">🔗<div class="flow-step-num">6</div></div><h4>元秩序归档</h4><p>结构化归档确权</p></div>
+      <div class="flow-step reveal"><div class="flow-icon">📊<div class="flow-step-num">7</div></div><h4>台账更新</h4><p>全局索引溯源</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="section-header reveal">
+    <div class="section-tag">CORE FEATURES</div>
+    <h2 class="section-title">六大核心能力</h2>
+    <p class="section-desc">专为短剧量产打造的AI能力矩阵，每一项都经过实战验证</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">📝</div>
+      <h3>剧本智能生成</h3>
+      <p>自动场景拆分、台词适配、短剧结构标准化，一键生成分集大纲和完整剧本，支持多角色多线叙事。</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">👤</div>
+      <h3>IP角色库锁定</h3>
+      <p>纯东方神女视觉规范，固化体态、发色、光影参数，保证多轮生成角色不漂移，IP形象永久一致。</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🎨</div>
+      <h3>关键帧量产</h3>
+      <p>9:16竖屏标准尺寸，防漂移质检，画质校验自动化，批量生成关键帧，单集12帧一键产出。</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">⚡</div>
+      <h3>视频智能渲染</h3>
+      <p>多API智能调度，自动适配可用模型，限流自动降级，单段5-10秒稳定输出，快切卡点转场。</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">⚔️</div>
+      <h3>长兵器结构铁律</h3>
+      <p>昆仑天元法则V1.2强制生效，禁止武器断裂/分段/穿插头部，三级判定自动修正，杜绝结构漂移。</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🔐</div>
+      <h3>自动归档确权</h3>
+      <p>四层结构化拆分，SHA256哈希确权，Merkle-DAG锁档，全域资产可溯源，每帧都有唯一身份。</p>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="section-header reveal">
+    <div class="section-tag">PRICING</div>
+    <h2 class="section-title">定价方案</h2>
+    <p class="section-desc">四档定价，满足从个人创作者到企业级量产的全场景需求</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card reveal">
+      <div class="price-tier">FREE</div>
+      <div class="price-name">免费版</div>
+      <div class="price-amount">¥0<span>/月</span></div>
+      <div class="price-desc">适合个人创作者体验</div>
+      <ul class="price-features">
+        <li>每月3条短剧</li>
+        <li>基础角色库</li>
+        <li>标准画质720P</li>
+        <li>社区支持</li>
+      </ul>
+      <a href="#trial" class="btn btn-secondary">立即试用</a>
+    </div>
+    <div class="price-card featured reveal">
+      <div class="price-tier">STANDARD</div>
+      <div class="price-name">标准版</div>
+      <div class="price-amount">¥299<span>/月</span></div>
+      <div class="price-desc">MCN机构与中小团队首选</div>
+      <ul class="price-features">
+        <li>每月50条短剧</li>
+        <li>全部角色库</li>
+        <li>高清画质1080P</li>
+        <li>自动归档确权</li>
+        <li>优先技术支持</li>
+      </ul>
+      <a href="#trial" class="btn btn-primary">开始使用</a>
+    </div>
+    <div class="price-card reveal">
+      <div class="price-tier">ENTERPRISE</div>
+      <div class="price-name">企业版</div>
+      <div class="price-amount">¥999<span>/月</span></div>
+      <div class="price-desc">大型内容团队与企业客户</div>
+      <ul class="price-features">
+        <li>每月200条短剧</li>
+        <li>定制角色IP</li>
+        <li>超清画质4K</li>
+        <li>私有化部署选项</li>
+        <li>专属客户经理</li>
+        <li>SLA服务保障</li>
+      </ul>
+      <a href="#trial" class="btn btn-secondary">联系销售</a>
+    </div>
+  </div>
+</section>
+
+<section id="trial">
+  <div class="trial-section reveal">
+    <h2>立即开启AI短剧量产之旅</h2>
+    <p>输入您的联系方式，我们将在24小时内为您开通试用账号，体验全链路AI短剧量产能力</p>
+    <form class="trial-form" onsubmit="alert('感谢您的关注！我们将尽快与您联系。');return false;">
+      <input type="text" placeholder="您的姓名" required>
+      <input type="tel" placeholder="联系电话" required>
+      <input type="email" placeholder="电子邮箱">
+      <button type="submit" class="btn btn-primary">申请免费试用</button>
+    </form>
+    <p style="margin-top:20px;font-size:12px;color:var(--text-muted);">提交即表示您同意我们的服务条款和隐私政策</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">火斗云智 AIOS</div>
+  <p>昆仑洞天 · AI短剧工业化量产工场</p>
+  <p class="footer-meta">DID-BR-000002 · Ω₀⊂⊙∞⊂Ω · © 2026 火斗云智系统 版权所有</p>
+</footer>
+
+<script>
+// 导航滚动效果
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('nav');
+  if (window.scrollY > 50) nav.classList.add('scrolled');
+  else nav.classList.remove('scrolled');
+});
+// 滚动显现动画
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+// 平滑滚动
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>

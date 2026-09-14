@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天·数字画廊 · 火斗云智AIOS</title>
+<meta name="description" content="沉浸式9:16竖屏作品画廊，3D悬停预览，沉浸式全屏竖屏播放，数字画廊体验">
+<!-- 字体使用系统栈，消除外部CDN请求 -->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#08080d;color:#e0e0e0;font-family:'Noto Sans SC',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:
+  radial-gradient(ellipse at 20% 20%,rgba(212,175,55,0.06) 0%,transparent 40%),
+  radial-gradient(ellipse at 80% 80%,rgba(139,105,20,0.05) 0%,transparent 40%);
+  pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 20px}
+.back{display:inline-block;color:#d4af37;text-decoration:none;font-size:0.9em;margin-bottom:16px}
+.hero{text-align:center;padding:10px 0 30px}
+.hero .symbol{font-size:12px;color:#d4af37;letter-spacing:4px;margin-bottom:12px;font-family:monospace}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2.4em;font-weight:900;background:linear-gradient(135deg,#f4e4bc,#d4af37,#8B6914);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero .subtitle{color:#999;font-size:0.95em;max-width:600px;margin:0 auto;line-height:1.8}
+.filters{display:flex;justify-content:center;gap:8px;margin:20px 0;flex-wrap:wrap}
+.filter-btn{padding:7px 18px;border:1px solid rgba(212,175,55,0.25);background:transparent;color:#999;border-radius:20px;cursor:pointer;font-size:0.85em;transition:all .25s}
+.filter-btn:hover,.filter-btn.active{background:rgba(212,175,55,0.12);color:#d4af37;border-color:#d4af37;box-shadow:0 0 15px rgba(212,175,55,0.15)}
+.stats{text-align:center;color:#777;font-size:0.8em;margin-bottom:20px}
+.stats span{color:#d4af37;font-weight:bold}
+
+/* === 数字画廊：横向滚动带 === */
+.gallery-section{margin:30px 0}
+.gallery-section h2{font-family:'Noto Serif SC',serif;font-size:1.15em;color:#d4af37;margin-bottom:14px;padding-left:12px;border-left:3px solid #d4af37;display:flex;align-items:center;gap:10px}
+.gallery-section h2 .count{font-size:0.7em;color:#888;font-weight:normal}
+.gallery-row{display:flex;gap:18px;overflow-x:auto;padding:20px 10px 30px;scroll-behavior:smooth}
+.gallery-row::-webkit-scrollbar{height:6px}
+.gallery-row::-webkit-scrollbar-track{background:rgba(255,255,255,0.03);border-radius:3px}
+.gallery-row::-webkit-scrollbar-thumb{background:rgba(212,175,55,0.3);border-radius:3px}
+
+/* === 画框卡片：9:16竖屏 === */
+.frame-card{flex:0 0 200px;position:relative;cursor:pointer;transition:all .4s cubic-bezier(.25,.8,.25,1)}
+.frame-card:hover{transform:translateY(-8px) scale(1.03);z-index:10}
+.frame-card .frame{position:relative;width:100%;aspect-ratio:9/16;border-radius:8px;overflow:hidden;
+  background:linear-gradient(145deg,#1a1a2e,#0f0f1a);
+  border:2px solid rgba(212,175,55,0.2);
+  box-shadow:0 4px 20px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.3);
+  transition:all .4s}
+.frame-card:hover .frame{border-color:rgba(212,175,55,0.6);box-shadow:0 12px 40px rgba(212,175,55,0.2), 0 0 30px rgba(212,175,55,0.1), inset 0 0 30px rgba(0,0,0,0.3)}
+/* 射灯效果 */
+.frame-card .frame::before{content:'';position:absolute;top:-50%;left:50%;transform:translateX(-50%);width:150%;height:100%;background:radial-gradient(ellipse at center,rgba(212,175,55,0.08) 0%,transparent 60%);pointer-events:none;z-index:1;opacity:0;transition:opacity .4s}
+.frame-card:hover .frame::before{opacity:1}
+.frame-card .frame video,.frame-card .frame img{width:100%;height:100%;object-fit:cover;display:block}
+.frame-card .frame .play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.2);z-index:2;transition:opacity .3s}
+.frame-card:hover .play-overlay{opacity:0}
+.frame-card .frame .play-btn{width:48px;height:48px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.frame-card .frame .play-btn::after{content:'';border-style:solid;border-width:9px 0 9px 15px;border-color:transparent transparent transparent #d4af37;margin-left:4px}
+.frame-card .frame .badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.75);color:#d4af37;font-size:0.65em;padding:3px 8px;border-radius:4px;z-index:3;font-weight:bold}
+.frame-card .frame .model-tag{position:absolute;bottom:8px;right:8px;background:rgba(212,175,55,0.85);color:#000;font-size:0.6em;padding:2px 6px;border-radius:3px;z-index:3;font-weight:bold}
+.frame-card .info{padding:10px 4px 0;text-align:center}
+.frame-card .info h4{color:#ddd;font-size:0.82em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.frame-card .info p{color:#666;font-size:0.7em}
+
+/* === 沉浸式全屏竖屏模式 === */
+.immersive{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;background:#000}
+.immersive.active{display:flex}
+.immersive .bg-blur{position:absolute;inset:0;filter:blur(40px) brightness(0.3);transform:scale(1.2);z-index:0;opacity:0.6}
+.immersive .bg-blur img,.immersive .bg-blur video{width:100%;height:100%;object-fit:cover}
+.immersive .phone-frame{position:relative;z-index:1;width:min(420px,90vw);height:min(746px,85vh);aspect-ratio:9/16;border-radius:24px;overflow:hidden;
+  border:3px solid rgba(212,175,55,0.4);box-shadow:0 0 60px rgba(212,175,55,0.2), 0 0 120px rgba(0,0,0,0.8);
+  background:#000}
+.immersive .phone-frame video,.immersive .phone-frame img{width:100%;height:100%;object-fit:contain}
+.immersive .close-btn{position:absolute;top:20px;right:24px;z-index:10;width:44px;height:44px;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:1.6em;cursor:pointer;border-radius:50%;transition:all .2s;backdrop-filter:blur(10px)}
+.immersive .close-btn:hover{background:rgba(212,175,55,0.3);color:#d4af37}
+.immersive .nav-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:10;width:50px;height:50px;background:rgba(255,255,255,0.08);border:none;color:#fff;font-size:1.5em;cursor:pointer;border-radius:50%;transition:all .2s;backdrop-filter:blur(10px)}
+.immersive .nav-btn:hover{background:rgba(212,175,55,0.3);color:#d4af37}
+.immersive .nav-prev{left:24px}.immersive .nav-next{right:24px}
+.immersive .caption{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:10;text-align:center;color:#fff;background:rgba(0,0,0,0.5);padding:10px 24px;border-radius:12px;backdrop-filter:blur(10px);max-width:80%}
+.immersive .caption h3{color:#d4af37;font-size:1em;margin-bottom:4px}
+.immersive .caption p{color:#aaa;font-size:0.8em}
+.immersive .indicator{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);z-index:10;color:#888;font-size:0.8em;font-family:monospace}
+
+/* === 关键帧网格 === */
+.kf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.kf-card{position:relative;aspect-ratio:9/16;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid rgba(212,175,55,0.15);transition:all .3s}
+.kf-card:hover{transform:scale(1.04);border-color:rgba(212,175,55,0.5);box-shadow:0 8px 30px rgba(212,175,55,0.15)}
+.kf-card img{width:100%;height:100%;object-fit:cover}
+.kf-card .kf-label{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:#ddd;font-size:0.72em;padding:20px 8px 8px}
+
+footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid rgba(212,175,55,0.1);color:#666;font-size:0.78em}
+footer .did{margin-top:6px;color:#d4af37;font-family:monospace}
+
+@media(max-width:768px){
+  .frame-card{flex:0 0 150px}
+  .immersive .nav-btn{width:40px;height:40px;font-size:1.2em}
+  .immersive .nav-prev{left:8px}.immersive .nav-next{right:8px}
+}
+
+.video-thumb{position:relative;width:100%;height:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .3s}
+.video-thumb:hover{transform:scale(1.05)}
+.play-btn{width:50px;height:50px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;transition:all .3s}
+.video-thumb:hover .play-btn{background:rgba(212,175,55,.8);transform:scale(1.1)}
+
+.ai-guide-btn{position:fixed;bottom:20px;right:20px;z-index:1000;background:linear-gradient(135deg,#d4af37,#f0d060);color:#000;padding:12px 20px;border-radius:25px;cursor:pointer;font-weight:bold;box-shadow:0 4px 20px rgba(212,175,55,0.4);transition:transform .3s}
+.ai-guide-btn:hover{transform:scale(1.05)}
+.ai-guide-panel{position:fixed;bottom:80px;right:20px;width:320px;background:#12121f;border:1px solid #d4af37;border-radius:12px;padding:16px;z-index:1001;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.ai-guide-panel.show{display:block}
+.ai-guide-panel h4{color:#d4af37;margin-bottom:10px}
+.ai-guide-result{color:#ccc;font-size:.9em;line-height:1.6;max-height:200px;overflow-y:auto}
+.ai-guide-loading{color:#888;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">← 返回首页</a>
+  <div class="hero">
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · 昆仑洞天 · 数字画廊V3.0</div>
+    <h1>数字画廊</h1>
+    <div class="subtitle">9:16竖屏作品沉浸式展示 · 画框式布局 · 3D悬停预览 · 点击进入全屏竖屏沉浸模式</div>
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="video">视频作品</button>
+    <button class="filter-btn" data-filter="keyframe">关键帧</button>
+  </div>
+  <div class="stats">共 <span id="totalCount">0</span> 件作品 · 悬停预览 · 点击沉浸播放</div>
+
+  <div class="gallery-section" id="videoSection">
+    <h2>🎬 视频作品 <span class="count" id="videoCount"></span></h2>
+    <div class="gallery-row" id="videoRow"></div>
+  </div>
+
+  <div class="gallery-section" id="kfSection">
+    <h2>🖼 关键帧资产 <span class="count" id="kfCount"></span></h2>
+    <div class="kf-grid" id="kfGrid"></div>
+  </div>
+</div>
+
+<!-- 沉浸式全屏模式 -->
+<div class="immersive" id="immersive">
+  <div class="bg-blur" id="bgBlur"></div>
+  <button class="close-btn" onclick="closeImmersive()">×</button>
+  <button class="nav-btn nav-prev" onclick="navImmersive(-1)">‹</button>
+  <div class="phone-frame" id="phoneFrame"></div>
+  <button class="nav-btn nav-next" onclick="navImmersive(1)">›</button>
+  <div class="indicator" id="immersiveIndicator"></div>
+  <div class="caption" id="immersiveCaption"></div>
+</div>
+
+<footer>
+  火斗云智AIOS · 昆仑洞天 · 数字画廊V3.0
+  <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 画框式布局 · 3D悬停 · 沉浸式竖屏 · 自进化创造</div>
+</footer>
+
+<script>
+const VIDEOS = [
+  {title:"赤华狐影 EP01", url:"/assets/videos/drama/ep091306.mp4", model:"Seedance", cat:"成片", size:"15.4MB"},
+  {title:"赤华狐影 EP02", url:"/assets/videos/drama/ep091307.mp4", model:"Seedance", cat:"成片", size:"11.9MB"},
+  {title:"赤华狐影 EP03", url:"/assets/videos/drama/ep091308.mp4", model:"Seedance", cat:"成片", size:"14.4MB"},
+  {title:"赤华狐影 EP04", url:"/assets/videos/drama/ep091309.mp4", model:"Seedance", cat:"成片", size:"14.9MB"},
+  {title:"EP01 配音版", url:"/assets/videos/drama/EP01_dubbed.mp4", model:"Seedance", cat:"配音版", size:"10.1MB"},
+  {title:"EP02 配音版", url:"/assets/videos/drama/EP02_dubbed.mp4", model:"Seedance", cat:"配音版", size:"8.9MB"},
+  {title:"EP03 配音版", url:"/assets/videos/drama/EP03_dubbed.mp4", model:"Seedance", cat:"配音版", size:"8.9MB"},
+  {title:"EP04 配音版", url:"/assets/videos/drama/EP04_dubbed.mp4", model:"Seedance", cat:"配音版", size:"9.2MB"},
+  {title:"EP05 配音版", url:"/assets/videos/drama/EP05_dubbed.mp4", model:"Seedance", cat:"配音版", size:"9.2MB"},
+  {title:"赤华短片 v1", url:"/assets/videos/kunlun/chiwa_shortfilm_v1.mp4", model:"Seedance", cat:"短片", size:"18.8MB"},
+  {title:"太阴月神短片", url:"/assets/videos/kunlun/taiyin_shortfilm_v1.mp4", model:"万象Wanx", cat:"短片", size:"14MB"},
+  {title:"昆仑万象演示", url:"/assets/videos/kunlun/kunlun_wanxiang_demo.mp4", model:"万象Wanx", cat:"演示", size:"5MB"},
+  {title:"昆仑真实AI演示", url:"/assets/videos/kunlun/kunlun_real_ai_demo.mp4", model:"Agnes", cat:"演示", size:"5MB"},
+  {title:"昆仑5秒演示", url:"/assets/videos/kunlun/kunlun_demo_5s.mp4", model:"Seedance", cat:"演示", size:"3MB"},
+  {title:"图生视频测试", url:"/assets/videos/drama/EP-IMG2VID-001_1788574395.mp4", model:"Seedance", cat:"测试", size:"10.6MB"},
+  {title:"一键生成测试", url:"/assets/videos/drama/EP-ONECLICK-51c4_1788575143.mp4", model:"Seedance", cat:"测试", size:"9.5MB"}
+];
+
+const KEYFRAMES = [
+  {title:"墟境封印破裂", url:"/assets/keyframes/ep01/S01-001_墟境封印破裂.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"万妖之眼", url:"/assets/keyframes/ep01/S01-002_万妖之眼.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"玄汐山门警报", url:"/assets/keyframes/ep01/S01-003_玄汐山门警报.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"妖云压境", url:"/assets/keyframes/ep01/S01-004_妖云压境.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"玄女战争形态降临", url:"/assets/keyframes/ep01/S01-005_玄女战争形态降临.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"玄女俯瞰山门", url:"/assets/keyframes/ep01/S01-006_玄女俯瞰山门.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"万妖潮冲锋", url:"/assets/keyframes/ep01/S01-007_万妖潮冲锋.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"玄女神兵斩妖", url:"/assets/keyframes/ep01/S01-008_玄女神兵斩妖.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"妖兽被击碎", url:"/assets/keyframes/ep01/S01-009_妖兽被击碎.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"真武大帝结阵", url:"/assets/keyframes/ep01/S01-010_真武大帝结阵.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"女娲天际剪影", url:"/assets/keyframes/ep01/S01-011_女娲天际剪影.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"未知巨兽浮现", url:"/assets/keyframes/ep01/S01-012_未知巨兽浮现结尾.jpg", model:"Seedance", cat:"EP01剧情"},
+  {title:"红裙九尾狐 全身", url:"/assets/keyframes/characters/hongqun_jiuweihu_keyframe_01_fullbody.png", model:"豆包Seedream", cat:"角色设定"},
+  {title:"红裙九尾狐 场景", url:"/assets/keyframes/characters/hongqun_jiuweihu_keyframe_02_scene.png", model:"豆包Seedream", cat:"角色设定"},
+  {title:"九天玄女 全身", url:"/assets/keyframes/characters/jiutian_xuannv_keyframe_01_fullbody.png", model:"豆包Seedream", cat:"角色设定"},
+  {title:"九天玄女 场景", url:"/assets/keyframes/characters/jiutian_xuannv_keyframe_02_scene.png", model:"豆包Seedream", cat:"角色设定"},
+  {title:"太阴月神 全身", url:"/assets/keyframes/characters/taiyin_moon_god_keyframe_01_fullbody.png", model:"豆包Seedream", cat:"角色设定"},
+  {title:"太阴月神 场景", url:"/assets/keyframes/characters/taiyin_moon_god_keyframe_02_scene.png", model:"豆包Seedream", cat:"角色设定"},
+  {title:"西王母 全身", url:"/assets/keyframes/characters/xiwangmu_keyframe_01_fullbody.png", model:"豆包Seedream", cat:"角色设定"},
+  {title:"西王母 场景", url:"/assets/keyframes/characters/xiwangmu_keyframe_02_scene.png", model:"豆包Seedream", cat:"角色设定"},
+  {title:"金色符文星尘", url:"/assets/keyframes/goddess/01_金色符文星尘_竖屏.png", model:"万象Wanx", cat:"神女觉醒"},
+  {title:"黑色裂隙", url:"/assets/keyframes/goddess/02_黑色裂隙_竖屏.png", model:"万象Wanx", cat:"神女觉醒"},
+  {title:"神女觉醒", url:"/assets/keyframes/goddess/03_神女觉醒_竖屏.png", model:"万象Wanx", cat:"神女觉醒"},
+  {title:"九尾现身", url:"/assets/keyframes/goddess/04_九尾现身_竖屏.png", model:"万象Wanx", cat:"神女觉醒"},
+  {title:"苍玄降临", url:"/assets/keyframes/goddess/05_苍玄降临_竖屏.png", model:"万象Wanx", cat:"神女觉醒"}
+];
+
+let allWorks = [...VIDEOS.map(v=>({...v,type:"video"})), ...KEYFRAMES.map(k=>({...k,type:"image"}))];
+let curFilter = "all";
+let immersiveIdx = 0;
+let immersiveList = [];
+
+let videosLoaded = 0;
+function renderVideos(){
+  const row = document.getElementById("videoRow");
+  const videos = curFilter==="keyframe" ? [] : VIDEOS;
+  document.getElementById("videoCount").textContent = videos.length + "件";
+  document.getElementById("videoSection").style.display = videos.length ? "block" : "none";
+  // 首屏只渲染前6个，其余滚动加载
+  const firstBatch = videos.slice(0,6);
+  const restBatch = videos.slice(6);
+  row.innerHTML = firstBatch.map((v,i)=>renderVideoCard(v, allWorks.indexOf(v))).join("");
+  videosLoaded = 6;
+  if(restBatch.length){
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          row.insertAdjacentHTML("beforeend", restBatch.map((v,i)=>renderVideoCard(v, allWorks.indexOf(v))).join(""));
+          observer.disconnect();
+        }
+      });
+    }, {rootMargin: "200px"});
+    const sentinel = document.createElement("div");
+    sentinel.id = "videoSentinel";
+    sentinel.style.height = "10px";
+    row.appendChild(sentinel);
+    observer.observe(sentinel);
+  }
+}
+function renderVideoCard(v, idx){
+  return '<div class="frame-card" onclick="openImmersive('+idx+')">'+
+    '<div class="frame">'+
+      '<span class="badge">▶ '+v.cat+'</span>'+
+      '<span class="model-tag">'+v.model+'</span>'+
+      '<div class="video-thumb" data-url="'+v.url+'" style="background-image:url(/assets/videos/thumbs'+v.url.replace('/assets/videos','').replace('.mp4','.jpg')+');background-size:cover;background-position:center"><div class="play-btn">▶</div></div>'+
+      '<div class="play-overlay"><div class="play-btn"></div></div>'+
+    '</div>'+
+    '<div class="info"><h4>'+v.title+'</h4><p>'+v.model+' · '+v.size+'</p></div>'+
+  '</div>';
+}
+// 旧函数保留兼容
+function _renderVideosOld(){
+  const row = document.getElementById("videoRow");
+  const videos = curFilter==="keyframe" ? [] : VIDEOS;
+  document.getElementById("videoCount").textContent = videos.length + "件";
+  document.getElementById("videoSection").style.display = videos.length ? "block" : "none";
+  row.innerHTML = videos.map((v,i)=>{
+    const idx = allWorks.indexOf(v);
+    return '<div class="frame-card" onclick="openImmersive('+idx+')">'+
+      '<div class="frame">'+
+        '<span class="badge">▶ '+v.cat+'</span>'+
+        '<span class="model-tag">'+v.model+'</span>'+
+        '<div class="video-thumb" data-url="'+v.url+'" style="background-image:url(/assets/videos/thumbs'+v.url.replace(\'/assets/videos\',\'\').replace(\'.mp4\',\'.jpg\')+\');background-size:cover;background-position:center"><div class="play-btn">▶</div></div>'+
+        '<div class="play-overlay"><div class="play-btn"></div></div>'+
+      '</div>'+
+      '<div class="info"><h4>'+v.title+'</h4><p>'+v.model+' · '+v.size+'</p></div>'+
+    '</div>';
+  }).join("");
+}
+
+function renderKeyframes(){
+  const grid = document.getElementById("kfGrid");
+  const kfs = curFilter==="video" ? [] : KEYFRAMES;
+  document.getElementById("kfCount").textContent = kfs.length + "件";
+  document.getElementById("kfSection").style.display = kfs.length ? "block" : "none";
+  grid.innerHTML = kfs.map((k,i)=>{
+    const idx = allWorks.indexOf(k);
+    return '<div class="kf-card" onclick="openImmersive('+idx+')">'+
+      '<img loading="lazy" src="'+k.url+'" alt="'+k.title+'">'+
+      '<div class="kf-label">'+k.title+'<br><span style="color:#d4af37;font-size:0.9em">'+k.model+'</span></div>'+
+    '</div>';
+  }).join("");
+}
+
+function renderAll(){
+  document.getElementById("totalCount").textContent = 
+    (curFilter==="video"?VIDEOS.length:curFilter==="keyframe"?KEYFRAMES.length:allWorks.length);
+  renderVideos();
+  renderKeyframes();
+}
+
+document.querySelectorAll(".filter-btn").forEach(btn=>{
+  btn.addEventListener("click",function(){
+    document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+    this.classList.add("active");
+    curFilter = this.dataset.filter;
+    renderAll();
+  });
+});
+
+function openImmersive(idx){
+  immersiveList = curFilter==="video"?VIDEOS.map(v=>({...v,type:"video"})):
+                   curFilter==="keyframe"?KEYFRAMES.map(k=>({...k,type:"image"})):allWorks;
+  immersiveIdx = immersiveList.findIndex(w=>w.title===allWorks[idx].title);
+  if(immersiveIdx<0) immersiveIdx = 0;
+  showImmersive();
+  document.getElementById("immersive").classList.add("active");
+}
+function showImmersive(){
+  const w = immersiveList[immersiveIdx];
+  const frame = document.getElementById("phoneFrame");
+  if(w.type==="video"){
+    frame.innerHTML = '<video controls autoplay playsinline style="width:100%;height:100%;object-fit:contain" onclick="event.stopPropagation()"><source src="'+w.url+'" type="video/mp4"></video>';
+  } else {
+    frame.innerHTML = '<img src="'+w.url+'" style="width:100%;height:100%;object-fit:contain">';
+  }
+  document.getElementById("bgBlur").innerHTML = w.type==="video" ?
+    '<video src="'+w.url+'" muted loop autoplay></video>' : '<img src="'+w.url+'">';
+  document.getElementById("immersiveCaption").innerHTML = '<h3>'+w.title+'</h3><p>'+w.model+' · '+w.cat+'</p>';
+  document.getElementById("immersiveIndicator").textContent = (immersiveIdx+1)+" / "+immersiveList.length;
+}
+function closeImmersive(){
+  document.getElementById("immersive").classList.remove("active");
+  document.getElementById("phoneFrame").innerHTML = "";
+  document.getElementById("bgBlur").innerHTML = "";
+}
+function navImmersive(dir){
+  immersiveIdx = (immersiveIdx+dir+immersiveList.length)%immersiveList.length;
+  showImmersive();
+}
+document.addEventListener("keydown",e=>{
+  if(!document.getElementById("immersive").classList.contains("active"))return;
+  if(e.key==="Escape")closeImmersive();
+  if(e.key==="ArrowLeft")navImmersive(-1);
+  if(e.key==="ArrowRight")navImmersive(1);
+});
+document.getElementById("immersive").addEventListener("click",e=>{
+  if(e.target.id==="immersive")closeImmersive();
+});
+
+renderAll();
+</script>
+
+<div class="ai-guide-btn" onclick="toggleAIGuide()">⚡ AI导览</div>
+<div class="ai-guide-panel" id="aiGuidePanel">
+  <h4>⚡ 秒塔AI导览</h4>
+  <div class="ai-guide-result" id="aiGuideResult">点击下方按钮，AI为您推荐作品</div>
+  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+    <button onclick="aiRecommend()" style="padding:6px 12px;background:#d4af37;color:#000;border:none;border-radius:6px;cursor:pointer;font-size:.85em">推荐作品</button>
+    <button onclick="aiExplain()" style="padding:6px 12px;background:#2a2a3a;color:#ccc;border:none;border-radius:6px;cursor:pointer;font-size:.85em">作品介绍</button>
+  </div>
+</div>
+<script>
+function toggleAIGuide(){document.getElementById("aiGuidePanel").classList.toggle("show")}
+function aiRecommend(){
+  const r=document.getElementById("aiGuideResult");
+  r.innerHTML="<span class=ai-guide-loading>秒塔推理中...</span>";
+  fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:"推荐一部昆仑洞天的作品，简单介绍",system:"你是火斗云智AIOS数字画廊导览员，简洁推荐",force_model:"zhipu",max_tokens:150,sec_tower:true})}).then(r=>r.json()).then(d=>{
+    r.innerHTML=d.result+"<br><br><span style=color:#67c23a;font-size:.8em>⚡秒塔模式 | 稳态评分:"+d.verdict.steady_score+" | "+d.verdict.mode_used+"模式</span>";
+  }).catch(()=>{r.innerHTML="推荐暂时不可用"});
+}
+function aiExplain(){
+  const r=document.getElementById("aiGuideResult");
+  r.innerHTML="<span class=ai-guide-loading>秒塔推理中...</span>";
+  fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:"介绍昆仑洞天数字画廊的特色",system:"你是火斗云智AIOS导览员",force_model:"zhipu",max_tokens:150,sec_tower:true})}).then(r=>r.json()).then(d=>{
+    r.innerHTML=d.result+"<br><br><span style=color:#67c23a;font-size:.8em>⚡秒塔模式 | 稳态评分:"+d.verdict.steady_score+"</span>";
+  }).catch(()=>{r.innerHTML="介绍暂时不可用"});
+}
+</script>
+</body>
+</html>

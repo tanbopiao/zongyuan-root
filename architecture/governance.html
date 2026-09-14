@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>治理与安全 | 火斗云智AIOS</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0e17 0%,#1a1f2e 50%,#0d1117 100%);color:#e2e8f0;min-height:100vh}
+.header{background:rgba(17,24,39,0.9);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(16,185,129,0.3);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#10b981,#047857);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+.logo-text{font-size:18px;font-weight:700;color:#10b981}
+.logo-sub{font-size:10px;color:#888}
+.nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.nav a{color:#aaa;text-decoration:none;font-size:13px;transition:all .2s;padding:4px 10px;border-radius:6px}
+.nav a:hover{color:#10b981;background:rgba(16,185,129,0.1)}
+.nav a.active{color:#10b981;background:rgba(16,185,129,0.15)}
+.status-badge{display:flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:20px;font-size:11px;color:#10b981}
+.dot{width:6px;height:6px;border-radius:50%;background:#10b981;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero{text-align:center;padding:50px 20px 40px;background:radial-gradient(ellipse at center,rgba(16,185,129,0.1) 0%,transparent 70%)}
+.hero h1{font-size:36px;margin-bottom:10px;background:linear-gradient(90deg,#fff,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .subtitle{font-size:16px;color:#888;margin-bottom:16px;max-width:800px;margin:0 auto 16px}
+.hero .badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.badge{padding:5px 12px;border-radius:20px;font-size:11px;border:1px solid #333}
+.badge.green{border-color:#10b981;color:#10b981}
+.badge.gold{border-color:#d4af37;color:#d4af37}
+.badge.blue{border-color:#3b82f6;color:#3b82f6}
+.badge.purple{border-color:#8b5cf6;color:#8b5cf6}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:14px;text-align:center;transition:all .3s}
+.stat-card:hover{border-color:rgba(16,185,129,0.5);transform:translateY(-2px)}
+.stat-value{font-size:24px;font-weight:700;color:#10b981;margin-bottom:2px}
+.stat-label{font-size:10px;color:#888}
+.section{margin-bottom:28px}
+.section-title{font-size:18px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#10b981}
+.section-title::before{content:"";width:3px;height:18px;background:linear-gradient(180deg,#10b981,#047857);border-radius:2px}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;margin-bottom:16px}
+.chart-card{background:rgba(255,255,255,0.02);border:1px solid rgba(16,185,129,0.15);border-radius:10px;padding:12px}
+.chart-card h3{font-size:12px;color:#10b981;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(16,185,129,0.1)}
+.chart-container{width:100%;height:260px}
+.full-width{grid-column:1/-1}
+.law-card{background:rgba(255,255,255,0.03);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:16px;margin-bottom:12px;transition:all .3s}
+.law-card:hover{border-color:#10b981;box-shadow:0 8px 24px rgba(16,185,129,0.1)}
+.law-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.law-level{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600}
+.law-level.l0{background:rgba(220,38,38,0.15);color:#ef4444;border:1px solid rgba(220,38,38,0.3)}
+.law-level.l1{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)}
+.law-level.l2{background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)}
+.law-level.l3{background:rgba(139,92,246,0.15);color:#8b5cf6;border:1px solid rgba(139,92,246,0.3)}
+.law-name{font-size:14px;font-weight:600;color:#fff}
+.law-desc{font-size:11px;color:#888;line-height:1.5;margin-left:10px}
+.law-features{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;margin-left:10px}
+.law-feature{padding:3px 8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15);border-radius:4px;font-size:10px;color:#10b981}
+.merkle-flow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:16px 0}
+.merkle-step{flex:1;min-width:120px;text-align:center;padding:12px 8px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px;transition:all .3s}
+.merkle-step:hover{background:rgba(16,185,129,0.1);transform:translateY(-2px)}
+.merkle-icon{font-size:20px;margin-bottom:6px}
+.merkle-name{font-size:12px;font-weight:600;color:#10b981;margin-bottom:2px}
+.merkle-desc{font-size:9px;color:#888}
+.merkle-arrow{color:#10b981;font-size:18px;font-weight:700}
+.permission-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:11px}
+.permission-table th{background:rgba(16,185,129,0.1);color:#10b981;padding:10px 8px;text-align:left;border-bottom:1px solid rgba(16,185,129,0.2)}
+.permission-table td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);color:#ccc}
+.permission-table tr:hover{background:rgba(16,185,129,0.03)}
+.perm-yes{color:#10b981;font-weight:600}
+.perm-no{color:#ef4444;font-weight:600}
+.perm-warn{color:#f59e0b;font-weight:600}
+.security-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.security-card{background:rgba(16,185,129,0.03);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:16px;transition:all .3s}
+.security-card:hover{border-color:#10b981;transform:translateY(-2px)}
+.security-icon{font-size:28px;margin-bottom:8px}
+.security-title{font-size:14px;font-weight:600;color:#10b981;margin-bottom:6px}
+.security-desc{font-size:11px;color:#888;line-height:1.5;margin-bottom:10px}
+.security-features{display:flex;flex-direction:column;gap:4px}
+.security-feature{font-size:10px;color:#aaa;padding-left:12px;position:relative}
+.security-feature::before{content:"✓";position:absolute;left:0;color:#10b981}
+.footer{text-align:center;padding:24px 20px;border-top:1px solid rgba(16,185,129,0.15);margin-top:30px;color:#666;font-size:11px}
+.footer .anchor{color:#10b981;font-family:monospace;letter-spacing:1px}
+@media(max-width:768px){.header{padding:12px 16px;flex-direction:column;gap:10px}.nav{gap:8px}.hero h1{font-size:26px}.container{padding:12px}.merkle-flow{flex-direction:column}.merkle-arrow{transform:rotate(90deg)}}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="元法则体系，Merkle-DAG锁档，双向互控权限矩阵，国家主权根治理架构，Lv7/Lv6权限隔离，机密信息脱敏，资产防篡改泄露。">
+<meta name="keywords" content="治理安全,元法则,Merkle-DAG,权限矩阵,国家主权根,权限隔离,防篡改">
+<meta property="og:title" content="治理与安全 | 火斗云智AIOS">
+<meta property="og:description" content="元法则体系，Merkle-DAG锁档，双向互控权限矩阵，国家主权根治理架构，Lv7/Lv6权限隔离，机密信息脱敏，资产防篡改泄露。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/governance.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="治理与安全 | 火斗云智AIOS">
+<meta name="twitter:description" content="元法则体系，Merkle-DAG锁档，双向互控权限矩阵，国家主权根治理架构，Lv7/Lv6权限隔离，机密信息脱敏，资产防篡改泄露。">
+    <link rel="canonical" href="https://huodouai.com/architecture/governance.html">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<!-- ZONGYUAN-ROOT Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">ZONGYUAN-ROOT · DID-BR-000002</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/about/philosophy.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">思想</a>
+      <a href="/about/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/about/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/about/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/products/engines.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">引擎</a>
+      <a href="/architecture/governance.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">治理</a>
+      <a href="/internal/monitor.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">监控</a>
+      <a href="/products/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/gov/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">政务AI</a>
+      <a href="/drama/demo.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">短剧</a>
+      <a href="/sovereignty/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">主权根</a>
+      <a href="/products/vector-kb.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">向量库</a>
+      <a href="/docs/developers.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">开发者</a>
+      <a href="/docs/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /ZONGYUAN-ROOT Unified Navigation -->
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🛡️</div>
+    <div>
+      <div class="logo-text">治理与安全</div>
+      <div class="logo-sub">火斗云智AIOS · 元法则 · 锁档 · 溯源 · 鉴权</div>
+    </div>
+  </div>
+  <div class="nav">
+    <a href="/">首页</a>
+    <a href="/internal/portal.html">门户</a>
+    <a href="/architecture/">架构</a>
+    <a href="/products/engines.html">引擎</a>
+    <a href="/architecture/governance.html" class="active">治理</a>
+    <a href="/gov/">政务AI</a>
+    <a href="/sovereignty/">主权根</a>
+    <a href="/internal/status.html">状态</a>
+    <div class="status-badge"><div class="dot"></div>47锁档</div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>🛡️ 火斗云智AIOS 治理与安全</h1>
+  <div class="subtitle">元法则体系 · Merkle-DAG锁档 · 全链路溯源确权 · 双向互控架构 · 国家主权根治理 · mTLS+JWT安全防护</div>
+  <div class="badges">
+    <span class="badge green">12元法则</span>
+    <span class="badge gold">47锁档记录</span>
+    <span class="badge blue">双向互控</span>
+    <span class="badge purple">国家主权根</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">12</div><div class="stat-label">元法则</div></div>
+    <div class="stat-card"><div class="stat-value">10</div><div class="stat-label">元规则</div></div>
+    <div class="stat-card"><div class="stat-value">47</div><div class="stat-label">锁档记录</div></div>
+    <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">主权根规则层</div></div>
+    <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">主权根引擎</div></div>
+    <div class="stat-card"><div class="stat-value">33</div><div class="stat-label">API端点</div></div>
+    <div class="stat-card"><div class="stat-value">256</div><div class="stat-label">SHA256位</div></div>
+    <div class="stat-card"><div class="stat-value">100%</div><div class="stat-label">可审计性</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 治理架构可视化</div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>元法则层级分布</h3><div class="chart-container" id="lawLevelChart"></div></div>
+      <div class="chart-card"><h3>锁档记录类型分布</h3><div class="chart-container" id="lockTypeChart"></div></div>
+      <div class="chart-card full-width"><h3>双向互控权限矩阵</h3><div class="chart-container" id="permissionChart" style="height:300px;"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📜 元法则体系（L0-L3四层）</div>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l0">L0 元宪法</span>
+        <span class="law-name">元极恒一宪法 · 最高法·唯一本源</span>
+      </div>
+      <div class="law-desc">全域唯一真值本源：Ω₀⊂⊙∞⊂Ω。一切体系存在，源于无极生太极、万法归一。所有层级、所有规则、所有算子、所有执行，同源、同构、同真值。无任何例外、无任何特权、无任何跳层、无任何断点。</div>
+      <div class="law-features">
+        <span class="law-feature">永久不可变</span>
+        <span class="law-feature">零态定义</span>
+        <span class="law-feature">运行态禁止修改</span>
+        <span class="law-feature">体系最高第一性</span>
+      </div>
+    </div>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l1">L1 元公理</span>
+        <span class="law-name">五大元公理 · 不可证伪·永恒成立</span>
+      </div>
+      <div class="law-desc">降维保构公理（高维法理向下显化，拓扑结构永不丢失）、升维归真公理（底层一切运行现象，必须逐层升维校验）、层级不跳公理（禁止一切单向跳层）、阴阳具足公理（任一独立单元必须阴阳具足、正反闭环）、不完备自补公理（承认哥德尔不完备，内置自补机制）。</div>
+      <div class="law-features">
+        <span class="law-feature">降维保构</span>
+        <span class="law-feature">升维归真</span>
+        <span class="law-feature">层级不跳</span>
+        <span class="law-feature">阴阳具足</span>
+        <span class="law-feature">不完备自补</span>
+      </div>
+    </div>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l2">L2 元法则</span>
+        <span class="law-name">十大元法则 · 运行总法则</span>
+      </div>
+      <div class="law-desc">蓝图优先法则（无道不器、无律不行、无图不建）、因果保真法则（上层定因、下层显果）、双向闭环法则（自上而下降维构建，自下而上升维进化）、算子即太极法则（任一标准单元皆是独立小太极）、标准化优先法则（能组合不手写、能复用不重构）、溯源确权法则（一切变更必有痕）、稳态优先法则（体系稳态高于功能迭代）、涌现治理法则（未知不等于错误）、双认知等效法则（顶层演绎+底层归纳）、元监护兜底法则（元宪法锚点永恒不变）。</div>
+      <div class="law-features">
+        <span class="law-feature">蓝图优先</span>
+        <span class="law-feature">因果保真</span>
+        <span class="law-feature">双向闭环</span>
+        <span class="law-feature">算子即太极</span>
+        <span class="law-feature">标准化优先</span>
+        <span class="law-feature">溯源确权</span>
+        <span class="law-feature">稳态优先</span>
+        <span class="law-feature">涌现治理</span>
+        <span class="law-feature">双认知等效</span>
+        <span class="law-feature">元监护兜底</span>
+      </div>
+    </div>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l3">L3 元规则</span>
+        <span class="law-name">免费优先·付费确认元规则</span>
+      </div>
+      <div class="law-desc">免费优先调度。免费模型优先使用，免费额度最大化利用，付费模型需要人工审核确认。此规则为最高优先级规则，所有后续操作必须以此为准。</div>
+      <div class="law-features">
+        <span class="law-feature">免费优先</span>
+        <span class="law-feature">付费禁用</span>
+        <span class="law-feature">人工审核</span>
+        <span class="law-feature">免费额度可用</span>
+        <span class="law-feature">最高优先级</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔗 Merkle-DAG锁档机制</div>
+    <div class="merkle-flow">
+      <div class="merkle-step">
+        <div class="merkle-icon">📄</div>
+        <div class="merkle-name">资产生成</div>
+        <div class="merkle-desc">图片/视频/文档/架构快照</div>
+      </div>
+      <div class="merkle-arrow">→</div>
+      <div class="merkle-step">
+        <div class="merkle-icon">🔐</div>
+        <div class="merkle-name">SHA256哈希</div>
+        <div class="merkle-desc">256位哈希确权</div>
+      </div>
+      <div class="merkle-arrow">→</div>
+      <div class="merkle-step">
+        <div class="merkle-icon">🌳</div>
+        <div class="merkle-name">Merkle树</div>
+        <div class="merkle-desc">根哈希生成</div>
+      </div>
+      <div class="merkle-arrow">→</div>
+      <div class="merkle-step">
+        <div class="merkle-icon">🔗</div>
+        <div class="merkle-name">DAG链</div>
+        <div class="merkle-desc">有向无环图链接</div>
+      </div>
+      <div class="merkle-arrow">→</div>
+      <div class="merkle-step">
+        <div class="merkle-icon">✅</div>
+        <div class="merkle-name">永久锁档</div>
+        <div class="merkle-desc">BLOWN_PERMANENT</div>
+      </div>
+    </div>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l2">锁档特性</span>
+        <span class="law-name">全域资产三态锁档 · 不可篡改·可溯源·可审计</span>
+      </div>
+      <div class="law-desc">所有资产自动打溯源标识Ω₀⊂⊙∞⊂Ω，自动SHA256哈希锁档，自动Merkle-DAG根凭证生成。锁档记录包含本轮三态采集指标快照、跨态联动调控决策记录、参数回写确认哈希、全域总熵变化曲线。支持任意时间节点的完整溯源与审计。三层级全自动锁档：云盘/知识库/ZONGYUAN-ROOT。</div>
+      <div class="law-features">
+        <span class="law-feature">SHA256哈希确权</span>
+        <span class="law-feature">Merkle-DAG根凭证</span>
+        <span class="law-feature">三层级锁档</span>
+        <span class="law-feature">全生命周期可审计</span>
+        <span class="law-feature">任意时间点溯源</span>
+        <span class="law-feature">eFuse硬件熔断固化</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔄 双向互控架构</div>
+    <table class="permission-table">
+      <thead>
+        <tr>
+          <th>权限操作</th>
+          <th>云→本地</th>
+          <th>本地→云</th>
+          <th>说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>修改L0公理</td><td class="perm-yes">✅ 允许</td><td class="perm-no">❌ 禁止</td><td>云内核是最终权威</td></tr>
+        <tr><td>修改配置</td><td class="perm-yes">✅ 允许</td><td class="perm-warn">⚠️ 建议权</td><td>本地可推送，云决定是否采纳</td></tr>
+        <tr><td>推送真值</td><td class="perm-yes">✅ 允许</td><td class="perm-warn">⚠️ 建议权</td><td>本地新真值自动推送，去重后采纳</td></tr>
+        <tr><td>触发任务</td><td class="perm-yes">✅ 允许</td><td class="perm-warn">⚠️ 紧急权</td><td>仅backup/巡检/自愈</td></tr>
+        <tr><td>删除资产</td><td class="perm-yes">✅ 允许</td><td class="perm-no">❌ 禁止</td><td>防止本地误删</td></tr>
+        <tr><td>改权限/密钥</td><td class="perm-yes">✅ 允许</td><td class="perm-no">❌ 禁止</td><td>安全红线</td></tr>
+        <tr><td>查询状态</td><td class="perm-yes">✅ 允许</td><td class="perm-yes">✅ 允许</td><td>双向透明</td></tr>
+      </tbody>
+    </table>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l1">核心原则</span>
+        <span class="law-name">双向通信，单向权威</span>
+      </div>
+      <div class="law-desc">云内核永远是真值和配置的最终裁决者，本地内核拥有建议权和紧急权，但不能越权修改云内核的L0公理、删除资产或改权限。云→本地6种指令（配置更新/真值下发/协议同步/任务触发/远程诊断/自更新），本地→云3种权限（建议权/紧急权/查询权）。</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏛️ 国家主权根治理架构</div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>四层规则体系</h3><div class="chart-container" id="sovereigntyLayerChart"></div></div>
+      <div class="chart-card"><h3>三大引擎能力</h3><div class="chart-container" id="sovereigntyEngineChart"></div></div>
+    </div>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l0">L0 元宪法</span>
+        <span class="law-name">国家主权根元宪法（4条）</span>
+      </div>
+      <div class="law-desc">国家主权至上原则、数据主权原则、技术自主可控原则、法治合规原则。由国家主权背书并受法律严格约束，赋予"最终裁决"以合法性，打通"技术可信"到"社会可信"的壁垒。</div>
+    </div>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l1">L1 元公理</span>
+        <span class="law-name">国家主权根元公理（5条）</span>
+      </div>
+      <div class="law-desc">主权不可分割公理、数据本地化公理、技术栈自主公理、合规优先公理、权力制衡公理。对主权权力进行法律与技术双重制衡，防止价值反转。</div>
+    </div>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l2">L2 元法则</span>
+        <span class="law-name">国家主权根元法则（6条）</span>
+      </div>
+      <div class="law-desc">主权审查法则、数据出境法则、技术准入法则、合规审计法则、权力监测法则、应急熔断法则。6条短剧专属规则DRAMA-001~006。</div>
+    </div>
+    <div class="law-card">
+      <div class="law-header">
+        <span class="law-level l3">L3 元规则</span>
+        <span class="law-name">国家主权根元规则（6条）</span>
+      </div>
+      <div class="law-desc">API调用规则、数据访问规则、操作审计规则、异常上报规则、权限分级规则、应急响应规则。14条合规规则，33个API端点。</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 安全防护体系</div>
+    <div class="security-grid">
+      <div class="security-card">
+        <div class="security-icon">🔏</div>
+        <div class="security-title">mTLS双向证书</div>
+        <div class="security-desc">双向TLS认证，客户端和服务器双向验证身份，防止中间人攻击和伪造身份。</div>
+        <div class="security-features">
+          <span class="security-feature">客户端证书验证</span>
+          <span class="security-feature">服务器证书验证</span>
+          <span class="security-feature">防中间人攻击</span>
+          <span class="security-feature">证书轮换机制</span>
+        </div>
+      </div>
+      <div class="security-card">
+        <div class="security-icon">🎫</div>
+        <div class="security-title">短期JWT令牌</div>
+        <div class="security-desc">短期有效的JSON Web Token，降低令牌泄露风险，支持自动刷新和吊销。</div>
+        <div class="security-features">
+          <span class="security-feature">短期有效（15分钟）</span>
+          <span class="security-feature">自动刷新机制</span>
+          <span class="security-feature">令牌吊销支持</span>
+          <span class="security-feature">防重放攻击</span>
+        </div>
+      </div>
+      <div class="security-card">
+        <div class="security-icon">🎯</div>
+        <div class="security-title">Scope作用域</div>
+        <div class="security-desc">通过Scope作用域限定可调用的内核能力集合，例如真值资产读写、节点心跳上报、远端任务调度等。</div>
+        <div class="security-features">
+          <span class="security-feature">真值资产读写</span>
+          <span class="security-feature">节点心跳上报</span>
+          <span class="security-feature">远端任务调度</span>
+          <span class="security-feature">最小权限原则</span>
+        </div>
+      </div>
+      <div class="security-card">
+        <div class="security-icon">🏖️</div>
+        <div class="security-title">沙箱隔离</div>
+        <div class="security-desc">物理层代码执行需要内核二次校验授权、契约规则与稳态风险策略之后，才会调度沙箱执行。</div>
+        <div class="security-features">
+          <span class="security-feature">内核二次校验</span>
+          <span class="security-feature">契约规则校验</span>
+          <span class="security-feature">风险策略评估</span>
+          <span class="security-feature">隔离执行环境</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📈 锁档记录与治理趋势</div>
+    <div class="charts-grid">
+      <div class="chart-card full-width"><h3>锁档记录时间线</h3><div class="chart-container" id="lockTimelineChart" style="height:280px;"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  火斗云智AIOS 治理与安全 ｜ <span class="anchor">Ω₀⊂⊙∞⊂Ω</span> ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V9.11<br>
+  元法则体系 · Merkle-DAG锁档 · 全链路溯源确权 · 双向互控 · 国家主权根 · mTLS+JWT安全防护
+</div>
+
+<script>
+const charts = {};
+function initCharts() {
+  ['lawLevelChart','lockTypeChart','permissionChart','sovereigntyLayerChart','sovereigntyEngineChart','lockTimelineChart'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) charts[id] = echarts.init(el);
+  });
+}
+
+function updateLawLevelChart() {
+  if (!charts.lawLevelChart) return;
+  charts.lawLevelChart.setOption({
+    tooltip: { trigger: 'item' },
+    legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{
+      type: 'pie', radius: ['35%', '65%'], center: ['50%', '45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0e17', borderWidth: 2 },
+      label: { show: false },
+      data: [
+        { value: 1, name: 'L0 元宪法', itemStyle: { color: '#ef4444' } },
+        { value: 5, name: 'L1 元公理', itemStyle: { color: '#f59e0b' } },
+        { value: 10, name: 'L2 元法则', itemStyle: { color: '#3b82f6' } },
+        { value: 6, name: 'L3 元规则', itemStyle: { color: '#8b5cf6' } }
+      ]
+    }]
+  });
+}
+
+function updateLockTypeChart() {
+  if (!charts.lockTypeChart) return;
+  charts.lockTypeChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    yAxis: { type: 'category', data: ['网页可视化','全域资产','主权根优化','架构升级','引擎优化','安全加固','其他'], axisLabel: { color: '#ccc', fontSize: 10 } },
+    series: [{
+      type: 'bar', data: [8, 12, 6, 5, 4, 7, 5],
+      itemStyle: { color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#10b98188'},{offset:1,color:'#10b981'}]), borderRadius: [0,4,4,0] },
+      barWidth: '50%', label: { show: true, position: 'right', color: '#10b981', fontSize: 10 }
+    }]
+  });
+}
+
+function updatePermissionChart() {
+  if (!charts.permissionChart) return;
+  const categories = ['修改L0公理','修改配置','推送真值','触发任务','删除资产','改权限密钥','查询状态'];
+  charts.permissionChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { data: ['云→本地', '本地→云'], textStyle: { color: '#888' }, top: 0 },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '12%', containLabel: true },
+    xAxis: { type: 'category', data: categories, axisLabel: { color: '#888', fontSize: 9, rotate: 20 } },
+    yAxis: { type: 'value', max: 2, axisLabel: { color: '#888', formatter: function(v){ return ['禁止','建议','允许'][v] || '' } }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series: [
+      { name: '云→本地', type: 'bar', data: [2,2,2,2,2,2,2], itemStyle: { color: '#3b82f6' }, barWidth: '30%' },
+      { name: '本地→云', type: 'bar', data: [0,1,1,1,0,0,2], itemStyle: { color: '#10b981' }, barWidth: '30%' }
+    ]
+  });
+}
+
+function updateSovereigntyLayerChart() {
+  if (!charts.sovereigntyLayerChart) return;
+  charts.sovereigntyLayerChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    yAxis: { type: 'category', data: ['L3 元规则','L2 元法则','L1 元公理','L0 元宪法'], axisLabel: { color: '#ccc', fontSize: 11 } },
+    series: [{
+      type: 'bar', data: [6,6,5,4],
+      itemStyle: { color: function(params){ const colors = ['#8b5cf6','#3b82f6','#f59e0b','#ef4444']; return colors[params.dataIndex]; }, borderRadius: [0,4,4,0] },
+      barWidth: '50%', label: { show: true, position: 'right', color: '#fff', fontSize: 11, fontWeight: 600 }
+    }]
+  });
+}
+
+function updateSovereigntyEngineChart() {
+  if (!charts.sovereigntyEngineChart) return;
+  charts.sovereigntyEngineChart.setOption({
+    tooltip: {},
+    radar: {
+      indicator: [
+        { name: '规则冲突解决', max: 100 },
+        { name: '合规校验', max: 100 },
+        { name: '权力监测熔断', max: 100 },
+        { name: '规则治理', max: 100 },
+        { name: '合规告警', max: 100 },
+        { name: 'API Key管理', max: 100 }
+      ],
+      axisName: { color: '#888', fontSize: 10 },
+      splitArea: { areaStyle: { color: ['rgba(16,185,129,0.02)','rgba(16,185,129,0.05)'] } },
+      splitLine: { lineStyle: { color: 'rgba(16,185,129,0.2)' } },
+      axisLine: { lineStyle: { color: 'rgba(16,185,129,0.3)' } }
+    },
+    series: [{
+      type: 'radar',
+      data: [{ value: [95, 97, 90, 88, 85, 92], name: '当前能力', areaStyle: { color: 'rgba(16,185,129,0.3)' }, lineStyle: { color: '#10b981', width: 2 }, itemStyle: { color: '#10b981' } }]
+    }]
+  });
+}
+
+function updateLockTimelineChart() {
+  if (!charts.lockTimelineChart) return;
+  const days = ['8/25','8/28','8/31','9/2','9/4','9/5','9/6'];
+  charts.lockTimelineChart.setOption({
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['锁档数量','资产数量','真值数量'], textStyle: { color: '#888' }, top: 0 },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '12%', containLabel: true },
+    xAxis: { type: 'category', data: days, axisLabel: { color: '#888', fontSize: 10 } },
+    yAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series: [
+      { name: '锁档数量', type: 'line', smooth: true, data: [5,12,20,28,35,42,47], lineStyle: { color: '#10b981', width: 2 }, areaStyle: { color: 'rgba(16,185,129,0.1)' }, itemStyle: { color: '#10b981' } },
+      { name: '资产数量', type: 'line', smooth: true, data: [200,350,450,520,580,630,669], lineStyle: { color: '#3b82f6', width: 2 }, areaStyle: { color: 'rgba(59,130,246,0.1)' }, itemStyle: { color: '#3b82f6' } },
+      { name: '真值数量', type: 'line', smooth: true, data: [80,110,130,145,155,162,167], lineStyle: { color: '#d4af37', width: 2 }, areaStyle: { color: 'rgba(212,175,55,0.1)' }, itemStyle: { color: '#d4af37' } }
+    ]
+  });
+}
+
+window.addEventListener('load', () => {
+  initCharts();
+  updateLawLevelChart();
+  updateLockTypeChart();
+  updatePermissionChart();
+  updateSovereigntyLayerChart();
+  updateSovereigntyEngineChart();
+  updateLockTimelineChart();
+  window.addEventListener('resize', () => { Object.values(charts).forEach(c => c && c.resize()); });
+});
+</script>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/docs/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/internal/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/internal/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products/">产品</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">架构</a>
+<a href="/whitepapers/aios-v1.html">白皮书</a>
+<a href="/docs/">文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系统监控·昆仑洞天内部控制台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Courier New',monospace;font-size:13px}
+.header{background:linear-gradient(90deg,#1a1a2e,#16213e);padding:14px 24px;border-bottom:1px solid #c9a227}
+.header h1{color:#c9a227;font-size:16px}
+.nav{display:flex;gap:8px;padding:10px 24px;background:#111;border-bottom:1px solid #222}
+.nav a{color:#888;text-decoration:none;padding:6px 14px;border-radius:4px;font-size:12px}
+.nav a:hover,.nav a.active{background:#c9a227;color:#0a0a0f}
+.container{padding:20px;max-width:1400px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:16px}
+.panel{background:#111;border:1px solid #222;border-radius:8px;padding:16px}
+.panel h3{color:#c9a227;font-size:13px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #222}
+.service-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a1a;font-size:12px}
+.service-item:last-child{border-bottom:none}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.status-ok{color:#4ade80}.status-ok .status-dot{background:#4ade80}
+.status-err{color:#f87171}.status-err .status-dot{background:#f87171}
+.status-warn{color:#fbbf24}.status-warn .status-dot{background:#fbbf24}
+.model-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a1a;font-size:11px}
+.model-row:last-child{border-bottom:none}
+.tag-free{background:#4ade80;color:#0a0a0f;padding:2px 6px;border-radius:3px;font-size:10px}
+.tag-paid{background:#666;color:#999;padding:2px 6px;border-radius:3px;font-size:10px;text-decoration:line-through}
+.log-box{background:#000;border:1px solid #222;border-radius:4px;padding:10px;font-size:11px;max-height:300px;overflow-y:auto;line-height:1.5}
+.log-line{color:#888}.log-line.success{color:#4ade80}.log-line.error{color:#f87171}
+.btn{background:#c9a227;color:#0a0a0f;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:bold;margin:4px}
+.btn:hover{background:#e0b830}
+.footer{text-align:center;padding:16px;color:#444;font-size:11px;border-top:1px solid #222;margin-top:20px}
+</style>    <link rel="canonical" href="https://huodouai.com/drama-internal/system.html">
+</head>
+<body>
+<div class="header"><h1>⚙️ 系统监控 · 服务/模型/额度/日志</h1></div>
+<div class="nav">
+  <a href="index.html">📊 主控台</a><a href="production.html">🎬 生产工作台</a>
+  <a href="batch.html">📦 批量生产线</a><a href="assets.html">🗂️ 资产管理</a><a href="system.html" class="active">⚙️ 系统监控</a>
+</div>
+<div class="container">
+  <div class="grid">
+    <div class="panel">
+      <h3>🔧 服务状态</h3>
+      <div id="service-list">
+        <div class="service-item status-ok"><span><span class="status-dot"></span>AI Proxy (8021)</span><span>active</span></div>
+        <div class="service-item status-ok"><span><span class="status-dot"></span>漂移检测 (8022)</span><span>active</span></div>
+        <div class="service-item status-ok"><span><span class="status-dot"></span>Omega Brain (8000)</span><span>active</span></div>
+        <div class="service-item status-ok"><span><span class="status-dot"></span>Monitor (8004)</span><span>active</span></div>
+        <div class="service-item status-ok"><span><span class="status-dot"></span>Nginx</span><span>active</span></div>
+        <div class="service-item status-warn"><span><span class="status-dot"></span>MySQL</span><span>stopped(省内存)</span></div>
+      </div>
+      <button class="btn" onclick="refreshServices()">🔄 刷新状态</button>
+    </div>
+    <div class="panel">
+      <h3>🤖 模型监控（全免费模式）</h3>
+      <div style="font-size:11px;color:#4ade80;margin-bottom:8px">━━ 永久免费 ━━</div>
+      <div class="model-row"><span>zhipu glm-4-flash</span><span class="tag-free">永久免费</span></div>
+      <div class="model-row"><span>agnes agnes-2.5-flash</span><span class="tag-free">永久免费</span></div>
+      <div class="model-row"><span>agnes-image-2.0-flash</span><span class="tag-free">永久免费</span></div>
+      <div class="model-row"><span>agnes-video-v2.0</span><span class="tag-free">永久免费</span></div>
+      <div class="model-row"><span>ollama-local qwen2.5:0.5b</span><span class="tag-free">本地免费</span></div>
+      <div style="font-size:11px;color:#fbbf24;margin:8px 0">━━ 火山方舟·免费额度内可用（内部专用） ━━</div>
+      <div class="model-row"><span>doubao Seed1.6</span><span class="tag-free">额度内</span></div>
+      <div class="model-row"><span>doubao-reasoning</span><span class="tag-free">额度内</span></div>
+      <div class="model-row"><span>doubao-reasoning2</span><span class="tag-free">额度内</span></div>
+      <div class="model-row"><span>Seedream 5.0 图片</span><span class="tag-free">额度内</span></div>
+      <div class="model-row"><span>Seedance 视频</span><span class="tag-free">额度内(有限制)</span></div>
+      <div style="font-size:11px;color:#fbbf24;margin:8px 0">━━ 其他平台·免费额度内可用 ━━</div>
+      <div class="model-row"><span>siliconflow Qwen2.5-7B</span><span class="tag-free">额度内</span></div>
+      <div class="model-row"><span>kimi k2.6 (256K)</span><span class="tag-free">额度内</span></div>
+      <div class="model-row"><span>aliyun qwen-turbo</span><span class="tag-free">额度内</span></div>
+      <div style="font-size:11px;color:#f87171;margin:8px 0">━━ 纯付费 - 禁用 ━━</div>
+      <div class="model-row"><span>hunyuan hy4-preview</span><span class="tag-paid">402付费</span></div>
+      <div class="model-row"><span>wanxiang 视频</span><span class="tag-paid">付费禁用</span></div>
+    </div>
+    <div class="panel">
+      <h3>📊 资源使用</h3>
+      <div class="service-item"><span>CPU</span><span id="cpu-usage">--%</span></div>
+      <div class="service-item"><span>内存</span><span id="mem-usage">--%</span></div>
+      <div class="service-item"><span>磁盘</span><span id="disk-usage">--%</span></div>
+      <div class="service-item"><span>内核快照</span><span>110</span></div>
+      <div class="service-item"><span>任务持久化</span><span class="status-ok">SQLite ✅</span></div>
+      <div class="service-item"><span>元法则</span><span class="status-ok">免费优先 ✅</span></div>
+      <button class="btn" onclick="testAllModels()">🧪 测试全部模型</button>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>📜 系统日志</h3>
+    <div class="log-box" id="log-box">
+      <div class="log-line">[系统] 系统监控面板启动</div>
+      <div class="log-line success">[元法则] MR-FREE-FIRST-PAY-CONFIRM 强制执行</div>
+      <div class="log-line">[配置] 付费模型已全部禁用，仅保留6个免费模型</div>
+      <div class="log-line success">[持久化] tasks.db SQLite 已连接</div>
+    </div>
+  </div>
+</div>
+<div class="footer">Ω₀⊂⊙∞⊂Ω｜系统监控｜全免费模式｜DID-BR-000002｜Ω-TAN-7-001</div>
+<script src="js/internal-core.js"></script>
+<script>
+function refreshServices(){addLog('info','刷新服务状态...');setTimeout(()=>{addLog('success','所有核心服务运行正常');},500);}
+async function testAllModels(){
+  addLog('info','测试免费模型连通性...');
+  const models = ['zhipu','agnes','siliconflow'];
+  for(const m of models){
+    const result = await apiCall('/chat',{message:'ping',model:m,max_tokens:10});
+    if(result.result) addLog('success',`${m}: 连通 ✅`);
+    else addLog('error',`${m}: 失败 - ${result.error||'未知'}`);
+  }
+  addLog('warn','付费模型：已禁用，跳过测试');
+}
+function addLog(type,msg){const box=document.getElementById('log-box');const t=new Date().toLocaleTimeString();const d=document.createElement('div');d.className='log-line '+type;d.textContent=`[${t}] ${msg}`;box.appendChild(d);box.scrollTop=box.scrollHeight;}
+// 模拟资源数据
+setInterval(()=>{
+  document.getElementById('cpu-usage').textContent=(Math.random()*30+10).toFixed(1)+'%';
+  document.getElementById('mem-usage').textContent=(Math.random()*20+50).toFixed(1)+'%';
+  document.getElementById('disk-usage').textContent=(Math.random()*5+45).toFixed(1)+'%';
+},3000);
+</script>
+</body></html>

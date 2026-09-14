@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>普惠教育·源域通识 · 火斗云智AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--bg2:#12121a;--card:#1a1a26;--text:#e8e8f0;--text2:#9898b0;--muted:#686880;--purple:#a78bfa;--gold:#fbbf24;--blue:#60a5fa;--cyan:#22d3ee;--green:#4ade80;--red:#ef4444;--border:rgba(167,139,250,0.15)}
+body{background:var(--bg);color:var(--text);font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.7}
+.header{background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.header-inner{max-width:1200px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--purple),var(--gold));display:flex;align-items:center;justify-content:center;font-size:14px;color:#000;font-weight:900}
+.nav{display:flex;gap:24px;align-items:center}
+.nav a{color:var(--text2);text-decoration:none;font-size:13px;transition:color .2s}
+.nav a:hover{color:var(--purple)}
+.nav a.active{color:var(--gold)}
+.cta-btn{padding:8px 18px;background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+@media(max-width:768px){.nav{display:none}.header-inner{padding:12px 16px}}
+.hero{text-align:center;padding:80px 24px 60px;background:radial-gradient(ellipse at top,rgba(96,165,250,0.08),transparent 60%)}
+.badge{display:inline-block;padding:6px 16px;border:1px solid rgba(96,165,250,0.3);border-radius:100px;font-size:12px;color:var(--blue);background:rgba(96,165,250,0.05);margin-bottom:20px}
+.hero h1{font-size:42px;font-weight:800;margin-bottom:16px;background:linear-gradient(135deg,#fff,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.3}
+.hero p{font-size:16px;color:var(--text2);max-width:640px;margin:0 auto;line-height:1.8}
+.hero-stats{display:flex;justify-content:center;gap:40px;margin-top:32px;flex-wrap:wrap}
+.hero-stat .num{font-size:32px;font-weight:800;color:var(--blue)}
+.hero-stat .lbl{font-size:11px;color:var(--muted)}
+/* Knowledge Domains */
+.domains{max-width:1000px;margin:0 auto;padding:40px 24px}
+.domains h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.domain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.domain-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;transition:all .3s;position:relative;overflow:hidden}
+.domain-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.domain-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.domain-card.d1::before{background:linear-gradient(90deg,var(--gold),var(--red))}
+.domain-card.d2::before{background:linear-gradient(90deg,var(--purple),var(--blue))}
+.domain-card.d3::before{background:linear-gradient(90deg,var(--green),var(--cyan))}
+.domain-card .d-icon{font-size:28px;margin-bottom:12px}
+.domain-card h3{font-size:17px;font-weight:700;margin-bottom:8px}
+.domain-card p{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:14px}
+.domain-card .topics{display:flex;flex-wrap:wrap;gap:6px}
+.domain-card .topic{padding:3px 10px;background:rgba(255,255,255,0.05);border-radius:100px;font-size:11px;color:var(--text2)}
+/* Course List */
+.courses{max-width:1000px;margin:0 auto;padding:40px 24px 80px}
+.courses h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.course-list{display:flex;flex-direction:column;gap:12px}
+.course-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;display:flex;align-items:center;gap:20px;transition:all .2s;flex-wrap:wrap}
+.course-item:hover{border-color:var(--blue);background:rgba(96,165,250,0.03)}
+.course-num{width:36px;height:36px;border-radius:8px;background:rgba(96,165,250,0.15);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.course-info{flex:1;min-width:200px}
+.course-info h4{font-size:15px;font-weight:600;margin-bottom:4px}
+.course-info p{font-size:12px;color:var(--muted)}
+.course-meta{display:flex;gap:16px;flex-shrink:0}
+.course-meta span{font-size:11px;color:var(--text2);padding:4px 10px;background:rgba(255,255,255,0.03);border-radius:6px}
+.course-meta .free{color:var(--green);background:rgba(74,222,128,0.08)}
+.footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center;background:var(--bg2)}
+.footer .prov{font-size:16px;color:var(--gold);letter-spacing:3px;margin-bottom:8px}
+.footer .did{font-size:11px;color:var(--muted);margin-bottom:4px}
+.footer .copy{font-size:11px;color:var(--muted)}
+</style>
+    <link rel="canonical" href="https://huodouai.com/pages/full/education.html">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo"><div class="logo-icon">Ω</div><span>火斗云智 AIOS</span></div>
+    <nav class="nav">
+      <a href="/">首页</a><a href="/products/">产品</a><a href="/solutions/">解决方案</a>
+      <a href="/architecture/">技术架构</a><a href="/education/" class="active">普惠教育</a>
+      <a href="/docs/">文档</a><a href="/pricing/">定价</a>
+    </nav>
+    <a href="/trial/" class="cta-btn">免费试用</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="badge">Ω₀⊂⊙∞⊂Ω · 源域通识 · 普惠教育公益计划</div>
+  <h1>回到源头<br>让知识自由流动</h1>
+  <p>火斗云智AIOS普惠教育计划，致力于将华夏上古神话、宇宙社会学、共生之城等源域知识，通过AI技术转化为人人可及的通识教育内容。知识不应被垄断，智慧应回归本源。</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">3</div><div class="lbl">源域知识体系</div></div>
+    <div class="hero-stat"><div class="num">100+</div><div class="lbl">通识课程</div></div>
+    <div class="hero-stat"><div class="num">0</div><div class="lbl">门槛 · 全部免费</div></div>
+    <div class="hero-stat"><div class="num">∞</div><div class="lbl">永久开放</div></div>
+  </div>
+</section>
+
+<section class="domains">
+  <h2>三大源域知识体系</h2>
+  <div class="domain-grid">
+    <div class="domain-card d1">
+      <div class="d-icon">🏔️</div>
+      <h3>华夏上古神话</h3>
+      <p>追溯华夏文明的源头神话——昆仑、帝俊、西王母、九天玄女、金乌、九尾狐……还原被历史尘埃遮蔽的原生神话体系，重建华夏精神的本源记忆。</p>
+      <div class="topics">
+        <span class="topic">昆仑神话</span>
+        <span class="topic">帝俊体系</span>
+        <span class="topic">西王母</span>
+        <span class="topic">九天玄女</span>
+        <span class="topic">金乌传说</span>
+        <span class="topic">九尾狐</span>
+      </div>
+    </div>
+    <div class="domain-card d2">
+      <div class="d-icon">🌌</div>
+      <h3>宇宙社会学</h3>
+      <p>从宇宙尺度审视人类文明的生存法则——黑暗森林、技术爆炸、猜疑链、文明层级……结合ZONGYUAN-ROOT元公理体系，构建面向星际时代的社会哲学。</p>
+      <div class="topics">
+        <span class="topic">黑暗森林法则</span>
+        <span class="topic">技术爆炸</span>
+        <span class="topic">猜疑链</span>
+        <span class="topic">文明层级</span>
+        <span class="topic">元公理社会</span>
+        <span class="topic">星际伦理</span>
+      </div>
+    </div>
+    <div class="domain-card d3">
+      <div class="d-icon">🏙️</div>
+      <h3>共生之城</h3>
+      <p>探索人类与AI共生的未来城市形态——自治系统、神经节点、介入即增强、冲突即学习……从火斗云智AIOS的实践出发，描绘人机共生的理想社会蓝图。</p>
+      <div class="topics">
+        <span class="topic">自治系统</span>
+        <span class="topic">神经城市</span>
+        <span class="topic">介入即增强</span>
+        <span class="topic">冲突即学习</span>
+        <span class="topic">人机共生</span>
+        <span class="topic">未来治理</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="courses">
+  <h2>通识课程目录（精选）</h2>
+  <div class="course-list">
+    <div class="course-item">
+      <div class="course-num">01</div>
+      <div class="course-info"><h4>昆仑神话体系溯源</h4><p>从《山海经》到《淮南子》，还原昆仑神山的完整神话地理</p></div>
+      <div class="course-meta"><span class="free">免费</span><span>12课时</span><span>华夏上古</span></div>
+    </div>
+    <div class="course-item">
+      <div class="course-num">02</div>
+      <div class="course-info"><h4>帝俊与上古神系</h4><p>被历史化的上古最高神，帝俊及其神系的复原与解读</p></div>
+      <div class="course-meta"><span class="free">免费</span><span>8课时</span><span>华夏上古</span></div>
+    </div>
+    <div class="course-item">
+      <div class="course-num">03</div>
+      <div class="course-info"><h4>九天玄女：战争与智慧女神</h4><p>从玄鸟到玄女，上古女性战神的形象演变与文化内涵</p></div>
+      <div class="course-meta"><span class="free">免费</span><span>10课时</span><span>华夏上古</span></div>
+    </div>
+    <div class="course-item">
+      <div class="course-num">04</div>
+      <div class="course-info"><h4>黑暗森林法则的哲学基础</h4><p>从博弈论到宇宙社会学，解析黑暗森林法则的逻辑链条</p></div>
+      <div class="course-meta"><span class="free">免费</span><span>15课时</span><span>宇宙社会学</span></div>
+    </div>
+    <div class="course-item">
+      <div class="course-num">05</div>
+      <div class="course-info"><h4>元公理与社会治理</h4><p>元极恒一、介入即增强、冲突即学习——元公理在社会治理中的应用</p></div>
+      <div class="course-meta"><span class="free">免费</span><span>12课时</span><span>宇宙社会学</span></div>
+    </div>
+    <div class="course-item">
+      <div class="course-num">06</div>
+      <div class="course-info"><h4>共生之城：AI时代的城市形态</h4><p>从神经内核到城市大脑，探索人机共生的未来城市治理模式</p></div>
+      <div class="course-meta"><span class="free">免费</span><span>18课时</span><span>共生之城</span></div>
+    </div>
+    <div class="course-item">
+      <div class="course-num">07</div>
+      <div class="course-info"><h4>冲突即学习：社会矛盾的建设性转化</h4><p>从社会冲突到系统进化，学习如何将矛盾转化为发展动力</p></div>
+      <div class="course-meta"><span class="free">免费</span><span>10课时</span><span>共生之城</span></div>
+    </div>
+    <div class="course-item">
+      <div class="course-num">08</div>
+      <div class="course-info"><h4>金乌与太阳崇拜</h4><p>十日神话、后羿射日背后的上古太阳崇拜与历法起源</p></div>
+      <div class="course-meta"><span class="free">免费</span><span>8课时</span><span>华夏上古</span></div>
+    </div>
+  </div>
+  <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:24px">更多课程持续更新中 · 全部课程永久免费开放 · 支持AI个性化学习路径</p>
+</section>
+
+<footer class="footer">
+  <div class="prov">Ω₀⊂⊙∞⊂Ω</div>
+  <div class="did">DID-BR-000002 · 元极恒一永恒自治 · ZONGYUAN-ROOT</div>
+  <div class="copy">© 2026 火斗云智 AIOS · 普惠教育·源域通识公益计划 V1.0</div>
+</footer>
+
+</body>
+</html>

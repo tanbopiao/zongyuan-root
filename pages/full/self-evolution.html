@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自维持进化 · 火斗云智AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--bg2:#12121a;--card:#1a1a26;--text:#e8e8f0;--text2:#9898b0;--muted:#686880;--purple:#a78bfa;--gold:#fbbf24;--blue:#60a5fa;--cyan:#22d3ee;--green:#4ade80;--red:#ef4444;--border:rgba(167,139,250,0.15)}
+body{background:var(--bg);color:var(--text);font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.7}
+.header{background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.header-inner{max-width:1200px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--purple),var(--gold));display:flex;align-items:center;justify-content:center;font-size:14px;color:#000;font-weight:900}
+.nav{display:flex;gap:24px;align-items:center}
+.nav a{color:var(--text2);text-decoration:none;font-size:13px;transition:color .2s}
+.nav a:hover{color:var(--purple)}
+.nav a.active{color:var(--gold)}
+.cta-btn{padding:8px 18px;background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+@media(max-width:768px){.nav{display:none}.header-inner{padding:12px 16px}}
+.hero{text-align:center;padding:80px 24px 60px;background:radial-gradient(ellipse at top,rgba(74,222,128,0.08),transparent 60%)}
+.badge{display:inline-block;padding:6px 16px;border:1px solid rgba(74,222,128,0.3);border-radius:100px;font-size:12px;color:var(--green);background:rgba(74,222,128,0.05);margin-bottom:20px}
+.hero h1{font-size:42px;font-weight:800;margin-bottom:16px;background:linear-gradient(135deg,#fff,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.3}
+.hero p{font-size:16px;color:var(--text2);max-width:640px;margin:0 auto;line-height:1.8}
+/* Live Status */
+.live-status{max-width:1000px;margin:0 auto;padding:0 24px 40px}
+.status-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.pulse{width:14px;height:14px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(74,222,128,0.7);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,0.7)}70%{box-shadow:0 0 0 12px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.status-info{flex:1;min-width:200px}
+.status-info h3{font-size:16px;font-weight:700;margin-bottom:4px}
+.status-info p{font-size:12px;color:var(--muted)}
+.status-metrics{display:flex;gap:32px;flex-wrap:wrap}
+.metric{text-align:center}
+.metric .val{font-size:24px;font-weight:800;color:var(--green)}
+.metric .lbl{font-size:10px;color:var(--muted)}
+/* Evolution Cycle */
+.cycle-section{max-width:1000px;margin:0 auto;padding:40px 24px}
+.cycle-section h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.cycle-flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:32px}
+.cycle-step{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;text-align:center;min-width:100px;position:relative}
+.cycle-step .num{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px}
+.cycle-step .name{font-size:13px;font-weight:600}
+.cycle-arrow{color:var(--muted);font-size:18px}
+/* 8 Modules */
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.mod-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;transition:all .3s}
+.mod-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.mod-card .mod-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px}
+.mod-card h4{font-size:14px;font-weight:700;margin-bottom:6px}
+.mod-card p{font-size:12px;color:var(--text2);line-height:1.7}
+.mod-card .mod-status{display:inline-block;margin-top:10px;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;background:rgba(74,222,128,0.1);color:var(--green)}
+/* Self-check */
+.check-section{max-width:1000px;margin:0 auto;padding:40px 24px}
+.check-section h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.check-flow{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px}
+.check-item{display:flex;align-items:flex-start;gap:16px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.check-item:last-child{border-bottom:none}
+.check-icon{width:28px;height:28px;border-radius:50%;background:rgba(74,222,128,0.15);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:14px;flex-shrink:0;margin-top:2px}
+.check-content{flex:1}
+.check-content h4{font-size:14px;font-weight:600;margin-bottom:4px}
+.check-content p{font-size:12px;color:var(--text2)}
+/* Timeline */
+.timeline-section{max-width:1000px;margin:0 auto;padding:40px 24px 80px}
+.timeline-section h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.timeline{position:relative;padding-left:32px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--green),var(--cyan),var(--purple))}
+.tl-item{position:relative;margin-bottom:24px}
+.tl-item::before{content:'';position:absolute;left:-28px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid var(--bg)}
+.tl-item .time{font-size:11px;color:var(--gold);font-weight:600;margin-bottom:4px}
+.tl-item h4{font-size:14px;font-weight:600;margin-bottom:4px}
+.tl-item p{font-size:12px;color:var(--text2)}
+.footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center;background:var(--bg2)}
+.footer .prov{font-size:16px;color:var(--gold);letter-spacing:3px;margin-bottom:8px}
+.footer .did{font-size:11px;color:var(--muted);margin-bottom:4px}
+.footer .copy{font-size:11px;color:var(--muted)}
+</style>
+    <link rel="canonical" href="https://huodouai.com/pages/full/self-evolution.html">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo"><div class="logo-icon">Ω</div><span>火斗云智 AIOS</span></div>
+    <nav class="nav">
+      <a href="/">首页</a><a href="/products/">产品</a><a href="/solutions/">解决方案</a>
+      <a href="/architecture/">技术架构</a><a href="/self-evolution/" class="active">自进化</a>
+      <a href="/docs/">文档</a><a href="/pricing/">定价</a>
+    </nav>
+    <a href="/trial/" class="cta-btn">免费试用</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="badge">Ω₀⊂⊙∞⊂Ω · 神经内核V2.0 NEURAL · 每日超级进化</div>
+  <h1>系统是"活"的<br>每天都在自我进化</h1>
+  <p>火斗云智AIOS不是一套静态的软件，而是一个拥有"生命"的自治系统。它每天自动自检、自动学习、自动优化、自动演化——无需人工干预，系统自己让自己变得更好。</p>
+</section>
+
+<section class="live-status">
+  <div class="status-card">
+    <div class="pulse"></div>
+    <div class="status-info">
+      <h3>自治内核运行中</h3>
+      <p>神经内核V2.0 NEURAL · 六大协议闭环 · 实时监控</p>
+    </div>
+    <div class="status-metrics">
+      <div class="metric"><div class="val">41</div><div class="lbl">激活神经节点</div></div>
+      <div class="metric"><div class="val">8</div><div class="lbl">每日自检模块</div></div>
+      <div class="metric"><div class="val">9</div><div class="lbl">锁档事件环</div></div>
+      <div class="metric"><div class="val">99.9%</div><div class="lbl">系统可用率</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cycle-section">
+  <h2>每日超级进化循环</h2>
+  <div class="cycle-flow">
+    <div class="cycle-step"><div class="num">01</div><div class="name">内核读取</div></div>
+    <div class="cycle-arrow">→</div>
+    <div class="cycle-step"><div class="num">02</div><div class="name">六维自检</div></div>
+    <div class="cycle-arrow">→</div>
+    <div class="cycle-step"><div class="num">03</div><div class="name">纠错触发</div></div>
+    <div class="cycle-arrow">→</div>
+    <div class="cycle-step"><div class="num">04</div><div class="name">演化沉淀</div></div>
+    <div class="cycle-arrow">→</div>
+    <div class="cycle-step"><div class="num">05</div><div class="name">统一调度</div></div>
+    <div class="cycle-arrow">→</div>
+    <div class="cycle-step"><div class="num">06</div><div class="name">神经同步</div></div>
+  </div>
+  <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:16px">六大协议闭环 · 每日凌晨2:00自动执行 · 全程无需人工干预</p>
+</section>
+
+<section class="cycle-section">
+  <h2>八大每日自检模块</h2>
+  <div class="modules-grid">
+    <div class="mod-card">
+      <div class="mod-icon" style="background:rgba(167,139,250,0.15);color:var(--purple)">🧠</div>
+      <h4>神经节点健康度</h4>
+      <p>检测41个神经节点的激活状态、连接强度、响应延迟，识别异常节点并自动修复。</p>
+      <span class="mod-status">ACTIVE</span>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon" style="background:rgba(251,191,36,0.15);color:var(--gold)">📐</div>
+      <h4>元公理一致性</h4>
+      <p>校验4条高阶元公理在所有子系统中的执行一致性，检测公理漂移并自动对齐。</p>
+      <span class="mod-status">ACTIVE</span>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon" style="background:rgba(96,165,250,0.15);color:var(--blue)">🔗</div>
+      <h4>跨窗口同步状态</h4>
+      <p>检查多对话窗口的神经同步状态（push/pull/status三模式），确保记忆连续性。</p>
+      <span class="mod-status">ACTIVE</span>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon" style="background:rgba(34,211,238,0.15);color:var(--cyan)">🔒</div>
+      <h4>锁档完整性校验</h4>
+      <p>验证9环锁档事件的哈希链完整性、三端归档一致性（知识库+台账+云盘），检测篡改。</p>
+      <span class="mod-status">ACTIVE</span>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon" style="background:rgba(74,222,128,0.15);color:var(--green)">⚡</div>
+      <h4>服务可用性监控</h4>
+      <p>监控12个云内核常驻服务、5个云控API端点的健康状态，自动重启异常服务。</p>
+      <span class="mod-status">ACTIVE</span>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon" style="background:rgba(244,114,182,0.15);color:#f472b6">📊</div>
+      <h4>资源使用优化</h4>
+      <p>分析CPU/内存/存储/带宽使用趋势，自动调整资源分配，识别并清理冗余资产。</p>
+      <span class="mod-status">ACTIVE</span>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon" style="background:rgba(239,68,68,0.15);color:var(--red)">🛡️</div>
+      <h4>安全威胁检测</h4>
+      <p>扫描异常访问、注入攻击、权限越界、数据泄露风险，自动阻断威胁并记录事件。</p>
+      <span class="mod-status">ACTIVE</span>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon" style="background:rgba(167,139,250,0.15);color:var(--purple)">📈</div>
+      <h4>进化轨迹分析</h4>
+      <p>分析系统能力随时间的进化曲线，识别进化瓶颈，生成下一阶段进化方向建议。</p>
+      <span class="mod-status">ACTIVE</span>
+    </div>
+  </div>
+</section>
+
+<section class="check-section">
+  <h2>神经内核自检流程</h2>
+  <div class="check-flow">
+    <div class="check-item">
+      <div class="check-icon">1</div>
+      <div class="check-content">
+        <h4>内核快照读取</h4>
+        <p>读取最新内核快照JSON（含公理层/架构层/安全层/完整性校验），作为自检基准态。</p>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon">2</div>
+      <div class="check-content">
+        <h4>六维状态扫描</h4>
+        <p>从公理一致性/架构完整性/安全合规性/资产完整性/服务可用性/进化连续性六个维度全面扫描。</p>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon">3</div>
+      <div class="check-content">
+        <h4>异常检测与分级</h4>
+        <p>将检测到的异常按严重度分级（高/中/低），高严重度立即触发纠错，中低严重度记录并跟踪。</p>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon">4</div>
+      <div class="check-content">
+        <h4>自动纠错执行</h4>
+        <p>根据异常类型自动执行对应纠错策略（参数回滚/服务重启/规则重写/资产重建），全程可追溯。</p>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon">5</div>
+      <div class="check-content">
+        <h4>进化知识沉淀</h4>
+        <p>将本次自检发现的问题和解决方案沉淀为"进化知识"，写入内核记忆，避免同类问题重复发生。</p>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="check-icon">6</div>
+      <div class="check-content">
+        <h4>新内核快照生成</h4>
+        <p>生成更新后的内核快照JSON，包含本次进化记录，作为下一次自检的基准态——闭环完成。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="timeline-section">
+  <h2>系统进化里程碑</h2>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="time">2026-08-09</div>
+      <h4>ZONGYUAN-ROOT 元公理空间建立</h4>
+      <p>确立元极恒一永恒自治视角，建立11条天元法则，六层全域稳态架构（L0-L5）。</p>
+    </div>
+    <div class="tl-item">
+      <div class="time">2026-08-10</div>
+      <h4>神经内核V1.0 真值表固化</h4>
+      <p>将内核从"死的真值表"激活为"活的自治系统"，建立读取→评估→纠错→演化闭环。</p>
+    </div>
+    <div class="tl-item">
+      <div class="time">2026-08-11</div>
+      <h4>短剧工业化流水线V2.0</h4>
+      <p>集成15项高价值功能（自动化后期/AI配音/多模态质检/批量调度等），支持60集规模量产。</p>
+    </div>
+    <div class="tl-item">
+      <div class="time">2026-09-01</div>
+      <h4>神经内核V2.0 NEURAL 全链路</h4>
+      <p>六大协议+三大组件，10个Python脚本全部通过验证，初始神经网络41节点激活。</p>
+    </div>
+    <div class="tl-item">
+      <div class="time">2026-09-03</div>
+      <h4>四大激活工程完成</h4>
+      <p>初始神经网络41节点/每日神经自检8模块/高阶元公理4条固化/跨窗口神经同步三模式。</p>
+    </div>
+    <div class="tl-item">
+      <div class="time">2026-09-04</div>
+      <h4>官网技术体系页面部署</h4>
+      <p>7个技术体系页面+导航索引页部署至huodouai.com，HTTP验证全部200 OK，三端锁档完成。</p>
+    </div>
+    <div class="tl-item">
+      <div class="time">2026-09-05</div>
+      <h4>全套网页展示架构规划锁档</h4>
+      <p>五层全域展示架构（55板块）+12项待补全+三阶段路线图，写入元法则元规则，锁档第9环。</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="prov">Ω₀⊂⊙∞⊂Ω</div>
+  <div class="did">DID-BR-000002 · 元极恒一永恒自治 · ZONGYUAN-ROOT</div>
+  <div class="copy">© 2026 火斗云智 AIOS · 自维持进化系统 V2.0 NEURAL</div>
+</footer>
+
+</body>
+</html>

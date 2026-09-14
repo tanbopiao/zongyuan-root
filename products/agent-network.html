@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多智能体节点网络平台 - 火斗云智AIOS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .hero { padding: 80px 0 60px; text-align: center; }
+        .hero-badge {
+            display: inline-block; padding: 6px 16px;
+            background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px; font-size: 14px; color: #a5b4fc; margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: 48px; font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 20px;
+        }
+        .hero .subtitle { font-size: 20px; color: #94a3b8; max-width: 800px; margin: 0 auto 40px; }
+        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 500;
+            text-decoration: none; transition: all 0.3s; display: inline-block;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.05); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+        .section { padding: 60px 0; }
+        .section-title { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 16px; color: #f1f5f9; }
+        .section-desc { text-align: center; color: #94a3b8; max-width: 700px; margin: 0 auto 48px; font-size: 16px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+        .grid-8 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+        .card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px; padding: 28px; transition: all 0.3s;
+        }
+        .card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-4px); }
+        .card .icon { font-size: 32px; margin-bottom: 16px; }
+        .card h3 { font-size: 18px; margin-bottom: 12px; color: #f1f5f9; }
+        .card p { color: #94a3b8; font-size: 14px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px; padding: 36px 28px; position: relative; transition: all 0.3s;
+        }
+        .pricing-card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-4px); }
+        .pricing-card.popular { border-color: rgba(99, 102, 241, 0.5); background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); }
+        .popular-badge {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
+        }
+        .pricing-name { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #f1f5f9; }
+        .pricing-price { font-size: 36px; font-weight: 700; margin-bottom: 4px; color: #fff; }
+        .pricing-price span { font-size: 14px; font-weight: 400; color: #94a3b8; }
+        .pricing-desc { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+        .pricing-features { list-style: none; margin-bottom: 28px; }
+        .pricing-features li { padding: 8px 0; color: #cbd5e1; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .pricing-features li::before { content: "✓"; color: #10b981; font-weight: bold; }
+        .customers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+        .customer-card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px; padding: 20px; text-align: center;
+        }
+        .customer-card .icon { font-size: 28px; margin-bottom: 8px; }
+        .customer-card .name { font-size: 15px; font-weight: 500; color: #f1f5f9; margin-bottom: 4px; }
+        .customer-card .desc { font-size: 13px; color: #a5b4fc; }
+        .cta-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 20px; padding: 60px 40px; text-align: center; margin: 60px 0;
+        }
+        .cta-section h2 { font-size: 32px; margin-bottom: 16px; color: #f1f5f9; }
+        .cta-section p { color: #94a3b8; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .footer { padding: 40px 0; text-align: center; color: #64748b; font-size: 14px; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 60px; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .hero .subtitle { font-size: 16px; }
+            .section-title { font-size: 24px; }
+        }
+    </style>
+
+<meta name="description" content="多智能体节点网络平台 - 火斗云智AIOS，支持多AI智能体协同工作、节点管理、负载均衡和任务分发，构建分布式智能体网络。">
+<meta name="keywords" content="多智能体,AI Agent,节点网络,协同工作,分布式AI,火斗云智">
+<meta property="og:type" content="website">
+<meta property="og:title" content="多智能体节点网络平台 - 火斗云智AIOS，支持多AI智能体协同工作、节点管理、负载均衡和任务分发，构建分布式智能体网络">
+<meta property="og:description" content="多智能体节点网络平台 - 火斗云智AIOS，支持多AI智能体协同工作、节点管理、负载均衡和任务分发，构建分布式智能体网络。">
+<meta property="og:url" content="https://huodouai.com/agent-network.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="多智能体节点网络平台 - 火斗云智AIOS，支持多AI智能体协同工作、节点管理、负载均衡和任务分发，构建分布式智能体网络">
+<meta name="twitter:description" content="多智能体节点网络平台 - 火斗云智AIOS，支持多AI智能体协同工作、节点管理、负载均衡和任务分发，构建分布式智能体网络。">
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/products/agent-network.html">
+</head>
+<body><nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products/">产品中心</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">技术架构</a>
+<a href="/whitepapers/aios-v1.html">技术白皮书</a>
+<a href="/blog/">技术博客</a>
+<a href="/docs/">开发者文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">🤖 分布式智能体</div>
+            <h1>多智能体节点网络平台</h1>
+            <p class="subtitle">分布式AI节点协作网络，企业可组建自己的智能体团队，自动分配任务</p>
+            <div class="hero-buttons">
+                <a href="/products/agent-studio.html" class="btn btn-gold">在线体验</a>
+                <a href="/about/book-demo.html" class="btn btn-outline">预约演示</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">你是否面临这些痛点？</h2>
+            <p class="section-desc">解决企业在AI应用中的核心难题</p>
+            <div class="grid-4">
+                
+                <div class="card">
+                    <div class="icon">🤖</div>
+                    <h3 style="color: #fca5a5;">多Agent难管理</h3>
+                    <p>有多个AI Agent，但各自为战，不知道谁该干什么、干得怎么样</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📊</div>
+                    <h3 style="color: #fca5a5;">任务分配混乱</h3>
+                    <p>任务来了不知道派给谁，重复劳动、效率低下</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔍</div>
+                    <h3 style="color: #fca5a5;">质量不可控</h3>
+                    <p>Agent输出质量参差不齐，没有统一的质量校验</p>
+                </div>
+                <div class="card">
+                    <div class="icon">💰</div>
+                    <h3 style="color: #fca5a5;">算力浪费</h3>
+                    <p>不同Agent各买各的算力，资源浪费严重</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <div class="container">
+            <h2 class="section-title">核心功能</h2>
+            <p class="section-desc">技术驱动的产品设计，解决真实业务问题</p>
+            <div class="grid-8">
+                
+                <div class="card">
+                    <div class="icon">📝</div>
+                    <h3>节点注册发现</h3>
+                    <p>新节点自动注册上线，心跳上报状态，节点池自动发现</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🎯</div>
+                    <h3>任务调度分配</h3>
+                    <p>根据节点能力/负载/历史质量自动分配任务</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📈</div>
+                    <h3>信任等级晋升</h3>
+                    <p>UNTRUSTED→OBSERVER→TRUSTED→HOMOGENEOUS四级晋升</p>
+                </div>
+                <div class="card">
+                    <div class="icon">✅</div>
+                    <h3>质量校验门禁</h3>
+                    <p>所有输出经过四重校验器，不合格自动打回</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔗</div>
+                    <h3>同源协议通信</h3>
+                    <p>节点间通过同源协议通信，身份可验证、消息可追溯</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📊</div>
+                    <h3>全局监控看板</h3>
+                    <p>节点状态、任务进度、成功率、成本一屏掌握</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔧</div>
+                    <h3>插件化扩展</h3>
+                    <p>新能力以插件形式接入，不用改核心代码</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔄</div>
+                    <h3>故障自动切换</h3>
+                    <p>节点故障自动标记离线，任务自动重新分配</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="pricing">
+        <div class="container">
+            <h2 class="section-title">定价方案</h2>
+            <p class="section-desc">从免费体验到企业级私有化部署，满足不同规模需求</p>
+            <div class="pricing-grid">
+                
+                <div class="pricing-card">
+                    
+                    <div class="pricing-name">开源版</div>
+                    <div class="pricing-price">¥0 <span>/开源</span></div>
+                    <div class="pricing-desc">开发者自建</div>
+                    <ul class="pricing-features">
+                        <li>全部核心功能</li><li>社区版开源</li><li>自行部署运维</li><li>社区支持</li>
+                    </ul>
+                    <a href="/trial.html" class="btn btn-primary" style="width:100%; text-align:center; display:block;">GitHub下载</a>
+                </div>
+                <div class="pricing-card popular">
+                    <div class="popular-badge">最受欢迎</div>
+                    <div class="pricing-name">云托管版</div>
+                    <div class="pricing-price">¥499 <span>/月</span></div>
+                    <div class="pricing-desc">中小团队开箱即用</div>
+                    <ul class="pricing-features">
+                        <li>云端托管</li><li>最多20个节点</li><li>任务调度</li><li>监控看板</li><li>工单支持</li>
+                    </ul>
+                    <a href="/trial.html" class="btn btn-primary" style="width:100%; text-align:center; display:block;">立即开通</a>
+                </div>
+                <div class="pricing-card">
+                    
+                    <div class="pricing-name">企业版</div>
+                    <div class="pricing-price">¥50,000 <span>/年起</span></div>
+                    <div class="pricing-desc">大型企业私有化</div>
+                    <ul class="pricing-features">
+                        <li>无限节点</li><li>私有化部署</li><li>定制插件</li><li>SLA保障</li>
+                    </ul>
+                    <a href="/trial.html" class="btn btn-primary" style="width:100%; text-align:center; display:block;">联系销售</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">谁在用？</h2>
+            <p class="section-desc">为不同行业的企业提供专业解决方案</p>
+            <div class="customers-grid">
+                
+                <div class="customer-card">
+                    <div class="icon">🤖</div>
+                    <div class="name">AI应用团队</div>
+                    <div class="desc">多Agent编排</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">🏢</div>
+                    <div class="name">中大型企业</div>
+                    <div class="desc">内部智能体平台</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">🛠️</div>
+                    <div class="name">AI服务商</div>
+                    <div class="desc">对外提供智能体服务</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">🎓</div>
+                    <div class="name">科研机构</div>
+                    <div class="desc">多智能体实验</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">💻</div>
+                    <div class="name">SaaS公司</div>
+                    <div class="desc">AI功能集成</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">📊</div>
+                    <div class="name">咨询公司</div>
+                    <div class="desc">业务流程自动化</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="cta-section">
+                <h2>开始使用多智能体节点网络平台</h2>
+                <p>5分钟快速接入，立即提升你的业务效率</p>
+                <div class="hero-buttons">
+                    <a href="/trial.html" class="btn btn-primary">免费试用30天</a>
+                    <a href="/internal/demo.html" class="btn btn-secondary">查看Demo</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>火斗云智AIOS · 多智能体节点网络平台 | Ω₀⊂⊙∞⊂Ω</p>
+            <p style="margin-top: 8px; opacity: 0.6;">DID-BR-000002 · ZONGYUAN-ROOT · 企业级AI解决方案</p>
+        </div>
+    </footer>
+</body>
+</html>

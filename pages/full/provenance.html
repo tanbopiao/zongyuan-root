@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>确权存证中心 · 火斗云智AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--bg2:#12121a;--card:#1a1a26;--text:#e8e8f0;--text2:#9898b0;--muted:#686880;--purple:#a78bfa;--gold:#fbbf24;--blue:#60a5fa;--cyan:#22d3ee;--green:#4ade80;--red:#ef4444;--border:rgba(167,139,250,0.15)}
+body{background:var(--bg);color:var(--text);font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.7}
+.header{background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.header-inner{max-width:1200px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--purple),var(--gold));display:flex;align-items:center;justify-content:center;font-size:14px;color:#000;font-weight:900}
+.nav{display:flex;gap:24px;align-items:center}
+.nav a{color:var(--text2);text-decoration:none;font-size:13px;transition:color .2s}
+.nav a:hover{color:var(--purple)}
+.nav a.active{color:var(--gold)}
+.cta-btn{padding:8px 18px;background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+@media(max-width:768px){.nav{display:none}.header-inner{padding:12px 16px}}
+.hero{text-align:center;padding:80px 24px 60px;background:radial-gradient(ellipse at top,rgba(251,191,36,0.08),transparent 60%)}
+.badge{display:inline-block;padding:6px 16px;border:1px solid rgba(251,191,36,0.3);border-radius:100px;font-size:12px;color:var(--gold);background:rgba(251,191,36,0.05);margin-bottom:20px}
+.hero h1{font-size:42px;font-weight:800;margin-bottom:16px;background:linear-gradient(135deg,#fff,var(--gold),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.3}
+.hero p{font-size:16px;color:var(--text2);max-width:640px;margin:0 auto;line-height:1.8}
+.prov-symbol{font-size:48px;color:var(--gold);letter-spacing:8px;margin:24px 0;font-weight:300;text-shadow:0 0 30px rgba(251,191,36,0.3)}
+/* Four Pillars */
+.pillars{max-width:1000px;margin:0 auto;padding:40px 24px}
+.pillars h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.pillars-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.pillar{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;transition:all .3s}
+.pillar:hover{border-color:var(--gold);transform:translateY(-3px)}
+.pillar .p-icon{width:48px;height:48px;border-radius:12px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.pillar h3{font-size:16px;font-weight:700;margin-bottom:8px}
+.pillar p{font-size:12px;color:var(--text2);line-height:1.8}
+/* DID Section */
+.did-section{max-width:1000px;margin:0 auto;padding:40px 24px}
+.did-section h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.did-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;position:relative;overflow:hidden}
+.did-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--purple),var(--cyan))}
+.did-display{text-align:center;margin-bottom:24px}
+.did-label{font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:8px}
+.did-value{font-size:28px;font-weight:800;color:var(--gold);font-family:'Courier New',monospace;letter-spacing:2px}
+.did-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:24px}
+.did-meta-item{background:rgba(255,255,255,0.02);border-radius:10px;padding:14px}
+.did-meta-item .k{font-size:10px;color:var(--muted);margin-bottom:4px}
+.did-meta-item .v{font-size:13px;font-weight:600;color:var(--text)}
+/* Merkle Tree */
+.merkle-section{max-width:1000px;margin:0 auto;padding:40px 24px}
+.merkle-section h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.merkle-tree{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px}
+.tree-level{display:flex;justify-content:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.tree-node{background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);border-radius:8px;padding:8px 14px;font-family:'Courier New',monospace;font-size:11px;color:var(--purple);min-width:100px;text-align:center}
+.tree-node.root{background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.3);color:var(--gold);font-weight:700;min-width:200px}
+.tree-label{text-align:center;font-size:10px;color:var(--muted);margin-bottom:6px}
+/* Watermark */
+.wm-section{max-width:1000px;margin:0 auto;padding:40px 24px 80px}
+.wm-section h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.wm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.wm-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px}
+.wm-card h4{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--gold)}
+.wm-card p{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:12px}
+.wm-card ul{list-style:none}
+.wm-card li{font-size:12px;color:var(--text2);padding:4px 0;padding-left:16px;position:relative}
+.wm-card li::before{content:'▸';position:absolute;left:0;color:var(--purple);font-size:10px}
+.footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center;background:var(--bg2)}
+.footer .prov{font-size:16px;color:var(--gold);letter-spacing:3px;margin-bottom:8px}
+.footer .did{font-size:11px;color:var(--muted);margin-bottom:4px}
+.footer .copy{font-size:11px;color:var(--muted)}
+</style>
+    <link rel="canonical" href="https://huodouai.com/pages/full/provenance.html">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo"><div class="logo-icon">Ω</div><span>火斗云智 AIOS</span></div>
+    <nav class="nav">
+      <a href="/">首页</a><a href="/products/">产品</a><a href="/solutions/">解决方案</a>
+      <a href="/architecture/">技术架构</a><a href="/provenance/" class="active">确权</a>
+      <a href="/docs/">文档</a><a href="/pricing/">定价</a>
+    </nav>
+    <a href="/trial/" class="cta-btn">免费试用</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="badge">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 全域确权存证体系</div>
+  <h1>每一份资产<br>都有不可篡改的身份</h1>
+  <p>火斗云智AIOS建立了四层确权存证体系——确权符号、去中心化身份、Merkle哈希链、帧级水印溯源。从宏观到微观，从系统到像素，每一份数字资产都拥有不可伪造、不可篡改、可永久追溯的唯一身份。</p>
+  <div class="prov-symbol">Ω₀⊂⊙∞⊂Ω</div>
+</section>
+
+<section class="pillars">
+  <h2>四层确权存证体系</h2>
+  <div class="pillars-grid">
+    <div class="pillar">
+      <div class="p-icon" style="background:rgba(251,191,36,0.15);color:var(--gold)">Ω</div>
+      <h3>确权符号体系</h3>
+      <p>Ω₀⊂⊙∞⊂Ω 是ZONGYUAN-ROOT体系的视觉确权锚点，固定显示于所有产出物右下角，代表元极恒一永恒自治的本源归属。</p>
+    </div>
+    <div class="pillar">
+      <div class="p-icon" style="background:rgba(167,139,250,0.15);color:var(--purple)">🆔</div>
+      <h3>去中心化身份</h3>
+      <p>DID-BR-000002 是火斗云智AIOS的去中心化标识符（DID），永久绑定于所有数字资产，不依赖任何中心化机构，全球唯一可验证。</p>
+    </div>
+    <div class="pillar">
+      <div class="p-icon" style="background:rgba(96,165,250,0.15);color:var(--blue)">🔗</div>
+      <h3>Merkle哈希链</h3>
+      <p>所有锁档事件通过Merkle树构建哈希链，每个节点的哈希依赖于前一节点，任何篡改都会导致根哈希不匹配，实现不可篡改的存证。</p>
+    </div>
+    <div class="pillar">
+      <div class="p-icon" style="background:rgba(34,211,238,0.15);color:var(--cyan)">💧</div>
+      <h3>帧级水印溯源</h3>
+      <p>视频/图片的每一帧都嵌入不可见数字水印，包含资产ID、生成时间、创作者DID等信息，即使被截图、裁剪、二次压缩，仍可溯源。</p>
+    </div>
+  </div>
+</section>
+
+<section class="did-section">
+  <h2>去中心化身份 (DID)</h2>
+  <div class="did-card">
+    <div class="did-display">
+      <div class="did-label">DECENTRALIZED IDENTIFIER</div>
+      <div class="did-value">DID-BR-000002</div>
+    </div>
+    <div class="did-meta">
+      <div class="did-meta-item"><div class="k">身份类型</div><div class="v">去中心化标识符 (DID)</div></div>
+      <div class="did-meta-item"><div class="k">绑定主体</div><div class="v">火斗云智AIOS / ZONGYUAN-ROOT</div></div>
+      <div class="did-meta-item"><div class="k">确权锚点</div><div class="v">Ω₀⊂⊙∞⊂Ω</div></div>
+      <div class="did-meta-item"><div class="k">激活日期</div><div class="v">2026-08-09</div></div>
+      <div class="did-meta-item"><div class="k">状态</div><div class="v" style="color:var(--green)">ACTIVE · 永久有效</div></div>
+      <div class="did-meta-item"><div class="k">验证方式</div><div class="v">哈希校验 + 三端交叉验证</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="merkle-section">
+  <h2>Merkle哈希链存证</h2>
+  <div class="merkle-tree">
+    <div class="tree-label">根哈希 (Root Hash) — 任何篡改都会导致根哈希不匹配</div>
+    <div class="tree-level">
+      <div class="tree-node root">ROOT: a3f7...e91c</div>
+    </div>
+    <div class="tree-label">第二层 — 两两哈希组合</div>
+    <div class="tree-level">
+      <div class="tree-node">H(01+02): b82d...44fa</div>
+      <div class="tree-node">H(03+04): c19e...77ab</div>
+    </div>
+    <div class="tree-label">叶子节点 — 9环锁档事件 (每环独立哈希)</div>
+    <div class="tree-level">
+      <div class="tree-node">LOCK-01: 5f2a...</div>
+      <div class="tree-node">LOCK-02: 8c4b...</div>
+      <div class="tree-node">LOCK-03: 2d7e...</div>
+      <div class="tree-node">LOCK-04..09: ...</div>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:20px">每环锁档事件的哈希包含：前一环哈希 + 本环内容哈希 + 时间戳 + DID签名</p>
+    <p style="text-align:center;font-size:12px;color:var(--muted)">篡改任意一环 → 该环哈希变化 → 上层哈希全部变化 → 根哈希不匹配 → 篡改被检测</p>
+  </div>
+</section>
+
+<section class="wm-section">
+  <h2>帧级水印溯源技术</h2>
+  <div class="wm-grid">
+    <div class="wm-card">
+      <h4>不可见数字水印</h4>
+      <p>在视频/图片的频域嵌入人眼不可见的数字水印，不影响视觉质量，但可通过专用算法提取。</p>
+      <ul>
+        <li>嵌入位置：频域高频分量（DCT/DWT）</li>
+        <li>不可见性：PSNR > 40dB</li>
+        <li>鲁棒性：抗压缩/裁剪/缩放/滤镜</li>
+      </ul>
+    </div>
+    <div class="wm-card">
+      <h4>水印内容结构</h4>
+      <p>每一帧水印包含完整的资产溯源信息，即使被截取单帧，仍可还原完整归属链。</p>
+      <ul>
+        <li>资产ID：唯一标识符</li>
+        <li>创作者DID：DID-BR-000002</li>
+        <li>生成时间戳：精确到毫秒</li>
+        <li>帧序号：视频中的帧位置</li>
+        <li>内容哈希：帧内容SHA-256</li>
+      </ul>
+    </div>
+    <div class="wm-card">
+      <h4>溯源验证流程</h4>
+      <p>发现疑似侵权内容时，可通过水印提取算法还原资产信息，与三端存证交叉验证。</p>
+      <ul>
+        <li>步骤1：提取可疑内容中的水印</li>
+        <li>步骤2：解析资产ID和创作者DID</li>
+        <li>步骤3：查询三端存证（知识库+台账+云盘）</li>
+        <li>步骤4：哈希校验确认归属</li>
+        <li>步骤5：生成确权报告（可作为法律证据）</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="prov">Ω₀⊂⊙∞⊂Ω</div>
+  <div class="did">DID-BR-000002 · 元极恒一永恒自治 · ZONGYUAN-ROOT</div>
+  <div class="copy">© 2026 火斗云智 AIOS · 全域确权存证中心 V1.0</div>
+</footer>
+
+</body>
+</html>

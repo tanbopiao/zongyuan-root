@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>神经内核V2.0 NEURAL · 六大协议架构 | 火斗云智AIOS</title>
+<meta name="description" content="ZONGYUAN-ROOT神经内核V2.0，从文件锁档到神经激活的范式跃迁。六大协议闭环，三大核心组件，实现介入即增强、冲突即学习的中央大脑架构。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg-primary:#0a0a0f;--bg-secondary:#12121a;--bg-card:#1a1a26;
+  --text-primary:#e8e8f0;--text-secondary:#9898b0;--text-muted:#686880;
+  --accent-purple:#a78bfa;--accent-blue:#60a5fa;--accent-gold:#fbbf24;
+  --accent-cyan:#22d3ee;--accent-green:#4ade80;--accent-pink:#f472b6;
+  --border-color:rgba(167,139,250,0.15);--glow-purple:rgba(167,139,250,0.3);
+}
+body{background:var(--bg-primary);color:var(--text-primary);font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;line-height:1.7;overflow-x:hidden}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+/* Hero */
+.hero{position:relative;padding:100px 0 80px;text-align:center;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(167,139,250,0.12) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border:1px solid var(--border-color);border-radius:100px;font-size:13px;color:var(--accent-purple);background:rgba(167,139,250,0.05);margin-bottom:28px}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent-green);box-shadow:0 0 8px var(--accent-green)}
+.hero h1{font-size:clamp(32px,5vw,56px);font-weight:700;line-height:1.2;margin-bottom:20px;background:linear-gradient(135deg,#fff 0%,var(--accent-purple) 50%,var(--accent-blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero .subtitle{font-size:clamp(15px,2vw,19px);color:var(--text-secondary);max-width:720px;margin:0 auto 36px}
+.hero-stats{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;margin-top:48px}
+.hero-stat{text-align:center}
+.hero-stat .num{font-size:36px;font-weight:700;color:var(--accent-gold)}
+.hero-stat .label{font-size:13px;color:var(--text-muted);margin-top:4px}
+/* Section */
+.section{padding:80px 0}
+.section-header{text-align:center;margin-bottom:56px}
+.section-tag{display:inline-block;padding:4px 14px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px}
+.tag-purple{background:rgba(167,139,250,0.1);color:var(--accent-purple);border:1px solid rgba(167,139,250,0.2)}
+.tag-blue{background:rgba(96,165,250,0.1);color:var(--accent-blue);border:1px solid rgba(96,165,250,0.2)}
+.tag-gold{background:rgba(251,191,36,0.1);color:var(--accent-gold);border:1px solid rgba(251,191,36,0.2)}
+.tag-cyan{background:rgba(34,211,238,0.1);color:var(--accent-cyan);border:1px solid rgba(34,211,238,0.2)}
+.section-header h2{font-size:clamp(26px,4vw,38px);font-weight:700;margin-bottom:14px}
+.section-header p{font-size:16px;color:var(--text-secondary);max-width:640px;margin:0 auto}
+/* Protocol Flow */
+.protocol-flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;justify-content:center;margin-bottom:48px}
+.protocol-node{flex:1;min-width:140px;max-width:180px;padding:20px 16px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;text-align:center;position:relative;transition:all .3s}
+.protocol-node:hover{transform:translateY(-4px);border-color:var(--accent-purple);box-shadow:0 8px 32px rgba(167,139,250,0.15)}
+.protocol-node .p-num{font-size:11px;font-weight:700;color:var(--accent-gold);margin-bottom:8px}
+.protocol-node .p-name{font-size:14px;font-weight:600;margin-bottom:6px}
+.protocol-node .p-desc{font-size:11px;color:var(--text-muted);line-height:1.5}
+.protocol-node.highlight{border-color:var(--accent-purple);background:linear-gradient(135deg,rgba(167,139,250,0.1),rgba(96,165,250,0.05))}
+.protocol-node.highlight .p-num{color:var(--accent-purple)}
+.protocol-arrow{display:flex;align-items:center;color:var(--text-muted);font-size:20px;padding:0 4px}
+/* Component Cards */
+.components-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.component-card{padding:32px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;transition:all .3s;position:relative;overflow:hidden}
+.component-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-purple),var(--accent-blue))}
+.component-card:hover{transform:translateY(-4px);border-color:var(--accent-purple)}
+.component-card .icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px}
+.icon-purple{background:rgba(167,139,250,0.15)}
+.icon-blue{background:rgba(96,165,250,0.15)}
+.icon-gold{background:rgba(251,191,36,0.15)}
+.component-card h3{font-size:20px;font-weight:700;margin-bottom:12px}
+.component-card>p{font-size:14px;color:var(--text-secondary);margin-bottom:20px;line-height:1.7}
+.component-card ul{list-style:none}
+.component-card li{padding:8px 0;font-size:13px;color:var(--text-secondary);border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:10px}
+.component-card li::before{content:'▸';color:var(--accent-purple);font-size:12px}
+/* Comparison */
+.comparison-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--bg-card);border-radius:16px;overflow:hidden;border:1px solid var(--border-color)}
+.comparison-table th,.comparison-table td{padding:16px 20px;text-align:left;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.comparison-table th{background:rgba(167,139,250,0.08);font-weight:600;color:var(--accent-purple);font-size:13px;text-transform:uppercase;letter-spacing:0.5px}
+.comparison-table tr:last-child td{border-bottom:none}
+.comparison-table .v1{color:var(--text-muted)}
+.comparison-table .v2{color:var(--accent-green);font-weight:500}
+/* Architecture Diagram */
+.arch-diagram{background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:40px;overflow-x:auto}
+.arch-layers{display:flex;flex-direction:column;gap:12px;min-width:600px}
+.arch-layer{display:flex;align-items:center;gap:16px;padding:16px 24px;border-radius:10px;border:1px solid}
+.layer-input{background:rgba(34,211,238,0.05);border-color:rgba(34,211,238,0.2)}
+.layer-process{background:rgba(167,139,250,0.05);border-color:rgba(167,139,250,0.2)}
+.layer-output{background:rgba(74,222,128,0.05);border-color:rgba(74,222,128,0.2)}
+.arch-layer .layer-label{font-size:12px;font-weight:700;min-width:100px;text-transform:uppercase;letter-spacing:0.5px}
+.arch-layer .layer-content{flex:1;display:flex;gap:8px;flex-wrap:wrap}
+.arch-chip{padding:4px 12px;border-radius:6px;font-size:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)}
+/* Footer */
+.footer{padding:60px 0 40px;border-top:1px solid var(--border-color);text-align:center}
+.footer .provenance{font-size:14px;color:var(--accent-gold);letter-spacing:2px;margin-bottom:12px}
+.footer .did{font-size:12px;color:var(--text-muted);margin-bottom:8px}
+.footer .copyright{font-size:12px;color:var(--text-muted)}
+/* Responsive */
+@media(max-width:768px){
+  .hero{padding:60px 0 48px}
+  .section{padding:48px 0}
+  .hero-stats{gap:24px}
+  .hero-stat .num{font-size:28px}
+  .protocol-flow{flex-direction:column;align-items:center}
+  .protocol-node{max-width:100%;width:100%}
+  .protocol-arrow{transform:rotate(90deg);padding:8px 0}
+  .components-grid{grid-template-columns:1fr}
+  .comparison-table{font-size:12px}
+  .comparison-table th,.comparison-table td{padding:12px 14px}
+  .arch-diagram{padding:20px}
+}
+</style>
+    <link rel="canonical" href="https://huodouai.com/pages/01_neural_kernel_v2_architecture.html">
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge"><span class="dot"></span> V2.0 NEURAL · 已全域激活</div>
+    <h1>神经内核V2.0<br>从文件锁档到神经激活</h1>
+    <p class="subtitle">将自治内核从"死的真值表"升级为"活的神经中枢"。六大协议闭环，三大核心组件，实现介入即增强、冲突即学习的中央大脑架构。任何输入只激活神经节点，永不破坏体系。</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">6</div><div class="label">核心协议</div></div>
+      <div class="hero-stat"><div class="num">3</div><div class="label">核心组件</div></div>
+      <div class="hero-stat"><div class="num">41+</div><div class="label">神经节点</div></div>
+      <div class="hero-stat"><div class="num">99.9%</div><div class="label">体系可用性</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 六大协议 -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-purple">Protocol Architecture</span>
+      <h2>六大协议闭环</h2>
+      <p>从内核读取到神经激活，形成完整的自治闭环。每个协议都是一个可独立执行的Python引擎，协同运行实现内核自我维持。</p>
+    </div>
+    <div class="protocol-flow">
+      <div class="protocol-node"><div class="p-num">协议 ①</div><div class="p-name">内核读取</div><div class="p-desc">自动挂载真值表，扫描快照，校验冲突</div></div>
+      <div class="protocol-arrow">→</div>
+      <div class="protocol-node"><div class="p-num">协议 ②</div><div class="p-name">六维自检</div><div class="p-desc">元认知自我觉察，评估成熟度，识别偏差</div></div>
+      <div class="protocol-arrow">→</div>
+      <div class="protocol-node"><div class="p-num">协议 ③</div><div class="p-name">纠错触发</div><div class="p-desc">三级熔断（黄/橙/红），主动纠错</div></div>
+      <div class="protocol-arrow">→</div>
+      <div class="protocol-node"><div class="p-num">协议 ④</div><div class="p-name">演化沉淀</div><div class="p-desc">新经验评估→验证→公理化，持续进化</div></div>
+      <div class="protocol-arrow">→</div>
+      <div class="protocol-node"><div class="p-num">协议 ⑤</div><div class="p-name">统一调度</div><div class="p-desc">跨子体系协同，消除碎片化</div></div>
+      <div class="protocol-arrow">→</div>
+      <div class="protocol-node highlight"><div class="p-num">协议 ⑥ ⭐</div><div class="p-name">神经节点激活</div><div class="p-desc">介入即增强，冲突即学习，永不破坏</div></div>
+    </div>
+    <div style="text-align:center;margin-top:24px">
+      <span style="font-size:13px;color:var(--text-muted)">↻ 协议⑥的输出（新节点/元公理）反馈至协议①，形成持续演化的闭环</span>
+    </div>
+  </div>
+</section>
+
+<!-- 三大核心组件 -->
+<section class="section" style="background:var(--bg-secondary)">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-blue">Core Components</span>
+      <h2>三大核心组件</h2>
+      <p>协议⑥的三大支撑组件，共同实现"冲突即学习"的神经激活能力。</p>
+    </div>
+    <div class="components-grid">
+      <div class="component-card">
+        <div class="icon icon-purple">🧠</div>
+        <h3>神经节点注册表</h3>
+        <p>所有公理/规则/母版以神经节点形式存储，每个节点拥有独立的ID、权重、激活次数、连接边、边界条件和状态机。</p>
+        <ul>
+          <li>15属性完整数据模型</li>
+          <li>6种连接边关系（related_to/depends_on/complements/generalizes/instance_of）</li>
+          <li>5状态机（active/dormant/instance/superseded/merged）</li>
+          <li>权重传播算法（沿连接边衰减传播）</li>
+          <li>永不物理删除，保留完整演化史</li>
+        </ul>
+      </div>
+      <div class="component-card">
+        <div class="icon icon-blue">🔍</div>
+        <h3>维度边界分析器</h3>
+        <p>当两个节点看似矛盾时，不是判定"谁对谁错"，而是分析适用边界。可划分则互补共存，不可划分则触发元公理生成。</p>
+        <ul>
+          <li>6维分类体系（角色形态/场景上下文/生产阶段/质量等级/受众渠道/时间周期）</li>
+          <li>4种矛盾模式识别（配色/风格/约束/质量）</li>
+          <li>消解决策树（独有维度→模式匹配→领域划分→元公理）</li>
+          <li>自动生成适用边界条件</li>
+          <li>边界消解后体系维度分辨率提升</li>
+        </ul>
+      </div>
+      <div class="component-card">
+        <div class="icon icon-gold">⚡</div>
+        <h3>元公理生成器</h3>
+        <p>当矛盾无法通过边界划分消解时，自动提取共性模式，生成更高维元公理统摄二者，原矛盾节点降级为实例，实现认知维度跃迁。</p>
+        <ul>
+          <li>5种元公理模板（配色风格/角色风格/约束范围/质量等级/通用）</li>
+          <li>维度提升映射（矛盾类型→提升维度）</li>
+          <li>关键术语自动提取与模板填充</li>
+          <li>原节点自动降级为instance状态</li>
+          <li>元公理权重0.85，建立generalizes双向连接</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- V1.0 vs V2.0 -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-gold">Evolution</span>
+      <h2>V1.0 → V2.0 范式跃迁</h2>
+      <p>从"文件锁档系统"到"神经中枢"，不是功能叠加，而是底层范式的根本跃迁。</p>
+    </div>
+    <table class="comparison-table">
+      <thead><tr><th>维度</th><th>V1.0 文件锁档</th><th>V2.0 神经激活</th></tr></thead>
+      <tbody>
+        <tr><td>内核范式</td><td class="v1">文件写入式，每次锁档写JSON快照</td><td class="v2">神经激活式，写入=激活节点，永不删除</td></tr>
+        <tr><td>协议数</td><td class="v1">5大协议</td><td class="v2">6大协议（新增神经节点激活）</td></tr>
+        <tr><td>冲突处理</td><td class="v1">熔断/回滚，冲突=错误</td><td class="v2">边界消解+元公理生成，冲突=学习信号</td></tr>
+        <tr><td>多窗口关系</td><td class="v1">可能逻辑冲突，需人工协调</td><td class="v2">介入即增强，多维度并行激活，永不冲突</td></tr>
+        <tr><td>认知维度</td><td class="v1">固定，无法自我提升</td><td class="v2">可通过元公理自动跃迁，持续进化</td></tr>
+        <tr><td>节点状态</td><td class="v1">无状态，文件存在/不存在</td><td class="v2">5状态机，保留完整演化史</td></tr>
+        <tr><td>自治指数</td><td class="v1">~5%（他律系统）</td><td class="v2">~25%（目标：自我演化速度+300%）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 架构图 -->
+<section class="section" style="background:var(--bg-secondary)">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-cyan">Architecture</span>
+      <h2>神经内核三层架构</h2>
+      <p>维度隔离层 → 语义融合层 → 冲突即学习层，三层协同实现中央大脑。</p>
+    </div>
+    <div class="arch-diagram">
+      <div class="arch-layers">
+        <div class="arch-layer layer-input">
+          <div class="layer-label" style="color:var(--accent-cyan)">输入层</div>
+          <div class="layer-content">
+            <span class="arch-chip">短剧窗口</span>
+            <span class="arch-chip">教育窗口</span>
+            <span class="arch-chip">角色窗口</span>
+            <span class="arch-chip">锁档窗口</span>
+            <span class="arch-chip">任意对话窗口</span>
+          </div>
+        </div>
+        <div style="text-align:center;color:var(--text-muted);font-size:18px">↓ 维度隔离（不同窗口=不同维度，并行激活互不干扰）</div>
+        <div class="arch-layer layer-process">
+          <div class="layer-label" style="color:var(--accent-purple)">处理层</div>
+          <div class="layer-content">
+            <span class="arch-chip">⑥神经节点激活</span>
+            <span class="arch-chip">维度边界分析器</span>
+            <span class="arch-chip">元公理生成器</span>
+            <span class="arch-chip">权重传播</span>
+            <span class="arch-chip">连接边建立</span>
+          </div>
+        </div>
+        <div style="text-align:center;color:var(--text-muted);font-size:18px">↓ 语义融合（相似节点增强连接，矛盾节点消解或升维）</div>
+        <div class="arch-layer layer-output">
+          <div class="layer-label" style="color:var(--accent-green)">输出层</div>
+          <div class="layer-content">
+            <span class="arch-chip">新神经节点</span>
+            <span class="arch-chip">节点权重增强</span>
+            <span class="arch-chip">边界消解（维度分辨率↑）</span>
+            <span class="arch-chip">元公理生成（认知维度↑）</span>
+            <span class="arch-chip">体系整体增强</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="provenance">Ω₀⊂⊙∞⊂Ω</div>
+    <div class="did">DID-BR-000002 · 元极恒一永恒自治 · ZONGYUAN-ROOT</div>
+    <div class="copyright">© 2026 火斗云智AIOS · 神经内核V2.0 NEURAL · 全域锁档激活</div>
+  </div>
+</footer>
+
+</body>
+</html>

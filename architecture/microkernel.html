@@ -1,0 +1,536 @@
+<html style="margin:0;padding:0;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="火斗云智 AIOS 微内核架构白皮书 - 最小化内核态代码，业务组件用户态隔离，消息全局可审计，真值锁档不可篡改">
+<meta name="keywords" content="火斗云智,AIOS,微内核架构,稳态运维,真值锁档,Ω-Brainμ">
+<title>微内核架构白皮书 · 火斗云智 AIOS</title>
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/architecture/microkernel.html">
+</head>
+<div style="background:linear-gradient(135deg,#0a0a0f 0%,#1a1a2e 50%,#0f0f1a 100%);box-sizing:border-box;font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;color:#e8e8e8;min-height:100vh;position:relative;overflow-x:hidden;">
+
+<!-- 背景暗纹效果 -->
+<div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.025;background-image:repeating-linear-gradient(0deg,transparent,transparent 50px,rgba(212,175,55,0.15) 50px,rgba(212,175,55,0.15) 51px),repeating-linear-gradient(90deg,transparent,transparent 50px,rgba(212,175,55,0.15) 50px,rgba(212,175,55,0.15) 51px);pointer-events:none;"></div>
+
+<!-- 顶部光晕 -->
+<div style="position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:500px;height:250px;background:radial-gradient(ellipse,rgba(212,175,55,0.12) 0%,transparent 70%);pointer-events:none;"></div>
+
+<div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 24px 40px;">
+
+
+<!-- 统一导航栏 -->
+<div style="position:sticky;top:0;z-index:1000;background:rgba(10,10,15,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(212,175,55,0.2);padding:12px 24px;">
+  <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">🔥</span>
+      <span style="font-size:14px;font-weight:600;background:linear-gradient(135deg,#d4af37,#f4e4a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">火斗云智 AIOS</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 首页</a>
+      <a href="/internal/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="/docs/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="/architecture/microkernel.html" style="color:#D4AF37;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;background:rgba(212,175,55,0.15);transition:all .2s">📐 架构白皮书</a>
+      <a href="/internal/ops-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">⚙️ 运维中枢</a>
+    </div>
+  </div>
+</div>
+<!-- ========== 标题区 ========== -->
+<div style="text-align:center;margin-bottom:40px;">
+  <div style="font-size:11px;color:#d4af37;letter-spacing:3px;margin-bottom:12px;opacity:0.85;">火斗云智 · AIOS 稳态底座 · 微内核架构</div>
+  <h1 style="font-size:28px;font-weight:700;margin:0 0 12px 0;background:linear-gradient(135deg,#d4af37 0%,#f4e4a6 50%,#d4af37 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;line-height:1.4;">Ω-Brainμ 微内核架构全景</h1>
+  <p style="font-size:13px;color:#999;margin:0 auto;line-height:1.8;letter-spacing:0.5px;max-width:600px;">最小化内核态代码 · 业务组件用户态隔离 · 消息全局可审计 · 真值锁档不可篡改</p>
+  <div style="margin-top:18px;display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+    <span style="font-size:10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);color:#d4af37;padding:4px 14px;border-radius:20px;letter-spacing:1px;">火斗云智 AIOS V2.0</span>
+    <span style="font-size:10px;background:rgba(255,140,66,0.1);border:1px solid rgba(255,140,66,0.3);color:#ff8c42;padding:4px 14px;border-radius:20px;letter-spacing:1px;">稳态运维平台</span>
+    <span style="font-size:10px;background:rgba(100,200,150,0.1);border:1px solid rgba(100,200,150,0.3);color:#6dd49a;padding:4px 14px;border-radius:20px;letter-spacing:1px;">生产级可用</span>
+  </div>
+</div>
+
+<!-- ========== 一、核心三层架构 ========== -->
+<div style="margin-bottom:44px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+    <div style="width:4px;height:22px;background:linear-gradient(180deg,#d4af37,#f4e4a6);border-radius:2px;"></div>
+    <span style="font-size:17px;font-weight:600;color:#d4af37;letter-spacing:2px;">一、核心三层架构</span>
+    <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,175,55,0.25),transparent);"></div>
+  </div>
+
+  <!-- 用户态业务层 -->
+  <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(100,200,150,0.2);border-radius:14px;padding:20px;margin-bottom:12px;position:relative;">
+    <div style="position:absolute;top:-11px;left:18px;background:linear-gradient(135deg,#2d5a3d,#1a3d2a);color:#6dd49a;font-size:10px;padding:4px 14px;border-radius:10px;font-weight:600;letter-spacing:1px;border:1px solid rgba(100,200,150,0.3);">用户态 · 业务执行层</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;margin-top:6px;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:14px;font-weight:600;color:#6dd49a;">业务组件层（插件化 · 可热迭代）</div>
+      <span style="font-size:10px;color:#6dd49a;opacity:0.7;background:rgba(100,200,150,0.08);padding:3px 10px;border-radius:6px;">故障隔离 · 独立启停</span>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="flex:1 1 90px;min-width:90px;background:rgba(100,200,150,0.06);border:1px solid rgba(100,200,150,0.12);border-radius:10px;padding:14px 10px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:6px;">📚</div>
+        <div style="font-size:11px;color:#a8d8b8;font-weight:500;">向量检索</div>
+      </div>
+      <div style="flex:1 1 90px;min-width:90px;background:rgba(100,200,150,0.06);border:1px solid rgba(100,200,150,0.12);border-radius:10px;padding:14px 10px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:6px;">🎬</div>
+        <div style="font-size:11px;color:#a8d8b8;font-weight:500;">多模态产线</div>
+      </div>
+      <div style="flex:1 1 90px;min-width:90px;background:rgba(100,200,150,0.06);border:1px solid rgba(100,200,150,0.12);border-radius:10px;padding:14px 10px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:6px;">🏛️</div>
+        <div style="font-size:11px;color:#a8d8b8;font-weight:500;">政务中台</div>
+      </div>
+      <div style="flex:1 1 90px;min-width:90px;background:rgba(100,200,150,0.06);border:1px solid rgba(100,200,150,0.12);border-radius:10px;padding:14px 10px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:6px;">💾</div>
+        <div style="font-size:11px;color:#a8d8b8;font-weight:500;">网盘服务</div>
+      </div>
+      <div style="flex:1 1 90px;min-width:90px;background:rgba(100,200,150,0.06);border:1px solid rgba(100,200,150,0.12);border-radius:10px;padding:14px 10px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:6px;">🔌</div>
+        <div style="font-size:11px;color:#a8d8b8;font-weight:500;">API网关</div>
+      </div>
+      <div style="flex:1 1 90px;min-width:90px;background:rgba(100,200,150,0.03);border:1px dashed rgba(100,200,150,0.15);border-radius:10px;padding:14px 10px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:6px;opacity:0.4;">+</div>
+        <div style="font-size:11px;color:#666;font-weight:500;">更多插件</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 箭头 -->
+  <div style="text-align:center;color:#d4af37;font-size:13px;margin:10px 0;letter-spacing:2px;opacity:0.7;">▲ 消息通道 · 全局可审计 · 哈希校验 ▲</div>
+
+  <!-- 微内核层 -->
+  <div style="background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.03));border:2px solid #d4af37;border-radius:16px;padding:24px;margin-bottom:12px;position:relative;box-shadow:0 0 30px rgba(212,175,55,0.12),inset 0 0 20px rgba(212,175,55,0.04);">
+    <div style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#d4af37,#b8941f);color:#0a0a0f;font-size:11px;padding:5px 20px;border-radius:12px;font-weight:700;letter-spacing:2px;white-space:nowrap;">内核态 · 最小化代码面 · 真值锚点</div>
+    
+    <div style="text-align:center;margin-bottom:20px;margin-top:8px;">
+      <div style="font-size:20px;font-weight:700;background:linear-gradient(135deg,#d4af37,#f4e4a6,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px;">Ω-Brainμ 微内核本体</div>
+      <div style="font-size:11px;color:#888;margin-top:6px;letter-spacing:1px;">尺子 · 裁判 · 真值守护者 — 不做被测量的物体</div>
+    </div>
+    
+    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+      <div style="flex:1 1 130px;min-width:130px;max-width:180px;background:rgba(0,0,0,0.25);border:1px solid rgba(212,175,55,0.25);border-radius:12px;padding:16px 12px;text-align:center;">
+        <div style="font-size:26px;margin-bottom:8px;">⚙️</div>
+        <div style="font-size:13px;font-weight:600;color:#d4af37;margin-bottom:4px;">底层调度</div>
+        <div style="font-size:10px;color:#888;line-height:1.5;">CPU/内存分片<br>优先级管控</div>
+      </div>
+      <div style="flex:1 1 130px;min-width:130px;max-width:180px;background:rgba(0,0,0,0.25);border:1px solid rgba(212,175,55,0.25);border-radius:12px;padding:16px 12px;text-align:center;">
+        <div style="font-size:26px;margin-bottom:8px;">🛡️</div>
+        <div style="font-size:13px;font-weight:600;color:#d4af37;margin-bottom:4px;">内存隔离</div>
+        <div style="font-size:10px;color:#888;line-height:1.5;">故障局部封闭<br>资源硬隔离</div>
+      </div>
+      <div style="flex:1 1 130px;min-width:130px;max-width:180px;background:rgba(0,0,0,0.25);border:1px solid rgba(212,175,55,0.25);border-radius:12px;padding:16px 12px;text-align:center;">
+        <div style="font-size:26px;margin-bottom:8px;">📨</div>
+        <div style="font-size:13px;font-weight:600;color:#d4af37;margin-bottom:4px;">消息转发</div>
+        <div style="font-size:10px;color:#888;line-height:1.5;">全局可审计<br>酉范数校验</div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;padding-top:16px;border-top:1px dashed rgba(212,175,55,0.15);display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+      <span style="font-size:10px;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.15);color:#d4af37;padding:3px 12px;border-radius:8px;">真值校验引擎</span>
+      <span style="font-size:10px;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.15);color:#d4af37;padding:3px 12px;border-radius:8px;">解空间治理</span>
+      <span style="font-size:10px;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.15);color:#d4af37;padding:3px 12px;border-radius:8px;">Merkle-DAG锁档</span>
+      <span style="font-size:10px;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.15);color:#d4af37;padding:3px 12px;border-radius:8px;">漂移监测</span>
+    </div>
+  </div>
+
+  <!-- 箭头 -->
+  <div style="text-align:center;color:#888;font-size:13px;margin:10px 0;letter-spacing:2px;opacity:0.5;">▲ 资源分片管控 · 硬件抽象层 ▲</div>
+
+  <!-- 硬件层 -->
+  <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(150,150,180,0.12);border-radius:14px;padding:18px;">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,#3a3a5a,#2a2a4a);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:1px solid rgba(150,150,180,0.15);">💻</div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:14px;font-weight:600;color:#aaa;">硬件层 / 资源层</div>
+        <div style="font-size:11px;color:#666;margin-top:3px;">CPU · 内存 · 磁盘 · 网络 · GPU/NPU · 异构算力</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:9px;background:rgba(150,150,180,0.08);color:#999;padding:3px 10px;border-radius:6px;">x86/ARM</span>
+        <span style="font-size:9px;background:rgba(150,150,180,0.08);color:#999;padding:3px 10px;border-radius:6px;">GPU/NPU</span>
+        <span style="font-size:9px;background:rgba(150,150,180,0.08);color:#999;padding:3px 10px;border-radius:6px;">云/边/端</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 二、稳态运维平台 × 微内核 融合架构 ========== -->
+<div style="margin-bottom:44px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap;">
+    <div style="width:4px;height:22px;background:linear-gradient(180deg,#ff8c42,#ffb380);border-radius:2px;"></div>
+    <span style="font-size:17px;font-weight:600;color:#ff8c42;letter-spacing:2px;">二、稳态运维平台 × 微内核融合架构</span>
+    <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(255,140,66,0.25),transparent);"></div>
+    <span style="font-size:9px;background:rgba(255,140,66,0.12);border:1px solid rgba(255,140,66,0.3);color:#ff8c42;padding:3px 12px;border-radius:10px;letter-spacing:1px;">核心价值</span>
+  </div>
+
+  <!-- 融合定位 -->
+  <div style="background:linear-gradient(135deg,rgba(255,140,66,0.08),rgba(212,175,55,0.04));border:1px solid rgba(255,140,66,0.2);border-radius:14px;padding:22px;margin-bottom:20px;">
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:stretch;justify-content:center;">
+      <div style="text-align:center;flex:1;min-width:140px;max-width:200px;">
+        <div style="font-size:32px;margin-bottom:8px;">🧠</div>
+        <div style="font-size:14px;font-weight:600;color:#ff8c42;margin-bottom:4px;">稳态运维平台</div>
+        <div style="font-size:10px;color:#888;margin-bottom:8px;">高阶自治大脑</div>
+        <div style="font-size:10px;color:#777;line-height:1.7;">稳态校准 · 自动运维<br>自愈闭环 · 经验学习</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#d4af37;font-weight:700;flex-shrink:0;">×</div>
+      <div style="text-align:center;flex:1;min-width:140px;max-width:200px;">
+        <div style="font-size:32px;margin-bottom:8px;">⚙️</div>
+        <div style="font-size:14px;font-weight:600;color:#d4af37;margin-bottom:4px;">Ω-Brainμ 微内核</div>
+        <div style="font-size:10px;color:#888;margin-bottom:8px;">真值执行底座</div>
+        <div style="font-size:10px;color:#777;line-height:1.7;">真值校验 · 锁档归档<br>故障隔离 · 可审计可回滚</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;font-size:28px;color:#6dd49a;font-weight:700;flex-shrink:0;">=</div>
+      <div style="text-align:center;flex:1;min-width:160px;max-width:220px;background:rgba(100,200,150,0.06);border:1px solid rgba(100,200,150,0.2);border-radius:12px;padding:14px;">
+        <div style="font-size:32px;margin-bottom:8px;">🌟</div>
+        <div style="font-size:14px;font-weight:600;color:#6dd49a;margin-bottom:4px;">真值驱动自治运维</div>
+        <div style="font-size:10px;color:#888;margin-bottom:8px;">从人工修修补补到系统自我稳态</div>
+        <div style="font-size:10px;color:#777;line-height:1.7;">云端学习 · 本地执行<br>真值锚定 · 全域自愈</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 四层融合架构 -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:13px;font-weight:600;color:#aaa;margin-bottom:14px;letter-spacing:1px;padding-left:4px;">▎四层融合架构 · 从硬件到高阶自治</div>
+    
+    <!-- L4 -->
+    <div style="background:linear-gradient(135deg,rgba(255,140,66,0.12),rgba(255,140,66,0.04));border:1px solid rgba(255,140,66,0.25);border-radius:12px;padding:16px;margin-bottom:8px;position:relative;">
+      <div style="position:absolute;top:-10px;left:16px;background:linear-gradient(135deg,#ff8c42,#e67329);color:#fff;font-size:9px;padding:3px 12px;border-radius:8px;font-weight:600;letter-spacing:1px;">L4 · 高阶智能层</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;">
+        <div style="font-size:22px;flex-shrink:0;">🧠</div>
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:13px;font-weight:600;color:#ff8c42;">稳态运维平台 · 自治大脑</div>
+          <div style="font-size:10px;color:#888;margin-top:3px;line-height:1.6;">云端学习大量运维真值，形成高阶稳态校准能力，对本地节点进行远程稳态校准与自动运维</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;">
+        <span style="font-size:9px;background:rgba(255,140,66,0.12);color:#ff8c42;padding:3px 10px;border-radius:6px;">稳态校准</span>
+        <span style="font-size:9px;background:rgba(255,140,66,0.12);color:#ff8c42;padding:3px 10px;border-radius:6px;">自动运维</span>
+        <span style="font-size:9px;background:rgba(255,140,66,0.12);color:#ff8c42;padding:3px 10px;border-radius:6px;">自愈闭环</span>
+        <span style="font-size:9px;background:rgba(255,140,66,0.12);color:#ff8c42;padding:3px 10px;border-radius:6px;">经验学习</span>
+        <span style="font-size:9px;background:rgba(255,140,66,0.12);color:#ff8c42;padding:3px 10px;border-radius:6px;">远程管控</span>
+        <span style="font-size:9px;background:rgba(255,140,66,0.12);color:#ff8c42;padding:3px 10px;border-radius:6px;">异常预测</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:#ff8c42;font-size:11px;margin:6px 0;opacity:0.6;">▼ 稳态校准指令 · 真值驱动 ▼</div>
+
+    <!-- L3 -->
+    <div style="background:linear-gradient(135deg,rgba(212,175,55,0.12),rgba(212,175,55,0.04));border:2px solid #d4af37;border-radius:12px;padding:16px;margin-bottom:8px;position:relative;box-shadow:0 0 20px rgba(212,175,55,0.08);">
+      <div style="position:absolute;top:-10px;left:16px;background:linear-gradient(135deg,#d4af37,#b8941f);color:#0a0a0f;font-size:9px;padding:3px 12px;border-radius:8px;font-weight:700;letter-spacing:1px;">L3 · 真值锚点层</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;">
+        <div style="font-size:22px;flex-shrink:0;">⚙️</div>
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:13px;font-weight:600;color:#d4af37;">Ω-Brainμ 微内核 · 真值执行底座</div>
+          <div style="font-size:10px;color:#888;margin-top:3px;line-height:1.6;">所有运维操作必须经过微内核真值校验、锁档归档，确保自愈操作可审计、可追溯、可回滚</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;">
+        <span style="font-size:9px;background:rgba(212,175,55,0.12);color:#d4af37;padding:3px 10px;border-radius:6px;">真值校验</span>
+        <span style="font-size:9px;background:rgba(212,175,55,0.12);color:#d4af37;padding:3px 10px;border-radius:6px;">锁档归档</span>
+        <span style="font-size:9px;background:rgba(212,175,55,0.12);color:#d4af37;padding:3px 10px;border-radius:6px;">故障隔离</span>
+        <span style="font-size:9px;background:rgba(212,175,55,0.12);color:#d4af37;padding:3px 10px;border-radius:6px;">消息审计</span>
+        <span style="font-size:9px;background:rgba(212,175,55,0.12);color:#d4af37;padding:3px 10px;border-radius:6px;">资源管控</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:#d4af37;font-size:11px;margin:6px 0;opacity:0.6;">▼ 消息通道 · 全局可审计 ▼</div>
+
+    <!-- L2 -->
+    <div style="background:rgba(100,200,150,0.05);border:1px solid rgba(100,200,150,0.18);border-radius:12px;padding:14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="font-size:20px;flex-shrink:0;">🔌</div>
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:12px;font-weight:600;color:#6dd49a;">L2 · 用户态业务组件 · 执行层</div>
+          <div style="font-size:10px;color:#777;margin-top:2px;">向量检索 · 多模态产线 · 政务中台 · 网盘服务 · API网关 · 各业务子域</div>
+        </div>
+        <span style="font-size:9px;color:#6dd49a;opacity:0.7;background:rgba(100,200,150,0.08);padding:3px 10px;border-radius:6px;">故障隔离 · 热迭代</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:#888;font-size:11px;margin:6px 0;opacity:0.4;">▼ 资源分片管控 · 硬件抽象 ▼</div>
+
+    <!-- L1 -->
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(150,150,180,0.12);border-radius:12px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="font-size:20px;flex-shrink:0;">💻</div>
+        <div style="flex:1;min-width:200px;">
+          <div style="font-size:12px;font-weight:600;color:#aaa;">L1 · 硬件资源层 · 基础层</div>
+          <div style="font-size:10px;color:#666;margin-top:2px;">CPU · 内存 · 磁盘 · 网络 · GPU/NPU · 本地电脑 · 云服务器 · 边缘节点</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自治运维闭环 -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:13px;font-weight:600;color:#aaa;margin-bottom:14px;letter-spacing:1px;padding-left:4px;">▎自治运维闭环 · 七步真值驱动自愈流程</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;justify-content:center;">
+      <div style="flex:1;min-width:80px;max-width:120px;background:rgba(255,140,66,0.07);border:1px solid rgba(255,140,66,0.18);border-radius:10px;padding:12px 8px;text-align:center;">
+        <div style="font-size:20px;">🔍</div>
+        <div style="font-size:11px;font-weight:600;color:#ff8c42;margin-top:4px;">异常检测</div>
+        <div style="font-size:9px;color:#777;margin-top:3px;">监控告警</div>
+      </div>
+      <div style="display:flex;align-items:center;color:#555;font-size:14px;flex-shrink:0;">→</div>
+      <div style="flex:1;min-width:80px;max-width:120px;background:rgba(212,175,55,0.07);border:1px solid rgba(212,175,55,0.18);border-radius:10px;padding:12px 8px;text-align:center;">
+        <div style="font-size:20px;">✅</div>
+        <div style="font-size:11px;font-weight:600;color:#d4af37;margin-top:4px;">真值校验</div>
+        <div style="font-size:9px;color:#777;margin-top:3px;">微内核锚定</div>
+      </div>
+      <div style="display:flex;align-items:center;color:#555;font-size:14px;flex-shrink:0;">→</div>
+      <div style="flex:1;min-width:80px;max-width:120px;background:rgba(180,140,220,0.07);border:1px solid rgba(180,140,220,0.18);border-radius:10px;padding:12px 8px;text-align:center;">
+        <div style="font-size:20px;">🧬</div>
+        <div style="font-size:11px;font-weight:600;color:#b89adc;margin-top:4px;">根因分析</div>
+        <div style="font-size:9px;color:#777;margin-top:3px;">因果链溯源</div>
+      </div>
+      <div style="display:flex;align-items:center;color:#555;font-size:14px;flex-shrink:0;">→</div>
+      <div style="flex:1;min-width:80px;max-width:120px;background:rgba(100,200,150,0.07);border:1px solid rgba(100,200,150,0.18);border-radius:10px;padding:12px 8px;text-align:center;">
+        <div style="font-size:20px;">⚡</div>
+        <div style="font-size:11px;font-weight:600;color:#6dd49a;margin-top:4px;">自愈执行</div>
+        <div style="font-size:9px;color:#777;margin-top:3px;">消息下发指令</div>
+      </div>
+      <div style="display:flex;align-items:center;color:#555;font-size:14px;flex-shrink:0;">→</div>
+      <div style="flex:1;min-width:80px;max-width:120px;background:rgba(139,200,234,0.07);border:1px solid rgba(139,200,234,0.18);border-radius:10px;padding:12px 8px;text-align:center;">
+        <div style="font-size:20px;">📊</div>
+        <div style="font-size:11px;font-weight:600;color:#8BC8EA;margin-top:4px;">效果验证</div>
+        <div style="font-size:9px;color:#777;margin-top:3px;">稳态回归测试</div>
+      </div>
+      <div style="display:flex;align-items:center;color:#555;font-size:14px;flex-shrink:0;">→</div>
+      <div style="flex:1;min-width:80px;max-width:120px;background:rgba(220,100,100,0.07);border:1px solid rgba(220,100,100,0.18);border-radius:10px;padding:12px 8px;text-align:center;">
+        <div style="font-size:20px;">🔒</div>
+        <div style="font-size:11px;font-weight:600;color:#dc8a8a;margin-top:4px;">锁档归档</div>
+        <div style="font-size:9px;color:#777;margin-top:3px;">Merkle-DAG</div>
+      </div>
+      <div style="display:flex;align-items:center;color:#555;font-size:14px;flex-shrink:0;">→</div>
+      <div style="flex:1;min-width:80px;max-width:120px;background:rgba(255,200,100,0.07);border:1px solid rgba(255,200,100,0.18);border-radius:10px;padding:12px 8px;text-align:center;">
+        <div style="font-size:20px;">📚</div>
+        <div style="font-size:11px;font-weight:600;color:#ffc864;margin-top:4px;">经验沉淀</div>
+        <div style="font-size:9px;color:#777;margin-top:3px;">运维真值库</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 融合价值矩阵 -->
+  <div style="display:flex;gap:14px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:200px;background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:18px;">
+      <div style="font-size:13px;font-weight:600;color:#d4af37;margin-bottom:14px;display:flex;align-items:center;gap:6px;"><span>⚙️</span>微内核提供（底座能力）</div>
+      <div style="font-size:11px;color:#bbb;line-height:2.2;">
+        <div>✓ 真值锚定与校验</div>
+        <div>✓ 故障局部隔离</div>
+        <div>✓ 操作全局可审计</div>
+        <div>✓ 状态可回滚</div>
+        <div>✓ 资源硬隔离管控</div>
+        <div>✓ 消息统一通道</div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:200px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,140,66,0.15);border-radius:12px;padding:18px;">
+      <div style="font-size:13px;font-weight:600;color:#ff8c42;margin-bottom:14px;display:flex;align-items:center;gap:6px;"><span>🧠</span>运维平台提供（高阶智能）</div>
+      <div style="font-size:11px;color:#bbb;line-height:2.2;">
+        <div>✓ 稳态校准算法</div>
+        <div>✓ 异常预测与预警</div>
+        <div>✓ 根因因果链分析</div>
+        <div>✓ 自愈策略生成</div>
+        <div>✓ 运维经验学习</div>
+        <div>✓ 云端-本地协同管控</div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:200px;background:linear-gradient(135deg,rgba(100,200,150,0.08),rgba(100,200,150,0.03));border:1px solid rgba(100,200,150,0.25);border-radius:12px;padding:18px;">
+      <div style="font-size:13px;font-weight:600;color:#6dd49a;margin-bottom:14px;display:flex;align-items:center;gap:6px;"><span>🌟</span>融合后获得（核心价值）</div>
+      <div style="font-size:11px;color:#bbb;line-height:2.2;">
+        <div>★ 真值驱动的自治运维</div>
+        <div>★ 从人工修补到系统自愈</div>
+        <div>★ 云端学习本地执行</div>
+        <div>★ 所有操作可审计可回滚</div>
+        <div>★ 运维经验持续沉淀真值</div>
+        <div>★ 全域稳态永恒自治</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 三、五要素架构对应 ========== -->
+<div style="margin-bottom:44px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+    <div style="width:4px;height:22px;background:linear-gradient(180deg,#8b9cf4,#a8b8ff);border-radius:2px;"></div>
+    <span style="font-size:17px;font-weight:600;color:#a8b8ff;letter-spacing:2px;">三、五要素架构对应关系</span>
+    <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(139,156,244,0.25),transparent);"></div>
+  </div>
+  
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;">
+      <div style="flex:0 0 120px;background:linear-gradient(135deg,#5a6abf,#4a5aaf);color:#fff;border-radius:10px;padding:14px;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:14px;font-weight:600;">主域</div>
+        <div style="font-size:9px;opacity:0.7;margin-top:3px;">基准本源空间</div>
+      </div>
+      <div style="flex:1;min-width:200px;background:rgba(139,156,244,0.06);border-radius:10px;padding:14px;border:1px solid rgba(139,156,244,0.15);">
+        <div style="font-size:13px;font-weight:600;color:#a8b8ff;margin-bottom:4px;">Ω-Brainμ 微内核本体</div>
+        <div style="font-size:11px;color:#888;line-height:1.6;">定义基准 · 执掌全局 · 校验锁档 · 真值锚点 · 元监护</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;">
+      <div style="flex:0 0 120px;background:linear-gradient(135deg,#2d7a4d,#1d5a3d);color:#fff;border-radius:10px;padding:14px;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:14px;font-weight:600;">正交子域</div>
+        <div style="font-size:9px;opacity:0.7;margin-top:3px;">业务隔离运行</div>
+      </div>
+      <div style="flex:1;min-width:200px;background:rgba(100,200,150,0.05);border-radius:10px;padding:14px;border:1px solid rgba(100,200,150,0.12);">
+        <div style="font-size:13px;font-weight:600;color:#6dd49a;margin-bottom:4px;">用户态业务组件</div>
+        <div style="font-size:11px;color:#888;line-height:1.6;">隔离执行业务 · 故障封闭 · 热迭代 · 独立启停 · 资源配额</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;">
+      <div style="flex:0 0 120px;background:linear-gradient(135deg,#8a6a3a,#6a4a2a);color:#fff;border-radius:10px;padding:14px;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:14px;font-weight:600;">影子Workspace</div>
+        <div style="font-size:9px;opacity:0.7;margin-top:3px;">试错实验投影</div>
+      </div>
+      <div style="flex:1;min-width:200px;background:rgba(212,175,100,0.05);border-radius:10px;padding:14px;border:1px solid rgba(212,175,100,0.12);">
+        <div style="font-size:13px;font-weight:600;color:#d4af8a;margin-bottom:4px;">微内核沙箱投影</div>
+        <div style="font-size:11px;color:#888;line-height:1.6;">安全试错 · 验证合格才合并 · 不影响生产基线 · 增量投影</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;">
+      <div style="flex:0 0 120px;background:linear-gradient(135deg,#6a4a8a,#4a2a6a);color:#fff;border-radius:10px;padding:14px;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:14px;font-weight:600;">SSG解空间</div>
+        <div style="font-size:9px;opacity:0.7;margin-top:3px;">边界校验滤网</div>
+      </div>
+      <div style="flex:1;min-width:200px;background:rgba(180,140,220,0.05);border-radius:10px;padding:14px;border:1px solid rgba(180,140,220,0.12);">
+        <div style="font-size:13px;font-weight:600;color:#b89adc;margin-bottom:4px;">微内核校验层</div>
+        <div style="font-size:11px;color:#888;line-height:1.6;">边界校验 · 漂移检测 · 高维语义空间治理 · 异常拦截熔断</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;">
+      <div style="flex:0 0 120px;background:linear-gradient(135deg,#8a3a3a,#6a2a2a);color:#fff;border-radius:10px;padding:14px;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:14px;font-weight:600;">全域锁档</div>
+        <div style="font-size:9px;opacity:0.7;margin-top:3px;">稳态固化层</div>
+      </div>
+      <div style="flex:1;min-width:200px;background:rgba(220,100,100,0.05);border-radius:10px;padding:14px;border:1px solid rgba(220,100,100,0.12);">
+        <div style="font-size:13px;font-weight:600;color:#dc8a8a;margin-bottom:4px;">微内核归档层</div>
+        <div style="font-size:11px;color:#888;line-height:1.6;">SHA256哈希固化 · Merkle-DAG谱系 · 不可篡改 · 可回滚 · 四端归档</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 四、五大核心收益 ========== -->
+<div style="margin-bottom:44px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+    <div style="width:4px;height:22px;background:linear-gradient(180deg,#6dd49a,#a8e8c8);border-radius:2px;"></div>
+    <span style="font-size:17px;font-weight:600;color:#6dd49a;letter-spacing:2px;">四、微内核架构 · 五大核心收益</span>
+    <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(100,200,150,0.25),transparent);"></div>
+  </div>
+  
+  <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div style="flex:1 1 150px;min-width:150px;background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:18px 14px;text-align:center;">
+      <div style="font-size:30px;margin-bottom:10px;">🧱</div>
+      <div style="font-size:13px;font-weight:600;color:#d4af37;margin-bottom:6px;">故障局部隔离</div>
+      <div style="font-size:10px;color:#888;line-height:1.7;">业务崩溃仅重启该服务，内核持续运行，自治循环不中断</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:150px;background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:18px 14px;text-align:center;">
+      <div style="font-size:30px;margin-bottom:10px;">🛡️</div>
+      <div style="font-size:13px;font-weight:600;color:#d4af37;margin-bottom:6px;">底层真值防护</div>
+      <div style="font-size:10px;color:#888;line-height:1.7;">缩减高权限代码面，业务模块无权篡改内核基线与全域真值</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:150px;background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:18px 14px;text-align:center;">
+      <div style="font-size:30px;margin-bottom:10px;">🔥</div>
+      <div style="font-size:13px;font-weight:600;color:#d4af37;margin-bottom:6px;">组件热迭代</div>
+      <div style="font-size:10px;color:#888;line-height:1.7;">独立服务可单独启停升级替换，更新API/知识库无需整机停机</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:150px;background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:18px 14px;text-align:center;">
+      <div style="font-size:30px;margin-bottom:10px;">📋</div>
+      <div style="font-size:13px;font-weight:600;color:#d4af37;margin-bottom:6px;">消息全局审计</div>
+      <div style="font-size:10px;color:#888;line-height:1.7;">消息中转可嵌入酉范数校验、哈希校验、漂移监测，拦截异常</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:150px;background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:18px 14px;text-align:center;">
+      <div style="font-size:30px;margin-bottom:10px;">⚖️</div>
+      <div style="font-size:13px;font-weight:600;color:#d4af37;margin-bottom:6px;">资源硬隔离</div>
+      <div style="font-size:10px;color:#888;line-height:1.7;">CPU内存分片管控，单业务负载暴涨不抢占内核巡检归档高优任务</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 五、正确模式 vs 反模式 ========== -->
+<div style="margin-bottom:44px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+    <div style="width:4px;height:22px;background:linear-gradient(180deg,#6dd49a,#dc8a8a);border-radius:2px;"></div>
+    <span style="font-size:17px;font-weight:600;color:#aaa;letter-spacing:2px;">五、正确模式 vs 反模式</span>
+    <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(150,150,150,0.2),transparent);"></div>
+  </div>
+  
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:240px;background:rgba(100,200,150,0.05);border:1px solid rgba(100,200,150,0.2);border-radius:14px;padding:22px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <span style="font-size:20px;">✅</span>
+        <span style="font-size:14px;font-weight:600;color:#6dd49a;letter-spacing:1px;">正确模式 · 锚定微内核</span>
+      </div>
+      <div style="font-size:12px;color:#bbb;line-height:2.4;">
+        <div style="display:flex;gap:10px;"><span style="color:#6dd49a;font-weight:600;flex-shrink:0;">01</span><span>业务在正交子域执行（用户态）</span></div>
+        <div style="display:flex;gap:10px;"><span style="color:#6dd49a;font-weight:600;flex-shrink:0;">02</span><span>通过消息通道请求资源、上报状态</span></div>
+        <div style="display:flex;gap:10px;"><span style="color:#6dd49a;font-weight:600;flex-shrink:0;">03</span><span>结果提交微内核真值校验</span></div>
+        <div style="display:flex;gap:10px;"><span style="color:#6dd49a;font-weight:600;flex-shrink:0;">04</span><span>校验通过 → 锁档归档 → 谱系记录</span></div>
+        <div style="display:flex;gap:10px;"><span style="color:#6dd49a;font-weight:600;flex-shrink:0;">05</span><span>校验失败 → 封闭子域 → 漂移告警</span></div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:240px;background:rgba(220,100,100,0.05);border:1px solid rgba(220,100,100,0.2);border-radius:14px;padding:22px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <span style="font-size:20px;">❌</span>
+        <span style="font-size:14px;font-weight:600;color:#dc8a8a;letter-spacing:1px;">反模式 · 未锚定微内核</span>
+      </div>
+      <div style="font-size:12px;color:#bbb;line-height:2.4;">
+        <div style="display:flex;gap:10px;"><span style="color:#dc8a8a;font-weight:600;flex-shrink:0;">01</span><span>把业务逻辑塞进微内核 → 攻击面增大</span></div>
+        <div style="display:flex;gap:10px;"><span style="color:#dc8a8a;font-weight:600;flex-shrink:0;">02</span><span>绕过消息通道直接操作 → 故障扩散</span></div>
+        <div style="display:flex;gap:10px;"><span style="color:#dc8a8a;font-weight:600;flex-shrink:0;">03</span><span>结果不经校验直接入库 → 漂移污染</span></div>
+        <div style="display:flex;gap:10px;"><span style="color:#dc8a8a;font-weight:600;flex-shrink:0;">04</span><span>变更不经锁档直接生效 → 无法回滚</span></div>
+        <div style="display:flex;gap:10px;"><span style="color:#dc8a8a;font-weight:600;flex-shrink:0;">05</span><span>子域之间直接穿透 → 失去审计</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 终极结论 ========== -->
+<div style="background:linear-gradient(135deg,rgba(212,175,55,0.12),rgba(212,175,55,0.04));border:1px solid rgba(212,175,55,0.25);border-radius:18px;padding:32px 24px;text-align:center;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(212,175,55,0.08);">
+  <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;height:200px;background:radial-gradient(ellipse,rgba(212,175,55,0.15) 0%,transparent 70%);pointer-events:none;"></div>
+  
+  <div style="position:relative;z-index:1;">
+    <div style="font-size:11px;color:#d4af37;letter-spacing:3px;margin-bottom:16px;opacity:0.8;">火斗云智 AIOS · 微内核架构 · 核心结论</div>
+    <div style="font-size:19px;font-weight:700;margin-bottom:18px;line-height:1.9;background:linear-gradient(135deg,#d4af37,#f4e4a6,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;">业务在子域跑，规则在微核定<br>消息经通道转，真值由微核校，稳态靠锁档固</div>
+    <div style="font-size:13px;color:#999;line-height:2;max-width:520px;margin:0 auto;">内核无为而无不为，子域有为而有所不为<br>所有操作锚定微内核进行，是最正确的架构原则</div>
+    
+    <div style="margin-top:24px;display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+      <span style="font-size:10px;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.3);color:#d4af37;padding:5px 16px;border-radius:20px;letter-spacing:1px;">Ω-Brainμ V1.0</span>
+      <span style="font-size:10px;background:rgba(255,140,66,0.12);border:1px solid rgba(255,140,66,0.3);color:#ff8c42;padding:5px 16px;border-radius:20px;letter-spacing:1px;">稳态运维平台</span>
+      <span style="font-size:10px;background:rgba(100,200,150,0.12);border:1px solid rgba(100,200,150,0.3);color:#6dd49a;padding:5px 16px;border-radius:20px;letter-spacing:1px;">生产级可用</span>
+    </div>
+    
+    <div style="margin-top:20px;font-size:9px;color:#555;letter-spacing:1px;line-height:1.8;">
+      火斗云智 AIOS · 微内核架构白皮书 · 内部技术文档<br>
+      本页面内容仅供技术架构展示，具体实现以实际部署为准
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1100px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/docs/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/internal/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/internal/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · 内部技术文档 · DID-BR-000002</div>
+  </div>
+</div>
+</html>

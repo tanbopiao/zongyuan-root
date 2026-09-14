@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务中台·工作人员后台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#333}
+.header{background:linear-gradient(135deg,#1a56db,#1e40af);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.header h1{font-size:18px;font-weight:600}
+.header .badge{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:12px;font-size:12px}
+.container{max-width:1400px;margin:20px auto;padding:0 20px}
+.tabs{display:flex;gap:8px;margin-bottom:20px;background:#fff;padding:8px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.tab{padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;transition:all .2s;border:none;background:transparent;color:#666}
+.tab.active{background:#1a56db;color:#fff}
+.tab:hover:not(.active){background:#f0f2f5}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}
+.stat-card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.stat-card .label{font-size:13px;color:#888;margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:700;color:#1a56db}
+.stat-card .sub{font-size:12px;color:#aaa;margin-top:4px}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:20px;overflow:hidden}
+.panel-header{padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+.panel-header h3{font-size:16px;font-weight:600}
+.btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;transition:all .2s}
+.btn-primary{background:#1a56db;color:#fff}
+.btn-primary:hover{background:#1e40af}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-danger:hover{background:#b91c1c}
+.btn-sm{padding:4px 10px;font-size:12px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 16px;text-align:left;border-bottom:1px solid #f0f0f0;font-size:13px}
+th{background:#fafafa;font-weight:600;color:#555;position:sticky;top:0}
+tr:hover{background:#f9fafb}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.tag-blue{background:#dbeafe;color:#1e40af}
+.tag-green{background:#dcfce7;color:#166534}
+.tag-orange{background:#fed7aa;color:#9a3412}
+.search-bar{padding:16px 20px;border-bottom:1px solid #eee;display:flex;gap:12px;align-items:center}
+.search-bar input{flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px}
+.search-bar select{padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;justify-content:center;align-items:center;z-index:1000}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto}
+.modal h3{margin-bottom:16px;font-size:18px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;color:#555;margin-bottom:4px;font-weight:500}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px}
+.form-group textarea{min-height:80px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid #eee}
+.log-entry{padding:10px 16px;border-bottom:1px solid #f0f0f0;font-size:12px}
+.log-entry .time{color:#888;margin-right:8px}
+.log-entry .action{font-weight:600;color:#1a56db}
+.empty{text-align:center;padding:40px;color:#aaa;font-size:14px}
+.login-box{max-width:400px;margin:80px auto;background:#fff;padding:32px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.login-box h2{text-align:center;margin-bottom:24px;color:#1a56db}
+.login-box input{width:100%;padding:12px;margin-bottom:16px;border:1px solid #ddd;border-radius:8px;font-size:14px}
+.login-box button{width:100%;padding:12px;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer}
+.cat-bar{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px}
+.cat-bar span{background:#f0f2f5;padding:4px 10px;border-radius:12px;font-size:12px;color:#555}
+</style>
+    <link rel="canonical" href="https://huodouai.comgov-admin/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,167,232,.2);padding:8px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:12px">
+  <span style="font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap">火斗云智·政务</span>
+  <a href="/gov-ai/" style="color:#c9a7e8;text-decoration:none;padding:4px 10px;border-radius:6px;background:rgba(201,167,232,.15)">政务服务</a>
+  <a href="/workbench/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">工作台</a>
+  <a href="/gov-admin/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">管理后台</a>
+  <a href="/gov-operator-admin/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">算子管理</a>
+  <a href="/gov-mobile/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">移动版</a>
+  <a href="/gov-canvas/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">Canvas版</a>
+  <a href="/portal/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px;margin-left:auto">智能中台</a>
+</div>
+<div style="height:40px"></div>
+
+<div id="loginView" class="login-box" style="display:none">
+<h2>政务中台·管理后台</h2>
+<input type="password" id="adminKey" placeholder="请输入管理密钥">
+<button onclick="doLogin()">登 录</button>
+</div>
+
+<div id="mainView" style="display:none">
+<div class="header">
+<h1>政务中台·工作人员后台</h1>
+<div style="display:flex;gap:12px;align-items:center">
+<span class="badge">V2.5</span>
+<span class="badge" id="apiStatus">API正常</span>
+<button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff" onclick="doLogout()">退出</button>
+</div>
+</div>
+
+<div class="container">
+<div class="tabs">
+<button class="tab active" onclick="switchTab('dashboard')">数据总览</button>
+<button class="tab" onclick="switchTab('policies')">政策管理</button>
+<button class="tab" onclick="switchTab('guides')">办事指南</button>
+<button class="tab" onclick="switchTab('logs')">操作日志</button>
+</div>
+
+<!-- 数据总览 -->
+<div id="tab-dashboard">
+<div class="stats-grid" id="statsGrid"></div>
+<div class="panel">
+<div class="panel-header"><h3>政策分类分布</h3></div>
+<div class="cat-bar" id="policyCats"></div>
+</div>
+<div class="panel">
+<div class="panel-header"><h3>办事指南分类分布</h3></div>
+<div class="cat-bar" id="guideCats"></div>
+</div>
+</div>
+
+<!-- 政策管理 -->
+<div id="tab-policies" style="display:none">
+<div class="panel">
+<div class="search-bar">
+<input type="text" id="policySearch" placeholder="搜索政策标题..." oninput="renderPolicies()">
+<select id="policyFilter" onchange="renderPolicies()">
+<option value="">全部分类</option>
+</select>
+<button class="btn btn-primary" onclick="openPolicyModal()">+ 新增政策</button>
+</div>
+<div style="max-height:500px;overflow-y:auto">
+<table>
+<thead><tr><th>ID</th><th>标题</th><th>分类</th><th>文号</th><th>发布机构</th><th>操作</th></tr></thead>
+<tbody id="policyTable"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- 办事指南 -->
+<div id="tab-guides" style="display:none">
+<div class="panel">
+<div class="search-bar">
+<input type="text" id="guideSearch" placeholder="搜索办事指南..." oninput="renderGuides()">
+<select id="guideFilter" onchange="renderGuides()">
+<option value="">全部分类</option>
+</select>
+<button class="btn btn-primary" onclick="openGuideModal()">+ 新增指南</button>
+</div>
+<div style="max-height:500px;overflow-y:auto">
+<table>
+<thead><tr><th>ID</th><th>标题</th><th>分类</th><th>办理地点</th><th>咨询电话</th><th>操作</th></tr></thead>
+<tbody id="guideTable"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- 操作日志 -->
+<div id="tab-logs" style="display:none">
+<div class="panel">
+<div class="panel-header"><h3>操作审计日志</h3><button class="btn btn-sm" onclick="loadLogs()">刷新</button></div>
+<div id="logList" style="max-height:500px;overflow-y:auto"></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 政策编辑弹窗 -->
+<div class="modal-overlay" id="policyModal">
+<div class="modal">
+<h3 id="policyModalTitle">新增政策</h3>
+<input type="hidden" id="policyId">
+<div class="form-row">
+<div class="form-group"><label>标题 *</label><input id="p_title"></div>
+<div class="form-group"><label>分类 *</label>
+<select id="p_category">
+<option>社保</option><option>医保</option><option>户籍</option><option>教育</option>
+<option>就业</option><option>住房</option><option>婚姻</option><option>生育</option>
+<option>税务</option><option>交通</option><option>其他</option>
+</select></div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>文号</label><input id="p_docNo"></div>
+<div class="form-group"><label>发布机构</label><input id="p_org"></div>
+</div>
+<div class="form-group"><label>生效日期</label><input id="p_date" type="date"></div>
+<div class="form-group"><label>摘要</label><textarea id="p_summary"></textarea></div>
+<div class="form-group"><label>关键词（逗号分隔）</label><input id="p_keywords"></div>
+<div class="modal-footer">
+<button class="btn" onclick="closeModal('policyModal')">取消</button>
+<button class="btn btn-primary" onclick="savePolicy()">保存</button>
+</div>
+</div>
+</div>
+
+<!-- 指南编辑弹窗 -->
+<div class="modal-overlay" id="guideModal">
+<div class="modal">
+<h3 id="guideModalTitle">新增办事指南</h3>
+<input type="hidden" id="guideId">
+<div class="form-row">
+<div class="form-group"><label>标题 *</label><input id="g_title"></div>
+<div class="form-group"><label>分类 *</label>
+<select id="g_category">
+<option>证件办理</option><option>社保医保</option><option>工商税务</option>
+<option>婚姻生育</option><option>交通出行</option><option>住房公积金</option>
+<option>权益维护</option><option>户籍人口</option><option>就业创业</option>
+<option>教育文化</option><option>其他</option>
+</select></div>
+</div>
+<div class="form-group"><label>办理条件</label><textarea id="g_conditions"></textarea></div>
+<div class="form-group"><label>所需材料</label><textarea id="g_materials"></textarea></div>
+<div class="form-group"><label>办理流程</label><textarea id="g_steps"></textarea></div>
+<div class="form-row">
+<div class="form-group"><label>办理地点</label><input id="g_location"></div>
+<div class="form-group"><label>咨询电话</label><input id="g_phone"></div>
+</div>
+<div class="form-group"><label>办理时限</label><input id="g_time"></div>
+<div class="modal-footer">
+<button class="btn" onclick="closeModal('guideModal')">取消</button>
+<button class="btn btn-primary" onclick="saveGuide()">保存</button>
+</div>
+</div>
+</div>
+
+<script>
+const API_BASE = '/gov-api';
+let ADMIN_KEY = localStorage.getItem('gov_admin_key') || '';
+let allPolicies = [], allGuides = [];
+
+function api(path, opts={}) {
+  return fetch(API_BASE + path, {
+    ...opts,
+    headers: {'Content-Type':'application/json','X-Admin-Key':ADMIN_KEY, ...(opts.headers||{})}
+  }).then(r=>r.json());
+}
+
+function doLogin() {
+  ADMIN_KEY = document.getElementById('adminKey').value;
+  localStorage.setItem('gov_admin_key', ADMIN_KEY);
+  checkAuth();
+}
+
+function doLogout() {
+  localStorage.removeItem('gov_admin_key');
+  ADMIN_KEY = '';
+  document.getElementById('mainView').style.display='none';
+  document.getElementById('loginView').style.display='block';
+}
+
+function checkAuth() {
+  if (!ADMIN_KEY) {
+    document.getElementById('loginView').style.display='block';
+    document.getElementById('mainView').style.display='none';
+    return;
+  }
+  api('/api/admin/stats').then(d=>{
+    if (d.error) { doLogout(); return; }
+    document.getElementById('loginView').style.display='none';
+    document.getElementById('mainView').style.display='block';
+    loadDashboard();
+    loadPolicies();
+    loadGuides();
+  }).catch(()=>{ document.getElementById('apiStatus').textContent='API异常'; });
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['dashboard','policies','guides','logs'][i]===tab));
+  ['dashboard','policies','guides','logs'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
+  });
+  if (tab==='logs') loadLogs();
+}
+
+function loadDashboard() {
+  api('/api/admin/stats').then(d=>{
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card"><div class="label">政策总数</div><div class="value">${d.policies_total}</div><div class="sub">条结构化政策</div></div>
+      <div class="stat-card"><div class="label">办事指南</div><div class="value">${d.guides_total}</div><div class="sub">条办事指南</div></div>
+      <div class="stat-card"><div class="label">操作日志</div><div class="value">${d.audit_log_count}</div><div class="sub">条审计记录</div></div>
+      <div class="stat-card"><div class="label">API版本</div><div class="value" style="font-size:20px">${d.api_version}</div><div class="sub">${d.last_updated.slice(0,10)}</div></div>
+    `;
+    document.getElementById('policyCats').innerHTML = Object.entries(d.policy_categories).map(([k,v])=>`<span>${k}: ${v}</span>`).join('');
+    document.getElementById('guideCats').innerHTML = Object.entries(d.guide_categories).map(([k,v])=>`<span>${k}: ${v}</span>`).join('');
+  });
+}
+
+function loadPolicies() {
+  fetch(API_BASE+'/api/gov/policy/categories').then(r=>r.json()).then(d=>{
+    const cats = d.categories || Object.keys(d);
+    const sel = document.getElementById('policyFilter');
+    cats.forEach(c=>{ if(![...sel.options].some(o=>o.value===c)) sel.innerHTML+=`<option value="${c}">${c}</option>`; });
+  });
+  fetch(API_BASE+'/api/gov/policy/search?q=').then(r=>r.json()).then(d=>{
+    allPolicies = d.results || d.policies || d;
+    renderPolicies();
+  });
+}
+
+function renderPolicies() {
+  const q = document.getElementById('policySearch').value.toLowerCase();
+  const cat = document.getElementById('policyFilter').value;
+  let list = allPolicies.filter(p=>
+    (!q || p.title.toLowerCase().includes(q) || (p.summary||'').toLowerCase().includes(q)) &&
+    (!cat || p.category===cat)
+  );
+  document.getElementById('policyTable').innerHTML = list.length ? list.map(p=>`
+    <tr>
+      <td><span class="tag tag-blue">${p.id}</span></td>
+      <td style="max-width:300px">${p.title}</td>
+      <td><span class="tag tag-green">${p.category}</span></td>
+      <td style="font-size:11px;color:#888">${p.doc_no||'-'}</td>
+      <td style="font-size:11px;color:#888">${p.org||'-'}</td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick='editPolicy(${JSON.stringify(p)})'>编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="deletePolicy('${p.id}')">删除</button>
+      </td>
+    </tr>
+  `).join('') : '<tr><td colspan="6" class="empty">暂无数据</td></tr>';
+}
+
+function openPolicyModal() {
+  document.getElementById('policyModalTitle').textContent='新增政策';
+  document.getElementById('policyId').value='';
+  ['p_title','p_docNo','p_org','p_date','p_summary','p_keywords'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('policyModal').classList.add('active');
+}
+
+function editPolicy(p) {
+  document.getElementById('policyModalTitle').textContent='编辑政策';
+  document.getElementById('policyId').value=p.id;
+  document.getElementById('p_title').value=p.title;
+  document.getElementById('p_category').value=p.category;
+  document.getElementById('p_docNo').value=p.doc_no||'';
+  document.getElementById('p_org').value=p.org||'';
+  document.getElementById('p_date').value=p.effective_date||'';
+  document.getElementById('p_summary').value=p.summary||'';
+  document.getElementById('p_keywords').value=(p.keywords||[]).join(',');
+  document.getElementById('policyModal').classList.add('active');
+}
+
+function savePolicy() {
+  const id = document.getElementById('policyId').value;
+  const data = {
+    title: document.getElementById('p_title').value,
+    category: document.getElementById('p_category').value,
+    doc_no: document.getElementById('p_docNo').value,
+    org: document.getElementById('p_org').value,
+    effective_date: document.getElementById('p_date').value,
+    summary: document.getElementById('p_summary').value,
+    keywords: document.getElementById('p_keywords').value.split(',').map(s=>s.trim()).filter(Boolean)
+  };
+  if (!data.title) { alert('请填写标题'); return; }
+  const method = id ? 'PUT' : 'POST';
+  if (id) data.id = id;
+  api('/api/admin/policy', {method, body:JSON.stringify(data)}).then(d=>{
+    if (d.ok) { closeModal('policyModal'); loadPolicies(); loadDashboard(); alert('保存成功'); }
+    else alert('保存失败: '+JSON.stringify(d));
+  });
+}
+
+function deletePolicy(id) {
+  if (!confirm('确定删除该政策？')) return;
+  api('/api/admin/policy?id='+id, {method:'DELETE'}).then(d=>{
+    if (d.ok) { loadPolicies(); loadDashboard(); }
+  });
+}
+
+function loadGuides() {
+  fetch(API_BASE+'/api/gov/guide/list').then(r=>r.json()).then(d=>{
+    allGuides = d.guides || d.results || d;
+    const cats = [...new Set(allGuides.map(g=>g.category))];
+    const sel = document.getElementById('guideFilter');
+    cats.forEach(c=>{ if(![...sel.options].some(o=>o.value===c)) sel.innerHTML+=`<option value="${c}">${c}</option>`; });
+    renderGuides();
+  });
+}
+
+function renderGuides() {
+  const q = document.getElementById('guideSearch').value.toLowerCase();
+  const cat = document.getElementById('guideFilter').value;
+  let list = allGuides.filter(g=>
+    (!q || g.title.toLowerCase().includes(q)) && (!cat || g.category===cat)
+  );
+  document.getElementById('guideTable').innerHTML = list.length ? list.map(g=>`
+    <tr>
+      <td><span class="tag tag-orange">${g.id}</span></td>
+      <td style="max-width:250px">${g.title}</td>
+      <td><span class="tag tag-green">${g.category}</span></td>
+      <td style="font-size:11px;color:#888;max-width:150px">${g.location||'-'}</td>
+      <td style="font-size:11px;color:#888">${g.phone||'-'}</td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick='editGuide(${JSON.stringify(g)})'>编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteGuide('${g.id}')">删除</button>
+      </td>
+    </tr>
+  `).join('') : '<tr><td colspan="6" class="empty">暂无数据</td></tr>';
+}
+
+function openGuideModal() {
+  document.getElementById('guideModalTitle').textContent='新增办事指南';
+  document.getElementById('guideId').value='';
+  ['g_title','g_conditions','g_materials','g_steps','g_location','g_phone','g_time'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('guideModal').classList.add('active');
+}
+
+function editGuide(g) {
+  document.getElementById('guideModalTitle').textContent='编辑办事指南';
+  document.getElementById('guideId').value=g.id;
+  document.getElementById('g_title').value=g.title;
+  document.getElementById('g_category').value=g.category;
+  document.getElementById('g_conditions').value=g.conditions||'';
+  document.getElementById('g_materials').value=g.materials||'';
+  document.getElementById('g_steps').value=g.steps||'';
+  document.getElementById('g_location').value=g.location||'';
+  document.getElementById('g_phone').value=g.phone||'';
+  document.getElementById('g_time').value=g.time||'';
+  document.getElementById('guideModal').classList.add('active');
+}
+
+function saveGuide() {
+  const id = document.getElementById('guideId').value;
+  const data = {
+    title: document.getElementById('g_title').value,
+    category: document.getElementById('g_category').value,
+    conditions: document.getElementById('g_conditions').value,
+    materials: document.getElementById('g_materials').value,
+    steps: document.getElementById('g_steps').value,
+    location: document.getElementById('g_location').value,
+    phone: document.getElementById('g_phone').value,
+    time: document.getElementById('g_time').value
+  };
+  if (!data.title) { alert('请填写标题'); return; }
+  const method = id ? 'PUT' : 'POST';
+  if (id) data.id = id;
+  api('/api/admin/guide', {method, body:JSON.stringify(data)}).then(d=>{
+    if (d.ok) { closeModal('guideModal'); loadGuides(); loadDashboard(); alert('保存成功'); }
+    else alert('保存失败: '+JSON.stringify(d));
+  });
+}
+
+function deleteGuide(id) {
+  if (!confirm('确定删除该办事指南？')) return;
+  api('/api/admin/guide?id='+id, {method:'DELETE'}).then(d=>{
+    if (d.ok) { loadGuides(); loadDashboard(); }
+  });
+}
+
+function loadLogs() {
+  api('/api/admin/logs?limit=100').then(d=>{
+    const logs = d.logs || [];
+    document.getElementById('logList').innerHTML = logs.length ? logs.reverse().map(l=>`
+      <div class="log-entry">
+        <span class="time">${l.timestamp.slice(0,19).replace('T',' ')}</span>
+        <span class="action">${l.action}</span>
+        <span style="color:#666">${l.target}</span>
+        <span style="color:#999;margin-left:8px">${l.detail||''}</span>
+      </div>
+    `).join('') : '<div class="empty">暂无操作日志</div>';
+  });
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+checkAuth();
+</script>
+</body>
+</html>

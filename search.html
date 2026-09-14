@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全站搜索 | 火斗云智AIOS</title>
+<meta name="description" content="火斗云智全站搜索 - 全域内容检索">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1520 50%, #0f0a15 100%);
+  color: #e8e8e8;
+  min-height: 100vh;
+}
+.top-nav {
+  background: rgba(17, 24, 39, 0.95);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 12px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.top-nav-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #D4AF37, #8B6914);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: 14px;
+}
+.logo-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+.logo-text span { color: #D4AF37; }
+.back-link {
+  color: #888;
+  text-decoration: none;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.back-link:hover {
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.1);
+}
+.search-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+.search-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.search-title {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #D4AF37, #F4E4BC, #D4AF37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.search-subtitle {
+  font-size: 13px;
+  color: #888;
+}
+.search-box {
+  position: relative;
+  margin-bottom: 24px;
+}
+.search-input {
+  width: 100%;
+  padding: 16px 20px 16px 50px;
+  background: rgba(20, 20, 30, 0.9);
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  color: #e8e8e8;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s;
+}
+.search-input:focus {
+  border-color: #D4AF37;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+.search-input::placeholder {
+  color: #555;
+}
+.search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #D4AF37;
+}
+.search-clear {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+  font-size: 18px;
+  display: none;
+  transition: color 0.2s;
+}
+.search-clear:hover {
+  color: #D4AF37;
+}
+.search-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.result-count {
+  font-size: 13px;
+  color: #888;
+}
+.result-count strong {
+  color: #D4AF37;
+}
+.category-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 6px 14px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 16px;
+  color: #888;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  color: #D4AF37;
+}
+.filter-btn.active {
+  background: rgba(212, 175, 55, 0.2);
+  color: #D4AF37;
+  border-color: #D4AF37;
+}
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.result-item {
+  background: linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(30, 25, 15, 0.9));
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  text-decoration: none;
+  transition: all 0.3s;
+  display: block;
+}
+.result-item:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  transform: translateX(5px);
+  box-shadow: 0 5px 20px rgba(212, 175, 55, 0.1);
+}
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.result-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #D4AF37;
+}
+.result-category {
+  padding: 3px 10px;
+  background: rgba(139, 92, 246, 0.15);
+  color: #C4B5FD;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.result-desc {
+  font-size: 13px;
+  color: #999;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.result-url {
+  font-size: 11px;
+  color: #555;
+  font-family: 'Courier New', monospace;
+}
+.highlight {
+  background: rgba(212, 175, 55, 0.3);
+  color: #F4E4BC;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: #555;
+}
+.no-results .icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+.no-results .text {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+.no-results .hint {
+  font-size: 13px;
+  color: #444;
+}
+.footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: #555;
+  font-size: 12px;
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  margin-top: 40px;
+}
+.footer .anchor {
+  color: #D4AF37;
+  font-family: 'Courier New', monospace;
+  margin-top: 8px;
+  letter-spacing: 1px;
+}
+.hot-keywords {
+  margin-top: 16px;
+  text-align: center;
+}
+.hot-keywords .label {
+  font-size: 12px;
+  color: #666;
+  margin-right: 8px;
+}
+.hot-keyword {
+  display: inline-block;
+  padding: 4px 12px;
+  margin: 4px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 14px;
+  color: #888;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.hot-keyword:hover {
+  background: rgba(212, 175, 55, 0.15);
+  color: #D4AF37;
+}
+</style>
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div id="site-nav"></div>
+<noscript><div style="background:#0b0e14;color:#c9a227;padding:10px 24px;border-bottom:1px solid #232a3a;font-size:13px"><a href="/" style="color:#e6c75a;margin-right:14px">首页</a><a href="/architecture.html" style="color:#aaa;margin-right:14px">架构</a><a href="/engines.html" style="color:#aaa;margin-right:14px">引擎</a><a href="/products.html" style="color:#aaa;margin-right:14px">产品</a><a href="/governance.html" style="color:#aaa;margin-right:14px">治理</a><a href="/assets/visual/pricing-v1.html" style="color:#aaa;margin-right:14px">定价</a><a href="/trial.html" style="color:#aaa;margin-right:14px">试用</a><a href="/auto-ops.html" style="color:#aaa">闭环控制台</a></div></noscript>
+
+
+
+
+
+<div class="top-nav">
+  <div class="top-nav-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">火</div>
+      <div>
+        <div class="logo-text">火斗云智<span>AIOS</span></div>
+      </div>
+    </a>
+    <a href="/" class="back-link">← 返回首页</a>
+  </div>
+</div>
+
+<div class="search-container">
+  <div class="search-header">
+    <h1 class="search-title">🔍 全站搜索</h1>
+    <p class="search-subtitle">搜索火斗云智AIOS全站页面、产品、文档、状态</p>
+  </div>
+
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" class="search-input" placeholder="输入关键词搜索，如：政务AI、内核状态、API文档、短剧..." autofocus>
+    <span class="search-clear" id="searchClear" onclick="clearSearch()">✕</span>
+  </div>
+
+  <div class="hot-keywords">
+    <span class="label">热门搜索：</span>
+    <span class="hot-keyword" onclick="searchKeyword('政务AI')">政务AI</span>
+    <span class="hot-keyword" onclick="searchKeyword('内核状态')">内核状态</span>
+    <span class="hot-keyword" onclick="searchKeyword('API文档')">API文档</span>
+    <span class="hot-keyword" onclick="searchKeyword('短剧')">短剧</span>
+    <span class="hot-keyword" onclick="searchKeyword('向量知识库')">向量知识库</span>
+    <span class="hot-keyword" onclick="searchKeyword('锁档')">锁档</span>
+  </div>
+
+  <div class="search-stats">
+    <div class="result-count">找到 <strong id="resultCount">0</strong> 个结果</div>
+    <div class="category-filters" id="categoryFilters"></div>
+  </div>
+
+  <div class="results-list" id="resultsList"></div>
+</div>
+
+<div class="footer">
+  <div>火斗云智AIOS · 全站搜索 · 实时检索</div>
+  <div class="anchor">Ω₀⊂⊙∞⊂Ω</div>
+</div>
+
+<script>
+// 页面索引数据
+const PAGE_INDEX = [{title:'首页',url:'/index.html',desc:'火斗云智AIOS全域智能操作系统首页',keywords:'首页 核心 火斗云智AIOS全域智能操作系统首页',category:'核心'},{title:'产品总览',url:'/products.html',desc:'火斗云智AIOS全产品矩阵展示',keywords:'产品总览 产品 火斗云智AIOS全产品矩阵展示',category:'产品'},{title:'产品矩阵图',url:'/product-matrix.html',desc:'产品矩阵可视化',keywords:'产品矩阵图 产品 产品矩阵可视化',category:'产品'},{title:'产品地图',url:'/product-map.html',desc:'产品生态地图',keywords:'产品地图 产品 产品生态地图',category:'产品'},{title:'产品详情',url:'/product.html',desc:'产品详细介绍',keywords:'产品详情 产品 产品详细介绍',category:'产品'},{title:'商业方案',url:'/commercial.html',desc:'商业化解决方案',keywords:'商业方案 产品 商业化解决方案',category:'产品'},{title:'定价',url:'/pricing.html',desc:'产品定价方案',keywords:'定价 产品 产品定价方案',category:'产品'},{title:'解决方案',url:'/solutions.html',desc:'全行业解决方案',keywords:'解决方案 产品 全行业解决方案',category:'产品'},{title:'客户案例',url:'/cases.html',desc:'成功案例展示',keywords:'客户案例 产品 成功案例展示',category:'产品'},{title:'智能体网络',url:'/agent-network.html',desc:'多智能体协同网络',keywords:'智能体网络 智能体 多智能体协同网络',category:'智能体'},{title:'智能体实体化',url:'/agent-embodiment.html',desc:'网页即智能体身体',keywords:'智能体实体化 智能体 网页即智能体身体',category:'智能体'},{title:'智能体工作室',url:'/agent-studio.html',desc:'智能体开发工作台',keywords:'智能体工作室 智能体 智能体开发工作台',category:'智能体'},{title:'高阶能力中心',url:'/high-capabilities.html',desc:'高阶智能能力展示',keywords:'高阶能力中心 智能体 高阶智能能力展示',category:'智能体'},{title:'角色AI',url:'/character-ai.html',desc:'角色智能体',keywords:'角色AI 智能体 角色智能体',category:'智能体'},{title:'中枢大脑',url:'/central-brain.html',desc:'体系中枢战略大脑',keywords:'中枢大脑 内核 体系中枢战略大脑',category:'内核'},{title:'战略全景',url:'/brain-strategy.html',desc:'全域战略规划',keywords:'战略全景 内核 全域战略规划',category:'内核'},{title:'内核记忆',url:'/kernel-memory.html',desc:'元内核记忆系统',keywords:'内核记忆 内核 元内核记忆系统',category:'内核'},{title:'内核状态',url:'/kernel-status.html',desc:'内核运行状态',keywords:'内核状态 内核 内核运行状态',category:'内核'},{title:'内核锁档可视化',url:'/kernel-lock-visual.html',desc:'锁档状态可视化',keywords:'内核锁档可视化 内核 锁档状态可视化',category:'内核'},{title:'架构总览',url:'/architecture.html',desc:'七层纵向架构总览',keywords:'架构总览 技术 七层纵向架构总览',category:'技术'},{title:'深度架构',url:'/architecture-deep.html',desc:'深度架构解析',keywords:'深度架构 技术 深度架构解析',category:'技术'},{title:'微内核架构',url:'/microkernel-architecture.html',desc:'微内核架构设计',keywords:'微内核架构 技术 微内核架构设计',category:'技术'},{title:'核心引擎',url:'/engines.html',desc:'算力调度与三维蒸馏',keywords:'核心引擎 技术 算力调度与三维蒸馏',category:'技术'},{title:'治理安全',url:'/governance.html',desc:'全域治理与安全防护',keywords:'治理安全 技术 全域治理与安全防护',category:'技术'},{title:'技术白皮书',url:'/whitepaper.html',desc:'完整技术白皮书',keywords:'技术白皮书 技术 完整技术白皮书',category:'技术'},{title:'开发者中心',url:'/developers.html',desc:'开发者资源中心',keywords:'开发者中心 技术 开发者资源中心',category:'技术'},{title:'开发者中心',url:'/developer-center.html',desc:'API文档与SDK',keywords:'开发者中心 技术 API文档与SDK',category:'技术'},{title:'文档中心',url:'/docs.html',desc:'产品文档与指南',keywords:'文档中心 技术 产品文档与指南',category:'技术'},{title:'API文档',url:'/prometheus-api-docs.html',desc:'API接口文档',keywords:'API文档 技术 API接口文档',category:'技术'},{title:'向量知识库',url:'/vector.html',desc:'企业级向量检索',keywords:'向量知识库 技术 企业级向量检索',category:'技术'},{title:'语义仪表盘',url:'/semantic-dashboard.html',desc:'语义分析仪表盘',keywords:'语义仪表盘 技术 语义分析仪表盘',category:'技术'},{title:'真值转化',url:'/truth-transmutation.html',desc:'真值提炼与转化',keywords:'真值转化 技术 真值提炼与转化',category:'技术'},{title:'记忆网关',url:'/memory-gateway.html',desc:'9120记忆网关',keywords:'记忆网关 技术 9120记忆网关',category:'技术'},{title:'AI网关',url:'/ai-gateway.html',desc:'AI智能路由网关',keywords:'AI网关 技术 AI智能路由网关',category:'技术'},{title:'令牌网关',url:'/token-gateway.html',desc:'API令牌管理',keywords:'令牌网关 技术 API令牌管理',category:'技术'},{title:'DLP网关',url:'/dlp-gateway.html',desc:'数据防泄漏网关',keywords:'DLP网关 技术 数据防泄漏网关',category:'技术'},{title:'存证API',url:'/notary-api.html',desc:'哈希存证接口',keywords:'存证API 技术 哈希存证接口',category:'技术'},{title:'秒塔架构',url:'/sec-tower-v1.html',desc:'四层分层推理架构',keywords:'秒塔架构 技术 四层分层推理架构',category:'技术'},{title:'秒塔推广规划',url:'/sec-tower-roadmap.html',desc:'秒塔全域推广路线图',keywords:'秒塔推广规划 技术 秒塔全域推广路线图',category:'技术'},{title:'轻量化战略V3',url:'/lightweight-v3.html',desc:'轻量化优先战略V3(AI对话版)',keywords:'轻量化战略V3 战略 轻量化优先战略V3(AI对话版)',category:'战略'},{title:'轻量化战略V2',url:'/lightweight-v2.html',desc:'轻量化战略V2(活体感版)',keywords:'轻量化战略V2 战略 轻量化战略V2(活体感版)',category:'战略'},{title:'轻量化战略',url:'/lightweight-strategy.html',desc:'轻量化优先战略',keywords:'轻量化战略 战略 轻量化优先战略',category:'战略'},{title:'进化战略',url:'/evolution-strategy.html',desc:'体系进化战略规划',keywords:'进化战略 战略 体系进化战略规划',category:'战略'},{title:'全网学习',url:'/global-learning.html',desc:'全域交叉学习',keywords:'全网学习 战略 全域交叉学习',category:'战略'},{title:'原创思想',url:'/philosophy.html',desc:'元极恒一哲学体系',keywords:'原创思想 战略 元极恒一哲学体系',category:'战略'},{title:'高阶状态',url:'/high-order-state.html',desc:'高阶认知状态',keywords:'高阶状态 战略 高阶认知状态',category:'战略'},{title:'涌现',url:'/emergence.html',desc:'智能涌现理论',keywords:'涌现 战略 智能涌现理论',category:'战略'},{title:'认知漂移',url:'/drift.html',desc:'认知漂移监控与防控',keywords:'认知漂移 战略 认知漂移监控与防控',category:'战略'},{title:'安全进化',url:'/safe-evolution.html',desc:'安全进化机制',keywords:'安全进化 战略 安全进化机制',category:'战略'},{title:'AI研究',url:'/research.html',desc:'人工智能前沿研究',keywords:'AI研究 战略 人工智能前沿研究',category:'战略'},{title:'知识图谱',url:'/knowledge.html',desc:'全域知识图谱',keywords:'知识图谱 战略 全域知识图谱',category:'战略'},{title:'昆仑洞天短剧',url:'/kunlun-drama.html',desc:'东方神话短剧品牌',keywords:'昆仑洞天短剧 短剧 东方神话短剧品牌',category:'短剧'},{title:'短剧工厂',url:'/drama-factory.html',desc:'短剧生产流水线',keywords:'短剧工厂 短剧 短剧生产流水线',category:'短剧'},{title:'作品库V2',url:'/works-gallery-v2.html',desc:'短剧作品展示库',keywords:'作品库V2 短剧 短剧作品展示库',category:'短剧'},{title:'关键帧资产库',url:'/keyframe-gallery.html',desc:'关键帧素材库',keywords:'关键帧资产库 短剧 关键帧素材库',category:'短剧'},{title:'普惠教育',url:'/education.html',desc:'源域通识教育平台',keywords:'普惠教育 教育 源域通识教育平台',category:'教育'},{title:'AI教师',url:'/edu-ai-teacher.html',desc:'AI智能教师',keywords:'AI教师 教育 AI智能教师',category:'教育'},{title:'教育对话',url:'/edu-chat.html',desc:'教育AI对话',keywords:'教育对话 教育 教育AI对话',category:'教育'},{title:'教育知识图谱',url:'/edu-knowledge-graph.html',desc:'教育领域知识图谱',keywords:'教育知识图谱 教育 教育领域知识图谱',category:'教育'},{title:'教育产品线',url:'/education-line.html',desc:'教育产品线路线图',keywords:'教育产品线 教育 教育产品线路线图',category:'教育'},{title:'政务产品线',url:'/gov-line.html',desc:'政务AI产品线路线图',keywords:'政务产品线 政务 政务AI产品线路线图',category:'政务'},{title:'运维中心',url:'/ops-center.html',desc:'全域运维中心',keywords:'运维中心 运维 全域运维中心',category:'运维'},{title:'运维监控',url:'/ops-monitor.html',desc:'运维监控面板',keywords:'运维监控 运维 运维监控面板',category:'运维'},{title:'运维产品线',url:'/ops-line.html',desc:'运维产品线路线图',keywords:'运维产品线 运维 运维产品线路线图',category:'运维'},{title:'自动运维',url:'/auto-ops.html',desc:'自动化运维系统',keywords:'自动运维 运维 自动化运维系统',category:'运维'},{title:'监控大屏',url:'/monitor.html',desc:'服务监控大屏',keywords:'监控大屏 运维 服务监控大屏',category:'运维'},{title:'服务器监控',url:'/server-monitor.html',desc:'服务器资源监控',keywords:'服务器监控 运维 服务器资源监控',category:'运维'},{title:'状态中心',url:'/status-center.html',desc:'统一状态监控入口',keywords:'状态中心 运维 统一状态监控入口',category:'运维'},{title:'系统仪表盘',url:'/system-dashboard.html',desc:'实时系统仪表盘',keywords:'系统仪表盘 运维 实时系统仪表盘',category:'运维'},{title:'自动化流水线',url:'/auto-pipeline.html',desc:'全自动生产流水线',keywords:'自动化流水线 运维 全自动生产流水线',category:'运维'},{title:'工作台',url:'/workbench.html',desc:'智能工作台',keywords:'工作台 运维 智能工作台',category:'运维'},{title:'数字资产',url:'/digital-assets.html',desc:'数字资产总览',keywords:'数字资产 资产 数字资产总览',category:'资产'},{title:'资产中心',url:'/asset-center.html',desc:'资产管理中心',keywords:'资产中心 资产 资产管理中心',category:'资产'},{title:'变更台账',url:'/change-ledger.html',desc:'系统变更记录台账',keywords:'变更台账 资产 系统变更记录台账',category:'资产'},{title:'真值账本',url:'/ledger.html',desc:'Merkle-DAG真值账本',keywords:'真值账本 资产 Merkle-DAG真值账本',category:'资产'},{title:'经验库',url:'/experience-kb.html',desc:'经验沉淀知识库',keywords:'经验库 资产 经验沉淀知识库',category:'资产'},{title:'成果展示',url:'/achievements.html',desc:'体系成果展示',keywords:'成果展示 资产 体系成果展示',category:'资产'},{title:'AI资产锁',url:'/ai-asset-lock.html',desc:'AI资产确权锁档',keywords:'AI资产锁 资产 AI资产确权锁档',category:'资产'},{title:'标准化中心',url:'/standardization-center.html',desc:'标准化管理中心',keywords:'标准化中心 资产 标准化管理中心',category:'资产'},{title:'标准SOP',url:'/standard-sop.html',desc:'标准作业流程',keywords:'标准SOP 资产 标准作业流程',category:'资产'},{title:'交付标准',url:'/delivery-standard.html',desc:'交付标准规范V1.0',keywords:'交付标准 资产 交付标准规范V1.0',category:'资产'},{title:'元规则V2',url:'/meta-rules-v2.html',desc:'系统开发元规则V2.0',keywords:'元规则V2 资产 系统开发元规则V2.0',category:'资产'},{title:'全球审计报告',url:'/global-audit-report.html',desc:'全域审计报告',keywords:'全球审计报告 资产 全域审计报告',category:'资产'},{title:'安全合规',url:'/security-compliance.html',desc:'安全合规体系',keywords:'安全合规 安全 安全合规体系',category:'安全'},{title:'安全产品线',url:'/security-line.html',desc:'安全产品线路线图',keywords:'安全产品线 安全 安全产品线路线图',category:'安全'},{title:'启动环防御白皮书',url:'/startup-loop-defense-whitepaper.html',desc:'希尔伯特镜像态防御',keywords:'启动环防御白皮书 安全 希尔伯特镜像态防御',category:'安全'},{title:'开源',url:'/opensource.html',desc:'开源计划',keywords:'开源 安全 开源计划',category:'安全'},{title:'决策智能',url:'/decision-intelligence.html',desc:'三维稳态决策系统',keywords:'决策智能 决策 三维稳态决策系统',category:'决策'},{title:'ROI计算器',url:'/roi-calculator.html',desc:'投资回报率计算',keywords:'ROI计算器 决策 投资回报率计算',category:'决策'},{title:'模型对比实验室',url:'/model-compare-lab.html',desc:'多模型对比测试',keywords:'模型对比实验室 决策 多模型对比测试',category:'决策'},{title:'企业系统体验版',url:'/enterprise-system.html',desc:'17模块企业系统演示',keywords:'企业系统体验版 体验 17模块企业系统演示',category:'体验'},{title:'知识库SaaS',url:'/kb-saas.html',desc:'知识库SaaS平台',keywords:'知识库SaaS 体验 知识库SaaS平台',category:'体验'},{title:'AIOS形象',url:'/aios-image.html',desc:'AIOS品牌形象',keywords:'AIOS形象 体验 AIOS品牌形象',category:'体验'},{title:'Logo设计',url:'/logo-design.html',desc:'品牌Logo设计',keywords:'Logo设计 体验 品牌Logo设计',category:'体验'},{title:'博客',url:'/blog.html',desc:'技术博客',keywords:'博客 内容 技术博客',category:'内容'},{title:'路线图',url:'/roadmap.html',desc:'发展路线图',keywords:'路线图 内容 发展路线图',category:'内容'},{title:'关于',url:'/about-line.html',desc:'关于我们',keywords:'关于 内容 关于我们',category:'内容'},{title:'内容产品线',url:'/content-line.html',desc:'内容产品线路线图',keywords:'内容产品线 内容 内容产品线路线图',category:'内容'},{title:'生态产品线',url:'/ecosystem-line.html',desc:'生态产品线路线图',keywords:'生态产品线 内容 生态产品线路线图',category:'内容'},{title:'学习进化',url:'/learning-evolution.html',desc:'持续学习进化',keywords:'学习进化 内容 持续学习进化',category:'内容'},{title:'书籍演示',url:'/book-demo.html',desc:'书籍内容演示',keywords:'书籍演示 内容 书籍内容演示',category:'内容'},{title:'全站搜索',url:'/search.html',desc:'全站页面搜索',keywords:'全站搜索 工具 全站页面搜索',category:'工具'},{title:'404页面',url:'/404.html',desc:'页面未找到',keywords:'404页面 工具 页面未找到',category:'工具'}];
+
+let currentCategory = 'all';
+let currentKeyword = '';
+
+// 初始化
+function init() {
+  renderCategoryFilters();
+  performSearch();
+  
+  // 搜索输入事件
+  document.getElementById('searchInput').addEventListener('input', function(e) {
+    currentKeyword = e.target.value.trim();
+    document.getElementById('searchClear').style.display = currentKeyword ? 'block' : 'none';
+    performSearch();
+  });
+  
+  // 回车搜索
+  document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      performSearch();
+    }
+  });
+}
+
+// 渲染分类筛选
+function renderCategoryFilters() {
+  const categories = ['all', ...new Set(PAGE_INDEX.map(p => p.category))];
+  const container = document.getElementById('categoryFilters');
+  container.innerHTML = categories.map(cat => 
+    `<button class="filter-btn ${cat === currentCategory ? 'active' : ''}" onclick="filterCategory('${cat}')">${cat === 'all' ? '全部' : cat}</button>`
+  ).join('');
+}
+
+// 分类筛选
+function filterCategory(cat) {
+  currentCategory = cat;
+  renderCategoryFilters();
+  performSearch();
+}
+
+// 热门关键词搜索
+function searchKeyword(keyword) {
+  document.getElementById('searchInput').value = keyword;
+  currentKeyword = keyword;
+  document.getElementById('searchClear').style.display = 'block';
+  performSearch();
+}
+
+// 清空搜索
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  currentKeyword = '';
+  document.getElementById('searchClear').style.display = 'none';
+  performSearch();
+}
+
+// 高亮关键词
+function highlight(text, keyword) {
+  if (!keyword) return text;
+  const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(regex, '<span class="highlight">$1</span>');
+}
+
+// 执行搜索
+function performSearch() {
+  let results = PAGE_INDEX;
+  
+  // 分类筛选
+  if (currentCategory !== 'all') {
+    results = results.filter(p => p.category === currentCategory);
+  }
+  
+  // 关键词搜索
+  if (currentKeyword) {
+    const kw = currentKeyword.toLowerCase();
+    results = results.filter(p => 
+      p.title.toLowerCase().includes(kw) ||
+      p.desc.toLowerCase().includes(kw) ||
+      p.keywords.toLowerCase().includes(kw) ||
+      p.url.toLowerCase().includes(kw)
+    );
+  }
+  
+  // 按相关度排序（标题匹配优先）
+  if (currentKeyword) {
+    const kw = currentKeyword.toLowerCase();
+    results.sort((a, b) => {
+      const aTitle = a.title.toLowerCase().includes(kw) ? 2 : 0;
+      const bTitle = b.title.toLowerCase().includes(kw) ? 2 : 0;
+      const aKeywords = a.keywords.toLowerCase().includes(kw) ? 1 : 0;
+      const bKeywords = b.keywords.toLowerCase().includes(kw) ? 1 : 0;
+      return (bTitle + bKeywords) - (aTitle + aKeywords);
+    });
+  }
+  
+  // 渲染结果
+  renderResults(results);
+}
+
+// 渲染结果列表
+function renderResults(results) {
+  const container = document.getElementById('resultsList');
+  document.getElementById('resultCount').textContent = results.length;
+  
+  if (results.length === 0) {
+    container.innerHTML = `
+      <div class="no-results">
+        <div class="icon">🔍</div>
+        <div class="text">未找到相关结果</div>
+        <div class="hint">请尝试其他关键词，或选择其他分类</div>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = results.map(p => `
+    <a href="${p.url}" class="result-item">
+      <div class="result-header">
+        <div class="result-title">${highlight(p.title, currentKeyword)}</div>
+        <span class="result-category">${p.category}</span>
+      </div>
+      <div class="result-desc">${highlight(p.desc, currentKeyword)}</div>
+      <div class="result-url">${p.url}</div>
+    </a>
+  `).join('');
+}
+
+// 页面加载完成后初始化
+window.onload = init;
+</script>
+
+<script src="/assets/js/site-nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>昆仑洞天 · AI短剧创作工作台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0e14;
+            color: #e6edf3;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app {
+            display: grid;
+            grid-template-columns: 240px 1fr 320px;
+            height: 100vh;
+        }
+
+        /* 左侧边栏 */
+        .sidebar {
+            background: #11161d;
+            border-right: 1px solid #1f2630;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 20px 16px;
+            border-bottom: 1px solid #1f2630;
+        }
+        .logo {
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #d4af37, #f4e4bc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 0;
+            overflow-y: auto;
+        }
+        .nav-item {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: #8b949e;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .nav-item:hover {
+            background: #1a1f28;
+            color: #e6edf3;
+        }
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(212,175,55,0.1), transparent);
+            color: #d4af37;
+            border-right: 2px solid #d4af37;
+        }
+        .nav-icon { font-size: 16px; }
+
+        /* 中央主区 */
+        .main {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .main-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #1f2630;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .main-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            border: 1px solid #30363d;
+            background: #1a1f28;
+            color: #e6edf3;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-sm:hover { border-color: #d4af37; color: #d4af37; }
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #0a0e14;
+            border: none;
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* 创作卡片 */
+        .create-card {
+            background: #11161d;
+            border: 1px solid #1f2630;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card-label {
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-label .required { color: #f85149; }
+        textarea, .input-box {
+            width: 100%;
+            background: #0a0e14;
+            border: 1px solid #2d333b;
+            border-radius: 8px;
+            color: #e6edf3;
+            padding: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        textarea:focus, .input-box:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+        textarea { min-height: 100px; }
+
+        /* 参数网格 */
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .param-item {
+            background: #0a0e14;
+            border: 1px solid #2d333b;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .param-label {
+            font-size: 12px;
+            color: #8b949e;
+            margin-bottom: 6px;
+        }
+        .param-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .param-options {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .opt-chip {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            background: #1a1f28;
+            border: 1px solid #30363d;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .opt-chip:hover, .opt-chip.active {
+            border-color: #d4af37;
+            color: #d4af37;
+        }
+
+        /* 生成按钮 */
+        .generate-bar {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+        }
+        .btn-generate {
+            padding: 14px 48px;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #0a0e14;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(212,175,55,0.4);
+        }
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 右侧结果栏 */
+        .right-panel {
+            background: #11161d;
+            border-left: 1px solid #1f2630;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid #1f2630;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        /* 进度项 */
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            background: #0a0e14;
+        }
+        .progress-item.running {
+            border: 1px solid rgba(212,175,55,0.3);
+        }
+        .progress-item.done {
+            opacity: 0.7;
+        }
+        .p-icon { font-size: 14px; width: 20px; }
+        .p-name { flex: 1; font-size: 13px; }
+        .p-status { font-size: 12px; color: #8b949e; }
+        .progress-item.done .p-status { color: #3fb950; }
+        .progress-item.running .p-status { color: #d4af37; }
+
+        /* 视频结果 */
+        .video-result {
+            margin-top: 12px;
+        }
+        .video-result video {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        /* 示例区 */
+        .examples {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .example-chip {
+            padding: 4px 12px;
+            background: #1a1f28;
+            border: 1px solid #30363d;
+            border-radius: 14px;
+            font-size: 12px;
+            color: #8b949e;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .example-chip:hover {
+            border-color: #d4af37;
+            color: #d4af37;
+        }
+
+        /* 角色一致性提示 */
+        .char-tip {
+            background: linear-gradient(90deg, rgba(212,175,55,0.08), transparent);
+            border-left: 3px solid #d4af37;
+            padding: 10px 14px;
+            border-radius: 0 8px 8px 0;
+            font-size: 12px;
+            color: #8b949e;
+            margin-top: 12px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .app { grid-template-columns: 200px 1fr; }
+            .right-panel { display: none; }
+        }
+        @media (max-width: 768px) {
+            .app { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- 左侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🏔️ 昆仑洞天</div>
+                <div style="font-size: 11px; color: #484f58; margin-top: 4px;">AI短剧创作工作台</div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active">
+                    <span class="nav-icon">✍️</span>
+                    <span>剧本创作</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">🎬</span>
+                    <span>分镜设计</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">🎥</span>
+                    <span>视频生成</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span>角色管理</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">📚</span>
+                    <span>作品库</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span>设置</span>
+                </div>
+            </nav>
+            <div style="padding: 12px; border-top: 1px solid #1f2630; font-size: 11px; color: #484f58;">
+                ZONGYUAN-ROOT<br>
+                DID-BR-000002
+            </div>
+        </aside>
+
+        <!-- 中央主区 -->
+        <main class="main">
+            <header class="main-header">
+                <div class="main-title">AI短剧生成工作台</div>
+                <div class="header-actions">
+                    <button class="btn-sm">📊 历史作品</button>
+                    <button class="btn-sm">📁 导入剧本</button>
+                    <button class="btn-sm btn-primary">💎 免费额度</button>
+                </div>
+            </header>
+
+            <div class="main-content">
+                <!-- 剧本输入 -->
+                <div class="create-card">
+                    <div class="card-label">
+                        <span class="required">*</span> 剧本描述
+                    </div>
+                    <textarea id="scriptInput" placeholder="描述你的短剧创意，例如：九天玄女从昆仑云端降临，青衣飘袂，眸光如电..."></textarea>
+                    <div class="examples">
+                        <span style="font-size: 12px; color: #484f58; align-self: center;">快速示例：</span>
+                        <div class="example-chip" onclick="fillExample(0)">玄女降临</div>
+                        <div class="example-chip" onclick="fillExample(1)">东方神女</div>
+                        <div class="example-chip" onclick="fillExample(2)">昆仑云海</div>
+                        <div class="example-chip" onclick="fillExample(3)">仙山御剑</div>
+                    </div>
+                </div>
+
+                <!-- 参数设置 -->
+                <div class="create-card">
+                    <div class="card-label">⚙️ 生成参数</div>
+                    <div class="param-grid">
+                        <div class="param-item">
+                            <div class="param-label">视频时长</div>
+                            <div class="param-value">5 秒 / 镜头</div>
+                            <div class="param-options">
+                                <div class="opt-chip active">5s</div>
+                                <div class="opt-chip">10s</div>
+                            </div>
+                        </div>
+                        <div class="param-item">
+                            <div class="param-label">画面风格</div>
+                            <div class="param-value">东方国风</div>
+                            <div class="param-options">
+                                <div class="opt-chip active">国风</div>
+                                <div class="opt-chip">仙侠</div>
+                                <div class="opt-chip">写实</div>
+                            </div>
+                        </div>
+                        <div class="param-item">
+                            <div class="param-label">画质</div>
+                            <div class="param-value">720P</div>
+                            <div class="param-options">
+                                <div class="opt-chip">480P</div>
+                                <div class="opt-chip active">720P</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="char-tip">
+                        💡 角色一致性：纯东方国风，黑发，无白发元素，符合昆仑洞天世界观
+                    </div>
+                </div>
+
+                <!-- 生成按钮 -->
+                <div class="generate-bar">
+                    <button class="btn-generate" id="generateBtn" onclick="generateDrama()">
+                        🚀 一键生成短剧
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- 右侧面板 -->
+        <aside class="right-panel">
+            <div class="panel-header">⚡ 生成进度</div>
+            <div class="panel-content" id="progressPanel">
+                <div style="text-align: center; padding: 40px 20px; color: #484f58; font-size: 13px;">
+                    提交任务后<br>将在此显示生成进度
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        const examples = [
+            "九天玄女从昆仑云端降临，青衣飘袂，眸光如电，开启一段未知的人间际遇。",
+            "东方神女立于山巅，黑发如瀑，月光洒落，云海翻涌，电影级画面。",
+            "昆仑山脉云海翻腾，神女御剑飞行，剑光如虹，国风仙侠风格。",
+            "昆仑仙境，神女抚琴，仙乐飘飘，仙鹤飞舞，金箔岩彩画风。"
+        ];
+
+        const layers = [
+            {name: "L1_script", label: "剧本解析与AI增强"},
+            {name: "L2_visual_asset", label: "视觉资产准备"},
+            {name: "L3_storyboard", label: "AI分镜生成"},
+            {name: "L4_shot_gen", label: "镜头视频生成"},
+            {name: "L5_audio_sub", label: "音频字幕生成"},
+            {name: "L6_ffmpeg", label: "视频合成输出"},
+            {name: "L7_archive", label: "归档锁档"}
+        ];
+
+        function fillExample(idx) {
+            document.getElementById('scriptInput').value = examples[idx];
+        }
+
+        async function generateDrama() {
+            const script = document.getElementById('scriptInput').value.trim();
+            if (!script) {
+                alert('请输入剧本描述');
+                return;
+            }
+
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 生成中...';
+
+            const panel = document.getElementById('progressPanel');
+            panel.innerHTML = '';
+
+            // 初始化进度
+            layers.forEach(layer => {
+                panel.innerHTML += `
+                    <div class="progress-item" id="p-${layer.name}">
+                        <span class="p-icon">⏳</span>
+                        <span class="p-name">${layer.label}</span>
+                        <span class="p-status">等待中</span>
+                    </div>
+                `;
+            });
+
+            try {
+                const taskId = 'web-' + Date.now();
+
+                // 提交任务
+                const submitRes = await fetch('/api/task/submit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        task_id: taskId,
+                        task_name: "Web工作台生成",
+                        script: script,
+                        shots: [{
+                            shot_id: "S001",
+                            duration: 5,
+                            description: script,
+                            characters: ["主角"]
+                        }]
+                    })
+                });
+                const submitData = await submitRes.json();
+
+                if (submitData.status !== 'ACCEPTED') {
+                    throw new Error('任务提交失败');
+                }
+
+                // 逐层执行
+                for (const layer of layers) {
+                    updateProgress(layer.name, 'running', '执行中');
+                    
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 180000);
+                        
+                        const res = await fetch(`/api/task/${taskId}/execute/${layer.name}`, {
+                            method: 'POST',
+                            signal: controller.signal
+                        });
+                        clearTimeout(timeoutId);
+                        const data = await res.json();
+                        
+                        if (data.status === 'SUCCESS') {
+                            updateProgress(layer.name, 'done', '✓ 完成');
+                        } else {
+                            updateProgress(layer.name, 'failed', '✗ 失败');
+                        }
+                    } catch (e) {
+                        updateProgress(layer.name, 'failed', '✗ 超时');
+                    }
+                }
+
+                // 获取结果
+                const statusRes = await fetch(`/api/task/${taskId}/status`);
+                const statusData = await statusRes.json();
+                showResult(statusData);
+
+            } catch (err) {
+                alert('生成失败: ' + err.message);
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 一键生成短剧';
+            }
+        }
+
+        function updateProgress(layerName, status, text) {
+            const item = document.getElementById(`p-${layerName}`);
+            if (!item) return;
+            const icon = item.querySelector('.p-icon');
+            const statusEl = item.querySelector('.p-status');
+            
+            item.className = 'progress-item ' + status;
+            statusEl.textContent = text;
+            if (status === 'done') icon.textContent = '✅';
+            else if (status === 'failed') icon.textContent = '❌';
+            else icon.textContent = '⏳';
+        }
+
+        function showResult(data) {
+            const panel = document.getElementById('progressPanel');
+            const l4Result = data.L4_shot_gen_result || {};
+            const videoUrl = l4Result.shots?.[0]?.video_url;
+
+            if (videoUrl) {
+                panel.innerHTML += `
+                    <div class="video-result">
+                        <div style="font-size: 13px; color: #3fb950; margin-bottom: 8px;">✅ 生成成功</div>
+                        <video controls autoplay muted loop>
+                            <source src="${videoUrl}" type="video/mp4">
+                        </video>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

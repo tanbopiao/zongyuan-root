@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>批量生产线·昆仑洞天内部控制台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Courier New',monospace;font-size:13px}
+.header{background:linear-gradient(90deg,#1a1a2e,#16213e);padding:14px 24px;border-bottom:1px solid #c9a227}
+.header h1{color:#c9a227;font-size:16px}
+.nav{display:flex;gap:8px;padding:10px 24px;background:#111;border-bottom:1px solid #222}
+.nav a{color:#888;text-decoration:none;padding:6px 14px;border-radius:4px;font-size:12px}
+.nav a:hover,.nav a.active{background:#c9a227;color:#0a0a0f}
+.container{padding:20px;max-width:1400px;margin:0 auto}
+.panel{background:#111;border:1px solid #222;border-radius:8px;padding:16px;margin-bottom:16px}
+.panel h3{color:#c9a227;font-size:13px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #222}
+textarea,input,select{width:100%;background:#000;border:1px solid #333;color:#e0e0e0;padding:8px;border-radius:4px;font-family:inherit;font-size:12px;margin-bottom:8px}
+.btn{background:#c9a227;color:#0a0a0f;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:bold;margin:4px}
+.btn:hover{background:#e0b830}
+.btn-secondary{background:#222;color:#c9a227;border:1px solid #c9a227}
+.batch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.batch-card{background:#0a0a0f;border:1px solid #222;border-radius:6px;padding:12px}
+.batch-card h4{color:#c9a227;font-size:12px;margin-bottom:8px}
+.episode-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a1a;font-size:11px}
+.episode-item:last-child{border-bottom:none}
+.status-ok{color:#4ade80}.status-warn{color:#fbbf24}.status-err{color:#f87171}
+.progress-bar{height:4px;background:#222;border-radius:2px;overflow:hidden;margin:4px 0}
+.progress-fill{height:100%;background:#c9a227;transition:width .3s}
+.log-box{background:#000;border:1px solid #222;border-radius:4px;padding:10px;font-size:11px;max-height:200px;overflow-y:auto}
+.log-line{color:#888}.log-line.success{color:#4ade80}.log-line.error{color:#f87171}.log-line.warn{color:#fbbf24}
+.footer{text-align:center;padding:16px;color:#444;font-size:11px;border-top:1px solid #222;margin-top:20px}
+</style>    <link rel="canonical" href="https://huodouai.com/drama-internal/batch.html">
+</head>
+<body>
+<div class="header"><h1>📦 批量生产线 · 多集并行</h1></div>
+<div class="nav">
+  <a href="index.html">📊 主控台</a><a href="production.html">🎬 生产工作台</a>
+  <a href="batch.html" class="active">📦 批量生产线</a><a href="assets.html">🗂️ 资产管理</a><a href="system.html">⚙️ 系统监控</a>
+</div>
+<div class="container">
+  <div class="panel">
+    <h3>🚀 创建批量任务</h3>
+    <label style="font-size:11px;color:#888">批量主题（每行一个短剧创意）</label>
+    <textarea id="batch-input" rows="5" placeholder="每行一个短剧主题，例如：&#10;纯乌黑长发东方神女下凡渡劫&#10;九天玄女战妖魔&#10;太阴月神蚀月之夜">纯乌黑长发东方神女下凡渡劫&#10;九天玄女战妖魔&#10;太阴月神蚀月之夜</textarea>
+    <div style="display:flex;gap:8px">
+      <select id="batch-template" style="flex:1"><option value="gufeng">古风模板</option><option value="taiyin">太阴月神IP</option><option value="xuannv">九天玄女IP</option></select>
+      <select id="batch-parallel" style="flex:1"><option value="1">并行1个（稳定）</option><option value="2" selected>并行2个（推荐）</option><option value="3">并行3个（快速）</option></select>
+    </div>
+    <button class="btn" onclick="submitBatch()">⚡ 提交批量任务</button>
+    <button class="btn btn-secondary" onclick="loadBatches()">🔄 刷新状态</button>
+  </div>
+  <div class="panel">
+    <h3>📋 批量任务列表</h3>
+    <div class="batch-grid" id="batch-list"><div style="color:#666;grid-column:1/-1;text-align:center;padding:20px">暂无批量任务，点击上方创建</div></div>
+  </div>
+  <div class="panel"><h3>📜 执行日志</h3><div class="log-box" id="log-box"><div class="log-line">[系统] 批量生产线就绪，全免费模式</div></div></div>
+</div>
+<div class="footer">Ω₀⊂⊙∞⊂Ω｜批量生产线｜全免费模式｜DID-BR-000002｜Ω-TAN-7-001</div>
+<script src="js/internal-core.js"></script>
+<script>
+let batches = {};
+async function submitBatch(){
+  const lines = document.getElementById('batch-input').value.split('\n').filter(l=>l.trim());
+  if(lines.length===0){addLog('error','请输入至少一个主题');return;}
+  addLog('info',`提交批量任务：${lines.length}集`);
+  const result = await submitBatch(lines, document.getElementById('batch-template').value);
+  if(result.batch_id){
+    batches[result.batch_id] = {id:result.batch_id,total:result.total,completed:0,items:lines.map((p,i)=>({index:i,prompt:p,status:'pending'}))};
+    addLog('success',`批量任务已提交：${result.batch_id}`);
+    renderBatches();
+    pollBatch(result.batch_id);
+  }else{addLog('error','提交失败：'+JSON.stringify(result));}
+}
+async function pollBatch(bid){
+  const interval = setInterval(async()=>{
+    const result = await apiCall(`/batch/status?batch_id=${bid}`,{},'GET');
+    if(result.error||result.status==='completed'){
+      clearInterval(interval);
+      if(result.status==='completed') addLog('success',`批量任务${bid}完成！`);
+    }
+    if(result.items){batches[bid]=result;renderBatches();}
+  },5000);
+}
+function renderBatches(){
+  const list = document.getElementById('batch-list');
+  const ids = Object.keys(batches);
+  if(ids.length===0){list.innerHTML='<div style="color:#666;grid-column:1/-1;text-align:center;padding:20px">暂无批量任务</div>';return;}
+  list.innerHTML = ids.map(id=>{
+    const b=batches[id];
+    const pct = b.total?Math.round(b.completed/b.total*100):0;
+    return `<div class="batch-card"><h4>${id}</h4>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:11px;color:#888;margin-bottom:8px">进度：${b.completed}/${b.total} (${pct}%)</div>
+      ${(b.items||[]).map((item,i)=>`<div class="episode-item"><span>第${i+1}集</span><span class="${item.status==='completed'?'status-ok':item.status==='running'?'status-warn':item.status==='failed'?'status-err':''}">${item.status||'pending'}</span></div>`).join('')}
+    </div>`;
+  }).join('');
+}
+function loadBatches(){renderBatches();addLog('info','状态已刷新');}
+function addLog(type,msg){const box=document.getElementById('log-box');const t=new Date().toLocaleTimeString();const d=document.createElement('div');d.className='log-line '+type;d.textContent=`[${t}] ${msg}`;box.appendChild(d);box.scrollTop=box.scrollHeight;}
+</script>
+</body></html>

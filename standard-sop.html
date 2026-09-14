@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta name="description" content="火斗云智AIOS标准作业流程SOP">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS · 全域基础建设标准化SOP</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',system-ui,sans-serif;background:#0a0e1a;color:#e0e6f0;line-height:1.7}
+.hero{background:linear-gradient(135deg,#0d1b2a,#1b2838,#0d1b2a);padding:50px 20px;text-align:center;border-bottom:1px solid rgba(100,200,255,.15)}
+.hero h1{font-size:2em;background:linear-gradient(90deg,#64c8ff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero p{color:#8899aa}
+.container{max-width:1100px;margin:0 auto;padding:30px 20px}
+.toc{background:rgba(20,30,50,.8);border:1px solid rgba(100,200,255,.12);border-radius:10px;padding:20px;margin-bottom:30px}
+.toc h3{color:#64c8ff;margin-bottom:12px}
+.toc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.toc a{color:#b0c0d0;text-decoration:none;font-size:.9em;padding:4px 0;display:block}
+.toc a:hover{color:#64c8ff}
+.section{margin-bottom:35px;background:rgba(15,25,40,.6);border:1px solid rgba(100,200,255,.1);border-radius:12px;padding:24px}
+.section h2{color:#64c8ff;font-size:1.3em;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(100,200,255,.15)}
+.section h3{color:#a78bfa;font-size:1.05em;margin:14px 0 8px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.88em}
+th{background:rgba(100,200,255,.1);color:#64c8ff;padding:8px 10px;text-align:left;border-bottom:1px solid rgba(100,200,255,.2)}
+td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.05);color:#b0c0d0}
+code{background:rgba(100,200,255,.1);padding:2px 6px;border-radius:4px;font-size:.85em;color:#64c8ff}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75em;margin-left:6px}
+.tag-lock{background:rgba(52,211,153,.15);color:#34d399}
+.tag-std{background:rgba(100,200,255,.15);color:#64c8ff}
+ul{padding-left:20px;margin:8px 0}
+li{color:#b0c0d0;margin:4px 0;font-size:.92em}
+.footer{text-align:center;padding:30px 20px;color:#556677;border-top:1px solid rgba(100,200,255,.1);margin-top:30px;font-size:.85em}
+
+/* ===== 移动端适配 ===== */
+@media (max-width: 768px) {
+  body { padding: 10px !important; }
+  .container, .sm-container { max-width: 100% !important; padding: 0 12px !important; }
+  h1 { font-size: 1.5em !important; }
+  h2 { font-size: 1.2em !important; }
+  .sm-grid { grid-template-columns: 1fr !important; }
+  table { font-size: 0.85em; }
+  img { max-width: 100% !important; height: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>全域基础建设标准化SOP</h1>
+<p>十大领域 · 一次固化 · 不再反复 · MR-099封版</p>
+</div>
+<div class="container">
+
+<div class="toc">
+<h3>📑 十大标准化领域</h3>
+<div class="toc-grid">
+<a href="#s1">1. Nginx反代路径标准</a>
+<a href="#s2">2. 服务部署标准</a>
+<a href="#s3">3. 网页开发标准</a>
+<a href="#s4">4. API接口标准</a>
+<a href="#s5">5. 真值上报标准</a>
+<a href="#s6">6. 同源节点接入标准</a>
+<a href="#s7">7. 审批流程标准</a>
+<a href="#s8">8. 监控告警标准</a>
+<a href="#s9">9. 备份恢复标准</a>
+<a href="#s10">10. 日志管理标准</a>
+</div>
+</div>
+
+<div class="section" id="s1">
+<h2>1. Nginx反代路径标准 <span class="tag tag-lock">已锁定</span></h2>
+<p>所有内部服务通过Nginx反代对外暴露，路径与端口一一对应，禁止随意新增。</p>
+<table>
+<tr><th>路径前缀</th><th>后端端口</th><th>服务</th><th>权限</th></tr>
+<tr><td><code>/api/memory/</code></td><td>9120</td><td>记忆网关(读写)</td><td>需API Key</td></tr>
+<tr><td><code>/api/v1/gateway/status</code></td><td>9120</td><td>记忆网关(只读状态)</td><td>公开</td></tr>
+<tr><td><code>/aios-api/memory/</code></td><td>9120</td><td>记忆网关(只读GET)</td><td>公开</td></tr>
+<tr><td><code>/drama/</code></td><td>8100</td><td>短剧管理API</td><td>公开</td></tr>
+<tr><td><code>/api/v1/*</code></td><td>8100</td><td>短剧算子API</td><td>公开</td></tr>
+<tr><td><code>/api/gateway/</code></td><td>8889</td><td>商业API网关</td><td>需鉴权</td></tr>
+<tr><td><code>/ai-proxy/</code></td><td>8021</td><td>AI代理</td><td>内部</td></tr>
+<tr><td><code>/vector/</code></td><td>8014</td><td>向量数据库</td><td>内部</td></tr>
+<tr><td><code>/aios-api/kg/</code></td><td>8070</td><td>知识图谱</td><td>内部</td></tr>
+<tr><td><code>/docs/</code></td><td>8001</td><td>飞书网关文档</td><td>公开</td></tr>
+</table>
+<h3>规范</h3>
+<ul>
+<li>配置文件必须同时修改<code>sites/</code>和<code>vhost/</code>两个目录</li>
+<li>修改前备份，<code>nginx -t</code>通过后才能reload</li>
+<li>新服务反代必须登记端口台账</li>
+<li>禁止<code>/api/</code>全局拦截覆盖专用路径</li>
+</ul>
+</div>
+
+<div class="section" id="s2">
+<h2>2. 服务部署标准 <span class="tag tag-lock">已锁定</span></h2>
+<h3>目录结构</h3>
+<table>
+<tr><th>路径</th><th>用途</th></tr>
+<tr><td><code>/opt/ZONGYUAN-ROOT/engine/scripts/</code></td><td>核心引擎脚本</td></tr>
+<tr><td><code>/opt/ZONGYUAN-ROOT/scripts/</code></td><td>自动化运维脚本</td></tr>
+<tr><td><code>/opt/ZONGYUAN-ROOT/data/</code></td><td>数据文件(台账/数据库)</td></tr>
+<tr><td><code>/opt/ZONGYUAN-ROOT/logs/</code></td><td>日志文件</td></tr>
+<tr><td><code>/opt/ZONGYUAN-ROOT/baseline/</code></td><td>基准快照</td></tr>
+<tr><td><code>/opt/ZONGYUAN-ROOT/backup/</code></td><td>备份文件</td></tr>
+<tr><td><code>/www/wwwroot/www.huodouai.com/</code></td><td>官网网页(主root)</td></tr>
+<tr><td><code>/www/wwwroot/huodouai.com/</code></td><td>官网网页(副root)</td></tr>
+</table>
+<h3>systemd服务模板</h3>
+<ul>
+<li>命名：<code>zr-功能.service</code> 或 <code>功能.service</code></li>
+<li>必须<code>Restart=always</code>，<code>RestartSec=5</code></li>
+<li>必须<code>After=network.target</code></li>
+<li>WorkingDirectory统一为<code>/opt/ZONGYUAN-ROOT</code></li>
+<li>禁止nohup裸跑，所有常驻服务必须注册systemd</li>
+</ul>
+</div>
+
+<div class="section" id="s3">
+<h2>3. 网页开发标准 <span class="tag tag-std">规范</span></h2>
+<ul>
+<li><strong>单文件HTML</strong>：CSS写在<code>&lt;style&gt;</code>，JS写在<code>&lt;script&gt;</code>，不拆出外部文件</li>
+<li><strong>轻量化</strong>：页面≤200KB，首屏加载&lt;1秒，100%懒加载</li>
+<li><strong>双root同步</strong>：同时部署到<code>www.huodouai.com</code>和<code>huodouai.com</code>两个目录</li>
+<li><strong>自动导航</strong>：新页面由auto_integrator.py自动加入官网导航</li>
+<li><strong>响应式</strong>：宽屏/窄屏/手机都能正常显示</li>
+<li><strong>深色科技风</strong>：统一视觉风格，禁止亮色主题</li>
+<li><strong>真实可用</strong>：禁止空壳页面，每个入口必须真实可点击</li>
+<li><strong>视频资源</strong>：统一存<code>/assets/videos/{drama,kunlun}/</code>，禁止引用外部域名</li>
+</ul>
+</div>
+
+<div class="section" id="s4">
+<h2>4. API接口标准 <span class="tag tag-std">规范</span></h2>
+<h3>统一返回格式</h3>
+<code>{"success": true/false, "data": {...}, "error": "错误信息", "timestamp": 1234567890}</code>
+<h3>鉴权方式</h3>
+<ul>
+<li>记忆网关读写：<code>X-API-Key</code>请求头</li>
+<li>同源节点：DID签名+时间戳</li>
+<li>内部服务：127.0.0.1白名单</li>
+</ul>
+<h3>限流</h3>
+<ul>
+<li>默认60次/分钟/IP</li>
+<li>超限返回429</li>
+<li>关键接口(写入真值)30次/分钟</li>
+</ul>
+</div>
+
+<div class="section" id="s5">
+<h2>5. 真值上报标准 <span class="tag tag-lock">已锁定</span></h2>
+<h3>上报端点</h3>
+<code>POST https://www.huodouai.com/api/memory/api/truth/upsert</code>（需API Key）
+<h3>必填字段</h3>
+<table>
+<tr><th>字段</th><th>说明</th><th>示例</th></tr>
+<tr><td>key</td><td>唯一键，点分命名</td><td>meta_rule.MR-099</td></tr>
+<tr><td>value</td><td>真值内容(JSON)</td><td>{"name":"..."}</td></tr>
+<tr><td>category</td><td>分类</td><td>meta_law/observation/achievement</td></tr>
+<tr><td>node_id</td><td>上报节点ID</td><td>hub-core/node-01</td></tr>
+</table>
+<h3>分类规范</h3>
+<ul>
+<li><code>meta_law</code>：元法则</li>
+<li><code>system_state</code>：系统状态</li>
+<li><code>observation</code>：观测数据</li>
+<li><code>achievement</code>：成果资产</li>
+<li><code>change_log</code>：变更记录</li>
+<li><code>security</code>：安全事件</li>
+</ul>
+</div>
+
+<div class="section" id="s6">
+<h2>6. 同源节点接入标准 <span class="tag tag-std">规范</span></h2>
+<ul>
+<li><strong>身份确权</strong>：每个节点分配唯一DID，上报必须携带node_id</li>
+<li><strong>握手协议</strong>：节点启动时向9120注册，获取接入令牌</li>
+<li><strong>上报频率</strong>：成果即时上报，状态每小时上报，心跳每5分钟</li>
+<li><strong>数据格式</strong>：严格遵循真值上报标准</li>
+<li><strong>禁止行为</strong>：禁止自行修改核心文件，禁止未审批部署，禁止重复上报</li>
+<li><strong>经验上报</strong>：试错经验、学习成果、方法论必须上报中枢</li>
+</ul>
+</div>
+
+<div class="section" id="s7">
+<h2>7. 审批流程标准 <span class="tag tag-lock">已锁定</span></h2>
+<table>
+<tr><th>级别</th><th>操作类型</th><th>审批方式</th></tr>
+<tr><td>P4</td><td>文案/样式/非核心优化</td><td>自动通过</td></tr>
+<tr><td>P3</td><td>新页面/新功能(≥85分)</td><td>多智能体仲裁自动通过</td></tr>
+<tr><td>P2</td><td>核心配置/服务变更</td><td>飞书审批+人工审核</td></tr>
+<tr><td>P1</td><td>元法则/基准/安全策略</td><td>人工审批</td></tr>
+<tr><td>P0</td><td>元公理/元宪法/架构重构</td><td>双人审批+本源主体确认</td></tr>
+</table>
+<h3>审批流程</h3>
+<ul>
+<li>提交飞书审批（原因+范围+回滚方案）</li>
+<li>多智能体三维稳态评估（利益40%/风险35%/成本25%）</li>
+<li>≥85分自动通过，&lt;85分人工审核</li>
+<li>通过后由中枢大脑统一执行</li>
+<li>执行后更新基准+推送网关+记录台账</li>
+</ul>
+</div>
+
+<div class="section" id="s8">
+<h2>8. 监控告警标准 <span class="tag tag-lock">已锁定</span></h2>
+<table>
+<tr><th>指标</th><th>预警阈值</th><th>熔断阈值</th><th>通知方式</th></tr>
+<tr><td>内存占用</td><td>70%</td><td>80%</td><td>飞书告警</td></tr>
+<tr><td>CPU占用</td><td>80%</td><td>90%</td><td>飞书告警</td></tr>
+<tr><td>磁盘占用</td><td>75%</td><td>85%</td><td>飞书告警</td></tr>
+<tr><td>服务异常</td><td>1次失败</td><td>3次失败</td><td>自愈+飞书</td></tr>
+<tr><td>真值冲突</td><td>检测到即告警</td><td>-</td><td>飞书告警</td></tr>
+<tr><td>Merkle断层</td><td>检测到即告警</td><td>-</td><td>飞书+自愈</td></tr>
+</table>
+<ul>
+<li>自愈守护每2分钟巡检所有服务</li>
+<li>异常自动重启，3次失败升级人工</li>
+<li>所有告警推送飞书内核通知群</li>
+</ul>
+</div>
+
+<div class="section" id="s9">
+<h2>9. 备份恢复标准 <span class="tag tag-std">规范</span></h2>
+<ul>
+<li><strong>基准快照</strong>：每次重大变更后生成，<code>baseline_manager.py generate</code></li>
+<li><strong>配置备份</strong>：修改Nginx/元法则前自动备份到.bak文件</li>
+<li><strong>数据库备份</strong>：memory_gateway.db每日备份，保留7天</li>
+<li><strong>恢复验证</strong>：备份后必须验证可恢复性</li>
+<li><strong>回滚方案</strong>：每次变更必须附带回滚步骤</li>
+</ul>
+</div>
+
+<div class="section" id="s10">
+<h2>10. 日志管理标准 <span class="tag tag-std">规范</span></h2>
+<ul>
+<li>日志统一存<code>/opt/ZONGYUAN-ROOT/logs/</code></li>
+<li>格式：<code>时间 [级别] 服务名: 消息</code></li>
+<li>自动轮转：超过10MB压缩，保留30天</li>
+<li>关键操作必须记录审计日志</li>
+<li>错误日志必须包含堆栈信息</li>
+</ul>
+</div>
+
+</div>
+<div class="footer">
+<p>Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ 火斗云智AIOS · 元极恒一自治体系</p>
+<p>全域基础建设标准化SOP ｜ MR-099封版 ｜ v9.1 ｜ 2026-09-14</p>
+<p>十大领域一次固化 · 不再反复修改 · 修改需人工审批</p>
+</div>
+</body>
+</html>

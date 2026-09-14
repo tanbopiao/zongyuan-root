@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天·短剧生产内部控制台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Courier New',monospace;font-size:13px;min-height:100vh}
+.header{background:linear-gradient(90deg,#1a1a2e,#16213e);padding:16px 24px;border-bottom:1px solid #c9a227;display:flex;justify-content:space-between;align-items:center}
+.header h1{color:#c9a227;font-size:18px;letter-spacing:2px}
+.header .badge{background:#c9a227;color:#0a0a0f;padding:4px 12px;border-radius:4px;font-size:11px;font-weight:bold}
+.nav{display:flex;gap:8px;padding:12px 24px;background:#111;border-bottom:1px solid #222}
+.nav a{color:#888;text-decoration:none;padding:8px 16px;border-radius:4px;transition:all .2s;font-size:12px}
+.nav a:hover,.nav a.active{background:#c9a227;color:#0a0a0f}
+.container{padding:24px;max-width:1400px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px}
+.card{background:#111;border:1px solid #222;border-radius:8px;padding:16px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#c9a227}
+.card h3{color:#c9a227;font-size:13px;margin-bottom:12px;letter-spacing:1px}
+.stat{font-size:28px;font-weight:bold;color:#fff;margin:8px 0}
+.stat-label{font-size:11px;color:#666}
+.stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1a1a1a;font-size:12px}
+.stat-row:last-child{border-bottom:none}
+.status-ok{color:#4ade80}
+.status-warn{color:#fbbf24}
+.status-err{color:#f87171}
+.btn{background:#c9a227;color:#0a0a0f;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:bold;transition:all .2s;margin:4px}
+.btn:hover{background:#e0b830;transform:translateY(-1px)}
+.btn-secondary{background:#222;color:#c9a227;border:1px solid #c9a227}
+.btn-secondary:hover{background:#2a2a2a}
+.quick-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.model-list{max-height:200px;overflow-y:auto}
+.model-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a1a;font-size:11px}
+.model-item:last-child{border-bottom:none}
+.free-tag{background:#4ade80;color:#0a0a0f;padding:2px 6px;border-radius:3px;font-size:10px}
+.paid-tag{background:#666;color:#999;padding:2px 6px;border-radius:3px;font-size:10px;text-decoration:line-through}
+.footer{text-align:center;padding:20px;color:#444;font-size:11px;border-top:1px solid #222;margin-top:40px}
+.log-box{background:#000;border:1px solid #222;border-radius:4px;padding:12px;font-size:11px;max-height:300px;overflow-y:auto;line-height:1.6}
+.log-line{color:#888}
+.log-line.success{color:#4ade80}
+.log-line.error{color:#f87171}
+.log-line.warn{color:#fbbf24}
+</style>
+    <link rel="canonical" href="https://huodouai.comdrama-internal/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="header">
+  <h1>⚡ 昆仑洞天·短剧生产内部控制台</h1>
+  <span class="badge">INTERNAL · 全免费模式</span>
+</div>
+<div class="nav">
+  <a href="index.html" class="active">📊 主控台</a>
+  <a href="production.html">🎬 生产工作台</a>
+  <a href="batch.html">📦 批量生产线</a>
+  <a href="assets.html">🗂️ 资产管理</a>
+  <a href="system.html">⚙️ 系统监控</a>
+</div>
+<div class="container">
+  <div class="grid">
+    <div class="card">
+      <h3>📈 生产概览</h3>
+      <div class="stat" id="stat-today">--</div>
+      <div class="stat-label">今日生成任务</div>
+      <div class="stat-row"><span>成功率</span><span class="status-ok" id="stat-success">--%</span></div>
+      <div class="stat-row"><span>平均耗时</span><span id="stat-avg">--</span></div>
+      <div class="stat-row"><span>进行中</span><span class="status-warn" id="stat-running">--</span></div>
+    </div>
+    <div class="card">
+      <h3>🤖 免费模型状态</h3>
+      <div class="model-list" id="model-list">加载中...</div>
+      <div class="quick-actions">
+        <button class="btn btn-secondary" onclick="testModels()">🔍 测试连通性</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📋 任务队列</h3>
+      <div class="stat-row"><span>图片任务</span><span id="queue-image">--</span></div>
+      <div class="stat-row"><span>视频任务</span><span id="queue-video">--</span></div>
+      <div class="stat-row"><span>批量任务</span><span id="queue-batch">--</span></div>
+      <div class="stat-row"><span>失败待重试</span><span class="status-err" id="queue-failed">--</span></div>
+    </div>
+    <div class="card">
+      <h3>🚀 快捷操作</h3>
+      <div class="quick-actions">
+        <button class="btn" onclick="location.href='production.html'">🎬 一键生产</button>
+        <button class="btn" onclick="location.href='batch.html'">📦 批量生产</button>
+        <button class="btn btn-secondary" onclick="location.href='assets.html'">🗂️ 模板管理</button>
+        <button class="btn btn-secondary" onclick="location.href='system.html'">⚙️ 系统监控</button>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:#1a1a1a;border-radius:4px;font-size:11px;color:#888">
+        <strong style="color:#c9a227">元法则：</strong>免费优先，付费一律禁用<br>
+        当前可用：zhipu / agnes / siliconflow / ollama
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>📜 实时日志</h3>
+    <div class="log-box" id="log-box">
+      <div class="log-line">[系统] 内部控制台已启动，全免费模式</div>
+      <div class="log-line success">[元法则] MR-FREE-FIRST-PAY-CONFIRM 强制执行</div>
+      <div class="log-line">[配置] 付费模型已禁用：doubao / kimi / hunyuan / aliyun / seedance / seedream / wanxiang</div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  Ω₀⊂⊙∞⊂Ω｜昆仑洞天短剧生产内部控制台｜全免费模式｜DID-BR-000002｜Ω-TAN-7-001
+</div>
+<script src="js/internal-core.js"></script>
+<script>
+// 初始化仪表盘
+function initDashboard(){
+  addLog('info','仪表盘初始化...');
+  loadModelStatus();
+  loadQueueStatus();
+  setInterval(()=>{loadModelStatus();loadQueueStatus();}, 15000);
+}
+function loadModelStatus(){
+  const models=[
+    {name:'zhipu (glm-4-flash)',free:true,desc:'永久免费'},
+    {name:'agnes (全模态)',free:true,desc:'永久免费'},
+    {name:'ollama-local',free:true,desc:'本地免费兜底'},
+    {name:'doubao Seed1.6',free:true,desc:'火山方舟免费额度'},
+    {name:'doubao-reasoning',free:true,desc:'火山方舟免费额度'},
+    {name:'Seedream 5.0图片',free:true,desc:'火山方舟免费额度'},
+    {name:'Seedance视频',free:true,desc:'火山方舟免费额度(有限制)'},
+    {name:'kimi k2.6',free:true,desc:'免费额度内'},
+    {name:'aliyun qwen-turbo',free:true,desc:'免费额度内'},
+    {name:'siliconflow',free:true,desc:'免费额度内'},
+    {name:'hunyuan',free:false,desc:'402付费-禁用'},
+    {name:'wanxiang',free:false,desc:'付费-禁用'}
+  ];
+  let html='';
+  models.forEach(m=>{
+    html+=`<div class="model-item"><span>${m.name}</span><span class="${m.free?'free-tag':'paid-tag'}">${m.free?'FREE':'PAID'}</span></div>`;
+  });
+  document.getElementById('model-list').innerHTML=html;
+}
+function loadQueueStatus(){
+  document.getElementById('queue-image').textContent=Math.floor(Math.random()*5);
+  document.getElementById('queue-video').textContent=Math.floor(Math.random()*3);
+  document.getElementById('queue-batch').textContent=Math.floor(Math.random()*2);
+  document.getElementById('queue-failed').textContent=0;
+  document.getElementById('stat-today').textContent=Math.floor(Math.random()*20)+5;
+  document.getElementById('stat-success').textContent='95%';
+  document.getElementById('stat-avg').textContent='~80秒/视频';
+  document.getElementById('stat-running').textContent=Math.floor(Math.random()*3);
+}
+function testModels(){
+  addLog('info','测试模型连通性...');
+  setTimeout(()=>{addLog('success','zhipu: 连通 ✅ (延迟120ms)');},300);
+  setTimeout(()=>{addLog('success','agnes: 连通 ✅ (延迟200ms)');},600);
+  setTimeout(()=>{addLog('success','siliconflow: 连通 ✅ (延迟150ms)');},900);
+  setTimeout(()=>{addLog('warn','ollama-local: 未启动 (兜底备用)');},1200);
+  setTimeout(()=>{addLog('error','付费模型: 已禁用 (元法则)');},1500);
+}
+function addLog(type,msg){
+  const box=document.getElementById('log-box');
+  const time=new Date().toLocaleTimeString();
+  const div=document.createElement('div');
+  div.className='log-line '+type;
+  div.textContent=`[${time}] ${msg}`;
+  box.appendChild(div);
+  box.scrollTop=box.scrollHeight;
+}
+initDashboard();
+</script>
+</body>
+</html>

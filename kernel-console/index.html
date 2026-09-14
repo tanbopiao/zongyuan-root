@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONGYUAN-ROOT 云内核主控面板</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 25px 40px;
+            border-bottom: 2px solid #d4af37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .logo {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, #d4af37, #f0c040);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 700; color: #1a1a2e;
+        }
+        .title-group h1 {
+            font-size: 22px; font-weight: 700; color: #d4af37;
+            letter-spacing: 1px; margin-bottom: 4px;
+        }
+        .title-group p { font-size: 12px; color: #888; }
+        .header-right { display: flex; gap: 15px; align-items: center; }
+        .status-badge {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 16px;
+            background: rgba(82, 196, 26, 0.1);
+            border: 1px solid rgba(82, 196, 26, 0.3);
+            border-radius: 20px;
+            font-size: 13px; color: #52c41a;
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            background: #52c41a; border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .nav-tabs {
+            background: #111118;
+            padding: 0 40px;
+            display: flex;
+            gap: 5px;
+            border-bottom: 1px solid #222;
+            overflow-x: auto;
+        }
+        .nav-tab {
+            padding: 15px 22px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-tab:hover { color: #d4af37; }
+        .nav-tab.active {
+            color: #d4af37;
+            border-bottom-color: #d4af37;
+            background: rgba(212, 175, 55, 0.05);
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #d4af37, #f0c040);
+        }
+        .stat-icon { font-size: 28px; margin-bottom: 10px; }
+        .stat-value {
+            font-size: 32px; font-weight: 700; color: #d4af37;
+            margin-bottom: 5px;
+        }
+        .stat-label { font-size: 13px; color: #888; }
+        .section-title {
+            font-size: 18px; font-weight: 600; color: #f0f0f0;
+            margin: 30px 0 18px;
+            padding-left: 12px;
+            border-left: 3px solid #d4af37;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 18px;
+        }
+        .info-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 22px;
+            transition: all 0.3s;
+        }
+        .info-card:hover {
+            border-color: #d4af37;
+            transform: translateY(-2px);
+        }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .card-title { font-size: 16px; font-weight: 600; color: #f0f0f0; }
+        .card-badge {
+            padding: 4px 10px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            font-size: 11px; color: #d4af37;
+        }
+        .card-desc { font-size: 13px; color: #a0a0a0; line-height: 1.6; margin-bottom: 14px; }
+        .card-meta {
+            display: flex; gap: 12px; flex-wrap: wrap;
+            padding-top: 14px; border-top: 1px solid #2a2a4a;
+        }
+        .meta-item { font-size: 11px; color: #888; display: flex; align-items: center; gap: 5px; }
+        .topology-container {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 30px;
+            min-height: 400px;
+            position: relative;
+        }
+        .topology-svg { width: 100%; height: 450px; }
+        .node-circle {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .node-circle:hover { transform: scale(1.1); transform-origin: center; }
+        .node-label {
+            font-size: 12px; fill: #e0e0e0; text-anchor: middle;
+            pointer-events: none;
+        }
+        .node-sub-label {
+            font-size: 10px; fill: #888; text-anchor: middle;
+            pointer-events: none;
+        }
+        .connection-line {
+            stroke: #d4af37; stroke-width: 1.5;
+            stroke-dasharray: 5,5;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+        .health-bar {
+            height: 8px; background: #222; border-radius: 4px;
+            overflow: hidden; margin-top: 8px;
+        }
+        .health-fill {
+            height: 100%; background: linear-gradient(90deg, #52c41a, #73d13d);
+            border-radius: 4px; transition: width 0.5s;
+        }
+        .health-fill.warning { background: linear-gradient(90deg, #faad14, #ffc53d); }
+        .health-fill.danger { background: linear-gradient(90deg, #ff4d4f, #ff7875); }
+        .log-container {
+            background: #0a0a0f;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-line { padding: 4px 0; border-bottom: 1px solid #1a1a2e; }
+        .log-time { color: #666; }
+        .log-info { color: #1890ff; }
+        .log-success { color: #52c41a; }
+        .log-warning { color: #faad14; }
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #555;
+            font-size: 12px;
+            border-top: 1px solid #1a1a2e;
+            margin-top: 40px;
+        }
+        .footer .trace-mark {
+            color: #d4af37; font-family: monospace; margin-top: 8px;
+        }
+        @media (max-width: 768px) {
+            .header { padding: 20px; }
+            .container { padding: 20px; }
+            .nav-tabs { padding: 0 20px; }
+            .title-group h1 { font-size: 18px; }
+            .stat-value { font-size: 24px; }
+        }
+    </style>
+    <link rel="canonical" href="https://huodouai.comkernel-console/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">Ω</div>
+            <div class="title-group">
+                <h1>ZONGYUAN-ROOT 云内核主控面板</h1>
+                <p>元极恒一超认知永恒自治体系 · 全域统一管理中枢</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>内核运行中 · Lv8自治</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('overview')">📊 总览</button>
+        <button class="nav-tab" onclick="switchTab('identity')">🔐 身份管理</button>
+        <button class="nav-tab" onclick="switchTab('capability')">⚡ 能力市场</button>
+        <button class="nav-tab" onclick="switchTab('topology')">🕸️ 体系拓扑</button>
+        <button class="nav-tab" onclick="switchTab('health')">💚 健康监控</button>
+        <button class="nav-tab" onclick="switchTab('logs')">📋 系统日志</button>
+    </div>
+
+    <div class="container">
+        <!-- 总览 -->
+        <div class="tab-content active" id="tab-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🔐</div>
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">注册身份节点</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-value">25</div>
+                    <div class="stat-label">注册节点能力</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔑</div>
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">API Key数量</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">身份申请记录</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💚</div>
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">节点健康率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔗</div>
+                    <div class="stat-value">Lv8</div>
+                    <div class="stat-label">锁档等级</div>
+                </div>
+            </div>
+
+            <div class="section-title">🚀 快捷入口</div>
+            <div class="card-grid">
+                <div class="info-card" onclick="window.open('/identity-console/','_blank')">
+                    <div class="card-header">
+                        <div class="card-title">身份节点管理控制台</div>
+                        <div class="card-badge">外部</div>
+                    </div>
+                    <div class="card-desc">身份节点申请、审批、注册、管理的完整控制台</div>
+                    <div class="card-meta">
+                        <span class="meta-item">🔗 /identity-console/</span>
+                        <span class="meta-item">📝 5个功能标签页</span>
+                    </div>
+                </div>
+                <div class="info-card" onclick="window.open('/identity-market/','_blank')">
+                    <div class="card-header">
+                        <div class="card-title">节点能力市场</div>
+                        <div class="card-badge">外部</div>
+                    </div>
+                    <div class="card-desc">25个节点能力可视化展示、搜索、筛选、在线调用测试</div>
+                    <div class="card-meta">
+                        <span class="meta-item">🔗 /identity-market/</span>
+                        <span class="meta-item">⚡ 25个能力</span>
+                    </div>
+                </div>
+                <div class="info-card" onclick="window.open('/identity-docs/','_blank')">
+                    <div class="card-header">
+                        <div class="card-title">API文档</div>
+                        <div class="card-badge">外部</div>
+                    </div>
+                    <div class="card-desc">身份节点API完整文档，Swagger UI交互式文档</div>
+                    <div class="card-meta">
+                        <span class="meta-item">🔗 /identity-docs/</span>
+                        <span class="meta-item">📖 9个API端点</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">部署监控</div>
+                        <div class="card-badge">外部</div>
+                    </div>
+                    <div class="card-desc">全服务部署状态监控，11项服务统一管理</div>
+                    <div class="card-meta">
+                        <span class="meta-item">🔗 /deploy-dashboard/</span>
+                        <span class="meta-item">🖥️ 11项服务</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">📈 体系状态</div>
+            <div class="card-grid">
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">Merkle-DAG主链</div>
+                        <div class="card-badge" style="color:#52c41a;border-color:rgba(82,196,26,0.3);background:rgba(82,196,26,0.1);">完整</div>
+                    </div>
+                    <div class="card-desc">链式继承完整，无断裂，无篡改</div>
+                    <div class="card-meta">
+                        <span class="meta-item">🔗 链完整性: PASS</span>
+                        <span class="meta-item">📦 资产: 11575+</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">eFuse熔断位</div>
+                        <div class="card-badge" style="color:#52c41a;border-color:rgba(82,196,26,0.3);background:rgba(82,196,26,0.1);">正常</div>
+                    </div>
+                    <div class="card-desc">硬件级永久固化，不可逆，不可篡改</div>
+                    <div class="card-meta">
+                        <span class="meta-item">🔥 熔断位: 多个</span>
+                        <span class="meta-item">🔒 状态: BLOWN</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">CTE闭环</div>
+                        <div class="card-badge" style="color:#52c41a;border-color:rgba(82,196,26,0.3);background:rgba(82,196,26,0.1);">闭合</div>
+                    </div>
+                    <div class="card-desc">因果-真值-进化三位一体闭环完全闭合</div>
+                    <div class="card-meta">
+                        <span class="meta-item">🔄 C→T→E→C</span>
+                        <span class="meta-item">✅ FULLY_CLOSED</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 身份管理 -->
+        <div class="tab-content" id="tab-identity">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">已部署节点</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value">1</div>
+                    <div class="stat-label">待审批申请</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">总申请记录</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔑</div>
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">API Key</div>
+                </div>
+            </div>
+
+            <div class="section-title">📋 已注册身份节点列表</div>
+            <div class="card-grid" id="identityNodes"></div>
+        </div>
+
+        <!-- 能力市场 -->
+        <div class="tab-content" id="tab-capability">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-value">25</div>
+                    <div class="stat-label">总能力数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">25</div>
+                    <div class="stat-label">活跃能力</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏷️</div>
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">能力分类</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔌</div>
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">提供节点</div>
+                </div>
+            </div>
+
+            <div class="section-title">⚡ 节点能力列表</div>
+            <div class="card-grid" id="capabilityList"></div>
+        </div>
+
+        <!-- 体系拓扑 -->
+        <div class="tab-content" id="tab-topology">
+            <div class="section-title">🕸️ ZONGYUAN-ROOT 六节点协同网络拓扑</div>
+            <div class="topology-container">
+                <svg class="topology-svg" viewBox="0 0 800 450">
+                    <!-- 连接线 -->
+                    <line class="connection-line" x1="400" y1="80" x2="150" y2="200" />
+                    <line class="connection-line" x1="400" y1="80" x2="400" y2="200" />
+                    <line class="connection-line" x1="400" y1="80" x2="650" y2="200" />
+                    <line class="connection-line" x1="150" y1="200" x2="250" y2="350" />
+                    <line class="connection-line" x1="400" y1="200" x2="400" y2="350" />
+                    <line class="connection-line" x1="650" y1="200" x2="550" y2="350" />
+                    <line class="connection-line" x1="250" y1="350" x2="400" y2="350" />
+                    <line class="connection-line" x1="400" y1="350" x2="550" y2="350" />
+
+                    <!-- 中心节点：云内核主控 -->
+                    <g class="node-circle" onclick="showNodeInfo('kernel')">
+                        <circle cx="400" cy="80" r="45" fill="url(#goldGradient)" stroke="#d4af37" stroke-width="3" />
+                        <text x="400" y="75" class="node-label" style="fill:#1a1a2e;font-weight:700;font-size:14px;">Ω</text>
+                        <text x="400" y="95" class="node-sub-label" style="fill:#1a1a2e;">云内核主控</text>
+                    </g>
+
+                    <!-- 第二层：3个核心节点 -->
+                    <g class="node-circle" onclick="showNodeInfo('gov')">
+                        <circle cx="150" cy="200" r="38" fill="#1a1a2e" stroke="#1890ff" stroke-width="2" />
+                        <text x="150" y="195" class="node-label">🏛️</text>
+                        <text x="150" y="215" class="node-sub-label">政务AI中台</text>
+                    </g>
+
+                    <g class="node-circle" onclick="showNodeInfo('workbench')">
+                        <circle cx="400" cy="200" r="38" fill="#1a1a2e" stroke="#722ed1" stroke-width="2" />
+                        <text x="400" y="195" class="node-label">🤖</text>
+                        <text x="400" y="215" class="node-sub-label">智能工作台</text>
+                    </g>
+
+                    <g class="node-circle" onclick="showNodeInfo('drama')">
+                        <circle cx="650" cy="200" r="38" fill="#1a1a2e" stroke="#eb2f96" stroke-width="2" />
+                        <text x="650" y="195" class="node-label">🎬</text>
+                        <text x="650" y="215" class="node-sub-label">昆仑洞天短剧</text>
+                    </g>
+
+                    <!-- 第三层：3个支撑节点 -->
+                    <g class="node-circle" onclick="showNodeInfo('vector')">
+                        <circle cx="250" cy="350" r="35" fill="#1a1a2e" stroke="#52c41a" stroke-width="2" />
+                        <text x="250" y="345" class="node-label">📚</text>
+                        <text x="250" y="365" class="node-sub-label">源域通识知识库</text>
+                    </g>
+
+                    <g class="node-circle" onclick="showNodeInfo('identity')">
+                        <circle cx="400" cy="350" r="35" fill="#1a1a2e" stroke="#faad14" stroke-width="2" />
+                        <text x="400" y="345" class="node-label">🔐</text>
+                        <text x="400" y="365" class="node-sub-label">身份网关</text>
+                    </g>
+
+                    <g class="node-circle" onclick="showNodeInfo('website')">
+                        <circle cx="550" cy="350" r="35" fill="#1a1a2e" stroke="#13c2c2" stroke-width="2" />
+                        <text x="550" y="345" class="node-label">🌐</text>
+                        <text x="550" y="365" class="node-sub-label">火斗云智官网</text>
+                    </g>
+
+                    <defs>
+                        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#d4af37" />
+                            <stop offset="100%" style="stop-color:#f0c040" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+
+            <div class="section-title">📊 拓扑说明</div>
+            <div class="card-grid">
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">第一层：主控层</div>
+                        <div class="card-badge">1节点</div>
+                    </div>
+                    <div class="card-desc">云内核主控（Ω），全域统一管理中枢，元极恒一超认知永恒自治核心</div>
+                </div>
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">第二层：业务核心层</div>
+                        <div class="card-badge">3节点</div>
+                    </div>
+                    <div class="card-desc">政务AI中台、智能工作台、昆仑洞天短剧引擎，三大核心业务引擎</div>
+                </div>
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">第三层：支撑服务层</div>
+                        <div class="card-badge">3节点</div>
+                    </div>
+                    <div class="card-desc">源域通识知识库、身份网关、火斗云智官网，提供基础支撑服务</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 健康监控 -->
+        <div class="tab-content" id="tab-health">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">💚</div>
+                    <div class="stat-value">6/6</div>
+                    <div class="stat-label">健康节点</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-value">25/25</div>
+                    <div class="stat-label">活跃能力</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔗</div>
+                    <div class="stat-value">PASS</div>
+                    <div class="stat-label">链完整性</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">严重告警</div>
+                </div>
+            </div>
+
+            <div class="section-title">💚 节点健康状态</div>
+            <div class="card-grid" id="healthList"></div>
+        </div>
+
+        <!-- 系统日志 -->
+        <div class="tab-content" id="tab-logs">
+            <div class="section-title">📋 最近系统日志</div>
+            <div class="log-container" id="logContainer"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>ZONGYUAN-ROOT 元极恒一超认知永恒自治体系 · 云内核主控面板 V1.0</div>
+        <div class="trace-mark">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 元极恒一·全域自治·永续稳态</div>
+    </div>
+
+    <script>
+        // 节点数据
+        const nodes = [
+            {id:'app-gov-ai-0001', name:'政务AI中台', window:'政务开发窗口', type:'application', status:'deployed', trust:3, capabilities:4, icon:'🏛️', color:'#1890ff', desc:'政务AI中台，提供政策问答、公文生成、预约管理、审批流转等政务智能化服务'},
+            {id:'app-workbench-0001', name:'智能工作台', window:'智能中台开发窗口', type:'application', status:'deployed', trust:3, capabilities:4, icon:'🤖', color:'#722ed1', desc:'智能工作台，提供智能体编排、工作流设计、多模态交互、数据分析等智能化服务'},
+            {id:'app-drama-0001', name:'昆仑洞天短剧引擎', window:'短剧开发窗口', type:'application', status:'deployed', trust:3, capabilities:4, icon:'🎬', color:'#eb2f96', desc:'昆仑洞天短剧工业化生产引擎，提供剧本生成、分镜表、关键帧生成、视频合成等全链路服务'},
+            {id:'app-vector-kb-0001', name:'源域通识知识库', window:'向量知识库开发窗口', type:'application', status:'deployed', trust:3, capabilities:4, icon:'📚', color:'#52c41a', desc:'源域通识向量知识库，提供向量检索、知识关联、语义搜索、真值提炼等知识服务'},
+            {id:'app-website-0001', name:'火斗云智官网', window:'官网展示开发窗口', type:'application', status:'deployed', trust:3, capabilities:4, icon:'🌐', color:'#13c2c2', desc:'火斗云智官方网站，提供页面展示、产品介绍、案例展示、联系表单等展示服务'},
+            {id:'svc-identity-api-0001', name:'身份节点申请API服务', window:'云内核主控', type:'service', status:'deployed', trust:3, capabilities:5, icon:'🔐', color:'#faad14', desc:'身份节点申请API服务，提供身份节点申请、审批、注册、查询、健康检查等身份管理服务'}
+        ];
+
+        // 能力数据
+        const capabilities = [
+            {name:'政策问答', provider:'政务AI中台', method:'POST', category:'identity', desc:'基于政策知识库的智能问答系统'},
+            {name:'公文生成', provider:'政务AI中台', method:'POST', category:'identity', desc:'AI辅助公文生成，支持多种公文类型'},
+            {name:'预约管理', provider:'政务AI中台', method:'GET', category:'identity', desc:'政务服务预约管理，支持预约创建、查询、取消'},
+            {name:'审批流转', provider:'政务AI中台', method:'GET', category:'identity', desc:'政务审批流程管理，支持多级审批'},
+            {name:'智能体编排', provider:'智能工作台', method:'POST', category:'identity', desc:'多智能体协同编排，支持复杂任务分解'},
+            {name:'工作流设计', provider:'智能工作台', method:'GET', category:'identity', desc:'可视化工作流设计器，支持拖拽编排'},
+            {name:'多模态交互', provider:'智能工作台', method:'POST', category:'identity', desc:'支持文本、语音、图像等多模态交互'},
+            {name:'数据分析', provider:'智能工作台', method:'GET', category:'identity', desc:'智能数据分析，支持多种图表和洞察'},
+            {name:'剧本生成', provider:'昆仑洞天短剧引擎', method:'POST', category:'identity', desc:'AI短剧剧本生成，支持分集大纲和完整剧本'},
+            {name:'分镜表', provider:'昆仑洞天短剧引擎', method:'POST', category:'identity', desc:'自动生成分镜表，包含镜号、画面、提示词、音效'},
+            {name:'关键帧生成', provider:'昆仑洞天短剧引擎', method:'POST', category:'identity', desc:'国风仙侠写实厚涂关键帧生成，支持角色一致性'},
+            {name:'视频合成', provider:'昆仑洞天短剧引擎', method:'POST', category:'identity', desc:'关键帧到视频一键合成，支持多段拼接'},
+            {name:'向量检索', provider:'源域通识知识库', method:'POST', category:'identity', desc:'基于bge-large-zh的向量检索，F1≥75%'},
+            {name:'知识关联', provider:'源域通识知识库', method:'POST', category:'identity', desc:'跨文档知识关联，实体关系抽取'},
+            {name:'语义搜索', provider:'源域通识知识库', method:'GET', category:'identity', desc:'语义级搜索，支持同义词和概念匹配'},
+            {name:'真值提炼', provider:'源域通识知识库', method:'POST', category:'identity', desc:'从非结构化文本中提炼高纯度真值'},
+            {name:'页面展示', provider:'火斗云智官网', method:'GET', category:'identity', desc:'官网页面展示，响应式设计'},
+            {name:'产品介绍', provider:'火斗云智官网', method:'GET', category:'identity', desc:'产品体系介绍，火斗云智AIOS、昆仑洞天等'},
+            {name:'案例展示', provider:'火斗云智官网', method:'GET', category:'identity', desc:'客户案例和成功案例展示'},
+            {name:'联系表单', provider:'火斗云智官网', method:'POST', category:'identity', desc:'联系我们表单，支持留言和咨询'},
+            {name:'身份节点申请', provider:'身份节点申请API服务', method:'POST', category:'identity', desc:'提交身份节点申请，等待审批注册'},
+            {name:'身份节点审批', provider:'身份节点申请API服务', method:'POST', category:'identity', desc:'审批身份节点申请，自动注册节点'},
+            {name:'节点健康检查', provider:'身份节点申请API服务', method:'GET', category:'identity', desc:'检查节点健康状态，识别问题节点'},
+            {name:'节点违规记录', provider:'身份节点申请API服务', method:'POST', category:'identity', desc:'记录节点违规行为，严重违规自动暂停'},
+            {name:'节点版本管理', provider:'身份节点申请API服务', method:'PUT', category:'identity', desc:'管理节点版本，记录版本历史，支持回滚'}
+        ];
+
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 渲染身份节点列表
+        function renderIdentityNodes() {
+            const container = document.getElementById('identityNodes');
+            container.innerHTML = nodes.map(node => `
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">${node.icon} ${node.name}</div>
+                        <div class="card-badge" style="color:#52c41a;border-color:rgba(82,196,26,0.3);background:rgba(82,196,26,0.1);">${node.status}</div>
+                    </div>
+                    <div class="card-desc">${node.desc}</div>
+                    <div class="card-meta">
+                        <span class="meta-item">🆔 ${node.id}</span>
+                        <span class="meta-item">🏷️ ${node.type}</span>
+                        <span class="meta-item">⚡ ${node.capabilities}个能力</span>
+                        <span class="meta-item">🔗 L${node.trust}信任链</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染能力列表
+        function renderCapabilities() {
+            const container = document.getElementById('capabilityList');
+            container.innerHTML = capabilities.map(cap => `
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">⚡ ${cap.name}</div>
+                        <div class="card-badge">${cap.method}</div>
+                    </div>
+                    <div class="card-desc">${cap.desc}</div>
+                    <div class="card-meta">
+                        <span class="meta-item">🔌 ${cap.provider}</span>
+                        <span class="meta-item">🏷️ ${cap.category}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染健康状态
+        function renderHealth() {
+            const container = document.getElementById('healthList');
+            container.innerHTML = nodes.map(node => `
+                <div class="info-card">
+                    <div class="card-header">
+                        <div class="card-title">${node.icon} ${node.name}</div>
+                        <div class="card-badge" style="color:#52c41a;border-color:rgba(82,196,26,0.3);background:rgba(82,196,26,0.1);">健康</div>
+                    </div>
+                    <div class="card-desc">节点运行正常，所有服务可用</div>
+                    <div class="health-bar"><div class="health-fill" style="width:100%"></div></div>
+                    <div class="card-meta">
+                        <span class="meta-item">💚 健康度: 100%</span>
+                        <span class="meta-item">⚡ 能力: ${node.capabilities}个活跃</span>
+                        <span class="meta-item">🔗 延迟: <10ms</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染日志
+        function renderLogs() {
+            const logs = [
+                {time:'2026-09-06 20:55:00', level:'success', msg:'云内核主控面板 V1.0 部署完成，全域锁档Lv8'},
+                {time:'2026-09-06 20:52:00', level:'success', msg:'节点能力市场Web界面部署完成，25个能力可视化展示'},
+                {time:'2026-09-06 20:46:00', level:'success', msg:'P0身份节点激活完成，5个开发窗口身份节点全部注册'},
+                {time:'2026-09-06 20:45:00', level:'info', msg:'批量审批5个身份节点申请，自动注册为正式节点'},
+                {time:'2026-09-06 20:44:00', level:'info', msg:'20个节点能力注册到能力市场，总能力数达到25个'},
+                {time:'2026-09-06 20:38:00', level:'success', msg:'全域所有资产锁档归档完成，3746个文件，2257.65MB'},
+                {time:'2026-09-06 20:33:00', level:'success', msg:'双域名路径规划完成，身份节点管理控制台外网可访问'},
+                {time:'2026-09-06 20:21:00', level:'success', msg:'身份节点API服务重启验证通过，健康检查200 OK'},
+                {time:'2026-09-06 20:15:00', level:'info', msg:'API功能扩展完成，添加违规记录、版本管理、健康监控5项新功能'},
+                {time:'2026-09-06 20:05:00', level:'success', msg:'身份节点管理Web界面创建完成，5个功能标签页'}
+            ];
+
+            const container = document.getElementById('logContainer');
+            container.innerHTML = logs.map(log => `
+                <div class="log-line">
+                    <span class="log-time">[${log.time}]</span>
+                    <span class="log-${log.level}">${log.level.toUpperCase()}</span>
+                    <span style="color:#ccc;"> ${log.msg}</span>
+                </div>
+            `).join('');
+        }
+
+        // 显示节点信息
+        function showNodeInfo(nodeId) {
+            const node = nodes.find(n => n.id.includes(nodeId)) || nodes.find(n => n.name.includes(nodeId));
+            if (node) {
+                alert(`${node.icon} ${node.name}\n\n节点ID: ${node.id}\n类型: ${node.type}\n状态: ${node.status}\n信任等级: L${node.trust}\n能力数: ${node.capabilities}个\n所属窗口: ${node.window}\n\n${node.desc}`);
+            }
+        }
+
+        // 初始化
+        renderIdentityNodes();
+        renderCapabilities();
+        renderHealth();
+        renderLogs();
+    </script>
+</body>
+</html>

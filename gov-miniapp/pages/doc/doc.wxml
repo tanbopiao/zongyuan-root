@@ -1,0 +1,39 @@
+<view class="container">
+  <view class="header">
+    <view class="title">✍️ 公文助手</view>
+    <view class="subtitle">AI智能生成各类公文，格式规范，要素完整</view>
+  </view>
+  <view class="form-card">
+    <view class="form-item">
+      <text class="label">公文类型</text>
+      <picker bindchange="onTypeChange" value="{{typeIndex}}" range="{{docTypes}}">
+        <view class="picker">{{docTypes[typeIndex]}} ▼</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="label">公文标题</text>
+      <input class="input" placeholder="请输入公文标题" value="{{title}}" bindinput="onTitleInput" />
+    </view>
+    <view class="form-item">
+      <text class="label">主要内容</text>
+      <textarea class="textarea" placeholder="请输入公文主要内容" value="{{content}}" bindinput="onContentInput" />
+    </view>
+    <button class="generate-btn" bindtap="generateDoc" loading="{{loading}}">AI生成公文</button>
+  </view>
+  <view class="result-card" wx:if="{{result}}">
+    <view class="result-title">📄 生成结果</view>
+    <view class="result-content">{{result}}</view>
+    <view class="result-actions">
+      <button class="copy-btn" bindtap="copyResult">复制内容</button>
+      <button class="save-btn" bindtap="saveResult">保存历史</button>
+    </view>
+  </view>
+  <view class="history-section" wx:if="{{history.length > 0}}">
+    <view class="section-title">📚 历史记录</view>
+    <view class="history-item" wx:for="{{history}}" wx:key="index">
+      <view class="history-title">{{item.title}}</view>
+      <view class="history-type">{{item.type}}</view>
+      <view class="history-time">{{item.time}}</view>
+    </view>
+  </view>
+</view>

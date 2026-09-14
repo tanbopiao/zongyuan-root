@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安全防护体系建设方案 - 火斗云智AIOS</title>
+<style>
+:root { --primary:#2563eb; --danger:#ef4444; --warning:#f59e0b; --success:#10b981; --gray-50:#f9fafb; --gray-200:#e5e7eb; --gray-600:#4b5563; --gray-800:#1f2937; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif; background:var(--gray-50); color:var(--gray-800); line-height:1.6; }
+.container { max-width:1100px; margin:0 auto; padding:0 24px; }
+.header { background:linear-gradient(135deg,#7f1d1d,#dc2626,#f59e0b); color:#fff; padding:50px 0 40px; }
+.header h1 { font-size:1.7rem; font-weight:700; }
+.header .sub { font-size:0.95rem; opacity:0.9; margin-top:6px; }
+.section { background:#fff; border-radius:12px; padding:28px; margin:20px 0; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid var(--gray-200); }
+.section h2 { font-size:1.2rem; font-weight:700; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid var(--danger); }
+.layer { border-left:4px solid; padding:16px 20px; margin:14px 0; border-radius:0 8px 8px 0; }
+.layer.l1 { border-color:#991b1b; background:#fef2f2; }
+.layer.l2 { border-color:#c2410c; background:#fff7ed; }
+.layer.l3 { border-color:#a16207; background:#fefce8; }
+.layer.l4 { border-color:#15803d; background:#f0fdf4; }
+.layer.l5 { border-color:#1d4ed8; background:#eff6ff; }
+.layer .title { font-weight:700; font-size:1rem; margin-bottom:8px; }
+.layer .items { font-size:0.85rem; }
+.layer .items ul { margin-left:18px; }
+.layer .items li { margin:4px 0; }
+.risk-box { padding:14px; background:#fef2f2; border-radius:8px; margin:12px 0; border-left:4px solid var(--danger); }
+.risk-box .title { font-weight:700; color:var(--danger); margin-bottom:6px; }
+table { width:100%; border-collapse:collapse; font-size:0.82rem; margin:12px 0; }
+th { background:var(--gray-50); text-align:left; padding:10px 12px; font-weight:600; border-bottom:2px solid var(--gray-200); }
+td { padding:10px 12px; border-bottom:1px solid var(--gray-200); }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:600; }
+.badge.danger { background:#fef2f2; color:var(--danger); }
+.badge.warning { background:#fffbeb; color:var(--warning); }
+.badge.success { background:#ecfdf5; color:var(--success); }
+.badge.info { background:#eff6ff; color:var(--primary); }
+.action-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0; }
+.action-card { padding:14px; border-radius:8px; text-align:center; }
+.action-card.immediate { background:#fef2f2; border:1px solid #fecaca; }
+.action-card.short { background:#fffbeb; border:1px solid #fde68a; }
+.action-card.long { background:#eff6ff; border:1px solid #bfdbfe; }
+.action-card .label { font-size:0.78rem; font-weight:600; margin-bottom:6px; }
+.action-card .items { font-size:0.75rem; color:var(--gray-600); }
+.footer { text-align:center; padding:30px 0; color:var(--gray-600); font-size:0.78rem; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="container">
+    <h1>安全防护体系建设方案</h1>
+    <div class="sub">应对外部攻击与机密探查 · 五层纵深防御体系 ｜ 火斗云智AIOS</div>
+  </div>
+</div>
+<div class="container">
+
+<div class="section">
+  <h2>当前安全状况评估</h2>
+  <div class="risk-box">
+    <div class="title">⚠️ 高危：30+内部API端口直接暴露公网</div>
+    <div style="font-size:0.85rem;">
+      9120记忆网关、9122通信网关、8081本地LLM、8200政务网关、8021 AI代理等内部服务直接监听0.0.0.0，
+      攻击者可绕过Nginx直接访问内部API，存在数据泄露和未授权操作风险。
+    </div>
+  </div>
+  <table>
+    <tr><th>检查项</th><th>状态</th><th>风险等级</th></tr>
+    <tr><td>SSH密钥登录</td><td>已启用（禁止密码）</td><td><span class="badge success">安全</span></td></tr>
+    <tr><td>SSH暴力破解</td><td>129.211.204.25持续尝试ubuntu用户</td><td><span class="badge warning">中风险</span></td></tr>
+    <tr><td>内部端口暴露</td><td>30+端口监听0.0.0.0</td><td><span class="badge danger">高风险</span></td></tr>
+    <tr><td>Nginx安全头</td><td>主站完整，kunlun/ops/api缺失</td><td><span class="badge warning">中风险</span></td></tr>
+    <tr><td>防火墙</td><td>firewalld运行，ipset封禁3639IP</td><td><span class="badge success">已有</span></td></tr>
+    <tr><td>fail2ban</td><td>未安装</td><td><span class="badge warning">待建设</span></td></tr>
+    <tr><td>敏感路径探测</td><td>/.git/HEAD被探测（已404）</td><td><span class="badge success">已防护</span></td></tr>
+    <tr><td>API认证</td><td>9122有HMAC，其他服务无统一认证</td><td><span class="badge warning">待建设</span></td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>五层纵深防御体系</h2>
+
+  <div class="layer l1">
+    <div class="title">第一层 · 网络边界防护（阻断攻击入口）</div>
+    <div class="items">
+      <ul>
+        <li><strong>端口收敛：</strong>所有内部API服务（8012/8021/8031/8200/9120等）改为绑定127.0.0.1，仅通过Nginx反向代理对外提供服务</li>
+        <li><strong>防火墙白名单：</strong>firewalld仅开放80/443/22端口，其他端口全部拒绝</li>
+        <li><strong>SSH安全：</strong>保持密钥登录，配置SSH白名单（仅允许可信IP），修改默认端口（可选）</li>
+        <li><strong>腾讯云安全组：</strong>控制台配置安全组，仅开放必要端口，源IP限制</li>
+        <li><strong>VPN/跳板机：</strong>管理操作通过VPN或跳板机，不直接暴露管理端口</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer l2">
+    <div class="title">第二层 · 应用层防护（过滤恶意请求）</div>
+    <div class="items">
+      <ul>
+        <li><strong>Nginx安全头：</strong>所有子域名统一添加HSTS/X-Frame-Options/X-Content-Type-Options/X-XSS-Protection/Referrer-Policy</li>
+        <li><strong>速率限制：</strong>Nginx limit_req_zone限制单IP请求频率，防止CC攻击和API滥用</li>
+        <li><strong>敏感路径拦截：</strong>拦截/.git、/.env、/.bak、/backup、/admin等敏感路径探测</li>
+        <li><strong>WAF规则：</strong>SQL注入/XSS/命令执行特征过滤（可使用Nginx+lua或第三方WAF）</li>
+        <li><strong>Bot管理：</strong>识别恶意爬虫，区分正常搜索引擎和恶意爬取</li>
+        <li><strong>HTTPS强制：</strong>所有HTTP请求301跳转HTTPS，TLS 1.2+</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer l3">
+    <div class="title">第三层 · 认证授权防护（验证身份权限）</div>
+    <div class="items">
+      <ul>
+        <li><strong>API统一认证：</strong>所有对外API要求Token/HMAC签名，参考9122通信网关的HMAC机制</li>
+        <li><strong>内部服务认证：</strong>服务间调用使用内部Token，防止未授权访问</li>
+        <li><strong>管理后台IP白名单：</strong>/internal/、运维平台、管理后台仅允许可信IP访问</li>
+        <li><strong>RBAC权限：</strong>基于角色的访问控制，最小权限原则</li>
+        <li><strong>主权根确权：</strong>利用8031主权根API进行身份确权和操作审计</li>
+        <li><strong>敏感操作二次确认：</strong>删除/修改/部署等操作需人工审核确认</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer l4">
+    <div class="title">第四层 · 监控检测防护（发现异常行为）</div>
+    <div class="items">
+      <ul>
+        <li><strong>入侵检测：</strong>安装fail2ban，自动封禁SSH暴力破解、Nginx恶意请求IP</li>
+        <li><strong>异常访问告警：</strong>监控4xx/5xx错误率、异常User-Agent、高频请求，触发告警</li>
+        <li><strong>日志审计：</strong>所有API调用、登录操作、配置变更记录审计日志，不可篡改</li>
+        <li><strong>文件完整性监控：</strong>监控关键配置文件和代码文件的变更，发现未授权修改</li>
+        <li><strong>进程监控：</strong>MR-007资源监控扩展，检测异常进程和端口监听</li>
+        <li><strong>真值审计：</strong>利用9120记忆网关的真值审计能力，记录所有安全事件</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layer l5">
+    <div class="title">第五层 · 应急响应防护（快速恢复止损）</div>
+    <div class="items">
+      <ul>
+        <li><strong>自动封禁：</strong>检测到攻击自动封禁IP（ipset+fail2ban），封禁时长梯度升级</li>
+        <li><strong>服务熔断：</strong>MR-007资源熔断机制扩展，异常流量触发服务降级</li>
+        <li><strong>网络隔离：</strong>紧急情况下可一键切断外部访问，保留本地运维通道</li>
+        <li><strong>数据备份：</strong>配置文件/代码/数据库定期备份，异地存储，可快速回滚</li>
+        <li><strong>应急响应预案：</strong>制定安全事件响应流程，明确角色和操作步骤</li>
+        <li><strong>取证分析：</strong>攻击发生后保留日志和证据，进行溯源分析</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>执行优先级与时间线</h2>
+  <div class="action-grid">
+    <div class="action-card immediate">
+      <div class="label" style="color:var(--danger);">🔴 立即执行（24小时内）</div>
+      <div class="items">
+        1. 补全子域名安全头<br>
+        2. 安装fail2ban<br>
+        3. 敏感路径拦截规则<br>
+        4. Nginx速率限制
+      </div>
+    </div>
+    <div class="action-card short">
+      <div class="label" style="color:var(--warning);">🟡 短期执行（1-2周）</div>
+      <div class="items">
+        1. 内部端口收敛到127.0.0.1<br>
+        2. API统一认证机制<br>
+        3. 管理后台IP白名单<br>
+        4. 异常访问告警
+      </div>
+    </div>
+    <div class="action-card long">
+      <div class="label" style="color:var(--primary);">🔵 长期建设（1月+）</div>
+      <div class="items">
+        1. WAF部署<br>
+        2. 文件完整性监控<br>
+        3. 应急响应预案演练<br>
+        4. 安全审计自动化
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>立即执行项详细说明</h2>
+  <table>
+    <tr><th>序号</th><th>加固项</th><th>操作</th><th>风险</th></tr>
+    <tr><td>1</td><td>补全安全头</td><td>为kunlun/ops/api子域名添加X-Frame-Options/X-Content-Type-Options/HSTS等5个安全头</td><td><span class="badge success">低</span></td></tr>
+    <tr><td>2</td><td>安装fail2ban</td><td>yum install fail2ban，配置SSH和Nginx监控，自动封禁暴力破解IP</td><td><span class="badge success">低</span></td></tr>
+    <tr><td>3</td><td>敏感路径拦截</td><td>Nginx添加location拦截/.git、/.env、/.bak、/backup等，返回404</td><td><span class="badge success">低</span></td></tr>
+    <tr><td>4</td><td>Nginx速率限制</td><td>配置limit_req_zone，限制单IP每秒10请求，突发20</td><td><span class="badge warning">中</span></td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>端口收敛清单（高优先级）</h2>
+  <p style="font-size:0.85rem; margin-bottom:10px;">以下端口当前监听0.0.0.0，应改为127.0.0.1，仅通过Nginx代理对外：</p>
+  <table>
+    <tr><th>端口</th><th>服务</th><th>当前监听</th><th>建议</th></tr>
+    <tr><td>9120</td><td>记忆网关</td><td>0.0.0.0</td><td>改127.0.0.1，Nginx代理/api/memory/</td></tr>
+    <tr><td>9122</td><td>通信网关（HMAC）</td><td>0.0.0.0</td><td>改127.0.0.1，Nginx代理/api/comm/</td></tr>
+    <tr><td>8081</td><td>本地LLM</td><td>0.0.0.0</td><td>改127.0.0.1，仅内部调用</td></tr>
+    <tr><td>8021</td><td>AI代理</td><td>0.0.0.0</td><td>改127.0.0.1，Nginx代理/api/ai/</td></tr>
+    <tr><td>8031</td><td>主权根API</td><td>0.0.0.0</td><td>改127.0.0.1，Nginx代理/gov-api/</td></tr>
+    <tr><td>8200-8203</td><td>政务API</td><td>0.0.0.0</td><td>改127.0.0.1，Nginx代理/gov-api/*</td></tr>
+    <tr><td>8628/8626</td><td>短剧API</td><td>0.0.0.0</td><td>改127.0.0.1，Nginx代理/api/production/</td></tr>
+    <tr><td>8012/8014</td><td>短剧/向量库</td><td>0.0.0.0</td><td>改127.0.0.1，内部调用</td></tr>
+  </table>
+  <p style="font-size:0.78rem; color:var(--gray-600); margin-top:8px;">注意：端口收敛需逐个修改服务配置并重启，建议先在测试环境验证，再逐步迁移生产服务。</p>
+</div>
+
+<div class="section">
+  <h2>安全元法则建议（MR-022）</h2>
+  <div style="padding:14px; background:#fefce8; border-radius:8px; border-left:4px solid var(--warning);">
+    <p style="font-weight:700; margin-bottom:8px;">建议新增MR-022安全防护元法则：</p>
+    <ul style="margin-left:18px; font-size:0.85rem;">
+      <li>所有内部API服务必须绑定127.0.0.1，禁止直接监听0.0.0.0</li>
+      <li>所有对外API必须经过Nginx反向代理和认证</li>
+      <li>检测到异常访问自动封禁IP（fail2ban+ipset）</li>
+      <li>敏感操作必须经过HMAC签名和人工审核</li>
+      <li>安全事件自动写入9120真值库审计</li>
+      <li>定期安全扫描（端口/配置/漏洞），结果归档</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+<div class="footer">
+  <p>火斗云智AIOS · 安全防护体系建设方案</p>
+  <p>五层纵深防御：网络边界 → 应用层 → 认证授权 → 监控检测 → 应急响应</p>
+  <p>确权：DID-BR-000002 ｜ 溯源：Ω₀⊂⊙∞⊂Ω ｜ 2026-09-13</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS | 元极恒一自治体系</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--card:#15151e;
+  --gold:#d4af37;--gold2:#f0d060;--gold-dim:#8a7030;--gold-line:rgba(212,175,55,.25);
+  --text:#e8e6df;--text2:#a0a0a8;--text3:#6a6a72;
+  --border:#2a2a35;--glow:rgba(212,175,55,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',system-ui,sans-serif;line-height:1.7;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 80% 50% at 50% -10%,rgba(212,175,55,.1),transparent),
+  radial-gradient(ellipse 60% 40% at 80% 100%,rgba(201,162,39,.06),transparent);
+  pointer-events:none;z-index:0}
+.serif{font-family:'Noto Serif SC',serif}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* 导航 */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--gold-line)}
+.nav-inner{max-width:1400px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{display:flex;align-items:center;gap:14px;text-decoration:none}
+.nav-logo{width:36px;height:36px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold);font-weight:700}
+.nav-title{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;color:var(--gold);letter-spacing:2px}
+.nav-sub{font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:2px}
+.nav-links{display:flex;gap:6px;align-items:center}
+.nav-link{padding:8px 16px;font-size:13px;color:var(--text2);cursor:pointer;border-radius:4px;transition:all .2s;border:none;background:none;font-family:inherit;text-decoration:none}
+.nav-link:hover{color:var(--gold);background:rgba(212,175,55,.08)}
+.nav-link.cta{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a0f;font-weight:600}
+.nav-link.cta:hover{opacity:.9}
+/* 移动端汉堡菜单 */
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;flex-direction:column;gap:5px}
+.nav-toggle span{display:block;width:22px;height:2px;background:var(--gold);transition:all .3s;border-radius:1px}
+.nav-toggle.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-toggle.active span:nth-child(2){opacity:0}
+.nav-toggle.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(10,10,15,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--gold-line);padding:16px 24px;z-index:99;flex-direction:column;gap:4px}
+.mobile-menu.show{display:flex}
+.mobile-menu a{padding:14px 16px;font-size:15px;color:var(--text2);text-decoration:none;border-radius:6px;transition:all .2s;border-bottom:1px solid var(--border)}
+.mobile-menu a:hover{color:var(--gold);background:rgba(212,175,55,.08)}
+.mobile-menu a.cta{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a0f;font-weight:600;text-align:center;margin-top:8px;border:none}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-toggle{display:flex}
+  .nav-inner{padding:0 16px}
+  .nav-title{font-size:15px}
+  .nav-sub{font-size:9px}
+}
+
+/* 主容器 */
+.main{position:relative;z-index:1}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative}
+.hero-omega{font-size:56px;color:var(--gold);letter-spacing:10px;margin-bottom:20px;opacity:.9}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:clamp(32px,6vw,64px);font-weight:900;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold-dim));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;letter-spacing:6px}
+.hero-sub{font-size:clamp(14px,2vw,18px);color:var(--text2);letter-spacing:8px;margin-bottom:12px}
+.hero-desc{font-size:14px;color:var(--text3);max-width:600px;margin:0 auto 32px;line-height:1.8}
+.hero-divider{width:160px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:28px auto}
+.hero-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{padding:14px 32px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;text-decoration:none;display:inline-block;border:none;font-family:inherit;letter-spacing:1px}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a0f}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px var(--glow)}
+.btn-outline{border:1px solid var(--gold-dim);color:var(--gold);background:transparent}
+.btn-outline:hover{background:rgba(212,175,55,.08)}
+.hero-stats{display:flex;gap:48px;justify-content:center;margin-top:60px;flex-wrap:wrap}
+.hero-stat .num{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;color:var(--gold)}
+.hero-stat .label{font-size:12px;color:var(--text3);letter-spacing:1px;margin-top:4px}
+
+/* 通用section */
+.section{max-width:1400px;margin:0 auto;padding:80px 24px}
+.section-header{text-align:center;margin-bottom:48px}
+.section-tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-dim);letter-spacing:3px;margin-bottom:12px}
+.section-title{font-family:'Noto Serif SC',serif;font-size:clamp(24px,4vw,36px);font-weight:700;color:var(--text);letter-spacing:3px;margin-bottom:12px}
+.section-desc{font-size:14px;color:var(--text2);max-width:600px;margin:0 auto}
+
+/* 模块卡片 */
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.module-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;text-decoration:none;display:block}
+.module-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s}
+.module-card:hover{border-color:var(--gold-dim);transform:translateY(-4px);box-shadow:0 12px 40px var(--glow)}
+.module-card:hover::before{opacity:1}
+.module-icon{width:48px;height:48px;border-radius:10px;background:rgba(212,175,55,.1);border:1px solid var(--gold-line);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
+.module-name{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px}
+.module-desc{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px}
+.module-meta{display:flex;gap:12px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.module-meta span{padding:3px 8px;background:var(--bg3);border-radius:3px}
+
+/* 架构图 */
+.arch-container{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px;margin:20px 0}
+.arch-layer{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.arch-layer:last-child{margin-bottom:0}
+.arch-label{width:100px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-dim);text-align:right;flex-shrink:0}
+.arch-nodes{flex:1;display:flex;gap:10px;flex-wrap:wrap}
+.arch-node{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 16px;font-size:12px;color:var(--text2);text-align:center;flex:1;min-width:100px;transition:all .2s}
+.arch-node:hover{border-color:var(--gold-dim);color:var(--gold)}
+.arch-node.core{border-color:var(--gold-dim);background:rgba(212,175,55,.06);color:var(--gold)}
+.arch-connector{text-align:center;color:var(--gold-dim);font-size:14px;margin:4px 0 4px 100px}
+
+/* 移动端全局适配 */
+@media(max-width:768px){
+  body{font-size:15px;line-height:1.8}
+  .section{padding:48px 16px}
+  .section-title{font-size:20px}
+  .hero{min-height:auto;padding:80px 16px 40px}
+  .hero-omega{font-size:36px;letter-spacing:6px}
+  .hero h1{letter-spacing:3px}
+  .hero-sub{letter-spacing:4px;font-size:13px}
+  .hero-desc{font-size:13px}
+  .hero-stats{gap:24px}
+  .hero-stat .num{font-size:24px}
+  .hero-buttons{flex-direction:column;align-items:center}
+  .btn{width:100%;max-width:280px;text-align:center}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .stat-card{padding:16px}
+  .stat-num{font-size:28px}
+  .modules-grid{grid-template-columns:1fr;gap:12px}
+  .module-card{padding:20px}
+  /* 架构图移动端：标签在上，节点在下 */
+  .arch-container{padding:20px 16px}
+  .arch-layer{flex-direction:column;align-items:stretch;gap:8px}
+  .arch-label{width:auto;text-align:left;font-size:12px;padding:6px 10px;background:rgba(212,175,55,.08);border-radius:4px;border-left:3px solid var(--gold)}
+  .arch-nodes{flex-direction:column;gap:6px}
+  .arch-node{min-width:auto;font-size:13px;padding:10px 12px}
+  .arch-connector{margin:4px 0}
+  .axiom-preview{padding:20px 16px}
+  .axiom-mini-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .footer-grid{grid-template-columns:repeat(2,1fr);gap:20px}
+  .footer{padding:32px 16px 24px}
+  .trace-mark{font-size:8px;bottom:8px;right:8px}
+}
+
+/* 公理预览 */
+.axiom-preview{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px;margin:20px 0}
+.axiom-preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.axiom-preview-title{font-family:'Noto Serif SC',serif;font-size:20px;font-weight:700;color:var(--gold)}
+.axiom-mini-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.axiom-mini{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;transition:all .2s}
+.axiom-mini:hover{border-color:var(--gold-dim)}
+.axiom-mini .id{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-dim)}
+.axiom-mini .name{font-size:12px;color:var(--text);margin-top:4px;font-weight:500}
+
+/* Footer */
+.footer{border-top:1px solid var(--border);padding:48px 24px 32px;margin-top:60px}
+.footer-inner{max-width:1400px;margin:0 auto}
+.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;margin-bottom:32px}
+.footer-col h4{font-family:'Noto Serif SC',serif;font-size:14px;color:var(--gold);margin-bottom:16px;letter-spacing:1px}
+.footer-col a{display:block;font-size:12px;color:var(--text3);text-decoration:none;margin-bottom:8px;transition:color .2s}
+.footer-col a:hover{color:var(--gold)}
+.footer-bottom{text-align:center;padding-top:24px;border-top:1px solid var(--border)}
+.footer-omega{font-size:18px;color:var(--gold-dim);letter-spacing:4px;margin-bottom:8px}
+.footer-text{font-size:11px;color:var(--text3);letter-spacing:2px}
+.footer-did{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:6px}
+
+/* 浮动溯源标识 */
+.trace-mark{position:fixed;bottom:16px;right:16px;z-index:99;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-dim);opacity:.6;letter-spacing:1px;pointer-events:none}
+</style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <div class="nav-logo">Ω</div>
+      <div>
+        <div class="nav-title">火斗云智AIOS</div>
+        <div class="nav-sub">ZONGYUAN-ROOT 元极恒一自治体系</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="#modules" class="nav-link">核心模块</a>
+      <a href="#architecture" class="nav-link">体系架构</a>
+      <a href="/math-axioms/" class="nav-link">数学公理</a>
+      <a href="https://drama.huodouai.com/" class="nav-link">昆仑洞天</a>
+      <a href="#about" class="nav-link">关于</a>
+      <a href="/math-axioms/" class="nav-link cta">进入公理体系</a>
+    </div>
+    <button class="nav-toggle" onclick="toggleMobileMenu()" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- 移动端菜单 -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#modules" onclick="closeMobileMenu()">核心模块</a>
+  <a href="#architecture" onclick="closeMobileMenu()">体系架构</a>
+  <a href="/math-axioms/" onclick="closeMobileMenu()">数学公理</a>
+  <a href="https://drama.huodouai.com/" onclick="closeMobileMenu()">昆仑洞天</a>
+  <a href="#about" onclick="closeMobileMenu()">关于</a>
+  <a href="/math-axioms/" class="cta" onclick="closeMobileMenu()">进入公理体系</a>
+</div>
+
+<div class="main">
+
+<!-- Hero -->
+<section class="hero">
+  <div>
+    <div class="hero-omega">Ω₀⊂⊙∞⊂Ω</div>
+    <h1>火斗云智AIOS</h1>
+    <div class="hero-sub">元极恒一超认知永恒自治体系</div>
+    <div class="hero-divider"></div>
+    <p class="hero-desc">
+      基于黎曼流形、永恒拓扑、李群对称、同构等价四大数学基底，<br>
+      融合华夏地脉、碳硅耦合、驻波生命三大跨域理论，<br>
+      构建80条核心公理驱动的自治智能操作系统。
+    </p>
+    <div class="hero-buttons">
+      <a href="/math-axioms/" class="btn btn-primary">探索数学公理体系</a>
+      <a href="#modules" class="btn btn-outline">了解核心模块</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">80</div><div class="label">核心公理</div></div>
+      <div class="hero-stat"><div class="num">9</div><div class="label">理论卷</div></div>
+      <div class="hero-stat"><div class="num">Lv8</div><div class="label">自治锁档</div></div>
+      <div class="hero-stat"><div class="num">3825+</div><div class="label">云端真值</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 核心模块 -->
+<section id="modules" class="section">
+  <div class="section-header">
+    <div class="section-tag">CORE MODULES</div>
+    <h2 class="section-title">核心模块</h2>
+    <p class="section-desc">元极恒一自治体系的六大核心能力模块，从数学基底到应用产线全栈覆盖</p>
+  </div>
+  <div class="modules-grid">
+    <a href="/math-axioms/" class="module-card">
+      <div class="module-icon">∞</div>
+      <div class="module-name">数学公理体系</div>
+      <div class="module-desc">80条核心公理，十八卷统一框架。黎曼流形、永恒拓扑、李群、同构群、地脉、碳硅、驻波生命、三论统一的公理化整合。</div>
+      <div class="module-meta"><span>80公理</span><span>18卷</span><span>V2.0</span></div>
+    </a>
+    <a href="https://drama.huodouai.com/" class="module-card">
+      <div class="module-icon">⛰</div>
+      <div class="module-name">昆仑洞天短剧流水线</div>
+      <div class="module-desc">AI短剧工业化生产系统，从分集大纲到成片全链路自动化。7步流水线，6节点标准化，单部成本6.6-7万。</div>
+      <div class="module-meta"><span>7步流程</span><span>9:16竖屏</span><span>V1.2</span></div>
+    </a>
+    <div class="module-card">
+      <div class="module-icon">⚡</div>
+      <div class="module-name">火山方舟算力池</div>
+      <div class="module-desc">6个EP接入点，视觉理解×2、文生图×2、图生视频×1。免费优先调度，串行执行，额度保护，主备切换。</div>
+      <div class="module-meta"><span>6 EP</span><span>免费优先</span><span>V1.0</span></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🛡</div>
+      <div class="module-name">合规确权中台</div>
+      <div class="module-desc">AI内容显式+隐式双标识，广电总局令第16号一/二/三类备案自动分类，Merkle-DAG哈希确权。</div>
+      <div class="module-meta"><span>C2PA</span><span>LSB隐写</span><span>V2.0</span></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🔗</div>
+      <div class="module-name">多Agent并发开发</div>
+      <div class="module-desc">Alpha/Beta/Gamma三分支隔离，内核写锁+部署锁+仲裁合并，冲突检测，支持多窗口并行推进。</div>
+      <div class="module-meta"><span>3分支</span><span>仲裁合并</span><span>V1.0</span></div>
+    </div>
+    <div class="module-card">
+      <div class="module-icon">🌐</div>
+      <div class="module-name">同源节点网络</div>
+      <div class="module-desc">动态IP白名单，HMAC-SHA256签名验证，心跳保活，空闲自动部署，云内核主控+工作节点分布式架构。</div>
+      <div class="module-meta"><span>HMAC</span><span>动态白名单</span><span>V1.0</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 体系架构 -->
+<section id="architecture" class="section">
+  <div class="section-header">
+    <div class="section-tag">SYSTEM ARCHITECTURE</div>
+    <h2 class="section-title">五层自治架构</h2>
+    <p class="section-desc">从调度中枢到展示层的完整五层架构，双内核驱动，四大产线协同</p>
+  </div>
+  <div class="arch-container">
+    <div class="arch-layer">
+      <div class="arch-label">L0 调度中枢</div>
+      <div class="arch-nodes">
+        <div class="arch-node core">宗源中枢 ZONGYUAN-HUB</div>
+        <div class="arch-node">统一调度器</div>
+        <div class="arch-node">意图识别引擎</div>
+      </div>
+    </div>
+    <div class="arch-connector">▼</div>
+    <div class="arch-layer">
+      <div class="arch-label">L1 双内核</div>
+      <div class="arch-nodes">
+        <div class="arch-node core">真值引擎</div>
+        <div class="arch-node core">因果奇点内核</div>
+        <div class="arch-node">真因果融合内核</div>
+        <div class="arch-node">元学习自进化</div>
+      </div>
+    </div>
+    <div class="arch-connector">▼</div>
+    <div class="arch-layer">
+      <div class="arch-label">L2 四大产线</div>
+      <div class="arch-nodes">
+        <div class="arch-node">决策产线</div>
+        <div class="arch-node">研究产线</div>
+        <div class="arch-node">短剧产线</div>
+        <div class="arch-node">法务护盾</div>
+      </div>
+    </div>
+    <div class="arch-connector">▼</div>
+    <div class="arch-layer">
+      <div class="arch-label">L3 基建层</div>
+      <div class="arch-nodes">
+        <div class="arch-node">算力调度</div>
+        <div class="arch-node">元秩序归档</div>
+        <div class="arch-node">Merkle-DAG</div>
+        <div class="arch-node">记忆网关 9120</div>
+      </div>
+    </div>
+    <div class="arch-connector">▼</div>
+    <div class="arch-layer">
+      <div class="arch-label">L4 展示层</div>
+      <div class="arch-nodes">
+        <div class="arch-node">黑金藏品卡</div>
+        <div class="arch-node">可视化网页</div>
+        <div class="arch-node">飞书文档</div>
+        <div class="arch-node">官网门户</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 公理体系预览 -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-tag">MATHEMATICAL FOUNDATION</div>
+    <h2 class="section-title">80条数学公理</h2>
+    <p class="section-desc">元极恒一体系的数学基底，点击进入完整可视化公理体系</p>
+  </div>
+  <div class="axiom-preview">
+    <div class="axiom-preview-header">
+      <div class="axiom-preview-title">五大元极恒一公理 · 核心</div>
+      <a href="/math-axioms/" class="btn btn-outline" style="padding:8px 20px;font-size:12px">查看全部80条 →</a>
+    </div>
+    <div class="axiom-mini-grid">
+      <div class="axiom-mini"><div class="id">M-1</div><div class="name">流形基底公理</div></div>
+      <div class="axiom-mini"><div class="id">M-2</div><div class="name">拓扑永恒公理</div></div>
+      <div class="axiom-mini"><div class="id">M-3</div><div class="name">李群对称公理</div></div>
+      <div class="axiom-mini"><div class="id">M-4</div><div class="name">同构等价公理</div></div>
+      <div class="axiom-mini"><div class="id">M-5</div><div class="name">指标统一公理</div></div>
+      <div class="axiom-mini"><div class="id">D1-D5</div><div class="name">华夏地脉公理</div></div>
+      <div class="axiom-mini"><div class="id">C1-C6</div><div class="name">碳硅耦合公理</div></div>
+      <div class="axiom-mini"><div class="id">L1-L7</div><div class="name">驻波生命公理</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 关于 -->
+<section id="about" class="section">
+  <div class="section-header">
+    <div class="section-tag">ABOUT</div>
+    <h2 class="section-title">关于火斗云智</h2>
+    <p class="section-desc">元极恒一超认知永恒自治体系的对外品牌</p>
+  </div>
+  <div style="max-width:800px;margin:0 auto;text-align:center">
+    <p style="font-size:14px;color:var(--text2);line-height:2;margin-bottom:24px">
+      火斗云智AIOS是基于ZONGYUAN-ROOT元极恒一自治体系构建的智能操作系统。<br>
+      以80条数学公理为基底，融合真值引擎、因果奇点内核、元学习自进化三大核心，<br>
+      实现从感知、推理、决策到执行的全链路自治。<br><br>
+      体系坚持"真值优先"原则，所有结论以交叉验证的客观事实为唯一依据；<br>
+      坚持"免费优先调度"策略，API模型调度以免费额度为首选；<br>
+      坚持"本地仿真→人工审核→云端部署"的稳健流程。
+    </p>
+    <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-top:32px">
+      <div style="text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:var(--gold)">DID-BR-000002</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">去中心化身份标识</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:24px;color:var(--gold)">Ω₀⊂⊙∞⊂Ω</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">溯源锚定标识</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /main -->
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>核心模块</h4>
+        <a href="/math-axioms/">数学公理体系</a>
+        <a href="https://drama.huodouai.com/">昆仑洞天短剧</a>
+        <a href="#modules">算力池调度</a>
+        <a href="#modules">合规确权中台</a>
+      </div>
+      <div class="footer-col">
+        <h4>体系架构</h4>
+        <a href="#architecture">五层自治架构</a>
+        <a href="#architecture">双内核驱动</a>
+        <a href="#architecture">四大产线</a>
+        <a href="#architecture">元秩序归档</a>
+      </div>
+      <div class="footer-col">
+        <h4>技术文档</h4>
+        <a href="/math-axioms/">80条公理</a>
+        <a href="/math-axioms/#/theorems">关键定理</a>
+        <a href="/math-axioms/#/unified">统一理论</a>
+        <a href="#">API文档</a>
+      </div>
+      <div class="footer-col">
+        <h4>关于</h4>
+        <a href="#about">火斗云智AIOS</a>
+        <a href="#about">ZONGYUAN-ROOT</a>
+        <a href="#about">元极恒一体系</a>
+        <a href="#about">联系我们</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-omega">Ω₀⊂⊙∞⊂Ω</div>
+      <div class="footer-text">火斗云智AIOS · 元极恒一超认知永恒自治体系</div>
+      <div class="footer-did">DID-BR-000002 | META-LAW-MATH-FOUNDATION-001 + SUPPLEMENT-001 | Lv8永久自治锁档</div>
+    </div>
+  </div>
+</footer>
+
+<div class="trace-mark">Ω₀⊂⊙∞⊂Ω | DID-BR-000002</div>
+
+<script>
+// 移动端菜单
+function toggleMobileMenu(){
+  document.getElementById('mobileMenu').classList.toggle('show');
+  document.querySelector('.nav-toggle').classList.toggle('active');
+}
+function closeMobileMenu(){
+  document.getElementById('mobileMenu').classList.remove('show');
+  document.querySelector('.nav-toggle').classList.remove('active');
+}
+// 点击页面其他区域关闭菜单
+document.addEventListener('click',function(e){
+  const menu=document.getElementById('mobileMenu');
+  const toggle=document.querySelector('.nav-toggle');
+  if(menu.classList.contains('show')&&!menu.contains(e.target)&&!toggle.contains(e.target)){
+    closeMobileMenu();
+  }
+});
+</script>
+</body>
+</html>

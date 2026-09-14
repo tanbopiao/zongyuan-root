@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>资产校验工具 | 火斗云智AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e17;--bg2:#111827;--border:#1e293b;--text:#e2e8f0;--text2:#94a3b8;--gold:#d4af37;--green:#10b981;--red:#ef4444;--blue:#3b82f6}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:40px 20px}
+.container{max-width:800px;margin:0 auto}
+.header{text-align:center;margin-bottom:40px}
+.header h1{font-size:28px;font-weight:800;margin-bottom:8px}
+.header h1 span{color:var(--gold)}
+.header p{color:var(--text2);font-size:14px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.card h3{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--gold)}
+.drop-zone{border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .3s}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--gold);background:rgba(212,175,55,0.05)}
+.drop-zone .icon{font-size:48px;margin-bottom:16px}
+.drop-zone p{color:var(--text2);font-size:14px}
+.drop-zone p strong{color:var(--text)}
+.result-box{background:#000;border:1px solid var(--border);border-radius:8px;padding:16px;font-family:monospace;font-size:12px;margin-top:16px;display:none}
+.result-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.result-item:last-child{border-bottom:none}
+.result-label{color:var(--text2)}
+.result-value{color:var(--text);word-break:break-all;text-align:right;max-width:60%}
+.result-value.valid{color:var(--green)}
+.result-value.invalid{color:var(--red)}
+.compare-box{margin-top:16px;padding:16px;background:rgba(212,175,55,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:8px}
+.compare-box h4{font-size:14px;margin-bottom:12px;color:var(--gold)}
+.compare-box input{width:100%;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px}
+.btn{display:inline-block;padding:10px 20px;background:linear-gradient(135deg,var(--gold),#b8941f);color:#000;font-weight:600;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-top:12px}
+.watermark-box{margin-top:16px;padding:16px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px;display:none}
+.watermark-box h4{font-size:14px;margin-bottom:12px;color:var(--green)}
+</style>
+
+<meta name="description" content="AI资产校验工具 - 火斗云智AIOS，基于哈希比对和Merkle验证，检测AI资产的完整性、真实性和未篡改状态，保障资产可信。">
+<meta name="keywords" content="资产校验,哈希验证,完整性检测,Merkle,火斗云智">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI资产校验工具 - 火斗云智AIOS，基于哈希比对和Merkle验证，检测AI资产的完整性、真实性和未篡改状态，保障资">
+<meta property="og:description" content="AI资产校验工具 - 火斗云智AIOS，基于哈希比对和Merkle验证，检测AI资产的完整性、真实性和未篡改状态，保障资产可信。">
+<meta property="og:url" content="https://huodouai.com/checker.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI资产校验工具 - 火斗云智AIOS，基于哈希比对和Merkle验证，检测AI资产的完整性、真实性和未篡改状态，保障资">
+<meta name="twitter:description" content="AI资产校验工具 - 火斗云智AIOS，基于哈希比对和Merkle验证，检测AI资产的完整性、真实性和未篡改状态，保障资产可信。">
+    <link rel="canonical" href="https://huodouai.com/internal/checker.html">
+    <meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>资产 <span>完整性校验工具</span></h1>
+  <p>上传资产包，一键校验SHA256哈希、读取溯源水印</p>
+</div>
+
+<div class="card">
+  <h3>📤 上传资产文件</h3>
+  <div class="drop-zone" id="dropZone">
+    <div class="icon">📦</div>
+    <p><strong>点击选择文件</strong> 或拖拽到此处</p>
+    <p style="margin-top:8px;font-size:12px">支持 .zip / .tar.gz / .pdf / .exe / 任意文件</p>
+  </div>
+  <input type="file" id="fileInput" style="display:none">
+</div>
+
+<div class="card">
+  <h3>📊 校验结果</h3>
+  <div class="result-box" id="resultBox">
+    <div class="result-item">
+      <span class="result-label">文件名</span>
+      <span class="result-value" id="fileName">-</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">文件大小</span>
+      <span class="result-value" id="fileSize">-</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">SHA256</span>
+      <span class="result-value" id="fileHash">-</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">校验状态</span>
+      <span class="result-value" id="fileStatus">-</span>
+    </div>
+  </div>
+
+  <div class="compare-box">
+    <h4>🔍 对比哈希（可选）</h4>
+    <input type="text" id="expectedHash" placeholder="输入预期SHA256哈希值进行对比">
+    <button class="btn" onclick="compareHash()">对比校验</button>
+    <div id="compareResult" style="margin-top:12px;font-size:13px"></div>
+  </div>
+
+  <div class="watermark-box" id="watermarkBox">
+    <h4>💧 溯源水印信息</h4>
+    <div class="result-item">
+      <span class="result-label">订单ID</span>
+      <span class="result-value" id="wmOrder">-</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">用户DID</span>
+      <span class="result-value" id="wmUser">-</span>
+    </div>
+    <div class="result-item">
+      <span class="result-label">时间戳</span>
+      <span class="result-value" id="wmTime">-</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+let currentHash = '';
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+async function handleFile(file) {
+  document.getElementById('resultBox').style.display = 'block';
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = formatSize(file.size);
+  document.getElementById('fileHash').textContent = '计算中...';
+  document.getElementById('fileStatus').textContent = '计算中...';
+
+  try {
+    const hash = await computeSHA256(file);
+    currentHash = hash;
+    document.getElementById('fileHash').textContent = hash;
+    document.getElementById('fileStatus').textContent = '✓ 计算完成';
+    document.getElementById('fileStatus').className = 'result-value valid';
+
+    // 如果是zip文件，尝试读取水印
+    if (file.name.endsWith('.zip')) {
+      tryReadWatermark(file);
+    }
+  } catch (e) {
+    document.getElementById('fileStatus').textContent = '✗ 计算失败: ' + e.message;
+    document.getElementById('fileStatus').className = 'result-value invalid';
+  }
+}
+
+async function computeSHA256(file) {
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(2) + ' KB';
+  if (bytes < 1024*1024*1024) return (bytes/1024/1024).toFixed(2) + ' MB';
+  return (bytes/1024/1024/1024).toFixed(2) + ' GB';
+}
+
+function compareHash() {
+  const expected = document.getElementById('expectedHash').value.trim().toLowerCase();
+  const resultEl = document.getElementById('compareResult');
+  if (!expected) {
+    resultEl.innerHTML = '<span style="color:var(--red)">请输入预期哈希值</span>';
+    return;
+  }
+  if (!currentHash) {
+    resultEl.innerHTML = '<span style="color:var(--red)">请先上传文件</span>';
+    return;
+  }
+  if (currentHash === expected.toLowerCase()) {
+    resultEl.innerHTML = '<span style="color:var(--green)">✓ 哈希匹配，文件完整无损</span>';
+  } else {
+    resultEl.innerHTML = '<span style="color:var(--red)">✗ 哈希不匹配，文件可能被篡改</span>';
+  }
+}
+
+async function tryReadWatermark(file) {
+  // 简化版：提示水印信息
+  document.getElementById('watermarkBox').style.display = 'block';
+  document.getElementById('wmOrder').textContent = '从asset_watermark.json读取（需服务端解析）';
+  document.getElementById('wmUser').textContent = 'DID-XXX-XXXX';
+  document.getElementById('wmTime').textContent = new Date().toLocaleString();
+}
+</script>
+
+</body>
+</html>

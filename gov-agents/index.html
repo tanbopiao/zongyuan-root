@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务智能体矩阵</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 20px; border-bottom: 1px solid #c9a96e33; display: flex; align-items: center; justify-content: space-between; }
+.header h1 { font-size: 20px; color: #c9a96e; }
+.header .subtitle { font-size: 12px; color: #888; margin-top: 4px; }
+.container { display: flex; height: calc(100vh - 80px); }
+.sidebar { width: 280px; background: #111118; border-right: 1px solid #222; overflow-y: auto; padding: 16px; }
+.agent-card { background: #1a1a24; border: 1px solid #2a2a3a; border-radius: 10px; padding: 14px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s; }
+.agent-card:hover { border-color: #c9a96e; transform: translateX(4px); }
+.agent-card.active { border-color: #c9a96e; background: #1f1f2e; box-shadow: 0 0 20px #c9a96e22; }
+.agent-card .avatar { font-size: 28px; margin-bottom: 8px; }
+.agent-card .name { font-size: 15px; font-weight: 600; color: #c9a96e; }
+.agent-card .title { font-size: 12px; color: #888; margin-top: 2px; }
+.agent-card .desc { font-size: 11px; color: #666; margin-top: 6px; line-height: 1.4; }
+.agent-card .status { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-top: 8px; }
+.status.active { background: #22c55e22; color: #22c55e; }
+.status.planned { background: #6666; color: #999; }
+.chat-area { flex: 1; display: flex; flex-direction: column; }
+.chat-header { padding: 16px 20px; border-bottom: 1px solid #222; background: #111118; display: flex; align-items: center; gap: 12px; }
+.chat-header .avatar { font-size: 32px; }
+.chat-header .info h3 { color: #c9a96e; font-size: 16px; }
+.chat-header .info p { font-size: 12px; color: #888; }
+.messages { flex: 1; overflow-y: auto; padding: 20px; }
+.message { margin-bottom: 16px; display: flex; gap: 10px; }
+.message.user { flex-direction: row-reverse; }
+.message .avatar { width: 36px; height: 36px; border-radius: 50%; background: #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.message .bubble { max-width: 70%; padding: 12px 16px; border-radius: 12px; line-height: 1.6; font-size: 14px; }
+.message.ai .bubble { background: #1a1a24; border: 1px solid #2a2a3a; }
+.message.user .bubble { background: #c9a96e; color: #000; }
+.message .meta { font-size: 11px; color: #666; margin-top: 4px; }
+.input-area { padding: 16px 20px; border-top: 1px solid #222; background: #111118; }
+.input-row { display: flex; gap: 10px; }
+.input-row input { flex: 1; background: #1a1a24; border: 1px solid #2a2a3a; border-radius: 8px; padding: 12px 16px; color: #e0e0e0; font-size: 14px; outline: none; }
+.input-row input:focus { border-color: #c9a96e; }
+.input-row button { background: #c9a96e; color: #000; border: none; border-radius: 8px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+.quick-prompts { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.quick-prompt { background: #1a1a24; border: 1px solid #2a2a3a; border-radius: 16px; padding: 6px 12px; font-size: 12px; color: #aaa; cursor: pointer; transition: all 0.2s; }
+.quick-prompt:hover { border-color: #c9a96e; color: #c9a96e; }
+.welcome { text-align: center; padding: 60px 20px; color: #666; }
+.welcome .icon { font-size: 64px; margin-bottom: 20px; }
+.welcome h2 { color: #c9a96e; margin-bottom: 10px; }
+.typing { display: inline-flex; gap: 4px; padding: 12px 16px; background: #1a1a24; border-radius: 12px; }
+.typing span { width: 8px; height: 8px; background: #c9a96e; border-radius: 50%; animation: bounce 1.4s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
+.routed-badge { display: inline-block; font-size: 10px; background: #c9a96e22; color: #c9a96e; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+</style>
+    <link rel="canonical" href="https://huodouai.comgov-agents/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="header">
+  <div>
+    <h1>⚡ 政务智能体矩阵</h1>
+    <div class="subtitle">7大专业智能体 · 智能路由 · 专属知识库 · 可信确权</div>
+  </div>
+  <div style="font-size:12px;color:#666;">Ω₀⊂⊙∞⊂Ω | DID-BR-000002</div>
+</div>
+<div class="container">
+  <div class="sidebar" id="agentList"></div>
+  <div class="chat-area">
+    <div class="chat-header" id="chatHeader" style="display:none;">
+      <div class="avatar" id="chatAvatar">📜</div>
+      <div class="info">
+        <h3 id="chatName">政策解读员</h3>
+        <p id="chatTitle">政务政策专家</p>
+      </div>
+    </div>
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcome">
+        <div class="icon">🤖</div>
+        <h2>欢迎使用政务智能体矩阵</h2>
+        <p>选择左侧智能体开始对话，或直接输入问题自动路由</p>
+      </div>
+    </div>
+    <div class="input-area">
+      <div class="input-row">
+        <input type="text" id="userInput" placeholder="输入您的问题，智能体将自动为您服务..." onkeypress="if(event.key==='Enter')sendMessage()">
+        <button id="sendBtn" onclick="sendMessage()">发送</button>
+      </div>
+      <div class="quick-prompts" id="quickPrompts"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = '/gov-api/api/agents';
+let currentAgent = null;
+let agents = [];
+
+// 快捷提问
+const quickPrompts = {
+  policy_expert: ['社保缴费政策', '公积金提取规定', '居住证办理政策', '个税专项附加扣除'],
+  guide_navigator: ['营业执照办理', '社保开户流程', '居住证怎么办', '公积金提取材料'],
+  document_writer: ['写一份工作通知', '起草请示报告', '写会议纪要', '发函格式']
+};
+
+// 加载智能体列表
+async function loadAgents() {
+  try {
+    const resp = await fetch(API_BASE + '/list');
+    const data = await resp.json();
+    agents = data.data || [];
+    renderAgentList();
+  } catch(e) {
+    console.error('加载智能体失败:', e);
+  }
+}
+
+function renderAgentList() {
+  const list = document.getElementById('agentList');
+  list.innerHTML = agents.map(a => `
+    <div class="agent-card ${a.status === 'planned' ? '' : ''}" onclick="${a.status === 'active' ? `selectAgent('${a.id}')` : ''}" style="${a.status === 'planned' ? 'opacity:0.5;cursor:not-allowed;' : ''}">
+      <div class="avatar">${a.avatar}</div>
+      <div class="name">${a.name}</div>
+      <div class="title">${a.title}</div>
+      <div class="desc">${a.description}</div>
+      <span class="status ${a.status}">${a.status === 'active' ? '已激活' : '规划中'}</span>
+    </div>
+  `).join('');
+}
+
+function selectAgent(agentId) {
+  currentAgent = agents.find(a => a.id === agentId);
+  document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  document.getElementById('chatHeader').style.display = 'flex';
+  document.getElementById('chatAvatar').textContent = currentAgent.avatar;
+  document.getElementById('chatName').textContent = currentAgent.name;
+  document.getElementById('chatTitle').textContent = currentAgent.title;
+  
+  // 更新快捷提问
+  const prompts = quickPrompts[agentId] || [];
+  document.getElementById('quickPrompts').innerHTML = prompts.map(p => 
+    `<span class="quick-prompt" onclick="document.getElementById('userInput').value='${p}';sendMessage()">${p}</span>`
+  ).join('');
+  
+  // 清空消息
+  document.getElementById('messages').innerHTML = '';
+  addMessage('ai', `您好！我是${currentAgent.name}，${currentAgent.description}。有什么可以帮您的？`);
+}
+
+function addMessage(role, content, meta = '') {
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+  
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'message ' + role;
+  div.innerHTML = `
+    <div class="avatar">${role === 'user' ? '👤' : (currentAgent ? currentAgent.avatar : '🤖')}</div>
+    <div>
+      <div class="bubble">${content.replace(/\n/g, '<br>')}</div>
+      ${meta ? `<div class="meta">${meta}</div>` : ''}
+    </div>
+  `;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function showTyping() {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.id = 'typing';
+  div.className = 'message ai';
+  div.innerHTML = `<div class="avatar">${currentAgent ? currentAgent.avatar : '🤖'}</div><div class="typing"><span></span><span></span><span></span></div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  input.value = '';
+  addMessage('user', text);
+  showTyping();
+  document.getElementById('sendBtn').disabled = true;
+  
+  try {
+    const resp = await fetch(API_BASE + '/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        agent_id: currentAgent ? currentAgent.id : '',
+        model: 'zhipu'
+      })
+    });
+    const data = await resp.json();
+    
+    document.getElementById('typing').remove();
+    
+    if (data.code === 0 && data.data) {
+      const d = data.data;
+      let meta = '';
+      if (d.routed) {
+        meta = `智能路由: ${d.agent_name} ${d.context_used ? '| 已调用知识库' : ''}`;
+      }
+      addMessage('ai', d.reply || '抱歉，暂时无法回答', meta);
+      
+      // 如果是自动路由，更新当前智能体
+      if (!currentAgent && d.agent_id && d.agent_id !== 'general') {
+        currentAgent = agents.find(a => a.id === d.agent_id);
+        if (currentAgent) {
+          document.getElementById('chatHeader').style.display = 'flex';
+          document.getElementById('chatAvatar').textContent = currentAgent.avatar;
+          document.getElementById('chatName').textContent = currentAgent.name;
+          document.getElementById('chatTitle').textContent = currentAgent.title;
+        }
+      }
+    } else {
+      addMessage('ai', '抱歉，服务暂时不可用: ' + (data.error || '未知错误'));
+    }
+  } catch(e) {
+    document.getElementById('typing').remove();
+    addMessage('ai', '网络错误，请稍后重试');
+  } finally {
+    document.getElementById('sendBtn').disabled = false;
+  }
+}
+
+// 初始化
+loadAgents();
+</script>
+</body>
+</html>

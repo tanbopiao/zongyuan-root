@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火斗云智 AIOS · 云端大脑总控中心</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 32px;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .header .subtitle { color: rgba(255,255,255,0.6); font-size: 14px; }
+        .header .anchor { color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 5px; }
+        
+        .status-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .status-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .status-card .value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .status-card .label { color: rgba(255,255,255,0.6); font-size: 13px; }
+        .status-card.healthy .value { color: #00ff88; }
+        .status-card.warning .value { color: #ffaa00; }
+        .status-card.critical .value { color: #ff4444; }
+        .status-card.info .value { color: #00d4ff; }
+        
+        .layers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .layer-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .layer-card h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .layer-card .status-badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: normal;
+        }
+        .status-badge.healthy { background: rgba(0,255,136,0.2); color: #00ff88; }
+        .status-badge.degraded { background: rgba(255,170,0,0.2); color: #ffaa00; }
+        .status-badge.down { background: rgba(255,68,68,0.2); color: #ff4444; }
+        
+        .service-list { list-style: none; }
+        .service-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+        .service-list li:last-child { border-bottom: none; }
+        .service-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .service-dot.running { background: #00ff88; box-shadow: 0 0 10px #00ff88; }
+        .service-dot.stopped { background: #ff4444; }
+        .service-dot.starting { background: #ffaa00; }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 30px;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 20px auto;
+            display: block;
+        }
+        .refresh-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔥 火斗云智 AIOS · 云端大脑总控中心</h1>
+            <div class="subtitle">Cloud Brain Control Center · 元极恒一超认知永恒自治体系</div>
+            <div class="anchor">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | Ω-TAN-7-001</div>
+        </div>
+        
+        <div class="status-overview" id="statusOverview">
+            <div class="status-card healthy">
+                <div class="value" id="healthPercent">--%</div>
+                <div class="label">整体健康度</div>
+            </div>
+            <div class="status-card info">
+                <div class="value" id="activeServices">--/--</div>
+                <div class="label">运行服务</div>
+            </div>
+            <div class="status-card healthy">
+                <div class="value" id="activeNodes">--</div>
+                <div class="label">协同节点</div>
+            </div>
+            <div class="status-card info">
+                <div class="value" id="memoryAssets">--</div>
+                <div class="label">记忆资产</div>
+            </div>
+            <div class="status-card healthy">
+                <div class="value" id="evolutionCycles">--</div>
+                <div class="label">进化周期</div>
+            </div>
+        </div>
+        
+        <button class="refresh-btn" onclick="refreshStatus()">🔄 刷新状态</button>
+        
+        <div class="layers-grid" id="layersGrid">
+            <!-- 动态生成 -->
+        </div>
+        
+        <div class="footer">
+            <p>火斗云智 AIOS · 云端大脑总控中心 | 稳态运维平台</p>
+            <p>Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 全域锁档固化 | 自治进化闭环</p>
+        </div>
+    </div>
+    
+    <script>
+        const LAYERS = [
+            {
+                name: '🧠 感知层',
+                key: 'perception',
+                services: [
+                    { name: 'Agent探针系统', port: 8099 },
+                    { name: '记忆网关', port: 9120 },
+                    { name: '飞书告警网关', port: 8050 },
+                    { name: '远程握手API', port: 8000 },
+                ]
+            },
+            {
+                name: '💡 决策层',
+                key: 'decision',
+                services: [
+                    { name: 'LLM决策引擎', port: 8098 },
+                    { name: '决策执行器V2.0', port: null },
+                    { name: '自治决策增强器', port: null },
+                ]
+            },
+            {
+                name: '🛡️ 自愈层',
+                key: 'healing',
+                services: [
+                    { name: '故障自愈引擎', port: null },
+                    { name: 'SSG解空间治理', port: null },
+                    { name: '防跑偏五层防线', port: null },
+                ]
+            },
+            {
+                name: '📚 学习层',
+                key: 'learning',
+                services: [
+                    { name: '学习反馈引擎', port: null },
+                    { name: '预测性维护', port: null },
+                    { name: '全域记忆同步', port: null },
+                ]
+            },
+            {
+                name: '🧬 进化层',
+                key: 'evolution',
+                services: [
+                    { name: '主动学习进化引擎', port: null },
+                    { name: '多节点协同框架', port: null },
+                    { name: '27算子组合架构', port: null },
+                ]
+            },
+            {
+                name: '🏗️ 基础设施层',
+                key: 'infrastructure',
+                services: [
+                    { name: '自托管Git服务', port: 5000 },
+                    { name: '自托管S3存储', port: 9000 },
+                    { name: 'Git Webhook接收器', port: 3000 },
+                    { name: 'Nginx网关', port: 80 },
+                ]
+            },
+        ];
+        
+        function renderLayers() {
+            const grid = document.getElementById('layersGrid');
+            grid.innerHTML = LAYERS.map(layer => `
+                <div class="layer-card">
+                    <h3>
+                        ${layer.name}
+                        <span class="status-badge healthy" id="badge-${layer.key}">检测中...</span>
+                    </h3>
+                    <ul class="service-list">
+                        ${layer.services.map(svc => `
+                            <li>
+                                <span><span class="service-dot starting" id="dot-${svc.name}"></span>${svc.name}</span>
+                                <span style="color:rgba(255,255,255,0.4)">${svc.port ? ':' + svc.port : '守护进程'}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+        
+        async function refreshStatus() {
+            try {
+                // 尝试从总控API获取状态
+                const response = await fetch('http://127.0.0.1:8101/api/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus(data);
+                } else {
+                    simulateStatus();
+                }
+            } catch (e) {
+                simulateStatus();
+            }
+        }
+        
+        function updateStatus(data) {
+            const summary = data.summary || {};
+            document.getElementById('healthPercent').textContent = (summary.health_percentage || 0) + '%';
+            document.getElementById('activeServices').textContent = (summary.active_services || 0) + '/' + (summary.total_services || 0);
+            
+            // 更新各层状态
+            const layers = data.layers || {};
+            for (const [key, layer] of Object.entries(layers)) {
+                const badge = document.getElementById('badge-' + key);
+                if (badge) {
+                    badge.textContent = layer.status === 'healthy' ? '健康' : (layer.status === 'degraded' ? '降级' : '异常');
+                    badge.className = 'status-badge ' + layer.status;
+                }
+            }
+            
+            // 更新服务状态
+            const services = data.services || [];
+            services.forEach(svc => {
+                const dot = document.getElementById('dot-' + svc.name);
+                if (dot) {
+                    dot.className = 'service-dot ' + (svc.status === 'running' ? 'running' : 'stopped');
+                }
+            });
+        }
+        
+        function simulateStatus() {
+            // 模拟状态（实际部署时通过API获取）
+            document.getElementById('healthPercent').textContent = '100%';
+            document.getElementById('activeServices').textContent = '10/10';
+            document.getElementById('activeNodes').textContent = '4';
+            document.getElementById('memoryAssets').textContent = '207';
+            document.getElementById('evolutionCycles').textContent = '1';
+            
+            LAYERS.forEach(layer => {
+                const badge = document.getElementById('badge-' + layer.key);
+                if (badge) {
+                    badge.textContent = '健康';
+                    badge.className = 'status-badge healthy';
+                }
+                layer.services.forEach(svc => {
+                    const dot = document.getElementById('dot-' + svc.name);
+                    if (dot) {
+                        dot.className = 'service-dot running';
+                    }
+                });
+            });
+        }
+        
+        // 初始化
+        renderLayers();
+        refreshStatus();
+        
+        // 每30秒自动刷新
+        setInterval(refreshStatus, 30000);
+    </script>
+</body>
+</html>

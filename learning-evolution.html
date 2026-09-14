@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>前沿思想 · 学习进化方法论</title>
+<meta name="description" content="火斗云智学习进化方法论 - 元学习、主动真值校验、持续进化">
+<style>
+  :root{--bg:#0b0e14;--panel:#121722;--line:#232c3d;--gold:#c9a227;--gold-soft:#e6c86a;--gold-dim:#8a7326;
+    --ink:#e6edf3;--muted:#8b949e;--blue:#58a6ff;--purple:#a371f7;--red:#f85149;--green:#7ee787;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;line-height:1.6;}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;opacity:.05;
+    background:repeating-linear-gradient(45deg,#c9a227 0,#c9a227 1px,transparent 1px,transparent 22px);}
+  .wrap{max-width:960px;margin:0 auto;padding:28px 20px 50px;}
+  .head{text-align:center;border-bottom:1px solid var(--line);padding-bottom:20px;}
+  .badge{display:inline-block;border:1px solid var(--gold-dim);color:var(--gold-soft);font-size:12px;letter-spacing:3px;padding:4px 14px;border-radius:3px;margin-bottom:10px;}
+  h1{font-size:clamp(20px,3.5vw,26px);font-weight:800;color:#fff;letter-spacing:1px;margin:6px 0 6px;}
+  h1 span{color:var(--gold);}
+  .sub{font-size:13px;color:var(--muted);margin:0;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-top:16px;}
+  .card h2{font-size:13px;color:var(--gold);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .card h2::before{content:"";width:3px;height:14px;background:var(--gold);border-radius:1px;}
+  .step{display:flex;align-items:center;gap:12px;border-radius:6px;padding:9px 12px;margin-top:6px;background:rgba(88,166,255,.06);border:1px solid var(--blue);}
+  .step .k{min-width:70px;font-size:13px;font-weight:800;color:var(--blue);}
+  .step .v{font-size:12px;color:#c0c8d0;}
+  .loop-note{font-size:11px;color:var(--muted);margin-top:10px;text-align:center;}
+  .two{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .half{flex:1;min-width:200px;border-radius:8px;padding:12px;}
+  .half .t{font-size:12px;font-weight:700;margin-bottom:4px;}
+  .half .d{font-size:12px;color:#c0c8d0;}
+  .half.blue{background:rgba(88,166,255,.06);border:1px solid var(--blue);}.half.blue .t{color:var(--blue);}
+  .half.gold{background:rgba(201,162,39,.1);border:1px solid var(--gold);}.half.gold .t{color:var(--gold-soft);}
+  .half.red{background:rgba(247,81,73,.05);border:1px solid var(--red);}.half.red .t{color:var(--red);}
+  .half.green{background:rgba(126,231,135,.05);border:1px solid var(--green);}.half.green .t{color:var(--green);}
+  .half.gray{background:rgba(139,148,158,.05);border:1px solid var(--muted);}.half.gray .t{color:var(--muted);}
+  .half.purple{background:rgba(163,113,247,.06);border:1px solid var(--purple);}.half.purple .t{color:var(--purple);}
+  .divider{border-top:1px dashed var(--line);margin-top:12px;padding-top:10px;font-size:12px;color:var(--muted);}
+  .pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid;margin-right:4px;}
+  .pill.gold{color:var(--gold-soft);border-color:var(--gold-dim);background:rgba(201,162,39,.08);}
+  .pill.blue{color:var(--blue);border-color:var(--blue);background:rgba(88,166,255,.08);}
+  .pill.red{color:var(--red);border-color:var(--red);background:rgba(247,81,73,.08);}
+  .pill.green{color:var(--green);border-color:var(--green);background:rgba(126,231,135,.08);}
+  .rule{background:linear-gradient(135deg,rgba(201,162,39,.08),rgba(163,113,247,.06));border:1px solid var(--gold);border-radius:10px;padding:16px;margin-top:16px;}
+  .rule h2{font-size:13px;color:var(--gold-soft);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .rule h2::before{content:"";width:3px;height:14px;background:var(--gold);border-radius:1px;}
+  .rule p{font-size:12.5px;color:#c0c8d0;}
+  .rule b{color:var(--gold-soft);}
+  .footer{text-align:center;color:var(--gold-dim);font-size:11px;letter-spacing:1px;margin-top:20px;padding-top:14px;border-top:1px solid var(--line);}
+  .footer .trace{color:var(--gold-dim);font-size:11px;margin-top:6px;}
+  @media(max-width:600px){.half{min-width:100%;}}
+</style>
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div class="wrap">
+  <div class="head">
+    <div class="badge">前沿思想 · 学习进化方法论</div>
+    <h1>学习进化 <span>四步闭环</span> · 涌现 · 自主决策</h1>
+    <p class="sub">互相学习 · 持续进化 · 涌现可视化 · 稳态治理</p>
+  </div>
+
+  <!-- ① 记忆驱动闭环 -->
+  <div class="card">
+    <h2>① 记忆驱动闭环 · 减少试错的标准流程</h2>
+    <div class="step"><div class="k">1 拉取</div><div class="v">从云端记忆网关获取最新记忆/真值，了解全域现状</div></div>
+    <div class="step"><div class="k">2 对比</div><div class="v">与本地全域状态逐项对比，识别差距与待优化点</div></div>
+    <div class="step"><div class="k">3 规划</div><div class="v">规划最优稳态方案，避免凭感觉盲目操作</div></div>
+    <div class="step"><div class="k">4 反馈</div><div class="v">执行后将新增增值写回记忆网关，供所有同源节点共享</div></div>
+    <div class="loop-note">↻ 每轮闭环都沉淀一条可复用方法论，把「经验」固化为「规则」</div>
+  </div>
+
+  <!-- ② 三大进化法则 -->
+  <div class="card">
+    <h2>② 三大进化法则 · 从试错到确权的路径</h2>
+    <div class="two">
+      <div class="half red"><div class="t">遇错先扫描</div><div class="d">遇到错误/反复试错时，先扫描记忆网关相关真值与旧部署轨迹，理解清楚再行动</div></div>
+      <div class="half gold"><div class="t">拿不定拉最高元法则</div><div class="d">决策不确定时，拉最高元法则+启动超认知自治评估，得出最优稳态方案</div></div>
+      <div class="half green"><div class="t">涌现层级可视化</div><div class="d">轮次梳理=自进化；低层自动浮现、高层法则人工升格、公理宪法层人工确权</div></div>
+    </div>
+  </div>
+
+  <!-- ③ 涌现层级理论 -->
+  <div class="card">
+    <h2>③ 涌现的上攀路径 · 从操作到宪法</h2>
+    <div class="half purple" style="margin-top:6px;"><div class="t">宪法层 / 公理层</div><div class="d">体系第一性 · 必须人工确权后升格</div></div>
+    <div class="half gold" style="margin-top:6px;"><div class="t">法则层 / 规则层 · 当前已到</div><div class="d">体系秩序 · 自动沉淀 · 可迭代</div></div>
+    <div class="half blue" style="margin-top:6px;"><div class="t">逻辑层 / 操作层</div><div class="d">为什么这么做 · 怎么做事 · 海量执行自动累积</div></div>
+    <div class="divider">涌现 = 有条件的必然：<span class="pill red">足够阈值</span><span class="pill green">正确循环</span> → 每轮向更高层收敛；缺循环则只是堆积。</div>
+  </div>
+
+  <!-- ④ 本地增值自主上报决策 -->
+  <div class="rule">
+    <h2>④ 本地增值自主上报决策 · metalaw.LOCAL-VALUE-PUSH-DECISION</h2>
+    <p>
+      <span class="pill blue">AUTO_REPORT 自动上报</span> 低风险+高确定性+已验证方法论 → 直接写入记忆网关 + 全域对账<br>
+      <span class="pill gold">APPROVAL_REPORT 审批上报</span> 中风险/需多方对账 → 生成提案 + 中枢发起飞书审批 → 三维稳态≥78自动通过<br>
+      <span class="pill red">MANUAL_FINAL 人工终审</span> 高危/机密/公理宪法层 → 只入提案库，必须人工终审<br>
+      <span class="pill green">核心</span> 能自动则自动，需评估走审批，高危人工终审；所有上报带 DID + 溯源，刷新镜像锁档
+    </p>
+  </div>
+
+  <div class="footer">火斗云智AIOS · ZONGYUAN-ROOT · 学习进化可视化 V1.1
+    <div class="trace">DID-BR-000002 · Ω-TAN-7-001 · Ω₀⊂⊙∞⊂Ω</div>
+  </div>
+</div>
+</body>
+</html>

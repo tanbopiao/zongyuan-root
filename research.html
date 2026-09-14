@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人工智能研究 | 火斗云智AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#e5e7eb;font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.hero{text-align:center;padding:40px 20px 30px;margin-bottom:30px;background:linear-gradient(180deg,rgba(212,175,55,0.08),transparent);border-radius:16px;border:1px solid rgba(212,175,55,0.15)}
+.hero h1{font-size:32px;font-weight:800;margin-bottom:10px;background:linear-gradient(90deg,#D4AF37,#F4E4BC,#D4AF37);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:14px;color:#9ca3af;max-width:700px;margin:0 auto}
+.hero-anchor{font-size:11px;color:#D4AF37;letter-spacing:2px;margin-top:12px}
+.section{margin-bottom:30px}
+.section-title{font-size:18px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#D4AF37}
+.section-title::before{content:"";width:4px;height:22px;background:linear-gradient(180deg,#D4AF37,#8B6914);border-radius:2px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s}
+.card:hover{border-color:rgba(212,175,55,0.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.1)}
+.card-icon{font-size:32px;margin-bottom:10px}
+.card-title{font-size:15px;font-weight:600;color:#D4AF37;margin-bottom:8px}
+.card-desc{font-size:12px;color:#9ca3af;line-height:1.7}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{font-size:10px;padding:3px 10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);border-radius:12px;color:#D4AF37}
+.timeline{position:relative;padding-left:30px}
+.timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#D4AF37,#8B6914)}
+.timeline-item{position:relative;margin-bottom:20px}
+.timeline-item::before{content:"";position:absolute;left:-26px;top:6px;width:12px;height:12px;border-radius:50%;background:#D4AF37;border:2px solid #0a0e17}
+.timeline-title{font-size:14px;font-weight:600;color:#D4AF37;margin-bottom:4px}
+.timeline-desc{font-size:12px;color:#9ca3af;line-height:1.6}
+.formula-box{background:rgba(212,175,55,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:16px;margin:12px 0;font-family:'Courier New',monospace;font-size:13px;color:#F4E4BC;overflow-x:auto}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.15);border-radius:10px;padding:16px;text-align:center}
+.stat-value{font-size:28px;font-weight:700;color:#D4AF37;margin-bottom:4px}
+.stat-label{font-size:11px;color:#6b7280}
+.footer{text-align:center;padding:30px 20px;border-top:1px solid rgba(212,175,55,0.15);margin-top:40px}
+.footer-text{font-size:11px;color:#6b7280}
+.footer-anchor{font-size:10px;color:#D4AF37;margin-top:8px;letter-spacing:1px}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="前沿AI技术探索，六大核心研究引擎（自进化/自愈/知识图谱/配置中心/算子协同/三维稳态），原创理论成果，AI模型调度，向量知识库，AGI、分布式自治、零信任安全等前沿研究方向。">
+<meta name="keywords" content="人工智能研究,自进化引擎,自愈引擎,知识图谱,AI模型调度,向量库,AGI,零信任安全,前沿研究">
+<meta property="og:title" content="人工智能研究 | 火斗云智AIOS">
+<meta property="og:description" content="前沿AI技术探索，六大核心研究引擎（自进化/自愈/知识图谱/配置中心/算子协同/三维稳态），原创理论成果，AI模型调度，向量知识库，AGI、分布式自治、零信任安全等前沿研究方向。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/research.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="人工智能研究 | 火斗云智AIOS">
+<meta name="twitter:description" content="前沿AI技术探索，六大核心研究引擎（自进化/自愈/知识图谱/配置中心/算子协同/三维稳态），原创理论成果，AI模型调度，向量知识库，AGI、分布式自治、零信任安全等前沿研究方向。">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div id="site-nav"></div>
+<noscript><div style="background:#0b0e14;color:#c9a227;padding:10px 24px;border-bottom:1px solid #232a3a;font-size:13px"><a href="/" style="color:#e6c75a;margin-right:14px">首页</a><a href="/architecture.html" style="color:#aaa;margin-right:14px">架构</a><a href="/engines.html" style="color:#aaa;margin-right:14px">引擎</a><a href="/products.html" style="color:#aaa;margin-right:14px">产品</a><a href="/governance.html" style="color:#aaa;margin-right:14px">治理</a><a href="/assets/visual/pricing-v1.html" style="color:#aaa;margin-right:14px">定价</a><a href="/trial.html" style="color:#aaa;margin-right:14px">试用</a><a href="/auto-ops.html" style="color:#aaa">闭环控制台</a></div></noscript>
+
+
+
+
+<!-- 火斗云智AIOS Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">自治部署平台</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/philosophy.html" style="color:#D4AF37;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px;background:rgba(212,175,55,0.1)">思想</a>
+      <a href="/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/products.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/docs.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h1>🔬 人工智能研究</h1>
+    <p>前沿AI技术探索 · 原创理论研究 · 工程化落地验证 · 从基础研究到产品应用的完整研究体系</p>
+    <div class="hero-anchor">研究驱动创新 · 理论指导实践 · 工程验证真理</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">6大</div><div class="stat-label">核心引擎</div></div>
+    <div class="stat-card"><div class="stat-value">9类</div><div class="stat-label">算子库</div></div>
+    <div class="stat-card"><div class="stat-value">4个</div><div class="stat-label">向量集合</div></div>
+    <div class="stat-card"><div class="stat-value">11+</div><div class="stat-label">AI模型</div></div>
+    <div class="stat-card"><div class="stat-value">20+</div><div class="stat-label">技术白皮书</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🧠 六大核心研究引擎</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">🔄</div><div class="card-title">自进化引擎</div><div class="card-desc">系统自我诊断、沙箱仿真、闭环迭代，自动生成优化方案，自主进化能力。engine.py 14.5KB核心实现。</div><div class="card-tags"><span class="tag">自诊断</span><span class="tag">沙箱仿真</span><span class="tag">闭环迭代</span></div></div>
+      <div class="card"><div class="card-icon">💊</div><div class="card-title">自愈引擎</div><div class="card-desc">6层闭环自愈架构：analyzers/detectors/executors/generators/learners/verifiers，自动检测故障并修复。</div><div class="card-tags"><span class="tag">6层闭环</span><span class="tag">故障检测</span><span class="tag">自动修复</span></div></div>
+      <div class="card"><div class="card-icon">🕸️</div><div class="card-title">知识图谱引擎</div><div class="card-desc">实体关系抽取，知识图谱构建，三元组存储，跨文档实体链接，kg_full_extractor.py 13.3KB。</div><div class="card-tags"><span class="tag">实体抽取</span><span class="tag">关系构建</span><span class="tag">图谱推理</span></div></div>
+      <div class="card"><div class="card-icon">⚙️</div><div class="card-title">配置中心</div><div class="card-desc">统一配置管理，配置版本历史，配置变更审计，配置热加载，config_center.py 12KB。</div><div class="card-tags"><span class="tag">统一配置</span><span class="tag">版本管理</span><span class="tag">热加载</span></div></div>
+      <div class="card"><div class="card-icon">🧮</div><div class="card-title">算子协同引擎</div><div class="card-desc">6标准算子+5组合模式，从代码堆叠升级到算子组合，上下文+契约+链状态机协同优化。</div><div class="card-tags"><span class="tag">算子库</span><span class="tag">组合模式</span><span class="tag">协同优化</span></div></div>
+      <div class="card"><div class="card-icon">🎯</div><div class="card-title">三维稳态校准</div><div class="card-desc">利益最大/风险最小/成本最小三维稳态决策公式，自动校准决策，最优稳态方案推荐。</div><div class="card-tags"><span class="tag">三维评估</span><span class="tag">稳态校准</span><span class="tag">决策优化</span></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📐 原创理论研究成果</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">🌊</div><div class="card-title">SM-BS语义-黎曼流形映射</div><div class="card-desc">语义空间与黎曼流形双向稳态映射，度量张量保证语义距离守恒，从数学层面解决语义漂移问题。</div><div class="formula-box">SM ⇄ BS | g_ij | d_semantic = d_manifold</div></div>
+      <div class="card"><div class="card-icon">🔗</div><div class="card-title">HLC哈希逻辑链</div><div class="card-desc">单写者模型+Merkle-DAG存证，验证机制天然分布式，任何人拿到根哈希就能验证任何副本。</div><div class="formula-box">Block_n = Hash(prev + data + ts)</div></div>
+      <div class="card"><div class="card-icon">⚡</div><div class="card-title">因果奇点理论</div><div class="card-desc">第七维因果域，因果链溯源，奇点概率计算，收敛路径规划，do-calculus干预模拟。</div><div class="formula-box">P(Y|do(X)) ≠ P(Y|X)</div></div>
+      <div class="card"><div class="card-icon">🔄</div><div class="card-title">CTE三位一体闭环</div><div class="card-desc">因果-真值-进化三位一体，C→T→E→C完整闭环，CausalToTruth/TruthToEvolution/EvolutionToCausal三适配器。</div><div class="formula-box">C → T → E → C (闭环)</div></div>
+      <div class="card"><div class="card-icon">🏗️</div><div class="card-title">七层完备架构</div><div class="card-desc">Ω₀本源监护+L0-L4五层+L-1涌现补全，工程完备+本体完备+逻辑完备。</div><div class="formula-box">Ω₀ → L0 → L1 → L2 → L3 → L4 → L-1</div></div>
+      <div class="card"><div class="card-icon">🧩</div><div class="card-title">算子化架构</div><div class="card-desc">标准算子库+组合引擎，串行/并行/条件/循环/嵌套5种组合模式，从代码堆叠升级到算子组合。</div><div class="formula-box">Task = Σ(Operator_i) + Composition</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🤖 AI模型调度研究</div>
+    <div class="card">
+      <div class="card-title">aiproxy v8-realgen · 多模型智能调度</div>
+      <div class="card-desc">
+        <strong>已接入模型（11+）：</strong>doubao / doubao-reasoning / doubao-reasoning2 / hunyuan / zhipu / siliconflow / aliyun / kimi / agnes / ollama-local / ollama<br><br>
+        <strong>主备双路failover：</strong>用户请求→先试豆包→失败试混元→都失败自动切本地Ollama，全程无感知。<br><br>
+        <strong>免费优先调度：</strong>免费模型优先，免费额度最大化，付费需要人工审核。
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 向量知识库研究</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">📚</div><div class="card-title">政务知识库</div><div class="card-desc">政务AI相关知识，政策法规，公文模板，政务流程。</div></div>
+      <div class="card"><div class="card-icon">🎬</div><div class="card-title">短剧剧本库</div><div class="card-desc">昆仑洞天短剧剧本，角色设定，分镜脚本，视觉基准。</div></div>
+      <div class="card"><div class="card-icon">📖</div><div class="card-title">技术文档库</div><div class="card-desc">技术白皮书，API文档，架构设计，运维手册。</div></div>
+      <div class="card"><div class="card-icon">💎</div><div class="card-title">真值资产库</div><div class="card-desc">经过交叉验证的高置信度真值，元法则，元规则，核心架构。</div></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">2560维高维真值召回</div>
+      <div class="card-desc">真实2560维语义向量校验，关闭降级哈希兜底，实现高维真值精准召回。Chroma向量数据库，6.4MB，4个collection。</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔬 前沿研究方向</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">🧠</div><div class="card-title">AGI通用人工智能</div><div class="card-desc">HC-AGI八大自治智能体集群，元序·本源调度/解离·多模态提纯/坍缩·因果推演/锁存·真值固化等。</div></div>
+      <div class="card"><div class="card-icon">🌐</div><div class="card-title">分布式自治系统</div><div class="card-desc">云↔本地双向互控，多节点协同，分布式HLC写入，共识机制研究。</div></div>
+      <div class="card"><div class="card-icon">🔒</div><div class="card-title">零信任安全架构</div><div class="card-desc">mTLS双向证书+短期JWT令牌+Scope作用域，沙箱隔离，内核能力授权凭证。</div></div>
+      <div class="card"><div class="card-icon">🎨</div><div class="card-title">多模态生成</div><div class="card-desc">文本/图像/视频/音频多模态生成，视觉基准锁死，风格统一，溯源标识自动挂载。</div></div>
+      <div class="card"><div class="card-icon">📈</div><div class="card-title">AI运维(AIOps)</div><div class="card-desc">ANCE AI-Native Cloud Ops Engine，自动扩容/降级保护/主备故障转移，智能运维。</div></div>
+      <div class="card"><div class="card-icon">🏛️</div><div class="card-title">国家主权根AI</div><div class="card-desc">国家主权背书的AI治理架构，权力制衡机制，技术可信到社会可信壁垒打通。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📝 研究成果产出</div>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-title">技术白皮书（20+篇）</div><div class="timeline-desc">Ω-Brainμ微内核架构、可信真值源架构、高价值任务深度规划、多写入者兼容进化、全域终极进化等。</div></div>
+      <div class="timeline-item"><div class="timeline-title">原创理论体系</div><div class="timeline-desc">火斗云智、火斗云智AIOS、SM-BS流形映射、因果奇点、HLC哈希链、CTE三位一体、七层完备架构。</div></div>
+      <div class="timeline-item"><div class="timeline-title">工程化实现</div><div class="timeline-desc">6大核心引擎、9类算子库、4个向量集合、11+AI模型、33+API端点、27算子巡检体系。</div></div>
+      <div class="timeline-item"><div class="timeline-title">开源贡献</div><div class="timeline-desc">算子化架构、组合引擎、自愈闭环、知识图谱抽取等可复用工程组件。</div></div>
+    </div>
+  </div>
+
+</div>
+<div class="footer">
+  <div class="footer-text">火斗云智AIOS · 人工智能研究 · 前沿探索 · 理论创新 · 工程验证</div>
+  <div class="footer-anchor">Ω₀⊂⊙∞⊂Ω · 研究成果全域溯源确权 · 永久锁档</div>
+</div>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+<script src="/assets/js/site-nav.js" defer></script>
+</body>
+</html>

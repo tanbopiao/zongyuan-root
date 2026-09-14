@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONGYUAN-ROOT 编排模板市场</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 20px 30px;
+            border-bottom: 2px solid #d4af37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .logo {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #d4af37, #f0c040);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 700; color: #1a1a2e;
+        }
+        .title-group h1 { font-size: 18px; font-weight: 700; color: #d4af37; }
+        .title-group p { font-size: 11px; color: #888; margin-top: 2px; }
+        .header-right { display: flex; gap: 10px; align-items: center; }
+        .search-box {
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #3a3a5a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 13px;
+            width: 240px;
+            outline: none;
+        }
+        .search-box:focus { border-color: #d4af37; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 25px 30px; }
+        
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        .stat-item {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+        .stat-value { font-size: 22px; font-weight: 700; color: #d4af37; }
+        .stat-label { font-size: 11px; color: #888; margin-top: 4px; }
+        
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .category-tab {
+            padding: 8px 16px;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #888;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .category-tab:hover { border-color: #d4af37; color: #d4af37; }
+        .category-tab.active {
+            background: rgba(212,175,55,0.15);
+            border-color: #d4af37;
+            color: #d4af37;
+        }
+        .category-tab .count {
+            background: rgba(212,175,55,0.2);
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+        }
+        
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+        .template-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .template-card:hover {
+            border-color: #d4af37;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(212,175,55,0.15);
+        }
+        .card-header {
+            padding: 20px;
+            border-bottom: 1px solid #2a2a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .card-icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .card-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .badge-easy { background: rgba(82,196,26,0.2); color: #52c41a; }
+        .badge-medium { background: rgba(24,144,255,0.2); color: #1890ff; }
+        .badge-hard { background: rgba(250,173,20,0.2); color: #faad14; }
+        
+        .card-body { padding: 16px 20px; }
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f0f0f0;
+            margin-bottom: 8px;
+        }
+        .card-desc {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.6;
+            margin-bottom: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card-meta {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .card-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .tag {
+            padding: 2px 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            font-size: 10px;
+            color: #888;
+        }
+        .card-footer {
+            padding: 14px 20px;
+            border-top: 1px solid #2a2a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .author { font-size: 11px; color: #666; }
+        .use-btn {
+            padding: 7px 16px;
+            background: linear-gradient(135deg, #d4af37, #f0c040);
+            border: none;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .use-btn:hover { opacity: 0.9; transform: scale(1.02); }
+        
+        .rating { color: #d4af37; font-size: 12px; }
+        
+        /* 详情弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #d4af37;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #2a2a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .modal-title { font-size: 20px; font-weight: 700; color: #d4af37; margin-bottom: 8px; }
+        .modal-close {
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            border-radius: 8px;
+            color: #888;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: #d4af37; }
+        .modal-body { padding: 24px; }
+        .modal-section { margin-bottom: 20px; }
+        .modal-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f0f0f0;
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 3px solid #d4af37;
+        }
+        .flow-container {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        .flow-nodes {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            min-width: max-content;
+        }
+        .flow-node {
+            padding: 10px 16px;
+            background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+            border: 1px solid #d4af37;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #d4af37;
+            white-space: nowrap;
+        }
+        .flow-arrow { color: #666; font-size: 16px; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .info-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .info-label { font-size: 11px; color: #666; margin-bottom: 4px; }
+        .info-value { font-size: 14px; font-weight: 600; color: #e0e0e0; }
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid #2a2a4a;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .btn-secondary {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid #3a3a5a;
+            border-radius: 8px;
+            color: #888;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #d4af37, #f0c040);
+            border: none;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+            font-size: 11px;
+            border-top: 1px solid #1a1a2e;
+            margin-top: 40px;
+        }
+        .footer .trace-mark { color: #d4af37; font-family: monospace; margin-top: 6px; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        
+        @media (max-width: 768px) {
+            .template-grid { grid-template-columns: 1fr; }
+            .container { padding: 15px; }
+            .search-box { width: 160px; }
+        }
+    </style>
+    <link rel="canonical" href="https://huodouai.comtemplate-market/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">Ω</div>
+            <div class="title-group">
+                <h1>ZONGYUAN-ROOT 编排模板市场</h1>
+                <p>预设编排模板 · 一键加载 · 快速复用成熟流程</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <input type="text" class="search-box" id="searchInput" placeholder="🔍 搜索模板..." oninput="filterTemplates()">
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 统计栏 -->
+        <div class="stats-bar" id="statsBar"></div>
+
+        <!-- 分类标签 -->
+        <div class="category-tabs" id="categoryTabs"></div>
+
+        <!-- 模板网格 -->
+        <div class="template-grid" id="templateGrid"></div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="modalTitle"></div>
+                    <div style="color:#888;font-size:12px;" id="modalCategory"></div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-section-title">📋 模板说明</div>
+                    <div style="font-size:13px;color:#aaa;line-height:1.8;" id="modalDesc"></div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">📊 模板信息</div>
+                    <div class="info-grid" id="modalInfo"></div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">🔄 编排流程</div>
+                    <div class="flow-container">
+                        <div class="flow-nodes" id="modalFlow"></div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">🏷️ 标签</div>
+                    <div class="card-tags" id="modalTags"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn-primary" onclick="useTemplate()">🚀 一键加载到编排引擎</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>ZONGYUAN-ROOT 元极恒一超认知永恒自治体系 · 编排模板市场 V1.0</div>
+        <div style="margin-top:4px;">预设模板 · 一键加载 · 快速复用 · 提升生产效率</div>
+        <div class="trace-mark">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 元极恒一·模板复用·快速编排·全域自治·永续稳态</div>
+    </div>
+
+    <script>
+        // 模板数据（实际使用时从API获取）
+        const templatesData = {
+            templates: [
+                {id:"tpl-drama-production-001",name:"短剧全流程生产模板",category:"短剧生产",description:"从剧本生成到视频合成的完整短剧生产流水线，涵盖剧本创作、分镜设计、关键帧生成、视频合成、配音字幕全流程",icon:"🎬",difficulty:"中级",estimated_time:"30-60分钟",usage_count:128,rating:4.8,author:"昆仑洞天短剧引擎",created_at:"2026-09-01",tags:["短剧","全流程","剧本生成","视频合成","AI制作"],nodes:["剧本生成","分镜表生成","关键帧生成","视频合成","配音生成","字幕生成","最终合成"]},
+                {id:"tpl-gov-qa-001",name:"政务智能问答模板",category:"政务服务",description:"政务政策智能问答流水线，从政策检索到答案生成的完整流程，支持政策理解、智能匹配、答案生成、质量校验",icon:"🏛️",difficulty:"初级",estimated_time:"5-10分钟",usage_count:256,rating:4.9,author:"政务AI中台",created_at:"2026-08-15",tags:["政务","问答","政策检索","智能客服"],nodes:["意图识别","政策检索","知识推理","答案生成","质量校验"]},
+                {id:"tpl-gov-document-001",name:"公文自动生成模板",category:"政务服务",description:"政务公文自动生成流水线，支持通知、请示、报告等多种公文类型，从需求分析到格式排版的全流程自动化",icon:"📄",difficulty:"中级",estimated_time:"10-20分钟",usage_count:189,rating:4.7,author:"政务AI中台",created_at:"2026-08-20",tags:["政务","公文","自动生成","格式排版"],nodes:["需求分析","模板匹配","内容生成","格式排版","审核校验"]},
+                {id:"tpl-workflow-001",name:"智能工作流编排模板",category:"智能办公",description:"通用智能工作流编排模板，支持任务分配、进度追踪、自动提醒、结果汇总的完整办公自动化流程",icon:"⚙️",difficulty:"中级",estimated_time:"15-30分钟",usage_count:167,rating:4.6,author:"智能工作台",created_at:"2026-08-25",tags:["办公","工作流","自动化","任务管理"],nodes:["任务创建","智能分配","多模态交互","进度追踪","自动提醒","结果汇总","知识沉淀"]},
+                {id:"tpl-knowledge-001",name:"知识库构建与检索模板",category:"知识管理",description:"从文档导入到智能检索的完整知识库构建流程，支持文档解析、实体抽取、向量存储、语义检索、真值提炼",icon:"📚",difficulty:"高级",estimated_time:"30-60分钟",usage_count:98,rating:4.8,author:"源域通识知识库",created_at:"2026-09-01",tags:["知识库","向量检索","文档解析","语义搜索"],nodes:["文档导入","内容解析","实体抽取","关系推理","向量化存储","语义检索","真值提炼"]},
+                {id:"tpl-website-001",name:"官网内容生产模板",category:"官网展示",description:"官网内容自动生产流水线，从产品资料到展示页面的完整流程，支持内容创作、视觉设计、页面生成、SEO优化",icon:"🌐",difficulty:"中级",estimated_time:"20-40分钟",usage_count:76,rating:4.5,author:"火斗云智官网",created_at:"2026-09-03",tags:["官网","内容生产","页面生成","SEO"],nodes:["资料整理","内容创作","视觉设计","页面生成","SEO优化"]},
+                {id:"tpl-data-analysis-001",name:"数据分析报告模板",category:"智能办公",description:"从原始数据到分析报告的完整数据分析流水线，支持数据清洗、统计分析、可视化生成、报告撰写、结论提炼",icon:"📊",difficulty:"中级",estimated_time:"15-30分钟",usage_count:145,rating:4.7,author:"智能工作台",created_at:"2026-08-28",tags:["数据分析","报告生成","可视化","统计"],nodes:["数据导入","数据清洗","统计分析","可视化生成","报告撰写","结论提炼","建议生成"]},
+                {id:"tpl-identity-001",name:"身份节点全流程管理模板",category:"身份管理",description:"从节点申请到权限管理的完整身份节点管理流水线，支持申请审批、能力注册、健康监控、权限控制、违规处理",icon:"🔐",difficulty:"高级",estimated_time:"20-40分钟",usage_count:112,rating:4.9,author:"云内核主控",created_at:"2026-09-05",tags:["身份管理","节点审批","权限控制","健康监控"],nodes:["申请受理","资质审核","节点注册","权限配置","健康监控","违规检测","版本管理"]}
+            ],
+            categories: [
+                {id:"all",name:"全部模板",icon:"📋"},
+                {id:"my-templates",name:"我的模板",icon:"⭐"},
+                {id:"短剧生产",name:"短剧生产",icon:"🎬"},
+                {id:"政务服务",name:"政务服务",icon:"🏛️"},
+                {id:"智能办公",name:"智能办公",icon:"⚙️"},
+                {id:"知识管理",name:"知识管理",icon:"📚"},
+                {id:"官网展示",name:"官网展示",icon:"🌐"},
+                {id:"身份管理",name:"身份管理",icon:"🔐"}
+            ]
+        };
+
+        let currentCategory = 'all';
+        let currentSearch = '';
+        let selectedTemplate = null;
+
+        function renderStats() {
+            const data = templatesData;
+            const custom = getCustomTemplates();
+            const totalUsage = data.templates.reduce((sum, t) => sum + t.usage_count, 0);
+            const avgRating = (data.templates.reduce((sum, t) => sum + t.rating, 0) / data.templates.length).toFixed(2);
+            const categories = new Set(data.templates.map(t => t.category)).size;
+            
+            document.getElementById('statsBar').innerHTML = `
+                <div class="stat-item"><div class="stat-value">${data.templates.length}</div><div class="stat-label">预设模板</div></div>
+                <div class="stat-item"><div class="stat-value" style="color:#52c41a;">${custom.length}</div><div class="stat-label">我的模板</div></div>
+                <div class="stat-item"><div class="stat-value">${categories}</div><div class="stat-label">覆盖分类</div></div>
+                <div class="stat-item"><div class="stat-value">${totalUsage.toLocaleString()}</div><div class="stat-label">累计使用</div></div>
+                <div class="stat-item"><div class="stat-value">${avgRating}</div><div class="stat-label">平均评分</div></div>
+                <div class="stat-item"><div class="stat-value">7</div><div class="stat-label">平均节点数</div></div>
+            `;
+        }
+
+        function renderCategories() {
+            const tabs = document.getElementById('categoryTabs');
+            tabs.innerHTML = templatesData.categories.map(cat => {
+                const count = cat.id === 'all' ? templatesData.templates.length : 
+                    templatesData.templates.filter(t => t.category === cat.id).length;
+                return `<div class="category-tab ${currentCategory===cat.id?'active':''}" onclick="selectCategory('${cat.id}')">
+                    <span>${cat.icon}</span> ${cat.name} <span class="count">${count}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function selectCategory(cat) {
+            currentCategory = cat;
+            renderCategories();
+            renderTemplates();
+        }
+
+        function filterTemplates() {
+            currentSearch = document.getElementById('searchInput').value.toLowerCase();
+            renderTemplates();
+        }
+
+        function getDifficultyBadge(diff) {
+            if (diff === '初级') return 'badge-easy';
+            if (diff === '中级') return 'badge-medium';
+            return 'badge-hard';
+        }
+
+        function getCustomTemplates() {
+            try {
+                const data = localStorage.getItem("zongyuan_custom_templates");
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function getAllTemplates() {
+            const custom = getCustomTemplates();
+            const customWithFlag = custom.map(t => ({
+                ...t,
+                isCustom: true,
+                usage_count: 0,
+                rating: 5.0,
+                author: "我自己",
+                created_at: t.createdAt ? t.createdAt.slice(0,10) : "未知",
+                nodes: t.nodes ? t.nodes.map(n => n.name) : [],
+                tags: ["自定义", t.category || "自定义"]
+            }));
+            return [...customWithFlag, ...templatesData.templates];
+        }
+
+        function renderTemplates() {
+            const grid = document.getElementById('templateGrid');
+            const allTemplates = getAllTemplates();
+            let filtered = allTemplates;
+            
+            if (currentCategory === 'my-templates') {
+                filtered = filtered.filter(t => t.isCustom);
+            } else if (currentCategory !== 'all') {
+                filtered = filtered.filter(t => t.category === currentCategory && !t.isCustom);
+            }
+            if (currentSearch) {
+                filtered = filtered.filter(t => 
+                    t.name.toLowerCase().includes(currentSearch) ||
+                    t.description.toLowerCase().includes(currentSearch) ||
+                    t.tags.some(tag => tag.toLowerCase().includes(currentSearch))
+                );
+            }
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+                    <div class="icon">🔍</div>
+                    <div>未找到匹配的模板</div>
+                    <div style="font-size:12px;margin-top:8px;">试试其他关键词或分类</div>
+                </div>`;
+                return;
+            }
+            
+            grid.innerHTML = filtered.map(t => `
+                <div class="template-card" onclick="openModal('${t.id}')">
+                    <div class="card-header">
+                        <div class="card-icon">${t.icon}</div>
+                        <span class="card-badge ${t.isCustom ? 'badge-easy' : getDifficultyBadge(t.difficulty)}">${t.isCustom ? '自定义' : t.difficulty}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${t.name}</div>
+                        <div class="card-desc">${t.description}</div>
+                        <div class="card-meta">
+                            <div class="meta-item">⏱️ ${t.estimated_time}</div>
+                            <div class="meta-item">📊 ${t.usage_count}次使用</div>
+                            <div class="meta-item rating">⭐ ${t.rating}</div>
+                        </div>
+                        <div class="card-tags">
+                            ${t.tags.slice(0,3).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            ${t.tags.length > 3 ? `<span class="tag">+${t.tags.length-3}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="author">${t.isCustom ? '⭐ 我的模板' : 'by ' + t.author}</div>
+                        <div style="display:flex;gap:6px;">
+                            ${t.isCustom ? '<button class="use-btn" style="background:linear-gradient(135deg,#ff4d4f,#cf1322);color:#fff;padding:7px 12px;font-size:11px;" onclick="event.stopPropagation();deleteCustomTemplateDirect(\'' + t.id + '\')">删除</button>' : ''}
+                            <button class="use-btn" onclick="event.stopPropagation();useTemplateDirect('${t.id}')">${t.isCustom ? '加载' : '使用模板'}</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openModal(id) {
+            selectedTemplate = templatesData.templates.find(t => t.id === id);
+            if (!selectedTemplate) return;
+            
+            document.getElementById('modalTitle').textContent = selectedTemplate.icon + ' ' + selectedTemplate.name;
+            document.getElementById('modalCategory').textContent = selectedTemplate.category + ' · ' + selectedTemplate.difficulty;
+            document.getElementById('modalDesc').textContent = selectedTemplate.description;
+            
+            document.getElementById('modalInfo').innerHTML = `
+                <div class="info-item"><div class="info-label">预计耗时</div><div class="info-value">${selectedTemplate.estimated_time}</div></div>
+                <div class="info-item"><div class="info-label">使用次数</div><div class="info-value">${selectedTemplate.usage_count}</div></div>
+                <div class="info-item"><div class="info-label">评分</div><div class="info-value">⭐ ${selectedTemplate.rating}</div></div>
+                <div class="info-item"><div class="info-label">节点数量</div><div class="info-value">${selectedTemplate.nodes.length}个</div></div>
+                <div class="info-item"><div class="info-label">作者</div><div class="info-value" style="font-size:12px;">${selectedTemplate.author}</div></div>
+                <div class="info-item"><div class="info-label">创建时间</div><div class="info-value">${selectedTemplate.created_at}</div></div>
+            `;
+            
+            document.getElementById('modalFlow').innerHTML = selectedTemplate.nodes.map((node, i) => 
+                `<div class="flow-node">${i+1}. ${node}</div>` + 
+                (i < selectedTemplate.nodes.length - 1 ? '<div class="flow-arrow">→</div>' : '')
+            ).join('');
+            
+            document.getElementById('modalTags').innerHTML = selectedTemplate.tags.map(tag => 
+                `<span class="tag">${tag}</span>`
+            ).join('');
+            
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function useTemplate() {
+            if (!selectedTemplate) return;
+            const templateId = selectedTemplate.id;
+            const templateName = selectedTemplate.name;
+            const nodeCount = selectedTemplate.nodes.length;
+            closeModal();
+            // 真实跳转到编排引擎，传递模板ID参数
+            const targetUrl = "/capability-orchestrator/?template=" + encodeURIComponent(templateId);
+            // 显示加载提示
+            showTemplateToast("🚀 正在加载模板「" + templateName + "」（" + nodeCount + "个节点）...");
+            // 延迟跳转，让用户看到提示
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 800);
+        }
+
+        function showTemplateToast(message) {
+            const toast = document.createElement("div");
+            toast.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #d4af37;color:#d4af37;padding:20px 32px;border-radius:12px;font-size:14px;z-index:9999;box-shadow:0 8px 40px rgba(212,175,55,0.4);font-weight:600;";
+            toast.textContent = message;
+            document.body.appendChild(toast);
+        }
+
+        function useTemplateDirect(id) {
+            const t = templatesData.templates.find(x => x.id === id);
+            if (t) {
+                const targetUrl = "/capability-orchestrator/?template=" + encodeURIComponent(id);
+                showTemplateToast("🚀 正在加载模板「" + t.name + "」（" + t.nodes.length + "个节点）...");
+                setTimeout(() => {
+                    window.location.href = targetUrl;
+                }, 800);
+            }
+        }
+
+        function deleteCustomTemplateDirect(id) {
+            if (!confirm("确定要删除这个自定义模板吗？此操作不可恢复。")) return;
+            try {
+                const templates = getCustomTemplates();
+                const idx = templates.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    templates.splice(idx, 1);
+                    localStorage.setItem("zongyuan_custom_templates", JSON.stringify(templates));
+                    renderCategories();
+                    renderTemplates();
+                    alert("✅ 模板已删除");
+                }
+            } catch (e) {
+                alert("删除失败：" + e.message);
+            }
+        }
+
+
+        // 初始化
+        renderStats();
+        renderCategories();
+        renderTemplates();
+        
+        // ESC关闭弹窗
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>

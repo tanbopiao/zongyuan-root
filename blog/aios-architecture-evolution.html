@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>火斗云智AIOS架构演进：从单体到微内核自治 - 火斗云智</title>
+  <meta name="description" content="深入解析火斗云智AIOS从单体架构向微内核自治架构的演进路径，包括CTE三位一体、SM-BS流形映射、元秩序归档等核心技术。">
+  <meta name="keywords" content="[,",架,构,",,, ,",微,内,核,",,, ,",自,治,系,统,",]">
+  <link rel="canonical" href="https://huodouai.com/blog/aios-architecture-evolution.html">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="火斗云智AIOS架构演进：从单体到微内核自治">
+  <meta property="og:description" content="深入解析火斗云智AIOS从单体架构向微内核自治架构的演进路径，包括CTE三位一体、SM-BS流形映射、元秩序归档等核心技术。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://huodouai.com/blog/aios-architecture-evolution.html">
+  <meta property="article:published_time" content="2026-09-13">
+
+  <!-- 设计令牌 -->
+  <style>
+  /* ============================================================
+   火斗云智 AIOS - 设计令牌系统 Design Tokens
+   版本: v1.0
+   用途: 全站统一色板、字体、间距、圆角、阴影
+   ============================================================ */
+
+:root {
+  /* ===== 品牌主色（蓝系） ===== */
+  --hd-color-primary-50: #eff6ff;
+  --hd-color-primary-100: #dbeafe;
+  --hd-color-primary-200: #bfdbfe;
+  --hd-color-primary-300: #93c5fd;
+  --hd-color-primary-400: #60a5fa;
+  --hd-color-primary-500: #3b82f6;
+  --hd-color-primary-600: #2563eb;
+  --hd-color-primary-700: #1d4ed8;
+  --hd-color-primary-800: #1e40af;
+  --hd-color-primary-900: #1e3a8a;
+
+  /* 主色快捷引用 */
+  --hd-color-primary: var(--hd-color-primary-600);
+  --hd-color-primary-hover: var(--hd-color-primary-700);
+  --hd-color-primary-light: var(--hd-color-primary-50);
+
+  /* ===== 辅助色 ===== */
+  --hd-color-accent-500: #06b6d4;
+  --hd-color-accent-600: #0891b2;
+  --hd-color-accent: var(--hd-color-accent-500);
+
+  /* ===== 中性色（灰阶） ===== */
+  --hd-color-gray-50: #f9fafb;
+  --hd-color-gray-100: #f3f4f6;
+  --hd-color-gray-200: #e5e7eb;
+  --hd-color-gray-300: #d1d5db;
+  --hd-color-gray-400: #9ca3af;
+  --hd-color-gray-500: #6b7280;
+  --hd-color-gray-600: #4b5563;
+  --hd-color-gray-700: #374151;
+  --hd-color-gray-800: #1f2937;
+  --hd-color-gray-900: #111827;
+  --hd-color-gray-950: #030712;
+
+  /* 文字色 */
+  --hd-color-text-primary: var(--hd-color-gray-900);
+  --hd-color-text-secondary: var(--hd-color-gray-600);
+  --hd-color-text-muted: var(--hd-color-gray-400);
+  --hd-color-text-inverse: #ffffff;
+
+  /* 背景色 */
+  --hd-color-bg-base: #ffffff;
+  --hd-color-bg-subtle: var(--hd-color-gray-50);
+  --hd-color-bg-muted: var(--hd-color-gray-100);
+  --hd-color-bg-dark: var(--hd-color-gray-900);
+
+  /* 边框色 */
+  --hd-color-border: var(--hd-color-gray-200);
+  --hd-color-border-light: var(--hd-color-gray-100);
+
+  /* ===== 语义色 ===== */
+  --hd-color-success: #10b981;
+  --hd-color-success-bg: #ecfdf5;
+  --hd-color-warning: #f59e0b;
+  --hd-color-warning-bg: #fffbeb;
+  --hd-color-danger: #ef4444;
+  --hd-color-danger-bg: #fef2f2;
+  --hd-color-info: var(--hd-color-primary-500);
+  --hd-color-info-bg: var(--hd-color-primary-50);
+
+  /* ===== 字体系统 ===== */
+  --hd-font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --hd-font-serif: 'Noto Serif SC', Georgia, 'Times New Roman', serif;
+  --hd-font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* 字号（移动端优先，桌面端通过媒体查询放大） */
+  --hd-font-size-xs: 0.75rem;    /* 12px */
+  --hd-font-size-sm: 0.875rem;   /* 14px */
+  --hd-font-size-base: 1rem;     /* 16px */
+  --hd-font-size-lg: 1.125rem;   /* 18px */
+  --hd-font-size-xl: 1.25rem;    /* 20px */
+  --hd-font-size-2xl: 1.5rem;    /* 24px */
+  --hd-font-size-3xl: 1.875rem;  /* 30px */
+  --hd-font-size-4xl: 2.25rem;   /* 36px */
+  --hd-font-size-5xl: 3rem;      /* 48px */
+
+  /* 字重 */
+  --hd-font-weight-light: 300;
+  --hd-font-weight-regular: 400;
+  --hd-font-weight-medium: 500;
+  --hd-font-weight-semibold: 600;
+  --hd-font-weight-bold: 700;
+
+  /* 行高 */
+  --hd-line-height-tight: 1.25;
+  --hd-line-height-normal: 1.5;
+  --hd-line-height-relaxed: 1.75;
+
+  /* ===== 间距系统（4px基准） ===== */
+  --hd-space-1: 0.25rem;   /* 4px */
+  --hd-space-2: 0.5rem;    /* 8px */
+  --hd-space-3: 0.75rem;   /* 12px */
+  --hd-space-4: 1rem;      /* 16px */
+  --hd-space-5: 1.25rem;   /* 20px */
+  --hd-space-6: 1.5rem;    /* 24px */
+  --hd-space-8: 2rem;      /* 32px */
+  --hd-space-10: 2.5rem;   /* 40px */
+  --hd-space-12: 3rem;     /* 48px */
+  --hd-space-16: 4rem;     /* 64px */
+  --hd-space-20: 5rem;     /* 80px */
+  --hd-space-24: 6rem;     /* 96px */
+
+  /* 容器最大宽度 */
+  --hd-container-sm: 640px;
+  --hd-container-md: 768px;
+  --hd-container-lg: 1024px;
+  --hd-container-xl: 1280px;
+  --hd-container-2xl: 1536px;
+
+  /* ===== 圆角系统 ===== */
+  --hd-radius-sm: 0.25rem;   /* 4px */
+  --hd-radius-md: 0.5rem;    /* 8px */
+  --hd-radius-lg: 0.75rem;   /* 12px */
+  --hd-radius-xl: 1rem;      /* 16px */
+  --hd-radius-2xl: 1.5rem;   /* 24px */
+  --hd-radius-full: 9999px;
+
+  /* ===== 阴影系统 ===== */
+  --hd-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --hd-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --hd-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --hd-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --hd-shadow-primary: 0 4px 14px 0 rgba(37, 99, 235, 0.25);
+
+  /* ===== 动画系统 ===== */
+  --hd-transition-fast: 150ms ease;
+  --hd-transition-normal: 250ms ease;
+  --hd-transition-slow: 350ms ease;
+
+  /* ===== Z-index层级 ===== */
+  --hd-z-dropdown: 100;
+  --hd-z-sticky: 200;
+  --hd-z-fixed: 300;
+  --hd-z-modal: 400;
+  --hd-z-toast: 500;
+}
+
+/* 桌面端字号放大 */
+@media (min-width: 768px) {
+  :root {
+    --hd-font-size-3xl: 2.25rem;
+    --hd-font-size-4xl: 3rem;
+    --hd-font-size-5xl: 3.75rem;
+  }
+}
+  </style>
+
+  <!-- 全局基础样式 -->
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--hd-font-sans);
+      font-size: var(--hd-font-size-base);
+      line-height: var(--hd-line-height-normal);
+      color: var(--hd-color-text-primary);
+      background: var(--hd-color-bg-base);
+      -webkit-font-smoothing: antialiased;
+    }
+    .hd-container { max-width: var(--hd-container-md); margin: 0 auto; padding: 0 var(--hd-space-6); }
+    a { color: var(--hd-color-primary); }
+    img { max-width: 100%; height: auto; }
+
+    /* 文章样式 */
+    .post-header { padding: var(--hd-space-16) 0 var(--hd-space-8); text-align: center; }
+    .post-meta { display: flex; justify-content: center; gap: var(--hd-space-4); font-size: var(--hd-font-size-sm); color: var(--hd-color-text-muted); margin-bottom: var(--hd-space-4); }
+    .post-title { font-size: var(--hd-font-size-4xl); font-weight: var(--hd-font-weight-bold); line-height: var(--hd-line-height-tight); margin-bottom: var(--hd-space-4); }
+    .post-tags { display: flex; justify-content: center; gap: var(--hd-space-2); flex-wrap: wrap; }
+    .post-tag { font-size: var(--hd-font-size-xs); padding: var(--hd-space-1) var(--hd-space-3); background: var(--hd-color-primary-light); color: var(--hd-color-primary); border-radius: var(--hd-radius-full); }
+    .post-content { padding: var(--hd-space-8) 0 var(--hd-space-16); }
+    .post-content h1 { font-size: var(--hd-font-size-3xl); margin: var(--hd-space-8) 0 var(--hd-space-4); font-weight: var(--hd-font-weight-bold); }
+    .post-content h2 { font-size: var(--hd-font-size-2xl); margin: var(--hd-space-8) 0 var(--hd-space-4); font-weight: var(--hd-font-weight-bold); border-bottom: 2px solid var(--hd-color-border); padding-bottom: var(--hd-space-2); }
+    .post-content h3 { font-size: var(--hd-font-size-xl); margin: var(--hd-space-6) 0 var(--hd-space-3); font-weight: var(--hd-font-weight-semibold); }
+    .post-content p { margin-bottom: var(--hd-space-4); line-height: var(--hd-line-height-relaxed); }
+    .post-content ul, .post-content ol { margin: var(--hd-space-4) 0; padding-left: var(--hd-space-6); }
+    .post-content li { margin-bottom: var(--hd-space-2); line-height: var(--hd-line-height-relaxed); }
+    .post-content blockquote { border-left: 4px solid var(--hd-color-primary); padding: var(--hd-space-4) var(--hd-space-6); margin: var(--hd-space-6) 0; background: var(--hd-color-bg-subtle); border-radius: 0 var(--hd-radius-md) var(--hd-radius-md) 0; }
+    .post-content code { background: var(--hd-color-bg-muted); padding: 2px 6px; border-radius: var(--hd-radius-sm); font-family: var(--hd-font-mono); font-size: 0.9em; }
+    .post-content pre { background: var(--hd-color-gray-900); color: var(--hd-color-gray-100); padding: var(--hd-space-4); border-radius: var(--hd-radius-md); overflow-x: auto; margin: var(--hd-space-6) 0; }
+    .post-content pre code { background: none; padding: 0; color: inherit; }
+    .post-content table { width: 100%; border-collapse: collapse; margin: var(--hd-space-6) 0; }
+    .post-content th, .post-content td { border: 1px solid var(--hd-color-border); padding: var(--hd-space-3) var(--hd-space-4); text-align: left; }
+    .post-content th { background: var(--hd-color-bg-subtle); font-weight: var(--hd-font-weight-semibold); }
+    .post-content hr { border: none; border-top: 1px solid var(--hd-color-border); margin: var(--hd-space-8) 0; }
+  </style>
+</head>
+<body>
+  
+<nav class="hd-nav" role="navigation" aria-label="主导航">
+  <div class="hd-nav__container">
+    <a href="/" class="hd-nav__logo" aria-label="火斗云智首页">
+      <span class="hd-nav__logo-icon">火</span>
+      <span class="hd-nav__logo-text">火斗云智</span>
+    </a>
+
+    <button class="hd-nav__toggle" aria-label="切换菜单" aria-expanded="false" onclick="document.querySelector('.hd-nav__menu').classList.toggle('hd-nav__menu--open')">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="hd-nav__menu">
+      <a href="/products/" class="hd-nav__link ">产品中心</a>
+      <a href="/solutions/" class="hd-nav__link ">解决方案</a>
+      <a href="/architecture/" class="hd-nav__link ">技术架构</a>
+      <a href="/whitepapers/" class="hd-nav__link ">白皮书</a>
+      <a href="/docs/" class="hd-nav__link ">开发者</a>
+      <a href="/blog/" class="hd-nav__link hd-nav__link--active">博客</a>
+      <a href="/about/" class="hd-nav__link ">关于我们</a>
+      <a href="/pricing/" class="hd-nav__link ">定价</a>
+      <a href="/about/book-demo.html" class="hd-nav__cta">预约演示</a>
+    </div>
+  </div>
+</nav>
+
+<style>
+.hd-nav {
+  position: sticky; top: 0; z-index: var(--hd-z-sticky);
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hd-color-border);
+}
+.hd-nav__container {
+  max-width: var(--hd-container-xl); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--hd-space-6); height: 64px;
+}
+.hd-nav__logo { display: flex; align-items: center; gap: var(--hd-space-2); text-decoration: none; }
+.hd-nav__logo-icon {
+  width: 32px; height: 32px; border-radius: var(--hd-radius-md);
+  background: linear-gradient(135deg, var(--hd-color-primary-500), var(--hd-color-accent-500));
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: var(--hd-font-weight-bold); font-size: var(--hd-font-size-lg);
+}
+.hd-nav__logo-text { font-size: var(--hd-font-size-lg); font-weight: var(--hd-font-weight-semibold); color: var(--hd-color-text-primary); }
+.hd-nav__menu { display: flex; align-items: center; gap: var(--hd-space-1); }
+.hd-nav__link {
+  padding: var(--hd-space-2) var(--hd-space-3); border-radius: var(--hd-radius-md);
+  color: var(--hd-color-text-secondary); text-decoration: none;
+  font-size: var(--hd-font-size-sm); font-weight: var(--hd-font-weight-medium);
+  transition: color var(--hd-transition-fast), background var(--hd-transition-fast);
+}
+.hd-nav__link:hover { color: var(--hd-color-primary); background: var(--hd-color-primary-light); }
+.hd-nav__link--active { color: var(--hd-color-primary); background: var(--hd-color-primary-light); }
+.hd-nav__cta {
+  margin-left: var(--hd-space-2); padding: var(--hd-space-2) var(--hd-space-4);
+  background: var(--hd-color-primary); color: #fff; border-radius: var(--hd-radius-md);
+  text-decoration: none; font-size: var(--hd-font-size-sm); font-weight: var(--hd-font-weight-semibold);
+  transition: background var(--hd-transition-fast);
+}
+.hd-nav__cta:hover { background: var(--hd-color-primary-hover); }
+.hd-nav__toggle { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 8px; }
+.hd-nav__toggle span { width: 20px; height: 2px; background: var(--hd-color-text-primary); border-radius: 2px; }
+@media (max-width: 768px) {
+  .hd-nav__toggle { display: flex; }
+  .hd-nav__menu {
+    display: none; position: absolute; top: 64px; left: 0; right: 0;
+    flex-direction: column; background: #fff; padding: var(--hd-space-4);
+    border-bottom: 1px solid var(--hd-color-border); gap: var(--hd-space-1);
+  }
+  .hd-nav__menu--open { display: flex; }
+  .hd-nav__link { width: 100%; padding: var(--hd-space-3); }
+  .hd-nav__cta { width: 100%; text-align: center; margin: var(--hd-space-2) 0 0; }
+}
+</style>
+
+  <article>
+    <header class="post-header">
+      <div class="hd-container">
+        <div class="post-meta">
+          <span>2026-09-13</span>
+          <span>火斗云智架构团队</span>
+        </div>
+        <h1 class="post-title">火斗云智AIOS架构演进：从单体到微内核自治</h1>
+        
+        <div class="post-tags">
+          <span class="post-tag">[</span><span class="post-tag">"</span><span class="post-tag">架</span><span class="post-tag">构</span><span class="post-tag">"</span><span class="post-tag">,</span><span class="post-tag"> </span><span class="post-tag">"</span><span class="post-tag">微</span><span class="post-tag">内</span><span class="post-tag">核</span><span class="post-tag">"</span><span class="post-tag">,</span><span class="post-tag"> </span><span class="post-tag">"</span><span class="post-tag">自</span><span class="post-tag">治</span><span class="post-tag">系</span><span class="post-tag">统</span><span class="post-tag">"</span><span class="post-tag">]</span>
+        </div>
+        
+      </div>
+    </header>
+
+    <div class="hd-container">
+      <div class="post-content">
+        <h1 id="aios">火斗云智AIOS架构演进：从单体到微内核自治</h1>
+<h2 id="_1">背景</h2>
+<p>在AI系统快速演进的今天，传统的单体架构已经无法满足复杂业务场景的需求。火斗云智AIOS经历了从V1.0到V4.0的四次重大架构升级，最终确立了<strong>元极恒一超认知永恒自治体系</strong>。</p>
+<h2 id="_2">架构演进四阶段</h2>
+<h3 id="v10">V1.0：单体应用阶段</h3>
+<p>最初的系统采用传统的单体架构，所有功能模块耦合在一个应用中。这种架构在早期快速迭代阶段具有开发效率高的优势，但随着业务规模扩大，问题逐渐显现：</p>
+<ul>
+<li>模块间耦合严重，修改一处影响全局</li>
+<li>无法独立扩展，资源利用率低</li>
+<li>故障隔离能力弱，单点故障影响全系统</li>
+</ul>
+<h3 id="v20tck">V2.0：真因果融合内核（TCK）</h3>
+<p>引入双相态交替迭代算子 <code>v=T(v,c)</code>，实现真值域与因果域的融合。这一阶段的核心突破是：</p>
+<ol>
+<li><strong>黎曼流形世界模型</strong>：将概念空间映射到流形坐标，度量概念间的语义距离</li>
+<li><strong>自组织网状架构</strong>：三总线（计算/通信/存储）分离，支持动态组网</li>
+<li><strong>元学习自进化引擎</strong>：8维策略空间搜索，主动真值校验网络</li>
+</ol>
+<h3 id="v30cte">V3.0：CTE三位一体闭环</h3>
+<p>因果（Causal）、真值（Truth）、进化（Evolution）三大域通过适配器形成闭环：</p>
+<div class="codehilite"><pre><span></span><code>Causal → Truth → Evolution → Causal
+  ↑                          ↓
+  └──────────────────────────┘
+</code></pre></div>
+
+<ul>
+<li><strong>CausalToTruth</strong>：因果边→真值条目，奇点概率→置信度</li>
+<li><strong>TruthToEvolution</strong>：真值纯度→适应度Φ，冲突标记→进化目标</li>
+<li><strong>EvolutionToCausal</strong>：策略变更→do-calculus干预注入</li>
+</ul>
+<h3 id="v40">V4.0：元极恒一自治体系</h3>
+<p>当前最新架构，实现Lv8完全自治：</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>能力</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1-L3</td>
+<td>基础运维自治</td>
+<td>已实现</td>
+</tr>
+<tr>
+<td>L4-L5</td>
+<td>决策与进化自治</td>
+<td>已实现</td>
+</tr>
+<tr>
+<td>L6-L7</td>
+<td>多主体文明仿真</td>
+<td>已实现</td>
+</tr>
+<tr>
+<td>L8</td>
+<td>完全永恒自治</td>
+<td>进行中</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_3">微内核架构设计</h2>
+<h3 id="_4">核心原则</h3>
+<ol>
+<li><strong>最小内核</strong>：仅保留真值校验、Merkle-DAG、消息路由三大核心</li>
+<li><strong>插件化算子</strong>：27大算子作为独立插件，可热插拔</li>
+<li><strong>十层依赖拓扑</strong>：严格按层执行，上游输出作为下游输入</li>
+</ol>
+<h3 id="27">27大算子十层拓扑</h3>
+<div class="codehilite"><pre><span></span><code>第一层：真值过滤与深度蒸馏（P4/P7/蒸馏）
+第二层：流形度量与SM-BS稳态映射
+第三层：知识图谱秩序化重建
+第四层：因果级推理
+第五层：CTE三位一体适配器流转
+第六层：结构化归档深化
+第七层：资产对账治理
+第八层：安全确权
+第九层：决策与法律护盾
+第十层：业务实体约束
+</code></pre></div>
+
+<h2 id="_5">自治运行的双算力注入</h2>
+<p>自治内核的持续运行需要两个条件：</p>
+<ol>
+<li><strong>本地小模型算力注入</strong>：Qwen2.5-0.5B部署在服务器本地，提供基础推理能力</li>
+<li><strong>外部API定时调用</strong>：通过AI网关调度外部大模型API，处理复杂任务</li>
+</ol>
+<p>这两个条件共同保证了内核的耗散结构能够持续进行自组织进化。</p>
+<h2 id="_6">总结</h2>
+<p>从单体到微内核自治，火斗云智AIOS的架构演进遵循了"解耦→融合→自治"的路径。未来的方向是实现Lv8完全永恒自治，让系统能够在无人干预的情况下持续进化。</p>
+<hr />
+<p><em>本文由火斗云智架构团队撰写，转载请注明出处。</em></p>
+      </div>
+    </div>
+  </article>
+
+  
+<footer class="hd-footer">
+  <div class="hd-footer__container">
+    <div class="hd-footer__grid">
+      <div class="hd-footer__brand">
+        <div class="hd-footer__logo">
+          <span class="hd-footer__logo-icon">火</span>
+          <span class="hd-footer__logo-text">火斗云智</span>
+        </div>
+        <p class="hd-footer__desc">元极恒一超认知永恒自治体系，构建下一代AI操作系统。</p>
+      </div>
+
+      <div class="hd-footer__col">
+        <h4 class="hd-footer__title">产品</h4>
+        <a href="/products/vector-kb.html" class="hd-footer__link">向量知识库</a>
+        <a href="/products/gov-ai.html" class="hd-footer__link">政务AI中台</a>
+        <a href="/products/kunlun-drama.html" class="hd-footer__link">昆仑短剧</a>
+        <a href="/products/ai-gateway.html" class="hd-footer__link">AI网关</a>
+      </div>
+
+      <div class="hd-footer__col">
+        <h4 class="hd-footer__title">资源</h4>
+        <a href="/whitepapers/aios-v1.html" class="hd-footer__link">技术白皮书</a>
+        <a href="/docs/" class="hd-footer__link">开发者文档</a>
+        <a href="/blog/" class="hd-footer__link">技术博客</a>
+        <a href="/architecture/" class="hd-footer__link">架构详解</a>
+      </div>
+
+      <div class="hd-footer__col">
+        <h4 class="hd-footer__title">公司</h4>
+        <a href="/about/" class="hd-footer__link">关于我们</a>
+        <a href="/about/philosophy.html" class="hd-footer__link">品牌理念</a>
+        <a href="/solutions/cases.html" class="hd-footer__link">客户案例</a>
+        <a href="/about/book-demo.html" class="hd-footer__link">联系我们</a>
+      </div>
+    </div>
+
+    <div class="hd-footer__bottom">
+      <p>&copy; 2026 火斗云智 AIOS. All rights reserved.</p>
+      <div class="hd-footer__legal">
+        <a href="/about/" class="hd-footer__link">隐私政策</a>
+        <a href="/about/" class="hd-footer__link">服务条款</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+.hd-footer { background: var(--hd-color-bg-dark); color: var(--hd-color-gray-300); padding: var(--hd-space-16) 0 var(--hd-space-8); }
+.hd-footer__container { max-width: var(--hd-container-xl); margin: 0 auto; padding: 0 var(--hd-space-6); }
+.hd-footer__grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--hd-space-12); margin-bottom: var(--hd-space-12); }
+.hd-footer__logo { display: flex; align-items: center; gap: var(--hd-space-2); margin-bottom: var(--hd-space-4); }
+.hd-footer__logo-icon {
+  width: 32px; height: 32px; border-radius: var(--hd-radius-md);
+  background: linear-gradient(135deg, var(--hd-color-primary-500), var(--hd-color-accent-500));
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: var(--hd-font-weight-bold);
+}
+.hd-footer__logo-text { font-size: var(--hd-font-size-lg); font-weight: var(--hd-font-weight-semibold); color: #fff; }
+.hd-footer__desc { font-size: var(--hd-font-size-sm); line-height: var(--hd-line-height-relaxed); color: var(--hd-color-gray-400); max-width: 280px; }
+.hd-footer__title { font-size: var(--hd-font-size-sm); font-weight: var(--hd-font-weight-semibold); color: #fff; margin-bottom: var(--hd-space-4); }
+.hd-footer__link { display: block; font-size: var(--hd-font-size-sm); color: var(--hd-color-gray-400); text-decoration: none; padding: var(--hd-space-1) 0; transition: color var(--hd-transition-fast); }
+.hd-footer__link:hover { color: var(--hd-color-primary-400); }
+.hd-footer__bottom { display: flex; justify-content: space-between; align-items: center; padding-top: var(--hd-space-6); border-top: 1px solid var(--hd-color-gray-800); font-size: var(--hd-font-size-xs); color: var(--hd-color-gray-500); }
+.hd-footer__legal { display: flex; gap: var(--hd-space-6); }
+.hd-footer__legal .hd-footer__link { padding: 0; }
+@media (max-width: 768px) {
+  .hd-footer__grid { grid-template-columns: 1fr 1fr; gap: var(--hd-space-8); }
+  .hd-footer__brand { grid-column: 1 / -1; }
+  .hd-footer__bottom { flex-direction: column; gap: var(--hd-space-4); text-align: center; }
+}
+</style>
+</body>
+</html>

@@ -1,0 +1,1219 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ZONGYUAN-ROOT 跨节点能力编排引擎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 15px 25px;
+            border-bottom: 2px solid #d4af37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 65px;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .logo {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #d4af37, #f0c040);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 700; color: #1a1a2e;
+        }
+        .title-group h1 {
+            font-size: 18px; font-weight: 700; color: #d4af37;
+            letter-spacing: 1px;
+        }
+        .title-group p { font-size: 11px; color: #888; margin-top: 2px; }
+        .toolbar { display: flex; gap: 8px; }
+        .btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #2a2a4a, #1a1a2e);
+            border: 1px solid #3a3a5a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn:hover { border-color: #d4af37; color: #d4af37; }
+        .btn.primary {
+            background: linear-gradient(135deg, #d4af37, #f0c040);
+            color: #1a1a2e;
+            border-color: #d4af37;
+            font-weight: 600;
+        }
+        .btn.primary:hover { opacity: 0.9; }
+        .btn.danger { border-color: #ff4d4f; color: #ff4d4f; }
+        .btn.danger:hover { background: rgba(255,77,79,0.1); }
+        .main-container {
+            display: flex;
+            height: calc(100vh - 65px - 40px);
+        }
+        .sidebar {
+            width: 260px;
+            background: #111118;
+            border-right: 1px solid #222;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .sidebar-title {
+            font-size: 13px; font-weight: 600; color: #d4af37;
+            margin-bottom: 12px; padding-bottom: 8px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .capability-group { margin-bottom: 15px; }
+        .group-header {
+            font-size: 12px; color: #888;
+            margin-bottom: 8px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .capability-item {
+            padding: 10px 12px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: grab;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+        .capability-item:hover {
+            border-color: #d4af37;
+            transform: translateX(3px);
+        }
+        .capability-item:active { cursor: grabbing; }
+        .capability-name { font-weight: 600; color: #e0e0e0; margin-bottom: 3px; }
+        .capability-provider { font-size: 10px; color: #666; }
+        .method-badge {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        .method-get { background: rgba(82,196,26,0.2); color: #52c41a; }
+        .method-post { background: rgba(24,144,255,0.2); color: #1890ff; }
+        .method-put { background: rgba(250,173,20,0.2); color: #faad14; }
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: #0a0a0f;
+            background-image:
+                radial-gradient(circle, #1a1a2e 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: hidden;
+        }
+        .canvas-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+        .canvas-node {
+            position: absolute;
+            width: 180px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #3a3a5a;
+            border-radius: 10px;
+            padding: 12px;
+            cursor: move;
+            user-select: none;
+            transition: box-shadow 0.2s;
+            z-index: 10;
+        }
+        .canvas-node:hover { box-shadow: 0 0 15px rgba(212,175,55,0.3); }
+        .canvas-node.selected {
+            border-color: #d4af37;
+            box-shadow: 0 0 20px rgba(212,175,55,0.4);
+        }
+        .node-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+        .node-title { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+        .node-delete {
+            width: 20px; height: 20px;
+            background: rgba(255,77,79,0.2);
+            border: none; border-radius: 4px;
+            color: #ff4d4f; cursor: pointer;
+            font-size: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .node-delete:hover { background: rgba(255,77,79,0.4); }
+        .node-provider { font-size: 10px; color: #888; margin-bottom: 8px; }
+        .node-ports {
+            display: flex; justify-content: space-between;
+            margin-top: 8px;
+        }
+        .port {
+            width: 14px; height: 14px;
+            background: #3a3a5a;
+            border: 2px solid #d4af37;
+            border-radius: 50%;
+            cursor: crosshair;
+            transition: all 0.2s;
+        }
+        .port:hover { background: #d4af37; transform: scale(1.3); }
+        .port.input { margin-right: auto; }
+        .port.output { margin-left: auto; }
+        .port-label { font-size: 9px; color: #666; margin: 0 4px; }
+        .properties-panel {
+            width: 280px;
+            background: #111118;
+            border-left: 1px solid #222;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .panel-title {
+            font-size: 13px; font-weight: 600; color: #d4af37;
+            margin-bottom: 12px; padding-bottom: 8px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .property-group { margin-bottom: 15px; }
+        .property-label {
+            font-size: 11px; color: #888;
+            margin-bottom: 5px;
+        }
+        .property-input {
+            width: 100%;
+            padding: 8px 10px;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 12px;
+        }
+        .property-input:focus { outline: none; border-color: #d4af37; }
+        .property-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px 10px;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 11px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        .property-textarea:focus { outline: none; border-color: #d4af37; }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #555;
+            font-size: 12px;
+        }
+        .empty-state-icon { font-size: 40px; margin-bottom: 15px; opacity: 0.5; }
+        .footer {
+            height: 40px;
+            background: #111118;
+            border-top: 1px solid #222;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+            font-size: 11px;
+            color: #666;
+        }
+        .footer-item { display: flex; align-items: center; gap: 5px; }
+        .footer-value { color: #d4af37; font-weight: 600; }
+        .log-panel {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 150px;
+            background: rgba(10,10,15,0.95);
+            border-top: 1px solid #2a2a4a;
+            padding: 10px 15px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 11px;
+            display: none;
+            z-index: 100;
+        }
+        .log-panel.show { display: block; }
+        .log-line { padding: 3px 0; border-bottom: 1px solid #1a1a2e; }
+        .log-time { color: #555; }
+        .log-info { color: #1890ff; }
+        .log-success { color: #52c41a; }
+        .log-warning { color: #faad14; }
+        .log-error { color: #ff4d4f; }
+        .log-toggle {
+            position: absolute;
+            bottom: 10px; right: 10px;
+            z-index: 101;
+        }
+        @media (max-width: 1024px) {
+            .sidebar { width: 200px; }
+            .properties-panel { width: 220px; }
+        }
+    </style>
+    <link rel="canonical" href="https://huodouai.comcapability-orchestrator/"></head><body><div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif"><div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:12px"><a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none"><div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div><div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div></a></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a><a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a><a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a><a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a><div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px"><div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div></div></div></div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+
+
+    <div class="header"><div class="header-left"><div class="logo">Ω</div><div class="title-group"><h1>ZONGYUAN-ROOT 跨节点能力编排引擎</h1><p>可视化拖拽编排 · 25个节点能力组合 · 跨节点协同流程</p></div></div><div class="toolbar"><select id="templateSelect" onchange="if(this.value){loadTemplate(this.value);this.value='';}" style="padding:8px 12px;background:linear-gradient(135deg,#2a2a4a,#1a1a2e);border:1px solid #3a3a5a;border-radius:8px;color:#e0e0e0;font-size:13px;cursor:pointer;outline:none;"><option value="">📋 加载模板...</option><optgroup label="短剧生产"><option value="tpl-drama-production-001">🎬 短剧全流程生产</option></optgroup><optgroup label="政务服务"><option value="tpl-gov-qa-001">🏛️ 政务智能问答</option><option value="tpl-gov-document-001">📄 公文自动生成</option></optgroup><optgroup label="智能办公"><option value="tpl-workflow-001">⚙️ 智能工作流编排</option><option value="tpl-data-analysis-001">📊 数据分析报告</option></optgroup><optgroup label="知识管理"><option value="tpl-knowledge-001">📚 知识库构建与检索</option></optgroup><optgroup label="官网展示"><option value="tpl-website-001">🌐 官网内容生产</option></optgroup><optgroup label="身份管理"><option value="tpl-identity-001">🔐 身份节点全流程管理</option></optgroup></select><button class="btn" onclick="saveAsTemplate()" title="将当前编排保存为自定义模板">💾 存为模板</button><button class="btn" onclick="exportTemplate()" title="导出当前编排为JSON文件">📤 导出</button><button class="btn" onclick="document.getElementById('importFile').click()" title="从JSON文件导入模板">📥 导入</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importTemplate(event)"><button class="btn" onclick="openTemplateManager()" title="管理自定义模板">📋 我的模板</button><button class="btn" onclick="clearCanvas()">🗑️ 清空</button><button class="btn" onclick="saveFlow()">💾 保存</button><button class="btn" onclick="loadFlow()">📂 加载</button><button class="btn" onclick="exportFlow()">📤 导出</button><button class="btn primary" onclick="executeFlow()">▶️ 执行流程</button></div></div><div class="main-container"><div class="sidebar"><div class="sidebar-title">⚡ 节点能力库（拖拽到画布）</div><div id="capabilityList"></div></div><div class="canvas-container" id="canvas" ondrop="dropNode(event)" ondragover="allowDrop(event)"><svg class="canvas-svg" id="connectionsSvg"></svg><div class="empty-state" id="emptyState"><div class="empty-state-icon">🎯</div><div>从左侧拖拽能力到画布开始编排</div><div style="margin-top:8px;font-size:10px;">点击节点输出端口，再点击另一个节点输入端口建立连接</div></div><div class="log-panel" id="logPanel"></div><button class="btn log-toggle" onclick="toggleLog()">📋 日志</button></div><div class="properties-panel"><div class="panel-title">⚙️ 节点属性配置</div><div id="propertiesContent"><div class="empty-state"><div class="empty-state-icon">👆</div><div>点击画布中的节点查看和编辑属性</div></div></div></div></div><div class="footer"><div class="footer-item">节点数: <span class="footer-value" id="nodeCount">0</span></div><div class="footer-item">连接数: <span class="footer-value" id="connectionCount">0</span></div><div class="footer-item">可用能力: <span class="footer-value">25</span></div><div class="footer-item">提供节点: <span class="footer-value">6</span></div><div class="footer-item" style="margin-left:auto;">Ω₀⊂⊙∞⊂Ω · DID-BR-000002</div></div>
+
+    <script>
+        // 能力数据
+        const capabilities = [
+            {name:'政策问答', provider:'政务AI中台', method:'POST', category:'政务', icon:'🏛️', endpoint:'/gov-api/policy/qa'},
+            {name:'公文生成', provider:'政务AI中台', method:'POST', category:'政务', icon:'📄', endpoint:'/gov-api/doc/generate'},
+            {name:'预约管理', provider:'政务AI中台', method:'GET', category:'政务', icon:'📅', endpoint:'/gov-api/appointments'},
+            {name:'审批流转', provider:'政务AI中台', method:'GET', category:'政务', icon:'✅', endpoint:'/gov-api/approvals'},
+            {name:'智能体编排', provider:'智能工作台', method:'POST', category:'智能', icon:'🤖', endpoint:'/workbench/agent/orchestrate'},
+            {name:'工作流设计', provider:'智能工作台', method:'GET', category:'智能', icon:'🔄', endpoint:'/workbench/workflow/design'},
+            {name:'多模态交互', provider:'智能工作台', method:'POST', category:'智能', icon:'🎙️', endpoint:'/workbench/multimodal'},
+            {name:'数据分析', provider:'智能工作台', method:'GET', category:'智能', icon:'📊', endpoint:'/workbench/data/analysis'},
+            {name:'剧本生成', provider:'昆仑洞天短剧引擎', method:'POST', category:'短剧', icon:'🎬', endpoint:'/drama/script/generate'},
+            {name:'分镜表', provider:'昆仑洞天短剧引擎', method:'POST', category:'短剧', icon:'🎞️', endpoint:'/drama/storyboard'},
+            {name:'关键帧生成', provider:'昆仑洞天短剧引擎', method:'POST', category:'短剧', icon:'🖼️', endpoint:'/drama/keyframe/generate'},
+            {name:'视频合成', provider:'昆仑洞天短剧引擎', method:'POST', category:'短剧', icon:'🎥', endpoint:'/drama/video/compose'},
+            {name:'向量检索', provider:'源域通识知识库', method:'POST', category:'知识', icon:'📚', endpoint:'/kb/vector/search'},
+            {name:'知识关联', provider:'源域通识知识库', method:'POST', category:'知识', icon:'🔗', endpoint:'/kb/knowledge/associate'},
+            {name:'语义搜索', provider:'源域通识知识库', method:'GET', category:'知识', icon:'🔍', endpoint:'/kb/semantic/search'},
+            {name:'真值提炼', provider:'源域通识知识库', method:'POST', category:'知识', icon:'💎', endpoint:'/kb/truth/extract'},
+            {name:'页面展示', provider:'火斗云智官网', method:'GET', category:'展示', icon:'🌐', endpoint:'/website/page/show'},
+            {name:'产品介绍', provider:'火斗云智官网', method:'GET', category:'展示', icon:'📦', endpoint:'/website/product/intro'},
+            {name:'案例展示', provider:'火斗云智官网', method:'GET', category:'展示', icon:'🏆', endpoint:'/website/case/show'},
+            {name:'联系表单', provider:'火斗云智官网', method:'POST', category:'展示', icon:'📧', endpoint:'/website/contact/form'},
+            {name:'身份节点申请', provider:'身份网关', method:'POST', category:'身份', icon:'🔐', endpoint:'/identity/apply'},
+            {name:'身份节点审批', provider:'身份网关', method:'POST', category:'身份', icon:'📝', endpoint:'/identity/approve'},
+            {name:'节点健康检查', provider:'身份网关', method:'GET', category:'身份', icon:'💚', endpoint:'/identity/health'},
+            {name:'节点违规记录', provider:'身份网关', method:'POST', category:'身份', icon:'⚠️', endpoint:'/identity/violation'},
+            {name:'节点版本管理', provider:'身份网关', method:'PUT', category:'身份', icon:'🔢', endpoint:'/identity/version'}
+        ];
+
+        // 状态
+        let nodes = [];
+        let connections = [];
+        let selectedNode = null;
+
+        // ========== 预设编排模板 ==========
+        const presetTemplates = [
+            {
+                id: "tpl-drama-production-001",
+                name: "短剧全流程生产模板",
+                icon: "🎬",
+                category: "短剧生产",
+                nodes: [
+                    {name: "剧本生成", capability: "剧本生成", x: 50, y: 80, params: {genre: "仙侠", episodes: 1}},
+                    {name: "分镜表生成", capability: "分镜表生成", x: 280, y: 80, params: {style: "电影级"}},
+                    {name: "关键帧生成", capability: "关键帧生成", x: 510, y: 80, params: {style: "国风仙侠", ratio: "9:16"}},
+                    {name: "视频合成", capability: "视频合成", x: 740, y: 80, params: {duration: "10秒/段"}},
+                    {name: "配音生成", capability: "配音生成", x: 280, y: 220, params: {voice: "女声-温柔"}},
+                    {name: "字幕生成", capability: "字幕生成", x: 510, y: 220, params: {style: "黑金字幕"}},
+                    {name: "最终合成", capability: "视频合成", x: 740, y: 220, params: {include_audio: true, include_subtitles: true}}
+                ],
+                connections: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6]]
+            },
+            {
+                id: "tpl-gov-qa-001",
+                name: "政务智能问答模板",
+                icon: "🏛️",
+                category: "政务服务",
+                nodes: [
+                    {name: "意图识别", capability: "意图识别", x: 50, y: 120, params: {domain: "政务"}},
+                    {name: "政策检索", capability: "政策检索", x: 280, y: 120, params: {top_k: 5}},
+                    {name: "知识推理", capability: "知识推理", x: 510, y: 120, params: {mode: "精准回答"}},
+                    {name: "答案生成", capability: "智能问答", x: 740, y: 120, params: {style: "官方正式"}},
+                    {name: "质量校验", capability: "自动摘要", x: 970, y: 120, params: {check_facts: true}}
+                ],
+                connections: [[0,1],[1,2],[2,3],[3,4]]
+            },
+            {
+                id: "tpl-gov-document-001",
+                name: "公文自动生成模板",
+                icon: "📄",
+                category: "政务服务",
+                nodes: [
+                    {name: "需求分析", capability: "意图识别", x: 50, y: 120, params: {domain: "公文"}},
+                    {name: "模板匹配", capability: "智能推荐", x: 280, y: 120, params: {type: "公文模板"}},
+                    {name: "内容生成", capability: "公文生成", x: 510, y: 120, params: {type: "通知", tone: "正式"}},
+                    {name: "格式排版", capability: "自动摘要", x: 740, y: 120, params: {format: "党政机关公文格式"}},
+                    {name: "审核校验", capability: "知识推理", x: 970, y: 120, params: {check_compliance: true}}
+                ],
+                connections: [[0,1],[1,2],[2,3],[3,4]]
+            },
+            {
+                id: "tpl-workflow-001",
+                name: "智能工作流编排模板",
+                icon: "⚙️",
+                category: "智能办公",
+                nodes: [
+                    {name: "任务创建", capability: "工作流设计", x: 50, y: 80, params: {type: "通用任务"}},
+                    {name: "智能分配", capability: "智能推荐", x: 280, y: 80, params: {strategy: "能力匹配"}},
+                    {name: "多模态交互", capability: "多模态交互", x: 510, y: 80, params: {mode: "对话式"}},
+                    {name: "进度追踪", capability: "数据分析", x: 740, y: 80, params: {metrics: ["完成率", "耗时"]}},
+                    {name: "自动提醒", capability: "智能问答", x: 280, y: 220, params: {channel: "多渠道"}},
+                    {name: "结果汇总", capability: "自动摘要", x: 510, y: 220, params: {format: "报告"}},
+                    {name: "知识沉淀", capability: "知识推理", x: 740, y: 220, params: {auto_archive: true}}
+                ],
+                connections: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6]]
+            },
+            {
+                id: "tpl-knowledge-001",
+                name: "知识库构建与检索模板",
+                icon: "📚",
+                category: "知识管理",
+                nodes: [
+                    {name: "文档导入", capability: "文档解析", x: 50, y: 80, params: {formats: ["PDF", "Word", "HTML"]}},
+                    {name: "内容解析", capability: "文档解析", x: 280, y: 80, params: {extract_structure: true}},
+                    {name: "实体抽取", capability: "实体抽取", x: 510, y: 80, params: {types: ["人物", "组织", "概念"]}},
+                    {name: "关系推理", capability: "关系推理", x: 740, y: 80, params: {build_graph: true}},
+                    {name: "向量化存储", capability: "向量检索", x: 280, y: 220, params: {model: "bge-large-zh"}},
+                    {name: "语义检索", capability: "语义搜索", x: 510, y: 220, params: {top_k: 10, rerank: true}},
+                    {name: "真值提炼", capability: "真值提炼", x: 740, y: 220, params: {confidence_threshold: 0.85}}
+                ],
+                connections: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6]]
+            },
+            {
+                id: "tpl-website-001",
+                name: "官网内容生产模板",
+                icon: "🌐",
+                category: "官网展示",
+                nodes: [
+                    {name: "资料整理", capability: "自动摘要", x: 50, y: 120, params: {source: "产品文档"}},
+                    {name: "内容创作", capability: "智能问答", x: 280, y: 120, params: {style: "专业正式", length: "详细"}},
+                    {name: "视觉设计", capability: "智能推荐", x: 510, y: 120, params: {style: "黑金高端"}},
+                    {name: "页面生成", capability: "页面展示", x: 740, y: 120, params: {responsive: true}},
+                    {name: "SEO优化", capability: "自动摘要", x: 970, y: 120, params: {keywords: "自动提取"}}
+                ],
+                connections: [[0,1],[1,2],[2,3],[3,4]]
+            },
+            {
+                id: "tpl-data-analysis-001",
+                name: "数据分析报告模板",
+                icon: "📊",
+                category: "智能办公",
+                nodes: [
+                    {name: "数据导入", capability: "数据分析", x: 50, y: 80, params: {formats: ["CSV", "Excel", "JSON"]}},
+                    {name: "数据清洗", capability: "数据分析", x: 280, y: 80, params: {remove_duplicates: true}},
+                    {name: "统计分析", capability: "数据分析", x: 510, y: 80, params: {methods: ["描述统计", "相关性", "趋势"]}},
+                    {name: "可视化生成", capability: "智能推荐", x: 740, y: 80, params: {chart_types: "自动选择"}},
+                    {name: "报告撰写", capability: "自动摘要", x: 280, y: 220, params: {format: "专业报告"}},
+                    {name: "结论提炼", capability: "知识推理", x: 510, y: 220, params: {actionable: true}},
+                    {name: "建议生成", capability: "智能问答", x: 740, y: 220, params: {priority: "高价值优先"}}
+                ],
+                connections: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6]]
+            },
+            {
+                id: "tpl-identity-001",
+                name: "身份节点全流程管理模板",
+                icon: "🔐",
+                category: "身份管理",
+                nodes: [
+                    {name: "申请受理", capability: "身份节点申请", x: 50, y: 80, params: {auto_validate: true}},
+                    {name: "资质审核", capability: "节点审批", x: 280, y: 80, params: {level: "L3信任链"}},
+                    {name: "节点注册", capability: "能力注册", x: 510, y: 80, params: {auto_discover: true}},
+                    {name: "权限配置", capability: "权限控制", x: 740, y: 80, params: {role_based: true}},
+                    {name: "健康监控", capability: "节点健康检查", x: 280, y: 220, params: {interval: "60秒"}},
+                    {name: "违规检测", capability: "节点违规记录", x: 510, y: 220, params: {auto_alert: true}},
+                    {name: "版本管理", capability: "版本管理", x: 740, y: 220, params: {auto_backup: true}}
+                ],
+                connections: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6]]
+            }
+        ];
+        // ========== 预设模板结束 ==========
+
+
+        let nodeIdCounter = 0;
+        let isConnecting = false;
+        let connectingFrom = null;
+        let dragNode = null;
+        let dragOffset = {x: 0, y: 0};
+
+        // 初始化能力列表
+
+        // 检测URL参数中的模板ID
+        function checkUrlTemplate() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const templateId = urlParams.get("template");
+            if (templateId) {
+                setTimeout(() => {
+                    loadTemplate(templateId);
+                }, 300);
+            }
+        }
+
+        function initCapabilityList() {
+            const categories = [...new Set(capabilities.map(c => c.category))];
+            const container = document.getElementById('capabilityList');
+            container.innerHTML = categories.map(cat => {
+                const items = capabilities.filter(c => c.category === cat);
+                return `
+                    <div class="capability-group">
+                        <div class="group-header">${items[0].icon} ${cat} (${items.length})</div>
+                        ${items.map((cap, idx) => `
+                            <div class="capability-item" draggable="true"
+                                 ondragstart="dragStart(event, ${capabilities.indexOf(cap)})"
+                                 data-idx="${capabilities.indexOf(cap)}">
+                                <div class="capability-name">
+                                    ${cap.icon} ${cap.name}
+                                    <span class="method-badge method-${cap.method.toLowerCase()}">${cap.method}</span>
+                                </div>
+                                <div class="capability-provider">${cap.provider}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 拖拽开始
+        function dragStart(e, idx) {
+            e.dataTransfer.setData('capabilityIdx', idx);
+        }
+
+        // 允许放置
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        // 放置节点
+        function dropNode(e) {
+            e.preventDefault();
+            const idx = parseInt(e.dataTransfer.getData('capabilityIdx'));
+            const cap = capabilities[idx];
+            const canvas = document.getElementById('canvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left - 90;
+            const y = e.clientY - rect.top - 50;
+
+            const node = {
+                id: 'node_' + (++nodeIdCounter),
+                capabilityIdx: idx,
+                name: cap.name,
+                provider: cap.provider,
+                method: cap.method,
+                icon: cap.icon,
+                endpoint: cap.endpoint,
+                x: Math.max(0, x),
+                y: Math.max(0, y),
+                params: '{}',
+                description: ''
+            };
+            nodes.push(node);
+            renderNodes();
+            updateStats();
+            hideEmptyState();
+            addLog('info', `添加节点: ${cap.icon} ${cap.name}`);
+        }
+
+        // 渲染节点
+        function renderNodes() {
+            const canvas = document.getElementById('canvas');
+            // 移除旧节点
+            canvas.querySelectorAll('.canvas-node').forEach(n => n.remove());
+
+            nodes.forEach(node => {
+                const el = document.createElement('div');
+                el.className = 'canvas-node' + (selectedNode === node.id ? ' selected' : '');
+                el.style.left = node.x + 'px';
+                el.style.top = node.y + 'px';
+                el.dataset.id = node.id;
+                el.innerHTML = `
+                    <div class="node-header">
+                        <div class="node-title">${node.icon} ${node.name}</div>
+                        <button class="node-delete" onclick="deleteNode('${node.id}', event)">×</button>
+                    </div>
+                    <div class="node-provider">${node.provider} · ${node.method}</div>
+                    <div class="node-ports">
+                        <div class="port input" data-node="${node.id}" data-port="input"
+                             onclick="handlePortClick('${node.id}', 'input', event)"></div>
+                        <span class="port-label">输入→输出</span>
+                        <div class="port output" data-node="${node.id}" data-port="output"
+                             onclick="handlePortClick('${node.id}', 'output', event)"></div>
+                    </div>
+                `;
+                el.addEventListener('mousedown', (e) => startDragNode(e, node.id));
+                el.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('port') && !e.target.classList.contains('node-delete')) {
+                        selectNode(node.id);
+                    }
+                });
+                canvas.appendChild(el);
+            });
+            renderConnections();
+        }
+
+        // 开始拖拽节点
+        function startDragNode(e, nodeId) {
+            if (e.target.classList.contains('port') || e.target.classList.contains('node-delete')) return;
+            dragNode = nodes.find(n => n.id === nodeId);
+            const rect = e.currentTarget.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            document.addEventListener('mousemove', onDragNode);
+            document.addEventListener('mouseup', stopDragNode);
+        }
+
+        // 拖拽节点中
+        function onDragNode(e) {
+            if (!dragNode) return;
+            const canvas = document.getElementById('canvas');
+            const rect = canvas.getBoundingClientRect();
+            dragNode.x = Math.max(0, e.clientX - rect.left - dragOffset.x);
+            dragNode.y = Math.max(0, e.clientY - rect.top - dragOffset.y);
+            const el = document.querySelector(`.canvas-node[data-id="${dragNode.id}"]`);
+            if (el) {
+                el.style.left = dragNode.x + 'px';
+                el.style.top = dragNode.y + 'px';
+            }
+            renderConnections();
+        }
+
+        // 停止拖拽
+        function stopDragNode() {
+            dragNode = null;
+            document.removeEventListener('mousemove', onDragNode);
+            document.removeEventListener('mouseup', stopDragNode);
+        }
+
+        // 处理端口点击
+        function handlePortClick(nodeId, portType, e) {
+            e.stopPropagation();
+            if (portType === 'output') {
+                isConnecting = true;
+                connectingFrom = nodeId;
+                addLog('info', `开始连接: 从 ${nodes.find(n=>n.id===nodeId).name} 输出端口`);
+            } else if (portType === 'input' && isConnecting && connectingFrom !== nodeId) {
+                // 检查是否已存在连接
+                const exists = connections.some(c => c.from === connectingFrom && c.to === nodeId);
+                if (!exists) {
+                    connections.push({from: connectingFrom, to: nodeId});
+                    addLog('success', `建立连接: ${nodes.find(n=>n.id===connectingFrom).name} → ${nodes.find(n=>n.id===nodeId).name}`);
+                }
+                isConnecting = false;
+                connectingFrom = null;
+                renderConnections();
+                updateStats();
+            }
+        }
+
+        // 渲染连接线
+        function renderConnections() {
+            const svg = document.getElementById('connectionsSvg');
+            svg.innerHTML = '';
+            connections.forEach((conn, idx) => {
+                const fromNode = nodes.find(n => n.id === conn.from);
+                const toNode = nodes.find(n => n.id === conn.to);
+                if (!fromNode || !toNode) return;
+
+                const x1 = fromNode.x + 180;
+                const y1 = fromNode.y + 70;
+                const x2 = toNode.x;
+                const y2 = toNode.y + 70;
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const midX = (x1 + x2) / 2;
+                path.setAttribute('d', `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+                path.setAttribute('stroke', '#d4af37');
+                path.setAttribute('stroke-width', '2');
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-dasharray', '5,5');
+                path.style.animation = 'dash 1s linear infinite';
+                path.style.cursor = 'pointer';
+                path.addEventListener('click', () => {
+                    if (confirm('删除此连接？')) {
+                        connections.splice(idx, 1);
+                        renderConnections();
+                        updateStats();
+                        addLog('warning', '删除连接');
+                    }
+                });
+                svg.appendChild(path);
+
+                // 箭头
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                arrow.setAttribute('points', `${x2},${y2} ${x2-8},${y2-4} ${x2-8},${y2+4}`);
+                arrow.setAttribute('fill', '#d4af37');
+                svg.appendChild(arrow);
+            });
+        }
+
+        // 选择节点
+        function selectNode(nodeId) {
+            selectedNode = nodeId;
+            renderNodes();
+            renderProperties();
+        }
+
+        // 渲染属性面板
+        function renderProperties() {
+            const container = document.getElementById('propertiesContent');
+            const node = nodes.find(n => n.id === selectedNode);
+            if (!node) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👆</div>
+                        <div>点击画布中的节点查看和编辑属性</div>
+                    </div>
+                `;
+                return;
+            }
+            container.innerHTML = `
+                <div class="property-group">
+                    <div class="property-label">节点名称</div>
+                    <input type="text" class="property-input" value="${node.name}"
+                           onchange="updateNodeProperty('${node.id}', 'name', this.value)">
+                </div>
+                <div class="property-group">
+                    <div class="property-label">提供节点</div>
+                    <input type="text" class="property-input" value="${node.provider}" readonly style="opacity:0.6;">
+                </div>
+                <div class="property-group">
+                    <div class="property-label">请求方法</div>
+                    <input type="text" class="property-input" value="${node.method}" readonly style="opacity:0.6;">
+                </div>
+                <div class="property-group">
+                    <div class="property-label">API端点</div>
+                    <input type="text" class="property-input" value="${node.endpoint}"
+                           onchange="updateNodeProperty('${node.id}', 'endpoint', this.value)">
+                </div>
+                <div class="property-group">
+                    <div class="property-label">请求参数 (JSON)</div>
+                    <textarea class="property-textarea"
+                              onchange="updateNodeProperty('${node.id}', 'params', this.value)">${node.params}</textarea>
+                </div>
+                <div class="property-group">
+                    <div class="property-label">节点描述</div>
+                    <textarea class="property-textarea" style="min-height:60px;"
+                              onchange="updateNodeProperty('${node.id}', 'description', this.value)">${node.description}</textarea>
+                </div>
+                <div class="property-group">
+                    <div class="property-label">节点位置</div>
+                    <div style="font-size:11px;color:#666;">X: ${Math.round(node.x)}, Y: ${Math.round(node.y)}</div>
+                </div>
+                <button class="btn danger" style="width:100%;margin-top:10px;"
+                        onclick="deleteNode('${node.id}')">🗑️ 删除此节点</button>
+            `;
+        }
+
+        // 更新节点属性
+        function updateNodeProperty(nodeId, prop, value) {
+            const node = nodes.find(n => n.id === nodeId);
+            if (node) {
+                node[prop] = value;
+                if (prop === 'name') renderNodes();
+            }
+        }
+
+        // 删除节点
+        function deleteNode(nodeId, e) {
+            if (e) e.stopPropagation();
+            nodes = nodes.filter(n => n.id !== nodeId);
+            connections = connections.filter(c => c.from !== nodeId && c.to !== nodeId);
+            if (selectedNode === nodeId) selectedNode = null;
+            renderNodes();
+            renderProperties();
+            updateStats();
+            if (nodes.length === 0) showEmptyState();
+            addLog('warning', `删除节点: ${nodeId}`);
+        }
+
+        // 清空画布
+        function clearCanvas() {
+            if (nodes.length > 0 && !confirm('确定清空画布？所有节点和连接将被删除。')) return;
+            nodes = [];
+            connections = [];
+            selectedNode = null;
+            renderNodes();
+            renderProperties();
+            updateStats();
+            showEmptyState();
+            addLog('warning', '清空画布');
+        }
+
+        function loadTemplate(templateId) {
+            const template = presetTemplates.find(t => t.id === templateId);
+            if (!template) {
+                alert("未找到模板: " + templateId);
+                return;
+            }
+            
+            // 清空画布
+            nodes = [];
+            connections = [];
+            nodeIdCounter = 0;
+            
+            // 创建节点
+            template.nodes.forEach((n, idx) => {
+                const node = {
+                    id: "node_" + (nodeIdCounter++),
+                    name: n.name,
+                    capability: n.capability,
+                    x: n.x,
+                    y: n.y,
+                    params: n.params || {},
+                    status: "pending"
+                };
+                nodes.push(node);
+            });
+            
+            // 创建连接
+            template.connections.forEach(([fromIdx, toIdx]) => {
+                if (nodes[fromIdx] && nodes[toIdx]) {
+                    connections.push({
+                        from: nodes[fromIdx].id,
+                        to: nodes[toIdx].id
+                    });
+                }
+            });
+            
+            renderNodes();
+            renderConnections();
+            renderProperties();
+            
+            // 显示提示
+            showToast("✅ 模板「" + template.name + "」已加载，共" + nodes.length + "个节点");
+        }
+
+        function showToast(message) {
+            const toast = document.createElement("div");
+            toast.style.cssText = "position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #d4af37;color:#d4af37;padding:12px 24px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 20px rgba(212,175,55,0.3);";
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = "0"; toast.style.transition = "opacity 0.3s"; }, 2000);
+            setTimeout(() => { toast.remove(); }, 2500);
+        }
+
+        // ========== 自定义模板功能 ==========
+        const CUSTOM_TEMPLATES_KEY = "zongyuan_custom_templates";
+
+        function getCustomTemplates() {
+            try {
+                const data = localStorage.getItem(CUSTOM_TEMPLATES_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveCustomTemplates(templates) {
+            localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(templates));
+        }
+
+        function saveAsTemplate() {
+            if (nodes.length === 0) {
+                showToast("⚠️ 画布为空，请先添加节点");
+                return;
+            }
+            document.getElementById("newTemplateName").value = "";
+            document.getElementById("newTemplateDesc").value = "";
+            document.getElementById("newTemplateCategory").value = "自定义";
+            document.getElementById("saveTemplateModal").style.display = "flex";
+        }
+
+        function closeSaveTemplateModal() {
+            document.getElementById("saveTemplateModal").style.display = "none";
+        }
+
+        function confirmSaveTemplate() {
+            const name = document.getElementById("newTemplateName").value.trim();
+            const desc = document.getElementById("newTemplateDesc").value.trim();
+            const category = document.getElementById("newTemplateCategory").value;
+            
+            if (!name) {
+                alert("请输入模板名称");
+                return;
+            }
+            
+            const templates = getCustomTemplates();
+            const newTemplate = {
+                id: "custom-" + Date.now(),
+                name: name,
+                description: desc || "用户自定义模板",
+                category: category,
+                icon: "🎨",
+                isCustom: true,
+                createdAt: new Date().toISOString(),
+                nodes: JSON.parse(JSON.stringify(nodes)),
+                connections: JSON.parse(JSON.stringify(connections))
+            };
+            
+            templates.unshift(newTemplate);
+            saveCustomTemplates(templates);
+            closeSaveTemplateModal();
+            showToast("✅ 模板「" + name + "」已保存到我的模板");
+        }
+
+        function exportTemplate() {
+            if (nodes.length === 0) {
+                showToast("⚠️ 画布为空，无法导出");
+                return;
+            }
+            
+            const templateData = {
+                name: "我的编排模板",
+                description: "从编排引擎导出的模板",
+                exportedAt: new Date().toISOString(),
+                version: "1.0",
+                nodes: nodes,
+                connections: connections
+            };
+            
+            const blob = new Blob([JSON.stringify(templateData, null, 2)], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "编排模板_" + new Date().toISOString().slice(0,10) + ".json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("📤 模板已导出为JSON文件");
+        }
+
+        function importTemplate(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.nodes || !Array.isArray(data.nodes)) {
+                        alert("无效的模板文件：缺少nodes数组");
+                        return;
+                    }
+                    
+                    // 加载模板到画布
+                    nodes = [];
+                    connections = [];
+                    nodeIdCounter = 0;
+                    
+                    data.nodes.forEach(n => {
+                        const node = {
+                            id: "node_" + (nodeIdCounter++),
+                            name: n.name || "未命名节点",
+                            capability: n.capability || "未知能力",
+                            x: n.x || 100,
+                            y: n.y || 100,
+                            params: n.params || {},
+                            status: "pending"
+                        };
+                        nodes.push(node);
+                    });
+                    
+                    if (data.connections && Array.isArray(data.connections)) {
+                        data.connections.forEach(c => {
+                            let fromId, toId;
+                            if (typeof c.from === "number" && typeof c.to === "number") {
+                                fromId = nodes[c.from] ? nodes[c.from].id : null;
+                                toId = nodes[c.to] ? nodes[c.to].id : null;
+                            } else {
+                                fromId = c.from;
+                                toId = c.to;
+                            }
+                            if (fromId && toId) {
+                                connections.push({from: fromId, to: toId});
+                            }
+                        });
+                    }
+                    
+                    renderNodes();
+                    renderConnections();
+                    renderProperties();
+                    showToast("📥 模板导入成功，共" + nodes.length + "个节点");
+                } catch (err) {
+                    alert("模板文件解析失败：" + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = "";
+        }
+
+        function openTemplateManager() {
+            renderTemplateManagerList();
+            document.getElementById("templateManagerModal").style.display = "flex";
+        }
+
+        function closeTemplateManager() {
+            document.getElementById("templateManagerModal").style.display = "none";
+        }
+
+        function renderTemplateManagerList() {
+            const templates = getCustomTemplates();
+            const listEl = document.getElementById("templateManagerList");
+            const emptyEl = document.getElementById("templateManagerEmpty");
+            
+            if (templates.length === 0) {
+                listEl.innerHTML = "";
+                emptyEl.style.display = "block";
+                return;
+            }
+            
+            emptyEl.style.display = "none";
+            listEl.innerHTML = templates.map((t, idx) => `
+                <div style="background:rgba(255,255,255,0.03);border:1px solid #2a2a4a;border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;">
+                    <div style="flex:1;">
+                        <div style="font-size:14px;font-weight:600;color:#e0e0e0;margin-bottom:4px;">
+                            ${t.icon || "🎨"} ${t.name}
+                            <span style="font-size:10px;color:#888;margin-left:8px;">${t.category || "自定义"}</span>
+                        </div>
+                        <div style="font-size:11px;color:#666;margin-bottom:4px;">${t.description || "无描述"}</div>
+                        <div style="font-size:10px;color:#555;">${t.nodes ? t.nodes.length : 0}个节点 · ${new Date(t.createdAt).toLocaleString()}</div>
+                    </div>
+                    <div style="display:flex;gap:6px;margin-left:12px;">
+                        <button onclick="loadCustomTemplate(${idx})" style="padding:6px 12px;background:rgba(212,175,55,0.15);border:1px solid #d4af37;border-radius:6px;color:#d4af37;font-size:11px;cursor:pointer;">加载</button>
+                        <button onclick="renameCustomTemplate(${idx})" style="padding:6px 12px;background:rgba(24,144,255,0.1);border:1px solid #1890ff;border-radius:6px;color:#1890ff;font-size:11px;cursor:pointer;">重命名</button>
+                        <button onclick="deleteCustomTemplate(${idx})" style="padding:6px 12px;background:rgba(255,77,79,0.1);border:1px solid #ff4d4f;border-radius:6px;color:#ff4d4f;font-size:11px;cursor:pointer;">删除</button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function loadCustomTemplate(idx) {
+            const templates = getCustomTemplates();
+            const t = templates[idx];
+            if (!t) return;
+            
+            nodes = [];
+            connections = [];
+            nodeIdCounter = 0;
+            
+            t.nodes.forEach(n => {
+                const node = {
+                    id: "node_" + (nodeIdCounter++),
+                    name: n.name,
+                    capability: n.capability,
+                    x: n.x,
+                    y: n.y,
+                    params: n.params || {},
+                    status: "pending"
+                };
+                nodes.push(node);
+            });
+            
+            if (t.connections) {
+                t.connections.forEach(c => {
+                    let fromId, toId;
+                    if (typeof c.from === "number" && typeof c.to === "number") {
+                        fromId = nodes[c.from] ? nodes[c.from].id : null;
+                        toId = nodes[c.to] ? nodes[c.to].id : null;
+                    } else {
+                        fromId = c.from;
+                        toId = c.to;
+                    }
+                    if (fromId && toId) {
+                        connections.push({from: fromId, to: toId});
+                    }
+                });
+            }
+            
+            renderNodes();
+            renderConnections();
+            renderProperties();
+            closeTemplateManager();
+            showToast("✅ 模板「" + t.name + "」已加载");
+        }
+
+        function renameCustomTemplate(idx) {
+            const templates = getCustomTemplates();
+            const t = templates[idx];
+            if (!t) return;
+            
+            const newName = prompt("请输入新的模板名称：", t.name);
+            if (newName && newName.trim()) {
+                templates[idx].name = newName.trim();
+                saveCustomTemplates(templates);
+                renderTemplateManagerList();
+                showToast("✅ 模板已重命名为「" + newName.trim() + "」");
+            }
+        }
+
+        function deleteCustomTemplate(idx) {
+            const templates = getCustomTemplates();
+            const t = templates[idx];
+            if (!t) return;
+            
+            if (confirm("确定要删除模板「" + t.name + "」吗？此操作不可恢复。")) {
+                templates.splice(idx, 1);
+                saveCustomTemplates(templates);
+                renderTemplateManagerList();
+                showToast("🗑️ 模板已删除");
+            }
+        }
+        // ========== 自定义模板功能结束 ==========
+
+
+
+        // 保存流程
+        function saveFlow() {
+            const flow = {nodes, connections, savedAt: new Date().toISOString()};
+            localStorage.setItem('zongyuan_orchestrator_flow', JSON.stringify(flow));
+            addLog('success', `流程已保存: ${nodes.length}个节点, ${connections.length}个连接`);
+            alert('流程已保存到本地存储！');
+        }
+
+        // 加载流程
+        function loadFlow() {
+            const saved = localStorage.getItem('zongyuan_orchestrator_flow');
+            if (!saved) {
+                alert('没有找到已保存的流程');
+                return;
+            }
+            const flow = JSON.parse(saved);
+            nodes = flow.nodes || [];
+            connections = flow.connections || [];
+            nodeIdCounter = nodes.length;
+            selectedNode = null;
+            renderNodes();
+            renderProperties();
+            updateStats();
+            if (nodes.length > 0) hideEmptyState();
+            addLog('success', `流程已加载: ${nodes.length}个节点, ${connections.length}个连接`);
+        }
+
+        // 导出流程
+        function exportFlow() {
+            const flow = {
+                name: 'ZONGYUAN-ROOT 能力编排流程',
+                version: '1.0',
+                did: 'DID-BR-000002',
+                createdAt: new Date().toISOString(),
+                nodes: nodes.map(n => ({
+                    id: n.id,
+                    name: n.name,
+                    provider: n.provider,
+                    method: n.method,
+                    endpoint: n.endpoint,
+                    params: JSON.parse(n.params || '{}'),
+                    description: n.description
+                })),
+                connections: connections.map(c => ({
+                    from: c.from,
+                    to: c.to,
+                    fromName: nodes.find(n=>n.id===c.from)?.name,
+                    toName: nodes.find(n=>n.id===c.to)?.name
+                }))
+            };
+            const blob = new Blob([JSON.stringify(flow, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'zongyuan_orchestrator_flow.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            addLog('success', '流程已导出为JSON文件');
+        }
+
+        // 执行流程
+                function executeFlow() {
+            if (nodes.length === 0) {
+                alert('画布为空，请先添加节点');
+                return;
+            }
+            addLog('info', '========== 开始执行流程（后端真实调度） ==========');
+            addLog('info', `流程包含 ${nodes.length} 个节点, ${connections.length} 个连接`);
+
+            // 构建编排定义
+            const definition = {
+                template_id: currentTemplateId || 'custom-orchestration',
+                template_name: currentTemplateName || '自定义编排',
+                nodes: nodes.map(n => ({
+                    id: n.id,
+                    name: n.name,
+                    type: 'capability',
+                    capability_id: n.capability_id || n.id,
+                    api_endpoint: n.endpoint || '',
+                    method: n.method || 'GET',
+                    params: n.params || {}
+                })),
+                edges: connections.map(c => ({ source: c.from, target: c.to })),
+                params: {},
+                api_key: 'zy-root-admin-2026-identity-api',
+                started_at: new Date().toISOString()
+            };
+
+            addLog('info', '调用后端编排调度服务...');
+
+            fetch('/api/identity/api/v1/identity/orchestration/run', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'zy-root-admin-2026-identity-api'
+                },
+                body: JSON.stringify(definition)
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (!result.success) {
+                    addLog('error', '执行失败: ' + (result.error || '未知错误'));
+                    if (result.cycle_nodes) {
+                        addLog('error', '循环依赖节点: ' + result.cycle_nodes.join(', '));
+                    }
+                    return;
+                }
+                addLog('success', `执行完成: ${result.success_count}/${result.total_nodes} 节点成功`);
+                addLog('info', `执行时长: ${result.duration_ms}ms`);
+                addLog('info', `执行ID: ${result.execution_id}`);
+                addLog('info', '--- 节点执行明细 ---');
+                Object.entries(result.node_results || {}).forEach(([id, r]) => {
+                    const status = r.success ? '✓' : '✗';
+                    const info = r.success ? `HTTP ${r.status_code} (${r.duration_ms}ms)` : (r.error || '失败');
+                    addLog(r.success ? 'success' : 'error', `${status} [${id}] ${r.node_name}: ${info}`);
+                });
+                addLog('success', '========== 流程执行完成 ==========');
+            })
+            .catch(err => {
+                addLog('error', '调用后端失败: ' + err.message);
+                addLog('error', '（可检查后端API服务状态）');
+            });
+        }
+
+        // 更新统计
+        function updateStats() {
+            document.getElementById('nodeCount').textContent = nodes.length;
+            document.getElementById('connectionCount').textContent = connections.length;
+        }
+
+        // 显示/隐藏空状态
+        function showEmptyState() { document.getElementById('emptyState').style.display = 'block'; }
+        function hideEmptyState() { document.getElementById('emptyState').style.display = 'none'; }
+
+        // 日志
+        function addLog(level, msg) {
+            const panel = document.getElementById('logPanel');
+            const time = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${level}">${level.toUpperCase()}</span> ${msg}`;
+            panel.appendChild(line);
+            panel.scrollTop = panel.scrollHeight;
+        }
+
+        // 切换日志面板
+        function toggleLog() {
+            document.getElementById('logPanel').classList.toggle('show');
+        }
+
+        // 点击画布空白处取消选择
+        document.getElementById('canvas').addEventListener('click', (e) => {
+            if (e.target.id === 'canvas' || e.target.id === 'emptyState') {
+                selectedNode = null;
+                renderNodes();
+                renderProperties();
+                isConnecting = false;
+                connectingFrom = null;
+            }
+        });
+
+        // 初始化
+        initCapabilityList();
+        checkUrlTemplate();
+        addLog('info', '跨节点能力编排引擎已就绪');
+        addLog('info', '可用能力: 25个, 提供节点: 6个');
+    </script>
+
+    
+    <div id="templateManagerModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9998;justify-content:center;align-items:center;"><div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #d4af37;border-radius:16px;width:90%;max-width:700px;max-height:80vh;overflow-y:auto;"><div style="padding:20px 24px;border-bottom:1px solid #2a2a4a;display:flex;justify-content:space-between;align-items:center;"><div style="font-size:18px;font-weight:700;color:#d4af37;">📋 我的模板管理</div><button onclick="closeTemplateManager()" style="width:32px;height:32px;background:rgba(255,255,255,0.05);border:none;border-radius:8px;color:#888;font-size:18px;cursor:pointer;">✕</button></div><div style="padding:20px 24px;"><div id="templateManagerList" style="display:flex;flex-direction:column;gap:10px;"></div><div id="templateManagerEmpty" style="text-align:center;padding:40px 20px;color:#666;"><div style="font-size:48px;margin-bottom:16px;">📭</div><div>暂无自定义模板</div><div style="font-size:12px;margin-top:8px;">在编排引擎中设计流程后，点击"存为模板"即可保存</div></div></div></div></div><div id="saveTemplateModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center;"><div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #d4af37;border-radius:16px;width:90%;max-width:450px;"><div style="padding:20px 24px;border-bottom:1px solid #2a2a4a;"><div style="font-size:18px;font-weight:700;color:#d4af37;">💾 保存为自定义模板</div></div><div style="padding:24px;"><div style="margin-bottom:16px;"><label style="display:block;font-size:13px;color:#888;margin-bottom:6px;">模板名称</label><input type="text" id="newTemplateName" placeholder="请输入模板名称" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid #3a3a5a;border-radius:8px;color:#e0e0e0;font-size:13px;outline:none;"></div><div style="margin-bottom:16px;"><label style="display:block;font-size:13px;color:#888;margin-bottom:6px;">模板描述（可选）</label><textarea id="newTemplateDesc" placeholder="请输入模板描述" rows="3" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid #3a3a5a;border-radius:8px;color:#e0e0e0;font-size:13px;outline:none;resize:vertical;"></textarea></div><div style="margin-bottom:20px;"><label style="display:block;font-size:13px;color:#888;margin-bottom:6px;">模板分类</label><select id="newTemplateCategory" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid #3a3a5a;border-radius:8px;color:#e0e0e0;font-size:13px;outline:none;"><option value="自定义">🎨 自定义</option><option value="短剧生产">🎬 短剧生产</option><option value="政务服务">🏛️ 政务服务</option><option value="智能办公">⚙️ 智能办公</option><option value="知识管理">📚 知识管理</option><option value="官网展示">🌐 官网展示</option><option value="身份管理">🔐 身份管理</option></select></div><div style="display:flex;gap:10px;justify-content:flex-end;"><button onclick="closeSaveTemplateModal()" style="padding:10px 20px;background:transparent;border:1px solid #3a3a5a;border-radius:8px;color:#888;font-size:13px;cursor:pointer;">取消</button><button onclick="confirmSaveTemplate()" style="padding:10px 24px;background:linear-gradient(135deg,#d4af37,#f0c040);border:none;border-radius:8px;color:#1a1a2e;font-size:13px;font-weight:600;cursor:pointer;">💾 保存模板</button></div></div></div></div></body></html>

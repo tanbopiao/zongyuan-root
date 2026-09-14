@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONGYUAN-ROOT API使用统计仪表盘</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 20px 30px;
+            border-bottom: 2px solid #d4af37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .logo {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #d4af37, #f0c040);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 700; color: #1a1a2e;
+        }
+        .title-group h1 { font-size: 18px; font-weight: 700; color: #d4af37; }
+        .title-group p { font-size: 11px; color: #888; margin-top: 2px; }
+        .header-right { display: flex; gap: 10px; align-items: center; }
+        .refresh-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #d4af37, #f0c040);
+            border: none; border-radius: 8px;
+            color: #1a1a2e; font-size: 13px; font-weight: 600;
+            cursor: pointer;
+        }
+        .refresh-btn:hover { opacity: 0.9; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 25px 30px; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #d4af37, #f0c040);
+        }
+        .stat-icon { font-size: 24px; margin-bottom: 8px; }
+        .stat-value { font-size: 26px; font-weight: 700; color: #d4af37; margin-bottom: 4px; }
+        .stat-label { font-size: 12px; color: #888; }
+        .stat-change { font-size: 11px; margin-top: 6px; }
+        .stat-change.up { color: #52c41a; }
+        .stat-change.down { color: #ff4d4f; }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .chart-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .chart-title {
+            font-size: 14px; font-weight: 600; color: #f0f0f0;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 3px solid #d4af37;
+        }
+        .chart-container { width: 100%; height: 280px; }
+        
+        .table-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .table-title {
+            font-size: 14px; font-weight: 600; color: #f0f0f0;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 3px solid #d4af37;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            background: rgba(212, 175, 55, 0.1);
+            color: #d4af37;
+            font-weight: 600;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #1a1a2e;
+            color: #ccc;
+        }
+        tr:hover { background: rgba(212, 175, 55, 0.05); }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .badge.success { background: rgba(82,196,26,0.2); color: #52c41a; }
+        .badge.warning { background: rgba(250,173,20,0.2); color: #faad14; }
+        .badge.danger { background: rgba(255,77,79,0.2); color: #ff4d4f; }
+        .progress-bar {
+            height: 6px;
+            background: #222;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #52c41a, #73d13d);
+            border-radius: 3px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+            font-size: 11px;
+            border-top: 1px solid #1a1a2e;
+            margin-top: 30px;
+        }
+        .footer .trace-mark { color: #d4af37; font-family: monospace; margin-top: 6px; }
+        
+        @media (max-width: 900px) {
+            .chart-grid { grid-template-columns: 1fr; }
+            .container { padding: 15px; }
+        }
+    </style>
+    <link rel="canonical" href="https://huodouai.comapi-usage-dashboard/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">Ω</div>
+            <div class="title-group">
+                <h1>ZONGYUAN-ROOT API使用统计仪表盘</h1>
+                <p>API Key使用监控 · 调用趋势分析 · 端点性能统计</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <span id="lastUpdate" style="font-size:11px;color:#888;">最后更新: --</span>
+            <button class="refresh-btn" onclick="loadData()">🔄 刷新数据</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 统计卡片 -->
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <!-- 图表区域 -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-title">📈 24小时调用趋势</div>
+                <div class="chart-container" id="hourlyChart"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">📊 7天调用趋势</div>
+                <div class="chart-container" id="dailyChart"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">🔑 API Key调用量分布</div>
+                <div class="chart-container" id="apiKeyChart"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">📡 端点调用量TOP10</div>
+                <div class="chart-container" id="endpointChart"></div>
+            </div>
+        </div>
+
+        <!-- API Key使用统计表 -->
+        <div class="table-card">
+            <div class="table-title">🔑 API Key使用统计详情</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>API Key</th>
+                        <th>所属窗口</th>
+                        <th>总调用量</th>
+                        <th>成功</th>
+                        <th>失败</th>
+                        <th>成功率</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody id="apiKeyTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- 端点使用统计表 -->
+        <div class="table-card">
+            <div class="table-title">📡 端点使用统计详情</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>端点</th>
+                        <th>方法</th>
+                        <th>总调用量</th>
+                        <th>成功</th>
+                        <th>失败</th>
+                        <th>成功率</th>
+                    </tr>
+                </thead>
+                <tbody id="endpointTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>ZONGYUAN-ROOT 元极恒一超认知永恒自治体系 · API使用统计仪表盘 V1.0</div>
+        <div class="trace-mark">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 元极恒一·全域监控·永续稳态</div>
+    </div>
+
+    <script>
+        // API Key到窗口名称的映射
+        const apiKeyWindowMap = {
+            'zy-d859b1e8875eb6fff6c3': '政务开发窗口',
+            'zy-700ea9d3b8a4f03156769': '智能中台开发窗口',
+            'zy-936755d2f3d6900f529d8': '短剧开发窗口',
+            'zy-d392a990d0deac8c0281f': '向量知识库开发窗口',
+            'zy-e221064d6c40901a2ff4d': '官网展示开发窗口',
+            'zy-b9ce0199bb23f9d751835': '云内核主控'
+        };
+
+        // 模拟数据（实际使用时从API获取）
+        const mockData = {
+            summary: {
+                total_calls: 847,
+                success_rate: 92.09,
+                avg_response_time_ms: 255.04,
+                last_24h_calls: 164,
+                last_7d_calls: 847,
+                unique_api_keys: 6,
+                unique_endpoints: 11
+            },
+            apiKeys: [
+                {api_key: 'zy-b9ce0199bb23f9d751835...', total_calls: 165, success: 151, error: 14, success_rate: 91.52},
+                {api_key: 'zy-e221064d6c40901a2ff4d...', total_calls: 143, success: 130, error: 13, success_rate: 90.91},
+                {api_key: 'zy-d392a990d0deac8c0281f...', total_calls: 140, success: 130, error: 10, success_rate: 92.86},
+                {api_key: 'zy-700ea9d3b8a4f03156769...', total_calls: 138, success: 128, error: 10, success_rate: 92.75},
+                {api_key: 'zy-d859b1e8875eb6fff6c3...', total_calls: 135, success: 125, error: 10, success_rate: 92.59},
+                {api_key: 'zy-936755d2f3d6900f529d8...', total_calls: 126, success: 115, error: 11, success_rate: 91.27}
+            ],
+            endpoints: [
+                {endpoint: '/api/v1/identity/applications', method: 'GET/POST', total_calls: 137, success: 128, error: 9, success_rate: 93.43},
+                {endpoint: '/api/v1/identity/nodes', method: 'GET', total_calls: 84, success: 79, error: 5, success_rate: 94.05},
+                {endpoint: '/api/v1/identity/api-keys', method: 'POST', total_calls: 81, success: 75, error: 6, success_rate: 92.59},
+                {endpoint: '/api/v1/identity/stats', method: 'GET', total_calls: 78, success: 73, error: 5, success_rate: 93.59},
+                {endpoint: '/api/v1/identity/nodes/app-gov-ai-0001/heartbeat', method: 'POST', total_calls: 76, success: 72, error: 4, success_rate: 94.74},
+                {endpoint: '/api/v1/identity/health', method: 'GET', total_calls: 72, success: 70, error: 2, success_rate: 97.22},
+                {endpoint: '/api/v1/identity/nodes/app-gov-ai-0001/capabilities', method: 'GET', total_calls: 68, success: 63, error: 5, success_rate: 92.65},
+                {endpoint: '/api/v1/identity/health-check/run', method: 'POST', total_calls: 65, success: 60, error: 5, success_rate: 92.31},
+                {endpoint: '/api/v1/identity/applications/test-001/approve', method: 'POST', total_calls: 62, success: 57, error: 5, success_rate: 91.94},
+                {endpoint: '/api/v1/identity/nodes/unknown/health', method: 'GET', total_calls: 58, success: 0, error: 58, success_rate: 0}
+            ],
+            hourly: [
+                {hour: '00:00', calls: 5}, {hour: '01:00', calls: 3}, {hour: '02:00', calls: 2},
+                {hour: '03:00', calls: 1}, {hour: '04:00', calls: 2}, {hour: '05:00', calls: 4},
+                {hour: '06:00', calls: 8}, {hour: '07:00', calls: 12}, {hour: '08:00', calls: 18},
+                {hour: '09:00', calls: 22}, {hour: '10:00', calls: 25}, {hour: '11:00', calls: 20},
+                {hour: '12:00', calls: 15}, {hour: '13:00', calls: 18}, {hour: '14:00', calls: 22},
+                {hour: '15:00', calls: 20}, {hour: '16:00', calls: 18}, {hour: '17:00', calls: 15},
+                {hour: '18:00', calls: 12}, {hour: '19:00', calls: 10}, {hour: '20:00', calls: 8},
+                {hour: '21:00', calls: 6}, {hour: '22:00', calls: 4}, {hour: '23:00', calls: 3}
+            ],
+            daily: [
+                {day: '08-31', calls: 105}, {day: '09-01', calls: 118}, {day: '09-02', calls: 125},
+                {day: '09-03', calls: 132}, {day: '09-04', calls: 128}, {day: '09-05', calls: 135},
+                {day: '09-06', calls: 104}
+            ]
+        };
+
+        let hourlyChart, dailyChart, apiKeyChart, endpointChart;
+
+        function initCharts() {
+            hourlyChart = echarts.init(document.getElementById('hourlyChart'));
+            dailyChart = echarts.init(document.getElementById('dailyChart'));
+            apiKeyChart = echarts.init(document.getElementById('apiKeyChart'));
+            endpointChart = echarts.init(document.getElementById('endpointChart'));
+            window.addEventListener('resize', () => {
+                hourlyChart.resize();
+                dailyChart.resize();
+                apiKeyChart.resize();
+                endpointChart.resize();
+            });
+        }
+
+        function renderStats(data) {
+            const s = data.summary;
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value">${s.total_calls.toLocaleString()}</div>
+                    <div class="stat-label">总调用量</div>
+                    <div class="stat-change up">↑ 最近7天</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">${s.success_rate}%</div>
+                    <div class="stat-label">成功率</div>
+                    <div class="stat-change up">↑ 稳定</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-value">${s.avg_response_time_ms}ms</div>
+                    <div class="stat-label">平均响应时间</div>
+                    <div class="stat-change up">↓ 优化中</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏰</div>
+                    <div class="stat-value">${s.last_24h_calls}</div>
+                    <div class="stat-label">最近24小时</div>
+                    <div class="stat-change up">↑ 活跃</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-value">${s.last_7d_calls}</div>
+                    <div class="stat-label">最近7天</div>
+                    <div class="stat-change up">↑ 增长</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔑</div>
+                    <div class="stat-value">${s.unique_api_keys}</div>
+                    <div class="stat-label">活跃API Key</div>
+                    <div class="stat-change up">6个窗口</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📡</div>
+                    <div class="stat-value">${s.unique_endpoints}</div>
+                    <div class="stat-label">活跃端点</div>
+                    <div class="stat-change up">14个端点</div>
+                </div>
+            `;
+        }
+
+        function renderHourlyChart(data) {
+            hourlyChart.setOption({
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'axis', backgroundColor: 'rgba(26,26,46,0.95)', borderColor: '#d4af37', textStyle: {color: '#e0e0e0'} },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: data.hourly.map(d => d.hour),
+                    axisLine: {lineStyle: {color: '#3a3a5a'}},
+                    axisLabel: {color: '#888', fontSize: 10}
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {lineStyle: {color: '#3a3a5a'}},
+                    axisLabel: {color: '#888', fontSize: 10},
+                    splitLine: {lineStyle: {color: '#1a1a2e'}}
+                },
+                series: [{
+                    name: '调用量',
+                    type: 'line',
+                    smooth: true,
+                    data: data.hourly.map(d => d.calls),
+                    itemStyle: {color: '#d4af37'},
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            {offset: 0, color: 'rgba(212,175,55,0.4)'},
+                            {offset: 1, color: 'rgba(212,175,55,0.05)'}
+                        ])
+                    }
+                }]
+            });
+        }
+
+        function renderDailyChart(data) {
+            dailyChart.setOption({
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'axis', backgroundColor: 'rgba(26,26,46,0.95)', borderColor: '#d4af37', textStyle: {color: '#e0e0e0'} },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: data.daily.map(d => d.day),
+                    axisLine: {lineStyle: {color: '#3a3a5a'}},
+                    axisLabel: {color: '#888', fontSize: 11}
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {lineStyle: {color: '#3a3a5a'}},
+                    axisLabel: {color: '#888', fontSize: 10},
+                    splitLine: {lineStyle: {color: '#1a1a2e'}}
+                },
+                series: [{
+                    name: '调用量',
+                    type: 'bar',
+                    data: data.daily.map(d => d.calls),
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            {offset: 0, color: '#d4af37'},
+                            {offset: 1, color: '#8b7355'}
+                        ]),
+                        borderRadius: [4, 4, 0, 0]
+                    }
+                }]
+            });
+        }
+
+        function renderApiKeyChart(data) {
+            const labels = data.apiKeys.map(k => {
+                const prefix = k.api_key.substring(0, 20);
+                const window = apiKeyWindowMap[prefix] || '未知';
+                return window;
+            });
+            apiKeyChart.setOption({
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'item', backgroundColor: 'rgba(26,26,46,0.95)', borderColor: '#d4af37', textStyle: {color: '#e0e0e0'} },
+                legend: { orient: 'vertical', right: 10, top: 'center', textStyle: {color: '#888', fontSize: 10} },
+                series: [{
+                    name: '调用量',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['35%', '50%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: { borderRadius: 6, borderColor: '#1a1a2e', borderWidth: 2 },
+                    label: { show: false },
+                    emphasis: { label: { show: true, fontSize: 12, fontWeight: 'bold', color: '#d4af37' } },
+                    data: data.apiKeys.map((k, i) => ({
+                        value: k.total_calls,
+                        name: labels[i],
+                        itemStyle: {color: ['#d4af37', '#1890ff', '#52c41a', '#722ed1', '#eb2f96', '#faad14'][i % 6]}
+                    }))
+                }]
+            });
+        }
+
+        function renderEndpointChart(data) {
+            const top10 = data.endpoints.slice(0, 10);
+            endpointChart.setOption({
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'axis', backgroundColor: 'rgba(26,26,46,0.95)', borderColor: '#d4af37', textStyle: {color: '#e0e0e0'} },
+                grid: { left: '3%', right: '8%', bottom: '3%', containLabel: true },
+                xAxis: {
+                    type: 'value',
+                    axisLine: {lineStyle: {color: '#3a3a5a'}},
+                    axisLabel: {color: '#888', fontSize: 10},
+                    splitLine: {lineStyle: {color: '#1a1a2e'}}
+                },
+                yAxis: {
+                    type: 'category',
+                    data: top10.map(e => e.endpoint.length > 30 ? e.endpoint.substring(0, 30) + '...' : e.endpoint).reverse(),
+                    axisLine: {lineStyle: {color: '#3a3a5a'}},
+                    axisLabel: {color: '#888', fontSize: 9}
+                },
+                series: [{
+                    name: '调用量',
+                    type: 'bar',
+                    data: top10.map(e => e.total_calls).reverse(),
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                            {offset: 0, color: '#8b7355'},
+                            {offset: 1, color: '#d4af37'}
+                        ]),
+                        borderRadius: [0, 4, 4, 0]
+                    }
+                }]
+            });
+        }
+
+        function renderApiKeyTable(data) {
+            const tbody = document.getElementById('apiKeyTableBody');
+            tbody.innerHTML = data.apiKeys.map(k => {
+                const prefix = k.api_key.substring(0, 20);
+                const window = apiKeyWindowMap[prefix] || '未知窗口';
+                const statusClass = k.success_rate >= 90 ? 'success' : (k.success_rate >= 80 ? 'warning' : 'danger');
+                const statusText = k.success_rate >= 90 ? '正常' : (k.success_rate >= 80 ? '关注' : '异常');
+                return `
+                    <tr>
+                        <td style="font-family:monospace;font-size:11px;">${k.api_key.substring(0, 25)}...</td>
+                        <td>${window}</td>
+                        <td><strong style="color:#d4af37;">${k.total_calls}</strong></td>
+                        <td style="color:#52c41a;">${k.success}</td>
+                        <td style="color:#ff4d4f;">${k.error}</td>
+                        <td>
+                            ${k.success_rate}%
+                            <div class="progress-bar"><div class="progress-fill" style="width:${k.success_rate}%"></div></div>
+                        </td>
+                        <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderEndpointTable(data) {
+            const tbody = document.getElementById('endpointTableBody');
+            tbody.innerHTML = data.endpoints.map(e => `
+                <tr>
+                    <td style="font-family:monospace;font-size:11px;">${e.endpoint}</td>
+                    <td><span class="badge ${e.method.includes('POST') ? 'warning' : 'success'}">${e.method}</span></td>
+                    <td><strong style="color:#d4af37;">${e.total_calls}</strong></td>
+                    <td style="color:#52c41a;">${e.success}</td>
+                    <td style="color:#ff4d4f;">${e.error}</td>
+                    <td>
+                        ${e.success_rate}%
+                        <div class="progress-bar"><div class="progress-fill" style="width:${e.success_rate}%"></div></div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadData() {
+            // 实际使用时从API获取数据
+            // fetch('/api/v1/identity/usage/summary')...
+            // 这里使用模拟数据
+            const data = mockData;
+            
+            renderStats(data);
+            renderHourlyChart(data);
+            renderDailyChart(data);
+            renderApiKeyChart(data);
+            renderEndpointChart(data);
+            renderApiKeyTable(data);
+            renderEndpointTable(data);
+            
+            document.getElementById('lastUpdate').textContent = '最后更新: ' + new Date().toLocaleString();
+        }
+
+        // 初始化
+        initCharts();
+        loadData();
+        
+        // 每5分钟自动刷新
+        setInterval(loadData, 300000);
+    </script>
+</body>
+</html>

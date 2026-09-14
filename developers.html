@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API开发者中心 | 火斗云智AIOS</title>
+<script src="/assets/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0e17 0%,#1a1f2e 50%,#0d1117 100%);color:#e2e8f0;min-height:100vh}
+.header{background:rgba(17,24,39,0.9);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(16,185,129,0.3);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#10b981,#047857);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+.logo-text{font-size:18px;font-weight:700;color:#10b981}
+.logo-sub{font-size:10px;color:#888}
+.nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.nav a{color:#aaa;text-decoration:none;font-size:13px;transition:all .2s;padding:4px 10px;border-radius:6px}
+.nav a:hover{color:#10b981;background:rgba(16,185,129,0.1)}
+.nav a.active{color:#10b981;background:rgba(16,185,129,0.15)}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.hero{text-align:center;padding:40px 20px 30px;background:radial-gradient(ellipse at center,rgba(16,185,129,0.1) 0%,transparent 70%)}
+.hero h1{font-size:32px;margin-bottom:10px;background:linear-gradient(90deg,#fff,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .subtitle{font-size:14px;color:#888;max-width:700px;margin:0 auto}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:20px 0}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:14px;text-align:center}
+.stat-value{font-size:24px;font-weight:700;color:#10b981;margin-bottom:2px}
+.stat-label{font-size:10px;color:#888}
+.section{margin-bottom:24px}
+.section-title{font-size:16px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:10px;color:#10b981}
+.section-title::before{content:"";width:3px;height:16px;background:linear-gradient(180deg,#10b981,#047857);border-radius:2px}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;margin-bottom:12px}
+.chart-card{background:rgba(255,255,255,0.02);border:1px solid rgba(16,185,129,0.15);border-radius:10px;padding:12px}
+.chart-card h3{font-size:12px;color:#10b981;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(16,185,129,0.1)}
+.chart-container{width:100%;height:260px}
+.full-width{grid-column:1/-1}
+.api-table{width:100%;border-collapse:collapse;font-size:11px}
+.api-table th{background:rgba(16,185,129,0.1);color:#10b981;padding:10px 8px;text-align:left;border-bottom:1px solid rgba(16,185,129,0.2);position:sticky;top:0}
+.api-table td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);color:#ccc}
+.api-table tr:hover{background:rgba(16,185,129,0.03)}
+.method{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:monospace}
+.method.get{background:rgba(59,130,246,0.15);color:#3b82f6}
+.method.post{background:rgba(16,185,129,0.15);color:#10b981}
+.method.put{background:rgba(245,158,11,0.15);color:#f59e0b}
+.method.delete{background:rgba(239,68,68,0.15);color:#ef4444}
+.endpoint{font-family:monospace;font-size:10px;color:#8b5cf6}
+.perm-level{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600}
+.perm-observer{background:rgba(107,114,128,0.15);color:#9ca3af}
+.perm-operator{background:rgba(59,130,246,0.15);color:#3b82f6}
+.perm-admin{background:rgba(245,158,11,0.15);color:#f59e0b}
+.perm-super{background:rgba(239,68,68,0.15);color:#ef4444}
+.flow-steps{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:16px 0}
+.flow-step{flex:1;min-width:120px;text-align:center;padding:12px 8px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px}
+.flow-step-num{width:24px;height:24px;background:linear-gradient(135deg,#10b981,#047857);border-radius:50%;text-align:center;line-height:24px;font-size:12px;font-weight:700;color:#fff;margin:0 auto 6px}
+.flow-step-name{font-size:12px;font-weight:600;color:#fff;margin-bottom:2px}
+.flow-step-desc{font-size:9px;color:#888}
+.flow-arrow{color:#10b981;font-size:18px;font-weight:700}
+.code-block{background:rgba(0,0,0,0.3);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:12px;margin:12px 0;overflow-x:auto}
+.code-block pre{font-family:'Consolas','Monaco',monospace;font-size:11px;color:#10b981;line-height:1.6;margin:0}
+.code-block .comment{color:#6b7280}
+.code-block .keyword{color:#3b82f6}
+.code-block .string{color:#d4af37}
+.sdk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.sdk-card{background:rgba(255,255,255,0.03);border:1px solid rgba(16,185,129,0.15);border-radius:10px;padding:16px;text-align:center;transition:all .3s}
+.sdk-card:hover{border-color:#10b981;transform:translateY(-2px)}
+.sdk-icon{font-size:32px;margin-bottom:8px}
+.sdk-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:4px}
+.sdk-desc{font-size:10px;color:#888;margin-bottom:10px}
+.sdk-btn{display:inline-block;padding:6px 16px;background:linear-gradient(135deg,#10b981,#047857);color:#fff;border-radius:6px;font-size:11px;text-decoration:none;transition:all .2s}
+.sdk-btn:hover{opacity:0.9;transform:scale(1.05)}
+.footer{text-align:center;padding:24px 20px;border-top:1px solid rgba(16,185,129,0.15);margin-top:20px;color:#666;font-size:11px}
+.footer .anchor{color:#10b981;font-family:monospace;letter-spacing:1px}
+@media(max-width:768px){.header{padding:12px 16px;flex-direction:column;gap:10px}.nav{gap:8px}.hero h1{font-size:24px}.container{padding:12px}.flow-steps{flex-direction:column}.flow-arrow{transform:rotate(90deg)}}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="33个API端点，5步快速接入，四级权限体系，3个SDK，完整的开发者文档和示例代码。">
+<meta name="keywords" content="API开发者,API端点,快速接入,权限体系,SDK,开发者文档">
+<meta property="og:title" content="API开发者中心 | 火斗云智AIOS">
+<meta property="og:description" content="33个API端点，5步快速接入，四级权限体系，3个SDK，完整的开发者文档和示例代码。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/developers.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="API开发者中心 | 火斗云智AIOS">
+<meta name="twitter:description" content="33个API端点，5步快速接入，四级权限体系，3个SDK，完整的开发者文档和示例代码。">
+    <link rel="canonical" href="https://huodouai.com/developers.html">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<!-- ZONGYUAN-ROOT Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">ZONGYUAN-ROOT · DID-BR-000002</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/philosophy.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">思想</a>
+      <a href="/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/engines.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">引擎</a>
+      <a href="/governance.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">治理</a>
+      <a href="/monitor.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">监控</a>
+      <a href="/products.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/gov/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">政务AI</a>
+      <a href="/drama/demo.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">短剧</a>
+      <a href="/sovereignty/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">主权根</a>
+      <a href="/vector.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">向量库</a>
+      <a href="/developers.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">开发者</a>
+      <a href="/docs.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /ZONGYUAN-ROOT Unified Navigation -->
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🔌</div>
+    <div>
+      <div class="logo-text">API开发者中心</div>
+      <div class="logo-sub">火斗云智AIOS · 33个API端点 · 身份节点申请 · SDK下载</div>
+    </div>
+  </div>
+  <div class="nav">
+    <a href="/">首页</a>
+    <a href="/architecture.html">架构</a>
+    <a href="/engines.html">引擎</a>
+    <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+    <a href="/vector.html">向量库</a>
+    <a href="/developers.html" class="active">开发者</a>
+    <a href="/products.html">产品</a>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>🔌 API开发者中心</h1>
+  <div class="subtitle">33个国家主权根API端点 · 4级权限体系 · mTLS+JWT安全鉴权 · 多语言SDK · 完整开发者文档</div>
+</div>
+
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">33</div><div class="stat-label">API端点</div></div>
+    <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">权限级别</div></div>
+    <div class="stat-card"><div class="stat-value">99.2%</div><div class="stat-label">API可用性</div></div>
+    <div class="stat-card"><div class="stat-value">45ms</div><div class="stat-label">平均响应</div></div>
+    <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">SDK语言</div></div>
+    <div class="stat-card"><div class="stat-value">REST</div><div class="stat-label">API风格</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 API统计与状态</div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>API端点分类分布</h3><div class="chart-container" id="apiCategoryChart"></div></div>
+      <div class="chart-card"><h3>API调用趋势（近7天）</h3><div class="chart-container" id="apiTrendChart"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🚀 快速开始（5步接入）</div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-step-num">1</div>
+        <div class="flow-step-name">注册账号</div>
+        <div class="flow-step-desc">创建开发者账号</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">2</div>
+        <div class="flow-step-name">申请身份节点</div>
+        <div class="flow-step-desc">获取节点ID和权限</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">3</div>
+        <div class="flow-step-name">生成API Key</div>
+        <div class="flow-step-desc">创建访问密钥</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">4</div>
+        <div class="flow-step-name">安装SDK</div>
+        <div class="flow-step-desc">选择语言安装</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-num">5</div>
+        <div class="flow-step-name">调用API</div>
+        <div class="flow-step-desc">开始开发集成</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔐 四级权限体系</div>
+    <div class="charts-grid">
+      <div class="chart-card full-width">
+        <div class="chart-container" id="permChart" style="height:280px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 API端点列表（33个）</div>
+    <div class="chart-card full-width" style="max-height:500px;overflow-y:auto;">
+      <table class="api-table">
+        <thead>
+          <tr><th>方法</th><th>端点</th><th>说明</th><th>权限</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/health</td><td>健康检查</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/status</td><td>系统状态查询</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/rules</td><td>规则列表查询</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/rules/{id}</td><td>规则详情查询</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/rules/check</td><td>合规校验</td><td><span class="perm-level perm-operator">operator</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/rules/conflict</td><td>规则冲突检测</td><td><span class="perm-level perm-operator">operator</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/nodes/apply</td><td>身份节点申请</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/nodes</td><td>节点列表查询</td><td><span class="perm-level perm-admin">admin</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/nodes/{id}</td><td>节点详情查询</td><td><span class="perm-level perm-operator">operator</span></td></tr>
+          <tr><td><span class="method put">PUT</span></td><td class="endpoint">/api/v1/nodes/{id}</td><td>节点信息更新</td><td><span class="perm-level perm-admin">admin</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/keys/generate</td><td>API Key生成</td><td><span class="perm-level perm-operator">operator</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/keys</td><td>API Key列表</td><td><span class="perm-level perm-admin">admin</span></td></tr>
+          <tr><td><span class="method delete">DELETE</span></td><td class="endpoint">/api/v1/keys/{id}</td><td>API Key吊销</td><td><span class="perm-level perm-admin">admin</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/governance/propose</td><td>规则提审</td><td><span class="perm-level perm-operator">operator</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/governance/approve</td><td>规则审核</td><td><span class="perm-level perm-admin">admin</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/governance/rollback</td><td>规则回滚</td><td><span class="perm-level perm-super">super_admin</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/alerts</td><td>告警列表查询</td><td><span class="perm-level perm-operator">operator</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/alerts/ack</td><td>告警确认</td><td><span class="perm-level perm-operator">operator</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/audit/logs</td><td>审计日志查询</td><td><span class="perm-level perm-admin">admin</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/audit/stats</td><td>审计统计</td><td><span class="perm-level perm-admin">admin</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/power/monitor</td><td>权力监测</td><td><span class="perm-level perm-super">super_admin</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/power/circuit</td><td>权力熔断</td><td><span class="perm-level perm-super">super_admin</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/locks</td><td>锁档记录查询</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/locks/{id}</td><td>锁档详情</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/locks/verify</td><td>锁档验证</td><td><span class="perm-level perm-operator">operator</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/truths</td><td>真值列表</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/truths/{id}</td><td>真值详情</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/truths/verify</td><td>真值校验</td><td><span class="perm-level perm-operator">operator</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/assets</td><td>资产列表</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/assets/{id}</td><td>资产详情</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/auth/token</td><td>获取JWT令牌</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/auth/refresh</td><td>刷新令牌</td><td><span class="perm-level perm-observer">observer</span></td></tr>
+          <tr><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/auth/revoke</td><td>吊销令牌</td><td><span class="perm-level perm-admin">admin</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💻 API调用示例</div>
+    <div class="chart-card full-width">
+      <div class="code-block">
+<pre><span class="comment"># Python 示例 - 调用健康检查API</span>
+<span class="keyword">import</span> requests
+
+<span class="comment"># 配置API端点和密钥</span>
+base_url = <span class="string">"https://www.huodouai.com/api/v1"</span>
+api_key = <span class="string">"your-api-key-here"</span>
+
+<span class="comment"># 设置请求头</span>
+headers = {
+    <span class="string">"Authorization"</span>: <span class="string">f"Bearer {api_key}"</span>,
+    <span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>
+}
+
+<span class="comment"># 调用健康检查API</span>
+response = requests.<span class="keyword">get</span>(<span class="string">f"{base_url}/health"</span>, headers=headers)
+<span class="keyword">print</span>(response.json())
+
+<span class="comment"># 调用合规校验API</span>
+data = {<span class="string">"content"</span>: <span class="string">"待校验内容"</span>, <span class="string">"rule_ids"</span>: [<span class="string">"R001"</span>, <span class="string">"R002"</span>]}
+response = requests.<span class="keyword">post</span>(<span class="string">f"{base_url}/rules/check"</span>, json=data, headers=headers)
+<span class="keyword">print</span>(response.json())</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📦 SDK下载</div>
+    <div class="sdk-grid">
+      <div class="sdk-card">
+        <div class="sdk-icon">🐍</div>
+        <div class="sdk-name">Python SDK</div>
+        <div class="sdk-desc">pip install huodouai-sdk</div>
+        <a href="#" class="sdk-btn">下载文档</a>
+      </div>
+      <div class="sdk-card">
+        <div class="sdk-icon">⚡</div>
+        <div class="sdk-name">JavaScript SDK</div>
+        <div class="sdk-desc">npm install @huodouai/sdk</div>
+        <a href="#" class="sdk-btn">下载文档</a>
+      </div>
+      <div class="sdk-card">
+        <div class="sdk-icon">🐹</div>
+        <div class="sdk-name">Go SDK</div>
+        <div class="sdk-desc">go get github.com/huodouai/sdk-go</div>
+        <a href="#" class="sdk-btn">下载文档</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  火斗云智AIOS API开发者中心 ｜ <span class="anchor">Ω₀⊂⊙∞⊂Ω</span> ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V9.11<br>
+  33个API端点 · 4级权限体系 · mTLS+JWT安全鉴权 · 多语言SDK · 完整开发者文档
+</div>
+
+<script>
+const charts = {};
+function initCharts() {
+  ['apiCategoryChart','apiTrendChart','permChart'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) charts[id] = echarts.init(el);
+  });
+}
+
+function updateApiCategoryChart() {
+  if (!charts.apiCategoryChart) return;
+  charts.apiCategoryChart.setOption({
+    tooltip: { trigger: 'item' },
+    legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{
+      type: 'pie', radius: ['35%', '65%'], center: ['50%', '45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0e17', borderWidth: 2 },
+      label: { show: false },
+      data: [
+        { value: 6, name: '规则管理', itemStyle: { color: '#3b82f6' } },
+        { value: 5, name: '身份节点', itemStyle: { color: '#10b981' } },
+        { value: 3, name: 'API Key', itemStyle: { color: '#8b5cf6' } },
+        { value: 3, name: '规则治理', itemStyle: { color: '#d4af37' } },
+        { value: 2, name: '告警管理', itemStyle: { color: '#f59e0b' } },
+        { value: 2, name: '审计日志', itemStyle: { color: '#ef4444' } },
+        { value: 2, name: '权力监测', itemStyle: { color: '#ec4899' } },
+        { value: 3, name: '锁档管理', itemStyle: { color: '#06b6d4' } },
+        { value: 3, name: '真值管理', itemStyle: { color: '#84cc16' } },
+        { value: 2, name: '资产管理', itemStyle: { color: '#a855f7' } },
+        { value: 2, name: '认证授权', itemStyle: { color: '#64748b' } }
+      ]
+    }]
+  });
+}
+
+function updateApiTrendChart() {
+  if (!charts.apiTrendChart) return;
+  charts.apiTrendChart.setOption({
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['调用量','成功率','响应时间(ms)'], textStyle: { color: '#888' }, top: 0 },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+    xAxis: { type: 'category', data: ['周一','周二','周三','周四','周五','周六','周日'], axisLabel: { color: '#888', fontSize: 10 } },
+    yAxis: [
+      { type: 'value', name: '调用量', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+      { type: 'value', name: '百分比/ms', max: 200, axisLabel: { color: '#888' }, splitLine: { show: false } }
+    ],
+    series: [
+      { name: '调用量', type: 'bar', data: [8500, 9200, 8800, 10500, 9800, 7200, 6800], itemStyle: { color: '#10b981', borderRadius: [4,4,0,0] }, barWidth: '30%' },
+      { name: '成功率', type: 'line', yAxisIndex: 1, data: [99.1, 99.3, 98.9, 99.5, 99.2, 99.6, 99.4], lineStyle: { color: '#3b82f6', width: 2 }, itemStyle: { color: '#3b82f6' } },
+      { name: '响应时间(ms)', type: 'line', yAxisIndex: 1, data: [42, 45, 48, 38, 44, 35, 36], lineStyle: { color: '#d4af37', width: 2 }, itemStyle: { color: '#d4af37' } }
+    ]
+  });
+}
+
+function updatePermChart() {
+  if (!charts.permChart) return;
+  charts.permChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { data: ['observer','operator','admin','super_admin'], textStyle: { color: '#888' }, top: 0 },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '12%', containLabel: true },
+    xAxis: { type: 'category', data: ['规则查询','规则修改','节点管理','Key管理','治理审核','权力熔断','审计日志','系统配置'], axisLabel: { color: '#888', fontSize: 10, rotate: 20 } },
+    yAxis: { type: 'value', max: 4, axisLabel: { color: '#888', formatter: function(v){ return ['无','只读','操作','管理','超级'][v] || '' } }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series: [
+      { name: 'observer', type: 'bar', stack: 'total', data: [1,0,0,0,0,0,0,0], itemStyle: { color: '#9ca3af' } },
+      { name: 'operator', type: 'bar', stack: 'total', data: [1,2,0,1,1,0,0,0], itemStyle: { color: '#3b82f6' } },
+      { name: 'admin', type: 'bar', stack: 'total', data: [1,2,3,3,2,0,3,2], itemStyle: { color: '#f59e0b' } },
+      { name: 'super_admin', type: 'bar', stack: 'total', data: [1,2,3,3,3,4,3,3], itemStyle: { color: '#ef4444' } }
+    ]
+  });
+}
+
+window.addEventListener('load', () => {
+  initCharts();
+  updateApiCategoryChart();
+  updateApiTrendChart();
+  updatePermChart();
+  window.addEventListener('resize', () => { Object.values(charts).forEach(c => c && c.resize()); });
+});
+</script>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products.html">产品</a>
+<a href="/solutions.html">解决方案</a>
+<a href="/architecture.html">架构</a>
+<a href="/whitepaper.html">白皮书</a>
+<a href="/docs.html">文档</a>
+<a href="/pricing.html">定价</a>
+<a href="/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

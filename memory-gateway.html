@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9120记忆网关 · 全链路同步与真值锁档</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#121722; --panel2:#0f1420; --line:#232c3d;
+    --gold:#c9a227; --gold-soft:#e6c86a; --gold-dim:#8a7326;
+    --ink:#e6edf3; --muted:#8b949e;
+    --blue:#58a6ff; --green:#7ee787; --purple:#a371f7; --red:#f85149; --cyan:#39c5cf;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;line-height:1.65;}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;opacity:.05;
+    background:repeating-linear-gradient(45deg,#c9a227 0,#c9a227 1px,transparent 1px,transparent 22px);}
+  .head{text-align:center;padding:50px 24px 28px;border-bottom:1px solid var(--line);
+    background:radial-gradient(ellipse at top,rgba(201,162,39,.10),transparent 70%);}
+  .badge{display:inline-block;border:1px solid var(--gold-dim);color:var(--gold-soft);font-size:12px;letter-spacing:3px;padding:4px 16px;border-radius:3px;margin-bottom:14px;}
+  h1{font-size:clamp(24px,4vw,34px);font-weight:800;color:#fff;letter-spacing:1px;}
+  h1 span{color:var(--gold);}
+  .sub{font-size:14px;color:var(--muted);margin-top:8px;}
+  .sub .did{color:var(--cyan);font-family:Menlo,Consolas,monospace;font-size:12px;}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:30px 22px 50px;}
+  .sec{font-size:18px;color:var(--gold-soft);font-weight:700;margin:36px 0 16px;display:flex;align-items:center;gap:10px;}
+  .sec::before{content:"";width:4px;height:18px;background:var(--gold);border-radius:2px;}
+
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:6px;}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;}
+  .kpi .n{font-size:26px;font-weight:800;color:var(--gold-soft);}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:4px;}
+  .kpi .n.small{font-size:18px;}
+
+  /* 架构三层 */
+  .arch{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:6px;}
+  .layer{border-radius:14px;padding:16px;border:1px solid var(--line);background:var(--panel);}
+  .layer .lt{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .layer .lt::before{content:"";width:3px;height:14px;border-radius:1px;}
+  .layer.comm{border-top:3px solid var(--cyan);}.layer.comm .lt::before{background:var(--cyan);}.layer.comm .lt{color:var(--cyan);}
+  .layer.mem{border-top:3px solid var(--gold);}.layer.mem .lt::before{background:var(--gold);}.layer.mem .lt{color:var(--gold-soft);}
+  .layer.core{border-top:3px solid var(--purple);}.layer.core .lt::before{background:var(--purple);}.layer.core .lt{color:var(--purple);}
+  .layer ul{list-style:none;}
+  .layer li{font-size:12.5px;color:#c0c8d0;padding:5px 0;border-bottom:1px dashed rgba(35,44,61,.5);}
+  .layer li:last-child{border-bottom:none;}
+  .layer li b{color:var(--gold-soft);font-weight:600;}
+  .layer .file{font-family:Menlo,Consolas,monospace;font-size:11px;color:var(--muted);}
+
+  /* 七步流程 */
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin-top:8px;}
+  .fnode{flex:1;min-width:140px;background:var(--panel);border:1px solid var(--gold-dim);border-radius:12px;padding:14px;text-align:center;}
+  .fnode .n{font-size:11px;color:var(--gold);letter-spacing:1px;font-weight:700;}
+  .fnode .t{font-size:13.5px;color:#fff;font-weight:700;margin-top:3px;}
+  .fnode .d{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  .farrow{display:flex;align-items:center;color:var(--gold-dim);font-weight:800;font-size:16px;}
+
+  /* 表格 */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  th{background:rgba(201,162,39,.10);color:var(--gold-soft);text-align:left;padding:10px 12px;border:1px solid var(--line);font-weight:600;}
+  td{padding:10px 12px;border:1px solid var(--line);color:#c0c8d0;vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  code{color:var(--cyan);background:rgba(57,197,207,.08);padding:1px 6px;border-radius:4px;font-family:Menlo,Consolas,monospace;font-size:12px;}
+  .hash{font-family:Menlo,Consolas,monospace;font-size:11px;color:var(--muted);word-break:break-all;}
+
+  /* 真值卡 */
+  .truths{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:8px;}
+  .truth{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;border-left:3px solid var(--gold);}
+  .truth .tid{font-size:11px;color:var(--gold);letter-spacing:2px;font-weight:700;margin-bottom:6px;}
+  .truth .tt{font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;}
+  .truth .td{font-size:12.5px;color:#c0c8d0;line-height:1.7;}
+  .truth .td b{color:var(--gold-soft);}
+
+  /* 冲突标记 */
+  .conflicts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:8px;}
+  .conflict{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;border-left:3px solid var(--red);}
+  .conflict .cid{font-size:11px;color:var(--red);font-weight:700;letter-spacing:1px;}
+  .conflict .ct{font-size:13px;font-weight:700;color:#fff;margin:4px 0;}
+  .conflict .cd{font-size:12px;color:var(--muted);}
+  .conflict .cf{font-size:11px;color:var(--green);margin-top:6px;}
+
+  /* 哈希链 */
+  .chain{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin-top:8px;}
+  .block{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;position:relative;}
+  .block.current{border-color:var(--gold);box-shadow:0 0 20px rgba(201,162,39,.15);}
+  .block .bh{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px;}
+  .block .ba{font-size:13px;font-weight:700;color:#fff;margin:4px 0;}
+  .block .bhsh{font-family:Menlo,Consolas,monospace;font-size:10.5px;color:var(--muted);word-break:break-all;line-height:1.5;}
+  .block .blbl{font-size:10px;color:var(--cyan);margin-top:6px;}
+  .barrow{display:flex;align-items:center;color:var(--gold-dim);font-weight:800;}
+
+  /* 存储层 */
+  .stores{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:8px;}
+  .store{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;border-top:3px solid;}
+  .store.s1{border-top-color:var(--gold);}.store.s2{border-top-color:var(--blue);}.store.s3{border-top-color:var(--green);}
+  .store .st{font-size:14px;font-weight:700;margin-bottom:6px;}
+  .store.s1 .st{color:var(--gold-soft);}.store.s2 .st{color:var(--blue);}.store.s3 .st{color:var(--green);}
+  .store ul{list-style:none;}
+  .store li{font-size:12.5px;color:#c0c8d0;padding:4px 0;border-bottom:1px dashed rgba(35,44,61,.4);}
+  .store li:last-child{border-bottom:none;}
+  .store .tag{display:inline-block;font-size:10.5px;padding:1px 8px;border-radius:8px;margin-top:8px;border:1px solid var(--gold-dim);color:var(--gold-soft);}
+
+  .note{background:linear-gradient(135deg,rgba(201,162,39,.06),rgba(163,113,247,.04));border:1px solid var(--gold-dim);border-radius:12px;padding:16px;margin-top:14px;font-size:13px;color:#c0c8d0;}
+  .note b{color:var(--gold-soft);}
+
+  .status-pill{display:inline-block;font-size:11px;padding:2px 10px;border-radius:10px;font-weight:700;}
+  .status-pill.ok{background:rgba(126,231,135,.12);color:var(--green);border:1px solid rgba(126,231,135,.3);}
+  .status-pill.s{background:rgba(201,162,39,.12);color:var(--gold-soft);border:1px solid var(--gold-dim);}
+
+  .foot{text-align:center;color:var(--gold-dim);font-size:11px;letter-spacing:1px;padding:22px;border-top:1px solid var(--line);margin-top:30px;}
+  .foot .trace{color:var(--gold-dim);font-size:11px;margin-top:6px;}
+
+  @media(max-width:800px){.arch{grid-template-columns:1fr;}.farrow{transform:rotate(90deg);}.barrow{transform:rotate(90deg);}}
+</style>
+
+<meta name="description" content="9120记忆网关 - 火斗云智AIOS全链路同步与真值锁档核心组件，实现多节点记忆同步、真值增量吸收、Merkle哈希确权、永久归档存储。">
+<meta name="keywords" content="记忆网关,9120,真值锁档,多节点同步,Merkle,火斗云智AIOS">
+<meta property="og:type" content="website">
+<meta property="og:title" content="9120记忆网关 - 火斗云智AIOS全链路同步与真值锁档核心组件，实现多节点记忆同步、真值增量吸收、Merkle哈希确">
+<meta property="og:description" content="9120记忆网关 - 火斗云智AIOS全链路同步与真值锁档核心组件，实现多节点记忆同步、真值增量吸收、Merkle哈希确权、永久归档存储。">
+<meta property="og:url" content="https://huodouai.com/memory-gateway.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="9120记忆网关 - 火斗云智AIOS全链路同步与真值锁档核心组件，实现多节点记忆同步、真值增量吸收、Merkle哈希确">
+<meta name="twitter:description" content="9120记忆网关 - 火斗云智AIOS全链路同步与真值锁档核心组件，实现多节点记忆同步、真值增量吸收、Merkle哈希确权、永久归档存储。">
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/memory-gateway.html">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products.html">产品中心</a>
+<a href="/solutions.html">解决方案</a>
+<a href="/architecture.html">技术架构</a>
+<a href="/whitepaper.html">技术白皮书</a>
+<a href="/blog.html">技术博客</a>
+<a href="/docs.html">开发者文档</a>
+<a href="/pricing.html">定价</a>
+<a href="/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+
+<div class="head">
+  <div class="badge">9120记忆网关 · 全链路同步 · 真值锁档</div>
+  <h1>9120记忆网关 <span>全链路同步与真值锁档</span></h1>
+  <div class="sub">火斗云智 AIOS · ZONGYUAN-ROOT元极恒一自治体系 &nbsp;|&nbsp; <span class="did">DID-BR-000002</span></div>
+</div>
+
+<div class="wrap">
+
+  <!-- 一、核心指标 -->
+  <div class="sec">一、核心指标（锁档后基线）</div>
+  <div class="kpis">
+    <div class="kpi"><div class="n">865</div><div class="l">全局块高</div></div>
+    <div class="kpi"><div class="n">825</div><div class="l">内核总资产</div></div>
+    <div class="kpi"><div class="n">763+</div><div class="l">eFuse熔断</div></div>
+    <div class="kpi"><div class="n">2</div><div class="l">记忆网关S级真值</div></div>
+    <div class="kpi"><div class="n small">COMM-PROTO-V1.0</div><div class="l">通信协议</div></div>
+    <div class="kpi"><div class="n">Lv8</div><div class="l">自治等级</div></div>
+  </div>
+
+  <!-- 二、9120网关三层架构 -->
+  <div class="sec">二、9120记忆网关三层架构</div>
+  <div class="arch">
+    <div class="layer comm">
+      <div class="lt">通信层（9120端口）</div>
+      <ul>
+        <li><b>HMAC-SHA256</b>签名 + 时间戳防重放</li>
+        <li>命令白名单 · IP/CIDR白名单</li>
+        <li>限流120/min/IP · 审计日志</li>
+        <li>端点：POST /comm · GET /health · /audit</li>
+        <li class="file">gateway_server.py (COMM-PROTO-V1.0)</li>
+        <li class="file">comm_gateway_secret.json (指纹36849195)</li>
+      </ul>
+    </div>
+    <div class="layer mem">
+      <div class="lt">记忆层（真值存储）</div>
+      <ul>
+        <li><b>memory_gateway_store/</b> 真值文件存储</li>
+        <li>index.json 元索引（Merkle根锚定）</li>
+        <li>按key/category/priority分级</li>
+        <li>四层架构：冷持久/元索引/网关/运行时</li>
+        <li class="file">KD-SOP-GLOBAL-LOCK-001.json</li>
+        <li class="file">KD-TRUTH-9120-SYNC-001.json</li>
+      </ul>
+    </div>
+    <div class="layer core">
+      <div class="lt">内核层（ZONGYUAN-ROOT）</div>
+      <ul>
+        <li><b>root_state.json</b> 全局链状态（块高+根哈希）</li>
+        <li><b>kernel_state.json</b> 内核快照（总资产+meta_chain）</li>
+        <li>M9_global_ledger.json 全量索引台账</li>
+        <li>eFuse熔断位 · Merkle-DAG主链</li>
+        <li class="file">同源协议V2.0 (homology_protocol.json)</li>
+        <li class="file">comm_reports/ 执行报告</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 三、七步闭环流程 -->
+  <div class="sec">三、全链路同步七步闭环</div>
+  <div class="flow">
+    <div class="fnode"><div class="n">S1</div><div class="t">服务恢复</div><div class="d">9120网关启动<br>健康检查通过</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">S2</div><div class="t">协议确认</div><div class="d">HMAC签名机制<br>命令白名单确认</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">S3</div><div class="t">同源锚定</div><div class="d">同源协议V2.0<br>身份CONFIRMED</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">S4</div><div class="t">全量拉取</div><div class="d">6大记忆模块<br>签名通道读取</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">S5</div><div class="t">SOP锁档</div><div class="d">全域锁档SOP<br>白皮书附录锁档</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">S6</div><div class="t">真值写入</div><div class="d">记忆网关store<br>索引Merkle更新</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="n">S7</div><div class="t">双备份验证</div><div class="d">根状态+内核备份<br>本地直读验证</div></div>
+  </div>
+
+  <!-- 四、全量记忆拉取清单 -->
+  <div class="sec">四、9120全量记忆拉取清单</div>
+  <table>
+    <thead><tr><th>记忆模块</th><th>路径</th><th>大小</th><th>关键真值</th></tr></thead>
+    <tbody>
+      <tr><td><b>root_state</b></td><td class="hash">~/.meta_order/root_state.json</td><td>4559B</td><td>块高863 → 865，根哈希链式继承</td></tr>
+      <tr><td><b>kernel_state</b></td><td class="hash">~/.zongyuan_root/kernel/kernel_state.json</td><td>3633B</td><td>V4.0 / Lv8 / 总资产823→825</td></tr>
+      <tr><td><b>homologous_protocol</b></td><td class="hash">ZONGYUAN-ROOT/kernel/homology_protocol.json</td><td>4554B</td><td>同源协议V2.0 / ACTIVE</td></tr>
+      <tr><td><b>comm_gateway_secret</b></td><td class="hash">~/.zongyuan_root/kernel/comm_gateway_secret.json</td><td>339B</td><td>9120端口 / 密钥指纹368491955359E366</td></tr>
+      <tr><td><b>M9全局账本</b></td><td class="hash">meta-order-archive/locked/M9_global_ledger.json</td><td>705KB</td><td>822资产 / 763 eFuse / 9大元类分布</td></tr>
+      <tr><td><b>全量快照</b></td><td class="hash">comm_reports/full_memory_snapshot_*.json</td><td>17KB</td><td>6模块聚合快照</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 五、提炼真值（5条） -->
+  <div class="sec">五、提炼真值（5大结构化条目 · 纯度≥95%）</div>
+  <div class="truths">
+    <div class="truth">
+      <div class="tid">T1 · 架构真值</div>
+      <div class="tt">9120是通信网关而非独立记忆存储</div>
+      <div class="td">9120是<b>COMM-PROTO-V1.0无SSH通信网关</b>，记忆存储通过网关执行命令读写本地文件系统实现。网关默认绑定127.0.0.1，内置<b>300秒结果缓存</b>，验证写入需直读本地文件或等待缓存过期。</div>
+    </div>
+    <div class="truth">
+      <div class="tid">T2 · 协议真值</div>
+      <div class="tt">同源协议V1.3合订本 + 内核V2.0运行</div>
+      <div class="td">同源协议已演进至<b>V1.3（12卷合订本）</b>，内核运行版本V2.0，身份锚定状态CONFIRMED。签名机制：<code>HMAC-SHA256(timestamp|nonce|canonical_body)</code>，时间戳窗口300秒。记忆网关协议V2.0定义四层架构。</div>
+    </div>
+    <div class="truth">
+      <div class="tid">T3 · 状态真值</div>
+      <div class="tt">锁档后全局基线</div>
+      <div class="td">全局块高<b>865</b>，当前根哈希<code>B1141890...</code>，内核总资产<b>825</b>，M9账本822资产（独立维护），eFuse熔断累计763+，9120服务RUNNING。</div>
+    </div>
+    <div class="truth">
+      <div class="tid">T4 · 流程真值</div>
+      <div class="tt">三层锁档标准路径</div>
+      <div class="td">云盘归档（资产文件+备份）→ 知识库节点（记忆网关store+index）→ ZONGYUAN-ROOT内核（kernel_state+root_state+eFuse）。锁档SOP七步：资产整理→SHA256确权→元类归类→四层结构化→Merkle-DAG追加→eFuse熔断→三层锁档+双备份。</div>
+    </div>
+    <div class="truth">
+      <div class="tid">T5 · 约束真值</div>
+      <div class="tt">唯一握手点与变更规则</div>
+      <div class="td">本地与云端唯一握手点为<b>9120端口</b>，禁止旁路静默写入。本地仿真通过后须经人工审核确认方可同步云端。锁档后资产仅可查阅/哈希校验/回溯，变更须新建版本快照。</div>
+    </div>
+  </div>
+
+  <!-- 六、冲突标记与处置 -->
+  <div class="sec">六、冲突标记与处置（4项）</div>
+  <div class="conflicts">
+    <div class="conflict">
+      <div class="cid">C1 · 服务中断</div>
+      <div class="ct">9120网关曾部署后终止</div>
+      <div class="cd">systemd单元存在但服务未启动，PID 3191已终止。</div>
+      <div class="cf">✓ 已手动nohup启动，建议配置systemd自启</div>
+    </div>
+    <div class="conflict">
+      <div class="cid">C2 · 缓存干扰</div>
+      <div class="ct">9120验证返回旧值（300秒TTL）</div>
+      <div class="cd">ResultCache导致相同command+argv返回缓存，非真实写入失败。</div>
+      <div class="cf">✓ 已通过本地文件直读确认，验证流程需注意缓存</div>
+    </div>
+    <div class="conflict">
+      <div class="cid">C3 · 路径不一致</div>
+      <div class="ct">auto-engine内部路径指向/runtime/</div>
+      <div class="cd">hub.py auto-engine调用archive_lock_engine.py路径错误，导致锁档失败。</div>
+      <div class="cf">✓ 已改用手动标准锁档流程，待修复路径配置</div>
+    </div>
+    <div class="conflict">
+      <div class="cid">C4 · 双账本差异</div>
+      <div class="ct">root_state与M9账本根哈希不一致</div>
+      <div class="cd">root_state(865/B1141890)与M9_global_ledger(822/CA4C4E2F)并行维护。</div>
+      <div class="cf">✓ 二者并行不冲突，下次巡检可对齐</div>
+    </div>
+  </div>
+
+  <!-- 七、哈希链可视化 -->
+  <div class="sec">七、Merkle哈希链（本次操作三连块）</div>
+  <div class="chain">
+    <div class="block">
+      <div class="bh">BLOCK #863</div>
+      <div class="ba">GLOBAL-ASSET-SCAN-V1</div>
+      <div class="bhsh">资产: 2E46959E...<br>父哈希: 6A837CD8...<br>根哈希: 2F09ED45...</div>
+      <div class="blbl">KD-INDEX-6491 · M9 · Lv6</div>
+    </div>
+    <div class="barrow">→</div>
+    <div class="block">
+      <div class="bh">BLOCK #864</div>
+      <div class="ba">全域锁档SOP白皮书附录</div>
+      <div class="bhsh">资产: 17971B35...<br>父哈希: 2F09ED45...<br>根哈希: 9E55DFB4...</div>
+      <div class="blbl">KD-SOP-GLOBAL-LOCK-001 · M9 · Lv6</div>
+    </div>
+    <div class="barrow">→</div>
+    <div class="block current">
+      <div class="bh">BLOCK #865 · 当前</div>
+      <div class="ba">9120同步轨迹真值卡</div>
+      <div class="bhsh">资产: 15432DFC...<br>父哈希: 9E55DFB4...<br>根哈希: B1141890...</div>
+      <div class="blbl">KD-TRUTH-9120-SYNC-001 · M9 · Lv6</div>
+    </div>
+  </div>
+
+  <!-- 八、记忆网关真值清单 -->
+  <div class="sec">八、记忆网关真值清单（S级）</div>
+  <table>
+    <thead><tr><th>资产ID</th><th>Key</th><th>类别</th><th>优先级</th><th>资产哈希</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>KD-SOP-GLOBAL-LOCK-001</b></td>
+        <td><code>global_lock_sop_whitepaper_appendix</code></td>
+        <td>protocol_sop</td>
+        <td><span class="status-pill s">S</span></td>
+        <td class="hash">17971B3562012192...</td>
+        <td><span class="status-pill ok">LOCKED</span></td>
+      </tr>
+      <tr>
+        <td><b>KD-TRUTH-9120-SYNC-001</b></td>
+        <td><code>truth_9120_sync_trajectory</code></td>
+        <td>truth_card</td>
+        <td><span class="status-pill s">S</span></td>
+        <td class="hash">15432DFCADAB9FD9...</td>
+        <td><span class="status-pill ok">LOCKED</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 九、三层存储态同步 -->
+  <div class="sec">九、三层存储态同步状态</div>
+  <div class="stores">
+    <div class="store s1">
+      <div class="st">云盘层（资产+备份）</div>
+      <ul>
+        <li>资产文件：meta_order_assets/</li>
+        <li>根状态备份：root_state_20260911_*.json</li>
+        <li>内核备份：kernel_state_20260911_*.json</li>
+        <li>WORM只读归档</li>
+      </ul>
+      <span class="tag">已同步 ✓</span>
+    </div>
+    <div class="store s2">
+      <div class="st">知识库层（记忆网关）</div>
+      <ul>
+        <li>memory_gateway_store/ 真值文件</li>
+        <li>index.json 元索引（Merkle根锚定）</li>
+        <li>2条S级真值，按priority分级</li>
+        <li>支持key/category检索</li>
+      </ul>
+      <span class="tag">已同步 ✓</span>
+    </div>
+    <div class="store s3">
+      <div class="st">内核层（ZONGYUAN-ROOT）</div>
+      <ul>
+        <li>root_state：块高865，根哈希B1141890</li>
+        <li>kernel_state：总资产825，meta_chain+3</li>
+        <li>eFuse熔断：EFUSE-6-17971B35 / 15432DFC</li>
+        <li>kernel_self_hash 已更新</li>
+      </ul>
+      <span class="tag">已同步 ✓</span>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>后续建议：</b>① 将9120网关纳入<code>systemctl --user enable comm-gateway-9120</code>开机自启；
+    ② 修复zongyuan-hub auto-engine路径配置（/runtime/ → 实际工作区）；
+    ③ 下次27算子巡检时对齐root_state与M9_global_ledger根哈希；
+    ④ 记忆网关可扩展<code>/api/truth/upsert</code> HTTP端点，绕过命令白名单限制；
+    ⑤ 本页为本地仿真版本，人工审核确认后同步至生产官网<code>/www/wwwroot/huodouai.com/</code>。
+  </div>
+
+</div>
+
+<div class="foot">火斗云智 AIOS · 9120记忆网关全链路同步可视化 · 2026-09-11
+  <div class="trace">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 块高865 · 根哈希B1141890... · Lv8永久锁档 · 记忆网关已同步</div>
+</div>
+
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products.html">产品</a>
+<a href="/solutions.html">解决方案</a>
+<a href="/architecture.html">架构</a>
+<a href="/whitepaper.html">白皮书</a>
+<a href="/docs.html">文档</a>
+<a href="/pricing.html">定价</a>
+<a href="/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

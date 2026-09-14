@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>体系实时仪表盘 · 火斗云智AIOS</title>
+<meta name="description" content="ZONGYUAN-ROOT体系实时数据仪表盘，真值分布/节点贡献/最近新增，每10分钟自动更新">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Noto Sans SC',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 50% 0%,rgba(212,175,55,0.08) 0%,transparent 50%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:40px 20px}
+.back{display:inline-block;color:#d4af37;text-decoration:none;font-size:0.9em;margin-bottom:16px}
+.hero{text-align:center;padding:10px 0 24px}
+.hero .symbol{font-size:12px;color:#d4af37;letter-spacing:4px;margin-bottom:10px;font-family:monospace}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2em;font-weight:900;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero .update{color:#666;font-size:0.8em}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0}
+.metric{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:16px;text-align:center}
+.metric .num{font-size:1.8em;font-weight:bold;color:#d4af37;font-family:'Noto Serif SC',serif}
+.metric .label{color:#888;font-size:0.78em;margin-top:4px}
+.metric .delta{font-size:0.7em;color:#4ade80;margin-top:2px}
+.section{margin:28px 0}
+.section h2{font-family:'Noto Serif SC',serif;font-size:1.2em;color:#d4af37;margin-bottom:14px;padding-left:12px;border-left:3px solid #d4af37}
+.chart-card{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.1);border-radius:12px;padding:18px}
+.bar-row{display:flex;align-items:center;margin:6px 0;gap:10px}
+.bar-label{width:100px;text-align:right;font-size:0.8em;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:20px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,#8B6914,#d4af37);border-radius:4px;transition:width .5s}
+.bar-value{width:50px;font-size:0.78em;color:#d4af37}
+.list-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82em}
+.list-item .key{color:#ccc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-item .cat{color:#8BC8EA;font-size:0.75em;margin:0 10px}
+.list-item .time{color:#666;font-size:0.75em}
+.auto-badge{display:inline-block;background:rgba(74,222,128,0.15);color:#4ade80;padding:2px 8px;border-radius:4px;font-size:0.7em;margin-left:8px}
+footer{text-align:center;margin-top:30px;padding-top:16px;border-top:1px solid rgba(212,175,55,0.1);color:#666;font-size:0.78em}
+footer .did{margin-top:5px;color:#d4af37;font-family:monospace}
+
+/* ===== 移动端适配 ===== */
+@media (max-width: 768px) {
+  body { padding: 10px !important; }
+  .container, .sm-container { max-width: 100% !important; padding: 0 12px !important; }
+  h1 { font-size: 1.5em !important; }
+  h2 { font-size: 1.2em !important; }
+  .sm-grid { grid-template-columns: 1fr !important; }
+  table { font-size: 0.85em; }
+  img { max-width: 100% !important; height: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">← 返回首页</a>
+  <div class="hero">
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · 自动可视化交付引擎</div>
+    <h1>体系实时仪表盘</h1>
+    <div class="update">数据更新于: 2026-09-14 17:20:01 <span class="auto-badge">每10分钟自动更新</span></div>
+  </div>
+  
+  <div class="metrics">
+    <div class="metric"><div class="num">6305</div><div class="label">真值总量</div><div class="delta">+3545 / 24h</div></div>
+    <div class="metric"><div class="num">49</div><div class="label">接入节点</div></div>
+    <div class="metric"><div class="num">349</div><div class="label">元法则</div></div>
+    <div class="metric"><div class="num">15</div><div class="label">分类数</div></div>
+    <div class="metric"><div class="num">448</div><div class="label">近1小时新增</div></div>
+  </div>
+  
+  <div class="section">
+    <h2>📊 真值分类分布</h2>
+    <div class="chart-card" id="catChart"></div>
+  </div>
+  
+  <div class="section">
+    <h2>🏆 节点贡献 Top10</h2>
+    <div class="chart-card" id="nodeChart"></div>
+  </div>
+  
+  <div class="section">
+    <h2>🆕 最近高价值资产</h2>
+    <div class="chart-card" id="highList"></div>
+  </div>
+</div>
+<footer>
+  火斗云智AIOS · 自动可视化交付引擎V1.0
+  <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 每10分钟自动扫描→可视化→集成→交付</div>
+</footer>
+<script>
+const CAT_DATA = [{"name": "data", "value": 2373}, {"name": "method", "value": 880}, {"name": "unclassified", "value": 545}, {"name": "theorem", "value": 520}, {"name": "case", "value": 450}, {"name": "meta_rule", "value": 349}, {"name": "protocol", "value": 302}, {"name": "未分类", "value": 199}, {"name": "creative", "value": 173}, {"name": "lock", "value": 149}, {"name": "risk", "value": 140}, {"name": "axiom", "value": 138}, {"name": "decision", "value": 85}, {"name": "other", "value": 1}, {"name": "stability_measure", "value": 1}];
+const NODE_DATA = [{"name": "unknown", "value": 2329}, {"name": "cloud-main-kernel-001", "value": 1015}, {"name": "DOUBAO-CLOUD-001", "value": 738}, {"name": "mr011-stability-evolution", "value": 461}, {"name": "auto-pipeline", "value": 450}, {"name": "mr010-dual-compute-scheduler", "value": 360}, {"name": "local-0.5b", "value": 176}, {"name": "mr014-metacognition", "value": 169}, {"name": "local-dev-001", "value": 91}, {"name": "global-guardian", "value": 82}];
+const HIGH_DATA = [{"key": "META_LAW.MR-073", "cat": "meta_rule", "node": "cloud-main-kernel-001", "time": "2026-09-14T01:33"}, {"key": "META_LAW.MR-072", "cat": "meta_rule", "node": "cloud-main-kernel-001", "time": "2026-09-14T01:20"}, {"key": "META_LAW.MR-071", "cat": "meta_rule", "node": "cloud-main-kernel-001", "time": "2026-09-14T00:59"}, {"key": "SELF_DEV.20260914_171719.42e6fa", "cat": "method", "node": "mr017-self-development", "time": "09-14 17:17"}, {"key": "META_LEARNING.20260914_171715.51e872", "cat": "method", "node": "mr016-thinking-evolution", "time": "09-14 17:17"}, {"key": "self-healing.repair.REPAIR-20260914170537-a4fac4b3", "cat": "method", "node": "unknown", "time": "09-14 17:05"}, {"key": "self-healing.repair.REPAIR-20260914170337-f240311a", "cat": "method", "node": "unknown", "time": "09-14 17:03"}, {"key": "self-healing.repair.REPAIR-20260914170336-f8e5660a", "cat": "method", "node": "unknown", "time": "09-14 17:03"}, {"key": "self-healing.repair.REPAIR-20260914170236-3f51525b", "cat": "method", "node": "unknown", "time": "09-14 17:02"}, {"key": "self-healing.repair.REPAIR-20260914170136-9eda31f5", "cat": "method", "node": "unknown", "time": "09-14 17:01"}];
+
+function renderBars(containerId, data, color){
+  const max = Math.max(...data.map(d=>d.value));
+  const html = data.map(d=>{
+    const pct = Math.round(d.value/max*100);
+    return '<div class="bar-row"><div class="bar-label" title="'+d.name+'">'+d.name+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div><div class="bar-value">'+d.value+'</div></div>';
+  }).join('');
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function renderList(containerId, data){
+  const html = data.map(d=>'<div class="list-item"><span class="key">'+d.key+'</span><span class="cat">'+d.cat+'</span><span class="time">'+d.time+'</span></div>').join('');
+  document.getElementById(containerId).innerHTML = html;
+}
+
+renderBars('catChart', CAT_DATA);
+renderBars('nodeChart', NODE_DATA);
+renderList('highList', HIGH_DATA);
+</script>
+</body>
+</html>

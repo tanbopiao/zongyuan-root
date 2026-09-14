@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系统状态中心 | 火斗云智AIOS</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1520 50%, #0f0a15 100%);
+  color: #e8e8e8;
+  min-height: 100vh;
+}
+
+/* 顶部导航 */
+.top-nav {
+  background: rgba(17, 24, 39, 0.95);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 12px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.top-nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #D4AF37, #8B6914);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: 14px;
+}
+.logo-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+.logo-text span { color: #D4AF37; }
+.logo-sub {
+  font-size: 10px;
+  color: #888;
+}
+.back-link {
+  color: #888;
+  text-decoration: none;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.back-link:hover {
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.1);
+}
+
+/* 页面标题 */
+.page-header {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px 24px 20px;
+  text-align: center;
+}
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #D4AF37, #F4E4BC, #D4AF37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.page-subtitle {
+  font-size: 13px;
+  color: #888;
+}
+.page-anchor {
+  font-size: 11px;
+  color: #D4AF37;
+  margin-top: 10px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+/* Tab导航 */
+.tab-nav {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  margin-bottom: 20px;
+}
+.tab-btn {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tab-btn:hover {
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.05);
+}
+.tab-btn.active {
+  color: #D4AF37;
+  border-bottom-color: #D4AF37;
+  background: rgba(212, 175, 55, 0.08);
+}
+.tab-btn .tab-icon {
+  font-size: 16px;
+}
+.tab-btn .tab-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Tab内容 */
+.tab-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+}
+.tab-pane {
+  display: none;
+}
+.tab-pane.active {
+  display: block;
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tab-pane iframe {
+  width: 100%;
+  height: 800px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+  background: #fff;
+}
+.tab-pane .pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tab-pane .pane-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #D4AF37;
+}
+.tab-pane .pane-actions {
+  display: flex;
+  gap: 8px;
+}
+.tab-pane .open-new-tab {
+  padding: 6px 14px;
+  background: rgba(212, 175, 55, 0.1);
+  color: #D4AF37;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 12px;
+  transition: all 0.2s;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+.tab-pane .open-new-tab:hover {
+  background: rgba(212, 175, 55, 0.2);
+}
+
+/* 快速概览卡片 */
+.overview-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.overview-card {
+  background: linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(30, 25, 15, 0.9));
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.overview-card:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  transform: translateY(-2px);
+}
+.overview-card .card-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+.overview-card .card-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #D4AF37;
+}
+.overview-card .card-label {
+  font-size: 12px;
+  color: #888;
+  margin-top: 6px;
+}
+.overview-card .card-status {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.status-online {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+/* 页脚 */
+.footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: #555;
+  font-size: 12px;
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  margin-top: 40px;
+}
+.footer .anchor {
+  color: #D4AF37;
+  font-family: 'Courier New', monospace;
+  margin-top: 8px;
+  letter-spacing: 1px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .page-title { font-size: 22px; }
+  .tab-btn { padding: 10px 16px; font-size: 12px; }
+  .tab-pane iframe { height: 600px; }
+  .overview-cards { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+<meta name="description" content="火斗云智 AIOS 系统状态中心 - 实时状态总览，内核状态，锁档可视化">
+    <link rel="canonical" href="https://huodouai.com/internal/status-center.html">
+    <meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+  <div class="top-nav-inner">
+    <a href="/" class="logo">
+      <div class="logo-icon">火</div>
+      <div>
+        <div class="logo-text">火斗云智<span>AIOS</span></div>
+        <div class="logo-sub">ZONGYUAN-ROOT · DID-BR-000002</div>
+      </div>
+    </a>
+    <a href="/" class="back-link">← 返回首页</a>
+  </div>
+</div>
+
+<!-- 页面标题 -->
+<div class="page-header">
+  <h1 class="page-title">📊 系统状态中心</h1>
+  <p class="page-subtitle">统一监控 · 实时状态 · 内核锁档 · 服务运维</p>
+  <div class="page-anchor">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V1.7</div>
+</div>
+
+<!-- 快速概览 -->
+<div class="tab-content">
+  <div class="overview-cards">
+    <div class="overview-card">
+      <div class="card-icon">🟢</div>
+      <div class="card-value">9/9</div>
+      <div class="card-label">核心服务在线</div>
+      <span class="card-status status-online">全部正常</span>
+    </div>
+    <div class="overview-card">
+      <div class="card-icon">🔒</div>
+      <div class="card-value">170</div>
+      <div class="card-label">锁档记录</div>
+      <span class="card-status status-online">永久固化</span>
+    </div>
+    <div class="overview-card">
+      <div class="card-icon">📐</div>
+      <div class="card-value">55</div>
+      <div class="card-label">真值条目</div>
+      <span class="card-status status-online">已验证</span>
+    </div>
+    <div class="overview-card">
+      <div class="card-icon">⚡</div>
+      <div class="card-value">97.25</div>
+      <div class="card-label">健康评分</div>
+      <span class="card-status status-online">优秀</span>
+    </div>
+    <div class="overview-card">
+      <div class="card-icon">🤖</div>
+      <div class="card-value">7x24</div>
+      <div class="card-label">自治运行</div>
+      <span class="card-status status-online">持续运行</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tab导航 -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview', this)">
+    <span class="tab-icon">🟢</span> 实时状态总览
+    <span class="tab-badge">默认</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('kernel-status', this)">
+    <span class="tab-icon">⚡</span> 内核状态面板
+  </button>
+  <button class="tab-btn" onclick="switchTab('lock-visual', this)">
+    <span class="tab-icon">🔒</span> 内核锁档可视化
+  </button>
+  <button class="tab-btn" onclick="switchTab('monitor', this)">
+    <span class="tab-icon">📈</span> 服务监控大屏
+  </button>
+</div>
+
+<!-- Tab内容 -->
+<div class="tab-content">
+  <!-- 实时状态总览 -->
+  <div id="tab-overview" class="tab-pane active">
+    <div class="pane-header">
+      <div class="pane-title">🟢 实时状态总览</div>
+      <div class="pane-actions">
+        <a href="/internal/status.html" target="_blank" class="open-new-tab">↗ 新窗口打开</a>
+      </div>
+    </div>
+    <iframe src="/status.html" frameborder="0"></iframe>
+  </div>
+
+  <!-- 内核状态面板 -->
+  <div id="tab-kernel-status" class="tab-pane">
+    <div class="pane-header">
+      <div class="pane-title">⚡ 内核状态实时面板</div>
+      <div class="pane-actions">
+        <a href="/internal/kernel-status.html" target="_blank" class="open-new-tab">↗ 新窗口打开</a>
+      </div>
+    </div>
+    <iframe src="/kernel-status.html" frameborder="0"></iframe>
+  </div>
+
+  <!-- 内核锁档可视化 -->
+  <div id="tab-lock-visual" class="tab-pane">
+    <div class="pane-header">
+      <div class="pane-title">🔒 内核锁档可视化窗口</div>
+      <div class="pane-actions">
+        <a href="/internal/kernel-lock-visual.html" target="_blank" class="open-new-tab">↗ 新窗口打开</a>
+      </div>
+    </div>
+    <iframe src="/kernel-lock-visual.html" frameborder="0"></iframe>
+  </div>
+
+  <!-- 服务监控大屏 -->
+  <div id="tab-monitor" class="tab-pane">
+    <div class="pane-header">
+      <div class="pane-title">📈 服务监控大屏</div>
+      <div class="pane-actions">
+        <a href="/internal/monitor.html" target="_blank" class="open-new-tab">↗ 新窗口打开</a>
+      </div>
+    </div>
+    <iframe src="/monitor.html" frameborder="0"></iframe>
+  </div>
+</div>
+
+<!-- 页脚 -->
+<div class="footer">
+  <div>火斗云智AIOS · 系统状态中心 · 统一监控入口</div>
+  <div>实时状态 | 内核面板 | 锁档可视化 | 服务监控</div>
+  <div class="anchor">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ 元极恒一超认知永恒自治体系</div>
+</div>
+
+<script>
+function switchTab(tabId, btn) {
+  // 隐藏所有pane
+  document.querySelectorAll('.tab-pane').forEach(function(pane) {
+    pane.classList.remove('active');
+  });
+  // 移除所有按钮active
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  // 显示当前pane
+  document.getElementById('tab-' + tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// 自动刷新概览数据（每30秒）
+setInterval(function() {
+  // 可以在这里添加实时数据刷新逻辑
+  console.log('状态中心数据刷新中...');
+}, 30000);
+</script>
+
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/docs/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/internal/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/internal/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+</body>
+</html>

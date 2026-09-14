@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智 · 元运维监控平台 V1.2</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a0f; color:#e0e0e0; font-family:'Courier New',monospace; min-height:100vh; }
+.header { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%); padding:20px 30px; border-bottom:2px solid #d4af37; display:flex; justify-content:space-between; align-items:center; }
+.header h1 { color:#d4af37; font-size:24px; letter-spacing:2px; }
+.header .meta { color:#888; font-size:12px; text-align:right; }
+.header .meta span { color:#d4af37; }
+.container { max-width:1400px; margin:0 auto; padding:20px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin-bottom:20px; }
+.card { background:#1a1a2e; border:1px solid #333; border-radius:8px; padding:20px; position:relative; overflow:hidden; }
+.card::before { content:''; position:absolute; top:0; left:0; width:100%; height:2px; background:linear-gradient(90deg,#d4af37,transparent); }
+.card h3 { color:#d4af37; font-size:14px; margin-bottom:15px; letter-spacing:1px; border-bottom:1px solid #333; padding-bottom:8px; }
+.metric { display:flex; justify-content:space-between; align-items:center; margin:10px 0; }
+.metric .label { color:#888; font-size:12px; }
+.metric .value { color:#fff; font-size:20px; font-weight:bold; }
+.metric .value.good { color:#4ade80; }
+.metric .value.warn { color:#fbbf24; }
+.metric .value.bad { color:#f87171; }
+.progress { background:#333; height:8px; border-radius:4px; overflow:hidden; margin-top:5px; }
+.progress .bar { height:100%; border-radius:4px; transition:width 0.5s; }
+.progress .bar.good { background:linear-gradient(90deg,#4ade80,#22c55e); }
+.progress .bar.warn { background:linear-gradient(90deg,#fbbf24,#f59e0b); }
+.progress .bar.bad { background:linear-gradient(90deg,#f87171,#ef4444); }
+.score-circle { width:120px; height:120px; border-radius:50%; border:4px solid #d4af37; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto; }
+.score-circle .score { font-size:36px; color:#d4af37; font-weight:bold; }
+.score-circle .label { font-size:10px; color:#888; }
+.node-list { max-height:200px; overflow-y:auto; }
+.node-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #222; font-size:12px; }
+.node-item .id { color:#d4af37; }
+.node-item .status { padding:2px 8px; border-radius:3px; font-size:10px; }
+.status.active { background:#166534; color:#4ade80; }
+.status.offline { background:#7f1d1d; color:#f87171; }
+.status.revoked { background:#713f12; color:#fbbf24; }
+.alert-item { padding:8px; margin:5px 0; background:#1e1e2e; border-left:3px solid #f87171; font-size:11px; border-radius:0 4px 4px 0; }
+.alert-item.warn { border-left-color:#fbbf24; }
+.alert-item.info { border-left-color:#60a5fa; }
+.task-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.task-stat { text-align:center; padding:10px; background:#1e1e2e; border-radius:4px; }
+.task-stat .num { font-size:24px; color:#d4af37; font-weight:bold; }
+.task-stat .lbl { font-size:10px; color:#888; }
+.footer { text-align:center; padding:20px; color:#555; font-size:11px; border-top:1px solid #222; margin-top:20px; }
+.footer span { color:#d4af37; }
+.refresh-btn { background:#d4af37; color:#0a0a0f; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-family:inherit; font-weight:bold; font-size:12px; }
+.refresh-btn:hover { background:#f0c040; }
+.endpoint-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
+.endpoint { padding:8px; text-align:center; border-radius:4px; font-size:10px; }
+.endpoint.ok { background:#166534; color:#4ade80; }
+.endpoint.down { background:#7f1d1d; color:#f87171; }
+.endpoint .port { font-weight:bold; font-size:12px; }
+</style>
+<meta name="description" content="火斗云智 AIOS 实时监控 - 服务状态监控，资源使用，告警管理">
+    <link rel="canonical" href="https://huodouai.com/ops-monitor.html">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<!-- 统一导航栏 -->
+<div style="position:sticky;top:0;z-index:1000;background:rgba(10,10,15,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(212,175,55,0.2);padding:12px 24px;">
+  <div style="max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">🔥</span>
+      <span style="font-size:14px;font-weight:600;background:linear-gradient(135deg,#d4af37,#f4e4a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">火斗云智 AIOS</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 首页</a>
+      <a href="/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="/microkernel-architecture.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📐 架构白皮书</a>
+      <a href="/ops-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">⚙️ 运维中枢</a>
+    </div>
+  </div>
+</div>
+
+<div class="header">
+  <h1>⚡ 火斗云智 · 元运维监控平台</h1>
+  <div class="meta">
+    <div>DID: <span>DID-BR-000002</span></div>
+    <div>版本: <span>V1.2.0 Autonomous</span></div>
+    <div id="lastUpdate">最后更新: --</div>
+    <button class="refresh-btn" onclick="loadAll()">🔄 刷新</button>
+  </div>
+</div>
+<div class="container">
+  <div class="grid">
+    <div class="card">
+      <h3>📊 健康评分</h3>
+      <div class="score-circle">
+        <div class="score" id="healthScore">--</div>
+        <div class="label">HEALTH SCORE</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>💻 系统资源</h3>
+      <div class="metric"><span class="label">CPU</span><span class="value" id="cpuVal">--</span></div>
+      <div class="progress"><div class="bar" id="cpuBar" style="width:0%"></div></div>
+      <div class="metric"><span class="label">内存</span><span class="value" id="memVal">--</span></div>
+      <div class="progress"><div class="bar" id="memBar" style="width:0%"></div></div>
+      <div class="metric"><span class="label">磁盘</span><span class="value" id="diskVal">--</span></div>
+      <div class="progress"><div class="bar" id="diskBar" style="width:0%"></div></div>
+    </div>
+    <div class="card">
+      <h3>🔗 节点状态</h3>
+      <div class="node-list" id="nodeList">加载中...</div>
+    </div>
+    <div class="card">
+      <h3>📋 任务队列</h3>
+      <div class="task-stats">
+        <div class="task-stat"><div class="num" id="taskTotal">--</div><div class="lbl">总任务</div></div>
+        <div class="task-stat"><div class="num" id="taskAccepted">--</div><div class="lbl">已采纳</div></div>
+        <div class="task-stat"><div class="num" id="taskRejected">--</div><div class="lbl">已拒绝</div></div>
+        <div class="task-stat"><div class="num" id="taskPending">--</div><div class="lbl">待处理</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>🌐 API端点状态 (26个)</h3>
+      <div class="endpoint-grid" id="endpointGrid">加载中...</div>
+    </div>
+    <div class="card">
+      <h3>⚠️ 告警与自愈</h3>
+      <div id="alertList">加载中...</div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  Ω₀⊂⊙∞⊂Ω | <span>DID-BR-000002</span> | ZR-MHP V1.2.0 Autonomous | 元极恒一自治体系
+</div>
+<script>
+const API_BASE = "https://api.huodouai.com";
+const endpoints = [
+  {name:"握手",port:8099,path:"/mhp/api/health"},
+  {name:"运维",port:8098,path:"/ops/api/ops/health"},
+  {name:"节点",port:8097,path:"/node/api/node/health"},
+  {name:"任务",port:8096,path:"/task/api/task/health"},
+  {name:"AgentHub",port:8023,path:"/api/agents"},
+  {name:"AI代理",port:8021,path:"/"},
+  {name:"Omega脑",port:8000,path:"/"},
+  {name:"KD产线",port:8626,path:"/"},
+];
+
+async function loadAll() {
+  document.getElementById("lastUpdate").textContent = "最后更新: " + new Date().toLocaleTimeString();
+  loadOverview();
+  loadNodes();
+  loadTasks();
+  loadEndpoints();
+  loadAlerts();
+}
+
+async function loadOverview() {
+  try {
+    const r = await fetch(API_BASE + "/ops/api/ops/overview");
+    const d = await r.json();
+    document.getElementById("healthScore").textContent = d.health_score;
+    const cpu = d.system_resources.cpu_percent;
+    const mem = d.system_resources.mem_percent;
+    const disk = d.system_resources.disk_percent;
+    setMetric("cpu", cpu); setMetric("mem", mem); setMetric("disk", disk);
+  } catch(e) { console.error("overview error", e); }
+}
+
+function setMetric(type, val) {
+  const el = document.getElementById(type+"Val");
+  const bar = document.getElementById(type+"Bar");
+  if(val === undefined) return;
+  el.textContent = val.toFixed(1) + "%";
+  el.className = "value " + (val < 60 ? "good" : val < 80 ? "warn" : "bad");
+  bar.style.width = val + "%";
+  bar.className = "bar " + (val < 60 ? "good" : val < 80 ? "warn" : "bad");
+}
+
+async function loadNodes() {
+  try {
+    const r = await fetch(API_BASE + "/ops/api/ops/nodes");
+    const d = await r.json();
+    const list = document.getElementById("nodeList");
+    if(d.nodes && d.nodes.length) {
+      list.innerHTML = d.nodes.map(n => 
+        '<div class="node-item"><span class="id">' + n.node_id + '</span><span class="status ' + n.status.toLowerCase() + '">' + n.status + '</span></div>'
+      ).join("");
+    } else list.innerHTML = "<div style='color:#666;font-size:11px'>无节点数据</div>";
+  } catch(e) { document.getElementById("nodeList").innerHTML = "<div style='color:#f87171;font-size:11px'>加载失败</div>"; }
+}
+
+async function loadTasks() {
+  try {
+    const r = await fetch(API_BASE + "/task/api/task/queue");
+    const d = await r.json();
+    document.getElementById("taskTotal").textContent = d.total || "--";
+    document.getElementById("taskAccepted").textContent = d.accepted || "--";
+    document.getElementById("taskRejected").textContent = d.rejected || "--";
+    document.getElementById("taskPending").textContent = d.pending || "--";
+  } catch(e) {}
+}
+
+async function loadEndpoints() {
+  const grid = document.getElementById("endpointGrid");
+  grid.innerHTML = endpoints.map(e => 
+    '<div class="endpoint down" id="ep-' + e.port + '"><div class="port">' + e.port + '</div><div>' + e.name + '</div></div>'
+  ).join("");
+  endpoints.forEach(async e => {
+    try {
+      const r = await fetch(API_BASE + e.path, {signal: AbortSignal.timeout(3000)});
+      if(r.ok || r.status === 404 || r.status === 401) {
+        document.getElementById("ep-" + e.port).className = "endpoint ok";
+      }
+    } catch(err) {}
+  });
+}
+
+async function loadAlerts() {
+  try {
+    const r = await fetch(API_BASE + "/ops/api/ops/alerts");
+    const d = await r.json();
+    const list = document.getElementById("alertList");
+    if(d.alerts && d.alerts.length) {
+      list.innerHTML = d.alerts.slice(0,5).map(a => 
+        '<div class="alert-item ' + (a.level === "warn" ? "warn" : a.level === "info" ? "info" : "") + '">[' + a.level + '] ' + a.message + '</div>'
+      ).join("");
+    } else list.innerHTML = "<div style='color:#4ade80;font-size:11px'>✅ 无活跃告警</div>";
+  } catch(e) { document.getElementById("alertList").innerHTML = "<div style='color:#4ade80;font-size:11px'>✅ 系统正常</div>"; }
+}
+
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS | ZONGYUAN-ROOT</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0e17 0%,#1a1f2e 50%,#0d1117 100%);color:#e2e8f0;min-height:100vh}
+.header{background:rgba(17,24,39,0.9);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(212,175,55,0.2);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#d4af37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+.logo-text{font-size:18px;font-weight:700;color:#d4af37}
+.logo-sub{font-size:10px;color:#888}
+.nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.nav a{color:#aaa;text-decoration:none;font-size:13px;transition:all .2s;padding:4px 10px;border-radius:6px}
+.nav a:hover{color:#d4af37;background:rgba(212,175,55,0.1)}
+.status-badge{display:flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:20px;font-size:11px;color:#10b981}
+.dot{width:6px;height:6px;border-radius:50%;background:#10b981;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero{text-align:center;padding:30px 20px 20px;background:radial-gradient(ellipse at center,rgba(212,175,55,0.08) 0%,transparent 70%)}
+.hero h1{font-size:28px;margin-bottom:8px;background:linear-gradient(90deg,#fff,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#888;font-size:13px;max-width:600px;margin:0 auto}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.15);border-radius:8px;padding:14px;text-align:center;transition:all .3s}
+.stat-card:hover{border-color:rgba(212,175,55,0.4);transform:translateY(-2px)}
+.stat-value{font-size:22px;font-weight:700;color:#d4af37;margin-bottom:2px}
+.stat-label{font-size:10px;color:#888}
+.section{margin-bottom:24px}
+.section-title{font-size:16px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:10px;color:#d4af37}
+.section-title::before{content:"";width:3px;height:16px;background:linear-gradient(180deg,#d4af37,#8B6914);border-radius:2px}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;margin-bottom:16px}
+.chart-card{background:rgba(255,255,255,0.02);border:1px solid rgba(212,175,55,0.1);border-radius:10px;padding:12px}
+.chart-card h3{font-size:12px;color:#d4af37;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(212,175,55,0.1)}
+.chart-container{width:100%;height:220px}
+.full-width{grid-column:1/-1}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.15);border-radius:10px;padding:16px;transition:all .3s;cursor:pointer;position:relative;overflow:hidden;text-decoration:none;color:inherit;display:block}
+.card:hover{border-color:#d4af37;transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.15)}
+.card::after{content:"";position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,#d4af37,#F4E4BC);transform:scaleX(0);transition:transform .3s}
+.card:hover::after{transform:scaleX(1)}
+.card-icon{font-size:24px;margin-bottom:8px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:4px;color:#fff}
+.card-desc{font-size:11px;color:#888;line-height:1.5;margin-bottom:10px}
+.card-meta{display:flex;justify-content:space-between;align-items:center;font-size:10px}
+.card-status{display:flex;align-items:center;gap:4px;color:#10b981}
+.card-status::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:#10b981}
+.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.agent-card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.15);border-radius:8px;padding:14px;text-align:center;transition:all .3s}
+.agent-card:hover{border-color:#d4af37;transform:translateY(-2px)}
+.agent-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#8B6914);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px}
+.agent-name{font-size:12px;font-weight:600;color:#d4af37;margin-bottom:2px}
+.agent-role{font-size:10px;color:#888;margin-bottom:6px}
+.agent-tags{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
+.tag{font-size:9px;padding:1px 5px;border-radius:6px;background:rgba(212,175,55,0.1);color:#d4af37}
+.footer{text-align:center;padding:24px 20px;border-top:1px solid rgba(212,175,55,0.1);margin-top:30px;color:#666;font-size:11px}
+.footer .anchor{color:#d4af37;font-family:monospace;letter-spacing:1px}
+@media(max-width:768px){.header{padding:12px 16px;flex-direction:column;gap:10px}.nav{gap:8px}.hero h1{font-size:22px}.container{padding:12px}}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="火斗云智AIOS - 基于ZONGYUAN-ROOT元极恒一自治体系的AI操作系统，提供政务AI、短剧流水线、知识图谱、普惠教育等核心产品。">
+<meta name="keywords" content="火斗云智,AIOS,ZONGYUAN-ROOT,元极恒一,政务AI,短剧,知识图谱,普惠教育">
+<meta property="og:title" content="火斗云智AIOS | ZONGYUAN-ROOT">
+<meta property="og:description" content="火斗云智AIOS - 基于ZONGYUAN-ROOT元极恒一自治体系的AI操作系统，提供政务AI、短剧流水线、知识图谱、普惠教育等核心产品。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/workbench.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="火斗云智AIOS | ZONGYUAN-ROOT">
+<meta name="twitter:description" content="火斗云智AIOS - 基于ZONGYUAN-ROOT元极恒一自治体系的AI操作系统，提供政务AI、短剧流水线、知识图谱、普惠教育等核心产品。">
+    <link rel="canonical" href="https://huodouai.com/products/workbench.html">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<!-- ZONGYUAN-ROOT Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">ZONGYUAN-ROOT · DID-BR-000002</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/about/philosophy.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">思想</a>
+      <a href="/about/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/about/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/about/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/products/engines.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">引擎</a>
+      <a href="/architecture/governance.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">治理</a>
+      <a href="/internal/monitor.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">监控</a>
+      <a href="/products/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/gov/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">政务AI</a>
+      <a href="/drama/demo.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">短剧</a>
+      <a href="/sovereignty/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">主权根</a>
+      <a href="/products/vector-kb.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">向量库</a>
+      <a href="/docs/developers.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">开发者</a>
+      <a href="/docs/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /ZONGYUAN-ROOT Unified Navigation -->
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🤖</div>
+    <div>
+      <div class="logo-text">AI智能体工作台</div>
+      <div class="logo-sub">火斗云智AIOS · 多智能体协同平台</div>
+    </div>
+  </div>
+  <div class="nav">
+    <a href="/">首页</a>
+    <a href="/internal/portal.html">门户</a>
+    <a href="/gov/">政务AI</a>
+    <a href="/products/workbench.html" class="active">工作台</a>
+    <a href="/drama/pipeline.html">短剧</a>
+    <a href="/sovereignty/">主权根</a>
+    <a href="/internal/status.html">状态</a>
+    <div class="status-badge"><div class="dot"></div>运行中</div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>🛠️ AI智能体工作台</h1>
+  <p>多智能体协同工作台，支持智能体创建、配置、监控、日志查看，全生命周期管理</p>
+</div>
+
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">78+</div><div class="stat-label">在册智能体</div></div>
+    <div class="stat-card"><div class="stat-value">9</div><div class="stat-label">核心集群</div></div>
+    <div class="stat-card"><div class="stat-value">24</div><div class="stat-label">内核模块</div></div>
+    <div class="stat-card"><div class="stat-value">100%</div><div class="stat-label">在线率</div></div>
+    <div class="stat-card"><div class="stat-value">Lv7</div><div class="stat-label">自治等级</div></div>
+    <div class="stat-card"><div class="stat-value">7x24</div><div class="stat-label">持续运行</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 智能体运行监控</div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>智能体集群状态分布</h3><div class="chart-container" id="clusterChart"></div></div>
+      <div class="chart-card"><h3>任务执行趋势（最近7天）</h3><div class="chart-container" id="taskChart"></div></div>
+      <div class="chart-card"><h3>智能体能力矩阵</h3><div class="chart-container" id="capabilityChart"></div></div>
+      <div class="chart-card"><h3>资源使用分布</h3><div class="chart-container" id="resourceChart"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏗️ 智能体架构总览</div>
+    <div class="chart-card full-width">
+      <div class="chart-container" id="archChart" style="height:320px;"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🤖 核心智能体集群</div>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-avatar">👑</div>
+        <div class="agent-name">造物主控</div>
+        <div class="agent-role">L1主控中枢级</div>
+        <div class="agent-tags"><span class="tag">全域统筹</span><span class="tag">任务拆解</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-avatar">🔗</div>
+        <div class="agent-name">因果收敛</div>
+        <div class="agent-role">L2高阶协同</div>
+        <div class="agent-tags"><span class="tag">因果链</span><span class="tag">奇点预测</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-avatar">⚡</div>
+        <div class="agent-name">算力调度</div>
+        <div class="agent-role">L2高阶协同</div>
+        <div class="agent-tags"><span class="tag">资源分配</span><span class="tag">优先级</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-avatar">🎬</div>
+        <div class="agent-name">昆仑洞天主控</div>
+        <div class="agent-role">短剧流水线</div>
+        <div class="agent-tags"><span class="tag">剧本</span><span class="tag">渲染</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-avatar">⚖️</div>
+        <div class="agent-name">政务AI引擎</div>
+        <div class="agent-role">政务中台</div>
+        <div class="agent-tags"><span class="tag">流程编排</span><span class="tag">可视化</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-avatar">🏛️</div>
+        <div class="agent-name">国家主权根</div>
+        <div class="agent-role">治理架构</div>
+        <div class="agent-tags"><span class="tag">规则治理</span><span class="tag">合规校验</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-avatar">🧠</div>
+        <div class="agent-name">元极恒一</div>
+        <div class="agent-role">全域稳态自治</div>
+        <div class="agent-tags"><span class="tag">自进化</span><span class="tag">自修复</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-avatar">🔒</div>
+        <div class="agent-name">系统运维安全</div>
+        <div class="agent-role">L2高阶协同</div>
+        <div class="agent-tags"><span class="tag">安全</span><span class="tag">运维</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🚀 工作台功能模块</div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">➕</div>
+        <div class="card-title">智能体创建</div>
+        <div class="card-desc">可视化创建新智能体，配置角色、能力、权限、触发条件</div>
+        <div class="card-meta"><span class="card-status">可用</span><span style="color:#d4af37">创建 →</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">智能体配置</div>
+        <div class="card-desc">配置智能体参数、模型、提示词、工具调用、知识库</div>
+        <div class="card-meta"><span class="card-status">可用</span><span style="color:#d4af37">配置 →</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <div class="card-title">运行监控</div>
+        <div class="card-desc">实时监控智能体运行状态、任务执行、资源使用、异常告警</div>
+        <div class="card-meta"><span class="card-status">可用</span><span style="color:#d4af37">监控 →</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📝</div>
+        <div class="card-title">日志查看</div>
+        <div class="card-desc">查看智能体执行日志、调用记录、错误追踪、性能分析</div>
+        <div class="card-meta"><span class="card-status">可用</span><span style="color:#d4af37">日志 →</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔗</div>
+        <div class="card-title">智能体协同</div>
+        <div class="card-desc">配置多智能体协同工作流，任务分发、结果汇总、冲突解决</div>
+        <div class="card-meta"><span class="card-status">可用</span><span style="color:#d4af37">协同 →</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧪</div>
+        <div class="card-title">沙箱测试</div>
+        <div class="card-desc">在隔离沙箱中测试智能体行为，验证安全性和正确性</div>
+        <div class="card-meta"><span class="card-status">可用</span><span style="color:#d4af37">测试 →</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">版本管理</div>
+        <div class="card-desc">智能体版本管理，支持版本回滚、对比、发布、灰度</div>
+        <div class="card-meta"><span class="card-status">可用</span><span style="color:#d4af37">版本 →</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <div class="card-title">权限管理</div>
+        <div class="card-desc">智能体权限分级管理，Lv6/Lv7权限隔离，访问控制</div>
+        <div class="card-meta"><span class="card-status">可用</span><span style="color:#d4af37">权限 →</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  AI智能体工作台 · 火斗云智AIOS ｜ <span class="anchor">Ω₀⊂⊙∞⊂Ω</span> ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V1.7<br>
+  多智能体协同 · 全生命周期管理 · 全域溯源确权
+</div>
+
+<script>
+const charts = {};
+function initCharts() {
+  ['clusterChart','taskChart','capabilityChart','resourceChart','archChart'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) charts[id] = echarts.init(el);
+  });
+}
+
+function updateClusterChart() {
+  if (!charts.clusterChart) return;
+  charts.clusterChart.setOption({
+    tooltip: { trigger: 'item' },
+    legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{
+      type: 'pie', radius: ['35%', '65%'], center: ['50%', '45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0e17', borderWidth: 2 },
+      label: { show: false },
+      data: [
+        { value: 42, name: '火斗云智AIOS', itemStyle: { color: '#d4af37' } },
+        { value: 8, name: 'HC-AGI集群', itemStyle: { color: '#8b5cf6' } },
+        { value: 9, name: '短剧智能体', itemStyle: { color: '#3b82f6' } },
+        { value: 2, name: '昆仑洞天', itemStyle: { color: '#10b981' } },
+        { value: 1, name: '火斗智算', itemStyle: { color: '#f59e0b' } },
+        { value: 8, name: '独立母版', itemStyle: { color: '#ef4444' } },
+        { value: 8, name: '体验版业务', itemStyle: { color: '#6366f1' } }
+      ]
+    }]
+  });
+}
+
+function updateTaskChart() {
+  if (!charts.taskChart) return;
+  charts.taskChart.setOption({
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['成功','失败','重试'], textStyle: { color: '#888', fontSize: 10 }, top: 0 },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '20%', containLabel: true },
+    xAxis: { type: 'category', data: ['周一','周二','周三','周四','周五','周六','周日'], axisLabel: { color: '#888', fontSize: 10 } },
+    yAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series: [
+      { name: '成功', type: 'bar', stack: 'total', data: [120,132,101,134,90,230,210], itemStyle: { color: '#10b981' } },
+      { name: '失败', type: 'bar', stack: 'total', data: [5,8,3,6,4,10,8], itemStyle: { color: '#ef4444' } },
+      { name: '重试', type: 'bar', stack: 'total', data: [10,15,8,12,6,20,15], itemStyle: { color: '#f59e0b' } }
+    ]
+  });
+}
+
+function updateCapabilityChart() {
+  if (!charts.capabilityChart) return;
+  charts.capabilityChart.setOption({
+    tooltip: {},
+    legend: { data: ['主控','协同','执行','治理'], textStyle: { color: '#888', fontSize: 10 }, top: 0 },
+    radar: {
+      indicator: [
+        { name: '任务调度', max: 100 },
+        { name: '因果推理', max: 100 },
+        { name: '内容生成', max: 100 },
+        { name: '安全防护', max: 100 },
+        { name: '自进化', max: 100 },
+        { name: '协同工作', max: 100 }
+      ],
+      axisName: { color: '#888', fontSize: 10 },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      splitArea: { areaStyle: { color: ['rgba(212,175,55,0.02)','rgba(212,175,55,0.05)'] } }
+    },
+    series: [{
+      type: 'radar',
+      data: [
+        { value: [95,85,70,90,80,85], name: '主控', itemStyle: { color: '#d4af37' }, areaStyle: { color: 'rgba(212,175,55,0.2)' } },
+        { value: [80,90,75,85,75,95], name: '协同', itemStyle: { color: '#8b5cf6' }, areaStyle: { color: 'rgba(139,92,246,0.2)' } },
+        { value: [60,70,95,70,65,80], name: '执行', itemStyle: { color: '#3b82f6' }, areaStyle: { color: 'rgba(59,130,246,0.2)' } },
+        { value: [75,80,65,95,85,70], name: '治理', itemStyle: { color: '#10b981' }, areaStyle: { color: 'rgba(16,185,129,0.2)' } }
+      ]
+    }]
+  });
+}
+
+function updateResourceChart() {
+  if (!charts.resourceChart) return;
+  charts.resourceChart.setOption({
+    tooltip: { trigger: 'item' },
+    legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{
+      type: 'pie', radius: ['35%', '65%'], center: ['50%', '45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0e17', borderWidth: 2 },
+      label: { show: false },
+      data: [
+        { value: 35, name: '主控集群', itemStyle: { color: '#d4af37' } },
+        { value: 25, name: '短剧流水线', itemStyle: { color: '#3b82f6' } },
+        { value: 15, name: '政务AI', itemStyle: { color: '#8b5cf6' } },
+        { value: 15, name: '治理架构', itemStyle: { color: '#10b981' } },
+        { value: 10, name: '其他', itemStyle: { color: '#6366f1' } }
+      ]
+    }]
+  });
+}
+
+function updateArchChart() {
+  if (!charts.archChart) return;
+  charts.archChart.setOption({
+    tooltip: {},
+    series: [{
+      type: 'tree',
+      data: [{
+        name: 'AI智能体工作台',
+        children: [
+          { name: 'L1主控中枢', children: [{ name: '造物主控' }, { name: '全域统筹' }] },
+          { name: 'L2高阶协同', children: [{ name: '因果收敛' }, { name: '算力调度' }, { name: '系统运维' }] },
+          { name: 'L3专业执行', children: [{ name: '短剧智能体' }, { name: '政务AI引擎' }, { name: '内容创作' }] },
+          { name: '治理架构', children: [{ name: '国家主权根' }, { name: '规则治理' }, { name: '合规校验' }] },
+          { name: '基础设施', children: [{ name: '元极恒一' }, { name: '自治内核' }, { name: '锁档归档' }] }
+        ]
+      }],
+      top: '5%', left: '10%', bottom: '5%', right: '20%',
+      symbolSize: 8,
+      orient: 'LR',
+      label: { position: 'left', verticalAlign: 'middle', align: 'right', fontSize: 11, color: '#ccc' },
+      leaves: { label: { position: 'right', verticalAlign: 'middle', align: 'left' } },
+      lineStyle: { color: '#d4af37', width: 1.5, curveness: 0.5 },
+      itemStyle: { color: '#d4af37', borderColor: '#8B6914' },
+      expandAndCollapse: true,
+      animationDuration: 550,
+      animationDurationUpdate: 750
+    }]
+  });
+}
+
+window.addEventListener('load', () => {
+  initCharts();
+  updateClusterChart();
+  updateTaskChart();
+  updateCapabilityChart();
+  updateResourceChart();
+  updateArchChart();
+  setInterval(() => { updateTaskChart(); }, 30000);
+  window.addEventListener('resize', () => { Object.values(charts).forEach(c => c && c.resize()); });
+});
+</script>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/docs/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/internal/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/internal/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products/">产品</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">架构</a>
+<a href="/whitepapers/aios-v1.html">白皮书</a>
+<a href="/docs/">文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

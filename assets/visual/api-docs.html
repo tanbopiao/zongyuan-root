@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0e17;color:#e2e8f0;line-height:1.7}
+.hero{padding:50px 20px 30px;text-align:center;background:radial-gradient(ellipse at center,rgba(139,92,246,.12),transparent 70%)}
+.hero h1{font-size:34px;background:linear-gradient(90deg,#fff,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.hero .sub{color:#94a3b8;font-size:15px}
+.layout{max-width:1280px;margin:0 auto;padding:30px 24px;display:grid;grid-template-columns:220px 1fr;gap:30px}
+.toc{position:sticky;top:80px;align-self:start}
+.toc h4{color:#c4b5fd;font-size:13px;margin-bottom:10px}
+.toc a{display:block;color:#94a3b8;text-decoration:none;font-size:13px;padding:5px 10px;border-radius:6px;border-left:2px solid transparent}
+.toc a:hover{color:#c4b5fd;background:rgba(139,92,246,.08);border-left-color:#8b5cf6}
+.content h2{font-size:22px;color:#c4b5fd;margin:30px 0 14px;padding-top:10px;border-top:1px solid rgba(139,92,246,.15)}
+.content h3{font-size:16px;color:#e2e8f0;margin:18px 0 8px}
+.content p{color:#94a3b8;font-size:14px;margin:8px 0}
+.content ul{margin-left:20px;color:#94a3b8;font-size:14px}
+.content li{margin:4px 0}
+pre{background:#0d1117;border:1px solid rgba(139,92,246,.2);border-radius:8px;padding:14px;overflow-x:auto;font-family:Menlo,Consolas,monospace;font-size:13px;color:#10b981;margin:10px 0}
+code{color:#c4b5fd;background:rgba(139,92,246,.1);padding:1px 6px;border-radius:4px;font-size:13px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(139,92,246,.15)}
+th{color:#c4b5fd;background:rgba(139,92,246,.08)}
+td{color:#94a3b8}
+.method{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700}
+.method.get{background:#10b981;color:#fff}
+.method.post{background:#3b82f6;color:#fff}
+.endpoint{font-family:Menlo,monospace;color:#e2e8f0;font-size:14px}
+.note{background:rgba(245,158,11,.08);border-left:3px solid #f59e0b;padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:13px;color:#fcd34d}
+.foot{text-align:center;padding:30px 20px;color:#64748b;font-size:13px;border-top:1px solid rgba(139,92,246,.15);margin-top:40px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.toc{position:static}}
+</style>
+</head>
+<body>
+<div id="site-nav"></div>
+<div class="hero">
+  <h1>API 文档</h1>
+  <div class="sub">OpenAI 兼容协议 · 统一接入多模型 · 五分钟跑通第一个调用</div>
+</div>
+<div class="layout">
+  <nav class="toc">
+    <h4>目录</h4>
+    <a href="#start">快速开始</a>
+    <a href="#auth">认证方式</a>
+    <a href="#models">列出模型</a>
+    <a href="#chat">对话补全</a>
+    <a href="#stream">流式输出</a>
+    <a href="#errors">错误码</a>
+    <a href="#limits">限流与配额</a>
+    <a href="#sdks">SDK 与迁移</a>
+      <a href="#commercial">商业化服务 API</a>
+  </nav>
+  <div class="content">
+    <h2 id="start">快速开始</h2>
+    <p>所有接口均为 HTTPS JSON 协议，基础地址：</p>
+    <pre>https://www.huodouai.com/v1</pre>
+    <p>兼容 OpenAI SDK，已有项目只需把 <code>base_url</code> 指向本地址即可。</p>
+    <h2 id="auth">认证方式</h2>
+    <p>在请求头携带 API Key：</p>
+    <pre>Authorization: Bearer zk_你的key</pre>
+    <p>Key 由管理员开通，格式为 <code>zk_</code> 前缀。Key 泄露后可联系管理员吊销并重新生成。</p>
+    <div class="note">请勿把 Key 写进前端代码或公开仓库，仅在服务端调用。</div>
+    <h2 id="models">列出可用模型</h2>
+    <p><span class="method get">GET</span> <span class="endpoint">/v1/models</span></p>
+    <pre>curl https://www.huodouai.com/v1/models \
+  -H "Authorization: Bearer zk_你的key"</pre>
+    <p>响应返回当前账号可访问的模型列表，每个模型含 <code>id</code>、<code>owned_by</code> 等字段，结构与 OpenAI 一致。</p>
+    <h2 id="chat">对话补全</h2>
+    <p><span class="method post">POST</span> <span class="endpoint">/v1/chat/completions</span></p>
+    <pre>curl https://www.huodouai.com/v1/chat/completions \
+  -H "Authorization: Bearer zk_你的key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "doubao",
+    "messages": [
+      {"role": "system", "content": "你是一个助手"},
+      {"role": "user", "content": "你好"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }'</pre>
+    <h3>请求参数</h3>
+    <table>
+      <tr><th>参数</th><th>类型</th><th>说明</th></tr>
+      <tr><td><code>model</code></td><td>string</td><td>模型 ID，从 /v1/models 获取</td></tr>
+      <tr><td><code>messages</code></td><td>array</td><td>对话消息数组，含 role/content</td></tr>
+      <tr><td><code>temperature</code></td><td>float</td><td>0-2，越高越随机，默认 1.0</td></tr>
+      <tr><td><code>max_tokens</code></td><td>int</td><td>最大生成 token 数</td></tr>
+      <tr><td><code>stream</code></td><td>bool</td><td>是否流式输出，默认 false</td></tr>
+    </table>
+    <h2 id="stream">流式输出</h2>
+    <p>设置 <code>"stream": true</code>，响应为 Server-Sent Events (SSE)，逐段返回：</p>
+    <pre>import openai
+client = openai.OpenAI(
+    api_key="zk_你的key",
+    base_url="https://www.huodouai.com/v1"
+)
+stream = client.chat.completions.create(
+    model="doubao",
+    messages=[{"role":"user","content":"写一首短诗"}],
+    stream=True
+)
+for chunk in stream:
+    print(chunk.choices[0].delta.content or "", end="")</pre>
+    <h2 id="errors">错误码</h2>
+    <table>
+      <tr><th>HTTP</th><th>含义</th><th>处理建议</th></tr>
+      <tr><td>401</td><td>未认证 / Key 无效</td><td>检查 Authorization 头</td></tr>
+      <tr><td>403</td><td>无权限 / 额度用尽</td><td>确认套餐额度或联系管理员</td></tr>
+      <tr><td>404</td><td>模型不存在</td><td>用 /v1/models 查可用模型</td></tr>
+      <tr><td>429</td><td>限流</td><td>降低频率，指数退避重试</td></tr>
+      <tr><td>500</td><td>服务内部错误</td><td>稍后重试，持续异常联系支持</td></tr>
+    </table>
+    <h2 id="limits">限流与配额</h2>
+    <ul>
+      <li>每个 Key 按套餐有每分钟请求数与每日总额度上限</li>
+      <li>超限返回 429，建议客户端做指数退避（1s → 2s → 4s）</li>
+      <li>S4 及以上支持多 Key 分组，按组隔离配额</li>
+      <li>用量与计费在控制台可查</li>
+    </ul>
+    <h2 id="sdks">SDK 与迁移</h2>
+    <h3>Python（openai 官方 SDK）</h3>
+    <pre>pip install openai
+import openai
+client = openai.OpenAI(
+    api_key="zk_你的key",
+    base_url="https://www.huodouai.com/v1"
+)</pre>
+    <h3>Node.js</h3>
+    <pre>import OpenAI from "openai";
+const client = new OpenAI({
+  apiKey: "zk_你的key",
+  baseURL: "https://www.huodouai.com/v1"
+});</pre>
+    <h3>LangChain / LlamaIndex</h3>
+    <p>把 base_url 指向本服务，模型名填对应模型 ID 即可，无需改动业务代码。</p>
+    <div class="note">当前网关服务正在灰度中，如遇 502 请稍后重试或联系管理员。</div>
+    <h2 id="commercial">商业化服务 API（网关 :9099）</h2>
+    <p>火斗云智 AIOS 商业化能力网关，提供决策引擎、记忆网关代理、产品矩阵查询等能力。网关已上线云端，支持 HTTPS 调用。</p>
+
+    <h3>Base URL</h3>
+    <pre>https://www.huodouai.com:9099/api/v1</pre>
+    <div class="note">当前网关运行于云端 123.207.202.158:9099，仅内网与授权出口可直连；对外 HTTPS 网关正在接入中。</div>
+
+    <h3>1. 健康检查</h3>
+    <p><span class="method get">GET</span> <span class="endpoint">/api/v1/health</span></p>
+    <pre>curl https://www.huodouai.com:9099/api/v1/health
+{"status":"healthy","service":"huodouai-commercial-gateway","version":"V1.0-sim"}</pre>
+
+    <h3>2. 三维稳态决策引擎</h3>
+    <p><span class="method post">POST</span> <span class="endpoint">/api/v1/decision</span></p>
+    <p>三维稳态决策：利益 40% / 风险 35% / 成本 25%。风险、成本为负向指标（越低越好），自动换算正向分。</p>
+    <pre>curl -X POST https://www.huodouai.com:9099/api/v1/decision \
+  -H "Content-Type: application/json" \
+  -d '{"options":[{"name":"方案A","benefit":60,"risk":20,"cost":30},{"name":"方案B","benefit":75,"risk":35,"cost":50}]}'
+
+{"decision":[{"name":"方案A","benefit":60,"risk":20,"cost":30,"score":69.5},...],"recommended":"方案A"}</pre>
+
+    <h3>3. 记忆网关真值查询（代理 9120）</h3>
+    <p><span class="method get">GET</span> <span class="endpoint">/api/v1/memory/truth/{key}</span></p>
+    <pre>curl https://www.huodouai.com:9099/api/v1/memory/truth/strategy.product.matrix</pre>
+
+    <h3>4. 记忆网关真值写入（代理 9120）</h3>
+    <p><span class="method post">POST</span> <span class="endpoint">/api/v1/memory/upsert</span></p>
+    <pre>curl -X POST https://www.huodouai.com:9099/api/v1/memory/upsert \
+  -H "Content-Type: application/json" \
+  -d '{"key":"demo.truth","truth_value":{"note":"示例真值"}}'</pre>
+
+    <h3>5. 商业化产品矩阵查询</h3>
+    <p><span class="method get">GET</span> <span class="endpoint">/api/v1/products</span></p>
+    <pre>curl https://www.huodouai.com:9099/api/v1/products
+{"matrix":{"matrix_name":"火斗云智AIOS数字资产产品矩阵","version":"V1.1",...}}</pre>
+
+    <h2 id="commercial-errors">商业化 API 错误码</h2>
+    <table>
+      <tr><th>HTTP</th><th>含义</th><th>处理建议</th></tr>
+      <tr><td>400</td><td>请求参数缺失 / 格式错误</td><td>检查 options / key 字段</td></tr>
+      <tr><td>404</td><td>端点不存在</td><td>对照文档检查路径</td></tr>
+      <tr><td>502</td><td>记忆网关代理失败</td><td>检查 9120 网关状态</td></tr>
+    </table>
+    <div class="note">所有响应均携带溯源头：X-DID: DID-BR-000002 ｜ X-Trace: Ω₀⊂⊙∞⊂Ω</div>
+
+  </div>
+</div>
+<script src="/assets/js/site-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv=Cache-Control content=no-cache, no-store, must-revalidate>
+    <meta http-equiv=Pragma content=no-cache>
+    <meta http-equiv=Expires content=0>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>昆仑洞天 · 短剧作品库</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0d5b8;
+            font-family: 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(90deg, #1a1a2e 0%, #2d1f3d 100%);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid #d4af37;
+        }
+        .header h1 { color: #d4af37; font-size: 28px; margin-bottom: 10px; }
+        .header p { color: #8a7a5a; font-size: 14px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 8px 20px;
+            background: transparent;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-btn.active, .filter-btn:hover { background: #d4af37; color: #0a0a0a; }
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 260px)); gap: 20px;
+            gap: 25px;
+        }
+        .work-card {
+            background: linear-gradient(145deg, #1a1a2e 0%, #252540 100%);
+            border: 1px solid #3a3a5a;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .work-card:hover {
+            transform: translateY(-5px);
+            border-color: #d4af37;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+        }
+        .work-thumb {
+            width: 100%;
+            aspect-ratio: 9/16;
+            background: linear-gradient(135deg, #2d1f3d 0%, #1a1a2e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #d4af37;
+        }
+        .work-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .work-info { padding: 15px; }
+        .work-title { color: #e0d5b8; font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+        .work-desc { color: #8a7a5a; font-size: 12px; margin-bottom: 8px; line-height: 1.5; }
+        .work-meta { display: flex; justify-content: space-between; color: #8a7a5a; font-size: 12px; }
+        .play-count { color: #d4af37; }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        .status-published { background: rgba(76,175,80,0.2); color: #4caf50; }
+        .status-draft { background: rgba(255,152,0,0.2); color: #ff9800; }
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #5a4a3a;
+            font-size: 12px;
+            border-top: 1px solid #2a2a4a;
+            margin-top: 50px;
+        }
+        .play-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .play-modal video { max-width: min(90%, 400px); max-height: 85vh; aspect-ratio: 9/16; }
+        .close-btn {
+            position: absolute;
+            top: 20px; right: 30px;
+            color: #d4af37;
+            font-size: 30px;
+            cursor: pointer;
+        }
+        .loading { text-align: center; color: #8a7a5a; padding: 50px; }
+        .skeleton { background: #1a1a24; border-radius: 16px; overflow: hidden; }
+        .skeleton-img { width: 100%; aspect-ratio: 9/16; background: linear-gradient(90deg, #1a1a24 25%, #252535 50%, #1a1a24 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        .skeleton-text { height: 16px; margin: 12px; border-radius: 4px; background: linear-gradient(90deg, #1a1a24 25%, #252535 50%, #1a1a24 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        .skeleton-text.short { width: 60%; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .lazy { opacity: 0; transition: opacity 0.3s; }
+        .lazy.loaded { opacity: 1; }
+
+    
+        /* 手机端自适应 */
+        @media (max-width: 768px) {
+            body { overflow-x: hidden; }
+            .header { padding: 20px 15px; }
+            .header h1 { font-size: 22px; }
+            .header p { font-size: 12px; }
+            .container { padding: 15px 10px; }
+            .works-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                justify-content: center;
+            }
+            .work-title { font-size: 14px; }
+            .work-desc { font-size: 11px; }
+            .work-info { padding: 10px; }
+        }
+        @media (max-width: 400px) {
+            .works-grid {
+                grid-template-columns: 1fr;
+                max-width: 260px;
+                margin: 0 auto;
+            }
+        }
+
+    </style>
+</head>
+<!-- VERSION: 20260911-v3 -->
+<body>
+    <div class="header">
+        <h1>昆仑洞天 · 短剧作品库</h1>
+        <p>东方神女神话 · 沉浸式视觉体验</p>
+    </div>
+
+    <div class="container">
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterWorks('all')">全部</button>
+            <button class="filter-btn" onclick="filterWorks('published')">已发布</button>
+            <button class="filter-btn" onclick="filterWorks('draft')">制作中</button>
+        </div>
+
+        <div class="works-grid" id="worksGrid">
+            <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div></div><div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div></div>
+        </div>
+    </div>
+
+    <div class="play-modal" id="playModal">
+        <span class="close-btn" onclick="closeModal()">×</span>
+        <video id="player" controls></video>
+    </div>
+
+    <div class="footer">
+        Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ 昆仑洞天
+    </div>
+
+    <script>
+        let allWorks = [];
+
+        function fixUrl(url) {
+            if (!url) return '';
+            // 把旧COS地址替换成本地路径
+            return url.replace('https://zongyuan-1341127773.cos.ap-guangzhou.myqcloud.com/kunlun-drama', '');
+        }
+
+        async function loadWorks() {
+            try {
+                const resp = await fetch('/api/works');
+                const data = await resp.json();
+                allWorks = data.episodes || [];
+                renderWorks(allWorks);
+            } catch (e) {
+                document.getElementById('worksGrid').innerHTML = '<div class="loading">加载失败：' + e.message + '</div>';
+            }
+        }
+
+        function renderWorks(works) {
+            const grid = document.getElementById('worksGrid');
+            if (works.length === 0) {
+                grid.innerHTML = '<div class="loading">暂无作品</div>';
+                return;
+            }
+            grid.innerHTML = works.map(w => {
+                const thumb = w.keyframes && w.keyframes[0] 
+                    ? '<img src="' + fixUrl(w.keyframes[0].url) + '" onerror="this.parentElement.innerHTML=\'🎬\'">' 
+                    : '🎬';
+                const statusClass = w.status === 'published' ? 'published' : 'draft';
+                const videoUrl = w.video ? fixUrl(w.video) : '';
+                return `
+                    <div class="work-card" onclick="location.href='/detail.html?id='+${w.id}">
+                        <div class="work-thumb">${thumb}</div>
+                        <div class="work-info">
+                            <div class="work-title">${w.name || w.id}</div>
+                            <div class="work-desc">${w.description || ''}</div>
+                            <div class="work-meta">
+                                <span class="status-badge status-${statusClass}">${w.status || '未知'}</span>
+                                <span class="play-count">分镜 ${(w.keyframes || []).length}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterWorks(status) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            if (status === 'all') {
+                renderWorks(allWorks);
+            } else {
+                renderWorks(allWorks.filter(w => w.status === status));
+            }
+        }
+
+        function playVideo(url) {
+            document.getElementById('player').src = url;
+            document.getElementById('playModal').style.display = 'flex';
+            document.getElementById('player').play();
+        }
+
+        function closeModal() {
+            document.getElementById('playModal').style.display = 'none';
+            document.getElementById('player').pause();
+        }
+
+        loadWorks();
+    </script>
+</body>
+</html>

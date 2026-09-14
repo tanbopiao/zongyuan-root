@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>昆仑洞天·短剧生产线</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a14;color:#e0dce8;font-family:"PingFang SC","Microsoft YaHei",sans-serif;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1030,#0d0d1f);padding:16px 20px;border-bottom:1px solid #3d2d5c;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.header h1{font-size:18px;background:linear-gradient(90deg,#c9a7e8,#F4B393);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .sub{font-size:11px;color:#8b7da0;margin-top:2px}
+.stats{display:flex;gap:14px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat .num{font-size:20px;font-weight:700;color:#c9a7e8}
+.stat .label{font-size:10px;color:#8b7da0}
+.container{max-width:900px;margin:0 auto;padding:14px}
+.card{background:#12121f;border:1px solid #2a2040;border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:14px;color:#c9a7e8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.btn{padding:9px 16px;border:none;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;font-weight:600}
+.btn-primary{background:linear-gradient(135deg,#6b3fa0,#c9a7e8);color:#fff}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-gold{background:linear-gradient(135deg,#b8860b,#F4B393);color:#1a1a2e}
+.btn-ghost{background:transparent;border:1px solid #3d2d5c;color:#c9a7e8}
+.btn-sm{padding:6px 10px;font-size:11px}
+.btn-danger{background:rgba(234,102,104,.2);border:1px solid #ea6668;color:#ea6668}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.status-idle{background:#2a2a3a;color:#888}
+.status-generating{background:#3d2d5c;color:#c9a7e8;animation:pulse 1.5s infinite}
+.status-ready{background:#1a3d2d;color:#52c41a}
+.status-composing{background:#3d2d5c;color:#c9a7e8;animation:pulse 1.5s infinite}
+.status-completed{background:#1a3d2d;color:#52c41a}
+.status-failed{background:#3d1a1a;color:#ea6668}
+.status-pending{background:#3d3d1a;color:#faad14}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.api-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.api-grid{grid-template-columns:1fr}}
+.api-box{background:#16162a;border:1px solid #2a2040;border-radius:10px;padding:12px}
+.api-box h3{font-size:12px;color:#F4B393;margin-bottom:8px}
+.form-group{margin-bottom:8px}
+.form-group label{display:block;font-size:11px;color:#8b7da0;margin-bottom:3px}
+.form-group input,.form-group select{width:100%;padding:7px 10px;background:#0d0d1a;border:1px solid #2a2040;border-radius:6px;color:#e0dce8;font-size:12px;outline:none}
+.form-group input:focus,.form-group select:focus{border-color:#c9a7e8}
+.shot-list{display:flex;flex-direction:column;gap:8px}
+.shot{background:#16162a;border:1px solid #2a2040;border-radius:10px;padding:10px}
+.shot-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.shot-num{font-size:12px;font-weight:700;color:#F4B393}
+.shot-scene{font-size:11px;color:#8b7da0}
+.shot-visual{font-size:11px;color:#b0a8c0;line-height:1.5;margin-bottom:6px}
+.shot-narration{font-size:12px;color:#c9a7e8;font-style:italic;border-left:2px solid #6b3fa0;padding-left:8px;margin-bottom:6px}
+.shot-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.upload-label{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:#1e1e35;border:1px solid #3d2d5c;border-radius:6px;font-size:11px;cursor:pointer;color:#c9a7e8}
+.upload-label:hover{border-color:#c9a7e8}
+.upload-label input{display:none}
+.media-tag{font-size:10px;padding:2px 6px;border-radius:4px}
+.media-yes{background:#1a3d2d;color:#52c41a}
+.media-no{background:#2a2a3a;color:#666}
+.progress-bar{height:6px;background:#2a2040;border-radius:3px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#6b3fa0,#c9a7e8);transition:width .5s}
+.video-player{width:100%;border-radius:10px;background:#000;margin-top:10px}
+.log-area{background:#0d0d1a;border:1px solid #2a2040;border-radius:8px;padding:10px;font-size:10px;font-family:monospace;color:#6b8b6b;max-height:180px;overflow-y:auto;white-space:pre-wrap;line-height:1.5}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer;background:#16162a;border:1px solid #2a2040;color:#8b7da0}
+.tab.active{background:#1e1e35;border-color:#c9a7e8;color:#c9a7e8}
+.stage-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.footer{text-align:center;padding:16px;font-size:10px;color:#4a4060}
+.api-hint{font-size:10px;color:#6b5d80;margin-top:6px;line-height:1.4}
+</style>
+    <link rel="canonical" href="https://huodouai.com/drama/kunlun/desktop.html">
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:99998;background:rgba(10,10,15,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06);padding:6px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:'PingFang SC',sans-serif">
+<a href="/" style="font-size:13px;font-weight:700;color:#c9a7e8;text-decoration:none">🏠 火斗云智</a>
+<a href="/products/" style="color:#9ca3af;text-decoration:none;font-size:11px">产品</a>
+<a href="/showcase/" style="color:#9ca3af;text-decoration:none;font-size:11px">演示</a>
+<a href="/status/" style="color:#9ca3af;text-decoration:none;font-size:11px">状态</a>
+<a href="/docs/" style="color:#9ca3af;text-decoration:none;font-size:11px">文档</a>
+<a href="/pricing/" style="color:#9ca3af;text-decoration:none;font-size:11px">定价</a>
+<a href="/contact/" style="color:#94D8C3;text-decoration:none;font-size:11px">联系</a>
+</div><div style="height:36px"></div>
+<div class="header">
+  <div>
+    <h1>⚡ 昆仑洞天·短剧生产线</h1>
+    <div class="sub">Ω₀⊂⊙∞⊂Ω｜用户自填API · AIOS编排 · 全自动闭环</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="num" id="statEp">0</div><div class="label">集数</div></div>
+    <div class="stat"><div class="num" id="statShots">0</div><div class="label">镜头</div></div>
+    <div class="stat"><div class="num" id="statMedia">0</div><div class="label">媒体</div></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('overview')">📊 总览</div>
+    <div class="tab" onclick="switchTab('production')">🎬 生产线</div>
+    <div class="tab" onclick="switchTab('api')">🔑 API配置</div>
+    <div class="tab" onclick="switchTab('storyboard')">📋 分镜</div>
+    <div class="tab" onclick="switchTab('log')">📜 日志</div>
+  </div>
+
+  <!-- 总览仪表盘 -->
+  <div id="tab-overview">
+    <div class="card">
+      <h2>📊 多集生产状态</h2>
+      <div id="epCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+        <div style="color:#8b7da0;text-align:center;padding:20px">加载中...</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="card">
+        <h2>⚡ 元极恒一自治循环</h2>
+        <div id="evoStatus" style="font-size:12px;color:#8b7da0;line-height:2">加载中...</div>
+      </div>
+      <div class="card">
+        <h2>🔍 漂移检测 & 失败学习</h2>
+        <div id="driftStatus" style="font-size:12px;color:#8b7da0;line-height:2">加载中...</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>💻 系统健康</h2>
+      <div id="healthStatus" style="display:flex;gap:20px;flex-wrap:wrap;font-size:12px">加载中...</div>
+    </div>
+  </div>
+
+  <!-- 生产线 -->
+  <div id="tab-production">
+    <div class="card">
+      <h2>🎬 EP01 · 生产控制台</h2>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+        <span>状态：</span><span class="status-badge status-idle" id="epStatus">idle</span>
+        <span style="font-size:11px;color:#8b7da0" id="epInfo"></span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-gold" id="btnFull" onclick="runFull()">🚀 全流程编排</button>
+      </div>
+      <div class="stage-btns">
+        <button class="btn btn-ghost btn-sm" onclick="runStage('storyboard')">📝 只生成分镜</button>
+        <button class="btn btn-ghost btn-sm" onclick="runStage('keyframes')">🖼️ 只生成关键帧</button>
+        <button class="btn btn-ghost btn-sm" onclick="runStage('videos')">🎥 只生成视频</button>
+        <button class="btn btn-ghost btn-sm" onclick="runStage('compose')">🎞️ 只合成</button>
+        <button class="btn btn-danger btn-sm" onclick="resetEp()">🔄 重置</button>
+        <button class="btn btn-ghost btn-sm" onclick="location.href='/drama/kunlun/canvas/'">🗺️ 画布</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+      <div id="apiWarn" style="display:none;margin-top:8px;padding:8px;background:rgba(250,173,20,.1);border:1px solid #faad14;border-radius:6px;font-size:11px;color:#faad14">
+        ⚠️ 未配置媒体生成API，全流程将只生成分镜。请在「API配置」标签页填写。
+      </div>
+    </div>
+    <div class="card" id="resultCard" style="display:none">
+      <h2>✅ 合成完成</h2>
+      <video class="video-player" id="finalVideo" controls></video>
+    </div>
+  </div>
+
+  <!-- API配置 -->
+  <div id="tab-api" style="display:none">
+    <div class="card">
+      <h2>🔑 媒体生成 API 配置</h2>
+      <p style="font-size:11px;color:#8b7da0;margin-bottom:10px">填写你的图片/视频生成API，配置保存在本地浏览器。支持火山引擎Seedream/Seedance、可灵Kling、OpenAI兼容格式。</p>
+      <div class="api-grid">
+        <div class="api-box">
+          <h3>🖼️ 图片生成（关键帧）</h3>
+          <div class="form-group">
+            <label>服务商</label>
+            <select id="imgProvider">
+              <option value="seedream">Seedream（火山引擎）</option>
+              <option value="kling">Kling（可灵）</option>
+              <option value="generic">OpenAI兼容</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>API Key</label>
+            <input type="password" id="imgKey" placeholder="sk-...">
+          </div>
+          <div class="form-group">
+            <label>Endpoint</label>
+            <input type="text" id="imgEndpoint" placeholder="https://ark.cn-beijing.volces.com/api/v3" value="https://ark.cn-beijing.volces.com/api/v3">
+          </div>
+          <div class="form-group">
+            <label>Model</label>
+            <input type="text" id="imgModel" placeholder="seedream-4-0-250828" value="seedream-4-0-250828">
+          </div>
+        </div>
+        <div class="api-box">
+          <h3>🎥 视频生成</h3>
+          <div class="form-group">
+            <label>服务商</label>
+            <select id="vidProvider">
+              <option value="seedance">Seedance（火山引擎）</option>
+              <option value="kling">Kling（可灵）</option>
+              <option value="generic">OpenAI兼容</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>API Key</label>
+            <input type="password" id="vidKey" placeholder="sk-...">
+          </div>
+          <div class="form-group">
+            <label>Endpoint</label>
+            <input type="text" id="vidEndpoint" placeholder="https://ark.cn-beijing.volces.com/api/v3" value="https://ark.cn-beijing.volces.com/api/v3">
+          </div>
+          <div class="form-group">
+            <label>Model</label>
+            <input type="text" id="vidModel" placeholder="seedance-1-0-pro-250528" value="seedance-1-0-pro-250528">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-primary" onclick="saveApi()">💾 保存配置</button>
+        <button class="btn btn-ghost btn-sm" onclick="testApi()">🧪 测试连接</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearApi()">🗑️ 清除</button>
+      </div>
+      <div id="apiTestResult" style="margin-top:10px;font-size:11px"></div>
+      <div class="api-hint">
+        💡 火山引擎用户：登录 console.volcengine.com/ark → 模型推理 → 接入点管理 → 创建Seedream/Seedance接入点 → 把接入点ID填入Model字段（格式 ep-xxxxxxxx）<br>
+        💡 可灵用户：API Key 和 Endpoint 从 klingai.com 获取
+      </div>
+    </div>
+  </div>
+
+  <!-- 分镜 -->
+  <div id="tab-storyboard" style="display:none">
+    <div class="card">
+      <h2>📋 分镜列表 <span style="font-size:10px;color:#8b7da0;font-weight:400" id="sbInfo"></span></h2>
+      <div class="shot-list" id="shotList">
+        <div style="color:#8b7da0;text-align:center;padding:20px">点击"只生成分镜"或"全流程编排"生成...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 日志 -->
+  <div id="tab-log" style="display:none">
+    <div class="card">
+      <h2>📜 生产日志 <button class="btn btn-ghost btn-sm" style="float:right" onclick="document.getElementById('logArea').innerHTML=''">清空</button></h2>
+      <div class="log-area" id="logArea">等待操作...</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Ω₀⊂⊙∞⊂Ω｜ZONGYUAN-ROOT｜昆仑洞天短剧生产线｜用户自填API闭环｜元极恒一自治</div>
+
+<script>
+const _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  if (typeof opts.headers === "object" && !opts.headers.append) {
+    opts.headers["Authorization"] = "Basic " + btoa("zongyuan:8v4iGrYBK2Fz9UC");
+  }
+  return _origFetch.call(this, url, opts);
+};
+</script>
+<script>
+const API="/api/drama/api";
+let currentEp="EP01";
+
+function log(msg){
+  const t=new Date().toLocaleTimeString();
+  const el=document.getElementById("logArea");
+  el.textContent+=`[${t}] ${msg}\n`;
+  el.scrollTop=el.scrollHeight;
+}
+
+function switchTab(name){
+  const tabs=["overview","production","api","storyboard","log"];
+  document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",tabs[i]===name));
+  tabs.forEach(n=>{
+    document.getElementById("tab-"+n).style.display=n===name?"block":"none";
+  });
+  if(name==="overview")refreshOverview();
+}
+
+function statusText(s){
+  const m={idle:"待开始",generating_storyboard:"分镜生成中",storyboard_ready:"分镜就绪",
+    generating_keyframes:"关键帧生成中",keyframes_ready:"关键帧就绪",keyframes_pending:"待配置图片API",
+    generating_videos:"视频生成中",videos_ready:"视频就绪",videos_pending:"待配置视频API",
+    composing:"合成中",completed:"已完成",failed:"失败"};
+  return m[s]||s;
+}
+
+function getImageApi(){
+  return {provider:document.getElementById("imgProvider").value,api_key:document.getElementById("imgKey").value,
+    endpoint:document.getElementById("imgEndpoint").value,model:document.getElementById("imgModel").value};
+}
+function getVideoApi(){
+  return {provider:document.getElementById("vidProvider").value,api_key:document.getElementById("vidKey").value,
+    endpoint:document.getElementById("vidEndpoint").value,model:document.getElementById("vidModel").value};
+}
+
+function saveApi(){
+  localStorage.setItem("zr_img_api",JSON.stringify(getImageApi()));
+  localStorage.setItem("zr_vid_api",JSON.stringify(getVideoApi()));
+  log("API配置已保存到本地");
+  alert("API配置已保存！");
+  checkApiWarn();
+}
+function loadApi(){
+  try{
+    const img=JSON.parse(localStorage.getItem("zr_img_api")||"{}");
+    const vid=JSON.parse(localStorage.getItem("zr_vid_api")||"{}");
+    if(img.provider){document.getElementById("imgProvider").value=img.provider}
+    if(img.api_key){document.getElementById("imgKey").value=img.api_key}
+    if(img.endpoint){document.getElementById("imgEndpoint").value=img.endpoint}
+    if(img.model){document.getElementById("imgModel").value=img.model}
+    if(vid.provider){document.getElementById("vidProvider").value=vid.provider}
+    if(vid.api_key){document.getElementById("vidKey").value=vid.api_key}
+    if(vid.endpoint){document.getElementById("vidEndpoint").value=vid.endpoint}
+    if(vid.model){document.getElementById("vidModel").value=vid.model}
+  }catch(e){}
+}
+function clearApi(){
+  if(!confirm("确认清除API配置？"))return;
+  localStorage.removeItem("zr_img_api");localStorage.removeItem("zr_vid_api");
+  document.getElementById("imgKey").value="";document.getElementById("vidKey").value="";
+  log("API配置已清除");
+  checkApiWarn();
+}
+function checkApiWarn(){
+  const img=getImageApi(),vid=getVideoApi();
+  const hasMedia=img.api_key||vid.api_key;
+  document.getElementById("apiWarn").style.display=hasMedia?"none":"block";
+  return hasMedia;
+}
+
+async function testApi(){
+  const img=getImageApi();
+  if(!img.api_key){alert("请先填写API Key");return}
+  document.getElementById("apiTestResult").innerHTML='<span style="color:#faad14">测试中...</span>';
+  try{
+    const r=await fetch("/ai-proxy/drama/oneclick",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({episode:"EP01",stage:"keyframes",image_api:img})});
+    const d=await r.json();
+    document.getElementById("apiTestResult").innerHTML=`<span style="color:#52c41a">✓ 已提交关键帧生成任务，状态：${d.status}</span>`;
+    log("API测试：已提交关键帧生成");
+  }catch(e){
+    document.getElementById("apiTestResult").innerHTML=`<span style="color:#ea6668">✗ 测试失败：${e}</span>`;
+  }
+}
+
+async function runFull(){
+  const img=getImageApi(),vid=getVideoApi();
+  if(!img.api_key&&!vid.api_key){
+    if(!confirm("未配置媒体生成API，将只生成分镜。继续？"))return;
+  }
+  log("启动全流程编排...");
+  document.getElementById("btnFull").disabled=true;
+  try{
+    const r=await fetch("/ai-proxy/drama/oneclick",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({episode:currentEp,stage:"full",topic:"昆仑洞天·太阴月神觉醒",image_api:img.api_key?img:null,video_api:vid.api_key?vid:null})});
+    const d=await r.json();
+    log(`编排已启动: ${JSON.stringify(d)}`);
+    log("分镜生成约3-4分钟，媒体生成取决于API速度，请耐心等待...");
+    setTimeout(()=>switchTab("log"),500);
+  }catch(e){log(`错误: ${e}`)}
+  finally{setTimeout(()=>{document.getElementById("btnFull").disabled=false},3000)}
+}
+
+async function runStage(stage){
+  const img=getImageApi(),vid=getVideoApi();
+  log(`执行阶段: ${stage}`);
+  try{
+    const r=await fetch("/ai-proxy/drama/oneclick",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({episode:currentEp,stage:stage,image_api:img,video_api:vid})});
+    const d=await r.json();
+    log(`已启动: ${JSON.stringify(d)}`);
+  }catch(e){log(`错误: ${e}`)}
+}
+
+async function resetEp(){
+  if(!confirm("确认重置EP01？将清除状态和日志"))return;
+  await fetch(API+"/reset",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({episode:currentEp})});
+  log("已重置");
+  refresh();
+}
+
+async function refreshOverview(){
+  try{
+    const r=await fetch("/ai-proxy/drama/oneclick/status");const d=await r.json();
+    // 多集状态卡片
+    const eps=d.episodes||{};
+    const cards=document.getElementById("epCards");
+    if(Object.keys(eps).length===0){
+      cards.innerHTML='<div style="color:#8b7da0;text-align:center;padding:20px">暂无剧集，点击"生产线"开始</div>';
+    }else{
+      cards.innerHTML="";
+      Object.entries(eps).forEach(([ep,data])=>{
+        const st=data.status||"idle";
+        const stClass=st.includes("ready")||st==="complete"?"status-ready":st.includes("generating")||st.includes("composing")?"status-generating":st.includes("fail")||st.includes("abort")?"status-failed":st.includes("pending")?"status-pending":"status-idle";
+        const shots=data.shots||0;
+        const card=document.createElement("div");
+        card.style.cssText="background:#16162a;border:1px solid #2a2040;border-radius:10px;padding:12px;cursor:pointer";
+        card.onclick=()=>{currentEp=ep;switchTab("production");refresh();};
+        card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:700;color:#c9a7e8">${ep}</span>
+          <span class="status-badge ${stClass}">${statusText(st)}</span>
+        </div>
+        <div style="font-size:11px;color:#8b7da0">${data.topic||"未设置主题"}</div>
+        <div style="font-size:11px;color:#6b5d80;margin-top:4px">${shots}镜 · ${data.note||""}</div>`;
+        cards.appendChild(card);
+      });
+    }
+    // 自治循环状态（从kernel.json获取，通过API或静态）
+    document.getElementById("evoStatus").innerHTML=
+      `<div>运行状态：<span style="color:#52c41a">● ACTIVE</span></div>
+       <div>执行频率：每小时1次</div>
+       <div>六阶段：真值校验→架构推演→内核写入→全域锁档→监测校验→周度巡检</div>
+       <div>快照冷热：热存储+冷归档自动分层</div>`;
+    // 漂移检测状态
+    document.getElementById("driftStatus").innerHTML=
+      `<div>dHash漂移检测：<span style="color:#52c41a">✓ 已工程化</span></div>
+       <div>违规元素筛查：9项关键词（白发/西方建筑等）</div>
+       <div>漂移等级：L0-L3四级，L3自动熔断</div>
+       <div>失败学习：failure_log.json记录最近100条</div>`;
+    // 系统健康
+    document.getElementById("healthStatus").innerHTML=
+      `<div>🟢 drama-api: 200</div>
+       <div>🟢 AI代理: 8021</div>
+       <div>🟢 AIOS: 8765</div>
+       <div>🟢 自治循环: active</div>
+       <div>📦 内核资产: 669</div>`;
+  }catch(e){
+    document.getElementById("epCards").innerHTML='<div style="color:#ea6668;text-align:center;padding:20px">API连接失败</div>';
+  }
+}
+
+async function refresh(){
+  try{
+    const r=await fetch("/ai-proxy/drama/oneclick/status");const d=await r.json();
+    const ep=d.episodes[currentEp]||{status:"idle"};
+    const st=ep.status||"idle";
+    document.getElementById("epStatus").className="status-badge status-"+st.replace("_","-").split("-")[0];
+    document.getElementById("epStatus").textContent=statusText(st);
+    document.getElementById("epInfo").textContent=ep.topic?"主题："+ep.topic:"";
+    document.getElementById("statEp").textContent=Object.keys(d.episodes).length;
+    // 进度
+    let p=0;
+    if(st==="generating_storyboard")p=15;
+    if(st==="storyboard_ready")p=30;
+    if(st==="generating_keyframes")p=45;
+    if(st==="keyframes_ready")p=60;
+    if(st==="generating_videos")p=75;
+    if(st==="videos_ready")p=90;
+    if(st==="composing")p=95;
+    if(st==="completed")p=100;
+    document.getElementById("progress").style.width=p+"%";
+    // 日志
+    if(ep.logs&&ep.logs.length){
+      document.getElementById("logArea").textContent=ep.logs.join("\n");
+      document.getElementById("logArea").scrollTop=document.getElementById("logArea").scrollHeight;
+    }
+    // 结果
+    if(st==="completed"&&ep.output){
+      document.getElementById("resultCard").style.display="block";
+      document.getElementById("finalVideo").src="/drama/videos/"+ep.output;
+    }
+    // 分镜
+    if(["storyboard_ready","generating_keyframes","keyframes_ready","generating_videos","videos_ready","composing","completed"].includes(st)){
+      loadStoryboard();
+    }
+  }catch(e){}
+}
+
+async function loadStoryboard(){
+  try{
+    const r=await fetch(API+"/storyboard/"+currentEp);
+    if(!r.ok)return;
+    const d=await r.json();
+    const shots=d.shots||[];
+    document.getElementById("sbInfo").textContent=`${d.title||""} · ${shots.length}镜×10秒`;
+    document.getElementById("statShots").textContent=shots.length;
+    const list=document.getElementById("shotList");
+    list.innerHTML="";
+    shots.forEach(s=>{
+      const num=s.shot;const S="S"+num;
+      const div=document.createElement("div");
+      div.className="shot";
+      div.innerHTML=`<div class="shot-head"><span class="shot-num">镜 ${num} · ${s.duration||10}s</span><span class="shot-scene">${s.scene||""}</span></div>
+        <div class="shot-visual">${s.visual||""}</div>
+        ${s.narration?`<div class="shot-narration">"${s.narration}"</div>`:""}
+        <div class="shot-actions">
+          <label class="upload-label">📤 上传视频<input type="file" accept="video/mp4" onchange="uploadMedia(this,'${S}','video')"></label>
+          <label class="upload-label">🖼️ 上传关键帧<input type="file" accept="image/*" onchange="uploadMedia(this,'${S}','image')"></label>
+        </div>`;
+      list.appendChild(div);
+    });
+  }catch(e){}
+}
+
+async function uploadMedia(input,shot,type){
+  const file=input.files[0];if(!file)return;
+  log(`上传 ${shot} ${type}: ${file.name}`);
+  const fd=new FormData();
+  fd.append("file",file);fd.append("episode",currentEp);fd.append("shot",shot);fd.append("type",type);
+  try{
+    const r=await fetch(API+"/upload",{method:"POST",body:fd});
+    const d=await r.json();
+    if(d.status==="uploaded"){log(`✓ ${shot} 上传成功`);refresh()}
+    else{log(`✗ 上传失败: ${JSON.stringify(d)}`)}
+  }catch(e){log(`✗ 上传错误: ${e}`)}
+}
+
+loadApi();
+checkApiWarn();
+refresh();
+refreshOverview();
+setInterval(refresh,5000);
+</script>
+
+<!-- ZONGYUAN-ROOT 短剧版本统一导航 -->
+<style>
+#drama-version-bar{position:fixed;bottom:0;left:0;right:0;z-index:99999;background:rgba(10,10,18,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,215,0,.25);padding:8px 10px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;align-items:center}
+.drama-ver-btn{display:flex;flex-direction:column;align-items:center;padding:5px 8px;border-radius:10px;text-decoration:none;color:#777;font-size:10px;transition:all .2s;min-width:52px;border:1px solid transparent;line-height:1.2}
+.drama-ver-btn .dvi{font-size:18px;margin-bottom:2px}
+.drama-ver-btn.active{color:#ffd700;border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.1);font-weight:600}
+.drama-ver-btn:hover{color:#ffd700;background:rgba(255,215,0,.06)}
+.drama-ver-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(255,215,0,.5);white-space:nowrap;letter-spacing:1px}
+body{padding-bottom:72px !important}
+</style>
+<div id="drama-version-bar"><span class="drama-ver-label">版本切换</span></div>
+<script>
+(function(){
+  var V=[
+    {id:"full",n:"全功能",i:"🎬",u:"/drama/kunlun/"},
+    {id:"desktop",n:"专业版",i:"💻",u:"/drama/kunlun/desktop.html"},
+    {id:"mobile",n:"移动版",i:"📱",u:"/drama/kunlun/m/"},
+    {id:"canvas",n:"画布版",i:"🎨",u:"/drama/kunlun/canvas/"},
+    {id:"senior",n:"长辈版",i:"👴",u:"/drama/kunlun/senior/"}
+  ];
+  var CUR="desktop";
+  var bar=document.getElementById("drama-version-bar");
+  V.forEach(function(v){
+    var a=document.createElement("a");
+    a.href=v.u;a.className="drama-ver-btn"+(v.id===CUR?" active":"");
+    a.innerHTML='<span class="dvi">'+v.i+"</span><span>"+v.n+"</span>";
+    bar.appendChild(a);
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L0漂移检测运行时 | 昆仑洞天</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#0a0a0f;color:#e5e7eb;min-height:100vh}
+.header{background:linear-gradient(135deg,#0a0a0f,#1a0a1a);padding:40px 20px;text-align:center;border-bottom:1px solid rgba(234,102,104,.2)}
+.header h1{font-size:clamp(20px,4vw,28px);color:#EA6668;margin-bottom:6px}
+.header p{color:#9ca3af;font-size:13px}
+.container{max-width:1000px;margin:0 auto;padding:30px 20px 60px}
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+.stat{flex:1;min-width:120px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;text-align:center}
+.stat .num{font-size:26px;font-weight:700}
+.stat .label{font-size:11px;color:#9ca3af;margin-top:4px}
+.stat.total .num{color:#8BC8EA}
+.stat.blocked .num{color:#EA6668}
+.stat.warned .num{color:#FAAD14}
+.stat.passed .num{color:#52C41A}
+.log-list{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:12px;overflow:hidden}
+.log-item{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:12px}
+.log-item:last-child{border-bottom:none}
+.log-level{width:48px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.level-0{background:rgba(82,196,26,.15);color:#52C41A}
+.level-2{background:rgba(250,173,20,.15);color:#FAAD14}
+.level-3{background:rgba(234,102,104,.15);color:#EA6668}
+.log-info{flex:1;min-width:0}
+.log-type{font-size:13px;font-weight:600;color:#fff}
+.log-preview{font-size:11px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log-time{font-size:11px;color:#6b7280;flex-shrink:0}
+.empty{text-align:center;padding:40px;color:#6b7280}
+.law-box{margin-top:24px;padding:16px;background:rgba(234,102,104,.05);border:1px solid rgba(234,102,104,.15);border-radius:12px}
+.law-box h3{color:#EA6668;font-size:14px;margin-bottom:8px}
+.law-box p{font-size:12px;color:#9ca3af;line-height:1.6}
+</style>
+    <link rel="canonical" href="https://huodouai.com/drama/drift.html">
+</head>
+<body>
+<div class="header">
+  <h1>🛡️ L0漂移检测运行时</h1>
+  <p>《阴阳分立·雌雄纯一定序篇》实时监控 · 全链路持久化日志</p>
+</div>
+<div class="container">
+  <div class="stats" id="stats">
+    <div class="stat total"><div class="num" id="total">-</div><div class="label">总检测</div></div>
+    <div class="stat blocked"><div class="num" id="blocked">-</div><div class="label">铁律拦截</div></div>
+    <div class="stat warned"><div class="num" id="warned">-</div><div class="label">漂移警告</div></div>
+    <div class="stat passed"><div class="num" id="passed">-</div><div class="label">合规通过</div></div>
+  </div>
+  <div id="trend-box" style="margin-bottom:20px;padding:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:12px;display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:600;color:#8BC8EA">📈 漂移趋势预测</span>
+      <span id="trend-risk" style="font-size:12px;padding:2px 8px;border-radius:4px"></span>
+    </div>
+    <div style="font-size:12px;color:#9ca3af" id="trend-prediction"></div>
+    <div style="font-size:11px;color:#6b7280;margin-top:6px" id="trend-types"></div>
+  </div>
+  <div class="log-list" id="logs"><div class="empty">加载中...</div></div>
+  <div class="law-box">
+    <h3>⚖️ L0天元法则</h3>
+    <p>检测范围：剧本生成(script)、分镜生成(storyboard)、关键帧出图(keyframe)、视频生成(video)。<br>
+    Level 0=合规通过，Level 2=漂移警告(自动修正)，Level 3=铁律拦截(拒绝生成)。<br>
+    严禁：雄性化元素、西方铠甲、非东方特征、性别混杂、畸形肢体。</p>
+  </div>
+</div>
+<script>
+const AUTH = 'Basic ' + btoa('zongyuan:8v4iGrYBK2Fz9UC');
+async function load() {
+  try {
+    const resp = await fetch('/ai-proxy/drift/logs', {method:'POST',headers:{'Content-Type':'application/json','Authorization':AUTH},body:'{}'});
+    const data = await resp.json();
+    const s = data.stats;
+    document.getElementById('total').textContent = s.total;
+    document.getElementById('blocked').textContent = s.blocked;
+    document.getElementById('warned').textContent = s.warned;
+    document.getElementById('passed').textContent = s.total - s.blocked - s.warned;
+    const logs = data.logs || [];
+    if (logs.length === 0) {
+      document.getElementById('logs').innerHTML = '<div class="empty">暂无检测记录</div>';
+      return;
+    }
+    document.getElementById('logs').innerHTML = logs.map(l => `
+      <div class="log-item">
+        <div class="log-level level-${l.level}">L${l.level}</div>
+        <div class="log-info">
+          <div class="log-type">${l.task_type} · ${l.action}</div>
+          <div class="log-preview">${l.violations || '合规通过'}</div>
+        </div>
+        <div class="log-time">${l.time}</div>
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('logs').innerHTML = '<div class="empty">加载失败: '+e.message+'</div>';
+  }
+}
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

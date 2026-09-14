@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模型生成对比实验室 · 火斗云智AIOS</title>
+<meta name="description" content="不同通用大模型生成效果对比，按模型分类标注，质量分层展示，直观对比万象/豆包/Seedance/Agnes生成质量">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Noto Sans SC',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 30% 0%,rgba(212,175,55,0.08) 0%,transparent 50%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:50px 24px}
+.back{display:inline-block;color:#d4af37;text-decoration:none;font-size:0.9em;margin-bottom:20px}
+.hero{text-align:center;padding:20px 0 30px}
+.hero .symbol{font-size:13px;color:#d4af37;letter-spacing:4px;margin-bottom:14px;font-family:monospace}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2.2em;font-weight:900;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.hero .subtitle{color:#aaa;font-size:0.95em}
+.tabs{display:flex;justify-content:center;gap:8px;margin:25px 0;flex-wrap:wrap}
+.tab-btn{padding:10px 22px;border:1px solid rgba(212,175,55,0.3);background:transparent;color:#aaa;border-radius:8px;cursor:pointer;font-size:0.9em;transition:all .2s}
+.tab-btn:hover,.tab-btn.active{background:rgba(212,175,55,0.15);color:#d4af37;border-color:#d4af37}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.model-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:20px}
+.model-card{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:16px;cursor:pointer;transition:all .3s}
+.model-card:hover,.model-card.selected{border-color:#d4af37;transform:translateY(-2px);box-shadow:0 4px 20px rgba(212,175,55,0.2)}
+.model-card .mc-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.model-card .mc-icon{font-size:1.5em}
+.model-card h3{color:#d4af37;font-size:1em}
+.model-card .mc-count{color:#888;font-size:0.8em}
+.model-card .mc-quality{margin-top:8px;font-size:0.78em}
+.quality-bar{height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:4px;overflow:hidden}
+.quality-bar span{display:block;height:100%;border-radius:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.1);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .3s;opacity:0;animation:fadeIn .4s forwards}
+@keyframes fadeIn{to{opacity:1}}
+.card:hover{transform:translateY(-3px);border-color:rgba(212,175,55,0.4)}
+.card .img-wrap{position:relative;aspect-ratio:9/16;overflow:hidden;background:#000}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.card .model-tag{position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.75);color:#fff;font-size:0.65em;padding:2px 6px;border-radius:4px}
+.card .quality-tag{position:absolute;top:6px;right:6px;font-size:0.65em;padding:2px 6px;border-radius:4px}
+.q-high{background:rgba(74,222,128,0.2);color:#4ade80}
+.q-mid{background:rgba(251,191,36,0.2);color:#fbbf24}
+.q-low{background:rgba(239,68,68,0.2);color:#ef4444}
+.card .info{padding:8px 10px}
+.card .info h4{color:#ccc;font-size:0.82em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .info p{color:#666;font-size:0.72em;margin-top:2px}
+.compare-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-bottom:24px}
+.compare-item{background:rgba(0,0,0,0.2);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.05)}
+.compare-item .ci-title{color:#d4af37;font-size:0.9em;margin-bottom:10px;text-align:center}
+.compare-item img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px}
+.compare-item .ci-meta{margin-top:8px;font-size:0.75em;color:#888;text-align:center}
+.section-title{font-family:'Noto Serif SC',serif;font-size:1.2em;color:#d4af37;margin:25px 0 15px;padding-left:12px;border-left:3px solid #d4af37}
+.lightbox{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;cursor:zoom-out}
+.lightbox.active{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px}
+.lightbox .close{position:absolute;top:20px;right:30px;color:#d4af37;font-size:2em;cursor:pointer}
+.lightbox .caption{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);color:#d4af37;font-size:1em;text-align:center}
+footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid rgba(212,175,55,0.1);color:#666;font-size:0.8em}
+footer .did{margin-top:6px;color:#d4af37;font-family:monospace}
+@media(max-width:640px){.hero h1{font-size:1.5em}.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">← 返回首页</a>
+  <div class="hero">
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · 模型生成对比实验室</div>
+    <h1>模型生成对比实验室</h1>
+    <div class="subtitle">按通用大模型分类标注 · 质量分层展示 · 直观对比生成效果</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="models">按模型浏览</button>
+    <button class="tab-btn" data-tab="compare">同角色对比</button>
+    <button class="tab-btn" data-tab="archive">低质量归档</button>
+  </div>
+
+  <!-- 按模型浏览 -->
+  <div class="tab-content active" id="tab-models">
+    <div class="model-cards" id="modelCards"></div>
+    <div class="grid" id="modelGrid"></div>
+  </div>
+
+  <!-- 同角色对比 -->
+  <div class="tab-content" id="tab-compare">
+    <div class="section-title">九天玄女 · 不同模型生成对比</div>
+    <div class="compare-row" id="compareXuannv"></div>
+    <div class="section-title">红裙九尾狐 · 不同模型生成对比</div>
+    <div class="compare-row" id="compareHuli"></div>
+    <div class="section-title">说明</div>
+    <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:16px;color:#999;font-size:0.88em;line-height:1.8">
+      <p>• <strong style="color:#d4af37">高质量层</strong>：≥500KB，细节丰富，构图完整，用于官网展示</p>
+      <p>• <strong style="color:#fbbf24">中质量层</strong>：100-500KB，可用但有瑕疵，用于参考对比</p>
+      <p>• <strong style="color:#ef4444">低质量层</strong>：<100KB或明显缺陷，归档留存不展示</p>
+      <p>• 所有资产标注生成模型来源，便于横向对比各模型擅长领域</p>
+    </div>
+  </div>
+
+  <!-- 低质量归档 -->
+  <div class="tab-content" id="tab-archive">
+    <div class="section-title">低质量资产归档（不对外展示，留存对比）</div>
+    <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:20px;color:#999;font-size:0.9em;line-height:1.8">
+      <p>当前低质量归档：<strong style="color:#ef4444">0 张</strong></p>
+      <p style="margin-top:10px">所有扫描到的30张关键帧均≥500KB，全部通过质量自检，无低质量资产。</p>
+      <p style="margin-top:10px">后续新增资产将自动按以下规则分层：</p>
+      <ul style="margin-left:20px;margin-top:8px">
+        <li>文件大小≥500KB → 高质量层（官网展示）</li>
+        <li>文件大小100-500KB → 中质量层（参考对比）</li>
+        <li>文件大小<100KB → 低质量层（归档留存）</li>
+        <li>所有资产必须标注生成模型来源</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <span class="close" onclick="closeLightbox()">×</span>
+  <img id="lightboxImg" src="" alt="">
+  <div class="caption" id="lightboxCaption"></div>
+</div>
+
+<footer>
+  火斗云智AIOS · 模型生成对比实验室V1.0
+  <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 模型来源标注 · 质量三层分级</div>
+</footer>
+
+<script>
+const ASSETS = [
+  // EP01剧情 - Seedance生成
+  {name:"S01-001",title:"墟境封印破裂",url:"/assets/keyframes/ep01/S01-001_墟境封印破裂.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:1165},
+  {name:"S01-002",title:"万妖之眼",url:"/assets/keyframes/ep01/S01-002_万妖之眼.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:863},
+  {name:"S01-003",title:"玄汐山门警报",url:"/assets/keyframes/ep01/S01-003_玄汐山门警报.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:902},
+  {name:"S01-004",title:"妖云压境",url:"/assets/keyframes/ep01/S01-004_妖云压境.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:1030},
+  {name:"S01-005",title:"玄女战争形态降临",url:"/assets/keyframes/ep01/S01-005_玄女战争形态降临.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:931},
+  {name:"S01-006",title:"玄女俯瞰山门",url:"/assets/keyframes/ep01/S01-006_玄女俯瞰山门.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:1048},
+  {name:"S01-007",title:"万妖潮冲锋",url:"/assets/keyframes/ep01/S01-007_万妖潮冲锋.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:905},
+  {name:"S01-008",title:"玄女神兵斩妖",url:"/assets/keyframes/ep01/S01-008_玄女神兵斩妖.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:966},
+  {name:"S01-009",title:"妖兽被击碎",url:"/assets/keyframes/ep01/S01-009_妖兽被击碎.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:903},
+  {name:"S01-010",title:"真武大帝结阵",url:"/assets/keyframes/ep01/S01-010_真武大帝结阵.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:1332},
+  {name:"S01-011",title:"女娲天际剪影",url:"/assets/keyframes/ep01/S01-011_女娲天际剪影.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:855},
+  {name:"S01-012",title:"未知巨兽浮现",url:"/assets/keyframes/ep01/S01-012_未知巨兽浮现结尾.jpg",model:"Seedance",category:"ep01",quality:"high",size_kb:776},
+  // 角色设定 - 豆包Seedream生成
+  {name:"红裙九尾狐-全身",title:"红裙九尾狐 全身",url:"/assets/keyframes/characters/hongqun_jiuweihu_keyframe_01_fullbody.png",model:"豆包Seedream",category:"characters",quality:"high",size_kb:1129},
+  {name:"红裙九尾狐-场景",title:"红裙九尾狐 场景",url:"/assets/keyframes/characters/hongqun_jiuweihu_keyframe_02_scene.png",model:"豆包Seedream",category:"characters",quality:"high",size_kb:1005},
+  {name:"九天玄女-全身",title:"九天玄女 全身",url:"/assets/keyframes/characters/jiutian_xuannv_keyframe_01_fullbody.png",model:"豆包Seedream",category:"characters",quality:"high",size_kb:1087},
+  {name:"九天玄女-场景",title:"九天玄女 场景",url:"/assets/keyframes/characters/jiutian_xuannv_keyframe_02_scene.png",model:"豆包Seedream",category:"characters",quality:"high",size_kb:1030},
+  {name:"太阴月神-全身",title:"太阴月神 全身",url:"/assets/keyframes/characters/taiyin_moon_god_keyframe_01_fullbody.png",model:"豆包Seedream",category:"characters",quality:"high",size_kb:826},
+  {name:"太阴月神-场景",title:"太阴月神 场景",url:"/assets/keyframes/characters/taiyin_moon_god_keyframe_02_scene.png",model:"豆包Seedream",category:"characters",quality:"high",size_kb:501},
+  {name:"西王母-全身",title:"西王母 全身",url:"/assets/keyframes/characters/xiwangmu_keyframe_01_fullbody.png",model:"豆包Seedream",category:"characters",quality:"high",size_kb:1091},
+  {name:"西王母-场景",title:"西王母 场景",url:"/assets/keyframes/characters/xiwangmu_keyframe_02_scene.png",model:"豆包Seedream",category:"characters",quality:"high",size_kb:849},
+  // 神女觉醒 - 万象生成
+  {name:"金色符文星尘",title:"金色符文星尘",url:"/assets/keyframes/goddess/01_金色符文星尘_竖屏.png",model:"万象Wanx",category:"goddess",quality:"high",size_kb:1692},
+  {name:"黑色裂隙",title:"黑色裂隙",url:"/assets/keyframes/goddess/02_黑色裂隙_竖屏.png",model:"万象Wanx",category:"goddess",quality:"high",size_kb:1253},
+  {name:"神女觉醒",title:"神女觉醒",url:"/assets/keyframes/goddess/03_神女觉醒_竖屏.png",model:"万象Wanx",category:"goddess",quality:"high",size_kb:1834},
+  {name:"九尾现身",title:"九尾现身",url:"/assets/keyframes/goddess/04_九尾现身_竖屏.png",model:"万象Wanx",category:"goddess",quality:"high",size_kb:2281},
+  {name:"苍玄降临",title:"苍玄降临",url:"/assets/keyframes/goddess/05_苍玄降临_竖屏.png",model:"万象Wanx",category:"goddess",quality:"high",size_kb:1830}
+];
+
+const MODELS = {};
+ASSETS.forEach(a => {
+  if(!MODELS[a.model]) MODELS[a.model] = {count:0, high:0, mid:0, low:0};
+  MODELS[a.model].count++;
+  MODELS[a.model][a.quality]++;
+});
+
+const MODEL_ICONS = {"Seedance":"🎬", "豆包Seedream":"🫘", "万象Wanx":"🌅", "Agnes":"🎨"};
+let currentModel = "all";
+
+function renderModelCards(){
+  const container = document.getElementById("modelCards");
+  let html = '<div class="model-card selected" data-model="all" onclick="filterModel(\'all\')"><div class="mc-head"><span class="mc-icon">📊</span><div><h3>全部模型</h3><div class="mc-count">'+ASSETS.length+' 张资产</div></div></div><div class="mc-quality">高质量 '+ASSETS.filter(a=>a.quality==="high").length+'</div></div>';
+  for(const [model, stats] of Object.entries(MODELS)){
+    const pct = Math.round(stats.high/stats.count*100);
+    html += '<div class="model-card" data-model="'+model+'" onclick="filterModel(\''+model+'\')">';
+    html += '<div class="mc-head"><span class="mc-icon">'+(MODEL_ICONS[model]||"🤖")+'</span><div><h3>'+model+'</h3><div class="mc-count">'+stats.count+' 张资产</div></div></div>';
+    html += '<div class="mc-quality">高质量率 '+pct+'%<div class="quality-bar"><span style="width:'+pct+'%;background:#4ade80"></span></div></div>';
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function filterModel(model){
+  currentModel = model;
+  document.querySelectorAll(".model-card").forEach(c => c.classList.toggle("selected", c.dataset.model===model));
+  renderGrid();
+}
+
+function renderGrid(){
+  const grid = document.getElementById("modelGrid");
+  const filtered = currentModel==="all" ? ASSETS : ASSETS.filter(a=>a.model===currentModel);
+  grid.innerHTML = filtered.map((a,i) => {
+    const qClass = a.quality==="high"?"q-high":a.quality==="mid"?"q-mid":"q-low";
+    const qText = a.quality==="high"?"高质量":a.quality==="mid"?"中质量":"低质量";
+    return '<div class="card" style="animation-delay:'+(i*0.03)+'s" onclick="openLightbox(\''+a.url+'\',\''+a.title+' · '+a.model+'\')">'+
+      '<div class="img-wrap"><img loading="lazy" src="'+a.url+'" alt="'+a.title+'">'+
+      '<span class="model-tag">'+a.model+'</span><span class="quality-tag '+qClass+'">'+qText+'</span></div>'+
+      '<div class="info"><h4>'+a.title+'</h4><p>'+a.size_kb+'KB · '+a.name+'</p></div></div>';
+  }).join("");
+}
+
+function renderCompare(){
+  // 九天玄女对比：豆包全身 + 豆包场景 + Seedance剧情中的玄女
+  const xuannv = ASSETS.filter(a => a.title.includes("玄女") || a.title.includes("九天"));
+  document.getElementById("compareXuannv").innerHTML = xuannv.map(a => 
+    '<div class="compare-item"><div class="ci-title">'+a.model+'</div><img loading="lazy" src="'+a.url+'" alt="'+a.title+'"><div class="ci-meta">'+a.title+' · '+a.size_kb+'KB</div></div>'
+  ).join("");
+  // 九尾狐对比
+  const huli = ASSETS.filter(a => a.title.includes("九尾") || a.title.includes("红裙"));
+  document.getElementById("compareHuli").innerHTML = huli.map(a =>
+    '<div class="compare-item"><div class="ci-title">'+a.model+'</div><img loading="lazy" src="'+a.url+'" alt="'+a.title+'"><div class="ci-meta">'+a.title+' · '+a.size_kb+'KB</div></div>'
+  ).join("");
+}
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", function(){
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+    this.classList.add("active");
+    document.getElementById("tab-"+this.dataset.tab).classList.add("active");
+  });
+});
+
+function openLightbox(url,cap){
+  document.getElementById("lightboxImg").src=url;
+  document.getElementById("lightboxCaption").textContent=cap;
+  document.getElementById("lightbox").classList.add("active");
+}
+function closeLightbox(){document.getElementById("lightbox").classList.remove("active")}
+document.getElementById("lightbox").addEventListener("click",function(e){if(e.target===this)closeLightbox()});
+
+renderModelCards();
+renderGrid();
+renderCompare();
+</script>
+</body>
+</html>

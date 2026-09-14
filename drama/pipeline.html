@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS | ZONGYUAN-ROOT</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0a14 0%,#1a1a2e 50%,#0f3460 100%);color:#fff;min-height:100vh}
+.hero{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:40px 20px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(201,167,232,0.08) 0%,transparent 60%);animation:pulse 4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:0.5}50%{opacity:1}}
+.hero-content{position:relative;z-index:1;max-width:900px;margin:0 auto}
+.logo{font-size:32px;font-weight:800;background:linear-gradient(90deg,#c9a7e8,#F4B393,#c9a7e8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.subtitle{color:#aaa;font-size:15px;margin-bottom:16px}
+.anchor{font-size:12px;color:#c9a7e8;letter-spacing:2px}
+.container{max-width:1300px;margin:0 auto;padding:30px 20px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:30px}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(201,167,232,0.2);border-radius:10px;padding:16px;text-align:center;transition:all .3s}
+.stat-card:hover{border-color:rgba(201,167,232,0.5);transform:translateY(-2px)}
+.stat-value{font-size:26px;font-weight:700;color:#c9a7e8;margin-bottom:4px}
+.stat-label{font-size:11px;color:#888}
+.section{margin-bottom:30px}
+.section-title{font-size:17px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#c9a7e8}
+.section-title::before{content:"";width:3px;height:18px;background:linear-gradient(180deg,#c9a7e8,#8B5CF6);border-radius:2px}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:15px;margin-bottom:20px}
+.chart-card{background:rgba(255,255,255,0.02);border:1px solid rgba(201,167,232,0.15);border-radius:10px;padding:14px}
+.chart-card h3{font-size:13px;color:#c9a7e8;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(201,167,232,0.1)}
+.chart-container{width:100%;height:260px}
+.full-width{grid-column:1/-1}
+.pipeline-flow{background:rgba(255,255,255,0.02);border:1px solid rgba(201,167,232,0.15);border-radius:12px;padding:20px;margin-bottom:20px}
+.flow-steps{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.flow-step{flex:1;min-width:100px;text-align:center;padding:12px 8px;background:rgba(201,167,232,0.08);border:1px solid rgba(201,167,232,0.2);border-radius:8px;transition:all .3s;position:relative}
+.flow-step:hover{background:rgba(201,167,232,0.15);border-color:#c9a7e8;transform:scale(1.05)}
+.flow-step .icon{font-size:24px;margin-bottom:6px}
+.flow-step .name{font-size:12px;font-weight:600;color:#c9a7e8;margin-bottom:2px}
+.flow-step .desc{font-size:10px;color:#888}
+.flow-arrow{color:#c9a7e8;font-size:20px;font-weight:700}
+.character-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.character-card{background:rgba(255,255,255,0.03);border:1px solid rgba(201,167,232,0.15);border-radius:10px;padding:16px;text-align:center;transition:all .3s}
+.character-card:hover{border-color:#c9a7e8;transform:translateY(-2px)}
+.character-avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#c9a7e8,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px}
+.character-name{font-size:14px;font-weight:600;color:#c9a7e8;margin-bottom:4px}
+.character-role{font-size:11px;color:#888;margin-bottom:8px}
+.character-tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.tag{font-size:9px;padding:2px 6px;border-radius:8px;background:rgba(201,167,232,0.1);color:#c9a7e8}
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.rule-card{background:rgba(255,255,255,0.03);border-left:3px solid #c9a7e8;border-radius:0 8px 8px 0;padding:14px}
+.rule-title{font-size:13px;font-weight:600;color:#c9a7e8;margin-bottom:6px}
+.rule-desc{font-size:11px;color:#aaa;line-height:1.5}
+.footer{text-align:center;padding:30px 20px;color:#666;font-size:11px;border-top:1px solid rgba(201,167,232,0.1);margin-top:40px}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="火斗云智AIOS - 基于ZONGYUAN-ROOT元极恒一自治体系的AI操作系统，提供政务AI、短剧流水线、知识图谱、普惠教育等核心产品。">
+<meta name="keywords" content="火斗云智,AIOS,ZONGYUAN-ROOT,元极恒一,政务AI,短剧,知识图谱,普惠教育">
+<meta property="og:title" content="火斗云智AIOS | ZONGYUAN-ROOT">
+<meta property="og:description" content="火斗云智AIOS - 基于ZONGYUAN-ROOT元极恒一自治体系的AI操作系统，提供政务AI、短剧流水线、知识图谱、普惠教育等核心产品。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/drama/pipeline.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="火斗云智AIOS | ZONGYUAN-ROOT">
+<meta name="twitter:description" content="火斗云智AIOS - 基于ZONGYUAN-ROOT元极恒一自治体系的AI操作系统，提供政务AI、短剧流水线、知识图谱、普惠教育等核心产品。">
+    <link rel="canonical" href="https://huodouai.com/drama/pipeline.html">
+</head>
+<body>
+<!-- ZONGYUAN-ROOT Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">ZONGYUAN-ROOT · DID-BR-000002</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/philosophy.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">思想</a>
+      <a href="/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/engines.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">引擎</a>
+      <a href="/governance.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">治理</a>
+      <a href="/monitor.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">监控</a>
+      <a href="/products.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/gov/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">政务AI</a>
+      <a href="/drama/demo.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">短剧</a>
+      <a href="/sovereignty/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">主权根</a>
+      <a href="/vector.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">向量库</a>
+      <a href="/developers.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">开发者</a>
+      <a href="/docs.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /ZONGYUAN-ROOT Unified Navigation -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="logo">🎬 昆仑洞天 · 短剧全自动生产流水线</div>
+    <div class="subtitle">暗黑东方神话短剧工业化生产 · 剧本结构化→基准库锚定→AI生成→风格固化→归档锁档</div>
+    <div class="anchor">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V1.7</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">9</div><div class="stat-label">生产环节</div></div>
+    <div class="stat-card"><div class="stat-value">5+</div><div class="stat-label">核心角色</div></div>
+    <div class="stat-card"><div class="stat-value">6</div><div class="stat-label">短剧合规规则</div></div>
+    <div class="stat-card"><div class="stat-value">9:16</div><div class="stat-label">竖屏画幅锁死</div></div>
+    <div class="stat-card"><div class="stat-value">黑金</div><div class="stat-label">视觉风格固化</div></div>
+    <div class="stat-card"><div class="stat-value">Ω₀</div><div class="stat-label">溯源标识自动挂载</div></div>
+    <div class="stat-card"><div class="stat-value">全自动</div><div class="stat-label">生产流水线</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔄 完整生产流水线</div>
+    <div class="pipeline-flow">
+      <div class="flow-steps">
+        <div class="flow-step"><div class="icon">📝</div><div class="name">剧本录入</div><div class="desc">结构化解析</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="icon">✅</div><div class="name">规则校验</div><div class="desc">合规检查</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="icon">🎭</div><div class="name">基准库锚定</div><div class="desc">角色/表情/风格</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="icon">🎨</div><div class="name">AI生成</div><div class="desc">图像/视频渲染</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="icon">🏷️</div><div class="name">溯源打标</div><div class="desc">Ω₀标识挂载</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="icon">🎬</div><div class="name">风格固化</div><div class="desc">黑金暗纹统一</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="icon">📱</div><div class="name">画幅锁死</div><div class="desc">9:16竖屏</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="icon">📦</div><div class="name">成片归档</div><div class="desc">版本锁档</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="icon">🔒</div><div class="name">三层锁档</div><div class="desc">云盘/知识库/内核</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 生产统计与趋势</div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>每日生成数量趋势（最近7天）</h3><div class="chart-container" id="dailyChart"></div></div>
+      <div class="chart-card"><h3>各环节耗时分布</h3><div class="chart-container" id="durationChart"></div></div>
+      <div class="chart-card"><h3>角色使用频次</h3><div class="chart-container" id="characterChart"></div></div>
+      <div class="chart-card"><h3>生成成功率</h3><div class="chart-container" id="successChart"></div></div>
+      <div class="chart-card full-width"><h3>生产流水线状态监控（实时）</h3><div class="chart-container" id="pipelineMonitor" style="height:280px;"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎭 核心角色基准库</div>
+    <div class="character-grid">
+      <div class="character-card">
+        <div class="character-avatar">🌙</div>
+        <div class="character-name">月神</div>
+        <div class="character-role">月神·太阴之主</div>
+        <div class="character-tags"><span class="tag">月白玄黑</span><span class="tag">银淡紫</span><span class="tag">清冷</span></div>
+      </div>
+      <div class="character-card">
+        <div class="character-avatar">🐉</div>
+        <div class="character-name">烛龙</div>
+        <div class="character-role">烛龙·时间之神</div>
+        <div class="character-tags"><span class="tag">黑金暗纹</span><span class="tag">赤红</span><span class="tag">威严</span></div>
+      </div>
+      <div class="character-card">
+        <div class="character-avatar">⚔️</div>
+        <div class="character-name">九天玄女</div>
+        <div class="character-role">战争形态·红裙凤冠</div>
+        <div class="character-tags"><span class="tag">红裙凤冠</span><span class="tag">金戈</span><span class="tag">肃穆</span></div>
+      </div>
+      <div class="character-card">
+        <div class="character-avatar">🌸</div>
+        <div class="character-name">女娲</div>
+        <div class="character-role">创世女神·补天</div>
+        <div class="character-tags"><span class="tag">五彩石</span><span class="tag">慈悲</span><span class="tag">创世</span></div>
+      </div>
+      <div class="character-card">
+        <div class="character-avatar">🛡️</div>
+        <div class="character-name">真武大帝</div>
+        <div class="character-role">北方之神·镇妖</div>
+        <div class="character-tags"><span class="tag">玄甲</span><span class="tag">龟蛇</span><span class="tag">镇邪</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📜 短剧专属合规规则（DRAMA-001~006）</div>
+    <div class="rules-grid">
+      <div class="rule-card"><div class="rule-title">DRAMA-001 内容合规</div><div class="rule-desc">短剧内容必须符合国家法律法规，禁止涉及敏感政治、色情、暴力等违规内容。</div></div>
+      <div class="rule-card"><div class="rule-title">DRAMA-002 角色一致性</div><div class="rule-desc">同一角色在不同镜头中必须保持形象一致，禁止角色形象漂移或突变。</div></div>
+      <div class="rule-card"><div class="rule-title">DRAMA-003 风格统一</div><div class="rule-desc">全剧必须保持黑金暗纹视觉风格统一，禁止出现风格不一致的镜头。</div></div>
+      <div class="rule-card"><div class="rule-title">DRAMA-004 画幅锁死</div><div class="rule-desc">所有镜头必须严格遵循9:16竖屏画幅，禁止出现其他比例的镜头。</div></div>
+      <div class="rule-card"><div class="rule-title">DRAMA-005 溯源标识</div><div class="rule-desc">所有成片必须在右下角挂载Ω₀⊂⊙∞⊂Ω溯源标识，禁止遗漏或遮挡。</div></div>
+      <div class="rule-card"><div class="rule-title">DRAMA-006 版权保护</div><div class="rule-desc">所有生成内容必须进行版权确权，禁止使用未授权的第三方素材。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚙️ 五大对接点（国家主权根集成）</div>
+    <div class="charts-grid">
+      <div class="chart-card full-width"><h3>短剧流水线与国家主权根API对接架构</h3><div class="chart-container" id="integrationChart" style="height:300px;"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  昆仑洞天 · 短剧全自动生产流水线 ｜ Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V1.7<br>
+  剧本结构化→基准库锚定→AI生成渲染→风格/画幅/标识强制固化→归档锁档
+</div>
+
+<script>
+const charts = {};
+
+function initCharts() {
+  ['dailyChart','durationChart','characterChart','successChart','pipelineMonitor','integrationChart'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) charts[id] = echarts.init(el);
+  });
+}
+
+function updateDailyChart() {
+  if (!charts.dailyChart) return;
+  const days = ['周一','周二','周三','周四','周五','周六','周日'];
+  charts.dailyChart.setOption({
+    tooltip: { trigger: 'axis' },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'category', data: days, axisLabel: { color: '#888', fontSize: 11 } },
+    yAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series: [{
+      type: 'bar', data: [12, 18, 15, 22, 28, 35, 30],
+      itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#c9a7e8'},{offset:1,color:'#8B5CF6'}]), borderRadius: [4,4,0,0] },
+      barWidth: '50%'
+    }]
+  });
+}
+
+function updateDurationChart() {
+  if (!charts.durationChart) return;
+  charts.durationChart.setOption({
+    tooltip: { trigger: 'item' },
+    legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{
+      type: 'pie', radius: ['35%', '65%'], center: ['50%', '45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0a14', borderWidth: 2 },
+      label: { show: false },
+      data: [
+        { value: 15, name: '剧本解析', itemStyle: { color: '#c9a7e8' } },
+        { value: 10, name: '规则校验', itemStyle: { color: '#8B5CF6' } },
+        { value: 20, name: '基准锚定', itemStyle: { color: '#F4B393' } },
+        { value: 35, name: 'AI生成', itemStyle: { color: '#3b82f6' } },
+        { value: 10, name: '后期处理', itemStyle: { color: '#10b981' } },
+        { value: 10, name: '归档锁档', itemStyle: { color: '#f59e0b' } }
+      ]
+    }]
+  });
+}
+
+function updateCharacterChart() {
+  if (!charts.characterChart) return;
+  charts.characterChart.setOption({
+    tooltip: { trigger: 'axis' },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    yAxis: { type: 'category', data: ['真武大帝','女娲','九天玄女','烛龙','月神'], axisLabel: { color: '#ccc', fontSize: 11 } },
+    series: [{
+      type: 'bar', data: [15, 22, 35, 28, 42],
+      itemStyle: { color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#c9a7e888'},{offset:1,color:'#c9a7e8'}]), borderRadius: [0,4,4,0] },
+      barWidth: '50%',
+      label: { show: true, position: 'right', color: '#c9a7e8', fontSize: 10 }
+    }]
+  });
+}
+
+function updateSuccessChart() {
+  if (!charts.successChart) return;
+  charts.successChart.setOption({
+    series: [{
+      type: 'gauge', min: 0, max: 100, radius: '85%',
+      axisLine: { lineStyle: { width: 12, color: [[0.7,'#ef4444'],[0.9,'#f59e0b'],[1,'#10b981']] } },
+      pointer: { itemStyle: { color: '#c9a7e8' } },
+      axisLabel: { color: '#888', fontSize: 9, distance: 18 },
+      detail: { formatter: '{value}%', color: '#c9a7e8', fontSize: 24, offsetCenter: [0, '65%'] },
+      data: [{ value: 94.5 }]
+    }]
+  });
+}
+
+function updatePipelineMonitor() {
+  if (!charts.pipelineMonitor) return;
+  const steps = ['剧本录入','规则校验','基准锚定','AI生成','溯源打标','风格固化','画幅锁死','成片归档','三层锁档'];
+  charts.pipelineMonitor.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { data: ['队列中','处理中','已完成','失败'], textStyle: { color: '#888', fontSize: 11 }, top: 0 },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+    xAxis: { type: 'category', data: steps, axisLabel: { color: '#888', fontSize: 10, rotate: 20 } },
+    yAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series: [
+      { name: '队列中', type: 'bar', stack: 'total', data: [2,1,0,3,1,0,0,0,0], itemStyle: { color: '#6366f1' } },
+      { name: '处理中', type: 'bar', stack: 'total', data: [1,2,1,2,1,1,0,0,0], itemStyle: { color: '#f59e0b' } },
+      { name: '已完成', type: 'bar', stack: 'total', data: [45,42,40,35,33,32,30,28,25], itemStyle: { color: '#10b981' } },
+      { name: '失败', type: 'bar', stack: 'total', data: [2,1,0,3,0,0,0,0,0], itemStyle: { color: '#ef4444' } }
+    ]
+  });
+}
+
+function updateIntegrationChart() {
+  if (!charts.integrationChart) return;
+  charts.integrationChart.setOption({
+    tooltip: {},
+    legend: { data: ['短剧流水线','国家主权根API'], textStyle: { color: '#888', fontSize: 11 }, top: 0 },
+    series: [{
+      type: 'sankey',
+      layout: 'none',
+      emphasis: { focus: 'adjacency' },
+      data: [
+        { name: '剧本生成', itemStyle: { color: '#c9a7e8' } },
+        { name: '分镜编排', itemStyle: { color: '#8B5CF6' } },
+        { name: '视频合成', itemStyle: { color: '#F4B393' } },
+        { name: '成片上传', itemStyle: { color: '#3b82f6' } },
+        { name: '内容合规校验', itemStyle: { color: '#10b981' } },
+        { name: '角色一致性校验', itemStyle: { color: '#f59e0b' } },
+        { name: '版权确权', itemStyle: { color: '#ef4444' } },
+        { name: '归档锁档', itemStyle: { color: '#6366f1' } }
+      ],
+      links: [
+        { source: '剧本生成', target: '内容合规校验', value: 10 },
+        { source: '分镜编排', target: '角色一致性校验', value: 8 },
+        { source: '视频合成', target: '内容合规校验', value: 6 },
+        { source: '成片上传', target: '版权确权', value: 5 },
+        { source: '内容合规校验', target: '归档锁档', value: 16 },
+        { source: '角色一致性校验', target: '归档锁档', value: 8 },
+        { source: '版权确权', target: '归档锁档', value: 5 }
+      ],
+      lineStyle: { color: 'gradient', curveness: 0.5, opacity: 0.6 },
+      label: { color: '#ccc', fontSize: 11 }
+    }]
+  });
+}
+
+window.addEventListener('load', () => {
+  initCharts();
+  updateDailyChart();
+  updateDurationChart();
+  updateCharacterChart();
+  updateSuccessChart();
+  updatePipelineMonitor();
+  updateIntegrationChart();
+  setInterval(() => { updatePipelineMonitor(); }, 30000);
+  window.addEventListener('resize', () => { Object.values(charts).forEach(c => c && c.resize()); });
+});
+</script>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+</body>
+</html>

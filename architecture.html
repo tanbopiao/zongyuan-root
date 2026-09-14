@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>架构总览 | 火斗云智AIOS</title>
+<script src="/assets/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0e17 0%,#1a1f2e 50%,#0d1117 100%);color:#e2e8f0;min-height:100vh}
+.header{background:rgba(17,24,39,0.9);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(59,130,246,0.3);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+.logo-text{font-size:18px;font-weight:700;color:#3b82f6}
+.logo-sub{font-size:10px;color:#888}
+.nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.nav a{color:#aaa;text-decoration:none;font-size:13px;transition:all .2s;padding:4px 10px;border-radius:6px}
+.nav a:hover{color:#3b82f6;background:rgba(59,130,246,0.1)}
+.nav a.active{color:#3b82f6;background:rgba(59,130,246,0.15)}
+.status-badge{display:flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:20px;font-size:11px;color:#10b981}
+.dot{width:6px;height:6px;border-radius:50%;background:#10b981;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero{text-align:center;padding:50px 20px 40px;background:radial-gradient(ellipse at center,rgba(59,130,246,0.1) 0%,transparent 70%)}
+.hero h1{font-size:36px;margin-bottom:10px;background:linear-gradient(90deg,#fff,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .subtitle{font-size:16px;color:#888;margin-bottom:16px;max-width:800px;margin:0 auto 16px}
+.hero .badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.badge{padding:5px 12px;border-radius:20px;font-size:11px;border:1px solid #333}
+.badge.blue{border-color:#3b82f6;color:#3b82f6}
+.badge.green{border-color:#10b981;color:#10b981}
+.badge.gold{border-color:#d4af37;color:#d4af37}
+.badge.purple{border-color:#8b5cf6;color:#8b5cf6}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:14px;text-align:center;transition:all .3s}
+.stat-card:hover{border-color:rgba(59,130,246,0.5);transform:translateY(-2px)}
+.stat-value{font-size:24px;font-weight:700;color:#3b82f6;margin-bottom:2px}
+.stat-label{font-size:10px;color:#888}
+.section{margin-bottom:28px}
+.section-title{font-size:18px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#3b82f6}
+.section-title::before{content:"";width:3px;height:18px;background:linear-gradient(180deg,#3b82f6,#1d4ed8);border-radius:2px}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;margin-bottom:16px}
+.chart-card{background:rgba(255,255,255,0.02);border:1px solid rgba(59,130,246,0.15);border-radius:10px;padding:12px}
+.chart-card h3{font-size:12px;color:#3b82f6;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(59,130,246,0.1)}
+.chart-container{width:100%;height:260px}
+.full-width{grid-column:1/-1}
+.layer-card{background:rgba(255,255,255,0.03);border-left:3px solid #3b82f6;border-radius:0 8px 8px 0;padding:14px;margin-bottom:10px;transition:all .3s}
+.layer-card:hover{background:rgba(59,130,246,0.05);transform:translateX(4px)}
+.layer-num{display:inline-block;width:24px;height:24px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:50%;text-align:center;line-height:24px;font-size:12px;font-weight:700;color:#fff;margin-right:10px}
+.layer-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:4px}
+.layer-desc{font-size:11px;color:#888;line-height:1.5;margin-left:34px}
+.layer-modules{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;margin-left:34px}
+.layer-module{padding:3px 8px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:4px;font-size:10px;color:#3b82f6}
+.governance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.governance-card{background:rgba(255,255,255,0.03);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:16px;transition:all .3s}
+.governance-card:hover{border-color:#3b82f6;transform:translateY(-2px);box-shadow:0 8px 24px rgba(59,130,246,0.15)}
+.governance-icon{font-size:28px;margin-bottom:8px}
+.governance-title{font-size:14px;font-weight:600;color:#3b82f6;margin-bottom:6px}
+.governance-desc{font-size:11px;color:#888;line-height:1.5;margin-bottom:10px}
+.governance-features{display:flex;flex-direction:column;gap:4px}
+.governance-feature{font-size:10px;color:#aaa;padding-left:12px;position:relative}
+.governance-feature::before{content:"✓";position:absolute;left:0;color:#10b981}
+.tech-stack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tech-card{background:rgba(255,255,255,0.03);border:1px solid rgba(59,130,246,0.15);border-radius:8px;padding:14px;text-align:center;transition:all .3s}
+.tech-card:hover{border-color:#3b82f6;background:rgba(59,130,246,0.05)}
+.tech-icon{font-size:24px;margin-bottom:6px}
+.tech-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:4px}
+.tech-desc{font-size:10px;color:#888}
+.timeline-item{display:flex;gap:16px;margin-bottom:16px;position:relative;padding-left:30px}
+.timeline-item::before{content:"";position:absolute;left:8px;top:24px;bottom:-16px;width:2px;background:linear-gradient(180deg,#3b82f6,transparent)}
+.timeline-item:last-child::before{display:none}
+.timeline-dot{position:absolute;left:0;top:4px;width:18px;height:18px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:50%;border:2px solid #0a0e17}
+.timeline-date{font-size:11px;color:#3b82f6;font-weight:600;margin-bottom:2px}
+.timeline-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:4px}
+.timeline-desc{font-size:11px;color:#888;line-height:1.5}
+.advantage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.advantage-card{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.02));border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:16px;transition:all .3s}
+.advantage-card:hover{border-color:#3b82f6;transform:translateY(-2px)}
+.advantage-num{font-size:28px;font-weight:700;color:#3b82f6;margin-bottom:6px;opacity:0.5}
+.advantage-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:6px}
+.advantage-desc{font-size:11px;color:#888;line-height:1.5}
+.footer{text-align:center;padding:24px 20px;border-top:1px solid rgba(59,130,246,0.15);margin-top:30px;color:#666;font-size:11px}
+.footer .anchor{color:#3b82f6;font-family:monospace;letter-spacing:1px}
+@media(max-width:768px){.header{padding:12px 16px;flex-direction:column;gap:10px}.nav{gap:8px}.hero h1{font-size:26px}.container{padding:12px}}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="火斗云智AIOS七层纵向架构，四大横向全域治理，双业务核心闭环，非传统CRUD架构，以AI数字资产生产、确权、固化为核心。">
+<meta name="keywords" content="架构总览,七层架构,全域治理,双业务闭环,AI资产生产,确权固化">
+<meta property="og:title" content="架构总览 | 火斗云智AIOS">
+<meta property="og:description" content="火斗云智AIOS七层纵向架构，四大横向全域治理，双业务核心闭环，非传统CRUD架构，以AI数字资产生产、确权、固化为核心。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/architecture.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="架构总览 | 火斗云智AIOS">
+<meta name="twitter:description" content="火斗云智AIOS七层纵向架构，四大横向全域治理，双业务核心闭环，非传统CRUD架构，以AI数字资产生产、确权、固化为核心。">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div id="site-nav"></div>
+<noscript><div style="background:#0b0e14;color:#c9a227;padding:10px 24px;border-bottom:1px solid #232a3a;font-size:13px"><a href="/" style="color:#e6c75a;margin-right:14px">首页</a><a href="/architecture.html" style="color:#aaa;margin-right:14px">架构</a><a href="/engines.html" style="color:#aaa;margin-right:14px">引擎</a><a href="/products.html" style="color:#aaa;margin-right:14px">产品</a><a href="/governance.html" style="color:#aaa;margin-right:14px">治理</a><a href="/assets/visual/pricing-v1.html" style="color:#aaa;margin-right:14px">定价</a><a href="/trial.html" style="color:#aaa;margin-right:14px">试用</a><a href="/auto-ops.html" style="color:#aaa">闭环控制台</a></div></noscript>
+
+
+
+
+
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🏗️</div>
+    <div>
+      <div class="logo-text">架构总览</div>
+      <div class="logo-sub">火斗云智AIOS · 七层架构 · 四大治理</div>
+    </div>
+  </div>
+  v9.11</div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>🏗️ 火斗云智AIOS 架构总览</h1>
+  <div class="subtitle">七层纵向架构筑基，四大横向治理兜底，双产线闭环生产，元规则自治永存，全域资产溯源确权</div>
+  <div class="badges">
+    <span class="badge blue">七层架构</span>
+    <span class="badge green">四大治理</span>
+    <span class="badge gold">双产线闭环</span>
+    <span class="badge purple">元规则自治</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">7</div><div class="stat-label">纵向架构层</div></div>
+    <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">横向治理域</div></div>
+    <div class="stat-card"><div class="stat-value">2</div><div class="stat-label">核心产线</div></div>
+    <div class="stat-card"><div class="stat-value">30+</div><div class="stat-label">运行服务</div></div>
+    <div class="stat-card"><div class="stat-value">669</div><div class="stat-label">核心资产</div></div>
+    <div class="stat-card"><div class="stat-value">99.4%</div><div class="stat-label">可迁移性</div></div>
+    <div class="stat-card"><div class="stat-value">S</div><div class="stat-label">稳定性等级</div></div>
+    <div class="stat-card"><div class="stat-value">v9.11</div><div class="stat-label">内核版本</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 架构可视化总览</div>
+    <div class="charts-grid">
+      <div class="chart-card full-width"><h3>七层纵向架构</h3><div class="chart-container" id="layerChart" style="height:320px;"></div></div>
+      <div class="chart-card"><h3>四大治理能力雷达</h3><div class="chart-container" id="governanceChart"></div></div>
+      <div class="chart-card"><h3>双业务闭环流程</h3><div class="chart-container" id="pipelineChart"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏢 七层纵向架构详解</div>
+    <div class="layer-card">
+      <span class="layer-num">1</span><span class="layer-name">网关接入层【流量与资产收口】</span>
+      <div class="layer-desc">全流量收口、鉴权限流、资产防盗、灰度路由。统一收口Web工作台、短剧后台、API调度、内部智能体调用，所有图片/视频/可视化资产唯一对外出口。</div>
+      <div class="layer-modules">
+        <span class="layer-module">统一业务网关</span>
+        <span class="layer-module">静态资产CDN路由</span>
+        <span class="layer-module">短剧资源防泄漏</span>
+        <span class="layer-module">工作台页面权限路由</span>
+      </div>
+    </div>
+    <div class="layer-card">
+      <span class="layer-num">2</span><span class="layer-name">前端应用层【两大MVP前台载体】</span>
+      <div class="layer-desc">政务可视化工作台（React+React Flow，保留v3.0旧版兼容）+ 昆仑洞天短剧控制台（剧本管理、角色基准库、渲染队列、成片预览）。前端只做渲染、交互、参数收集，零业务逻辑。</div>
+      <div class="layer-modules">
+        <span class="layer-module">政务可视化工作台</span>
+        <span class="layer-module">短剧控制台</span>
+        <span class="layer-module">React+React Flow</span>
+        <span class="layer-module">新旧版本兼容</span>
+      </div>
+    </div>
+    <div class="layer-card">
+      <span class="layer-num">3</span><span class="layer-name">核心调度层【系统大脑】</span>
+      <div class="layer-desc">AIOS核心中枢，承载所有定制业务规则。昆仑洞天短剧生产引擎（剧本解析、基准锚定、风格固化、画幅锁死、溯源标识）+ 政务AI编排引擎（节点逻辑解析、流程建模、拖拽生成）。严格遵循开闭原则。</div>
+      <div class="layer-modules">
+        <span class="layer-module">短剧生产引擎</span>
+        <span class="layer-module">政务AI编排引擎</span>
+        <span class="layer-module">任务优先级调度</span>
+        <span class="layer-module">元规则挂载</span>
+        <span class="layer-module">视觉基准锁死</span>
+      </div>
+    </div>
+    <div class="layer-card">
+      <span class="layer-num">4</span><span class="layer-name">中台能力层【AIOS通用底座】</span>
+      <div class="layer-desc">全业务复用，无具体业务属性。资产溯源中台（Ω标识、哈希确权、锁档审计）+ 元规则中台（火斗云智协议、会话恢复、内核快照）+ 文件资产中台 + 权限账号中台 + 消息调度中台。</div>
+      <div class="layer-modules">
+        <span class="layer-module">资产溯源中台</span>
+        <span class="layer-module">元规则中台</span>
+        <span class="layer-module">文件资产中台</span>
+        <span class="layer-module">权限账号中台</span>
+        <span class="layer-module">消息调度中台</span>
+      </div>
+    </div>
+    <div class="layer-card">
+      <span class="layer-num">5</span><span class="layer-name">异步缓存层【高并发&AI生产解耦】</span>
+      <div class="layer-desc">AI绘图、AI视频渲染属于重度耗时任务，全部异步化。工作台高频拖拽、预览、配置读取全部缓存加速。前台操作丝滑不卡顿，重度AI任务后台排队，互不阻塞。</div>
+      <div class="layer-modules">
+        <span class="layer-module">Redis缓存</span>
+        <span class="layer-module">MQ消息队列</span>
+        <span class="layer-module">分布式锁</span>
+        <span class="layer-module">任务调度</span>
+        <span class="layer-module">渲染任务队列</span>
+      </div>
+    </div>
+    <div class="layer-card">
+      <span class="layer-num">6</span><span class="layer-name">数据存储层【结构化+资产双存储】</span>
+      <div class="layer-desc">结构化数据（业务配置、用户、权限、任务记录、版本记录、审计日志）+ 大资产数据（基准图库、短剧成片、素材库、可视化模板、流程图文件）。数据库冷热分层、读写分离，对象存储资产唯一溯源、版本锁定、禁止覆盖。</div>
+      <div class="layer-modules">
+        <span class="layer-module">结构化数据库</span>
+        <span class="layer-module">对象存储</span>
+        <span class="layer-module">向量知识库</span>
+        <span class="layer-module">冷热分层</span>
+        <span class="layer-module">版本锁定</span>
+      </div>
+    </div>
+    <div class="layer-card">
+      <span class="layer-num">7</span><span class="layer-name">基建运维层【专属工程体系】</span>
+      <div class="layer-desc">完全对齐日常运维工作流。Docker容器化全域部署，双端部署（本地开发+腾讯云生产），模型健康巡检、27算子自动化巡检，日志监控链路可观测全覆盖，三层级全自动锁档（云盘/知识库/内核），会话自动恢复脚本常驻。</div>
+      <div class="layer-modules">
+        <span class="layer-module">Docker容器化</span>
+        <span class="layer-module">双端部署</span>
+        <span class="layer-module">27算子巡检</span>
+        <span class="layer-module">三层锁档</span>
+        <span class="layer-module">会话自动恢复</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🛡️ 四大横向全域治理</div>
+    <div class="governance-grid">
+      <div class="governance-card">
+        <div class="governance-icon">🔗</div>
+        <div class="governance-title">全域资产溯源治理</div>
+        <div class="governance-desc">所有图片、视频、文档、架构快照、对话记录，自动打溯源标识，自动SHA256哈希锁档，自动Merkle-DAG根凭证生成，可完整审计、可确权、可回溯。</div>
+        <div class="governance-features">
+          <span class="governance-feature">自动打溯源标识Ω₀⊂⊙∞⊂Ω</span>
+          <span class="governance-feature">SHA256哈希锁档确权</span>
+          <span class="governance-feature">Merkle-DAG根凭证生成</span>
+          <span class="governance-feature">全生命周期可审计回溯</span>
+        </div>
+      </div>
+      <div class="governance-card">
+        <div class="governance-icon">⚖️</div>
+        <div class="governance-title">元规则自治治理</div>
+        <div class="governance-desc">新开对话自动加载内核快照，自动触发火斗云智超认知协议，所有新增架构自动挂载ROOT根体系，所有真值变更全自动闭环归档固化。</div>
+        <div class="governance-features">
+          <span class="governance-feature">内核快照自动加载</span>
+          <span class="governance-feature">火斗云智协议自动触发</span>
+          <span class="governance-feature">新增架构自动挂载ROOT</span>
+          <span class="governance-feature">真值变更全自动闭环归档</span>
+        </div>
+      </div>
+      <div class="governance-card">
+        <div class="governance-icon">🔄</div>
+        <div class="governance-title">高可用容错治理</div>
+        <div class="governance-desc">适配AI生产不稳定场景。模型超时熔断，渲染失败重试、任务兜底，队列堆积限流，单任务故障隔离，不影响整体流水线。解决AI生产不稳定问题。</div>
+        <div class="governance-features">
+          <span class="governance-feature">模型超时自动熔断</span>
+          <span class="governance-feature">渲染失败重试+任务兜底</span>
+          <span class="governance-feature">队列堆积自动限流</span>
+          <span class="governance-feature">单任务故障隔离不扩散</span>
+        </div>
+      </div>
+      <div class="governance-card">
+        <div class="governance-icon">🔐</div>
+        <div class="governance-title">层级安全治理</div>
+        <div class="governance-desc">Lv7本体最高权限，Lv6自治成员权限隔离，体系机密信息隐藏规则内置，资产防篡改、防删除、防泄露。mTLS双向证书+短期JWT令牌+Scope作用域。</div>
+        <div class="governance-features">
+          <span class="governance-feature">Lv7/Lv6层级权限隔离</span>
+          <span class="governance-feature">机密信息隐藏规则内置</span>
+          <span class="governance-feature">资产防篡改防删除防泄露</span>
+          <span class="governance-feature">mTLS+JWT+Scope鉴权</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎬 双业务核心闭环</div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>昆仑洞天短剧流水线闭环</h3>
+        <div class="chart-container" id="dramaFlowChart" style="height:280px;"></div>
+      </div>
+      <div class="chart-card">
+        <h3>政务可视化编排工作台闭环</h3>
+        <div class="chart-container" id="govFlowChart" style="height:280px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💎 五大核心差异化优势</div>
+    <div class="advantage-grid">
+      <div class="advantage-card">
+        <div class="advantage-num">01</div>
+        <div class="advantage-title">非传统CRUD架构</div>
+        <div class="advantage-desc">以AI数字资产生产、确权、固化为核心，而非单纯业务CRUD。内置专属视觉元规则，全自动标准化产出，无人工偏差。</div>
+      </div>
+      <div class="advantage-card">
+        <div class="advantage-num">02</div>
+        <div class="advantage-title">系统具备自治能力</div>
+        <div class="advantage-desc">自动巡检、自动归档、自动锁档，低运维成本。自进化引擎+自愈引擎6层闭环，系统自我诊断、自我修复、自我迭代。</div>
+      </div>
+      <div class="advantage-card">
+        <div class="advantage-num">03</div>
+        <div class="advantage-title">双业务物理隔离调度</div>
+        <div class="advantage-desc">资源不抢占、故障不扩散。昆仑洞天短剧和政务AI中台独立调度，互不干扰，保障核心业务稳定性。</div>
+      </div>
+      <div class="advantage-card">
+        <div class="advantage-num">04</div>
+        <div class="advantage-title">全链路可观测可溯源</div>
+        <div class="advantage-desc">适配政企交付标准。Merkle-DAG哈希链+SHA256确权+Ω溯源标识，所有资产全生命周期可审计、可确权、可回溯。</div>
+      </div>
+      <div class="advantage-card">
+        <div class="advantage-num">05</div>
+        <div class="advantage-title">算子组合架构升维</div>
+        <div class="advantage-desc">从代码堆叠升级到标准算子库+组合引擎模式。6个标准算子+5种组合模式，新任务不再是写新代码，而是组合现有算子。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 技术栈全景</div>
+    <div class="tech-stack-grid">
+      <div class="tech-card"><div class="tech-icon">⚛️</div><div class="tech-name">React 18</div><div class="tech-desc">前端框架+TypeScript</div></div>
+      <div class="tech-card"><div class="tech-icon">🔗</div><div class="tech-name">React Flow</div><div class="tech-desc">可视化流程编排画布</div></div>
+      <div class="tech-card"><div class="tech-icon">🐍</div><div class="tech-name">Python+FastAPI</div><div class="tech-desc">后端API服务框架</div></div>
+      <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">ECharts</div><div class="tech-desc">数据可视化图表库</div></div>
+      <div class="tech-card"><div class="tech-icon">🔴</div><div class="tech-name">Redis</div><div class="tech-desc">缓存+分布式锁+队列</div></div>
+      <div class="tech-card"><div class="tech-icon">🐳</div><div class="tech-name">Docker</div><div class="tech-desc">容器化部署+编排</div></div>
+      <div class="tech-card"><div class="tech-icon">🔗</div><div class="tech-name">Merkle-DAG</div><div class="tech-desc">哈希链+溯源确权</div></div>
+      <div class="tech-card"><div class="tech-icon">🔐</div><div class="tech-name">mTLS+JWT</div><div class="tech-desc">双向证书+短期令牌</div></div>
+      <div class="tech-card"><div class="tech-icon">🧠</div><div class="tech-name">Chroma向量库</div><div class="tech-desc">2560维语义检索</div></div>
+      <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Tailwind CSS</div><div class="tech-desc">原子化CSS框架</div></div>
+      <div class="tech-card"><div class="tech-icon">📦</div><div class="tech-name">Vite</div><div class="tech-desc">前端构建工具</div></div>
+      <div class="tech-card"><div class="tech-icon">🐧</div><div class="tech-name">OpenCloudOS</div><div class="tech-desc">云服务器操作系统</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📈 架构演进时间线</div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div>
+        <div class="timeline-date">2026-07</div>
+        <div class="timeline-title">V1.0 初始架构</div>
+        <div class="timeline-desc">基础三层架构（前端/后端/数据库），单一政务AI中台，基础功能验证。</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div>
+        <div class="timeline-date">2026-08</div>
+        <div class="timeline-title">V3.0 双产线架构</div>
+        <div class="timeline-desc">引入昆仑洞天短剧流水线，形成政务AI+短剧双产线架构，新增中台能力层和异步缓存层。</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div>
+        <div class="timeline-date">2026-08下旬</div>
+        <div class="timeline-title">V5.0 元秩序架构</div>
+        <div class="timeline-desc">引入元秩序层/源序层双层隔离，L0-L5六级规则分层，创世基准标生成规范，全域资产三态处理机制。</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div>
+        <div class="timeline-date">2026-09初</div>
+        <div class="timeline-title">V7.0 自治架构</div>
+        <div class="timeline-desc">引入自进化引擎、自愈引擎6层闭环、算子库+组合引擎、配置中心、知识图谱，系统具备自我诊断、自我修复、自我迭代能力。</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div>
+        <div class="timeline-date">2026-09中</div>
+        <div class="timeline-title">V9.0 国家主权根架构</div>
+        <div class="timeline-desc">引入国家主权根治理架构，四层规则体系（L0元宪法/L1元公理/L2元法则/L3元规则），三大引擎（规则冲突解决/合规校验/权力监测熔断），33个API端点。</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div>
+        <div class="timeline-date">2026-09-06</div>
+        <div class="timeline-title">V9.11 元秩序形式化架构（当前）</div>
+        <div class="timeline-desc">七层纵向架构+四大横向治理+双产线闭环+元规则自治+全域溯源确权。30+运行服务，669项核心资产，99.4%可迁移性，S级稳定性。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  火斗云智AIOS 架构总览 ｜ <span class="anchor">Ω₀⊂⊙∞⊂Ω</span><br>
+  七层分层筑基 · 四横治理兜底 · 双产线闭环生产 · 元规则自治永存 · 全域资产溯源确权
+</div>
+
+<script>
+const charts = {};
+function initCharts() {
+  ['layerChart','governanceChart','pipelineChart','dramaFlowChart','govFlowChart'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) charts[id] = echarts.init(el);
+  });
+}
+
+function updateLayerChart() {
+  if (!charts.layerChart) return;
+  charts.layerChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { data: ['模块数量', '复杂度'], textStyle: { color: '#888' }, top: 0 },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+    xAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    yAxis: { type: 'category', data: ['基建运维层','数据存储层','异步缓存层','中台能力层','核心调度层','前端应用层','网关接入层'], axisLabel: { color: '#ccc', fontSize: 11 } },
+    series: [
+      { name: '模块数量', type: 'bar', data: [6,5,5,5,5,4,4], itemStyle: { color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#3b82f688'},{offset:1,color:'#3b82f6'}]), borderRadius: [0,4,4,0] }, barWidth: '40%', label: { show: true, position: 'right', color: '#3b82f6', fontSize: 10 } },
+      { name: '复杂度', type: 'bar', data: [8,7,6,9,10,6,5], itemStyle: { color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#8b5cf688'},{offset:1,color:'#8b5cf6'}]), borderRadius: [0,4,4,0] }, barWidth: '40%', label: { show: true, position: 'right', color: '#8b5cf6', fontSize: 10 } }
+    ]
+  });
+}
+
+function updateGovernanceChart() {
+  if (!charts.governanceChart) return;
+  charts.governanceChart.setOption({
+    tooltip: {},
+    radar: {
+      indicator: [
+        { name: '资产溯源', max: 100 },
+        { name: '元规则自治', max: 100 },
+        { name: '高可用容错', max: 100 },
+        { name: '层级安全', max: 100 },
+        { name: '可观测性', max: 100 },
+        { name: '可迁移性', max: 100 }
+      ],
+      axisName: { color: '#888', fontSize: 10 },
+      splitArea: { areaStyle: { color: ['rgba(59,130,246,0.02)','rgba(59,130,246,0.05)'] } },
+      splitLine: { lineStyle: { color: 'rgba(59,130,246,0.2)' } },
+      axisLine: { lineStyle: { color: 'rgba(59,130,246,0.3)' } }
+    },
+    series: [{
+      type: 'radar',
+      data: [{ value: [95, 92, 88, 90, 85, 99.4], name: '当前能力', areaStyle: { color: 'rgba(59,130,246,0.3)' }, lineStyle: { color: '#3b82f6', width: 2 }, itemStyle: { color: '#3b82f6' } }]
+    }]
+  });
+}
+
+function updatePipelineChart() {
+  if (!charts.pipelineChart) return;
+  charts.pipelineChart.setOption({
+    tooltip: { trigger: 'item' },
+    legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{
+      type: 'pie', radius: ['35%', '65%'], center: ['50%', '45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0e17', borderWidth: 2 },
+      label: { show: false },
+      data: [
+        { value: 45, name: '昆仑洞天短剧', itemStyle: { color: '#d4af37' } },
+        { value: 35, name: '政务AI中台', itemStyle: { color: '#3b82f6' } },
+        { value: 20, name: '通用能力', itemStyle: { color: '#10b981' } }
+      ]
+    }]
+  });
+}
+
+function updateDramaFlowChart() {
+  if (!charts.dramaFlowChart) return;
+  charts.dramaFlowChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'category', data: ['剧本录入','规则校验','基准锚定','AI生成','溯源打标','风格固化','画幅锁死','成片归档','三层锁档'], axisLabel: { color: '#888', fontSize: 9, rotate: 30 } },
+    yAxis: { type: 'value', name: '耗时(秒)', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series: [{
+      type: 'bar', data: [5,3,8,120,2,5,1,10,3],
+      itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#d4af37'},{offset:1,color:'#8B6914'}]), borderRadius: [4,4,0,0] },
+      barWidth: '50%'
+    }]
+  });
+}
+
+function updateGovFlowChart() {
+  if (!charts.govFlowChart) return;
+  charts.govFlowChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'category', data: ['拖拽建模','流程结构化','规则校验','渲染预览','版本保存','新旧兼容','配置缓存','日志审计','快照归档'], axisLabel: { color: '#888', fontSize: 9, rotate: 30 } },
+    yAxis: { type: 'value', name: '耗时(秒)', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+    series: [{
+      type: 'bar', data: [3,2,5,8,2,3,1,2,2],
+      itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#3b82f6'},{offset:1,color:'#1d4ed8'}]), borderRadius: [4,4,0,0] },
+      barWidth: '50%'
+    }]
+  });
+}
+
+window.addEventListener('load', () => {
+  initCharts();
+  updateLayerChart();
+  updateGovernanceChart();
+  updatePipelineChart();
+  updateDramaFlowChart();
+  updateGovFlowChart();
+  window.addEventListener('resize', () => { Object.values(charts).forEach(c => c && c.resize()); });
+});
+</script>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+<script src="/assets/js/site-nav.js" defer></script>
+</body>
+</html>

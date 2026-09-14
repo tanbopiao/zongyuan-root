@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>昆仑洞天·短剧生产线（长辈版）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a12;color:#f0f0f0;min-height:100vh;padding:16px;max-width:600px;margin:0 auto}
+.header{text-align:center;padding:20px 0 16px}
+.header h1{font-size:28px;font-weight:700;color:#ffd700;letter-spacing:2px;text-shadow:0 0 20px rgba(255,215,0,0.3)}
+.header p{font-size:18px;color:#aaa;margin-top:8px}
+.step{background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:20px;padding:24px;margin-bottom:20px;border:2px solid #2a2a4a}
+.step-title{font-size:22px;font-weight:700;color:#ffd700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.step-num{background:#ffd700;color:#0a0a12;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0}
+.char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.char-card{background:#0f0f1e;border:3px solid #333;border-radius:16px;padding:16px 8px;text-align:center;cursor:pointer;transition:all .2s;min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.char-card:active{transform:scale(0.95)}
+.char-card.selected{border-color:#ffd700;background:linear-gradient(135deg,#2a1f00,#1a1500);box-shadow:0 0 20px rgba(255,215,0,0.3)}
+.char-icon{font-size:36px;margin-bottom:8px}
+.char-name{font-size:17px;font-weight:600;color:#eee}
+.char-card.selected .char-name{color:#ffd700}
+.input-big{width:100%;background:#0f0f1e;border:3px solid #333;border-radius:16px;padding:20px;font-size:20px;color:#fff;outline:none;transition:border .2s;min-height:80px;resize:none;font-family:inherit}
+.input-big:focus{border-color:#ffd700}
+.input-big::placeholder{color:#666;font-size:18px}
+.btn-big{width:100%;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#0a0a12;border:none;border-radius:20px;padding:24px;font-size:26px;font-weight:800;cursor:pointer;letter-spacing:4px;box-shadow:0 8px 30px rgba(255,140,0,0.4);transition:all .2s;margin-top:8px}
+.btn-big:active{transform:scale(0.97);box-shadow:0 4px 15px rgba(255,140,0,0.3)}
+.btn-big:disabled{background:#444;color:#888;box-shadow:none;cursor:not-allowed;transform:none}
+.progress-box{background:#0f0f1e;border-radius:16px;padding:20px;margin-top:16px;display:none}
+.progress-box.show{display:block}
+.progress-stage{font-size:20px;color:#ffd700;margin-bottom:12px;font-weight:600}
+.progress-bar{background:#222;border-radius:10px;height:24px;overflow:hidden;margin-bottom:12px}
+.progress-fill{background:linear-gradient(90deg,#ffd700,#ff8c00);height:100%;border-radius:10px;transition:width .5s;width:0%}
+.progress-log{background:#000;border-radius:10px;padding:12px;font-size:15px;color:#8f8;max-height:200px;overflow-y:auto;line-height:1.8;font-family:monospace}
+.result-box{background:linear-gradient(135deg,#0a2a0a,#0a1a0a);border:2px solid #2a5a2a;border-radius:16px;padding:20px;margin-top:16px;display:none}
+.result-box.show{display:block}
+.result-title{font-size:22px;color:#4ade80;font-weight:700;margin-bottom:12px}
+.result-info{font-size:18px;color:#ccc;line-height:2}
+.result-info span{color:#ffd700;font-weight:600}
+.settings-toggle{text-align:center;margin-top:20px;color:#666;font-size:16px;cursor:pointer;padding:10px}
+.settings-box{background:#0f0f1e;border-radius:16px;padding:16px;margin-top:8px;display:none}
+.settings-box.show{display:block}
+.settings-box label{font-size:16px;color:#aaa;display:block;margin-bottom:8px}
+.settings-box input{width:100%;background:#1a1a2e;border:2px solid #333;border-radius:10px;padding:12px;font-size:16px;color:#fff;outline:none;margin-bottom:12px}
+.tip{background:#1a1a2e;border-left:4px solid #ffd700;border-radius:8px;padding:14px 16px;margin-top:16px;font-size:16px;color:#bbb;line-height:1.7}
+.footer{text-align:center;padding:24px 0;color:#444;font-size:14px}
+</style>
+    <link rel="canonical" href="https://huodouai.comdrama/kunlun/senior/">
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:99998;background:rgba(10,10,15,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06);padding:6px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:'PingFang SC',sans-serif">
+<a href="/" style="font-size:13px;font-weight:700;color:#c9a7e8;text-decoration:none">🏠 火斗云智</a>
+<a href="/products/" style="color:#9ca3af;text-decoration:none;font-size:11px">产品</a>
+<a href="/showcase/" style="color:#9ca3af;text-decoration:none;font-size:11px">演示</a>
+<a href="/status/" style="color:#9ca3af;text-decoration:none;font-size:11px">状态</a>
+<a href="/docs/" style="color:#9ca3af;text-decoration:none;font-size:11px">文档</a>
+<a href="/pricing/" style="color:#9ca3af;text-decoration:none;font-size:11px">定价</a>
+<a href="/contact/" style="color:#94D8C3;text-decoration:none;font-size:11px">联系</a>
+</div><div style="height:36px"></div>
+
+<div class="header">
+  <h1>昆仑洞天·短剧生产线</h1>
+  <p>长辈简易版 · 两步做成短剧</p>
+</div>
+
+<!-- 第一步：选角色 -->
+<div class="step">
+  <div class="step-title"><span class="step-num">1</span>选一个人物</div>
+  <div class="char-grid" id="charGrid"></div>
+</div>
+
+<!-- 第二步：说内容 -->
+<div class="step">
+  <div class="step-title"><span class="step-num">2</span>说说想拍什么</div>
+  <textarea class="input-big" id="topicInput" placeholder="比如：月亮女神在冰里醒来了&#10;想到什么就写什么，不用怕写错"></textarea>
+</div>
+
+<!-- 大按钮 -->
+<button class="btn-big" id="startBtn" onclick="startProduction()">开 始 制 作</button>
+
+<!-- 进度 -->
+<div class="progress-box" id="progressBox">
+  <div class="progress-stage" id="progressStage">准备中...</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-log" id="progressLog"></div>
+</div>
+
+<!-- 结果 -->
+<div class="result-box" id="resultBox">
+  <div class="result-title">制作完成！</div>
+  <div class="result-info" id="resultInfo"></div>
+</div>
+
+<!-- API设置（折叠） -->
+<div class="settings-toggle" onclick="toggleSettings()">⚙️ 高级设置（一般不用动）</div>
+<div class="settings-box" id="settingsBox">
+  <label>图片生成 API Key（没有可以不填）</label>
+  <input type="password" id="imageApiKey" placeholder="留空也能先出分镜">
+  <label>视频生成 API Key（没有可以不填）</label>
+  <input type="password" id="videoApiKey" placeholder="留空也能先出分镜">
+</div>
+
+<div class="tip">
+  💡 小贴士：不填API也能生成剧本和分镜。想要生成真实图片和视频，需要填入有图片/视频生成能力的API Key。
+</div>
+
+<div class="footer">Ω₀⊂⊙∞⊂Ω｜DID-BR-000002｜昆仑洞天</div>
+
+<script>
+// 全局fetch拦截：自动添加Basic Auth
+const _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  if (url.includes('/ai-proxy/')) {
+    opts.headers['Authorization'] = 'Basic ' + btoa('zongyuan:8v4iGrYBK2Fz9UC');
+  }
+  return _origFetch(url, opts);
+};
+const CHARS = [
+  {icon:'🌙',name:'太阴月神'},
+  {icon:'⚔️',name:'九天玄女'},
+  {icon:'🦊',name:'九尾狐'},
+  {icon:'🪨',name:'女娲'},
+  {icon:'☀️',name:'金乌'},
+  {icon:'💜',name:'紫宸溟主'},
+  {icon:'🔥',name:'赤华玄媱'},
+  {icon:'👑',name:'凰绾'},
+  {icon:'💫',name:'绯灵汐'},
+  {icon:'🐒',name:'石猴余脉'},
+  {icon:'🐉',name:'山海经萌宠'},
+  {icon:'🏯',name:'罗定文塔'}
+];
+
+let selectedChar = null;
+
+// 渲染角色卡片
+const grid = document.getElementById('charGrid');
+CHARS.forEach((c,i) => {
+  const card = document.createElement('div');
+  card.className = 'char-card';
+  card.innerHTML = `<div class="char-icon">${c.icon}</div><div class="char-name">${c.name}</div>`;
+  card.onclick = () => {
+    document.querySelectorAll('.char-card').forEach(x=>x.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedChar = c.name;
+  };
+  grid.appendChild(card);
+});
+
+function log(msg){
+  const el = document.getElementById('progressLog');
+  el.innerHTML += msg + '<br>';
+  el.scrollTop = el.scrollHeight;
+}
+
+function setProgress(pct, stage){
+  document.getElementById('progressFill').style.width = pct + '%';
+  if(stage) document.getElementById('progressStage').textContent = stage;
+}
+
+function toggleSettings(){
+  document.getElementById('settingsBox').classList.toggle('show');
+}
+
+async function startProduction(){
+  if(!selectedChar){
+    alert('请先选一个人物（点上面的卡片）');
+    return;
+  }
+  const topic = document.getElementById('topicInput').value.trim();
+  if(!topic){
+    alert('请写一下想拍什么');
+    document.getElementById('topicInput').focus();
+    return;
+  }
+
+  const btn = document.getElementById('startBtn');
+  btn.disabled = true;
+  btn.textContent = '制作中...';
+  document.getElementById('progressBox').classList.add('show');
+  document.getElementById('resultBox').classList.remove('show');
+  document.getElementById('progressLog').innerHTML = '';
+
+  const imageKey = document.getElementById('imageApiKey').value.trim();
+  const videoKey = document.getElementById('videoApiKey').value.trim();
+  const fullTopic = selectedChar + '·' + topic;
+
+  log('📝 开始制作：' + fullTopic);
+  setProgress(5, '正在连接服务器...');
+
+  try {
+    // 生成剧集编号
+    const ep = 'EP' + String(Date.now()).slice(-4);
+    
+    // 调用API
+    const resp = await fetch('/ai-proxy/drama/oneclick', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        episode: ep,
+        topic: fullTopic,
+        stage: 'full',
+        image_api: imageKey ? {api_key:imageKey} : null,
+        video_api: videoKey ? {api_key:videoKey} : null,
+        style: 'guofeng',
+        aspect: '9_16',
+        shots: 5,
+        quality: '1080p'
+      })
+    });
+    const data = await resp.json();
+    log('✅ 服务器已接收任务');
+    setProgress(15, '正在写剧本...');
+
+    // 轮询状态
+    let checks = 0;
+    const maxChecks = 60;
+    const poll = setInterval(async () => {
+      checks++;
+      try {
+        const sresp = await fetch('/ai-proxy/drama/oneclick/status');
+        const sdata = await sresp.json();
+        const epData = sdata.episodes[ep];
+        if(epData){
+          const status = epData.status;
+          const logs = epData.logs || [];
+          if(logs.length > 0){
+            document.getElementById('progressLog').innerHTML = logs.map(l=>l.replace(/\[\d+:\d+:\d+\]\s*/,'')).join('<br>');
+          }
+          // 根据状态更新进度
+          if(status.includes('storyboard')){ setProgress(35,'正在写剧本和分镜...'); }
+          else if(status.includes('keyframe')){ setProgress(55,'正在生成图片...'); }
+          else if(status.includes('video')){ setProgress(70,'正在生成视频...'); }
+          else if(status.includes('subtitle')||status.includes('ffmpeg')||status.includes('compos')){ setProgress(85,'正在合成成片...'); }
+          else if(status.includes('truth')||status.includes('snap')||status.includes('archive')){ setProgress(95,'正在校验归档...'); }
+          else if(status === 'complete'){
+            clearInterval(poll);
+            setProgress(100,'制作完成！');
+            showResult(ep, epData);
+            return;
+          }
+          else if(status.includes('fail')||status.includes('error')||status.includes('abort')){
+            clearInterval(poll);
+            setProgress(100,'制作结束');
+            log('⚠️ 状态：' + status);
+            log('如果没有图片/视频API，分镜和剧本已经生成好了');
+            showResult(ep, epData);
+            return;
+          }
+        }
+        if(checks >= maxChecks){
+          clearInterval(poll);
+          log('⏰ 时间较长，可以稍后在"历史项目"里查看');
+          showResult(ep, epData || {status:'processing'});
+        }
+      } catch(e){ log('网络检查中...'); }
+    }, 3000);
+
+  } catch(e) {
+    log('❌ 出错了：' + e.message);
+    btn.disabled = false;
+    btn.textContent = '开 始 制 作';
+  }
+}
+
+function showResult(ep, data){
+  const btn = document.getElementById('startBtn');
+  btn.disabled = false;
+  btn.textContent = '再 做 一 个';
+  const box = document.getElementById('resultBox');
+  box.classList.add('show');
+  const status = data.status || '处理中';
+  const shots = data.shots || '-';
+  document.getElementById('resultInfo').innerHTML = 
+    '编号：<span>' + ep + '</span><br>' +
+    '状态：<span>' + status + '</span><br>' +
+    '分镜数：<span>' + shots + ' 镜</span><br>' +
+    '人物：<span>' + selectedChar + '</span>';
+  if(status === 'complete'){
+    document.getElementById('resultInfo').innerHTML += '<br>成片已生成，可在视频目录查看';
+  } else {
+    document.getElementById('resultInfo').innerHTML += '<br><br>📋 剧本分镜已生成<br>填入图片/视频API可继续生成画面';
+  }
+}
+</script>
+
+<!-- ZONGYUAN-ROOT 短剧版本统一导航 -->
+<style>
+#drama-version-bar{position:fixed;bottom:0;left:0;right:0;z-index:99999;background:rgba(10,10,18,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,215,0,.25);padding:8px 10px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;align-items:center}
+.drama-ver-btn{display:flex;flex-direction:column;align-items:center;padding:5px 8px;border-radius:10px;text-decoration:none;color:#777;font-size:10px;transition:all .2s;min-width:52px;border:1px solid transparent;line-height:1.2}
+.drama-ver-btn .dvi{font-size:18px;margin-bottom:2px}
+.drama-ver-btn.active{color:#ffd700;border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.1);font-weight:600}
+.drama-ver-btn:hover{color:#ffd700;background:rgba(255,215,0,.06)}
+.drama-ver-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(255,215,0,.5);white-space:nowrap;letter-spacing:1px}
+body{padding-bottom:72px !important}
+</style>
+<div id="drama-version-bar"><span class="drama-ver-label">版本切换</span></div>
+<script>
+(function(){
+  var V=[
+    {id:"full",n:"全功能",i:"🎬",u:"/drama/kunlun/"},
+    {id:"desktop",n:"专业版",i:"💻",u:"/drama/kunlun/desktop.html"},
+    {id:"mobile",n:"移动版",i:"📱",u:"/drama/kunlun/m/"},
+    {id:"canvas",n:"画布版",i:"🎨",u:"/drama/kunlun/canvas/"},
+    {id:"senior",n:"长辈版",i:"👴",u:"/drama/kunlun/senior/"}
+  ];
+  var CUR="senior";
+  var bar=document.getElementById("drama-version-bar");
+  V.forEach(function(v){
+    var a=document.createElement("a");
+    a.href=v.u;a.className="drama-ver-btn"+(v.id===CUR?" active":"");
+    a.innerHTML='<span class="dvi">'+v.i+"</span><span>"+v.n+"</span>";
+    bar.appendChild(a);
+  });
+})();
+</script>
+
+</body>
+</html>

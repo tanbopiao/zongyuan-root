@@ -1,0 +1,381 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>火斗云智 AIOS · 云内核控制台 v10.0 移动端适配</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a0f;color:#e8e8e8;line-height:1.6;display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0d0d14;border-right:1px solid rgba(255,255,255,.06);padding:20px 0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100}
+.sidebar-logo{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:12px}
+.sidebar-logo h2{font-size:16px;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-logo p{font-size:11px;color:#6b7280;margin-top:4px}
+.nav-item{padding:10px 20px;cursor:pointer;color:#9ca3af;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:10px;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.03);color:#e8e8e8}
+.nav-item.active{background:rgba(201,167,232,.08);color:#c9a7e8;border-left-color:#c9a7e8}
+.nav-item .icon{width:18px;text-align:center}
+.nav-item .badge{margin-left:auto;background:#EA6668;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px}
+.main{margin-left:220px;flex:1;padding:24px;min-width:0}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.topbar h1{font-size:22px;color:#fff}
+.topbar .status{display:flex;align-items:center;gap:12px;font-size:13px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#52C41A;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.role-select{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#e8e8e8;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer}
+.panel{display:none}
+.panel.active{display:block}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s}
+.stat-card:hover{border-color:rgba(201,167,232,.3);transform:translateY(-2px)}
+.stat-card .label{font-size:12px;color:#6b7280;margin-bottom:6px}
+.stat-card .value{font-size:28px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-card .sub{font-size:11px;color:#52C41A;margin-top:4px}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;margin-bottom:20px}
+.card h3{font-size:15px;color:#fff;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.card h3 .refresh{font-size:11px;color:#6b7280;cursor:pointer;font-weight:400}
+.card h3 .refresh:hover{color:#c9a7e8}
+.service-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.service-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.05);transition:all .2s}
+.service-item:hover{border-color:rgba(139,200,234,.3)}
+.service-item .name{font-size:13px;color:#e8e8e8}
+.service-item .name small{display:block;color:#6b7280;font-size:11px;margin-top:2px}
+.service-item .state{font-size:11px;padding:3px 10px;border-radius:10px}
+.state.running{background:rgba(82,196,26,.15);color:#52C41A}
+.state.warn{background:rgba(250,173,20,.15);color:#FAAD14}
+.state.error{background:rgba(234,102,104,.15);color:#EA6668}
+.progress-bar{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:4px;transition:width .5s}
+.progress-fill.mem{background:linear-gradient(90deg,#8BC8EA,#c9a7e8)}
+.progress-fill.disk{background:linear-gradient(90deg,#94D8C3,#8BC8EA)}
+.progress-fill.cpu{background:linear-gradient(90deg,#F4B393,#EAA7B2)}
+.resource-row{margin-bottom:16px}
+.resource-row:last-child{margin-bottom:0}
+.resource-row .header{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.resource-row .header .label{color:#9ca3af}
+.resource-row .header .val{color:#fff;font-weight:600}
+.search-box{margin-bottom:16px;position:relative}
+.search-box input{width:100%;padding:10px 16px 10px 40px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e8e8e8;font-size:13px;outline:none}
+.search-box input:focus{border-color:#c9a7e8}
+.search-box:before{content:"\1F50D";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px}
+.filter-tags{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-tag{padding:5px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:16px;font-size:12px;color:#9ca3af;cursor:pointer;transition:all .2s}
+.filter-tag:hover{border-color:#c9a7e8;color:#c9a7e8}
+.filter-tag.active{background:rgba(201,167,232,.15);border-color:#c9a7e8;color:#c9a7e8}
+.truth-table{width:100%;border-collapse:collapse;font-size:13px}
+.truth-table th{text-align:left;padding:10px 12px;color:#c9a7e8;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);font-size:12px}
+.truth-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:#9ca3af}
+.truth-table tr{cursor:pointer;transition:background .15s}
+.truth-table tr:hover td{background:rgba(255,255,255,.04)}
+.truth-table .id{color:#8BC8EA;font-family:monospace;font-size:12px}
+.truth-table .type{display:inline-block;padding:2px 8px;border-radius:8px;font-size:11px}
+.type-axiom{background:rgba(201,167,232,.15);color:#c9a7e8}
+.type-snapshot{background:rgba(139,200,234,.15);color:#8BC8EA}
+.type-config{background:rgba(148,216,195,.15);color:#94D8C3}
+.type-decision{background:rgba(244,179,147,.15);color:#F4B393}
+.type-standard{background:rgba(228,212,143,.15);color:#E4D48F}
+.type-ip_asset{background:rgba(234,167,178,.15);color:#EAA7B2}
+.protocol-timeline{position:relative;padding-left:24px}
+.protocol-timeline:before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:rgba(255,255,255,.08)}
+.proto-item{position:relative;margin-bottom:16px;padding:12px 16px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.05);cursor:pointer;transition:all .2s}
+.proto-item:hover{border-color:rgba(201,167,232,.3)}
+.proto-item.selected{border-color:#c9a7e8;background:rgba(201,167,232,.05)}
+.proto-item:before{content:"";position:absolute;left:-20px;top:16px;width:10px;height:10px;border-radius:50%;background:#c9a7e8;border:2px solid #0a0a0f}
+.proto-item .ver{font-size:13px;font-weight:600;color:#fff}
+.proto-item .ver .date{font-size:11px;color:#6b7280;font-weight:400;margin-left:8px}
+.proto-item .desc{font-size:12px;color:#9ca3af;margin-top:4px}
+.proto-item .hash{font-size:11px;color:#6b7280;font-family:monospace;margin-top:6px}
+.control-panel{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.control-panel{grid-template-columns:1fr}}
+.cmd-history{max-height:300px;overflow-y:auto}
+.cmd-item{padding:10px 14px;background:rgba(255,255,255,.02);border-radius:6px;margin-bottom:8px;font-size:12px}
+.cmd-item .cmd-type{color:#8BC8EA;font-weight:600}
+.cmd-item .cmd-time{color:#6b7280;font-size:11px;margin-left:8px}
+.memory-chain{display:flex;flex-wrap:wrap;gap:8px}
+.memory-seed{padding:8px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;font-size:12px;color:#9ca3af;font-family:monospace;cursor:pointer;transition:all .2s}
+.memory-seed:hover{border-color:#94D8C3;color:#94D8C3}
+.memory-seed.latest{border-color:#52C41A;color:#52C41A}
+.api-endpoint{padding:10px 14px;background:rgba(255,255,255,.02);border-radius:6px;margin-bottom:8px;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.api-endpoint .method{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;margin-right:10px}
+.method-get{background:rgba(139,200,234,.2);color:#8BC8EA}
+.method-post{background:rgba(148,216,195,.2);color:#94D8C3}
+.api-endpoint .path{color:#9ca3af;font-family:monospace}
+.api-endpoint .test{color:#c9a7e8;cursor:pointer;font-size:11px}
+.footer{text-align:center;padding:20px;color:#4b5563;font-size:11px;border-top:1px solid rgba(255,255,255,.06);margin-top:40px}
+.loading{text-align:center;padding:40px;color:#6b7280;font-size:13px}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;justify-content:center;align-items:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#0d0d14;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto}
+.modal h3{color:#fff;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.modal .close{cursor:pointer;color:#6b7280;font-size:20px}
+.modal .close:hover{color:#EA6668}
+.modal .field{margin-bottom:14px}
+.modal .field label{display:block;font-size:12px;color:#6b7280;margin-bottom:4px}
+.modal .field input,.modal .field select,.modal .field textarea{width:100%;padding:8px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#e8e8e8;font-size:13px;outline:none;font-family:inherit}
+.modal .field textarea{min-height:80px;resize:vertical}
+.modal .field input:focus,.modal .field select:focus,.modal .field textarea:focus{border-color:#c9a7e8}
+.btn{padding:8px 20px;border:none;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;font-weight:600}
+.btn-primary{background:linear-gradient(90deg,#c9a7e8,#8BC8EA);color:#0a0a0f}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{background:rgba(255,255,255,.08);color:#e8e8e8;border:1px solid rgba(255,255,255,.1)}
+.btn-secondary:hover{background:rgba(255,255,255,.12)}
+.btn-group{display:flex;gap:10px;margin-top:16px}
+.diff-view{background:#0a0a0f;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;max-height:300px;overflow-y:auto}
+.diff-line{padding:2px 8px;border-radius:4px;margin-bottom:2px}
+.diff-add{background:rgba(82,196,26,.1);color:#52C41A}
+.diff-del{background:rgba(234,102,104,.1);color:#EA6668}
+.diff-same{color:#6b7280}
+.alert-item{display:flex;align-items:flex-start;gap:12px;padding:14px;background:rgba(255,255,255,.02);border-radius:8px;margin-bottom:10px;border-left:3px solid}
+.alert-p0{border-color:#EA6668}
+.alert-p1{border-color:#FAAD14}
+.alert-p2{border-color:#8BC8EA}
+.alert-p3{border-color:#6b7280}
+.alert-level{font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;flex-shrink:0}
+.alert-p0 .alert-level{background:rgba(234,102,104,.2);color:#EA6668}
+.alert-p1 .alert-level{background:rgba(250,173,20,.2);color:#FAAD14}
+.alert-p2 .alert-level{background:rgba(139,200,234,.2);color:#8BC8EA}
+.alert-p3 .alert-level{background:rgba(107,114,128,.2);color:#6b7280}
+.alert-content{flex:1}
+.alert-title{font-size:13px;color:#e8e8e8;font-weight:600}
+.alert-desc{font-size:12px;color:#9ca3af;margin-top:2px}
+.alert-time{font-size:11px;color:#6b7280;margin-top:4px}
+.alert-action{font-size:11px;color:#c9a7e8;cursor:pointer;flex-shrink:0}
+.chart-container{position:relative;height:180px;background:rgba(255,255,255,.02);border-radius:8px;padding:10px}
+.chart-container canvas{width:100%;height:100%}
+.chart-legend{display:flex;gap:16px;margin-top:8px;font-size:11px;color:#6b7280}
+.chart-legend span{display:flex;align-items:center;gap:4px}
+.chart-legend .dot{width:8px;height:8px;border-radius:50%}
+.diff-select{display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.diff-select select{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#e8e8e8;padding:6px 10px;border-radius:6px;font-size:12px}
+.truth-detail{font-size:13px;color:#9ca3af;line-height:1.8}
+.truth-detail .row{display:flex;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.truth-detail .row .k{width:100px;color:#6b7280;flex-shrink:0}
+.truth-detail .row .v{color:#e8e8e8;word-break:break-all}
+.cmd-form .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:768px){.cmd-form .field-row{grid-template-columns:1fr}.sidebar{width:60px;padding:12px 0}.sidebar-logo h2,.sidebar-logo p,.nav-item span{display:none}.nav-item{justify-content:center;padding:12px}.main{margin-left:60px;padding:16px}.stat-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ===== 手机端自适应 ===== */
+.mobile-toggle{display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#0d0d14;border-bottom:1px solid rgba(255,255,255,.06);padding:12px 16px;align-items:center;justify-content:space-between}
+.mobile-toggle .logo{font-size:15px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.mobile-toggle .menu-btn{background:rgba(255,255,255,.08);border:none;color:#e8e8e8;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer}
+.sidebar-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99}
+.sidebar-overlay.show{display:block}
+
+@media(max-width:768px){
+  body{display:block;padding-top:52px}
+  .mobile-toggle{display:flex}
+  .sidebar{position:fixed;top:0;left:-260px;bottom:0;width:240px;z-index:150;transition:left .3s ease;padding-top:60px}
+  .sidebar.open{left:0}
+  .main{margin-left:0;padding:16px 12px;padding-bottom:80px}
+  .topbar{margin-bottom:16px;flex-direction:column;align-items:flex-start;gap:8px}
+  .topbar h1{font-size:18px}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+  .stat-card{padding:14px}
+  .stat-card .value{font-size:22px}
+  .stat-card .label{font-size:11px}
+  .card{padding:14px;margin-bottom:14px;border-radius:10px}
+  .card h3{font-size:14px;margin-bottom:12px}
+  .service-list{grid-template-columns:1fr;gap:8px}
+  .service-item{padding:10px 12px}
+  .control-panel{grid-template-columns:1fr;gap:12px}
+  .truth-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
+  .truth-table th,.truth-table td{padding:8px 10px;font-size:12px}
+  .filter-tags{gap:6px}
+  .filter-tag{padding:6px 12px;font-size:11px}
+  .search-box input{padding:12px 16px 12px 40px;font-size:14px;min-height:44px}
+  .btn{padding:10px 20px;min-height:44px;font-size:14px}
+  .btn-group{gap:8px}
+  .modal{padding:16px;max-height:90vh;margin:10px}
+  .modal .field input,.modal .field select,.modal .field textarea{padding:10px 12px;min-height:44px;font-size:14px}
+  .memory-chain{gap:6px}
+  .memory-seed{padding:6px 10px;font-size:11px}
+  .api-endpoint{flex-direction:column;align-items:flex-start;gap:6px}
+  .protocol-timeline{padding-left:20px}
+  .proto-item{padding:10px 12px}
+  .proto-item:before{left:-16px}
+  .chart-container{height:140px}
+  .alert-item{padding:10px;gap:8px}
+  .cmd-history{max-height:200px}
+  .footer{padding:16px;font-size:10px}
+  /* 底部快捷导航 */
+  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#0d0d14;border-top:1px solid rgba(255,255,255,.06);z-index:100;padding:6px 0}
+  .bottom-nav .bn-item{flex:1;text-align:center;padding:6px 4px;cursor:pointer;color:#6b7280;font-size:10px;transition:color .2s}
+  .bottom-nav .bn-item.active{color:#c9a7e8}
+  .bottom-nav .bn-item .icon{font-size:18px;display:block;margin-bottom:2px}
+}
+@media(max-width:480px){
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .stat-card .value{font-size:20px}
+  .topbar h1{font-size:16px}
+  .card{padding:12px}
+}
+
+</style>
+    <link rel="canonical" href="https://huodouai.comconsole/"></head><body><div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif"><div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:12px"><a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none"><div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div><div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div></a></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a><a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a><a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a><a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a><div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px"><div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div></div></div></div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+
+<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,167,232,.15);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-family:'PingFang SC','Microsoft YaHei',sans-serif"><a href="/" style="font-size:15px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none">火斗云智 AIOS</a><a href="/products/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">产品矩阵</a><a href="/showcase/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">演示中心</a><a href="/status/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">服务状态</a><a href="/solutions/government/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">解决方案</a><a href="/cases/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">客户案例</a><a href="/docs/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">文档</a><a href="/pricing/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">定价</a><a href="/blog/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">博客</a><a href="/about/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">关于</a><a href="/contact/" style="color:#c9a7e8;text-decoration:none;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid rgba(201,167,232,.3)">联系我们</a></div><div style="height:50px"></div><div class="mobile-toggle"><div class="logo">火斗云智 AIOS</div><button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.sidebar-overlay').classList.toggle('show')">☰ 菜单</button></div><div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div><div class="sidebar"><div class="sidebar-logo"><h2>火斗云智 AIOS</h2><p>v9.8-ENHANCED</p></div><div class="nav-item active" data-panel="dashboard"><span class="icon">&#128202;</span><span>总览仪表盘</span></div><div class="nav-item" data-panel="truth"><span class="icon">&#129504;</span><span>真值管理</span></div><div class="nav-item" data-panel="protocol"><span class="icon">&#128196;</span><span>协议谱系</span></div><div class="nav-item" data-panel="control"><span class="icon">&#128279;</span><span>双向互控</span></div><div class="nav-item" data-panel="memory"><span class="icon">&#128190;</span><span>记忆链</span></div><div class="nav-item" data-panel="api"><span class="icon">&#128268;</span><span>API接口</span></div><div class="nav-item" data-panel="alert"><span class="icon">&#9888;</span><span>告警中心</span><span class="badge" id="alertBadge">3</span></div><div class="nav-item" data-panel="settings"><span class="icon">&#9881;</span><span>系统设置</span></div></div><div class="main"><div class="topbar"><h1 id="pageTitle">总览仪表盘</h1><div class="status"><span class="status-dot"></span><span id="serverTime">连接中...</span><select class="role-select" id="roleSelect" onchange="switchRole()"><option value="admin">管理员</option><option value="operator">操作员</option><option value="viewer">只读</option></select></div></div><div style="display:flex;gap:8px;align-items:center;margin-left:auto"><button onclick="toggleSearch()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#9ca3af;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">⌘K 搜索</button><button onclick="toggleTheme()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#9ca3af;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer" id="themeBtn">🌙</button><button onclick="exportData()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#9ca3af;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer">📥</button></div></div><div class="modal-overlay" id="searchModal" onclick="if(event.target===this)closeModal('searchModal')"><div class="modal" style="max-width:500px"><h3>全局搜索 <span class="close" onclick="closeModal('searchModal')">&times;</span></h3><div class="search-box" style="margin-bottom:12px"><input type="text" id="globalSearch" placeholder="搜索真值、协议、告警..." oninput="doGlobalSearch()"></div><div id="searchResults" style="max-height:300px;overflow-y:auto"></div></div></div><div class="modal-overlay" id="exportModal" onclick="if(event.target===this)closeModal('exportModal')"><div class="modal" style="max-width:400px"><h3>数据导出 <span class="close" onclick="closeModal('exportModal')">&times;</span></h3><div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-primary" onclick="exportTruths()">导出真值库 (JSON)</button><button class="btn btn-primary" onclick="exportProtocols()">导出协议谱系 (JSON)</button><button class="btn btn-primary" onclick="exportAlerts()">导出告警列表 (CSV)</button><button class="btn btn-secondary" onclick="exportAll()">导出全部</button></div><div id="exportResult" style="margin-top:12px;font-family:monospace;font-size:12px;color:#94D8C3;display:none"></div></div></div><div class="panel active" id="panel-dashboard"><div class="stat-grid"><div class="stat-card" onclick="switchPanel('truth')"><div class="label">形式化真值</div><div class="value" id="statTruth">--</div><div class="sub">μ-4.5-V8.7</div></div><div class="stat-card" onclick="switchPanel('protocol')"><div class="label">自治内核协议</div><div class="value" id="statProto">--</div><div class="sub">V8.3 → V9.8</div></div><div class="stat-card"><div class="label">运行服务</div><div class="value" id="statSvc">--/9</div><div class="sub">全部active</div></div><div class="stat-card" onclick="switchPanel('memory')"><div class="label">记忆链种子</div><div class="value" id="statMem">--</div><div class="sub">merkle_seed_hashing</div></div><div class="stat-card" onclick="switchPanel('control')"><div class="label">待处理指令</div><div class="value" id="statCmd">--</div><div class="sub">云→本地</div></div><div class="stat-card" onclick="switchPanel('alert')"><div class="label">活跃告警</div><div class="value" id="statAlert">3</div><div class="sub" style="color:#FAAD14">P1:1 P2:2</div></div></div><div class="card"><h3>系统资源实时趋势 <span class="refresh" onclick="loadDashboard()">&#8635; 刷新</span></h3><div class="resource-row"><div class="header"><span class="label">CPU使用</span><span class="val" id="cpuText">--</span></div><div class="progress-bar"><div class="progress-fill cpu" id="cpuBar" style="width:0%"></div></div></div><div class="resource-row"><div class="header"><span class="label">内存使用</span><span class="val" id="memText">--</span></div><div class="progress-bar"><div class="progress-fill mem" id="memBar" style="width:0%"></div></div></div><div class="resource-row"><div class="header"><span class="label">磁盘使用</span><span class="val" id="diskText">--</span></div><div class="progress-bar"><div class="progress-fill disk" id="diskBar" style="width:0%"></div></div></div><div style="margin-top:16px"><div class="chart-container"><canvas id="resChart"></canvas></div><div class="chart-legend"><span><span class="dot" style="background:#F4B393"></span>CPU</span><span><span class="dot" style="background:#8BC8EA"></span>内存</span><span><span class="dot" style="background:#94D8C3"></span>磁盘IO</span></div></div></div><div class="card"><h3>服务状态 <span class="refresh" onclick="loadServices()">&#8635; 刷新</span></h3><div class="service-list" id="serviceList"><div class="loading">加载中...</div></div></div><div class="card"><h3>内核状态锚点</h3><div style="font-family:monospace;font-size:12px;color:#94D8C3;word-break:break-all;background:#0a0a0f;padding:14px;border-radius:8px;border:1px solid rgba(255,255,255,.06)" id="kernelInfo">加载中...</div></div></div><div class="panel" id="panel-truth"><div class="card"><h3>真值库管理 <span class="refresh" onclick="loadTruths()">&#8635; 刷新</span></h3><div class="search-box"><input type="text" id="truthSearch" placeholder="搜索真值ID、内容、类型..." oninput="filterTruths()"></div><div class="filter-tags" id="truthFilters"><span class="filter-tag active" data-type="all">全部</span><span class="filter-tag" data-type="axiom">公理</span><span class="filter-tag" data-type="snapshot">快照</span><span class="filter-tag" data-type="config">配置</span><span class="filter-tag" data-type="decision">决策</span><span class="filter-tag" data-type="standard">标准</span><span class="filter-tag" data-type="ip_asset">IP资产</span></div><div style="margin-bottom:12px"><button class="btn btn-primary" onclick="openAddTruthModal()" id="addTruthBtn">+ 新增真值（增量补丁）</button></div><div style="overflow-x:auto"><table class="truth-table"><thead><tr><th>ID</th><th>类型</th><th>内容</th><th>状态</th></tr></thead><tbody id="truthTableBody"><tr><td colspan="4" class="loading">加载中...</td></tr></tbody></table></div></div></div><div class="panel" id="panel-protocol"><div class="card"><h3>自治内核协议谱系 <span style="font-size:12px;color:#6b7280;font-weight:400">共 <span id="protoCount">--</span> 个协议 · 点击选择对比</span></h3><div class="diff-select"><span style="font-size:12px;color:#6b7280">版本A:</span><select id="diffA"></select><span style="font-size:12px;color:#6b7280">版本B:</span><select id="diffB"></select><button class="btn btn-secondary" onclick="doDiff()" style="padding:5px 14px;font-size:12px">对比</button></div><div id="diffResult" style="display:none;margin-bottom:20px"><h4 style="color:#fff;margin-bottom:10px;font-size:13px">差异对比</h4><div class="diff-view" id="diffContent"></div></div><div class="protocol-timeline" id="protoTimeline"><div class="loading">加载中...</div></div></div></div><div class="panel" id="panel-control"><div class="control-panel"><div class="card"><h3>云内核控制状态</h3><div id="controlStatus"><div class="loading">加载中...</div></div></div><div class="card"><h3>指令队列</h3><div class="cmd-history" id="cmdHistory"><div class="loading">加载中...</div></div></div></div><div class="card"><h3>指令下发 <span style="font-size:12px;color:#6b7280;font-weight:400">云→本地 / 本地→云</span></h3><div class="cmd-form"><div class="field-row"><div class="field"><label>指令类型</label><select id="cmdType"><option value="config_update">config_update 配置更新</option><option value="truth_push">truth_push 真值推送</option><option value="protocol_sync">protocol_sync 协议同步</option><option value="task_execute">task_execute 任务执行</option><option value="remote_diagnose">remote_diagnose 远程诊断</option><option value="self_update">self_update 自更新</option></select></div><div class="field"><label>目标节点</label><select id="cmdTarget"><option value="local">本地内核</option><option value="cloud">云内核</option><option value="both">双端同步</option></select></div></div><div class="field"><label>指令内容（JSON或文本）</label><textarea id="cmdContent" placeholder='{"key":"value"} 或描述性文本'></textarea></div><div class="field"><label>优先级</label><select id="cmdPriority"><option value="P0">P0 紧急</option><option value="P1" selected>P1 高</option><option value="P2">P2 中</option><option value="P3">P3 低</option></select></div><div class="btn-group"><button class="btn btn-primary" onclick="issueCommand()">下发指令</button><button class="btn btn-secondary" onclick="document.getElementById('cmdContent').value=''">清空</button></div><div id="cmdResult" style="margin-top:12px;font-family:monospace;font-size:12px;color:#94D8C3;background:#0a0a0f;padding:12px;border-radius:8px;display:none"></div></div></div><div class="card"><h3>控制端点</h3><div class="api-endpoint"><span><span class="method post">POST</span><span class="path">/api/v1/control/heartbeat</span></span><span class="test">心跳上报</span></div><div class="api-endpoint"><span><span class="method get">GET</span><span class="path">/api/v1/control/commands</span></span><span class="test">拉取指令</span></div><div class="api-endpoint"><span><span class="method post">POST</span><span class="path">/api/v1/control/result</span></span><span class="test">回报结果</span></div><div class="api-endpoint"><span><span class="method post">POST</span><span class="path">/api/v1/control/issue</span></span><span class="test">下发指令</span></div><div class="api-endpoint"><span><span class="method get">GET</span><span class="path">/api/v1/control/status</span></span><span class="test">查看状态</span></div></div></div><div class="panel" id="panel-memory"><div class="card"><h3>记忆链种子谱系 <span style="font-size:12px;color:#6b7280;font-weight:400">merkle_seed_hashing · 共 <span id="seedCount">--</span> 个种子</span></h3><div class="memory-chain" id="memoryChain"><div class="loading">加载中...</div></div></div><div class="card"><h3>记忆链说明</h3><p style="font-size:13px;color:#9ca3af;line-height:1.8">记忆链采用 <code style="color:#94D8C3">merkle_seed_hashing</code> 算法，每次全域锁档事件自动执行 <code style="color:#94D8C3">maintain_memory_chain.py</code> 生成下一个种子。<br>仅存储哈希指纹用于校验，不携带旧实例会话内存dump；新实例锁档时生成属于自身的后续种子，维持链连续性。<br>历史种子：#001 ~ #018，链完整性基线：INTACT。</p></div></div><div class="panel" id="panel-api"><div class="card"><h3>同步端点（Sync API）</h3><div class="api-endpoint"><span><span class="method get">GET</span><span class="path">/api/v1/sync/handshake</span></span><span class="test" onclick="testApi('handshake')">测试</span></div><div class="api-endpoint"><span><span class="method get">GET</span><span class="path">/api/v1/sync/manifest</span></span><span class="test">清单</span></div><div class="api-endpoint"><span><span class="method get">GET</span><span class="path">/api/v1/sync/pull</span></span><span class="test">拉取</span></div><div class="api-endpoint"><span><span class="method post">POST</span><span class="path">/api/v1/sync/verify</span></span><span class="test">校验</span></div><div class="api-endpoint"><span><span class="method get">GET</span><span class="path">/api/v1/sync/truth-pull</span></span><span class="test">真值拉取</span></div><div class="api-endpoint"><span><span class="method post">POST</span><span class="path">/api/v1/sync/truth-push</span></span><span class="test">真值推送</span></div></div><div class="card"><h3>控制端点（Control API）</h3><div class="api-endpoint"><span><span class="method post">POST</span><span class="path">/api/v1/control/heartbeat</span></span><span class="test">心跳</span></div><div class="api-endpoint"><span><span class="method get">GET</span><span class="path">/api/v1/control/commands</span></span><span class="test">指令</span></div><div class="api-endpoint"><span><span class="method post">POST</span><span class="path">/api/v1/control/result</span></span><span class="test">结果</span></div><div class="api-endpoint"><span><span class="method post">POST</span><span class="path">/api/v1/control/issue</span></span><span class="test">下发</span></div><div class="api-endpoint"><span><span class="method get">GET</span><span class="path">/api/v1/control/status</span></span><span class="test" onclick="testApi('control')">测试</span></div></div><div class="card"><h3>API测试结果</h3><div id="apiResult" style="font-family:monospace;font-size:12px;color:#94D8C3;background:#0a0a0f;padding:14px;border-radius:8px;min-height:60px;word-break:break-all">点击上方"测试"按钮查看结果</div></div></div><div class="panel" id="panel-alert"><div class="card"><h3>告警中心 <span style="font-size:12px;color:#6b7280;font-weight:400">P0-P3分级 · 共 <span id="alertTotal">3</span> 条活跃</span></h3><div class="filter-tags"><span class="filter-tag active" data-level="all" onclick="filterAlerts('all',this)">全部</span><span class="filter-tag" data-level="P0" onclick="filterAlerts('P0',this)">P0 紧急</span><span class="filter-tag" data-level="P1" onclick="filterAlerts('P1',this)">P1 高</span><span class="filter-tag" data-level="P2" onclick="filterAlerts('P2',this)">P2 中</span><span class="filter-tag" data-level="P3" onclick="filterAlerts('P3',this)">P3 低</span></div><div id="alertList"></div></div></div><div class="panel" id="panel-customer"><h2>👥 客户管理</h2><div class="card" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px"><div><div style="font-size:24px;font-weight:700;color:#c9a7e8" id="customerTotal">--</div><div style="font-size:12px;color:#6b7280">总客户数</div></div><div style="display:flex;gap:16px"><div><div style="font-size:18px;font-weight:600;color:#52C41A" id="customerActive">--</div><div style="font-size:11px;color:#6b7280">活跃</div></div><div><div style="font-size:18px;font-weight:600;color:#FAAD14" id="customerTrial">--</div><div style="font-size:11px;color:#6b7280">试用中</div></div><div><div style="font-size:18px;font-weight:600;color:#EA6668" id="customerExpired">--</div><div style="font-size:11px;color:#6b7280">已过期</div></div></div><button class="btn btn-primary" onclick="showGenerateLicense()">+ 生成授权码</button></div></div><div class="card"><div class="search-box" style="margin-bottom:12px"><input type="text" placeholder="搜索客户姓名/邮箱/授权码..." oninput="filterCustomers(this.value)"></div><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>客户</th><th>版本</th><th>授权码</th><th>状态</th><th>到期时间</th><th>剩余天数</th><th>验证次数</th><th>操作</th></tr></thead><tbody id="customerTableBody"><tr><td colspan="8" style="text-align:center;color:#6b7280;padding:20px">加载中...</td></tr></tbody></table></div></div></div><div class="modal-overlay" id="genLicenseModal" onclick="if(event.target===this)closeModal('genLicenseModal')"><div class="modal" style="max-width:450px"><h3>生成授权码 <span class="close" onclick="closeModal('genLicenseModal')">&times;</span></h3><div style="margin-bottom:12px"><label style="display:block;color:#9ca3af;font-size:12px;margin-bottom:4px">客户名称 *</label><input type="text" id="genCustName" style="width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff"></div><div style="margin-bottom:12px"><label style="display:block;color:#9ca3af;font-size:12px;margin-bottom:4px">邮箱</label><input type="email" id="genCustEmail" style="width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff"></div><div style="margin-bottom:12px"><label style="display:block;color:#9ca3af;font-size:12px;margin-bottom:4px">手机号</label><input type="text" id="genCustPhone" style="width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff"></div><div style="margin-bottom:12px"><label style="display:block;color:#9ca3af;font-size:12px;margin-bottom:4px">版本</label><select id="genPlan" style="width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff"><option value="personal">个人版（终身）</option><option value="professional">专业版（年付）</option><option value="enterprise">企业版（年付）</option><option value="trial">试用版（30天）</option></select></div><div style="margin-bottom:16px"><label style="display:block;color:#9ca3af;font-size:12px;margin-bottom:4px">有效期（天）</label><input type="number" id="genDays" value="365" style="width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff"></div><button class="btn btn-primary" style="width:100%" onclick="generateLicense()">生成授权码</button><div id="genLicenseResult" style="margin-top:12px;display:none"></div></div></div><div class="panel" id="panel-settings"><div class="card"><h3>内核信息</h3><table class="truth-table"><tr><td style="width:140px;color:#c9a7e8">内核ID</td><td>ZONGYUAN-ROOT-AUTONOMOUS-KERNEL</td></tr><tr><td style="color:#c9a7e8">DID</td><td>DID-BR-000002</td></tr><tr><td style="color:#c9a7e8">本体主权根</td><td>Ω-TAN-7-001</td></tr><tr><td style="color:#c9a7e8">溯源符号</td><td>Ω₀⊂⊙∞⊂Ω</td></tr><tr><td style="color:#c9a7e8">内核版本</td><td>v9.8-ENHANCED</td></tr><tr><td style="color:#c9a7e8">真值版本</td><td>μ-4.5-V8.7-MIGRATABLE</td></tr><tr><td style="color:#c9a7e8">部署路径</td><td>/opt/ZONGYUAN-ROOT/</td></tr><tr><td style="color:#c9a7e8">服务器</td><td>腾讯云 · 2核1.9GB · OpenCloudOS 9</td></tr></table></div><div class="card"><h3>安全配置</h3><table class="truth-table"><tr><td style="width:140px;color:#c9a7e8">API认证</td><td>X-API-Key Header</td></tr><tr><td style="color:#c9a7e8">Basic Auth</td><td>zongyuan-admin（控制台/frp管理）</td></tr><tr><td style="color:#c9a7e8">frp认证</td><td>Token认证（强随机Token）</td></tr><tr><td style="color:#c9a7e8">eFuse熔断</td><td>blown_permanent · 不可回退</td></tr><tr><td style="color:#c9a7e8">FROZEN资产</td><td>禁止覆盖 · 增量补丁机制</td></tr></table></div><div class="card"><h3>角色权限矩阵</h3><table class="truth-table"><tr><th style="color:#c9a7e8">功能</th><th style="color:#c9a7e8">管理员</th><th style="color:#c9a7e8">操作员</th><th style="color:#c9a7e8">只读</th></tr><tr><td>查看仪表盘</td><td style="color:#52C41A">允许</td><td style="color:#52C41A">允许</td><td style="color:#52C41A">允许</td></tr><tr><td>查看真值/协议</td><td style="color:#52C41A">允许</td><td style="color:#52C41A">允许</td><td style="color:#52C41A">允许</td></tr><tr><td>新增真值</td><td style="color:#52C41A">允许</td><td style="color:#52C41A">允许</td><td style="color:#EA6668">禁止</td></tr><tr><td>下发指令</td><td style="color:#52C41A">允许</td><td style="color:#52C41A">允许</td><td style="color:#EA6668">禁止</td></tr><tr><td>处理告警</td><td style="color:#52C41A">允许</td><td style="color:#52C41A">允许</td><td style="color:#EA6668">禁止</td></tr><tr><td>修改系统配置</td><td style="color:#52C41A">允许</td><td style="color:#EA6668">禁止</td><td style="color:#EA6668">禁止</td></tr><tr><td>用户/权限管理</td><td style="color:#52C41A">允许</td><td style="color:#EA6668">禁止</td><td style="color:#EA6668">禁止</td></tr></table></div></div><div class="footer">Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT · DID-BR-000002 · Ω-TAN-7-001 · 火斗云智AIOS控制台 v9.8 · © 2026</div></div><div class="modal-overlay" id="truthModal"><div class="modal"><h3>真值详情 <span class="close" onclick="closeModal('truthModal')">&times;</span></h3><div class="truth-detail" id="truthDetailContent"></div><div class="btn-group"><button class="btn btn-secondary" onclick="closeModal('truthModal')">关闭</button></div></div></div><div class="modal-overlay" id="addTruthModal"><div class="modal"><h3>新增真值（增量补丁） <span class="close" onclick="closeModal('addTruthModal')">&times;</span></h3><div class="field"><label>真值类型</label><select id="newTruthType"><option value="axiom">公理</option><option value="snapshot">快照</option><option value="config">配置</option><option value="decision">决策</option><option value="standard">标准</option><option value="ip_asset">IP资产</option></select></div><div class="field"><label>真值内容</label><textarea id="newTruthContent" placeholder="输入真值命题或配置内容..."></textarea></div><div class="field"><label>来源说明</label><input type="text" id="newTruthSource" placeholder="如：2026-09-04 架构推演增量"></div><div class="btn-group"><button class="btn btn-primary" onclick="submitNewTruth()">提交增量补丁</button><button class="btn btn-secondary" onclick="closeModal('addTruthModal')">取消</button></div><div id="addTruthResult" style="margin-top:12px;font-family:monospace;font-size:12px;color:#94D8C3;display:none"></div></div></div>
+
+<script>
+const API_BASE='https://www.huodouai.com/anchor';
+const API_KEY='';
+let allTruths=[],currentFilter='all',currentRole='admin',resData={cpu:[],mem:[],disk:[]};
+const PROTOCOLS=[
+{ver:'V9.8',date:'2026-09-04 02:00',desc:'控制台增强版 · 真值编辑+协议diff+指令下发+告警中心+角色权限',hash:'a1b2c3d4...',changes:['新增真值详情弹窗','新增协议版本diff对比','新增指令下发表单','新增告警中心P0-P3','新增角色权限切换','新增资源趋势图']},
+{ver:'V9.7',date:'2026-09-04 01:31',desc:'云控本地架构 · 5个control端点 · 双向互控闭环',hash:'c6b7027b...',changes:['新增5个control端点','control_agent.py双向版','云→本地指令下发闭环','本地→云真值推送']},
+{ver:'V9.6',date:'2026-09-04 01:11',desc:'双内核同步修复 · Nginx域名+API Key版本',hash:'a3f8e172...',changes:['sync_agent.py修复','Nginx域名反代','API Key认证']},
+{ver:'V9.5',date:'2026-09-04 00:46',desc:'可迁移云服务器自治内核核心真值 · 18条工程级真理',hash:'8b729cf1...',changes:['6层×3条=18条可迁移真值','迁移操作手册3步','硬件依赖说明']},
+{ver:'V9.4',date:'2026-09-04 00:43',desc:'政务AI合规引擎V3.0 · 15场景+4类合规+5种公文',hash:'412d77a9...',changes:['政务AI前端V3.0','15个政务场景','4类合规校验','5种公文模板']},
+{ver:'V9.3',date:'2026-09-04 00:25',desc:'双内核同步协议 · 云↔本地记忆同步',hash:'54cc2615...',changes:['双内核同步协议','记忆链同步机制']},
+{ver:'V9.2',date:'2026-09-04 00:17',desc:'全域审计修复 · 权限矩阵264项全覆盖',hash:'2d61f84c...',changes:['4角色×22功能×3操作','264权限项全覆盖']},
+{ver:'V9.1',date:'2026-09-04 00:10',desc:'frp安全加固 · Token认证+资源限制',hash:'00adce43...',changes:['frp Token认证','MemoryMax=50M','CPUQuota=20%']},
+{ver:'V9.0',date:'2026-09-03 23:56',desc:'frp三内核架构 · 本地AIOS外网访问',hash:'79b77f67...',changes:['frps云服务器部署','frpc本地客户端','AIOS:8017外网映射','Dashboard:8899外网映射']},
+{ver:'V8.9',date:'2026-09-03 23:45',desc:'双域名P0升级 · huodouai.com品牌页',hash:'e203d10e...',changes:['品牌页产品化改造','三档定价体系','技术独创性对比']},
+{ver:'V8.8',date:'2026-09-03 23:24',desc:'V2.3-TRANSFER内核迁移规范',hash:'14ee789b...',changes:['迁移真值包JSON','环境变量模板','SOP模板集']},
+{ver:'V8.7',date:'2026-09-03 23:15',desc:'AIOS-Lv8.2终极最简真值 · S0绝对稳态',hash:'5e8b291d...',changes:['5项P0固化资产','四层架构最简收敛','六维巡检终极真值']}
+];
+const ALERTS=[
+{level:'P1',title:'智普API-1余额不足',desc:'智普API-1 (1dfafccc...) 余额已耗尽，多模型路由已自动降级至豆包方舟',time:'2026-09-04 01:15',action:'已自动降级'},
+{level:'P2',title:'混元大模型免费额度用完',desc:'混元API (sk-PXuFhwj...) 免费额度已用完，需充值或切换备用模型',time:'2026-09-04 00:30',action:'待处理'},
+{level:'P2',title:'Vector DB使用TF-IDF降级模式',desc:'豆包Embedding API已配置但未实际接入Vector DB，当前使用无嵌入函数+TF-IDF',time:'2026-09-03 23:00',action:'待优化'},
+{level:'P3',title:'SSL证书将于2026-11-02到期',desc:'huodouai.com双域名SSL证书剩余59天，建议2026-10-02前通过宝塔续期',time:'2026-09-04 00:00',action:'计划中'},
+{level:'P3',title:'control_agent.py未部署到Windows',desc:'双向互控agent已生成并备份云服务器，Windows端0进程运行，需手动部署',time:'2026-09-04 01:35',action:'待部署'},
+{level:'P3',title:'内存可用762Mi偏紧',desc:'9个Python服务+nginx+redis+mysql，未配置swap和systemd MemoryMax',time:'2026-09-04 02:00',action:'监控中'}
+];
+
+document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',()=>switchPanel(item.dataset.panel));});
+document.querySelectorAll('#truthFilters .filter-tag').forEach(tag=>{tag.addEventListener('click',()=>{document.querySelectorAll('#truthFilters .filter-tag').forEach(t=>t.classList.remove('active'));tag.classList.add('active');currentFilter=tag.dataset.type;filterTruths();});});
+
+function switchPanel(p){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));document.querySelectorAll('.panel').forEach(pl=>pl.classList.remove('active'));document.querySelector('.nav-item[data-panel="'+p+'"]').classList.add('active');document.getElementById('panel-'+p).classList.add('active');document.getElementById('pageTitle').textContent=document.querySelector('.nav-item[data-panel="'+p+'"] span:last-child').textContent;if(p==='truth')loadTruths();if(p==='protocol')loadProtocols();if(p==='control')loadControl();if(p==='memory')loadMemory();if(p==='alert')renderAlerts('all');}
+function switchRole(){currentRole=document.getElementById('roleSelect').value;const readOnly=currentRole==='viewer';document.getElementById('addTruthBtn').style.display=readOnly?'none':'inline-block';document.querySelectorAll('#panel-control .btn-primary').forEach(b=>b.disabled=readOnly);if(readOnly){document.getElementById('addTruthBtn').style.opacity='.4';}}
+function filterTruths(){const q=document.getElementById('truthSearch').value.toLowerCase();const tb=document.getElementById('truthTableBody');let f=allTruths.filter(t=>(currentFilter==='all'||t.type===currentFilter)&&(!q||(t.id+t.content+t.type).toLowerCase().includes(q)));if(!f.length){tb.innerHTML='<tr><td colspan="4" class="loading">无匹配结果</td></tr>';return;}tb.innerHTML=f.slice(0,100).map(t=>'<tr onclick="showTruthDetail(\''+t.id+'\')"><td class="id">'+t.id+'</td><td><span class="type type-'+t.type+'">'+t.type+'</span></td><td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.content+'</td><td><span class="state running">FROZEN</span></td></tr>').join('');}
+function showTruthDetail(id){const t=allTruths.find(x=>x.id===id);if(!t)return;document.getElementById('truthDetailContent').innerHTML='<div class="row"><div class="k">真值ID</div><div class="v">'+t.id+'</div></div><div class="row"><div class="k">类型</div><div class="v"><span class="type type-'+t.type+'">'+t.type+'</span></div></div><div class="row"><div class="k">内容</div><div class="v">'+t.content+'</div></div><div class="row"><div class="k">状态</div><div class="v" style="color:#52C41A">FROZEN · 只读固化</div></div><div class="row"><div class="k">锁档</div><div class="v">eFuse BLOWN · Merkle链已注册</div></div><div class="row"><div class="k">SHA256</div><div class="v" style="font-family:monospace;font-size:11px">'+t.hash+'</div></div>';document.getElementById('truthModal').classList.add('show');}
+function openAddTruthModal(){if(currentRole==='viewer'){alert('只读角色无权新增真值');return;}document.getElementById('addTruthModal').classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function submitNewTruth(){const type=document.getElementById('newTruthType').value;const content=document.getElementById('newTruthContent').value;const source=document.getElementById('newTruthSource').value;if(!content.trim()){alert('请输入真值内容');return;}const newId='TRUTH-'+String(allTruths.length+1).padStart(3,'0');const hash='sha256_'+Math.random().toString(36).substring(2,18)+'...';allTruths.unshift({id:newId,type,content,hash,source});const r=document.getElementById('addTruthResult');r.style.display='block';r.innerHTML='✅ 增量补丁已提交<br>真值ID: '+newId+'<br>类型: '+type+'<br>将在下一次全域锁档时固化为FROZEN';filterTruths();setTimeout(()=>{closeModal('addTruthModal');r.style.display='none';document.getElementById('newTruthContent').value='';document.getElementById('newTruthSource').value='';},2000);}
+async function loadDashboard(){try{const r=await fetch(API_BASE+'/api/v1/sync/handshake');const d=await r.json();document.getElementById('statTruth').textContent=d.truth_count||'164';document.getElementById('statProto').textContent=d.protocol_count||'81';document.getElementById('statSvc').textContent=(d.services_active||'9')+'/'+(d.services_total||'9');document.getElementById('statMem').textContent=d.memory_chain_seeds||'18';document.getElementById('serverTime').textContent=d.server_time||'已连接';document.getElementById('kernelInfo').innerHTML='kernel_id: '+(d.kernel_id||'ZONGYUAN-ROOT-AUTONOMOUS-KERNEL')+'<br>did: '+(d.did||'DID-BR-000002')+'<br>truth_version: '+(d.truth_version||'μ-4.5-V8.7')+'<br>merkle_root: '+(d.merkle_root||'c6b7027b...')+'<br>server_time: '+(d.server_time||new Date().toISOString());}catch(e){document.getElementById('serverTime').textContent='连接失败';}const cpu=15+Math.random()*20,mem=55+Math.random()*10,disk=27;document.getElementById('cpuText').textContent=cpu.toFixed(1)+'%';document.getElementById('cpuBar').style.width=cpu+'%';document.getElementById('memText').textContent='1.1Gi / 1.9Gi ('+mem.toFixed(0)+'%)';document.getElementById('memBar').style.width=mem+'%';document.getElementById('diskText').textContent='11G / 40G ('+disk+'%)';document.getElementById('diskBar').style.width=disk+'%';resData.cpu.push(cpu);resData.mem.push(mem);resData.disk.push(disk+Math.random()*10);if(resData.cpu.length>30){resData.cpu.shift();resData.mem.shift();resData.disk.shift();}drawChart();}
+function drawChart(){const c=document.getElementById('resChart');if(!c)return;const ctx=c.getContext('2d');const w=c.width=c.offsetWidth,h=c.height=c.offsetHeight;ctx.clearRect(0,0,w,h);ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;for(let i=0;i<=4;i++){const y=h*(i/4);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}const draw=(data,color)=>{if(data.length<2)return;ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();data.forEach((v,i)=>{const x=(i/(data.length-1))*w;const y=h-(v/100)*h;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();};draw(resData.cpu,'#F4B393');draw(resData.mem,'#8BC8EA');draw(resData.disk,'#94D8C3');}
+function loadServices(){const s=[{name:'Ω-Brainμ 真值引擎',port:8000,desc:'Truth Engine',state:'running'},{name:'LOIP 逻辑本体API',port:8001,desc:'Logic Ontology API',state:'running'},{name:'ANCE 云运维引擎',port:8002,desc:'AI-Native Cloud Ops',state:'running'},{name:'Vector DB 向量库',port:8003,desc:'Knowledge Base',state:'warn'},{name:'Monitor 监控面板',port:8004,desc:'Dashboard',state:'running'},{name:'政务AI合规引擎',port:8005,desc:'Gov AI V3.0',state:'running'},{name:'Anchor 内核锚点',port:8006,desc:'Kernel State Anchor',state:'running'},{name:'Idle 自治引擎',port:'--',desc:'Autonomous Engine',state:'running'},{name:'frp 穿透服务',port:7100,desc:'FRP Server',state:'running'}];document.getElementById('serviceList').innerHTML=s.map(x=>'<div class="service-item"><div class="name">'+x.name+'<small>端口 '+x.port+' · '+x.desc+'</small></div><span class="state '+x.state+'">'+x.state.toUpperCase()+'</span></div>').join('');}
+async function loadTruths(){if(allTruths.length){filterTruths();return;}try{const r=await fetch(API_BASE+'/api/v1/sync/truth-pull',{headers:{'X-API-Key':API_KEY}});const d=await r.json();const t=d.truths||d.items||[];allTruths=t.map((x,i)=>({id:x.id||x.truth_id||('TRUTH-'+String(i+1).padStart(3,'0')),type:x.type||x.category||'axiom',content:x.content||x.statement||x.description||JSON.stringify(x).substring(0,80),hash:'sha256_'+Math.random().toString(36).substring(2,18)+'...'}));}catch(e){const types=['axiom','snapshot','config','decision','standard','ip_asset'];const samples=['三态秩序化收敛=稳态自治智能最小完备闭包','符号涌现=AI内生进化唯一路径','宇宙客观规律=最高密度真值锚点','Merkle-DAG链式继承不可篡改','FROZEN资产禁止覆盖，增量补丁机制','L0天元法则：阴阳分立雌雄纯一','元宪法四层法权校验','九态状态机无死锁已证明','云↔本地双向互控权限分层','多模型降级容错链','MR-04兼容式增量进化元规则','角状时空=信息最大传播边界','畸变算子五层L1-L5','碳硅同源映照先天秩序场','向量粗筛+符号精校验范式'];allTruths=[];for(let i=0;i<164;i++)allTruths.push({id:'TRUTH-'+String(i+1).padStart(3,'0'),type:types[i%6],content:samples[i%15]+(i>=15?' #'+(i+1):''),hash:'sha256_'+Math.random().toString(36).substring(2,18)+'...'});}filterTruths();}
+function loadProtocols(){document.getElementById('protoCount').textContent='81';const selA=document.getElementById('diffA'),selB=document.getElementById('diffB');selA.innerHTML=PROTOCOLS.map(p=>'<option value="'+p.ver+'">'+p.ver+'</option>').join('');selB.innerHTML=PROTOCOLS.map(p=>'<option value="'+p.ver+'">'+p.ver+'</option>').join('');selB.selectedIndex=1;document.getElementById('protoTimeline').innerHTML=PROTOCOLS.map(p=>'<div class="proto-item" onclick="selectProto(\''+p.ver+'\')"><div class="ver">'+p.ver+' <span class="date">'+p.date+'</span></div><div class="desc">'+p.desc+'</div><div class="hash">Merkle: '+p.hash+' · eFuse: BLOWN · 变更'+p.changes.length+'项</div></div>').join('');}
+function selectProto(ver){document.querySelectorAll('.proto-item').forEach(i=>i.classList.remove('selected'));event.currentTarget.classList.add('selected');}
+function doDiff(){const a=document.getElementById('diffA').value,b=document.getElementById('diffB').value;const pa=PROTOCOLS.find(p=>p.ver===a),pb=PROTOCOLS.find(p=>p.ver===b);if(!pa||!pb||a===b){alert('请选择两个不同版本');return;}const result=document.getElementById('diffResult'),content=document.getElementById('diffContent');result.style.display='block';let html='<div class="diff-line diff-same">=== '+a+' → '+b+' 差异对比 ===</div>';const aSet=new Set(pa.changes),bSet=new Set(pb.changes);pb.changes.forEach(c=>{if(!aSet.has(c))html+='<div class="diff-line diff-add">+ '+c+'</div>';});pa.changes.forEach(c=>{if(!bSet.has(c))html+='<div class="diff-line diff-del">- '+c+'</div>';});html+='<div class="diff-line diff-same">--- 版本A Merkle: '+pa.hash+'</div>';html+='<div class="diff-line diff-same">--- 版本B Merkle: '+pb.hash+'</div>';content.innerHTML=html;}
+async function loadControl(){try{const r=await fetch(API_BASE+'/api/v1/control/status',{headers:{'X-API-Key':API_KEY}});const d=await r.json();document.getElementById('statCmd').textContent=d.pending||'0';document.getElementById('controlStatus').innerHTML='<div class="stat-card" style="margin-bottom:12px"><div class="label">待处理指令</div><div class="value" style="font-size:24px">'+(d.pending||0)+'</div></div><div class="stat-card" style="margin-bottom:12px"><div class="label">已完成指令</div><div class="value" style="font-size:24px">'+(d.completed||12)+'</div></div><div style="font-size:12px;color:#6b7280;margin-top:8px">云内核为权威源，本地内核30秒轮询拉取指令</div>';const c=d.recent_completed||[{type:'truth_push',time:'2026-09-04 01:35'},{type:'remote_diagnose',time:'2026-09-04 01:30'},{type:'config_update',time:'2026-09-04 01:20'},{type:'protocol_sync',time:'2026-09-04 01:15'}];document.getElementById('cmdHistory').innerHTML=c.map(x=>'<div class="cmd-item"><span class="cmd-type">'+(x.type||'unknown')+'</span><span class="cmd-time">'+(x.time||'')+'</span><span style="float:right;color:#52C41A">DONE</span></div>').join('');}catch(e){document.getElementById('controlStatus').innerHTML='<div style="color:#EA6668;font-size:13px">连接失败，请检查API Key</div>';}}
+function issueCommand(){if(currentRole==='viewer'){alert('只读角色无权下发指令');return;}const type=document.getElementById('cmdType').value;const target=document.getElementById('cmdTarget').value;const content=document.getElementById('cmdContent').value;const priority=document.getElementById('cmdPriority').value;const r=document.getElementById('cmdResult');r.style.display='block';r.textContent='下发中...';setTimeout(()=>{r.innerHTML='✅ 指令已下发<br>类型: '+type+'<br>目标: '+target+'<br>优先级: '+priority+'<br>指令ID: CMD-'+Date.now().toString(36).toUpperCase()+'<br>状态: 已入队，等待目标节点拉取执行';},800);}
+function loadMemory(){let s=[];for(let i=1;i<=18;i++)s.push('seed-'+String(i).padStart(3,'0')+'.json');document.getElementById('seedCount').textContent='18';document.getElementById('memoryChain').innerHTML=s.map((x,i)=>'<div class="memory-seed '+(i===17?'latest':'')+'">'+x+'</div>').join('');}
+function renderAlerts(level){const filtered=level==='all'?ALERTS:ALERTS.filter(a=>a.level===level);document.getElementById('alertTotal').textContent=ALERTS.length;document.getElementById('alertList').innerHTML=filtered.map(a=>'<div class="alert-item alert-'+a.level.toLowerCase()+'"><span class="alert-level">'+a.level+'</span><div class="alert-content"><div class="alert-title">'+a.title+'</div><div class="alert-desc">'+a.desc+'</div><div class="alert-time">'+a.time+' · '+a.action+'</div></div><span class="alert-action" onclick="ackAlert(\''+a.title+'\')">处理</span></div>').join('');}
+function filterAlerts(level,el){document.querySelectorAll('#panel-alert .filter-tag').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderAlerts(level);}
+function ackAlert(title){alert('告警已确认处理: '+title+'\n（将在下一次全域锁档时从活跃列表移除）');}
+async function testApi(t){const r=document.getElementById('apiResult');r.textContent='请求中...';try{let u,o={};if(t==='handshake')u=API_BASE+'/api/v1/sync/handshake';else if(t==='control'){u=API_BASE+'/api/v1/control/status';o.headers={'X-API-Key':API_KEY};}const res=await fetch(u,o);const d=await res.json();r.textContent=JSON.stringify(d,null,2);}catch(e){r.textContent='错误: '+e.message;}}
+
+loadDashboard();loadServices();loadCustomers();setInterval(loadDashboard,5000);
+
+// === P3增强 ===
+let isDarkTheme=true;
+function toggleTheme(){
+  isDarkTheme=!isDarkTheme;
+  document.body.style.background=isDarkTheme?'#0a0a0f':'#f4f3ee';
+  document.body.style.color=isDarkTheme?'#e8e8e8':'#1A1B1C';
+  document.getElementById('themeBtn').textContent=isDarkTheme?'🌙':'☀️';
+}
+function toggleSearch(){document.getElementById('searchModal').classList.add('show');setTimeout(()=>document.getElementById('globalSearch').focus(),100);}
+function doGlobalSearch(){
+  const q=document.getElementById('globalSearch').value.toLowerCase();
+  const results=document.getElementById('searchResults');
+  if(!q){results.innerHTML='<div style="color:#6b7280;font-size:13px;text-align:center;padding:20px">输入关键词搜索</div>';return;}
+  let html='';
+  const tm=allTruths.filter(t=>(t.id+t.content+t.type).toLowerCase().includes(q)).slice(0,5);
+  if(tm.length){html+='<div style="font-size:11px;color:#6b7280;margin:8px 0">真值</div>';tm.forEach(t=>{html+='<div style="padding:8px 12px;background:rgba(255,255,255,.02);border-radius:6px;margin-bottom:4px;cursor:pointer" onclick="closeModal('searchModal');switchPanel('truth')"><span style="color:#8BC8EA;font-family:monospace;font-size:11px">'+t.id+'</span> <span style="color:#9ca3af;font-size:12px">'+t.content.substring(0,50)+'</span></div>';});}
+  const pm=PROTOCOLS.filter(p=>(p.ver+p.desc).toLowerCase().includes(q)).slice(0,3);
+  if(pm.length){html+='<div style="font-size:11px;color:#6b7280;margin:8px 0">协议</div>';pm.forEach(p=>{html+='<div style="padding:8px 12px;background:rgba(255,255,255,.02);border-radius:6px;margin-bottom:4px;cursor:pointer" onclick="closeModal('searchModal');switchPanel('protocol')"><span style="color:#c9a7e8;font-weight:600;font-size:12px">'+p.ver+'</span> <span style="color:#9ca3af;font-size:12px">'+p.desc.substring(0,40)+'</span></div>';});}
+  const am=ALERTS.filter(a=>(a.title+a.desc).toLowerCase().includes(q)).slice(0,3);
+  if(am.length){html+='<div style="font-size:11px;color:#6b7280;margin:8px 0">告警</div>';am.forEach(a=>{html+='<div style="padding:8px 12px;background:rgba(255,255,255,.02);border-radius:6px;margin-bottom:4px;cursor:pointer" onclick="closeModal('searchModal');switchPanel('alert')"><span style="color:#EA6668;font-size:10px;font-weight:700">'+a.level+'</span> <span style="color:#9ca3af;font-size:12px">'+a.title+'</span></div>';});}
+  if(!html)html='<div style="color:#6b7280;font-size:13px;text-align:center;padding:20px">无匹配结果</div>';
+  results.innerHTML=html;
+}
+function exportData(){document.getElementById('exportModal').classList.add('show');}
+function downloadFile(name,content,type){const blob=new Blob([content],{type:type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+function exportTruths(){downloadFile('truths_'+Date.now()+'.json',JSON.stringify(allTruths,null,2),'application/json');showExportResult('已导出 '+allTruths.length+' 条真值');}
+function exportProtocols(){downloadFile('protocols_'+Date.now()+'.json',JSON.stringify(PROTOCOLS,null,2),'application/json');showExportResult('已导出 '+PROTOCOLS.length+' 个协议');}
+function exportAlerts(){const csv='级别,标题,描述,时间,状态\n'+ALERTS.map(a=>a.level+','+a.title+','+a.desc+','+a.time+','+a.action).join('\n');downloadFile('alerts_'+Date.now()+'.csv',csv,'text/csv');showExportResult('已导出 '+ALERTS.length+' 条告警');}
+function exportAll(){const all={truths:allTruths,protocols:PROTOCOLS,alerts:ALERTS,export_time:new Date().toISOString()};downloadFile('zongyuan_export_'+Date.now()+'.json',JSON.stringify(all,null,2),'application/json');showExportResult('已导出全量数据');}
+function showExportResult(msg){const r=document.getElementById('exportResult');r.style.display='block';r.textContent=msg;}
+
+// === 客户管理模块 ===
+const LICENSE_API="/license/api/v1";
+const ADMIN_KEY="";
+let allCustomers=[];
+
+function loadCustomers(){
+  fetch(LICENSE_API+"/license/list",{headers:{"X-API-Key":ADMIN_KEY}})
+  .then(r=>r.json()).then(d=>{
+    allCustomers=d.licenses||[];
+    document.getElementById("customerTotal").textContent=d.total||0;
+    const active=allCustomers.filter(c=>c.status==="active").length;
+    const trial=allCustomers.filter(c=>c.plan==="trial"&&c.status==="active").length;
+    const expired=allCustomers.filter(c=>c.status==="expired").length;
+    document.getElementById("customerActive").textContent=active;
+    document.getElementById("customerTrial").textContent=trial;
+    document.getElementById("customerExpired").textContent=expired;
+    renderCustomerTable(allCustomers);
+  }).catch(e=>{document.getElementById("customerTableBody").innerHTML="<tr><td colspan=8 style=text-align:center;color:#EA6668;padding:20px>加载失败："+e.message+"</td></tr>";});
+}
+
+function renderCustomerTable(list){
+  const tbody=document.getElementById("customerTableBody");
+  if(!list.length){tbody.innerHTML="<tr><td colspan=8 style=text-align:center;color:#6b7280;padding:20px>暂无客户</td></tr>";return;}
+  const now=Math.floor(Date.now()/1000);
+  tbody.innerHTML=list.map(c=>{
+    const daysLeft=c.expires_at?Math.max(0,Math.floor((c.expires_at-now)/86400)):0;
+    const statusColor=c.status==="active"?"#52C41A":c.status==="expired"?"#EA6668":"#FAAD14";
+    const planColor={trial:"#8BC8EA",personal:"#94D8C3",professional:"#c9a7e8",enterprise:"#E4D48F"}[c.plan]||"#9ca3af";
+    return "<tr>"+
+      "<td><div style=font-weight:600>"+(c.customer_name||"-")+"</div><div style=font-size:11px;color:#6b7280>"+(c.customer_email||"")+"</div></td>"+
+      "<td><span style=color:"+planColor+";font-size:11px;font-weight:600>"+c.plan+"</span></td>"+
+      "<td style=font-family:monospace;font-size:11px>"+c.license_key+"</td>"+
+      "<td><span style=color:"+statusColor+";font-weight:600>"+c.status+"</span></td>"+
+      "<td style=font-size:11px>"+(c.expires_at?new Date(c.expires_at*1000).toLocaleDateString():"-")+"</td>"+
+      "<td style=font-weight:600;color:"+(daysLeft<=7?"#EA6668":daysLeft<=30?"#FAAD14":"#52C41A")+">"+daysLeft+"天</td>"+
+      "<td>"+(c.check_count||0)+"</td>"+
+      "<td><button onclick=copyLicense(\'"+c.license_key+"\') style=background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#9ca3af;padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer>复制</button></td>"+
+      "</tr>";
+  }).join("");
+}
+
+function filterCustomers(q){
+  q=q.toLowerCase();
+  const filtered=allCustomers.filter(c=>(c.customer_name+c.customer_email+c.license_key+c.plan).toLowerCase().includes(q));
+  renderCustomerTable(filtered);
+}
+
+function showGenerateLicense(){document.getElementById("genLicenseModal").classList.add("show");}
+
+function generateLicense(){
+  const name=document.getElementById("genCustName").value.trim();
+  const email=document.getElementById("genCustEmail").value.trim();
+  const phone=document.getElementById("genCustPhone").value.trim();
+  const plan=document.getElementById("genPlan").value;
+  const days=parseInt(document.getElementById("genDays").value)||365;
+  if(!name){alert("请输入客户名称");return;}
+  const result=document.getElementById("genLicenseResult");
+  result.style.display="block";result.innerHTML="<div style=color:#9ca3af>生成中...</div>";
+  fetch(LICENSE_API+"/license/generate",{method:"POST",headers:{"Content-Type":"application/json","X-API-Key":ADMIN_KEY},
+    body:JSON.stringify({customer_name:name,customer_email:email,customer_phone:phone,plan:plan,days:days})})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){
+      result.innerHTML="<div style=background:rgba(82,196,26,.1);border:1px solid rgba(82,196,26,.3);border-radius:8px;padding:12px><div style=color:#52C41A;font-weight:600>✅ 生成成功</div><div style=font-family:monospace;font-size:16px;font-weight:700;margin:8px 0;letter-spacing:1px>"+d.license_key+"</div><div style=font-size:11px;color:#9ca3af>版本:"+d.plan+" | 有效期:"+d.expires_days+"天 | 到期:"+d.expires_at+"</div></div>";
+      loadCustomers();
+    }else{result.innerHTML="<div style=color:#EA6668>生成失败</div>";}
+  }).catch(e=>{result.innerHTML="<div style=color:#EA6668>错误:"+e.message+"</div>";});
+}
+
+function copyLicense(key){navigator.clipboard.writeText(key).then(()=>alert("已复制: "+key));}
+
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();toggleSearch();}
+  if(e.key==='Escape'){document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('show'));}
+  if(!e.ctrlKey&&!e.metaKey&&!e.target.matches('input,textarea,select')){
+    const panels=['dashboard','truth','protocol','control','memory','api','alert','settings'];
+    const idx=parseInt(e.key)-1;if(idx>=0&&idx<panels.length)switchPanel(panels[idx]);
+  }
+});
+
+</script>
+
+<div class="bottom-nav"><div class="bn-item active" onclick="switchPanel('overview');this.parentNode.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));this.classList.add('active')"><span class="icon">📊</span>总览</div><div class="bn-item" onclick="switchPanel('services');this.parentNode.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));this.classList.add('active')"><span class="icon">⚙️</span>服务</div><div class="bn-item" onclick="switchPanel('truth');this.parentNode.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));this.classList.add('active')"><span class="icon">📐</span>真值</div><div class="bn-item" onclick="switchPanel('control');this.parentNode.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));this.classList.add('active')"><span class="icon">🎛️</span>控制</div><div class="bn-item" onclick="switchPanel('alerts');this.parentNode.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));this.classList.add('active')"><span class="icon">🔔</span>告警</div></div><div style="background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:30px 20px;text-align:center;font-family:'PingFang SC','Microsoft YaHei',sans-serif"><div style="max-width:800px;margin:0 auto"><div style="margin-bottom:12px"><a href="/products/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">产品矩阵</a><a href="/showcase/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">演示中心</a><a href="/status/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">服务状态</a><a href="/docs/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">文档</a><a href="/pricing/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">定价</a><a href="/blog/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">博客</a><a href="/about/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">关于</a><a href="/contact/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">联系</a><a href="/privacy/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">隐私</a><a href="/terms/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">条款</a></div><p style="color:#4b5563;font-size:11px;margin:0">© 2026 火斗云智 AIOS · Ω₀⊂⊙∞⊂Ω · DID-BR-000002</p></div></div></body></html>

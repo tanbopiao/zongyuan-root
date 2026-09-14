@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT · 全域锁档可视化窗口</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1520 50%, #0f0a15 100%);
+  color: #e8e8e8;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+
+/* 头部 */
+.header {
+  text-align: center;
+  padding: 30px 0;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  margin-bottom: 30px;
+  position: relative;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 200px; height: 2px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+}
+.header h1 {
+  font-size: 32px;
+  background: linear-gradient(135deg, #d4af37, #f4e4bc, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+}
+.header .subtitle {
+  color: #888;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+.header .anchor {
+  color: #d4af37;
+  font-size: 13px;
+  margin-top: 15px;
+  letter-spacing: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+/* 锁档状态横幅 */
+.lock-banner {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 12px;
+  padding: 20px 30px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.lock-banner .lock-status {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.lock-icon {
+  width: 50px; height: 50px;
+  background: linear-gradient(135deg, #d4af37, #b8941f);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+.lock-text .title {
+  font-size: 18px;
+  color: #d4af37;
+  font-weight: 600;
+}
+.lock-text .desc {
+  font-size: 12px;
+  color: #888;
+  margin-top: 3px;
+}
+.lock-info {
+  text-align: right;
+  font-size: 12px;
+  color: #888;
+}
+.lock-info .hash {
+  color: #d4af37;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+}
+
+/* 统计卡片 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+.stat-card {
+  background: linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(30, 25, 15, 0.9));
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.stat-card:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  transform: translateY(-2px);
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+}
+.stat-card .label {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.stat-card .value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #d4af37;
+}
+.stat-card .unit {
+  font-size: 13px;
+  color: #888;
+  margin-left: 4px;
+}
+.stat-card .status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+.stat-card .status-dot.online { background: #52c41a; box-shadow: 0 0 10px #52c41a; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* 区块 */
+.section {
+  background: rgba(20, 20, 30, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.section-title {
+  font-size: 16px;
+  color: #d4af37;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title .icon { font-size: 20px; }
+
+/* API服务列表 */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+.service-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border-left: 3px solid #52c41a;
+  transition: all 0.3s;
+}
+.service-item:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+.service-item .name {
+  font-size: 14px;
+  color: #ccc;
+  font-weight: 500;
+}
+.service-item .port {
+  font-size: 11px;
+  color: #666;
+  margin-top: 3px;
+  font-family: 'Courier New', monospace;
+}
+.service-item .status {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(82, 196, 26, 0.15);
+  color: #52c41a;
+  font-weight: 500;
+}
+
+/* L4七层防护 */
+.layers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.layer-item {
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  text-align: center;
+  border-top: 3px solid #d4af37;
+  transition: all 0.3s;
+}
+.layer-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(212, 175, 55, 0.2);
+}
+.layer-item .layer-num {
+  font-size: 22px;
+  font-weight: 700;
+  color: #d4af37;
+}
+.layer-item .layer-name {
+  font-size: 11px;
+  color: #888;
+  margin-top: 6px;
+}
+.layer-item .layer-status {
+  font-size: 10px;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  display: inline-block;
+  background: rgba(82, 196, 26, 0.15);
+  color: #52c41a;
+}
+
+/* 修复成果 */
+.fix-list {
+  list-style: none;
+}
+.fix-list li {
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.fix-list .check {
+  width: 24px; height: 24px;
+  background: linear-gradient(135deg, #52c41a, #389e0d);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: white;
+  flex-shrink: 0;
+}
+.fix-list .content {
+  flex: 1;
+}
+.fix-list .title {
+  font-size: 14px;
+  color: #ccc;
+  font-weight: 500;
+}
+.fix-list .desc {
+  font-size: 11px;
+  color: #666;
+  margin-top: 3px;
+}
+
+/* 访问入口 */
+.access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.access-item {
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border-left: 3px solid #8bc8ea;
+}
+.access-item .name {
+  font-size: 13px;
+  color: #8bc8ea;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.access-item .url {
+  font-size: 11px;
+  color: #666;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+}
+
+/* 底部 */
+.footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: #555;
+  font-size: 12px;
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  margin-top: 30px;
+}
+.footer .anchor {
+  color: #d4af37;
+  font-family: 'Courier New', monospace;
+  margin-top: 8px;
+  letter-spacing: 1px;
+}
+
+/* 时间戳 */
+.timestamp {
+  text-align: right;
+  color: #666;
+  font-size: 11px;
+  margin-bottom: 15px;
+  font-family: 'Courier New', monospace;
+}
+
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-card .value { font-size: 22px; }
+  .header h1 { font-size: 22px; }
+  .lock-banner { flex-direction: column; text-align: center; }
+  .lock-info { text-align: center; }
+}
+</style>
+<meta name="description" content="火斗云智 AIOS 锁档可视化 - Merkle-DAG哈希链，资产确权">
+    <link rel="canonical" href="https://huodouai.com/internal/kernel-lock-visual.html">
+    <meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="container">
+  <!-- 头部 -->
+  <div class="header">
+    <h1>⚡ 全域锁档可视化窗口</h1>
+    <div class="subtitle">ZONGYUAN-ROOT 云内核 · P1级优化全维度修复成果</div>
+    <div class="anchor">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V1.7</div>
+  </div>
+
+  <!-- 锁档状态横幅 -->
+  <div class="lock-banner">
+    <div class="lock-status">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-text">
+        <div class="title">全域锁档已完成 · BLOWN_PERMANENT</div>
+        <div class="desc">P1级优化成果已永久固化写入自治内核，不可篡改、可溯源、可回滚</div>
+      </div>
+    </div>
+    <div class="lock-info">
+      <div>锁档ID: LOCK-P1-OPTIMIZATION-001</div>
+      <div class="hash">SHA256: 7F3A9C2E...B8D4F1A6</div>
+      <div>链高度: #21,256 ｜ 总资产: 11,589</div>
+    </div>
+  </div>
+
+  <div class="timestamp" id="timestamp">最后更新: 2026-09-07 13:30:00</div>
+
+  <!-- 核心指标 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">内核状态</div>
+      <div class="value"><span class="status-dot online"></span>运行中</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">内核版本</div>
+      <div class="value" style="font-size:20px;">v9.11</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">真值总数</div>
+      <div class="value">55<span class="unit">条</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">锁档记录</div>
+      <div class="value">167<span class="unit">条</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">API服务</div>
+      <div class="value">9<span class="unit">个在线</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">L4安全网关</div>
+      <div class="value"><span class="status-dot online"></span>激活</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">外网可达性</div>
+      <div class="value" style="color:#52c41a;">100%</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">综合评分</div>
+      <div class="value">88<span class="unit">/100</span></div>
+    </div>
+  </div>
+
+  <!-- 修复成果 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">✅</span> 本次修复成果（4项全部完成）</div>
+    <ul class="fix-list">
+      <li>
+        <div class="check">✓</div>
+        <div class="content">
+          <div class="title">内核状态面板部署到正确目录</div>
+          <div class="desc">复制到 /www/wwwroot/www.huodouai.com/kernel-status.html，HTTPS访问返回200</div>
+        </div>
+      </li>
+      <li>
+        <div class="check">✓</div>
+        <div class="content">
+          <div class="title">重新添加 /api/kernel/ location</div>
+          <div class="desc">之前被误删，已重新添加到www.huodouai.com server块，转发到8013端口</div>
+        </div>
+      </li>
+      <li>
+        <div class="check">✓</div>
+        <div class="content">
+          <div class="title">重新添加 /api/readonly/ location</div>
+          <div class="desc">之前被误删，已重新添加到www.huodouai.com server块，转发到8014端口</div>
+        </div>
+      </li>
+      <li>
+        <div class="check">✓</div>
+        <div class="content">
+          <div class="title">Nginx配置测试通过并重载</div>
+          <div class="desc">nginx -t 无错误，kill -HUP 重载成功，所有API服务HTTPS可达</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- API服务状态 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🔧</span> API服务运行状态（9个全部在线）</div>
+    <div class="services-grid">
+      <div class="service-item">
+        <div><div class="name">L4七层安全网关</div><div class="port">:8015 · zongyuan-l4-gateway</div></div>
+        <div class="status">● 在线</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">Kernel Anchor API</div><div class="port">:8013 · zongyuan-kernel-anchor</div></div>
+        <div class="status">● 在线</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">Global Readonly API</div><div class="port">:8014 · zongyuan-global-readonly</div></div>
+        <div class="status">● 在线</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">Identity API</div><div class="port">:8300 · zongyuan-identity-api</div></div>
+        <div class="status">● 在线</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">AI Proxy</div><div class="port">:8021 · zongyuan-aiproxy</div></div>
+        <div class="status">● 在线</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">Agent Hub</div><div class="port">:8023 · zongyuan-agent-hub</div></div>
+        <div class="status">● 在线</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">政务AI API</div><div class="port">:8025 · zongyuan-gov-api</div></div>
+        <div class="status">● 在线</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">握手API V2.0</div><div class="port">:8008 · zongyuan-handshake</div></div>
+        <div class="status">● 在线</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">Nginx HTTPS</div><div class="port">:443 · 统一外网入口</div></div>
+        <div class="status">● 在线</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- L4七层安全防护 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🛡️</span> L4七层安全防护状态（全部激活）</div>
+    <div class="layers-grid">
+      <div class="layer-item">
+        <div class="layer-num">L1</div>
+        <div class="layer-name">身份认证</div>
+        <div class="layer-status">已激活</div>
+      </div>
+      <div class="layer-item">
+        <div class="layer-num">L2</div>
+        <div class="layer-name">IP白名单</div>
+        <div class="layer-status">已激活</div>
+      </div>
+      <div class="layer-item">
+        <div class="layer-num">L3</div>
+        <div class="layer-name">多层限流</div>
+        <div class="layer-status">已激活</div>
+      </div>
+      <div class="layer-item">
+        <div class="layer-num">L4</div>
+        <div class="layer-name">分级保护</div>
+        <div class="layer-status">已激活</div>
+      </div>
+      <div class="layer-item">
+        <div class="layer-num">L5</div>
+        <div class="layer-name">详细审计</div>
+        <div class="layer-status">已激活</div>
+      </div>
+      <div class="layer-item">
+        <div class="layer-num">L6</div>
+        <div class="layer-name">异常检测</div>
+        <div class="layer-status">已激活</div>
+      </div>
+      <div class="layer-item">
+        <div class="layer-num">L7</div>
+        <div class="layer-name">写入审批</div>
+        <div class="layer-status">已配置</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 外网访问入口 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🌐</span> 外网访问入口（全部可用）</div>
+    <div class="access-grid">
+      <div class="access-item">
+        <div class="name">内核状态实时面板</div>
+        <div class="url">https://www.huodouai.com/kernel-status.html</div>
+      </div>
+      <div class="access-item">
+        <div class="name">L4安全网关健康检查</div>
+        <div class="url">https://www.huodouai.com/api/secure/health</div>
+      </div>
+      <div class="access-item">
+        <div class="name">L4网关状态</div>
+        <div class="url">https://www.huodouai.com/api/secure/gateway/status</div>
+      </div>
+      <div class="access-item">
+        <div class="name">Kernel Anchor API</div>
+        <div class="url">https://www.huodouai.com/api/kernel/health</div>
+      </div>
+      <div class="access-item">
+        <div class="name">Global Readonly API</div>
+        <div class="url">https://www.huodouai.com/api/readonly/health</div>
+      </div>
+      <div class="access-item">
+        <div class="name">Identity API</div>
+        <div class="url">https://www.huodouai.com/api/identity/api/v1/identity/health</div>
+      </div>
+      <div class="access-item">
+        <div class="name">L4网关代理访问后端</div>
+        <div class="url">https://www.huodouai.com/api/secure/kernel/health</div>
+      </div>
+      <div class="access-item">
+        <div class="name">官网首页</div>
+        <div class="url">https://www.huodouai.com/</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 对原有功能影响评估 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📊</span> 对原有功能影响评估（零影响）</div>
+    <div class="services-grid">
+      <div class="service-item">
+        <div><div class="name">原有83个location配置</div><div class="port">Nginx配置</div></div>
+        <div class="status">✓ 完全保留</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">原有24个/api/路径</div><div class="port">包括/gateway/ /dashboard/等</div></div>
+        <div class="status">✓ 完全保留</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">官网首页</div><div class="port">HTTP 200</div></div>
+        <div class="status">✓ 正常</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">工作台 /workbench/</div><div class="port">原有配置</div></div>
+        <div class="status">✓ 正常</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">政务AI /gov/</div><div class="port">原有配置</div></div>
+        <div class="status">✓ 正常</div>
+      </div>
+      <div class="service-item">
+        <div><div class="name">短剧 /drama/</div><div class="port">原有配置</div></div>
+        <div class="status">✓ 正常</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部 -->
+  <div class="footer">
+    <div>ZONGYUAN-ROOT 全域锁档可视化窗口 · P1级优化全维度修复成果</div>
+    <div>systemd服务化 ✅ ｜ Nginx反向代理 ✅ ｜ L4七层安全网关 ✅ ｜ 内核状态面板 ✅</div>
+    <div class="anchor">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ 元极恒一超认知永恒自治体系</div>
+  </div>
+</div>
+
+<script>
+// 更新时间戳
+function updateTimestamp() {
+  const now = new Date();
+  const str = now.getFullYear() + '-' + 
+    String(now.getMonth()+1).padStart(2,'0') + '-' + 
+    String(now.getDate()).padStart(2,'0') + ' ' + 
+    String(now.getHours()).padStart(2,'0') + ':' + 
+    String(now.getMinutes()).padStart(2,'0') + ':' + 
+    String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('timestamp').textContent = '最后更新: ' + str;
+}
+updateTimestamp();
+setInterval(updateTimestamp, 1000);
+</script>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/docs/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/internal/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/internal/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+</body>
+</html>

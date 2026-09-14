@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智 AIOS · 企业级 AI 操作系统</title>
+<meta name="description" content="火斗云智企业级AI操作系统 - 政务AI、短剧流水线、知识图谱、普惠教育">
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#121722; --panel2:#161c2a; --line:#232c3d;
+    --gold:#c9a227; --gold-soft:#e6c86a; --gold-dim:#8a7326;
+    --ink:#e6edf3; --muted:#8b949e; --blue:#58a6ff; --red:#f85149;
+    --green:#7ee787; --purple:#a371f7; --orange:#d29922;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;line-height:1.6;}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px;}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;opacity:.05;
+    background:repeating-linear-gradient(45deg,#c9a227 0,#c9a227 1px,transparent 1px,transparent 22px);}
+  a{color:var(--gold-soft);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* ===== Nav ===== */
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);}
+  .nav .logo{font-weight:800;color:#fff;font-size:16px;letter-spacing:1px;}
+  .nav .logo span{color:var(--gold);}
+  .nav .links{display:flex;gap:20px;font-size:13px;}
+  .nav .links a{color:var(--muted);}
+  .nav .links a:hover{color:var(--gold-soft);text-decoration:none;}
+  @media(max-width:640px){.nav .links{display:none;}}
+
+  /* ===== Hero ===== */
+  .hero{text-align:center;padding:64px 0 48px;}
+  .hero .badge{display:inline-block;border:1px solid var(--gold-dim);color:var(--gold-soft);
+    font-size:12px;letter-spacing:3px;padding:4px 16px;border-radius:3px;margin-bottom:20px;}
+  .hero h1{font-size:clamp(30px,5vw,50px);font-weight:800;color:#fff;letter-spacing:1px;line-height:1.25;}
+  .hero h1 span{color:var(--gold);}
+  .hero .sub{color:var(--muted);margin-top:16px;font-size:16px;max-width:680px;margin-left:auto;margin-right:auto;}
+  .cta{margin-top:30px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+  .btn{display:inline-block;padding:12px 28px;border-radius:6px;font-size:14px;font-weight:600;letter-spacing:1px;}
+  .btn-gold{background:var(--gold);color:#0b0e14;}
+  .btn-gold:hover{background:var(--gold-soft);text-decoration:none;}
+  .btn-ghost{border:1px solid var(--gold-dim);color:var(--gold-soft);}
+  .btn-ghost:hover{background:rgba(201,162,39,.08);text-decoration:none;}
+
+  /* ===== Section ===== */
+  .sec{margin:54px 0;}
+  .sec-title{text-align:center;font-size:clamp(20px,3vw,26px);font-weight:800;color:#fff;margin-bottom:8px;}
+  .sec-title span{color:var(--gold);}
+  .sec-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:30px;}
+
+  /* 简介 */
+  .intro{max-width:820px;margin:0 auto;font-size:14.5px;color:var(--ink);}
+  .intro p{margin-bottom:14px;color:var(--muted);}
+  .intro p b{color:#fff;}
+
+  /* 能力矩阵 */
+  .cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:900px){.cap-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.cap-grid{grid-template-columns:1fr;}}
+  .cap{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px;transition:border-color .2s,transform .2s;}
+  .cap:hover{border-color:var(--gold-dim);transform:translateY(-3px);}
+  .cap .ico{width:42px;height:42px;border-radius:9px;background:rgba(201,162,39,.12);border:1px solid var(--gold-dim);
+    display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px;}
+  .cap h4{font-size:16px;color:#fff;margin-bottom:5px;}
+  .cap .one{font-size:12.5px;color:var(--gold-soft);margin-bottom:12px;}
+  .cap ul{list-style:none;}
+  .cap li{font-size:13px;color:var(--muted);padding:3px 0 3px 14px;position:relative;}
+  .cap li::before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--gold);}
+
+  /* 定价 */
+  .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch;}
+  @media(max-width:900px){.price-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.price-grid{grid-template-columns:1fr;}}
+  .plan{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px 20px;display:flex;flex-direction:column;position:relative;}
+  .plan.recommend{border:1.5px solid var(--gold);box-shadow:0 0 24px rgba(201,162,39,.15);}
+  .plan .tag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--gold);color:#0b0e14;
+    font-size:11px;font-weight:800;letter-spacing:1px;padding:3px 12px;border-radius:10px;}
+  .plan .skuid{font-size:11px;color:var(--gold-dim);letter-spacing:2px;}
+  .plan h4{font-size:17px;color:#fff;margin:4px 0 8px;}
+  .plan .price{font-size:28px;font-weight:800;color:var(--gold);margin-bottom:4px;}
+  .plan .price small{font-size:12px;color:var(--muted);font-weight:400;}
+  .plan .pos{font-size:12.5px;color:var(--muted);margin-bottom:14px;min-height:36px;}
+  .plan .btn-plan{margin-top:auto;text-align:center;padding:9px;border-radius:6px;font-size:13px;font-weight:600;
+    border:1px solid var(--gold-dim);color:var(--gold-soft);}
+  .plan.recommend .btn-plan{background:var(--gold);color:#0b0e14;border-color:var(--gold);}
+  .plan .btn-plan:hover{text-decoration:none;background:rgba(201,162,39,.12);}
+  .plan.recommend .btn-plan:hover{background:var(--gold-soft);}
+
+  /* 测试窗口 */
+  .test{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:26px;}
+  .test h3{font-size:15px;color:var(--gold-soft);margin-bottom:14px;}
+  .code{background:#0a0d13;border:1px solid var(--line);border-radius:8px;padding:16px;overflow-x:auto;
+    font-family:'SF Mono',Consolas,monospace;font-size:12.5px;line-height:1.7;color:#c9d1d9;}
+  .code .c{color:#8b949e;}
+  .code .k{color:#7ee787;}
+  .code .u{color:#58a6ff;}
+  .test-row{display:flex;gap:14px;margin-top:16px;flex-wrap:wrap;}
+
+  /* 应用场景 */
+  .scene-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media(max-width:900px){.scene-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.scene-grid{grid-template-columns:1fr;}}
+  .scene{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;}
+  .scene h5{font-size:14px;color:#fff;margin-bottom:6px;}
+  .scene p{font-size:12.5px;color:var(--muted);}
+
+  .footer{text-align:center;color:var(--gold-dim);font-size:12px;margin-top:60px;padding-top:22px;border-top:1px solid var(--line);letter-spacing:1px;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:12px;font-size:11px;color:var(--muted);}
+</style>
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div class="wrap">
+
+  <!-- ===== Nav ===== -->
+  <div class="links">
+      <a href="#intro">产品简介</a>
+      <a href="#features">功能矩阵</a>
+      <a href="#pricing">定价</a>
+      <a href="#test">在线测试</a>
+      <a href="#scenes">应用场景</a>
+    </div>
+  </div>
+
+  <!-- ===== Hero ===== -->
+  <div class="hero">
+    <div class="badge">企业级 AI 操作系统</div>
+    <h1>让 AI 能力<br><span>像水电一样稳定接入业务</span></h1>
+    <p class="sub">统一接入 · 智能调度 · 可溯源确权 —— 一套为企业生产环境而生的 AI 基础设施，持续进化，全链路自愈。</p>
+    <div class="cta">
+      <a class="btn btn-gold" href="https://console.huodouai.com">立即体验</a>
+      <a class="btn btn-ghost" href="#pricing">查看定价</a>
+    </div>
+  </div>
+
+  <!-- ===== 产品简介 ===== -->
+  <div class="sec" id="intro">
+    <div class="sec-title">产品<span>简介</span></div>
+    <div class="sec-sub">企业级 AI 操作系统 · 自进化 · 可溯源 · 稳态调度</div>
+    <div class="intro">
+      <p><b>火斗云智 AIOS</b> 是一套面向企业生产环境的 AI 操作系统，把分散的模型调用、任务调度、知识沉淀与质量治理收敛到统一平台。开发者只需一次接入，即可获得从网关到调度、从记忆到确权的完整能力栈。</p>
+      <p>平台以<b>可溯源</b>为核心设计理念：每一次调用、每一份资产都带哈希锚点与链式记录，关键环节不依赖口头约定，让 AI 系统从"能跑"走向"敢上生产"。</p>
+      <p>调度层采用<b>多维度加权裁决</b>与漂移检测机制，在业务波动中自动收敛到更优路径；失败即进化输入，平台随使用时间持续变稳。</p>
+    </div>
+  </div>
+
+  <!-- ===== 功能矩阵 ===== -->
+  <div class="sec" id="features">
+    <div class="sec-title">六大<span>核心能力</span></div>
+    <div class="sec-sub">一个平台，覆盖企业 AI 生产的完整链路</div>
+    <div class="cap-grid">
+      <div class="cap">
+        <div class="ico">⇄</div>
+        <h4>API 网关</h4>
+        <div class="one">统一接入与流量管控入口</div>
+        <ul>
+          <li>统一接入与路由分发</li>
+          <li>密钥认证鉴权</li>
+          <li>限流熔断与流量管控</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">⚙</div>
+        <h4>智能调度引擎</h4>
+        <div class="one">负载感知的自适应任务路由</div>
+        <ul>
+          <li>负载感知动态选路</li>
+          <li>自适应路由策略</li>
+          <li>热升级不停服</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">✦</div>
+        <h4>真值锁档系统</h4>
+        <div class="one">资产确权与防篡改</div>
+        <ul>
+          <li>SHA256 哈希确权</li>
+          <li>链式溯源记录</li>
+          <li>防篡改与版本快照</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">☁</div>
+        <h4>记忆中枢</h4>
+        <div class="one">跨会话的知识沉淀与上下文管理</div>
+        <ul>
+          <li>跨会话记忆持久化</li>
+          <li>知识资产持续沉淀</li>
+          <li>上下文统一管理</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">◈</div>
+        <h4>稳态调度</h4>
+        <div class="one">业务波动中的自愈与收敛</div>
+        <ul>
+          <li>漂移检测与告警</li>
+          <li>多维度加权裁决</li>
+          <li>容错闭环自动恢复</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">⬡</div>
+        <h4>同源认证</h4>
+        <div class="one">轻量统一的身份与权限体系</div>
+        <ul>
+          <li>API Key 轻认证</li>
+          <li>多节点同源校验</li>
+          <li>权限隔离与最小授权</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 定价 ===== -->
+  <div class="sec" id="pricing">
+    <div class="sec-title">版本<span>定价</span></div>
+    <div class="sec-sub">从个人体验到企业私有化，按需选择，随时升级</div>
+    <div class="price-grid">
+      <div class="plan">
+        <div class="skuid">S1</div>
+        <h4>体验版</h4>
+        <div class="price">免费</div>
+        <div class="pos">个人开发者体验，基础 API 调用</div>
+        <a class="btn-plan" href="https://console.huodouai.com">立即开始</a>
+      </div>
+      <div class="plan">
+        <div class="skuid">S2</div>
+        <h4>入门版</h4>
+        <div class="price">¥68<small>/月</small></div>
+        <div class="pos">小型团队，标准能力 + 配额</div>
+        <a class="btn-plan" href="https://console.huodouai.com">选择入门版</a>
+      </div>
+      <div class="plan recommend">
+        <div class="tag">推荐</div>
+        <div class="skuid">S3</div>
+        <h4>专业版</h4>
+        <div class="price">¥299<small>/月</small></div>
+        <div class="pos">成长型企业，全能力 + 优先调度</div>
+        <a class="btn-plan" href="https://console.huodouai.com">选择专业版</a>
+      </div>
+      <div class="plan">
+        <div class="skuid">S4</div>
+        <h4>旗舰版</h4>
+        <div class="price">¥999<small>/月</small></div>
+        <div class="pos">中大型企业，高并发 + 专属支持</div>
+        <a class="btn-plan" href="https://console.huodouai.com">选择旗舰版</a>
+      </div>
+      <div class="plan">
+        <div class="skuid">S5</div>
+        <h4>企业版</h4>
+        <div class="price">面议</div>
+        <div class="pos">私有化部署 + 定制集成 + SLA</div>
+        <a class="btn-plan" href="#test">联系我们</a>
+      </div>
+      <div class="plan">
+        <div class="skuid">S6</div>
+        <h4>定制版</h4>
+        <div class="price">定制</div>
+        <div class="pos">行业解决方案 + 全栈定制</div>
+        <a class="btn-plan" href="#test">联系我们</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 测试窗口 ===== -->
+  <div class="sec" id="test">
+    <div class="sec-title">在线<span>测试窗口</span></div>
+    <div class="sec-sub">拿到 API Key 后，一条命令即可验证接入</div>
+    <div class="test">
+      <h3>快速接入示例</h3>
+      <div class="code">
+<span class="c"># 替换 your-api-key-here 为你的密钥</span>
+curl <span class="u">https://api.huodouai.com/v1/chat</span> \
+  -H <span class="k">"Authorization: Bearer your-api-key-here"</span> \
+  -H <span class="k">"Content-Type: application/json"</span> \
+  -d '{<span class="k">"message"</span>: <span class="u">"你好，火斗云智"</span>}'
+      </div>
+      <div class="test-row">
+        <a class="btn btn-gold" href="https://console.huodouai.com">打开在线控制台</a>
+        <a class="btn btn-ghost" href="https://console.huodouai.com">申请 API Key</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 应用场景 ===== -->
+  <div class="sec" id="scenes">
+    <div class="sec-title">应用<span>场景</span></div>
+    <div class="sec-sub">已在真实业务中跑通的四类典型场景</div>
+    <div class="scene-grid">
+      <div class="scene">
+        <h5>产业数字化</h5>
+        <p>工单治理、流程自动化与数据看板，把老师傅经验沉淀为可调用的数字资产。</p>
+      </div>
+      <div class="scene">
+        <h5>智能客服</h5>
+        <p>统一接入多轮对话与知识库，响应可溯源，售后质量可度量。</p>
+      </div>
+      <div class="scene">
+        <h5>知识管理</h5>
+        <p>跨会话记忆中枢让团队知识持续复利，新人接手不丢失上下文。</p>
+      </div>
+      <div class="scene">
+        <h5>AI Agent 编排</h5>
+        <p>多 Agent 任务调度与权限隔离，从原型到生产环境平滑过渡。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <div class="footer">火斗云智 AIOS · 企业级 AI 操作系统 · Ω₀⊂⊙∞⊂Ω</div>
+  <div class="legend">持续进化中 · 全链路自愈 · 多维度加权 · 2026</div>
+
+</div>
+</body>
+</html>

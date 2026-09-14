@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天 · 东方神女神话作品库 | 火斗云智AIOS</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{--bg:#0a0a0f;--bg2:#12121a;--gold:#d4a017;--gold-light:#f0c75e;--white:#e8e4dc;--dim:#a8a49c;--border:rgba(212,160,23,0.25)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--white);font-family:'Noto Sans SC',sans-serif;line-height:1.8;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 20% 0%,rgba(212,160,23,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(192,57,43,0.05) 0%,transparent 50%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:60px 24px}
+header{text-align:center;margin-bottom:50px}
+header .symbol{font-size:14px;color:var(--gold);letter-spacing:4px;margin-bottom:16px;font-family:monospace}
+header h1{font-family:'Noto Serif SC',serif;font-size:42px;font-weight:900;background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+header .stats{color:var(--dim);font-size:15px;display:flex;justify-content:center;gap:28px;flex-wrap:wrap}
+header .stats b{color:var(--gold);font-weight:700}
+h2{font-family:'Noto Serif SC',serif;font-size:26px;color:var(--gold-light);margin:46px 0 22px;padding-left:16px;border-left:3px solid var(--gold)}
+.film-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+.film-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform .3s,box-shadow .3s;display:flex;flex-direction:column}
+.film-card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(212,160,23,0.15)}
+.film-card video{width:100%;aspect-ratio:9/16;background:#000;object-fit:cover;display:block}
+.film-card .poster{width:100%;aspect-ratio:9/16;background:linear-gradient(160deg,#1a1626,#0d0d14);display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:13px}
+.film-card .info{padding:14px 16px}
+.film-card .info h3{font-family:'Noto Serif SC',serif;font-size:17px;color:var(--gold-light);margin-bottom:2px}
+.film-card .info p{color:var(--dim);font-size:12.5px}
+.film-card .info .meta{display:flex;justify-content:space-between;margin-top:8px;font-size:11.5px;color:var(--dim);border-top:1px solid rgba(212,160,23,0.12);padding-top:8px}
+.arch-card video{width:100%;aspect-ratio:16/9;background:#000;object-fit:cover;display:block}
+.kf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.kf-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:transform .3s,box-shadow .3s}
+.kf-card:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(212,160,23,0.13)}
+.kf-card img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:#0d0d14}
+.kf-card .info{padding:12px 14px}
+.kf-card .info h4{font-family:'Noto Serif SC',serif;font-size:14.5px;color:var(--gold-light);margin-bottom:2px}
+.kf-card .info p{color:var(--dim);font-size:12px}
+.empty{color:var(--dim);text-align:center;padding:60px 0;font-size:15px}
+.loading{color:var(--dim);text-align:center;padding:80px 0;font-size:15px;letter-spacing:1px}
+footer{text-align:center;margin-top:70px;padding-top:26px;border-top:1px solid var(--border);color:var(--dim);font-size:12.5px}
+footer .did{margin-top:6px;color:var(--gold);font-family:monospace;letter-spacing:1px}
+@media(max-width:640px){header h1{font-size:30px}header .stats{gap:14px;font-size:13px}.wrap{padding:40px 16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT</div>
+    <h1>昆仑洞天 · 东方神女神话作品库</h1>
+    <div class="stats" id="stats">正在统计…</div>
+  </header>
+
+  <h2>短剧成片</h2>
+  <div class="film-grid" id="films"><div class="loading">加载中…</div></div>
+
+  <h2>关键帧资产</h2>
+  <div class="kf-grid" id="kfs"><div class="loading">加载中…</div></div>
+
+  <h2>归档库 · 已锁档视频</h2>
+  <div class="film-grid" id="archv"><div class="loading">加载中…</div></div>
+
+  <footer>
+    <p>昆仑洞天 IP · 绝地天通主线 · ZONGYUAN-ROOT 自治产线 · 本地对象存储</p>
+    <p class="did">DID-BR-000002 · Ω₀⊂⊙∞⊂Ω · 全自动量产 · 每日更新</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  function el(tag, cls, txt){var n=document.createElement(tag);if(cls)n.className=cls;if(txt!=null)n.textContent=txt;return n}
+  function safeUrl(u){if(!u)return '';if(u.indexOf('http')===0)return u;return u}
+  var films=document.getElementById('films'), kfs=document.getElementById('kfs'), stats=document.getElementById('stats'), archv=document.getElementById('archv');
+  fetch('https://drama.huodouai.com/api/gallery').then(function(r){return r.json()}).then(function(d){
+    var w=d.works||[];
+    if(!w.length){films.innerHTML='<div class="empty">暂无作品，量产启动中…</div>';kfs.innerHTML='';return}
+    stats.innerHTML='';
+    var s=[['成片视频',d.stats.videos],['关键帧资产',d.stats.keyframes],['作品总数',d.stats.total],['归档视频',d.stats.archive_videos],['竖屏范式','9:16'],['天元法则锁定','L0']];
+    s.forEach(function(x){var sp=document.createElement('span');sp.textContent=x[0]+'：';var b=document.createElement('b');b.textContent=x[1];sp.appendChild(b);stats.appendChild(sp)});
+    // 成片
+    var filmsData=w.filter(function(i){return i.video_ok&&i.video});
+    films.innerHTML='';
+    if(!filmsData.length){films.innerHTML='<div class="empty">暂无成片视频</div>'}
+    filmsData.forEach(function(i){
+      var c=el('div','film-card');
+      var v=document.createElement('video');v.src=safeUrl(i.video);v.controls=true;v.preload='metadata';v.playsInline=true;
+      var cover=i.keyframes.filter(function(k){return k.ok})[0];
+      if(cover){v.poster=safeUrl(cover.url)}
+      c.appendChild(v);
+      var info=el('div','info');
+      info.appendChild(el('h3',null,i.role||'昆仑神女'));
+      info.appendChild(el('p',null,i.theme||''));
+      var meta=el('div','meta');
+      meta.appendChild(el('span',null,i.id||''));
+      meta.appendChild(el('span',null,(i.date||'').slice(0,10)));
+      info.appendChild(meta);
+      c.appendChild(info);
+      films.appendChild(c);
+    });
+    // 关键帧
+    var all=[];w.forEach(function(i){i.keyframes.forEach(function(k){if(k.ok)all.push({url:k.url,role:i.role,theme:i.theme,id:i.id})})});
+    kfs.innerHTML='';
+    if(!all.length){kfs.innerHTML='<div class="empty">暂无关键帧</div>'}
+    all.forEach(function(k){
+      var c=el('div','kf-card');
+      var img=document.createElement('img');img.src=safeUrl(k.url);img.loading='lazy';img.alt=k.role;
+      c.appendChild(img);
+      var info=el('div','info');
+      info.appendChild(el('h4',null,k.role||'昆仑神女'));
+      info.appendChild(el('p',null,(k.theme||'')+' · '+(k.id||'')));
+      c.appendChild(info);
+      kfs.appendChild(c);
+    });
+    // 归档库
+    var ad=d.archive||[];
+    archv.innerHTML='';
+    if(!ad.length){archv.innerHTML='<div class="empty">归档库为空</div>'}
+    ad.forEach(function(a){
+      var c=el('div','film-card arch-card');
+      var v=document.createElement('video');v.src=safeUrl(a.url);v.controls=true;v.preload='metadata';v.playsInline=true;
+      c.appendChild(v);
+      var info=el('div','info');
+      info.appendChild(el('h3',null,a.name));
+      var meta=el('div','meta');
+      meta.appendChild(el('span',null,((a.size/1048576).toFixed(1))+' MB'));
+      meta.appendChild(el('span',null,a.sha256));
+      info.appendChild(meta);
+      c.appendChild(info);
+      archv.appendChild(c);
+    });
+  }).catch(function(e){
+    films.innerHTML='<div class="empty">作品库加载失败：'+e.message+'</div>';stats.textContent='错误:'+e.message
+    kfs.innerHTML='';archv.innerHTML='';
+  });
+})();
+</script>
+</body>
+</html>

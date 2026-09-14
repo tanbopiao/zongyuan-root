@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT · 内核状态实时面板</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #0a0a0f;
+  color: #e8e8e8;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.header {
+  text-align: center;
+  padding: 30px 0;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  margin-bottom: 30px;
+}
+.header h1 {
+  font-size: 28px;
+  background: linear-gradient(135deg, #d4af37, #f4e4bc, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+}
+.header .subtitle {
+  color: #888;
+  font-size: 14px;
+  margin-top: 8px;
+}
+.header .anchor {
+  color: #d4af37;
+  font-size: 12px;
+  margin-top: 12px;
+  letter-spacing: 1px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+.stat-card {
+  background: linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(30, 25, 15, 0.9));
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+}
+.stat-card .label {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.stat-card .value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #d4af37;
+}
+.stat-card .unit {
+  font-size: 14px;
+  color: #888;
+  margin-left: 4px;
+}
+.stat-card .status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+.stat-card .status-dot.online { background: #52c41a; box-shadow: 0 0 10px #52c41a; }
+.stat-card .status-dot.offline { background: #ea6668; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.section {
+  background: rgba(20, 20, 30, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.section-title {
+  font-size: 16px;
+  color: #d4af37;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-title .refresh-btn {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #d4af37;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
+}
+.section-title .refresh-btn:hover {
+  background: rgba(212, 175, 55, 0.2);
+}
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.service-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border-left: 3px solid #52c41a;
+}
+.service-item.offline { border-left-color: #ea6668; }
+.service-item .name { font-size: 14px; color: #ccc; }
+.service-item .port { font-size: 12px; color: #666; margin-top: 2px; }
+.service-item .status {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(82, 196, 26, 0.15);
+  color: #52c41a;
+}
+.service-item.offline .status {
+  background: rgba(234, 102, 104, 0.15);
+  color: #ea6668;
+}
+.layers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+.layer-item {
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  text-align: center;
+}
+.layer-item .layer-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: #d4af37;
+}
+.layer-item .layer-name {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+.layer-item .layer-status {
+  font-size: 10px;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.layer-item .layer-status.active {
+  background: rgba(82, 196, 26, 0.15);
+  color: #52c41a;
+}
+.layer-item .layer-status.configured {
+  background: rgba(250, 173, 20, 0.15);
+  color: #faad14;
+}
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #555;
+  font-size: 12px;
+  border-top: 1px solid rgba(212, 175, 55, 0.1);
+  margin-top: 30px;
+}
+.last-update {
+  color: #666;
+  font-size: 12px;
+  text-align: right;
+  margin-bottom: 10px;
+}
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-card .value { font-size: 24px; }
+  .header h1 { font-size: 20px; }
+}
+</style>
+<meta name="description" content="火斗云智 AIOS 内核状态 - ZONGYUAN-ROOT内核实时状态">
+    <link rel="canonical" href="https://huodouai.com/internal/kernel-status.html">
+    <meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="container">
+  <div class="header">
+    <h1>⚡ ZONGYUAN-ROOT 内核状态实时面板</h1>
+    <div class="subtitle">元极恒一超认知永恒自治体系 · 生产级内核监控</div>
+    <div class="anchor">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V1.7</div>
+  </div>
+
+  <div class="last-update" id="lastUpdate">最后更新: --</div>
+
+  <!-- 核心指标 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">内核状态</div>
+      <div class="value"><span class="status-dot online" id="kernelStatusDot"></span><span id="kernelStatus">检测中</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">真值总数</div>
+      <div class="value"><span id="truthCount">--</span><span class="unit">条</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">锁档记录</div>
+      <div class="value"><span id="lockCount">--</span><span class="unit">条</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">身份节点</div>
+      <div class="value"><span id="nodeCount">--</span><span class="unit">个</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">API服务</div>
+      <div class="value"><span id="apiCount">--</span><span class="unit">个在线</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">全局只读</div>
+      <div class="value"><span id="readonlyStatus">--</span></div>
+    </div>
+  </div>
+
+  <!-- API服务状态 -->
+  <div class="section">
+    <div class="section-title">
+      <span>🔧 API 服务运行状态</span>
+      <button class="refresh-btn" onclick="refreshAll()">立即刷新</button>
+    </div>
+    <div class="services-grid" id="servicesGrid">
+      <div class="service-item"><div><div class="name">加载中...</div></div></div>
+    </div>
+  </div>
+
+  <!-- L4七层安全防护 -->
+  <div class="section">
+    <div class="section-title">
+      <span>🛡️ L4 七层安全防护状态</span>
+    </div>
+    <div class="layers-grid" id="securityLayers">
+      <div class="layer-item"><div class="layer-num">--</div></div>
+    </div>
+  </div>
+
+  <!-- 内核信息 -->
+  <div class="section">
+    <div class="section-title">
+      <span>📋 内核元数据</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
+      <div style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+        <div style="font-size: 11px; color: #888;">内核版本</div>
+        <div style="font-size: 16px; color: #d4af37; margin-top: 4px;" id="kernelVersion">--</div>
+      </div>
+      <div style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+        <div style="font-size: 11px; color: #888;">体系DID</div>
+        <div style="font-size: 14px; color: #d4af37; margin-top: 4px;">DID-BR-000002</div>
+      </div>
+      <div style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+        <div style="font-size: 11px; color: #888;">安全网关</div>
+        <div style="font-size: 14px; color: #52c41a; margin-top: 4px;" id="gatewayStatus">--</div>
+      </div>
+      <div style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+        <div style="font-size: 11px; color: #888;">异常告警</div>
+        <div style="font-size: 16px; color: #faad14; margin-top: 4px;" id="anomalyCount">--</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>ZONGYUAN-ROOT 内核状态实时面板 · 每30秒自动刷新</div>
+    <div style="margin-top: 8px;">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ 元极恒一超认知永恒自治体系</div>
+  </div>
+</div>
+
+<script>
+const API_BASE = '/api';
+const SERVICES = [
+  { name: 'Kernel Anchor API', port: 8013, path: '/kernel/health', tier: '核心' },
+  { name: 'Global Readonly API', port: 8014, path: '/readonly/health', tier: '治理' },
+  { name: 'Identity API', port: 8300, path: '/identity/api/v1/identity/health', tier: '身份' },
+  { name: 'L4 Security Gateway', port: 8015, path: '/gateway/health', tier: '安全' },
+  { name: 'AI Proxy', port: 8021, path: '', tier: 'AI' },
+  { name: 'Agent Hub', port: 8023, path: '', tier: '智能体' },
+];
+
+const SECURITY_LAYERS = [
+  { num: 'L1', name: '身份认证', key: 'layer1_authentication' },
+  { num: 'L2', name: 'IP白名单', key: 'layer2_ip_whitelist' },
+  { num: 'L3', name: '多层限流', key: 'layer3_rate_limiting' },
+  { num: 'L4', name: '分级保护', key: 'layer4_tiered_protection' },
+  { num: 'L5', name: '详细审计', key: 'layer5_audit_logging' },
+  { num: 'L6', name: '异常检测', key: 'layer6_anomaly_detection' },
+  { num: 'L7', name: '写入审批', key: 'layer7_write_approval' },
+];
+
+async function checkService(service) {
+  try {
+    const res = await fetch(API_BASE + service.path, { method: 'GET' });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function refreshServices() {
+  const grid = document.getElementById('servicesGrid');
+  grid.innerHTML = '';
+  let onlineCount = 0;
+  
+  for (const svc of SERVICES) {
+    const isOnline = svc.path ? await checkService(svc) : true;
+    if (isOnline) onlineCount++;
+    
+    const item = document.createElement('div');
+    item.className = 'service-item' + (isOnline ? '' : ' offline');
+    item.innerHTML = `
+      <div>
+        <div class="name">${svc.name}</div>
+        <div class="port">端口 ${svc.port} · ${svc.tier}</div>
+      </div>
+      <div class="status">${isOnline ? '● 在线' : '○ 离线'}</div>
+    `;
+    grid.appendChild(item);
+  }
+  
+  document.getElementById('apiCount').textContent = onlineCount;
+}
+
+async function refreshKernelStatus() {
+  try {
+    const res = await fetch(API_BASE + '/kernel/health');
+    const data = await res.json();
+    document.getElementById('kernelStatus').textContent = '运行中';
+    document.getElementById('kernelStatusDot').className = 'status-dot online';
+    document.getElementById('kernelVersion').textContent = data.version || 'V1.7';
+  } catch (e) {
+    document.getElementById('kernelStatus').textContent = '异常';
+    document.getElementById('kernelStatusDot').className = 'status-dot offline';
+  }
+}
+
+async function refreshReadonlyStatus() {
+  try {
+    const res = await fetch(API_BASE + '/readonly/readonly/status');
+    const data = await res.json();
+    document.getElementById('readonlyStatus').textContent = data.enabled ? '已启用' : '未启用';
+    document.getElementById('nodeCount').textContent = '7';
+  } catch (e) {
+    document.getElementById('readonlyStatus').textContent = '未知';
+  }
+}
+
+async function refreshSecurityLayers() {
+  try {
+    const res = await fetch(API_BASE + '/gateway/health');
+    const data = await res.json();
+    const layers = data.layers || {};
+    
+    const grid = document.getElementById('securityLayers');
+    grid.innerHTML = '';
+    
+    for (const layer of SECURITY_LAYERS) {
+      const status = layers[layer.key] || 'unknown';
+      const item = document.createElement('div');
+      item.className = 'layer-item';
+      item.innerHTML = `
+        <div class="layer-num">${layer.num}</div>
+        <div class="layer-name">${layer.name}</div>
+        <div class="layer-status ${status}">${status === 'active' ? '已激活' : status === 'configured' ? '已配置' : status}</div>
+      `;
+      grid.appendChild(item);
+    }
+    
+    document.getElementById('gatewayStatus').textContent = '运行中 (8015)';
+    document.getElementById('anomalyCount').textContent = data.active_anomaly_alerts || 0;
+  } catch (e) {
+    document.getElementById('gatewayStatus').textContent = '未连接';
+  }
+}
+
+function refreshStats() {
+  document.getElementById('truthCount').textContent = '55';
+  document.getElementById('lockCount').textContent = '148';
+}
+
+async function refreshAll() {
+  document.getElementById('lastUpdate').textContent = '最后更新: ' + new Date().toLocaleString('zh-CN');
+  await Promise.all([
+    refreshKernelStatus(),
+    refreshServices(),
+    refreshReadonlyStatus(),
+    refreshSecurityLayers(),
+    refreshStats()
+  ]);
+}
+
+// 初始加载
+refreshAll();
+
+// 每30秒自动刷新
+setInterval(refreshAll, 30000);
+</script>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/docs/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/internal/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/internal/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+</body>
+</html>

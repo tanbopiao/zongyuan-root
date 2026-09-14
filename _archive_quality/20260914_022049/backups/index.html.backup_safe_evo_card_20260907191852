@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS · 应用控制台</title>
+<meta name="description" content="火斗云智AIOS应用控制台 - 政务AI中台、企业AI向量知识库、昆仑洞天短剧流水线、AI智能体工作台，所有应用一键直达">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'PingFang SC','Microsoft YaHei','Segoe UI',Arial,sans-serif;
+  background:#0a0e17;
+  color:#e5e7eb;
+  min-height:100vh;
+}
+.console-container { max-width:1400px; margin:0 auto; padding:0 24px; }
+/* Hero欢迎区 */
+.hero-section {
+  background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(139,105,20,0.05));
+  border-bottom:1px solid rgba(212,175,55,0.1);
+  padding:40px 0 30px;
+}
+.hero-title {
+  font-size:28px;font-weight:700;color:#fff;margin-bottom:8px;
+  background:linear-gradient(135deg,#D4AF37,#F5DEB3);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-subtitle { font-size:14px;color:#888;margin-bottom:24px; }
+.search-box {
+  max-width:600px;position:relative;margin-bottom:24px;
+}
+.search-input {
+  width:100%;padding:14px 20px 14px 48px;
+  background:rgba(30,35,50,0.8);border:1px solid rgba(212,175,55,0.2);
+  border-radius:10px;color:#fff;font-size:14px;outline:none;
+  transition:all .3s;
+}
+.search-input:focus { border-color:#D4AF37;box-shadow:0 0 0 3px rgba(212,175,55,0.1); }
+.search-icon { position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:18px; }
+/* 状态概览卡片 */
+.stats-grid {
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:8px;
+}
+.stat-card {
+  background:rgba(30,35,50,0.6);border:1px solid rgba(212,175,55,0.1);
+  border-radius:10px;padding:16px;
+}
+.stat-label { font-size:11px;color:#888;margin-bottom:6px; }
+.stat-value { font-size:22px;font-weight:700;color:#D4AF37; }
+.stat-desc { font-size:10px;color:#666;margin-top:4px; }
+/* 应用区域 */
+.apps-section { padding:40px 0; }
+.section-title {
+  font-size:20px;font-weight:600;color:#fff;margin-bottom:6px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-title::before {
+  content:'';width:4px;height:20px;background:linear-gradient(180deg,#D4AF37,#8B6914);border-radius:2px;
+}
+.section-subtitle { font-size:13px;color:#888;margin-bottom:24px;margin-left:14px; }
+.apps-grid {
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+}
+/* 快速开始 */
+.quickstart-section {
+  padding:40px 0;border-top:1px solid rgba(212,175,55,0.1);
+}
+.quickstart-grid {
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+}
+.quickstart-card {
+  background:rgba(30,35,50,0.6);border:1px solid rgba(212,175,55,0.1);
+  border-radius:10px;padding:24px;text-align:center;
+}
+.quickstart-icon { font-size:36px;margin-bottom:12px; }
+.quickstart-title { font-size:15px;font-weight:600;color:#fff;margin-bottom:8px; }
+.quickstart-desc { font-size:12px;color:#888;line-height:1.6; }
+.quickstart-step {
+  display:inline-block;width:28px;height:28px;line-height:28px;
+  background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:50%;
+  color:#fff;font-size:13px;font-weight:700;margin-bottom:12px;
+}
+/* 页脚 */
+.footer {
+  background:rgba(10,14,23,0.95);border-top:1px solid rgba(212,175,55,0.1);
+  padding:30px 0;margin-top:40px;
+}
+.footer-content { text-align:center; }
+.footer-links {
+  display:flex;justify-content:center;gap:24px;margin-bottom:16px;flex-wrap:wrap;
+}
+.footer-links a {
+  color:#D4AF37;text-decoration:none;font-size:13px;
+  padding:8px 16px;border:1px solid rgba(212,175,55,0.3);border-radius:6px;
+  transition:all .2s;
+}
+.footer-links a:hover { background:rgba(212,175,55,0.1); }
+.footer-text { font-size:11px;color:#666;line-height:1.8; }
+/* 响应式 */
+@media (max-width:1024px) {
+  .apps-grid { grid-template-columns:repeat(3,1fr); }
+  .stats-grid { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:768px) {
+  .apps-grid { grid-template-columns:repeat(2,1fr); }
+  .quickstart-grid { grid-template-columns:1fr; }
+  .hero-title { font-size:22px; }
+  .console-container { padding:0 16px; }
+}
+@media (max-width:480px) {
+  .apps-grid { grid-template-columns:1fr; }
+  .stats-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用控制台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>全部服务正常
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+
+<!-- Hero欢迎区 -->
+<section class="hero-section">
+  <div class="console-container">
+    <h1 class="hero-title">🔥 火斗云智AIOS · 应用控制台</h1>
+    <p class="hero-subtitle">所有应用一键直达，快速开始你的AI之旅 · 16个应用 · 全链路打通</p>
+    
+    <!-- 快速搜索 -->
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" placeholder="搜索应用、文档、功能..." id="appSearch" oninput="filterApps()">
+    </div>
+    
+    <!-- 状态概览 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">🟢 服务状态</div>
+        <div class="stat-value">正常</div>
+        <div class="stat-desc">16个应用全部在线</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">⚡ 运行时长</div>
+        <div class="stat-value">7×24</div>
+        <div class="stat-desc">云端内核持续运行</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">📦 应用数量</div>
+        <div class="stat-value">16</div>
+        <div class="stat-desc">覆盖政务/短剧/智能体/开发</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🔒 锁档记录</div>
+        <div class="stat-value">170+</div>
+        <div class="stat-desc">Merkle-DAG全域确权</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 应用入口网格 -->
+<section class="apps-section">
+  <div class="console-container">
+    <h2 class="section-title">🚀 全部应用</h2>
+    <p class="section-subtitle">点击卡片直接进入对应应用，所有应用已全链路打通</p>
+    
+    <div class="apps-grid" id="appsGrid">
+      
+    <a href="/gov-ai/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#D4AF37';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#D4AF3733,#D4AF3711);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">🏛️</div>
+          <div style="font-size:10px;color:#D4AF37;padding:3px 8px;background:#D4AF3715;border-radius:10px;border:1px solid #D4AF3730">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">政务AI中台</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">政务AI可视化编排工作台，拖拽建模，流程自动化</div>
+      </div>
+    </a>
+    
+    <a href="/vector.html" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#8B5CF6';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#8B5CF633,#8B5CF611);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">🧠</div>
+          <div style="font-size:10px;color:#8B5CF6;padding:3px 8px;background:#8B5CF615;border-radius:10px;border:1px solid #8B5CF630">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">企业AI向量知识库</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">企业级AI向量知识库，智能检索，语义理解</div>
+      </div>
+    </a>
+    
+    <a href="/drama/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#EF4444';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#EF444433,#EF444411);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">🎬</div>
+          <div style="font-size:10px;color:#EF4444;padding:3px 8px;background:#EF444415;border-radius:10px;border:1px solid #EF444430">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">昆仑洞天短剧流水线</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">暗黑东方神话短剧全自动生产流水线</div>
+      </div>
+    </a>
+    
+    <a href="/workbench/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#3B82F6';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#3B82F633,#3B82F611);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">🛠️</div>
+          <div style="font-size:10px;color:#3B82F6;padding:3px 8px;background:#3B82F615;border-radius:10px;border:1px solid #3B82F630">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">AI智能体工作台</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">AI智能体编排工作台，多智能体协同，任务自动化</div>
+      </div>
+    </a>
+    
+    <a href="/api-platform/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#10B981';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#10B98133,#10B98111);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">🔌</div>
+          <div style="font-size:10px;color:#10B981;padding:3px 8px;background:#10B98115;border-radius:10px;border:1px solid #10B98130">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">API平台</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">API密钥管理，用量统计，接口调试</div>
+      </div>
+    </a>
+    
+    <a href="/developer-center.html" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#06B6D4';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#06B6D433,#06B6D411);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">📚</div>
+          <div style="font-size:10px;color:#06B6D4;padding:3px 8px;background:#06B6D415;border-radius:10px;border:1px solid #06B6D430">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">开发者中心</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">API文档，开发者指南，SDK下载</div>
+      </div>
+    </a>
+    
+    <a href="/search.html" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#F59E0B';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#F59E0B33,#F59E0B11);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">🔍</div>
+          <div style="font-size:10px;color:#F59E0B;padding:3px 8px;background:#F59E0B15;border-radius:10px;border:1px solid #F59E0B30">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">全站搜索</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">全站内容搜索，28页面索引，7分类</div>
+      </div>
+    </a>
+    
+    <a href="/docs.html" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#84CC16';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#84CC1633,#84CC1611);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">📄</div>
+          <div style="font-size:10px;color:#84CC16;padding:3px 8px;background:#84CC1615;border-radius:10px;border:1px solid #84CC1630">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">文档中心</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">技术文档，使用指南，最佳实践</div>
+      </div>
+    </a>
+    
+    <a href="/console/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#6366F1';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#6366F133,#6366F111);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">⚙️</div>
+          <div style="font-size:10px;color:#6366F1;padding:3px 8px;background:#6366F115;border-radius:10px;border:1px solid #6366F130">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">管理控制台</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">系统管理，配置中心，权限管理</div>
+      </div>
+    </a>
+    
+    <a href="/dashboard/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#EC4899';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#EC489933,#EC489911);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">📊</div>
+          <div style="font-size:10px;color:#EC4899;padding:3px 8px;background:#EC489915;border-radius:10px;border:1px solid #EC489930">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">数据看板</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">数据可视化，运营分析，实时监控</div>
+      </div>
+    </a>
+    
+    <a href="/status-center.html" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#14B8A6';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#14B8A633,#14B8A611);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">🟢</div>
+          <div style="font-size:10px;color:#14B8A6;padding:3px 8px;background:#14B8A615;border-radius:10px;border:1px solid #14B8A630">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">系统状态中心</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">实时状态总览，内核状态，锁档可视化</div>
+      </div>
+    </a>
+    
+    <a href="/kernel-console/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#A855F7';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#A855F733,#A855F711);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">🔮</div>
+          <div style="font-size:10px;color:#A855F7;padding:3px 8px;background:#A855F715;border-radius:10px;border:1px solid #A855F730">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">内核控制台</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">ZONGYUAN-ROOT内核状态管理，运维操作</div>
+      </div>
+    </a>
+    
+    <a href="/portal/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#F97316';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#F9731633,#F9731611);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">👤</div>
+          <div style="font-size:10px;color:#F97316;padding:3px 8px;background:#F9731615;border-radius:10px;border:1px solid #F9731630">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">用户中心</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">个人中心，账号管理，作品云同步</div>
+      </div>
+    </a>
+    
+    <a href="/identity-console/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#0EA5E9';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#0EA5E933,#0EA5E911);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">🪪</div>
+          <div style="font-size:10px;color:#0EA5E9;padding:3px 8px;background:#0EA5E915;border-radius:10px;border:1px solid #0EA5E930">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">身份管理</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">身份节点管理，权限认证，访问控制</div>
+      </div>
+    </a>
+    
+    <a href="https://www.huodouai.com/api/feishu/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#00D2B4';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#00D2B433,#00D2B411);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">📨</div>
+          <div style="font-size:10px;color:#00D2B4;padding:3px 8px;background:#00D2B415;border-radius:10px;border:1px solid #00D2B430">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">飞书桥接</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">飞书全链路打通，消息同步，文档协作</div>
+      </div>
+    </a>
+    
+    <a href="https://www.huodouai.com/api/threedim/" style="text-decoration:none;color:inherit;display:block">
+      <div style="background:linear-gradient(135deg,rgba(30,35,50,0.8),rgba(20,25,40,0.9));border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s;cursor:pointer;height:100%;box-sizing:border-box" onmouseover="this.style.borderColor='#EAB308';this.style.transform='translateY(-4px)';this.style.box-shadow='0 8px 25px rgba(212,175,55,0.15)'" onmouseout="this.style.borderColor='rgba(212,175,55,0.15)';this.style.transform='translateY(0)';this.style.box-shadow='none'">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#EAB30833,#EAB30811);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px">⚖️</div>
+          <div style="font-size:10px;color:#EAB308;padding:3px 8px;background:#EAB30815;border-radius:10px;border:1px solid #EAB30830">进入 →</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:6px">三维稳态校准</div>
+        <div style="font-size:12px;color:#888;line-height:1.5">利益/风险/成本三维稳态决策校准</div>
+      </div>
+    </a>
+    
+    </div>
+  </div>
+</section>
+
+<!-- 快速开始 -->
+<section class="quickstart-section">
+  <div class="console-container">
+    <h2 class="section-title">⚡ 快速开始</h2>
+    <p class="section-subtitle">三步上手火斗云智AIOS，开启你的AI生产力之旅</p>
+    
+    <div class="quickstart-grid">
+      <div class="quickstart-card">
+        <div class="quickstart-step">1</div>
+        <div class="quickstart-icon">🎯</div>
+        <div class="quickstart-title">选择应用</div>
+        <div class="quickstart-desc">从上方16个应用中选择你需要的功能，点击卡片直接进入</div>
+      </div>
+      <div class="quickstart-card">
+        <div class="quickstart-step">2</div>
+        <div class="quickstart-icon">📖</div>
+        <div class="quickstart-title">查看文档</div>
+        <div class="quickstart-desc">访问开发者中心，查看API文档、使用指南和最佳实践</div>
+      </div>
+      <div class="quickstart-card">
+        <div class="quickstart-step">3</div>
+        <div class="quickstart-icon">🚀</div>
+        <div class="quickstart-title">开始使用</div>
+        <div class="quickstart-desc">按照快速开始教程，几分钟内完成配置并开始使用</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <div class="console-container">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="https://www.huodouai.com/">🏠 官方主站</a>
+        <a href="https://huodouai.com/">🚀 应用平台</a>
+        <a href="/status-center.html">📊 系统状态</a>
+        <a href="/developer-center.html">🔌 开发者中心</a>
+        <a href="/search.html">🔍 全站搜索</a>
+      </div>
+      <div class="footer-text">
+        Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V1.7<br>
+        火斗云智AIOS · 应用控制台 · 元极恒一超认知永恒自治体系<br>
+        © 2026 火斗云智 · 全域锁档确权 · 不可篡改 · 可追溯
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// 应用搜索过滤
+function filterApps() {
+  const query = document.getElementById('appSearch').value.toLowerCase();
+  const cards = document.querySelectorAll('#appsGrid > a');
+  cards.forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(query) ? '' : 'none';
+  });
+}
+
+// 页面加载动画
+document.addEventListener('DOMContentLoaded', function() {
+  const cards = document.querySelectorAll('#appsGrid > a');
+  cards.forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      card.style.transition = 'all .5s ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, index * 50);
+  });
+});
+</script>
+
+</body>
+</html>

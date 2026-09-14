@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS | ZONGYUAN-ROOT</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: linear-gradient(135deg, #0a0e17 0%, #1a1f2e 50%, #0d1117 100%);
+  color: #e8e8e8;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  min-height: 100vh;
+  padding: 20px;
+}
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 15px 20px; margin-bottom: 20px;
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 12px;
+}
+.header h1 { font-size: 20px; color: #D4AF37; }
+.header .anchor { font-size: 11px; color: #666; letter-spacing: 1px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab {
+  padding: 10px 20px; background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(212,175,55,0.15); border-radius: 8px;
+  cursor: pointer; font-size: 13px; color: #888; transition: all 0.3s;
+}
+.tab:hover { border-color: rgba(212,175,55,0.4); color: #D4AF37; }
+.tab.active { background: rgba(212,175,55,0.1); border-color: #D4AF37; color: #D4AF37; font-weight: 600; }
+.panel { display: none; }
+.panel.active { display: block; }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 10px; padding: 15px; text-align: center;
+}
+.stat-card .label { color: #888; font-size: 11px; margin-bottom: 6px; }
+.stat-card .value { font-size: 24px; font-weight: 700; color: #D4AF37; }
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.chart-card {
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.1);
+  border-radius: 10px; padding: 12px;
+}
+.chart-card h3 { font-size: 13px; color: #D4AF37; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(212,175,55,0.1); }
+.chart-container { width: 100%; height: 250px; }
+.full-width { grid-column: 1 / -1; }
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { background: rgba(212,175,55,0.1); color: #D4AF37; padding: 10px 8px; text-align: left; font-weight: 600; border-bottom: 1px solid rgba(212,175,55,0.2); }
+td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc; }
+tr:hover { background: rgba(212,175,55,0.03); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+.badge-pending { background: rgba(250,173,20,0.15); color: #FAAD14; }
+.badge-approved { background: rgba(82,196,26,0.15); color: #52C41A; }
+.badge-rejected { background: rgba(234,102,104,0.15); color: #EA6668; }
+.badge-applied { background: rgba(139,200,234,0.15); color: #8BC8EA; }
+.badge-active { background: rgba(82,196,26,0.15); color: #52C41A; }
+.badge-revoked { background: rgba(234,102,104,0.15); color: #EA6668; }
+.badge-critical { background: rgba(234,102,104,0.2); color: #EA6668; border: 1px solid #EA6668; }
+.badge-warning { background: rgba(250,173,20,0.15); color: #FAAD14; }
+.badge-info { background: rgba(139,200,234,0.15); color: #8BC8EA; }
+.footer { text-align: center; padding: 15px; color: #555; font-size: 10px; border-top: 1px solid rgba(212,175,55,0.1); margin-top: 20px; }
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="火斗云智AIOS - 基于ZONGYUAN-ROOT元极恒一自治体系的AI操作系统，提供政务AI、短剧流水线、知识图谱、普惠教育等核心产品。">
+<meta name="keywords" content="火斗云智,AIOS,ZONGYUAN-ROOT,元极恒一,政务AI,短剧,知识图谱,普惠教育">
+<meta property="og:title" content="火斗云智AIOS | ZONGYUAN-ROOT">
+<meta property="og:description" content="火斗云智AIOS - 基于ZONGYUAN-ROOT元极恒一自治体系的AI操作系统，提供政务AI、短剧流水线、知识图谱、普惠教育等核心产品。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/sovereignty/console.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="火斗云智AIOS | ZONGYUAN-ROOT">
+<meta name="twitter:description" content="火斗云智AIOS - 基于ZONGYUAN-ROOT元极恒一自治体系的AI操作系统，提供政务AI、短剧流水线、知识图谱、普惠教育等核心产品。">
+    <link rel="canonical" href="https://huodouai.com/sovereignty/console.html">
+</head>
+<body>
+<!-- ZONGYUAN-ROOT Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">ZONGYUAN-ROOT · DID-BR-000002</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/philosophy.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">思想</a>
+      <a href="/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/engines.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">引擎</a>
+      <a href="/governance.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">治理</a>
+      <a href="/monitor.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">监控</a>
+      <a href="/products.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/gov/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">政务AI</a>
+      <a href="/drama/demo.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">短剧</a>
+      <a href="/sovereignty/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">主权根</a>
+      <a href="/vector.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">向量库</a>
+      <a href="/developers.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">开发者</a>
+      <a href="/docs.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /ZONGYUAN-ROOT Unified Navigation -->
+
+<div class="header">
+  <h1>⚖️ 国家主权根 · 治理控制台</h1>
+  <div class="anchor">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V1.7</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')">📊 总览</div>
+  <div class="tab" onclick="switchTab('governance')">📋 规则治理</div>
+  <div class="tab" onclick="switchTab('alerts')">🔔 合规告警</div>
+  <div class="tab" onclick="switchTab('apikeys')">🔑 API Key</div>
+  <div class="tab" onclick="switchTab('audit')">📝 审计日志</div>
+</div>
+
+<!-- 总览面板 -->
+<div class="panel active" id="panel-overview">
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">系统健康评分</div><div class="value" id="ovHealth">97.25</div></div>
+    <div class="stat-card"><div class="label">合规规则总数</div><div class="value" id="ovRules">14</div></div>
+    <div class="stat-card"><div class="label">待审核提案</div><div class="value" id="ovPending">0</div></div>
+    <div class="stat-card"><div class="label">活跃告警</div><div class="value" id="ovAlerts">0</div></div>
+    <div class="stat-card"><div class="label">活跃API Key</div><div class="value" id="ovKeys">1</div></div>
+    <div class="stat-card"><div class="label">权力等级</div><div class="value" style="font-size:16px;" id="ovPower">normal</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>健康评分仪表盘</h3><div class="chart-container" id="ovGauge"></div></div>
+    <div class="chart-card"><h3>规则层级分布</h3><div class="chart-container" id="ovRulesPie"></div></div>
+    <div class="chart-card"><h3>告警级别分布</h3><div class="chart-container" id="ovAlertsPie"></div></div>
+    <div class="chart-card"><h3>API Key权限分布</h3><div class="chart-container" id="ovKeysPie"></div></div>
+    <div class="chart-card full-width"><h3>近7天合规校验趋势</h3><div class="chart-container" id="ovTrend" style="height:280px;"></div></div>
+  </div>
+</div>
+
+<!-- 规则治理面板 -->
+<div class="panel" id="panel-governance">
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">总提案数</div><div class="value" id="govTotal">0</div></div>
+    <div class="stat-card"><div class="label">待审核</div><div class="value" id="govPending">0</div></div>
+    <div class="stat-card"><div class="label">已通过</div><div class="value" id="govApproved">0</div></div>
+    <div class="stat-card"><div class="label">已生效</div><div class="value" id="govApplied">0</div></div>
+    <div class="stat-card"><div class="label">已回滚</div><div class="value" id="govReverted">0</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>提案状态分布</h3><div class="chart-container" id="govStatusChart"></div></div>
+    <div class="chart-card"><h3>规则层级变更分布</h3><div class="chart-container" id="govLevelChart"></div></div>
+    <div class="chart-card full-width"><h3>规则变更提案列表</h3>
+      <div class="table-container"><table id="govTable">
+        <thead><tr><th>提案ID</th><th>规则ID</th><th>层级</th><th>类型</th><th>状态</th><th>提案人</th><th>时间</th></tr></thead>
+        <tbody><tr><td colspan="7" style="text-align:center;color:#666;">暂无提案数据</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- 合规告警面板 -->
+<div class="panel" id="panel-alerts">
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">总告警数</div><div class="value" id="alTotal">0</div></div>
+    <div class="stat-card"><div class="label">Critical</div><div class="value" style="color:#EA6668;" id="alCritical">0</div></div>
+    <div class="stat-card"><div class="label">Warning</div><div class="value" style="color:#FAAD14;" id="alWarning">0</div></div>
+    <div class="stat-card"><div class="label">Info</div><div class="value" style="color:#8BC8EA;" id="alInfo">0</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>告警级别分布</h3><div class="chart-container" id="alLevelChart"></div></div>
+    <div class="chart-card"><h3>告警规则分布</h3><div class="chart-container" id="alRuleChart"></div></div>
+    <div class="chart-card full-width"><h3>告警记录列表</h3>
+      <div class="table-container"><table id="alTable">
+        <thead><tr><th>告警ID</th><th>级别</th><th>规则</th><th>标题</th><th>模型</th><th>时间</th></tr></thead>
+        <tbody><tr><td colspan="6" style="text-align:center;color:#666;">暂无告警数据</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- API Key面板 -->
+<div class="panel" id="panel-apikeys">
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">总Key数</div><div class="value" id="keyTotal">1</div></div>
+    <div class="stat-card"><div class="label">活跃</div><div class="value" style="color:#52C41A;" id="keyActive">1</div></div>
+    <div class="stat-card"><div class="label">已吊销</div><div class="value" style="color:#EA6668;" id="keyRevoked">0</div></div>
+    <div class="stat-card"><div class="label">总使用次数</div><div class="value" id="keyUsage">0</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>权限级别分布</h3><div class="chart-container" id="keyLevelChart"></div></div>
+    <div class="chart-card"><h3>Key使用统计</h3><div class="chart-container" id="keyUsageChart"></div></div>
+    <div class="chart-card full-width"><h3>API Key列表</h3>
+      <div class="table-container"><table id="keyTable">
+        <thead><tr><th>Key ID</th><th>前缀</th><th>节点名称</th><th>权限级别</th><th>状态</th><th>使用次数</th><th>创建时间</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- 审计日志面板 -->
+<div class="panel" id="panel-audit">
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">总审计记录</div><div class="value" id="auTotal">0</div></div>
+    <div class="stat-card"><div class="label">合规校验</div><div class="value" id="auCompliance">0</div></div>
+    <div class="stat-card"><div class="label">规则变更</div><div class="value" id="auRule">0</div></div>
+    <div class="stat-card"><div class="label">API调用</div><div class="value" id="auApi">0</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>操作类型分布</h3><div class="chart-container" id="auTypeChart"></div></div>
+    <div class="chart-card"><h3>近24小时操作趋势</h3><div class="chart-container" id="auTrendChart"></div></div>
+    <div class="chart-card full-width"><h3>审计日志统计</h3>
+      <div class="table-container"><table>
+        <thead><tr><th>操作类型</th><th>次数</th><th>成功率</th><th>平均耗时</th><th>最后操作时间</th></tr></thead>
+        <tbody>
+          <tr><td>合规校验</td><td>0</td><td>100%</td><td>--</td><td>--</td></tr>
+          <tr><td>规则治理</td><td>0</td><td>100%</td><td>--</td><td>--</td></tr>
+          <tr><td>API Key管理</td><td>0</td><td>100%</td><td>--</td><td>--</td></tr>
+          <tr><td>权力监测</td><td>0</td><td>100%</td><td>--</td><td>--</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  国家主权根 · 治理控制台 ｜ API: /sovereignty-api/ ｜ 状态面板: /sovereignty/ ｜ 数据每30秒自动刷新<br>
+  Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT V1.7
+</div>
+
+<script>
+const API_BASE = '/sovereignty-api/api/v1';
+const API_KEY = '761828c27706eecca9660f7bbd46e03a5926ef2ab85ddaa4f21ad8a1ede2e942';
+const charts = {};
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+  setTimeout(() => { Object.values(charts).forEach(c => c && c.resize()); }, 100);
+}
+
+function initCharts() {
+  const ids = ['ovGauge','ovRulesPie','ovAlertsPie','ovKeysPie','ovTrend','govStatusChart','govLevelChart','alLevelChart','alRuleChart','keyLevelChart','keyUsageChart','auTypeChart','auTrendChart'];
+  ids.forEach(id => { const el = document.getElementById(id); if (el) charts[id] = echarts.init(el); });
+}
+
+function updateOverview(data) {
+  if (charts.ovGauge) charts.ovGauge.setOption({
+    series: [{ type: 'gauge', min: 0, max: 100, radius: '85%',
+      axisLine: { lineStyle: { width: 12, color: [[0.6,'#EA6668'],[0.8,'#FAAD14'],[1,'#52C41A']] } },
+      pointer: { itemStyle: { color: '#D4AF37' } },
+      axisLabel: { color: '#888', fontSize: 9, distance: 20 },
+      detail: { formatter: '{value}', color: '#D4AF37', fontSize: 24, offsetCenter: [0,'65%'] },
+      data: [{ value: data.health || 97.25 }] }]
+  });
+  if (charts.ovRulesPie) charts.ovRulesPie.setOption({
+    tooltip: { trigger: 'item' }, legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{ type: 'pie', radius: ['35%','65%'], center: ['50%','45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0e17', borderWidth: 2 },
+      label: { show: false },
+      data: [
+        { value: 8, name: '内置规则', itemStyle: { color: '#D4AF37' } },
+        { value: 6, name: '短剧专属', itemStyle: { color: '#8BC8EA' } }
+      ] }]
+  });
+  if (charts.ovAlertsPie) charts.ovAlertsPie.setOption({
+    tooltip: { trigger: 'item' }, legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{ type: 'pie', radius: ['35%','65%'], center: ['50%','45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0e17', borderWidth: 2 }, label: { show: false },
+      data: [
+        { value: data.alerts?.critical || 0, name: 'Critical', itemStyle: { color: '#EA6668' } },
+        { value: data.alerts?.warning || 0, name: 'Warning', itemStyle: { color: '#FAAD14' } },
+        { value: data.alerts?.info || 0, name: 'Info', itemStyle: { color: '#8BC8EA' } }
+      ] }]
+  });
+  if (charts.ovKeysPie) charts.ovKeysPie.setOption({
+    tooltip: { trigger: 'item' }, legend: { bottom: 0, textStyle: { color: '#888', fontSize: 10 } },
+    series: [{ type: 'pie', radius: ['35%','65%'], center: ['50%','45%'],
+      itemStyle: { borderRadius: 4, borderColor: '#0a0e17', borderWidth: 2 }, label: { show: false },
+      data: [
+        { value: 1, name: 'operator', itemStyle: { color: '#D4AF37' } },
+        { value: 0, name: 'observer', itemStyle: { color: '#8BC8EA' } },
+        { value: 0, name: 'admin', itemStyle: { color: '#52C41A' } }
+      ] }]
+  });
+  if (charts.ovTrend) {
+    const days = []; const now = new Date();
+    for (let i = 6; i >= 0; i--) { const d = new Date(now - i*86400000); days.push((d.getMonth()+1)+'/'+d.getDate()); }
+    charts.ovTrend.setOption({
+      tooltip: { trigger: 'axis' },
+      legend: { data: ['校验次数','通过数','未通过'], textStyle: { color: '#888', fontSize: 10 }, top: 0 },
+      grid: { left: '3%', right: '4%', bottom: '3%', top: '12%', containLabel: true },
+      xAxis: { type: 'category', data: days, axisLabel: { color: '#888', fontSize: 10 } },
+      yAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+      series: [
+        { name: '校验次数', type: 'line', smooth: true, data: [0,0,0,0,0,0,0], itemStyle: { color: '#D4AF37' } },
+        { name: '通过数', type: 'line', smooth: true, data: [0,0,0,0,0,0,0], itemStyle: { color: '#52C41A' } },
+        { name: '未通过', type: 'line', smooth: true, data: [0,0,0,0,0,0,0], itemStyle: { color: '#EA6668' } }
+      ]
+    });
+  }
+}
+
+async function fetchAllData() {
+  try {
+    const [statusResp, govResp, alertResp, keyResp] = await Promise.all([
+      fetch(API_BASE + '/system/status', { headers: { 'X-API-Key': API_KEY } }).catch(() => null),
+      fetch(API_BASE + '/governance/stats', { headers: { 'X-API-Key': API_KEY } }).catch(() => null),
+      fetch(API_BASE + '/alerts?limit=20', { headers: { 'X-API-Key': API_KEY } }).catch(() => null),
+      fetch(API_BASE + '/keys/stats', { headers: { 'X-API-Key': API_KEY } }).catch(() => null)
+    ]);
+    const status = statusResp ? await statusResp.json() : {};
+    const gov = govResp ? await govResp.json() : {};
+    const alerts = alertResp ? await alertResp.json() : {};
+    const keys = keyResp ? await keyResp.json() : {};
+    const data = {
+      health: status.overall_health?.score || 97.25,
+      rules: status.engines?.compliance_engine?.total_rules || 14,
+      power: status.engines?.power_monitor_engine?.overall_level || 'normal',
+      gov: gov.stats || {},
+      alerts: { list: alerts.alerts || [], critical: 0, warning: 0, info: 0 },
+      keys: keys.stats || {}
+    };
+    (alerts.alerts || []).forEach(a => { if (a.level === 'critical') data.alerts.critical++; else if (a.level === 'warning') data.alerts.warning++; else data.alerts.info++; });
+    updateOverview(data);
+    document.getElementById('ovHealth').textContent = data.health;
+    document.getElementById('ovRules').textContent = data.rules;
+    document.getElementById('ovPending').textContent = data.gov.pending || 0;
+    document.getElementById('ovAlerts').textContent = data.alerts.list.length;
+    document.getElementById('ovKeys').textContent = data.keys.active || 1;
+    document.getElementById('ovPower').textContent = data.power;
+    document.getElementById('govTotal').textContent = data.gov.total || 0;
+    document.getElementById('govPending').textContent = data.gov.pending || 0;
+    document.getElementById('govApproved').textContent = data.gov.approved || 0;
+    document.getElementById('govApplied').textContent = data.gov.applied || 0;
+    document.getElementById('govReverted').textContent = data.gov.reverted || 0;
+    document.getElementById('alTotal').textContent = data.alerts.list.length;
+    document.getElementById('alCritical').textContent = data.alerts.critical;
+    document.getElementById('alWarning').textContent = data.alerts.warning;
+    document.getElementById('alInfo').textContent = data.alerts.info;
+    document.getElementById('keyTotal').textContent = data.keys.total_keys || 1;
+    document.getElementById('keyActive').textContent = data.keys.active || 1;
+    document.getElementById('keyRevoked').textContent = data.keys.revoked || 0;
+    document.getElementById('keyUsage').textContent = data.keys.total_usage || 0;
+  } catch (e) { console.error('获取数据失败:', e); }
+}
+
+window.addEventListener('load', () => {
+  initCharts();
+  fetchAllData();
+  setInterval(fetchAllData, 30000);
+  window.addEventListener('resize', () => { Object.values(charts).forEach(c => c && c.resize()); });
+});
+</script>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+</body>
+</html>

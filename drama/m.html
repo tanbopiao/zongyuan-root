@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>昆仑洞天 · 短剧创作</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0a0a14;color:#fff;min-height:100vh}
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+/* 顶部导航 */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.topbar .logo{font-size:20px;font-weight:800;background:linear-gradient(135deg,#c9a7e8,#9eacea);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar .works-btn{padding:8px 14px;background:rgba(201,167,232,0.1);border:1px solid rgba(201,167,232,0.2);border-radius:20px;font-size:13px;color:#c9a7e8;cursor:pointer}
+.topbar .works-btn:active{transform:scale(0.95)}
+/* 步骤指示器 */
+.steps{display:flex;padding:16px;gap:8px}
+.step{flex:1;text-align:center}
+.step .num{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;margin:0 auto 6px;color:#666}
+.step.active .num{background:linear-gradient(135deg,#9eacea,#c9a7e8);color:#1a1a2e}
+.step.done .num{background:#4ade80;color:#1a1a2e}
+.step .label{font-size:11px;color:#666}
+.step.active .label{color:#c9a7e8}
+.step.done .label{color:#4ade80}
+/* 内容区 */
+.content{flex:1;padding:0 16px 20px}
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;color:#aaa;margin-bottom:10px}
+textarea{width:100%;height:90px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;padding:12px;font-size:14px;resize:none;outline:none;font-family:inherit;line-height:1.6}
+textarea:focus{border-color:rgba(201,167,232,0.5)}
+textarea::placeholder{color:#555}
+.quick-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tag{padding:6px 12px;background:rgba(201,167,232,0.1);border:1px solid rgba(201,167,232,0.2);border-radius:20px;font-size:12px;color:#c9a7e8;cursor:pointer}
+.tag:active{background:rgba(201,167,232,0.25);transform:scale(0.95)}
+.btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.btn-primary{background:linear-gradient(135deg,#9eacea,#c9a7e8);color:#1a1a2e}
+.btn-primary:active{transform:scale(0.98)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.btn-secondary{background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.1)}
+.btn-secondary:active{transform:scale(0.98)}
+/* 分镜脚本 */
+.script-content{font-size:13px;line-height:1.8;color:#ccc;max-height:200px;overflow-y:auto;white-space:pre-wrap}
+/* 关键帧 */
+.keyframe-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.keyframe-item{position:relative;border-radius:12px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all 0.2s}
+.keyframe-item.selected{border-color:#c9a7e8;box-shadow:0 0 20px rgba(201,167,232,0.3)}
+.keyframe-item img{width:100%;display:block;aspect-ratio:9/16;object-fit:cover}
+.keyframe-item .badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);padding:4px 8px;border-radius:10px;font-size:11px}
+.keyframe-item.selected .badge{background:#c9a7e8;color:#1a1a2e}
+.keyframe-loading{aspect-ratio:9/16;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-size:12px;color:#666;border-radius:12px}
+/* 进度 */
+.progress-box{text-align:center;padding:20px 0}
+.progress-stage{font-size:16px;font-weight:600;color:#c9a7e8;margin-bottom:8px}
+.progress-time{font-size:13px;color:#888;margin-bottom:16px}
+.progress-bar-wrap{width:100%;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin-bottom:12px}
+.progress-bar{height:100%;background:linear-gradient(90deg,#9eacea,#c9a7e8);border-radius:4px;transition:width 0.5s;width:0%}
+.progress-percent{font-size:28px;font-weight:800}
+/* 视频结果 */
+video{width:100%;border-radius:16px;background:#000;max-height:55vh}
+.result-actions{display:flex;gap:10px;margin-top:16px}
+.result-actions .btn{flex:1;padding:14px;font-size:14px}
+/* 
+<div id="hotWorksSection" style="margin:15px 0;padding:12px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:10px;">
+    <div style="font-size:16px;font-weight:bold;color:#ffd700;margin-bottom:10px;">🔥 热门作品</div>
+    <div id="hotWorksList" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:5px;">
+        <div style="color:#888;font-size:12px;">加载中...</div>
+    </div>
+</div>
+<script>
+// V2.6.0: 加载热门作品
+function loadHotWorks() {
+    fetch(API + "/drama/works/trending", {method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"})
+    .then(r => r.json())
+    .then(data => {
+        const list = document.getElementById("hotWorksList");
+        if (!data.trending || data.trending.length === 0) {
+            list.innerHTML = "<div style="color:#888;font-size:12px;">暂无热门作品</div>";
+            return;
+        }
+        list.innerHTML = data.trending.slice(0,5).map(w => `
+            <div style="min-width:120px;text-align:center;cursor:pointer;" onclick="playVideo('${w.video_url}')">
+                <video src="${w.video_url}" style="width:120px;height:180px;object-fit:cover;border-radius:8px;background:#000;" muted></video>
+                <div style="font-size:11px;color:#ddd;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${w.title || "未命名"}</div>
+                <div style="font-size:10px;color:#ffd700;">★${w.rating || 0} | 🔥${w.heat_score || 0}</div>
+            </div>
+        `).join("");
+    }).catch(e => console.log("热门作品加载失败:", e));
+}
+// 页面加载时自动加载热门作品
+document.addEventListener("DOMContentLoaded", function() {
+    if (typeof loadHotWorks === "function") setTimeout(loadHotWorks, 500);
+});
+</script>
+
+作品库（点击星级评分） */
+.work-item{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.06);transition:all 0.2s}
+.work-item:active{transform:scale(0.98);border-color:rgba(201,167,232,0.3)}
+.work-thumb{width:50px;height:50px;border-radius:8px;background:rgba(201,167,232,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer}
+.work-info{flex:1;min-width:0;cursor:pointer}
+.work-name{font-size:14px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.work-time{font-size:11px;color:#666}
+.work-actions{display:flex;gap:6px;flex-shrink:0}
+.work-action-btn{width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.work-action-btn.del{background:rgba(255,80,80,0.1);color:#ff5050}
+.work-action-btn.del:active{background:rgba(255,80,80,0.3)}
+.work-action-btn.share{background:rgba(244,179,147,0.1);color:#F4B393}
+.work-action-btn.share:active{background:rgba(244,179,147,0.3)}
+.empty-state{text-align:center;padding:40px;color:#666;font-size:14px}
+/* 页面切换 */
+.page{display:none}
+.page.active{display:block;animation:fadeIn 0.3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.hint{font-size:12px;color:#666;text-align:center;margin-top:12px}
+</style>
+    <link rel="canonical" href="https://huodouai.com/drama/m.html">
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">昆仑洞天</div>
+    <div class="works-btn" onclick="showWorks()">📁 作品库</div>
+  </div>
+
+  <!-- 步骤指示器 -->
+  <div class="steps" id="steps-bar">
+    <div class="step active" id="step1-ind"><div class="num">1</div><div class="label">剧本分镜</div></div>
+    <div class="step" id="step2-ind"><div class="num">2</div><div class="label">关键帧</div></div>
+    <div class="step" id="step3-ind"><div class="num">3</div><div class="label">生成视频</div></div>
+  </div>
+
+  <div class="content">
+    <!-- 页面1：输入需求 -->
+    <div class="page active" id="page-input">
+      <div class="card">
+        <div class="card-title">你想做什么短剧？</div>
+        <textarea id="demand-input" placeholder="例如：太阴月神在月光下觉醒，发现自己拥有操控月光的力量，决定守护昆仑洞天..."></textarea>
+        <div class="quick-tags">
+          <div class="tag" onclick="fillTag(this)">太阴月神觉醒</div>
+          <div class="tag" onclick="fillTag(this)">九天玄女战蚩尤</div>
+          <div class="tag" onclick="fillTag(this)">赤凰涅槃重生</div>
+          <div class="tag" onclick="fillTag(this)">山海经萌宠日常</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="generateScript()">✨ 生成剧本分镜</button>
+      <div class="hint">AI将生成剧本、5张关键帧和5/10/15/30秒短视频</div>
+    </div>
+
+    <!-- 页面2：剧本分镜 -->
+    <div class="page" id="page-script">
+      <div class="card">
+        <div class="card-title">📝 剧情分镜脚本</div>
+        <div class="script-content" id="script-content">生成中...</div>
+      </div>
+      <button class="btn btn-primary" onclick="generateKeyframes()">🎨 生成关键帧</button>
+    </div>
+
+    <!-- 页面3：关键帧选择 -->
+    <div class="page" id="page-keyframes">
+      <div class="card">
+        <div class="card-title">🖼️ 选择一张关键帧生成视频</div>
+        <div class="keyframe-grid" id="keyframe-grid">
+          <div class="keyframe-loading">生成中 1/5...</div>
+          <div class="keyframe-loading">等待中</div>
+          <div class="keyframe-loading">等待中</div>
+          <div class="keyframe-loading">等待中</div>
+          <div class="keyframe-loading">等待中</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn btn-secondary" id="dur-5s" onclick="setDuration(5)" style="flex:1;background:#c9a7e8;color:#1a1a2e">5秒短视频</button>
+        <button class="btn btn-secondary" id="dur-10s" onclick="setDuration(10)" style="flex:1">10秒长视频</button>
+        <button class="btn btn-secondary" id="dur-15s" onclick="setDuration(15)" style="flex:1">15秒</button>
+        <button class="btn btn-secondary" id="dur-30s" onclick="setDuration(30)" style="flex:1">30秒</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" onclick="generateKeyframes()" style="flex:1">🔄 换一批</button>
+        <button class="btn btn-primary" id="video-btn" onclick="generateVideo()" disabled style="flex:2">🎬 生成视频</button>
+      </div>
+    </div>
+
+    <!-- 页面4：视频生成进度 -->
+    <div class="page" id="page-progress">
+      <div class="progress-box">
+        <div class="progress-stage" id="progress-stage">准备中...</div>
+        <div class="progress-time" id="progress-time">约2-4分钟</div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="progress-percent" id="progress-percent">0%</div>
+        <div class="hint">生成中可关闭页面，完成后自动保存到作品库</div>
+      </div>
+    </div>
+
+    <!-- 页面5：视频结果 -->
+    <div class="page" id="page-result">
+      <div class="card">
+        <div class="card-title">🎉 生成完成！</div>
+        <video id="result-video" controls playsinline></video>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-primary" onclick="restart()">再做一个</button>
+        <button class="btn btn-secondary" onclick="showWorks()">作品库</button>
+      </div>
+    </div>
+
+    <!-- 页面6：作品库 -->
+    <div class="page" id="page-works">
+      <div class="card">
+        <div class="card-title">📁 我的作品</div>
+        <div id="works-list"></div>
+      </div>
+      <button class="btn btn-secondary" onclick="restart()">+ 创作新作品</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "/ai-proxy";
+let deviceId = localStorage.getItem("drama_device_id") || ("user-" + Math.random().toString(36).substr(2, 10));
+localStorage.setItem("drama_device_id", deviceId);
+let currentScript = "";
+let currentStoryboard = "";
+let keyframes = [];
+let selectedKeyframe = null;
+let videoDuration = 5; // 5或10秒
+let pollTimer = null;
+
+function fillTag(el){ document.getElementById("demand-input").value = el.textContent; }
+
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function setStep(n){
+  for(let i=1;i<=3;i++){
+    const el = document.getElementById("step"+i+"-ind");
+    el.classList.remove("active","done");
+    if(i<n) el.classList.add("done");
+    if(i===n) el.classList.add("active");
+  }
+  document.getElementById("steps-bar").style.display = (id==="page-works"||id==="page-result") ? "none" : "flex";
+}
+
+// 步骤1：生成剧本分镜
+function generateScript(){
+  const demand = document.getElementById("demand-input").value.trim();
+  if(!demand){ alert("请输入短剧内容"); return; }
+  const btn = this;
+  btn.disabled = true; btn.textContent = "生成中...";
+  
+  // 调用算子生成剧本
+  callOperator("text","generate_script",{template_name:demand}).then(r=>{
+    currentScript = r.script || demand;
+    return callOperator("text","generate_storyboard",{script:currentScript});
+  }).then(r=>{
+    currentStoryboard = r.storyboard || currentScript;
+    document.getElementById("script-content").textContent = currentScript + "\n\n【分镜】\n" + currentStoryboard;
+    showPage("page-script");
+    setStep(1);
+    btn.disabled = false; btn.textContent = "✨ 生成剧本分镜";
+  }).catch(e=>{
+    alert("生成失败："+e.message);
+    btn.disabled = false; btn.textContent = "✨ 生成剧本分镜";
+  });
+}
+
+// 步骤2：生成3张关键帧
+function generateKeyframes(){
+  showPage("page-keyframes");
+  setStep(2);
+  const grid = document.getElementById("keyframe-grid");
+  grid.innerHTML = '<div class="keyframe-loading">生成中 1/5...</div><div class="keyframe-loading">等待中</div><div class="keyframe-loading">等待中</div><div class="keyframe-loading">等待中</div><div class="keyframe-loading">等待中</div>';
+  keyframes = [];
+  selectedKeyframe = null;
+  document.getElementById("video-btn").disabled = true;
+
+  const prompts = [
+    currentScript + "，纯东方神女，电影级关键帧，冷色调，清冷月光",
+    currentScript + "，纯东方神女，电影级关键帧，暖色调，温暖霞光",
+    currentScript + "，纯东方神女，电影级关键帧，强烈轮廓光，剪影效果",
+    currentScript + "，纯东方神女，电影级关键帧，水墨国风，写意留白",
+    currentScript + "，纯东方神女，电影级关键帧，敦煌飞天，金碧辉煌"
+  ];
+
+  promises = prompts.map((p,i)=>{
+    return callOperator("image","generate_keyframe",{prompt:p}).then(r=>{
+      if(r.image_url){
+        keyframes[i] = r.image_url;
+        renderKeyframes();
+      }
+    }).catch(()=>{});
+  });
+}
+
+function renderKeyframes(){
+  const grid = document.getElementById("keyframe-grid");
+  grid.innerHTML = keyframes.map((url,i)=>{
+    if(!url) return '<div class="keyframe-loading">生成中...</div>';
+    return '<div class="keyframe-item '+(selectedKeyframe===i?'selected':'')+'" onclick="selectKeyframe('+i+')">' +
+      '<img src="'+url+'" alt="关键帧'+(i+1)+'">' +
+      '<div class="badge">'+(selectedKeyframe===i?'✓ 已选':'关键帧'+(i+1))+'</div></div>';
+  }).join("");
+}
+
+function selectKeyframe(i){
+  selectedKeyframe = i;
+  renderKeyframes();
+  document.getElementById("video-btn").disabled = false;
+}
+function setDuration(d){
+  videoDuration = d;
+  ["5s","10s","15s","30s"].forEach(id=>{
+    const el=document.getElementById("dur-"+id);
+    if(el){el.style.background="";el.style.color="";}
+  });
+  const active=document.getElementById("dur-"+d+"s");
+  if(active){active.style.background="#c9a7e8";active.style.color="#1a1a2e";}
+  // 15秒=3段, 30秒=6段
+  segmentCount = d <= 5 ? 1 : (d <= 10 ? 2 : (d <= 15 ? 3 : 6));
+}
+
+// 步骤3：基于选中关键帧生成视频
+function generateVideo(){
+  if(selectedKeyframe===null){ alert("请先选择一张关键帧"); return; }
+  showPage("page-progress");
+  setStep(3);
+  document.getElementById("progress-text").textContent = "视频生成中（"+videoDuration+"秒模式）...";
+  
+  const kfUrl = keyframes[selectedKeyframe];
+  
+  // 生成视频（10秒模式生成2个然后拼接）
+  let videoPromise;
+  if(videoDuration === 10){
+    // 10秒模式：生成2个5秒视频然后拼接
+    videoPromise = callOperator("video","image_to_video",{prompt:currentScript, image_url:kfUrl}).then(r1=>{
+      if(!r1.video_url) throw new Error("视频1生成失败");
+      return callOperator("video","image_to_video",{prompt:currentScript+"，镜头延续", image_url:kfUrl}).then(r2=>{
+        if(!r2.video_url) return {video_url:r1.video_url}; // 第二个失败则用第一个
+        // 拼接两个视频
+        return callOperator("video","concat",{video_urls:[r1.video_url, r2.video_url]}).then(cr=>{
+          if(cr.success) return {video_url: cr.output_url};
+          return {video_url: r1.video_url}; // 拼接失败用第一个
+        });
+      });
+    });
+  } else {
+    // 5秒模式：单视频
+    videoPromise = callOperator("video","image_to_video",{prompt:currentScript, image_url:kfUrl});
+  }
+  
+  videoPromise.then(r=>{
+    if(r.video_url){
+      // TTS配音
+      return callOperator("text","extract_narration",{script:currentScript,max_len:200}).then(nr=>{
+        const narration = nr.narration || currentScript.slice(0,200);
+        return callOperator("audio","text_to_speech",{text:narration}).then(ar=>{
+          if(ar.audio_url){
+            return callOperator("video","merge_audio",{video_url:r.video_url, audio_url:ar.audio_url});
+          }
+          return {output_url:r.video_url};
+        });
+      });
+    }
+    throw new Error("视频生成失败");
+  }).then(r=>{
+    const finalUrl = r.output_url || r.video_url;
+    // 保存到作品库
+    callOperator("storage","save_work",{device_id:deviceId, title:document.getElementById("demand-input").value.slice(0,20), video_url:finalUrl});
+    document.getElementById("result-video").src = finalUrl;
+    showPage("page-result");
+  }).catch(e=>{
+    alert("生成失败："+e.message);
+    showPage("page-keyframes");
+    setStep(2);
+  });
+}
+
+// 算子调用封装
+function callOperator(group, operator, params){
+  return fetch(API+"/operators/call",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({group, operator, params})
+  }).then(r=>r.json());
+}
+
+// 作品库
+function showWorks(){
+  showPage("page-works");
+  document.getElementById("steps-bar").style.display = "none";
+  fetch(API+"/drama/works/list",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({device_id:deviceId})
+  }).then(r=>r.json()).then(data=>{
+    const works = data.works || [];
+    const list = document.getElementById("works-list");
+    if(works.length===0){
+      list.innerHTML = '<div class="empty-state">还没有作品，快去创作第一个吧</div>';
+      return;
+    }
+    list.innerHTML = works.map(w=>{
+      const url = w.video_url || '';
+      const fullUrl = url.startsWith('http') ? url : ('https://www.huodouai.com' + url);
+      return '<div class="work-item">' +
+        '<div class="work-thumb" onclick="playWork(\''+url+'\')">🎬</div>' +
+        '<div class="work-info" onclick="playWork(\''+url+'\')"><div class="work-name">'+(w.title||'未命名')+'</div>' +
+        '<div class="work-time">'+(w.created_at||'')+'</div></div>' +
+        '<div class="work-actions">' +
+        '<button class="work-action-btn share" onclick="shareWork(\''+fullUrl+'\',event)" title="分享">🔗</button>' +
+        '<button class="work-action-btn del" onclick="deleteWork('+w.id+',event)" title="删除">🗑️</button>' +
+        '</div></div>';
+    }).join("");
+  });
+}
+
+function playWork(url){
+  if(url){
+    document.getElementById("result-video").src = url;
+    showPage("page-result");
+  }
+}
+function deleteWork(id, e){
+  e.stopPropagation();
+  if(!confirm("确定删除这个作品吗？")) return;
+  fetch(API+"/drama/works/delete",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({id:id, device_id:deviceId})
+  }).then(r=>r.json()).then(d=>{
+    if(d.deleted){ alert("删除成功"); showWorks(); }
+    else alert("删除失败："+(d.message||"未知错误"));
+  }).catch(()=>alert("删除失败"));
+}
+function shareWork(url, e){
+  e.stopPropagation();
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=>{
+      alert("分享链接已复制到剪贴板\n"+url);
+    }).catch(()=>{
+      prompt("复制以下链接分享：", url);
+    });
+  } else {
+    prompt("复制以下链接分享：", url);
+  }
+}
+
+function restart(){
+  document.getElementById("demand-input").value = "";
+  currentScript = ""; keyframes = []; selectedKeyframe = null;
+  showPage("page-input");
+  setStep(1);
+  document.getElementById("steps-bar").style.display = "flex";
+}
+
+// V1.9.0: 多段视频生成+concat拼接
+async function generateMultiSegment(imageUrl, segments) {
+  const videoUrls = [];
+  for (let i = 0; i < segments; i++) {
+    const stageEl = document.getElementById("videoStage");
+    if (stageEl) stageEl.textContent = "生成视频段 " + (i+1) + "/" + segments + "...";
+    const r = await callOperator("video","image_to_video",{image_url:imageUrl, duration:5});
+    if (r.success && (r.video_url || r.url)) {
+      videoUrls.push(r.video_url || r.url);
+    } else {
+      throw new Error("视频段" + (i+1) + "生成失败");
+    }
+  }
+  if (videoUrls.length === 1) return videoUrls[0];
+  // 多段concat
+  if (stageEl) stageEl.textContent = "拼接" + segments + "段视频...";
+  const concatR = await callOperator("video","concat",{video_urls: videoUrls});
+  if (concatR.success && concatR.output_url) return concatR.output_url;
+  if (concatR.success && concatR.video_url) return concatR.video_url;
+  return videoUrls[0]; // fallback
+}
+
+</script>
+
+<script>
+// V1.8.0: 一键生成模式 - 全自动8阶段生产
+function oneClickGenerate() {
+    const topic = document.getElementById("scriptInput").value.trim();
+    if (!topic) { alert("请输入短剧主题"); return; }
+    
+    const btn = document.getElementById("oneClickBtn");
+    btn.disabled = true;
+    btn.textContent = "生成中...";
+    
+    // 显示进度
+    const progressDiv = document.createElement("div");
+    progressDiv.id = "oneClickProgress";
+    progressDiv.style.cssText = "margin:15px 0;padding:15px;background:#f8f9fa;border-radius:10px;font-size:13px;";
+    progressDiv.innerHTML = "<div style='font-weight:bold;margin-bottom:10px;'>一键生成进度</div><div id='ocStage'>阶段1/8: 生成剧本...</div><div id='ocBar' style='height:6px;background:#e0e0e0;border-radius:3px;margin-top:8px;'><div id='ocFill' style='height:100%;width:12%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:3px;transition:width 0.5s;'></div></div>";
+    
+    const resultArea = document.getElementById("resultArea") || document.body;
+    resultArea.appendChild(progressDiv);
+    
+    const stages = ["生成剧本","生成分镜","生成关键帧","选择关键帧","生成视频","生成配音","合并音视频","保存作品"];
+    let currentStage = 0;
+    
+    function updateStage(n) {
+        currentStage = n;
+        document.getElementById("ocStage").textContent = "阶段" + (n+1) + "/8: " + stages[n] + "...";
+        document.getElementById("ocFill").style.width = ((n+1)*12.5) + "%";
+    }
+    
+    // 步骤1: 生成剧本
+    updateStage(0);
+    fetch(API + "/operators/call", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({group:"text", operator:"generate_script", params:{template_name:topic}})
+    })
+    .then(r => r.json())
+    .then(scriptData => {
+        if (!scriptData.success) throw new Error("剧本生成失败");
+        updateStage(1);
+        // 步骤2: 生成分镜
+        return fetch(API + "/operators/call", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({group:"text", operator:"generate_storyboard", params:{script:scriptData.script}})
+        });
+    })
+    .then(r => r.json())
+    .then(sbData => {
+        updateStage(2);
+        // 步骤3: 生成关键帧
+        return fetch(API + "/operators/call", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({group:"image", operator:"generate_keyframe", params:{prompt:topic + " 纯东方神女", timeout:120}})
+        });
+    })
+    .then(r => r.json())
+    .then(kfData => {
+        updateStage(3);
+        // 自动选择第一张关键帧
+        const imageUrl = kfData.image_url || kfData.url || (kfData.images && kfData.images[0]);
+        if (!imageUrl) throw new Error("关键帧生成失败");
+        updateStage(4);
+        // 步骤4: 生成视频
+        return fetch(API + "/operators/call", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({group:"video", operator:"image_to_video", params:{image_url:imageUrl, duration:5}})
+        });
+    })
+    .then(r => r.json())
+    .then(videoData => {
+        updateStage(5);
+        const videoUrl = videoData.video_url || videoData.url;
+        if (!videoUrl) throw new Error("视频生成失败");
+        // 步骤5: 生成配音
+        return fetch(API + "/operators/call", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({group:"audio", operator:"text_to_speech", params:{text:topic, timeout:60}})
+        }).then(r => r.json()).then(audioData => ({videoUrl, audioData}));
+    })
+    .then(({videoUrl, audioData}) => {
+        updateStage(6);
+        // 步骤6: 合并音视频（如果有音频）
+        const audioUrl = audioData.audio_url || audioData.url;
+        if (audioUrl) {
+            return fetch(API + "/operators/call", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({group:"video", operator:"merge_audio", params:{video_url:videoUrl, audio_url:audioUrl}})
+            }).then(r => r.json()).then(d => d.video_url || videoUrl);
+        }
+        return videoUrl;
+    })
+    .then(finalVideoUrl => {
+        updateStage(7);
+        // 步骤7: 保存作品
+        const deviceId = localStorage.getItem("device_id") || ("device_" + Date.now());
+        localStorage.setItem("device_id", deviceId);
+        return fetch(API + "/operators/call", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({group:"storage", operator:"save_work", params:{device_id:deviceId, title:topic, video_url:finalVideoUrl}})
+        }).then(() => finalVideoUrl);
+    })
+    .then(finalVideoUrl => {
+        document.getElementById("ocStage").textContent = "生成完成！";
+        document.getElementById("ocFill").style.width = "100%";
+        // 显示视频
+        const videoDiv = document.createElement("div");
+        videoDiv.style.cssText = "margin-top:15px;";
+        videoDiv.innerHTML = "<video controls style='width:100%;border-radius:10px;' src='" + finalVideoUrl + "'></video><p style='text-align:center;color:#666;margin-top:8px;'>已自动保存到作品库</p>";
+        progressDiv.appendChild(videoDiv);
+        btn.disabled = false;
+        btn.textContent = "一键生成";
+    })
+    .catch(err => {
+        document.getElementById("ocStage").textContent = "生成失败: " + err.message;
+        document.getElementById("ocFill").style.background = "#ff6b6b";
+        btn.disabled = false;
+        btn.textContent = "一键生成";
+    });
+}
+</script>
+
+
+<script>
+// V2.2.0: 作品评分功能
+function submitRating(workId, rating) {
+    const deviceId = localStorage.getItem("device_id") || "anonymous";
+    fetch(API + "/drama/works/rate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id: workId, device_id: deviceId, rating: rating})
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            // 更新UI显示评分
+            const stars = document.querySelectorAll("#rating-" + workId + " .star");
+            stars.forEach((s, i) => {
+                s.style.color = i < rating ? "#ffd700" : "#ddd";
+            });
+            alert("评分成功！感谢反馈");
+        }
+    }).catch(e => console.log("评分失败:", e));
+}
+
+function renderStars(workId, currentRating) {
+    let html = "<div id='rating-" + workId + "' style='margin:5px 0;'>";
+    for (let i = 1; i <= 5; i++) {
+        const color = i <= currentRating ? "#ffd700" : "#ddd";
+        html += "<span class='star' onclick='submitRating(" + workId + "," + i + ")' style='cursor:pointer;font-size:18px;color:" + color + ";margin-right:2px;'>★</span>";
+    }
+    html += "</div>";
+    return html;
+}
+</script>
+
+
+<script>
+// V2.3.0: 作品库排序功能
+let currentSort = "time"; // time / rating / plays
+function sortWorks(sortBy) {
+    currentSort = sortBy;
+    currentPage = 1; // 切换排序时重置到第一页
+    document.getElementById("pageInfo").textContent = "第 1 页";
+    document.querySelectorAll(".sort-btn").forEach(b => {
+        b.style.background = b.dataset.sort === sortBy ? "#4a9eff" : "#333";
+    });
+    if (typeof loadWorks === "function") loadWorks();
+    else if (typeof showWorks === "function") showWorks();
+}
+</script>
+
+
+<div id="pagination" style="margin:15px 0;display:flex;justify-content:center;gap:10px;align-items:center;">
+    <button onclick="changePage(-1)" style="padding:8px 16px;border:none;border-radius:6px;background:#4a9eff;color:#fff;cursor:pointer;font-size:14px;">上一页</button>
+    <span id="pageInfo" style="color:#ddd;font-size:14px;">第 1 页</span>
+    <button onclick="changePage(1)" style="padding:8px 16px;border:none;border-radius:6px;background:#4a9eff;color:#fff;cursor:pointer;font-size:14px;">下一页</button>
+</div>
+<script>
+// V2.7.0: 作品库分页
+let currentPage = 1;
+const pageSize = 20;
+function changePage(delta) {
+    currentPage = Math.max(1, currentPage + delta);
+    document.getElementById("pageInfo").textContent = "第 " + currentPage + " 页";
+    if (typeof loadWorks === "function") loadWorks();
+    else if (typeof showWorks === "function") showWorks();
+}
+</script>
+
+</body>
+</html>

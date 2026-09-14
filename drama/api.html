@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>短剧生产母机 · API文档</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a14;color:#fff;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px 20px;text-align:center}
+.header h1{font-size:24px;background:linear-gradient(90deg,#c9a7e8,#F4B393);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{color:#888;font-size:13px;margin-top:6px}
+.main{max-width:800px;margin:0 auto;padding:20px}
+.api-group{margin-bottom:24px}
+.api-group h2{font-size:16px;color:#c9a7e8;margin-bottom:12px;border-left:3px solid #c9a7e8;padding-left:10px}
+.api-item{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;margin-bottom:10px}
+.api-item .method{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-right:8px}
+.method-get{background:#52C41A;color:#fff}
+.method-post{background:#1890FF;color:#fff}
+.api-item .path{font-family:monospace;font-size:13px;color:#F4B393}
+.api-item .desc{font-size:12px;color:#888;margin-top:6px}
+.api-item .params{font-size:11px;color:#666;margin-top:4px;font-family:monospace}
+.footer{text-align:center;padding:20px;color:#555;font-size:11px}
+</style>
+    <link rel="canonical" href="https://huodouai.com/drama/api.html">
+</head>
+<body>
+<div class="header">
+  <h1>短剧生产母机 API文档</h1>
+  <p>V1.5.0 · 8组29算子 · 全链路自动化生产</p>
+</div>
+<div class="main">
+
+<div class="api-group">
+  <h2>系统状态</h2>
+  <div class="api-item">
+    <span class="method method-get">GET</span><span class="path">/health</span>
+    <div class="desc">服务健康检查，返回服务状态、模型列表、智能路由状态</div>
+  </div>
+  <div class="api-item">
+    <span class="method method-get">GET</span><span class="path">/drama/stats</span>
+    <div class="desc">生产统计，返回作品数、用户数、任务数、系统资源</div>
+  </div>
+</div>
+
+<div class="api-group">
+  <h2>短剧生产</h2>
+  <div class="api-item">
+    <span class="method method-post">POST</span><span class="path">/drama/oneclick</span>
+    <div class="desc">一键提交生产任务（异步），参数：template_name, demand, device_id</div>
+    <div class="params">返回: {task_id, poll_url}</div>
+  </div>
+  <div class="api-item">
+    <span class="method method-get">GET</span><span class="path">/drama/oneclick/status?task_id=xxx</span>
+    <div class="desc">查询生产任务状态和进度</div>
+  </div>
+  <div class="api-item">
+    <span class="method method-get">GET</span><span class="path">/drama/list</span>
+    <div class="desc">视频文件列表</div>
+  </div>
+</div>
+
+<div class="api-group">
+  <h2>算子调用（8组29算子）</h2>
+  <div class="api-item">
+    <span class="method method-post">POST</span><span class="path">/operators/call</span>
+    <div class="desc">通用算子调用接口</div>
+    <div class="params">Body: {group, operator, params}</div>
+  </div>
+  <div class="api-item" style="font-size:11px;color:#666">
+    <b>算子组：</b>text(5) image(4) video(5) audio(3) storage(3) verify(3) adp_rag(3) local_rag(4)<br>
+    <b>video组：</b>text_to_video, image_to_video, merge_audio, transcode, concat<br>
+    <b>image组：</b>generate_keyframe, batch_generate, enhance_image, style_transfer
+  </div>
+</div>
+
+<div class="api-group">
+  <h2>作品库</h2>
+  <div class="api-item">
+    <span class="method method-post">POST</span><span class="path">/drama/works/delete</span>
+    <div class="desc">删除作品，参数：work_id, device_id</div>
+  </div>
+</div>
+
+<div class="api-group">
+  <h2>视频生成</h2>
+  <div class="api-item">
+    <span class="method method-post">POST</span><span class="path">/video/generate</span>
+    <div class="desc">提交视频生成任务，参数：prompt, duration, ratio, mode, [image_url]</div>
+  </div>
+  <div class="api-item">
+    <span class="method method-get">GET</span><span class="path">/video/status?task_id=xxx</span>
+    <div class="desc">查询视频生成状态</div>
+  </div>
+  <div class="api-item">
+    <span class="method method-post">POST</span><span class="path">/image/generate</span>
+    <div class="desc">图片生成，参数：prompt, size, n</div>
+  </div>
+</div>
+
+</div>
+<div class="footer">
+  昆仑洞天短剧生产工业母机 · ZONGYUAN-ROOT · DID-BR-000002 · Ω₀⊂⊙∞⊂Ω
+</div>
+</body>
+</html>

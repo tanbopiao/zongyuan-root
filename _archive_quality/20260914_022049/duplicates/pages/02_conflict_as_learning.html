@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>冲突即学习 · 矛盾是进化的契机 | 火斗云智AIOS</title>
+<meta name="description" content="ZONGYUAN-ROOT神经内核V2.0核心机制：冲突即学习。矛盾不是系统的bug，而是进化的契机。6维边界分析+5种元公理模板，实现认知维度自动跃迁。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg-primary:#0a0a0f;--bg-secondary:#12121a;--bg-card:#1a1a26;--text-primary:#e8e8f0;--text-secondary:#9898b0;--text-muted:#686880;--accent-purple:#a78bfa;--accent-blue:#60a5fa;--accent-gold:#fbbf24;--accent-cyan:#22d3ee;--accent-green:#4ade80;--accent-red:#f87171;--accent-pink:#f472b6;--border-color:rgba(167,139,250,0.15)}
+body{background:var(--bg-primary);color:var(--text-primary);font-family:'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;line-height:1.7;overflow-x:hidden}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.hero{position:relative;padding:100px 0 80px;text-align:center;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(248,113,113,0.08) 0%,rgba(167,139,250,0.1) 50%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border:1px solid rgba(248,113,113,0.3);border-radius:100px;font-size:13px;color:var(--accent-red);background:rgba(248,113,113,0.05);margin-bottom:28px}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent-red);box-shadow:0 0 8px var(--accent-red);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.hero h1{font-size:clamp(32px,5vw,56px);font-weight:700;line-height:1.2;margin-bottom:20px;background:linear-gradient(135deg,#fff 0%,var(--accent-red) 40%,var(--accent-gold) 70%,var(--accent-purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero .quote{font-size:clamp(16px,2.5vw,22px);color:var(--accent-gold);font-style:italic;max-width:700px;margin:0 auto 16px;font-weight:500}
+.hero .subtitle{font-size:15px;color:var(--text-secondary);max-width:680px;margin:0 auto}
+.section{padding:80px 0}
+.section-header{text-align:center;margin-bottom:56px}
+.section-tag{display:inline-block;padding:4px 14px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px}
+.tag-red{background:rgba(248,113,113,0.1);color:var(--accent-red);border:1px solid rgba(248,113,113,0.2)}
+.tag-purple{background:rgba(167,139,250,0.1);color:var(--accent-purple);border:1px solid rgba(167,139,250,0.2)}
+.tag-gold{background:rgba(251,191,36,0.1);color:var(--accent-gold);border:1px solid rgba(251,191,36,0.2)}
+.tag-cyan{background:rgba(34,211,238,0.1);color:var(--accent-cyan);border:1px solid rgba(34,211,238,0.2)}
+.tag-green{background:rgba(74,222,128,0.1);color:var(--accent-green);border:1px solid rgba(74,222,128,0.2)}
+.section-header h2{font-size:clamp(26px,4vw,38px);font-weight:700;margin-bottom:14px}
+.section-header p{font-size:16px;color:var(--text-secondary);max-width:640px;margin:0 auto}
+/* Flow Diagram */
+.flow-container{background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:40px;overflow-x:auto}
+.flow-steps{display:flex;flex-direction:column;gap:0;min-width:500px}
+.flow-step{display:flex;align-items:center;gap:20px;padding:20px;border-radius:12px;border:1px solid;margin-bottom:8px}
+.flow-step:last-child{margin-bottom:0}
+.step-detect{background:rgba(248,113,113,0.05);border-color:rgba(248,113,113,0.2)}
+.step-analyze{background:rgba(251,191,36,0.05);border-color:rgba(251,191,36,0.2)}
+.step-branch{background:rgba(96,165,250,0.05);border-color:rgba(96,165,250,0.2)}
+.step-resolve{background:rgba(74,222,128,0.05);border-color:rgba(74,222,128,0.2)}
+.step-elevate{background:rgba(167,139,250,0.05);border-color:rgba(167,139,250,0.2)}
+.step-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}
+.step-detect .step-num{background:rgba(248,113,113,0.2);color:var(--accent-red)}
+.step-analyze .step-num{background:rgba(251,191,36,0.2);color:var(--accent-gold)}
+.step-branch .step-num{background:rgba(96,165,250,0.2);color:var(--accent-blue)}
+.step-resolve .step-num{background:rgba(74,222,128,0.2);color:var(--accent-green)}
+.step-elevate .step-num{background:rgba(167,139,250,0.2);color:var(--accent-purple)}
+.step-content h4{font-size:16px;font-weight:600;margin-bottom:4px}
+.step-content p{font-size:13px;color:var(--text-secondary)}
+.flow-arrow{text-align:center;color:var(--text-muted);font-size:18px;padding:4px 0}
+/* Dimension Grid */
+.dim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.dim-card{padding:24px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;transition:all .3s}
+.dim-card:hover{border-color:var(--accent-cyan);transform:translateY(-2px)}
+.dim-card .dim-icon{font-size:28px;margin-bottom:12px}
+.dim-card h4{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--accent-cyan)}
+.dim-card p{font-size:13px;color:var(--text-secondary);margin-bottom:12px}
+.dim-card .keywords{display:flex;flex-wrap:wrap;gap:6px}
+.dim-card .kw{padding:3px 10px;border-radius:4px;font-size:11px;background:rgba(34,211,238,0.08);color:var(--accent-cyan);border:1px solid rgba(34,211,238,0.15)}
+/* Pattern Cards */
+.pattern-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.pattern-card{padding:24px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;text-align:center;transition:all .3s}
+.pattern-card:hover{transform:translateY(-4px)}
+.pattern-card .p-icon{font-size:36px;margin-bottom:16px}
+.pattern-card h4{font-size:16px;font-weight:600;margin-bottom:8px}
+.pattern-card .pairs{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+.pattern-card .resolution{font-size:12px;color:var(--accent-green);padding:8px 12px;background:rgba(74,222,128,0.05);border-radius:6px;border:1px solid rgba(74,222,128,0.15)}
+/* Template Table */
+.template-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--bg-card);border-radius:16px;overflow:hidden;border:1px solid var(--border-color)}
+.template-table th,.template-table td{padding:16px 20px;text-align:left;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.template-table th{background:rgba(167,139,250,0.08);font-weight:600;color:var(--accent-purple);font-size:12px;text-transform:uppercase;letter-spacing:0.5px}
+.template-table tr:last-child td{border-bottom:none}
+.template-table .template-name{font-weight:600;color:var(--accent-gold)}
+/* Case Study */
+.case-study{background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:32px}
+.case-title{font-size:18px;font-weight:600;margin-bottom:24px;display:flex;align-items:center;gap:10px}
+.case-title .badge{padding:4px 12px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(167,139,250,0.1);color:var(--accent-purple)}
+.case-flow{display:flex;flex-direction:column;gap:16px}
+.case-node{padding:16px 20px;border-radius:10px;border-left:3px solid;font-size:14px}
+.case-conflict{background:rgba(248,113,113,0.05);border-color:var(--accent-red)}
+.case-analyze{background:rgba(251,191,36,0.05);border-color:var(--accent-gold)}
+.case-resolve{background:rgba(74,222,128,0.05);border-color:var(--accent-green)}
+.case-elevate{background:rgba(167,139,250,0.05);border-color:var(--accent-purple)}
+.case-node .label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.case-conflict .label{color:var(--accent-red)}
+.case-analyze .label{color:var(--accent-gold)}
+.case-resolve .label{color:var(--accent-green)}
+.case-elevate .label{color:var(--accent-purple)}
+/* Comparison */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.compare-col{padding:28px;border-radius:16px;border:1px solid}
+.compare-traditional{background:rgba(248,113,113,0.03);border-color:rgba(248,113,113,0.15)}
+.compare-neural{background:rgba(74,222,128,0.03);border-color:rgba(74,222,128,0.2)}
+.compare-col h4{font-size:16px;font-weight:600;margin-bottom:16px;text-align:center}
+.compare-traditional h4{color:var(--accent-red)}
+.compare-neural h4{color:var(--accent-green)}
+.compare-col ul{list-style:none}
+.compare-col li{padding:10px 0;font-size:13px;color:var(--text-secondary);border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:8px}
+.compare-col li:last-child{border-bottom:none}
+.compare-traditional li::before{content:'✗';color:var(--accent-red);font-weight:700}
+.compare-neural li::before{content:'✓';color:var(--accent-green);font-weight:700}
+.footer{padding:60px 0 40px;border-top:1px solid var(--border-color);text-align:center}
+.footer .provenance{font-size:14px;color:var(--accent-gold);letter-spacing:2px;margin-bottom:12px}
+.footer .did{font-size:12px;color:var(--text-muted);margin-bottom:8px}
+.footer .copyright{font-size:12px;color:var(--text-muted)}
+@media(max-width:768px){.hero{padding:60px 0 48px}.section{padding:48px 0}.flow-container{padding:20px}.dim-grid,.pattern-grid{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}.template-table{font-size:12px}.template-table th,.template-table td{padding:12px 14px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/pages/02_conflict_as_learning.html">
+</head>
+<body>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge"><span class="dot"></span> Core Mechanism · 神经内核V2.0</div>
+    <h1>冲突即学习</h1>
+    <p class="quote">"矛盾不是体系的bug，而是体系进化的契机。"</p>
+    <p class="subtitle">每一次冲突消解，都让体系的维度分辨率更高、认知层次更高。传统系统视冲突为错误，神经内核视冲突为学习信号——这是自治系统与他律系统的本质分野。</p>
+  </div>
+</section>
+
+<!-- 完整流程 -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-red">Conflict Resolution Flow</span>
+      <h2>冲突消解完整流程</h2>
+      <p>从矛盾检测到认知跃迁，五步完成"冲突即学习"的完整闭环。</p>
+    </div>
+    <div class="flow-container">
+      <div class="flow-steps">
+        <div class="flow-step step-detect">
+          <div class="step-num">1</div>
+          <div class="step-content"><h4>矛盾检测</h4><p>新输入与已有神经节点进行语义相似度比对，检测否定词/对立词/矛盾模式对，识别潜在冲突</p></div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step step-analyze">
+          <div class="step-num">2</div>
+          <div class="step-content"><h4>维度边界分析</h4><p>提取冲突双方的6维标签（角色形态/场景上下文/生产阶段/质量等级/受众渠道/时间周期），分析是否存在独有维度</p></div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step step-branch">
+          <div class="step-num">3</div>
+          <div class="step-content"><h4>消解决策分支</h4><p>有独有维度 → 边界划分路径；矛盾模式匹配 → 模式建议路径；领域不同 → 领域划分路径；都不满足 → 元公理生成路径</p></div>
+        </div>
+        <div class="flow-arrow">↓ ↓</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="flow-step step-resolve">
+            <div class="step-num">4a</div>
+            <div class="step-content"><h4>边界消解</h4><p>划分适用边界，双方互补共存，体系维度分辨率提升</p></div>
+          </div>
+          <div class="flow-step step-elevate">
+            <div class="step-num">4b</div>
+            <div class="step-content"><h4>元公理生成</h4><p>提取共性模式，生成高阶元公理统摄二者，原节点降级为实例，认知维度跃迁</p></div>
+          </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step step-resolve">
+          <div class="step-num">5</div>
+          <div class="step-content"><h4>体系增强</h4><p>无论哪条路径，冲突消解后体系永远比消解前更强——维度分辨率更高，或认知层次更高</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6维分类体系 -->
+<section class="section" style="background:var(--bg-secondary)">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-cyan">Dimension Taxonomy</span>
+      <h2>6维边界分类体系</h2>
+      <p>每个神经节点都携带6维标签，冲突消解时通过维度划分实现互补共存。</p>
+    </div>
+    <div class="dim-grid">
+      <div class="dim-card"><div class="dim-icon">🎭</div><h4>角色形态域</h4><p>角色所处形态决定规则适用性</p><div class="keywords"><span class="kw">战神</span><span class="kw">溟主</span><span class="kw">月神</span><span class="kw">九尾</span><span class="kw">玄女</span><span class="kw">金乌</span></div></div>
+      <div class="dim-card"><div class="dim-icon">🎬</div><h4>场景上下文域</h4><p>场景类型决定规则适用性</p><div class="keywords"><span class="kw">战斗</span><span class="kw">日常</span><span class="kw">仪式</span><span class="kw">回忆</span><span class="kw">梦境</span><span class="kw">预告</span></div></div>
+      <div class="dim-card"><div class="dim-icon">⚙️</div><h4>生产阶段域</h4><p>生产阶段决定规则适用性</p><div class="keywords"><span class="kw">关键帧</span><span class="kw">视频</span><span class="kw">配音</span><span class="kw">后期</span><span class="kw">质检</span><span class="kw">归档</span></div></div>
+      <div class="dim-card"><div class="dim-icon">⭐</div><h4>质量等级域</h4><p>镜头重要性决定质量标准</p><div class="keywords"><span class="kw">重点镜头</span><span class="kw">普通镜头</span><span class="kw">过渡镜头</span><span class="kw">首镜</span><span class="kw">高潮</span><span class="kw">结尾</span></div></div>
+      <div class="dim-card"><div class="dim-icon">📱</div><h4>受众渠道域</h4><p>发布渠道决定适配规则</p><div class="keywords"><span class="kw">抖音</span><span class="kw">快手</span><span class="kw">B站</span><span class="kw">小红书</span><span class="kw">横屏</span><span class="kw">竖屏</span></div></div>
+      <div class="dim-card"><div class="dim-icon">⏳</div><h4>时间周期域</h4><p>世界观时代决定风格规则</p><div class="keywords"><span class="kw">古代</span><span class="kw">现代</span><span class="kw">未来</span><span class="kw">上古</span><span class="kw">仙侠</span><span class="kw">科幻</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4种矛盾模式 -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-gold">Contradiction Patterns</span>
+      <h2>4种矛盾模式识别</h2>
+      <p>系统自动识别4类常见矛盾模式，并匹配对应的消解策略。</p>
+    </div>
+    <div class="pattern-grid">
+      <div class="pattern-card"><div class="p-icon">🎨</div><h4>配色矛盾</h4><div class="pairs">红金 vs 紫宸 / 红金 vs 月白 / 黑金 vs 白金</div><div class="resolution">按角色形态域划分：不同形态对应不同配色体系</div></div>
+      <div class="pattern-card"><div class="p-icon">🎭</div><h4>风格矛盾</h4><div class="pairs">高冷 vs 妖冶 / 威严 vs 狡黠 / 清冷 vs 炽热</div><div class="resolution">按形态+场景域划分：同一角色不同形态/场景有不同风格</div></div>
+      <div class="pattern-card"><div class="p-icon">📏</div><h4>约束矛盾</h4><div class="pairs">必须 vs 禁止 / 只能 vs 可以 / 永远 vs 暂时</div><div class="resolution">按适用条件域划分：强约束在特定条件下成立，其他条件可放宽</div></div>
+      <div class="pattern-card"><div class="p-icon">🏆</div><h4>质量矛盾</h4><div class="pairs">最高质量 vs 快速生成 / 4候选 vs 2候选 / 精修 vs 批量</div><div class="resolution">按质量等级域划分：重点镜头用高质量，普通镜头用快速生成</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5种元公理模板 -->
+<section class="section" style="background:var(--bg-secondary)">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-purple">Meta-Axiom Templates</span>
+      <h2>5种元公理生成模板</h2>
+      <p>当矛盾无法通过边界划分消解时，元公理生成器自动匹配模板，生成高阶元公理统摄二者。</p>
+    </div>
+    <table class="template-table">
+      <thead><tr><th>模板</th><th>适用矛盾</th><th>生成模式</th><th>维度提升</th></tr></thead>
+      <tbody>
+        <tr><td class="template-name">color_style</td><td>配色矛盾</td><td>角色配色由{dimension}决定，{cond_a}时为{color_a}，{cond_b}时为{color_b}</td><td>→ 角色形态域</td></tr>
+        <tr><td class="template-name">style_character</td><td>风格矛盾</td><td>角色风格由{form_dimension}决定：{form_a}形态下表现为{style_a}</td><td>→ 形态+场景域</td></tr>
+        <tr><td class="template-name">constraint_scope</td><td>约束矛盾</td><td>在{scope_a}条件下必须{rule_a}，在{scope_b}条件下可以{rule_b}</td><td>→ 适用条件域</td></tr>
+        <tr><td class="template-name">quality_tier</td><td>质量矛盾</td><td>质量标准由{priority_dimension}决定：{high_priority}时采用{high_standard}</td><td>→ 质量等级域</td></tr>
+        <tr><td class="template-name">generic</td><td>通用矛盾</td><td>在{meta_domain}域中，{rule_a}与{rule_b}互为场景化实例</td><td>→ 元认知域</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 实际案例 -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-green">Case Study</span>
+      <h2>实际案例：配色矛盾的冲突消解</h2>
+      <p>以"战神红金配色"与"溟主紫宸配色"的矛盾为例，演示完整的冲突即学习流程。</p>
+    </div>
+    <div class="case-study">
+      <div class="case-title"><span class="badge">CASE-001</span> 角色配色矛盾 → 边界消解 → 维度分辨率提升</div>
+      <div class="case-flow">
+        <div class="case-node case-conflict"><div class="label">① 矛盾检测</div>节点A："战神形态必须红金配色" vs 节点B："溟主形态必须紫宸配色" — 检测到配色矛盾模式（红金 vs 紫宸）</div>
+        <div class="case-node case-analyze"><div class="label">② 维度边界分析</div>提取6维标签：节点A=角色形态域[战神]，节点B=角色形态域[溟主] — 发现独有维度：战神 vs 溟主</div>
+        <div class="case-node case-resolve"><div class="label">③ 边界消解</div>按角色形态域划分：战神形态适用红金配色，溟主形态适用紫宸配色 — 两者边界不重叠，互补共存</div>
+        <div class="case-node case-elevate"><div class="label">④ 体系增强</div>体系从"单一配色规则"扩展为"按角色形态划分的多配色规则集" — 维度分辨率提升，适用范围扩大，体系整体增强</div>
+      </div>
+    </div>
+    <div style="height:32px"></div>
+    <div class="case-study">
+      <div class="case-title"><span class="badge">CASE-002</span> 同域同维矛盾 → 元公理生成 → 认知维度跃迁</div>
+      <div class="case-flow">
+        <div class="case-node case-conflict"><div class="label">① 矛盾检测</div>节点A："所有角色必须高冷神性" vs 节点B："九尾狐必须妖冶魅惑" — 同域同维，无法通过形态划分</div>
+        <div class="case-node case-analyze"><div class="label">② 维度边界分析</div>6维标签完全重叠，无独有维度；矛盾模式=风格矛盾（高冷 vs 妖冶）</div>
+        <div class="case-node case-elevate"><div class="label">③ 元公理生成</div>匹配style_character模板，生成元公理："角色风格由形态+场景决定：战神形态下表现为高冷神性，九尾形态下表现为妖冶魅惑" — 原节点A、B降级为instance</div>
+        <div class="case-node case-elevate"><div class="label">④ 认知跃迁</div>体系从"两条矛盾的风格规则"升级为"一条高阶元公理+两个场景化实例" — 认知维度从"规则层"跃迁到"元公理层"，可统摄未来更多角色风格</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 传统 vs 神经 -->
+<section class="section" style="background:var(--bg-secondary)">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag tag-red">Paradigm Shift</span>
+      <h2>传统冲突处理 vs 冲突即学习</h2>
+      <p>这不是功能优化，而是底层范式的根本跃迁。</p>
+    </div>
+    <div class="compare-grid">
+      <div class="compare-col compare-traditional">
+        <h4>传统系统：冲突=错误</h4>
+        <ul>
+          <li>检测到冲突即报错/熔断</li>
+          <li>需要人工介入判定谁对谁错</li>
+          <li>冲突导致系统不稳定，需要回滚</li>
+          <li>多用户并发写入容易数据冲突</li>
+          <li>规则越多，冲突概率越高，系统越脆弱</li>
+          <li>认知维度固定，无法自我提升</li>
+          <li>冲突是系统的bug，需要修复</li>
+        </ul>
+      </div>
+      <div class="compare-col compare-neural">
+        <h4>神经内核：冲突=学习</h4>
+        <ul>
+          <li>检测到冲突即触发学习流程</li>
+          <li>自动边界分析，无需人工判定</li>
+          <li>冲突消解后系统更稳定，维度更清晰</li>
+          <li>多用户并发写入=多维度并行激活，永不冲突</li>
+          <li>规则越多，边界越精细，系统越健壮</li>
+          <li>通过元公理自动跃迁，认知持续提升</li>
+          <li>冲突是系统进化的契机，是学习信号</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="provenance">Ω₀⊂⊙∞⊂Ω</div>
+    <div class="did">DID-BR-000002 · 元极恒一永恒自治 · ZONGYUAN-ROOT</div>
+    <div class="copyright">© 2026 火斗云智AIOS · 冲突即学习机制 · 神经内核V2.0 NEURAL</div>
+  </div>
+</footer>
+
+</body>
+</html>

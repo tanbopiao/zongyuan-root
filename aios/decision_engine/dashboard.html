@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONGYUAN-ROOT LLM决策引擎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        .header .subtitle { color: #888; font-size: 14px; }
+        .header .anchor { color: #666; font-size: 12px; margin-top: 8px; font-family: monospace; }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .summary-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .summary-card:hover { transform: translateY(-2px); }
+        .summary-card .label { font-size: 13px; color: #888; margin-bottom: 8px; }
+        .summary-card .value { font-size: 32px; font-weight: 700; }
+        .summary-card.total .value { color: #00d4ff; }
+        .summary-card.pending .value { color: #faad14; }
+        .summary-card.approved .value { color: #52c41a; }
+        .summary-card.executed .value { color: #7b2ff7; }
+        .summary-card.rejected .value { color: #ff4d4f; }
+
+        .section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, #00d4ff, #7b2ff7);
+            border-radius: 2px;
+        }
+
+        .decision-list { display: flex; flex-direction: column; gap: 12px; }
+        .decision-card {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid #888;
+            transition: all 0.3s;
+        }
+        .decision-card:hover { background: rgba(0,0,0,0.3); }
+        .decision-card.status-pending_review { border-left-color: #faad14; }
+        .decision-card.status-approved { border-left-color: #52c41a; }
+        .decision-card.status-executed { border-left-color: #7b2ff7; }
+        .decision-card.status-rejected { border-left-color: #ff4d4f; }
+        .decision-card.status-executing { border-left-color: #00d4ff; }
+
+        .decision-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .decision-id {
+            font-family: monospace;
+            font-size: 12px;
+            color: #888;
+        }
+        .decision-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-pending_review { background: rgba(250,173,20,0.2); color: #faad14; }
+        .status-approved { background: rgba(82,196,26,0.2); color: #52c41a; }
+        .status-executed { background: rgba(123,47,247,0.2); color: #7b2ff7; }
+        .status-rejected { background: rgba(255,77,79,0.2); color: #ff4d4f; }
+        .status-executing { background: rgba(0,212,255,0.2); color: #00d4ff; }
+
+        .decision-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .decision-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .decision-meta span { display: flex; align-items: center; gap: 4px; }
+        .risk-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .risk-low { background: rgba(82,196,26,0.2); color: #52c41a; }
+        .risk-medium { background: rgba(250,173,20,0.2); color: #faad14; }
+        .risk-high { background: rgba(255,125,0,0.2); color: #ff7d00; }
+        .risk-critical { background: rgba(255,77,79,0.2); color: #ff4d4f; }
+
+        .decision-desc {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .decision-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-approve { background: rgba(82,196,26,0.2); color: #52c41a; }
+        .btn-approve:hover { background: rgba(82,196,26,0.4); }
+        .btn-reject { background: rgba(255,77,79,0.2); color: #ff4d4f; }
+        .btn-reject:hover { background: rgba(255,77,79,0.4); }
+        .btn-execute { background: rgba(0,212,255,0.2); color: #00d4ff; }
+        .btn-execute:hover { background: rgba(0,212,255,0.4); }
+        .btn-detail { background: rgba(136,136,136,0.2); color: #888; }
+        .btn-detail:hover { background: rgba(136,136,136,0.4); }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-state .text { font-size: 16px; }
+
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #888;
+            backdrop-filter: blur(10px);
+        }
+        .refresh-indicator .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #52c41a;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-title { font-size: 18px; font-weight: 600; color: #fff; }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .modal-body { font-size: 14px; color: #ccc; line-height: 1.6; }
+        .modal-body h4 { color: #00d4ff; margin: 16px 0 8px; }
+        .modal-body pre {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .summary-cards { grid-template-columns: repeat(2, 1fr); }
+            .decision-meta { flex-direction: column; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="refresh-indicator">
+        <span class="dot"></span>
+        <span id="last-update">正在加载...</span>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>ZONGYUAN-ROOT LLM决策引擎</h1>
+            <div class="subtitle">基于Agent探针数据的智能运维决策系统 · 故障分析 · 决策生成 · 人工审核 · 自动执行</div>
+            <div class="anchor">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | Ω-TAN-7-001</div>
+        </div>
+
+        <div class="summary-cards" id="summary-cards"></div>
+
+        <div class="section">
+            <div class="section-title">待审核决策</div>
+            <div class="decision-list" id="pending-decisions"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">最近决策</div>
+            <div class="decision-list" id="recent-decisions"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">决策详情</div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function fetchStatistics() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/statistics`);
+                return await resp.json();
+            } catch (e) {
+                console.error('获取统计失败:', e);
+                return null;
+            }
+        }
+
+        async function fetchDecisions(status = null, limit = 20) {
+            try {
+                let url = `${API_BASE}/api/v1/decisions?limit=${limit}`;
+                if (status) url += `&status=${status}`;
+                const resp = await fetch(url);
+                return await resp.json();
+            } catch (e) {
+                console.error('获取决策列表失败:', e);
+                return [];
+            }
+        }
+
+        function renderSummary(stats) {
+            const container = document.getElementById('summary-cards');
+            if (!stats) {
+                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#666;padding:20px;">无法获取统计数据</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="summary-card total">
+                    <div class="label">决策总数</div>
+                    <div class="value">${stats.total_decisions || 0}</div>
+                </div>
+                <div class="summary-card pending">
+                    <div class="label">待审核</div>
+                    <div class="value">${stats.pending_review || 0}</div>
+                </div>
+                <div class="summary-card approved">
+                    <div class="label">已批准</div>
+                    <div class="value">${stats.approved || 0}</div>
+                </div>
+                <div class="summary-card executed">
+                    <div class="label">已执行</div>
+                    <div class="value">${stats.executed || 0}</div>
+                </div>
+                <div class="summary-card rejected">
+                    <div class="label">已拒绝</div>
+                    <div class="value">${stats.rejected || 0}</div>
+                </div>
+            `;
+        }
+
+        function getStatusText(status) {
+            const map = {
+                'pending_review': '待审核',
+                'approved': '已批准',
+                'rejected': '已拒绝',
+                'executing': '执行中',
+                'executed': '已执行',
+                'failed': '执行失败'
+            };
+            return map[status] || status;
+        }
+
+        function getRiskText(risk) {
+            const map = {
+                'low': '低风险',
+                'medium': '中风险',
+                'high': '高风险',
+                'critical': '严重风险'
+            };
+            return map[risk] || risk;
+        }
+
+        function renderDecisionCard(d) {
+            const canApprove = d.status === 'pending_review';
+            const canExecute = d.status === 'approved';
+
+            return `
+                <div class="decision-card status-${d.status}">
+                    <div class="decision-header">
+                        <div class="decision-id">${d.decision_id}</div>
+                        <div class="decision-status status-${d.status}">${getStatusText(d.status)}</div>
+                    </div>
+                    <div class="decision-title">${d.action_name} - ${d.agent_id}</div>
+                    <div class="decision-meta">
+                        <span>🕐 ${new Date(d.created_at).toLocaleString('zh-CN')}</span>
+                        <span class="risk-badge risk-${d.risk_level}">${getRiskText(d.risk_level)}</span>
+                        <span>⏱️ ${d.estimated_duration || '未知'}</span>
+                    </div>
+                    <div class="decision-desc">${d.description}</div>
+                    <div class="decision-actions">
+                        ${canApprove ? `
+                            <button class="btn btn-approve" onclick="reviewDecision('${d.decision_id}', 'approve')">批准</button>
+                            <button class="btn btn-reject" onclick="reviewDecision('${d.decision_id}', 'reject')">拒绝</button>
+                        ` : ''}
+                        ${canExecute ? `
+                            <button class="btn btn-execute" onclick="executeDecision('${d.decision_id}')">执行</button>
+                        ` : ''}
+                        <button class="btn btn-detail" onclick="showDetail('${d.decision_id}')">详情</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDecisions(decisions, containerId) {
+            const container = document.getElementById(containerId);
+            if (!decisions || decisions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📋</div>
+                        <div class="text">暂无决策记录</div>
+                    </div>
+                `;
+                return;
+            }
+            container.innerHTML = decisions.map(renderDecisionCard).join('');
+        }
+
+        async function reviewDecision(decisionId, action) {
+            const comment = action === 'reject' ? prompt('请输入拒绝原因：') : '';
+            if (action === 'reject' && comment === null) return;
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/decisions/${decisionId}/review`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        decision_id: decisionId,
+                        action: action,
+                        reviewer: 'admin',
+                        comment: comment || ''
+                    })
+                });
+                if (resp.ok) {
+                    alert(action === 'approve' ? '决策已批准' : '决策已拒绝');
+                    refresh();
+                } else {
+                    alert('操作失败: ' + (await resp.text()));
+                }
+            } catch (e) {
+                alert('操作失败: ' + e.message);
+            }
+        }
+
+        async function executeDecision(decisionId) {
+            if (!confirm('确认执行此决策？')) return;
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/decisions/${decisionId}/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        decision_id: decisionId,
+                        executor: 'admin'
+                    })
+                });
+                if (resp.ok) {
+                    const result = await resp.json();
+                    alert('决策执行完成: ' + (result.result?.message || '成功'));
+                    refresh();
+                } else {
+                    alert('执行失败: ' + (await resp.text()));
+                }
+            } catch (e) {
+                alert('执行失败: ' + e.message);
+            }
+        }
+
+        async function showDetail(decisionId) {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/decisions/${decisionId}`);
+                const d = await resp.json();
+
+                document.getElementById('modal-title').textContent = `决策详情 - ${d.action_name}`;
+                document.getElementById('modal-body').innerHTML = `
+                    <h4>基本信息</h4>
+                    <p><strong>决策ID:</strong> ${d.decision_id}</p>
+                    <p><strong>目标Agent:</strong> ${d.agent_id}</p>
+                    <p><strong>创建时间:</strong> ${new Date(d.created_at).toLocaleString('zh-CN')}</p>
+                    <p><strong>状态:</strong> ${getStatusText(d.status)}</p>
+                    <p><strong>风险等级:</strong> ${getRiskText(d.risk_level)} - ${d.risk_description}</p>
+                    <p><strong>预计耗时:</strong> ${d.estimated_duration}</p>
+
+                    <h4>决策描述</h4>
+                    <p>${d.description}</p>
+
+                    <h4>故障分析</h4>
+                    <pre>${JSON.stringify(d.fault_analysis, null, 2)}</pre>
+
+                    <h4>执行步骤</h4>
+                    <ol>${d.execution_steps.map(s => `<li>${s}</li>`).join('')}</ol>
+
+                    <h4>回滚方案</h4>
+                    <p>${d.rollback_plan}</p>
+
+                    <h4>审核历史</h4>
+                    <pre>${JSON.stringify(d.review_history, null, 2)}</pre>
+
+                    <h4>执行历史</h4>
+                    <pre>${JSON.stringify(d.execution_history, null, 2)}</pre>
+
+                    ${d.result ? `<h4>执行结果</h4><pre>${JSON.stringify(d.result, null, 2)}</pre>` : ''}
+                `;
+                document.getElementById('detail-modal').classList.add('active');
+            } catch (e) {
+                alert('获取详情失败: ' + e.message);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('active');
+        }
+
+        async function refresh() {
+            const [stats, pending, recent] = await Promise.all([
+                fetchStatistics(),
+                fetchDecisions('pending_review', 10),
+                fetchDecisions(null, 10)
+            ]);
+
+            renderSummary(stats);
+            renderDecisions(pending, 'pending-decisions');
+            renderDecisions(recent, 'recent-decisions');
+
+            document.getElementById('last-update').textContent =
+                `最后更新: ${new Date().toLocaleTimeString('zh-CN')}`;
+        }
+
+        // 启动
+        refresh();
+        setInterval(refresh, 10000);
+
+        // 点击模态框外部关闭
+        document.getElementById('detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>

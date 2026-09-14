@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONGYUAN-ROOT 记忆网关监控面板 V3.0</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e6f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(100,150,255,0.2);
+        }
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(90deg, #6496ff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .header .subtitle { color: #8892b0; font-size: 14px; }
+        .header .meta { margin-top: 10px; font-size: 12px; color: #64748b; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(100,150,255,0.15);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(100,150,255,0.4);
+            box-shadow: 0 8px 32px rgba(100,150,255,0.1);
+        }
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #6496ff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card .label { color: #8892b0; font-size: 13px; margin-top: 4px; }
+        .stat-card.healthy .value { background: linear-gradient(90deg, #10b981, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card.warning .value { background: linear-gradient(90deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .panel {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(100,150,255,0.15);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .panel h2 {
+            font-size: 18px;
+            color: #6496ff;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(100,150,255,0.1);
+        }
+
+        .node-list { display: flex; flex-direction: column; gap: 12px; }
+        .node-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+        .node-item.offline { border-left-color: #64748b; opacity: 0.6; }
+        .node-info { flex: 1; }
+        .node-id { font-weight: 600; font-size: 15px; color: #e0e6f0; }
+        .node-type { font-size: 12px; color: #8892b0; margin-top: 4px; }
+        .node-status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .node-status.online { background: rgba(16,185,129,0.15); color: #10b981; }
+        .node-status.offline { background: rgba(100,116,139,0.15); color: #64748b; }
+
+        .truth-category {
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 4px;
+            background: rgba(100,150,255,0.1);
+            border-radius: 4px;
+            font-size: 12px;
+            color: #6496ff;
+        }
+
+        .audit-log { max-height: 300px; overflow-y: auto; }
+        .audit-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+        .audit-time { color: #64748b; font-size: 11px; }
+        .audit-action { color: #6496ff; font-weight: 600; margin: 0 8px; }
+        .audit-detail { color: #94a3b8; }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6496ff, #a855f7);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(100,150,255,0.4);
+            transition: all 0.3s;
+        }
+        .refresh-btn:hover { transform: scale(1.1); }
+        .refresh-btn.spinning { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #475569;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-card .value { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ZONGYUAN-ROOT 记忆网关监控面板</h1>
+        <div class="subtitle">Memory Gateway V3.0 · SQLite持久化 · 多节点协同</div>
+        <div class="meta">
+            DID: DID-BR-000002 | 主权根: Ω-TAN-7-001 | 溯源: Ω₀⊂⊙∞⊂Ω
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card healthy">
+            <div class="value" id="health-status">--</div>
+            <div class="label">服务状态</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="truth-count">--</div>
+            <div class="label">真值总数</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="node-count">--</div>
+            <div class="label">接入节点</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="online-count">--</div>
+            <div class="label">在线节点</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="audit-count">--</div>
+            <div class="label">审计日志</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="last-update">--</div>
+            <div class="label">最后更新</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>📡 节点状态</h2>
+        <div class="node-list" id="node-list">
+            <div style="text-align:center; color:#64748b; padding:20px;">加载中...</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>📊 真值分类统计</h2>
+        <div id="truth-categories">
+            <div style="text-align:center; color:#64748b; padding:20px;">加载中...</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>📋 最近审计日志</h2>
+        <div class="audit-log" id="audit-log">
+            <div style="text-align:center; color:#64748b; padding:20px;">加载中...</div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="refreshData()" title="刷新数据">↻</button>
+
+    <div class="footer">
+        ZONGYUAN-ROOT Memory Gateway Monitor V3.0 | 火斗云智AIOS | Ω₀⊂⊙∞⊂Ω
+    </div>
+
+    <script>
+        const GATEWAY_URL = 'http://127.0.0.1:9120';
+
+        async function fetchJSON(url) {
+            try {
+                const resp = await fetch(url);
+                return await resp.json();
+            } catch (e) {
+                console.error('请求失败:', e);
+                return null;
+            }
+        }
+
+        async function refreshData() {
+            const btn = document.querySelector('.refresh-btn');
+            btn.classList.add('spinning');
+
+            // 1. 获取状态
+            const status = await fetchJSON(`${GATEWAY_URL}/api/status`);
+            if (status && status.status === 'ok') {
+                document.getElementById('truth-count').textContent = status.stats.truths;
+                document.getElementById('node-count').textContent = status.stats.nodes;
+                document.getElementById('audit-count').textContent = status.stats.audit_logs;
+                document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+            }
+
+            // 2. 健康检查
+            const health = await fetchJSON(`${GATEWAY_URL}/health`);
+            if (health) {
+                document.getElementById('health-status').textContent = health.status === 'healthy' ? '正常' : '异常';
+            }
+
+            // 3. 获取节点列表
+            const nodes = await fetchJSON(`${GATEWAY_URL}/api/nodes`);
+            if (nodes && nodes.status === 'ok') {
+                const nodeList = document.getElementById('node-list');
+                let onlineCount = 0;
+                let html = '';
+                for (const [nid, node] of Object.entries(nodes.nodes || {})) {
+                    const isOnline = node.online_status === 'online';
+                    if (isOnline) onlineCount++;
+                    html += `
+                        <div class="node-item ${isOnline ? '' : 'offline'}">
+                            <div class="node-info">
+                                <div class="node-id">${nid}</div>
+                                <div class="node-type">类型: ${node.node_type || 'unknown'} | 心跳: ${node.heartbeat_count || 0}次</div>
+                            </div>
+                            <div class="node-status ${isOnline ? 'online' : 'offline'}">${isOnline ? '在线' : '离线'}</div>
+                        </div>
+                    `;
+                }
+                if (!html) html = '<div style="text-align:center; color:#64748b; padding:20px;">暂无节点</div>';
+                nodeList.innerHTML = html;
+                document.getElementById('online-count').textContent = onlineCount;
+            }
+
+            // 4. 获取真值分类
+            const truths = await fetchJSON(`${GATEWAY_URL}/api/truths`);
+            if (truths && truths.status === 'ok') {
+                const categories = {};
+                for (const [key, truth] of Object.entries(truths.truths || {})) {
+                    const cat = truth.category || 'uncategorized';
+                    categories[cat] = (categories[cat] || 0) + 1;
+                }
+                const catDiv = document.getElementById('truth-categories');
+                let html = '';
+                for (const [cat, count] of Object.entries(categories).sort((a,b) => b[1]-a[1]))) {
+                    html += `<span class="truth-category">${cat}: ${count}条</span>`;
+                }
+                if (!html) html = '<div style="text-align:center; color:#64748b; padding:20px;">暂无真值</div>';
+                catDiv.innerHTML = html;
+            }
+
+            // 5. 获取审计日志
+            const audit = await fetchJSON(`${GATEWAY_URL}/api/audit`);
+            if (audit && audit.status === 'ok') {
+                const auditDiv = document.getElementById('audit-log');
+                let html = '';
+                const logs = (audit.logs || []).slice(-20).reverse();
+                for (const log of logs) {
+                    html += `
+                        <div class="audit-item">
+                            <span class="audit-time">${log.datetime || ''}</span>
+                            <span class="audit-action">${log.action || ''}</span>
+                            <span class="audit-detail">${log.detail || ''}</span>
+                        </div>
+                    `;
+                }
+                if (!html) html = '<div style="text-align:center; color:#64748b; padding:20px;">暂无日志</div>';
+                auditDiv.innerHTML = html;
+            }
+
+            setTimeout(() => btn.classList.remove('spinning'), 500);
+        }
+
+        // 初始加载
+        refreshData();
+
+        // 每30秒自动刷新
+        setInterval(refreshData, 30000);
+    </script>
+</body>
+</html>

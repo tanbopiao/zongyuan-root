@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高阶能力中心 · 火斗云智AIOS</title>
+<meta name="description" content="ZONGYUAN-ROOT高阶智能能力全景：已激活/进行中/待开发能力，RAG本地推理、多智能体辩论、知识图谱、跨模态记忆">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Noto Sans SC',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 30% 0%,rgba(212,175,55,0.08) 0%,transparent 50%),radial-gradient(ellipse at 70% 100%,rgba(139,200,234,0.06) 0%,transparent 50%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:50px 24px}
+.back{display:inline-block;color:#d4af37;text-decoration:none;font-size:0.9em;margin-bottom:20px}
+.hero{text-align:center;padding:30px 0 40px}
+.hero .symbol{font-size:13px;color:#d4af37;letter-spacing:4px;margin-bottom:14px;font-family:monospace}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2.4em;font-weight:900;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.hero .subtitle{color:#aaa;font-size:1em;max-width:700px;margin:0 auto;line-height:1.8}
+.stats{display:flex;justify-content:center;gap:30px;margin:25px 0;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-item .num{font-size:1.8em;font-weight:bold;font-family:'Noto Serif SC',serif}
+.stat-item .label{color:#888;font-size:0.8em}
+.num-done{color:#4ade80}.num-progress{color:#fbbf24}.num-todo{color:#8BC8EA}
+.section{margin:45px 0}
+.section h2{font-family:'Noto Serif SC',serif;font-size:1.4em;color:#d4af37;margin-bottom:18px;padding-left:16px;border-left:4px solid #d4af37}
+.cap-card{background:linear-gradient(145deg,#1a1a2e,#16213e);border-radius:12px;padding:20px;margin-bottom:14px;border-left:4px solid;transition:all 0.3s}
+.cap-card:hover{transform:translateX(4px)}
+.cap-done{border-left-color:#4ade80}
+.cap-progress{border-left-color:#fbbf24}
+.cap-todo{border-left-color:#8BC8EA}
+.cap-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.cap-head .cap-icon{font-size:1.6em}
+.cap-head h3{color:#fff;font-size:1.1em;flex:1}
+.cap-badge{padding:3px 10px;border-radius:6px;font-size:0.75em;font-weight:bold}
+.badge-done{background:rgba(74,222,128,0.15);color:#4ade80}
+.badge-progress{background:rgba(251,191,36,0.15);color:#fbbf24}
+.badge-todo{background:rgba(139,200,234,0.15);color:#8BC8EA}
+.cap-desc{color:#999;font-size:0.88em;line-height:1.7;margin-bottom:8px}
+.cap-components{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.comp-tag{background:rgba(255,255,255,0.06);padding:3px 8px;border-radius:4px;font-size:0.75em;color:#aaa}
+.cap-action{margin-top:10px;padding:8px 12px;background:rgba(212,175,55,0.08);border-radius:6px;font-size:0.82em;color:#d4af37}
+.roadmap{position:relative;padding-left:30px}
+.roadmap::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#4ade80,#fbbf24,#8BC8EA)}
+.rm-node{position:relative;margin-bottom:18px;padding-left:20px}
+.rm-node::before{content:'';position:absolute;left:-26px;top:6px;width:14px;height:14px;border-radius:50%}
+.rm-done::before{background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,0.5)}
+.rm-progress::before{background:#fbbf24;box-shadow:0 0 8px rgba(251,191,36,0.5)}
+.rm-todo::before{background:#8BC8EA;box-shadow:0 0 8px rgba(139,200,234,0.5)}
+.rm-node .rm-phase{font-weight:bold;font-size:0.9em}
+.rm-done .rm-phase{color:#4ade80}
+.rm-progress .rm-phase{color:#fbbf24}
+.rm-todo .rm-phase{color:#8BC8EA}
+.rm-node .rm-desc{color:#999;font-size:0.85em;margin-top:2px}
+footer{text-align:center;margin-top:50px;padding-top:24px;border-top:1px solid rgba(212,175,55,0.1);color:#666;font-size:0.8em}
+footer .did{margin-top:6px;color:#d4af37;font-family:monospace}
+
+/* ===== 移动端适配 ===== */
+@media (max-width: 768px) {
+  body { padding: 10px !important; }
+  .container, .sm-container { max-width: 100% !important; padding: 0 12px !important; }
+  h1 { font-size: 1.5em !important; }
+  h2 { font-size: 1.2em !important; }
+  .sm-grid { grid-template-columns: 1fr !important; }
+  table { font-size: 0.85em; }
+  img { max-width: 100% !important; height: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">← 返回首页</a>
+  <div class="hero">
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT · DID-BR-000002</div>
+    <h1>高阶能力中心</h1>
+    <div class="subtitle">从基础自治到高阶智能，全面工程化落地<br>每一项能力都真实部署、可验证、可视化</div>
+    <div class="stats">
+      <div class="stat-item"><div class="num num-done">7</div><div class="label">已激活</div></div>
+      <div class="stat-item"><div class="num num-progress">2</div><div class="label">进行中</div></div>
+      <div class="stat-item"><div class="num num-todo">3</div><div class="label">待开发</div></div>
+    </div>
+  </div>
+
+  <!-- 已激活能力 -->
+  <div class="section">
+    <h2>✅ 已激活能力（7项）</h2>
+    <div class="cap-card cap-done">
+      <div class="cap-head"><span class="cap-icon">🔄</span><h3>全自动吸收部署流水线</h3><span class="cap-badge badge-done">已激活</span></div>
+      <div class="cap-desc">每小时自动拉取9120新增真值，7类自动分类，五方评分≥80自动部署，高风险生成审批单。首次运行处理200条真值，196条自动部署。</div>
+      <div class="cap-components"><span class="comp-tag">9120真值总线</span><span class="comp-tag">7类分类</span><span class="comp-tag">五方评分</span><span class="comp-tag">crontab每小时</span></div>
+    </div>
+    <div class="cap-card cap-done">
+      <div class="cap-head"><span class="cap-icon">🔗</span><h3>官网骨架自动集成器</h3><span class="cap-badge badge-done">已激活</span></div>
+      <div class="cap-desc">每小时扫描新页面，自动分类加入导航，双root同步，HTTP验证。新页面部署后自动集成，不用再下命令。</div>
+      <div class="cap-components"><span class="comp-tag">自动分类</span><span class="comp-tag">导航集成</span><span class="comp-tag">双root同步</span></div>
+    </div>
+    <div class="cap-card cap-done">
+      <div class="cap-head"><span class="cap-icon">🛡️</span><h3>三层自愈守护</h3><span class="cap-badge badge-done">已激活</span></div>
+      <div class="cap-desc">服务异常自动重启+飞书通知，内存>70%自动暂停非核心服务，<80%硬熔断，核心保护集合永不宕机。</div>
+      <div class="cap-components"><span class="comp-tag">自动重启</span><span class="comp-tag">自动扩缩容</span><span class="comp-tag">MR-007熔断</span></div>
+    </div>
+    <div class="cap-card cap-done">
+      <div class="cap-head"><span class="cap-icon">🪞</span><h3>元认知反思</h3><span class="cap-badge badge-done">已激活</span></div>
+      <div class="cap-desc">mr014算子检测认知偏差（过度概括/确认偏差/邓宁-克鲁格/锚定效应），持续优化推理质量。</div>
+      <div class="cap-components"><span class="comp-tag">mr014算子</span><span class="comp-tag">4类偏差检测</span></div>
+    </div>
+    <div class="cap-card cap-done">
+      <div class="cap-head"><span class="cap-icon">📈</span><h3>元学习进化</h3><span class="cap-badge badge-done">已激活</span></div>
+      <div class="cap-desc">mr016算子通过UCB算法优化推理策略，已运行第10轮，自动选择最优推理策略。</div>
+      <div class="cap-components"><span class="comp-tag">mr016算子</span><span class="comp-tag">UCB算法</span><span class="comp-tag">第10轮</span></div>
+    </div>
+    <div class="cap-card cap-done">
+      <div class="cap-head"><span class="cap-icon">👤</span><h3>持久自我模型(SARSI基础)</h3><span class="cap-badge badge-done">已激活</span></div>
+      <div class="cap-desc">机器可读的身份/目标/能力/局限/不确定性/自传历史模型，为递归自进化奠定基础。</div>
+      <div class="cap-components"><span class="comp-tag">DID-BR-000002</span><span class="comp-tag">7项能力</span><span class="comp-tag">4项局限</span></div>
+    </div>
+    <div class="cap-card cap-done">
+      <div class="cap-head"><span class="cap-icon">📖</span><h3>经验萃取与全域推广</h3><span class="cap-badge badge-done">已激活</span></div>
+      <div class="cap-desc">每小时自动萃取各节点经验，7类分类+去重+质量评分，80分以上自动升级全域推广。</div>
+      <div class="cap-components"><span class="comp-tag">7类分类</span><span class="comp-tag">质量评分</span><span class="comp-tag">自动推广</span></div>
+    </div>
+  </div>
+
+  <!-- 进行中能力 -->
+  <div class="section">
+    <h2>🔄 进行中能力（2项）</h2>
+    <div class="cap-card cap-progress">
+      <div class="cap-head"><span class="cap-icon">🧠</span><h3>RAG本地推理（内核懂自己）</h3><span class="cap-badge badge-progress">进行中</span></div>
+      <div class="cap-desc">串联向量数据库(8014)+知识图谱(8070)+本地LLM(8081)+9120真值库(5216条)，实现私有知识库问答。四个组件已独立运行，待串联。</div>
+      <div class="cap-components"><span class="comp-tag">8014向量库</span><span class="comp-tag">8070知识图谱</span><span class="comp-tag">8081本地LLM</span><span class="comp-tag">9120真值库</span></div>
+      <div class="cap-action">🎯 下一步：构建LightRAG式双层次检索层，向量+图谱双路召回</div>
+    </div>
+    <div class="cap-card cap-progress">
+      <div class="cap-head"><span class="cap-icon">🕸️</span><h3>知识图谱联动</h3><span class="cap-badge badge-progress">进行中</span></div>
+      <div class="cap-desc">8070知识图谱服务与9120真值库联动，从扁平键值对升级为关系网络，发现"元法则A依赖服务B"隐藏链路。</div>
+      <div class="cap-components"><span class="comp-tag">8070图谱API</span><span class="comp-tag">NetworkX轻量存储</span><span class="comp-tag">实体关系抽取</span></div>
+      <div class="cap-action">🎯 下一步：自动从5216真值中抽取实体关系，生成可视化图谱</div>
+    </div>
+  </div>
+
+  <!-- 待开发能力 -->
+  <div class="section">
+    <h2>📋 待开发高阶能力（3项）</h2>
+    <div class="cap-card cap-todo">
+      <div class="cap-head"><span class="cap-icon">⚖️</span><h3>多智能体辩论决策</h3><span class="cap-badge badge-todo">待开发</span></div>
+      <div class="cap-desc">重要决策时自动生成乐观/保守/中立三角色分别论证，然后五方仲裁出最优方案。比单代理决策质量高一个量级。</div>
+      <div class="cap-components"><span class="comp-tag">三角色辩论</span><span class="comp-tag">五方仲裁</span><span class="comp-tag">LangGraph状态机</span></div>
+      <div class="cap-action">📅 计划：第二阶段（1-3月），复用现有8021代理+8023 Agent Hub</div>
+    </div>
+    <div class="cap-card cap-todo">
+      <div class="cap-head"><span class="cap-icon">🎨</span><h3>跨模态记忆编织</h3><span class="cap-badge badge-todo">待开发</span></div>
+      <div class="cap-desc">文本/图片/视频/代码统一关联，媒体归档引擎与真值库联动，实现"这张图片对应哪段真值"的跨模态检索。</div>
+      <div class="cap-components"><span class="comp-tag">媒体归档引擎</span><span class="comp-tag">多模态关联</span><span class="comp-tag">统一记忆层</span></div>
+      <div class="cap-action">📅 计划：第二阶段，SITS2026前沿理念落地</div>
+    </div>
+    <div class="cap-card cap-todo">
+      <div class="cap-head"><span class="cap-icon">🎯</span><h3>可验证目标对齐(VGA)</h3><span class="cap-badge badge-todo">待开发</span></div>
+      <div class="cap-desc">每个目标设定可验证指标，达成后自动确认，未达成自动回溯。SITS2026三大不可逆技术拐点之一。</div>
+      <div class="cap-components"><span class="comp-tag">形式化验证</span><span class="comp-tag">目标追踪</span><span class="comp-tag">自动回溯</span></div>
+      <div class="cap-action">📅 计划：第三阶段，配合SARSI自我模型深化</div>
+    </div>
+  </div>
+
+  <!-- 进化路线图 -->
+  <div class="section">
+    <h2>高阶能力进化路线图</h2>
+    <div class="roadmap">
+      <div class="rm-node rm-done"><div class="rm-phase">第一阶段 ✅ 基础自治能力</div><div class="rm-desc">自愈守护/自动扩缩容/元认知/元学习/经验萃取/自动流水线/自动集成器 — 7项已激活</div></div>
+      <div class="rm-node rm-progress"><div class="rm-phase">第二阶段 🔄 认知能力激活</div><div class="rm-desc">RAG本地推理+知识图谱联动 — 内核真正"懂自己"，从数据堆变知识网</div></div>
+      <div class="rm-node rm-todo"><div class="rm-phase">第三阶段 📋 群体智能能力</div><div class="rm-desc">多智能体辩论+跨模态记忆+可验证目标对齐 — 从单体智能到群体智能</div></div>
+      <div class="rm-node rm-todo"><div class="rm-phase">第四阶段 🔮 递归自进化</div><div class="rm-desc">MetaRSI²递归自我改进+遗传算法优化+Agent OS完全体 — 优化"优化方法的方法"</div></div>
+    </div>
+  </div>
+
+  <footer>
+    火斗云智AIOS · 元极恒一超认知永恒自治体系 · 高阶能力中心V1.0
+    <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 7已激活/2进行中/3待开发</div>
+  </footer>
+</div>
+</body>
+</html>

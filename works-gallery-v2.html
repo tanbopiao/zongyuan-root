@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天 · 全域作品库 · 火斗云智AIOS</title>
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.huodouai.com/works-gallery-v2.html">
+  <meta property="og:title" content="昆仑洞天作品库 - AI生成东方神话作品集">
+  <meta property="og:description" content="九天玄女、太阴月神、女娲等角色的AI生成关键帧与视频作品库">
+  <meta property="og:image" content="https://www.huodouai.com/assets/og-cover.jpg">
+  <meta property="og:site_name" content="火斗云智AIOS">
+  <meta property="og:locale" content="zh_CN">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="昆仑洞天作品库 - AI生成东方神话作品集">
+  <meta name="twitter:description" content="九天玄女、太阴月神、女娲等角色的AI生成关键帧与视频作品库">
+  <meta name="twitter:image" content="https://www.huodouai.com/assets/og-cover.jpg">
+
+<meta name="description" content="昆仑洞天全作品库，视频+关键帧统一展示，按生成模型分类，瀑布流布局，悬停预览，灯箱播放">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Noto Sans SC',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 50% 0%,rgba(212,175,55,0.07) 0%,transparent 50%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:40px 20px}
+.back{display:inline-block;color:#d4af37;text-decoration:none;font-size:0.9em;margin-bottom:16px}
+.hero{text-align:center;padding:10px 0 24px}
+.hero .symbol{font-size:12px;color:#d4af37;letter-spacing:4px;margin-bottom:10px;font-family:monospace}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2em;font-weight:900;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero .subtitle{color:#999;font-size:0.9em}
+.filters{display:flex;justify-content:center;gap:8px;margin:20px 0;flex-wrap:wrap;align-items:center}
+.filter-group{display:flex;gap:6px;align-items:center}
+.filter-label{color:#666;font-size:0.8em;margin-right:4px}
+.filter-btn{padding:6px 16px;border:1px solid rgba(212,175,55,0.25);background:transparent;color:#999;border-radius:16px;cursor:pointer;font-size:0.82em;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:rgba(212,175,55,0.12);color:#d4af37;border-color:#d4af37}
+.divider{width:1px;height:20px;background:rgba(255,255,255,0.1);margin:0 6px}
+.stats{text-align:center;color:#777;font-size:0.8em;margin-bottom:16px}
+.stats span{color:#d4af37;font-weight:bold}
+/* 竖屏网格：9:16固定比例 */
+.masonry{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:1200px){.masonry{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.masonry{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.masonry{grid-template-columns:repeat(2,1fr);gap:8px}}
+.card{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.1);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .3s;opacity:0;animation:fadeIn .4s forwards;position:relative;display:flex;flex-direction:column}
+@keyframes fadeIn{to{opacity:1}}
+.card:hover{transform:translateY(-3px);border-color:rgba(212,175,55,0.4);box-shadow:0 8px 30px rgba(212,175,55,0.12)}
+.card .media{position:relative;width:100%;aspect-ratio:9/16;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.card .media img,.card .media video{width:100%;height:100%;object-fit:cover;display:block}
+.card .media .thumb-placeholder{width:100%;height:100%;background:linear-gradient(135deg,#0a0a15,#1a1a2e);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+.card .media .thumb-placeholder .ph-icon{font-size:28px;opacity:0.3}
+.card .media .thumb-placeholder .ph-text{font-size:10px;color:#555}
+.card .media .type-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.75);color:#fff;font-size:0.65em;padding:2px 7px;border-radius:4px;z-index:2}
+.card .media .model-badge{position:absolute;top:8px;right:8px;background:rgba(212,175,55,0.85);color:#000;font-size:0.62em;padding:2px 7px;border-radius:4px;font-weight:bold;z-index:2}
+.card .media .play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;transition:all .2s}
+.card:hover .play-icon{background:rgba(212,175,55,0.9);transform:translate(-50%,-50%) scale(1.1)}
+.card .play-icon::after{content:'';border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent #fff;margin-left:2px}
+.card .info{padding:8px 10px;flex-shrink:0}
+.card .info h4{color:#ddd;font-size:0.78em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.card .info p{color:#666;font-size:0.68em}
+.card .info .meta{display:flex;justify-content:space-between;margin-top:4px;font-size:0.62em;color:#555}
+.load-more{display:block;margin:24px auto;padding:10px 36px;background:linear-gradient(135deg,#d4af37,#8B6914);color:#000;border:none;border-radius:8px;font-size:0.9em;font-weight:bold;cursor:pointer;transition:all .2s}
+.load-more:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(212,175,55,0.4)}
+.load-more:disabled{opacity:.4;cursor:not-allowed;transform:none}
+/* 灯箱 */
+.lightbox{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.96);display:none;align-items:center;justify-content:center;flex-direction:column}
+.lightbox.active{display:flex}
+.lightbox .lb-close{position:absolute;top:16px;right:24px;color:#d4af37;font-size:2em;cursor:pointer;z-index:10}
+.lightbox .lb-content{max-width:90vw;max-height:80vh;display:flex;align-items:center;justify-content:center}
+.lightbox .lb-content video,.lightbox .lb-content img{max-width:90vw;max-height:80vh;object-fit:contain;border-radius:8px}
+.lightbox .lb-caption{color:#d4af37;font-size:0.95em;margin-top:14px;text-align:center}
+.lightbox .lb-meta{color:#888;font-size:0.8em;margin-top:4px}
+.lightbox .lb-proof{margin-top:16px;padding:14px 20px;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.15);border-radius:10px;max-width:600px;text-align:left}
+.lightbox .lb-proof-title{color:#d4af37;font-size:0.85em;font-weight:bold;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.lightbox .lb-proof-row{display:flex;justify-content:space-between;font-size:0.78em;color:#aaa;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.lightbox .lb-proof-row:last-child{border-bottom:none}
+.lightbox .lb-proof-row .label{color:#888}
+.lightbox .lb-proof-row .value{color:#ccc;font-family:monospace;font-size:0.9em}
+.lightbox .lb-proof-row .hash{color:#d4af37;font-size:0.85em;word-break:break-all}
+.lightbox .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;background:rgba(212,175,55,0.2);border:none;color:#d4af37;font-size:1.4em;cursor:pointer;border-radius:50%;transition:all .2s}
+.lightbox .lb-nav:hover{background:rgba(212,175,55,0.4)}
+.lightbox .lb-prev{left:20px}.lightbox .lb-next{right:20px}
+footer{text-align:center;margin-top:30px;padding-top:16px;border-top:1px solid rgba(212,175,55,0.1);color:#666;font-size:0.78em}
+footer .did{margin-top:5px;color:#d4af37;font-family:monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">← 返回首页</a>
+  <div class="hero">
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · 昆仑洞天 · 昆仑洞天 · 全域作品库</div>
+    <h1>作品库</h1>
+    <div class="subtitle">视频 + 关键帧统一展示 · 按模型分类 · 瀑布流 · 悬停预览</div>
+  </div>
+  <div class="filters">
+    <div class="filter-group">
+      <span class="filter-label">类型</span>
+      <button class="filter-btn active" data-type="all">全部</button>
+      <button class="filter-btn" data-type="video">视频</button>
+      <button class="filter-btn" data-type="image">关键帧</button>
+    </div>
+    <div class="divider"></div>
+    <div class="filter-group">
+      <span class="filter-label">模型</span>
+      <button class="filter-btn active" data-model="all">全部</button>
+      <button class="filter-btn" data-model="Seedance">Seedance</button>
+      <button class="filter-btn" data-model="豆包Seedream">豆包</button>
+      <button class="filter-btn" data-model="万象Wanx">万象</button>
+      <button class="filter-btn" data-model="Agnes">Agnes</button>
+    </div>
+  </div>
+  <div class="filter-group" style="margin-top:8px">
+    <span class="filter-label">分类:</span>
+    <button class="filter-btn active" data-cat="all">全部</button>
+    <button class="filter-btn" data-cat="成片">成片</button>
+    <button class="filter-btn" data-cat="配音版">配音版</button>
+    <button class="filter-btn" data-cat="短片">短片</button>
+    <button class="filter-btn" data-cat="演示">演示</button>
+    <button class="filter-btn" data-cat="关键帧">关键帧</button>
+    <button class="filter-btn" data-cat="角色设定">角色设定</button>
+    <button class="filter-btn" data-cat="神女觉醒">神女觉醒</button>
+    <button class="filter-btn" data-cat="EP01剧情">EP01剧情</button>
+  </div>
+  <div class="stats">共 <span id="totalCount">0</span> 件作品 · 当前显示 <span id="shownCount">0</span> 件</div>
+  <div class="masonry" id="masonry"></div>
+  <button class="load-more" id="loadMore" style="display:none">加载更多</button>
+</div>
+<div class="lightbox" id="lightbox">
+  <span class="lb-close" onclick="closeLB()">×</span>
+  <button class="lb-nav lb-prev" onclick="navLB(-1)">‹</button>
+  <div class="lb-content" id="lbContent"></div>
+  <button class="lb-nav lb-next" onclick="navLB(1)">›</button>
+  <div class="lb-caption" id="lbCaption"></div>
+  <div class="lb-meta" id="lbMeta"></div>
+</div>
+<footer>
+  火斗云智AIOS · 昆仑洞天 · 昆仑洞天 · 全域作品库
+  <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 瀑布流 · 模型分类 · 悬停预览</div>
+</footer>
+<script>
+const WORKS = [
+  // === 视频作品 ===
+  {type:"video",title:"赤华狐影 EP01 成片",url:"/drama/videos/ep091306.mp4",model:"Seedance",size:"15.4MB",duration:"约5分钟",category:"成片"},
+  {type:"video",title:"赤华狐影 EP02 成片",url:"/drama/videos/ep091307.mp4",model:"Seedance",size:"11.9MB",duration:"约5分钟",category:"成片"},
+  {type:"video",title:"赤华狐影 EP03 成片",url:"/drama/videos/ep091308.mp4",model:"Seedance",size:"14.4MB",duration:"约5分钟",category:"成片"},
+  {type:"video",title:"赤华狐影 EP04 成片",url:"/drama/videos/ep091309.mp4",model:"Seedance",size:"14.9MB",duration:"约5分钟",category:"成片"},
+  {type:"video",title:"EP01 配音版",url:"/drama/videos/EP01_dubbed.mp4",model:"Seedance",size:"10.1MB",duration:"约5分钟",category:"配音版"},
+  {type:"video",title:"EP02 配音版",url:"/drama/videos/EP02_dubbed.mp4",model:"Seedance",size:"8.9MB",duration:"约5分钟",category:"配音版"},
+  {type:"video",title:"EP03 配音版",url:"/drama/videos/EP03_dubbed.mp4",model:"Seedance",size:"8.9MB",duration:"约5分钟",category:"配音版"},
+  {type:"video",title:"EP04 配音版",url:"/drama/videos/EP04_dubbed.mp4",model:"Seedance",size:"9.2MB",duration:"约5分钟",category:"配音版"},
+  {type:"video",title:"EP05 配音版",url:"/drama/videos/EP05_dubbed.mp4",model:"Seedance",size:"9.2MB",duration:"约5分钟",category:"配音版"},
+  {type:"video",title:"赤华短片 v1",url:"/assets/kunlun/chiwa_v1/chiwa_shortfilm_v1.mp4",model:"Seedance",size:"18.8MB",duration:"短片",category:"短片"},
+  {type:"video",title:"太阴月神短片",url:"/assets/kunlun/test_run/taiyin_shortfilm_v1.mp4",model:"万象Wanx",size:"14.0MB",duration:"短片",category:"短片"},
+  {type:"video",title:"昆仑万象演示",url:"/kunlun/videos/kunlun_wanxiang_demo.mp4",model:"万象Wanx",size:"5MB",duration:"5秒",category:"演示"},
+  {type:"video",title:"昆仑真实AI演示",url:"/kunlun/videos/kunlun_real_ai_demo.mp4",model:"Agnes",size:"5MB",duration:"5秒",category:"演示"},
+  {type:"video",title:"昆仑5秒演示",url:"/kunlun/videos/kunlun_demo_5s.mp4",model:"Seedance",size:"3MB",duration:"5秒",category:"演示"},
+  // === 关键帧作品 ===
+  {type:"image",title:"墟境封印破裂",url:"/drama/keyframes/ep01/S01-001_墟境封印破裂.jpg",model:"Seedance",size:"1.1MB",category:"EP01剧情"},
+  {type:"image",title:"万妖之眼",url:"/drama/keyframes/ep01/S01-002_万妖之眼.jpg",model:"Seedance",size:"863KB",category:"EP01剧情"},
+  {type:"image",title:"玄汐山门警报",url:"/drama/keyframes/ep01/S01-003_玄汐山门警报.jpg",model:"Seedance",size:"902KB",category:"EP01剧情"},
+  {type:"image",title:"妖云压境",url:"/drama/keyframes/ep01/S01-004_妖云压境.jpg",model:"Seedance",size:"1.0MB",category:"EP01剧情"},
+  {type:"image",title:"玄女战争形态降临",url:"/drama/keyframes/ep01/S01-005_玄女战争形态降临.jpg",model:"Seedance",size:"931KB",category:"EP01剧情"},
+  {type:"image",title:"玄女俯瞰山门",url:"/drama/keyframes/ep01/S01-006_玄女俯瞰山门.jpg",model:"Seedance",size:"1.0MB",category:"EP01剧情"},
+  {type:"image",title:"万妖潮冲锋",url:"/drama/keyframes/ep01/S01-007_万妖潮冲锋.jpg",model:"Seedance",size:"905KB",category:"EP01剧情"},
+  {type:"image",title:"玄女神兵斩妖",url:"/drama/keyframes/ep01/S01-008_玄女神兵斩妖.jpg",model:"Seedance",size:"966KB",category:"EP01剧情"},
+  {type:"image",title:"妖兽被击碎",url:"/drama/keyframes/ep01/S01-009_妖兽被击碎.jpg",model:"Seedance",size:"903KB",category:"EP01剧情"},
+  {type:"image",title:"真武大帝结阵",url:"/drama/keyframes/ep01/S01-010_真武大帝结阵.jpg",model:"Seedance",size:"1.3MB",category:"EP01剧情"},
+  {type:"image",title:"女娲天际剪影",url:"/drama/keyframes/ep01/S01-011_女娲天际剪影.jpg",model:"Seedance",size:"855KB",category:"EP01剧情"},
+  {type:"image",title:"未知巨兽浮现",url:"/drama/keyframes/ep01/S01-012_未知巨兽浮现结尾.jpg",model:"Seedance",size:"776KB",category:"EP01剧情"},
+  {type:"image",title:"红裙九尾狐 全身",url:"/drama/gallery/keyframes/hongqun_jiuweihu_keyframe_01_fullbody.png",model:"豆包Seedream",size:"1.1MB",category:"角色设定"},
+  {type:"image",title:"红裙九尾狐 场景",url:"/drama/gallery/keyframes/hongqun_jiuweihu_keyframe_02_scene.png",model:"豆包Seedream",size:"1005KB",category:"角色设定"},
+  {type:"image",title:"九天玄女 全身",url:"/drama/gallery/keyframes/jiutian_xuannv_keyframe_01_fullbody.png",model:"豆包Seedream",size:"1.1MB",category:"角色设定"},
+  {type:"image",title:"九天玄女 场景",url:"/drama/gallery/keyframes/jiutian_xuannv_keyframe_02_scene.png",model:"豆包Seedream",size:"1.0MB",category:"角色设定"},
+  {type:"image",title:"太阴月神 全身",url:"/drama/gallery/keyframes/taiyin_moon_god_keyframe_01_fullbody.png",model:"豆包Seedream",size:"826KB",category:"角色设定"},
+  {type:"image",title:"太阴月神 场景",url:"/drama/gallery/keyframes/taiyin_moon_god_keyframe_02_scene.png",model:"豆包Seedream",size:"501KB",category:"角色设定"},
+  {type:"image",title:"西王母 全身",url:"/drama/gallery/keyframes/xiwangmu_keyframe_01_fullbody.png",model:"豆包Seedream",size:"1.1MB",category:"角色设定"},
+  {type:"image",title:"西王母 场景",url:"/drama/gallery/keyframes/xiwangmu_keyframe_02_scene.png",model:"豆包Seedream",size:"849KB",category:"角色设定"},
+  {type:"image",title:"金色符文星尘",url:"/drama/gallery/keyframes/01_金色符文星尘_竖屏.png",model:"万象Wanx",size:"1.7MB",category:"神女觉醒"},
+  {type:"image",title:"黑色裂隙",url:"/drama/gallery/keyframes/02_黑色裂隙_竖屏.png",model:"万象Wanx",size:"1.2MB",category:"神女觉醒"},
+  {type:"image",title:"神女觉醒",url:"/drama/gallery/keyframes/03_神女觉醒_竖屏.png",model:"万象Wanx",size:"1.8MB",category:"神女觉醒"},
+  {type:"image",title:"九尾现身",url:"/drama/gallery/keyframes/04_九尾现身_竖屏.png",model:"万象Wanx",size:"2.2MB",category:"神女觉醒"},
+  {type:"image",title:"苍玄降临",url:"/drama/gallery/keyframes/05_苍玄降临_竖屏.png",model:"万象Wanx",size:"1.8MB",category:"神女觉醒"}
+
+  // === 关键帧资产（从keyframe-gallery整合） ===
+  {type:"image",title:"墟境封印破裂",url:"/drama/keyframes/ep01/S01-001_墟境封印破裂.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"万妖之眼",url:"/drama/keyframes/ep01/S01-002_万妖之眼.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"玄汐山门警报",url:"/drama/keyframes/ep01/S01-003_玄汐山门警报.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"妖云压境",url:"/drama/keyframes/ep01/S01-004_妖云压境.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"玄女战争形态降临",url:"/drama/keyframes/ep01/S01-005_玄女战争形态降临.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"玄女俯瞰山门",url:"/drama/keyframes/ep01/S01-006_玄女俯瞰山门.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"万妖潮冲锋",url:"/drama/keyframes/ep01/S01-007_万妖潮冲锋.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"玄女神兵斩妖",url:"/drama/keyframes/ep01/S01-008_玄女神兵斩妖.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"妖兽被击碎",url:"/drama/keyframes/ep01/S01-009_妖兽被击碎.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"真武大帝结阵",url:"/drama/keyframes/ep01/S01-010_真武大帝结阵.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"女娲天际剪影",url:"/drama/keyframes/ep01/S01-011_女娲天际剪影.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"未知巨兽浮现",url:"/drama/keyframes/ep01/S01-012_未知巨兽浮现结尾.jpg",model:"Seedance",size:"关键帧",duration:"EP01",category:"关键帧"},
+  {type:"image",title:"红裙九尾狐 全身设定",url:"/drama/gallery/keyframes/hongqun_jiuweihu_keyframe_01_fullbody.png",model:"Seedance",size:"角色设定",duration:"角色",category:"角色设定"},
+  {type:"image",title:"红裙九尾狐 场景",url:"/drama/gallery/keyframes/hongqun_jiuweihu_keyframe_02_scene.png",model:"Seedance",size:"角色设定",duration:"角色",category:"角色设定"},
+  {type:"image",title:"九天玄女 全身设定",url:"/drama/gallery/keyframes/jiutian_xuannv_keyframe_01_fullbody.png",model:"Seedance",size:"角色设定",duration:"角色",category:"角色设定"},
+  {type:"image",title:"九天玄女 场景",url:"/drama/gallery/keyframes/jiutian_xuannv_keyframe_02_scene.png",model:"Seedance",size:"角色设定",duration:"角色",category:"角色设定"},
+  {type:"image",title:"太阴月神 全身设定",url:"/drama/gallery/keyframes/taiyin_moon_god_keyframe_01_fullbody.png",model:"Seedance",size:"角色设定",duration:"角色",category:"角色设定"},
+  {type:"image",title:"太阴月神 场景",url:"/drama/gallery/keyframes/taiyin_moon_god_keyframe_02_scene.png",model:"Seedance",size:"角色设定",duration:"角色",category:"角色设定"},
+  {type:"image",title:"西王母 全身设定",url:"/drama/gallery/keyframes/xiwangmu_keyframe_01_fullbody.png",model:"Seedance",size:"角色设定",duration:"角色",category:"角色设定"},
+  {type:"image",title:"西王母 场景",url:"/drama/gallery/keyframes/xiwangmu_keyframe_02_scene.png",model:"Seedance",size:"角色设定",duration:"角色",category:"角色设定"},
+  {type:"image",title:"金色符文星尘",url:"/drama/gallery/keyframes/01_金色符文星尘_竖屏.png",model:"Seedance",size:"竖屏",duration:"神女觉醒",category:"神女觉醒"},
+  {type:"image",title:"黑色裂隙",url:"/drama/gallery/keyframes/02_黑色裂隙_竖屏.png",model:"Seedance",size:"竖屏",duration:"神女觉醒",category:"神女觉醒"},
+  {type:"image",title:"神女觉醒",url:"/drama/gallery/keyframes/03_神女觉醒_竖屏.png",model:"Seedance",size:"竖屏",duration:"神女觉醒",category:"神女觉醒"},
+  {type:"image",title:"九尾现身",url:"/drama/gallery/keyframes/04_九尾现身_竖屏.png",model:"Seedance",size:"竖屏",duration:"神女觉醒",category:"神女觉醒"},
+  {type:"image",title:"苍玄降临",url:"/drama/gallery/keyframes/05_苍玄降临_竖屏.png",model:"Seedance",size:"竖屏",duration:"神女觉醒",category:"神女觉醒"},
+  // === 昆仑演示视频（从kunlun/gallery整合） ===
+  {type:"video",title:"昆仑万象演示",url:"/kunlun/videos/kunlun_wanxiang_demo.mp4",model:"通义万相",size:"5MB",duration:"16秒",category:"演示"},
+  {type:"video",title:"昆仑真实AI演示",url:"/kunlun/videos/kunlun_real_ai_demo.mp4",model:"Agnes",size:"5MB",duration:"20秒",category:"演示"},
+  {type:"video",title:"昆仑关键帧动效",url:"/kunlun/videos/kunlun_demo_5s.mp4",model:"ffmpeg",size:"2MB",duration:"14秒",category:"演示"},
+];
+
+const PAGE_SIZE = 12;
+let curType = "all", curModel = "all", shown = 0, lbIndex = 0;
+let filtered = [];
+
+function applyFilter(){
+  filtered = WORKS.filter(w => 
+    (curType==="all"||w.type===curType) && 
+    (curModel==="all"||w.model===curModel)
+  );
+  shown = 0;
+  document.getElementById("masonry").innerHTML = "";
+  document.getElementById("totalCount").textContent = filtered.length;
+  renderBatch();
+}
+
+function renderBatch(){
+  const grid = document.getElementById("masonry");
+  const batch = filtered.slice(shown, shown+PAGE_SIZE);
+  batch.forEach((w,i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.animationDelay = (i*0.03)+"s";
+    const idx = filtered.indexOf(w);
+    let media = "";
+    if(w.type==="video"){
+      media = '<div class="media"><span class="type-badge">▶ 视频</span><span class="model-badge">'+w.model+'</span><div class="play-icon"></div><div class="thumb-placeholder"><div class="ph-icon">▶</div><div class="ph-text">'+w.duration+'</div></div></div>';
+    } else {
+      media = '<div class="media"><span class="type-badge">🖼 关键帧</span><span class="model-badge">'+w.model+'</span><img loading="lazy" src="'+w.url+'" alt="'+w.title+'"></div>';
+    }
+    card.innerHTML = media + '<div class="info"><h4>'+w.title+'</h4><p>'+w.category+'</p><div class="meta"><span>'+w.size+'</span><span>'+w.model+'</span></div></div>';
+    card.onclick = () => openLB(idx);
+    grid.appendChild(card);
+  });
+  shown += batch.length;
+  document.getElementById("shownCount").textContent = shown;
+  document.getElementById("loadMore").style.display = shown<filtered.length ? "block":"none";
+}
+
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", function(){
+    const group = this.closest(".filter-group");
+    group.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+    this.classList.add("active");
+    if(group.querySelector(".filter-label").textContent==="类型") curType = this.dataset.type;
+    else curModel = this.dataset.model;
+    applyFilter();
+  });
+});
+document.getElementById("loadMore").addEventListener("click", renderBatch);
+
+function openLB(idx){
+  lbIndex = idx;
+  const w = filtered[idx];
+  const content = document.getElementById("lbContent");
+  if(w.type==="video"){
+    content.innerHTML = '<video controls autoplay style="max-width:90vw;max-height:80vh"><source src="'+w.url+'" type="video/mp4"></video>';
+  } else {
+    content.innerHTML = '<img loading="lazy" src="'+w.url+'" alt="'+w.title+'">';
+  }
+  document.getElementById("lbCaption").textContent = w.title;
+  document.getElementById("lbMeta").textContent = w.model+" · "+w.category+" · "+w.size;
+  document.getElementById("lightbox").classList.add("active");
+}
+function closeLB(){
+  document.getElementById("lightbox").classList.remove("active");
+  document.getElementById("lbContent").innerHTML = "";
+}
+function navLB(dir){
+  lbIndex = (lbIndex+dir+filtered.length)%filtered.length;
+  openLB(lbIndex);
+}
+document.addEventListener("keydown",e=>{
+  if(!document.getElementById("lightbox").classList.contains("active"))return;
+  if(e.key==="Escape")closeLB();
+  if(e.key==="ArrowLeft")navLB(-1);
+  if(e.key==="ArrowRight")navLB(1);
+});
+document.getElementById("lightbox").addEventListener("click",e=>{if(e.target.id==="lightbox")closeLB()});
+
+applyFilter();
+</script>
+</body>
+</html>

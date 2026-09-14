@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投资回报计算器 - 火斗云智AIOS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+        .nav { padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .nav a { color: #94a3b8; text-decoration: none; font-size: 14px; }
+        .nav a:hover { color: #d4af37; }
+
+        .hero { padding: 50px 0 30px; text-align: center; }
+        .hero h1 { font-size: 32px; margin-bottom: 12px; }
+        .hero p { color: #94a3b8; }
+
+        .calculator {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 36px;
+            margin: 40px 0;
+        }
+        .input-group {
+            margin-bottom: 24px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 16px;
+            outline: none;
+        }
+        .input-group input:focus {
+            border-color: #d4af37;
+        }
+
+        .result {
+            background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05));
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 12px;
+            padding: 28px;
+            margin-top: 32px;
+            display: none;
+        }
+        .result.show { display: block; }
+        .result h3 {
+            color: #d4af37;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            text-align: center;
+        }
+        .result-item .num {
+            font-size: 28px;
+            font-weight: 700;
+            color: #00ff88;
+        }
+        .result-item .label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #0a0a0f;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .btn:hover { box-shadow: 0 8px 32px rgba(212,175,55,0.3); }
+
+        .footer { padding: 40px 0; text-align: center; color: #64748b; font-size: 13px; }
+    </style>
+
+<meta name="description" content="火斗云智AIOS投资回报计算器 - 量化评估AI部署的投资回报率，包括成本节省、效率提升、收入增长等多维度ROI分析，辅助企业决策。">
+<meta name="keywords" content="ROI计算器,投资回报,成本分析,效率提升,AI投资,火斗云智">
+<meta property="og:type" content="website">
+<meta property="og:title" content="火斗云智AIOS投资回报计算器 - 量化评估AI部署的投资回报率，包括成本节省、效率提升、收入增长等多维度ROI分析，辅">
+<meta property="og:description" content="火斗云智AIOS投资回报计算器 - 量化评估AI部署的投资回报率，包括成本节省、效率提升、收入增长等多维度ROI分析，辅助企业决策。">
+<meta property="og:url" content="https://huodouai.com/roi-calculator.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="火斗云智AIOS投资回报计算器 - 量化评估AI部署的投资回报率，包括成本节省、效率提升、收入增长等多维度ROI分析，辅">
+<meta name="twitter:description" content="火斗云智AIOS投资回报计算器 - 量化评估AI部署的投资回报率，包括成本节省、效率提升、收入增长等多维度ROI分析，辅助企业决策。">
+    <link rel="canonical" href="https://huodouai.com/roi-calculator.html">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<section class="hero">
+        <div class="container">
+            <h1>投资回报计算器</h1>
+            <p>输入您当前的AI使用情况，看看火斗云智方案能为您省多少钱、提多少效</p>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="calculator">
+            <div class="input-group">
+                <label>每月AI API成本（元）</label>
+                <input type="number" id="api_cost" value="10000" placeholder="比如10000">
+            </div>
+
+            <div class="input-group">
+                <label>内容/技术团队人数</label>
+                <input type="number" id="team_size" value="5" placeholder="比如5">
+            </div>
+
+            <div class="input-group">
+                <label>每人月成本（元）</label>
+                <input type="number" id="person_cost" value="15000" placeholder="比如15000">
+            </div>
+
+            <div class="input-group">
+                <label>每月AI产出量（件）</label>
+                <input type="number" id="output" value="100" placeholder="比如100">
+            </div>
+
+            <button class="btn" onclick="calculate()">计算投资回报</button>
+
+            <div class="result" id="result">
+                <h3>预计投资回报</h3>
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="num" id="save_year">¥0</div>
+                        <div class="label">每年预计节省</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="num" id="efficiency">0%</div>
+                        <div class="label">效率提升</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="num" id="roi">0%</div>
+                        <div class="label">投资回报率</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="num" id="month_save">¥0</div>
+                        <div class="label">每月节省</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>火斗云智AIOS · 投资回报计算器 | Ω₀⊂⊙∞⊂Ω</p>
+        </div>
+    </footer>
+
+    <script>
+        function calculate() {
+            const apiCost = parseFloat(document.getElementById('api_cost').value) || 0;
+            const teamSize = parseFloat(document.getElementById('team_size').value) || 0;
+            const personCost = parseFloat(document.getElementById('person_cost').value) || 0;
+            const output = parseFloat(document.getElementById('output').value) || 0;
+
+            // 计算逻辑：
+            // API成本节省：通过多模型调度+免费优先，节省40%
+            const apiSave = apiCost * 0.4;
+            
+            // 人力效率提升：内容生产流水线提升3倍效率
+            const efficiency = 200; // 200%提升
+            
+            // 人力成本节省：相当于1个人的工作量被自动化
+            const personSave = personCost * 1; // 每月省1个人力
+            
+            // 总月节省
+            const monthSave = apiSave + personSave;
+            const yearSave = monthSave * 12;
+            
+            // 产品成本：专业版999/月
+            const productCost = 999;
+            const roi = Math.round((yearSave - productCost*12) / (productCost*12) * 100);
+
+            document.getElementById('save_year').textContent = '¥' + Math.round(yearSave).toLocaleString();
+            document.getElementById('efficiency').textContent = efficiency + '%';
+            document.getElementById('roi').textContent = roi + '%';
+            document.getElementById('month_save').textContent = '¥' + Math.round(monthSave).toLocaleString();
+
+            document.getElementById('result').classList.add('show');
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

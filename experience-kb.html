@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域经验库 · 火斗云智AIOS</title>
+<meta name="description" content="火斗云智全域经验库 - 同源节点经验萃取，方法论沉淀，全域通用推广">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:#0a0a0f; color:#e0e0e0; min-height:100vh; }
+.header { background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460); padding:40px 20px; text-align:center; border-bottom:1px solid rgba(212,175,55,0.3); }
+.header h1 { font-size:2em; background:linear-gradient(90deg,#d4af37,#f4e4bc,#d4af37); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px; }
+.header p { color:#888; }
+.stats { display:flex; justify-content:center; gap:40px; margin-top:20px; }
+.stat-item .num { font-size:2em; color:#d4af37; font-weight:bold; }
+.stat-item .label { color:#666; font-size:0.85em; }
+.container { max-width:1000px; margin:0 auto; padding:30px 20px; }
+.type-section { margin-bottom:35px; }
+.type-title { color:#d4af37; font-size:1.3em; margin-bottom:15px; display:flex; align-items:center; gap:10px; }
+.type-title .count { font-size:0.7em; background:rgba(212,175,55,0.2); padding:3px 10px; border-radius:10px; }
+.exp-card { background:linear-gradient(145deg,#1a1a2e,#16213e); border:1px solid rgba(212,175,55,0.2); border-radius:10px; padding:20px; margin-bottom:12px; }
+.exp-card.promoted { border-color:rgba(212,175,55,0.5); background:linear-gradient(145deg,#1a1a2e,#1e1a10); }
+.exp-title { color:#d4af37; font-weight:bold; margin-bottom:8px; font-size:1.05em; }
+.exp-meta { display:flex; gap:15px; font-size:0.8em; color:#666; margin-bottom:10px; flex-wrap:wrap; }
+.exp-meta .tag { background:rgba(212,175,55,0.1); padding:2px 8px; border-radius:8px; }
+.exp-meta .promoted-tag { background:rgba(74,222,128,0.2); color:#4ade80; padding:2px 8px; border-radius:8px; }
+.exp-scenario { color:#aaa; font-size:0.9em; margin-bottom:8px; }
+.exp-steps { background:rgba(0,0,0,0.3); padding:12px 15px; border-radius:8px; margin:10px 0; }
+.exp-steps li { color:#bbb; font-size:0.88em; margin:5px 0; line-height:1.6; }
+.exp-result { color:#8BC8EA; font-size:0.88em; margin-top:8px; padding-left:10px; border-left:3px solid #8BC8EA; }
+.loading { text-align:center; padding:50px; color:#888; }
+.back-link { display:inline-block; margin:20px; color:#d4af37; text-decoration:none; font-size:0.9em; }
+
+/* ===== 移动端适配 ===== */
+@media (max-width: 768px) {
+  body { padding: 10px !important; }
+  .container, .sm-container { max-width: 100% !important; padding: 0 12px !important; }
+  h1 { font-size: 1.5em !important; }
+  h2 { font-size: 1.2em !important; }
+  .sm-grid { grid-template-columns: 1fr !important; }
+  table { font-size: 0.85em; }
+  img { max-width: 100% !important; height: auto !important; }
+}
+</style>
+</head>
+<body>
+<a href="/" class="back-link">← 返回首页</a>
+<div class="header">
+    <h1>全域经验库</h1>
+    <p>同源节点经验萃取 · 方法论沉淀 · 全域通用推广</p>
+    <div class="stats">
+        <div class="stat-item"><div class="num" id="totalCount">...</div><div class="label">经验总数</div></div>
+        <div class="stat-item"><div class="num" id="promotedCount">...</div><div class="label">全域推广</div></div>
+    </div>
+</div>
+<div class="container" id="content">
+    <div class="loading">正在加载经验库...</div>
+</div>
+<div style="text-align:center;padding:30px;color:#555;font-size:0.85em;border-top:1px solid rgba(212,175,55,0.1)">
+    Ω₀⊂⊙∞⊂Ω · 火斗云智AIOS · 全域经验库 · DID-BR-000002
+</div>
+<script>
+async function load() {
+    try {
+        const resp = await fetch('/experience_kb.json');
+        const data = await resp.json();
+        document.getElementById('totalCount').textContent = data.total_experiences;
+        document.getElementById('promotedCount').textContent = data.promoted_experiences;
+
+        let html = '';
+        for (const [type, items] of Object.entries(data.experiences)) {
+            if (items.length === 0) continue;
+            const meta = data.types[type] || {name: type, icon: '📌'};
+            html += '<div class="type-section">';
+            html += '<div class="type-title">' + meta.icon + ' ' + meta.name + '<span class="count">' + items.length + '条</span></div>';
+            items.forEach(exp => {
+                html += '<div class="exp-card' + (exp._promoted ? ' promoted' : '') + '">';
+                html += '<div class="exp-title">' + (exp.title || '未命名经验') + '</div>';
+                html += '<div class="exp-meta">';
+                html += '<span class="tag">节点: ' + (exp._node || 'unknown') + '</span>';
+                html += '<span class="tag">复用性: ' + (exp.reusability || '?') + '</span>';
+                html += '<span class="tag">评分: ' + (exp._score || 0) + '</span>';
+                if (exp._promoted) html += '<span class="promoted-tag">⭐ 全域推广</span>';
+                if (exp.related_meta_law) html += '<span class="tag">' + exp.related_meta_law + '</span>';
+                html += '</div>';
+                if (exp.scenario) html += '<div class="exp-scenario">📌 场景: ' + exp.scenario + '</div>';
+                if (exp.steps && exp.steps.length > 0) {
+                    html += '<div class="exp-steps"><ol>';
+                    exp.steps.forEach(s => html += '<li>' + s + '</li>');
+                    html += '</ol></div>';
+                }
+                if (exp.result) html += '<div class="exp-result">✅ 效果: ' + exp.result + '</div>';
+                html += '</div>';
+            });
+            html += '</div>';
+        }
+        if (html === '') html = '<div class="loading">暂无经验上报，等待同源节点提交...</div>';
+        document.getElementById('content').innerHTML = html;
+    } catch (e) {
+        document.getElementById('content').innerHTML = '<div class="loading">加载失败: ' + e.message + '</div>';
+    }
+}
+load();
+setInterval(load, 300000);
+</script>
+</body>
+</html>

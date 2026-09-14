@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prometheus API 文档 | 火斗云智 AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a0f;color:#e8e8e8;line-height:1.8;padding:20px}
+.container{max-width:900px;margin:0 auto}
+.header{text-align:center;padding:40px 0;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:30px}
+.header h1{font-size:28px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.header p{color:#9ca3af;font-size:14px}
+.section{margin-bottom:30px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:24px}
+.section h2{font-size:18px;color:#c9a7e8;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(201,167,232,.2)}
+.section h3{font-size:15px;color:#8BC8EA;margin:16px 0 8px}
+.api-endpoint{background:rgba(139,200,234,.05);border-left:3px solid #8BC8EA;padding:12px 16px;margin:12px 0;border-radius:0 8px 8px 0}
+.api-method{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;margin-right:8px}
+.method-get{background:rgba(82,196,26,.15);color:#52C41A}
+.method-post{background:rgba(139,200,234,.15);color:#8BC8EA}
+.api-path{font-family:'Courier New',monospace;color:#e8e8e8;font-size:14px}
+.api-desc{color:#9ca3af;font-size:13px;margin-top:6px}
+.code-block{background:#0d0d14;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:16px;margin:12px 0;overflow-x:auto}
+.code-block code{font-family:'Courier New',monospace;font-size:13px;color:#94D8C3;line-height:1.6}
+.code-block .comment{color:#6B7280}
+.code-block .keyword{color:#c9a7e8}
+.code-block .string{color:#F4B393}
+.params-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.params-table th{background:rgba(201,167,232,.1);color:#c9a7e8;padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.1)}
+.params-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05);color:#d1d5db}
+.params-table tr:hover{background:rgba(255,255,255,.02)}
+.note{background:rgba(250,173,20,.08);border-left:3px solid #FAAD14;padding:12px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:13px;color:#FAAD14}
+.success{background:rgba(82,196,26,.08);border-left:3px solid #52C41A;padding:12px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:13px;color:#52C41A}
+.footer{text-align:center;padding:30px 0;border-top:1px solid rgba(255,255,255,.08);margin-top:40px;color:#6B7280;font-size:12px}
+.quick-links{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+.quick-link{padding:8px 16px;background:rgba(139,200,234,.1);border:1px solid rgba(139,200,234,.2);border-radius:8px;color:#8BC8EA;text-decoration:none;font-size:13px;transition:all .3s}
+.quick-link:hover{background:rgba(139,200,234,.2);transform:translateY(-2px)}
+</style>
+
+<meta name="description" content="Prometheus API文档 - 火斗云智AIOS监控系统API接口文档，包括指标查询、告警管理、数据导出等接口说明和调用示例。">
+<meta name="keywords" content="Prometheus,API文档,监控API,指标查询,告警,火斗云智">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Prometheus API文档 - 火斗云智AIOS监控系统API接口文档，包括指标查询、告警管理、数据导出等接口说明">
+<meta property="og:description" content="Prometheus API文档 - 火斗云智AIOS监控系统API接口文档，包括指标查询、告警管理、数据导出等接口说明和调用示例。">
+<meta property="og:url" content="https://huodouai.com/prometheus-api-docs.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Prometheus API文档 - 火斗云智AIOS监控系统API接口文档，包括指标查询、告警管理、数据导出等接口说明">
+<meta name="twitter:description" content="Prometheus API文档 - 火斗云智AIOS监控系统API接口文档，包括指标查询、告警管理、数据导出等接口说明和调用示例。">
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/docs/prometheus-api.html">
+</head>
+<body><nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products/">产品中心</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">技术架构</a>
+<a href="/whitepapers/aios-v1.html">技术白皮书</a>
+<a href="/blog/">技术博客</a>
+<a href="/docs/">开发者文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+<div class="container">
+
+<div class="header">
+<h1>Prometheus API 文档</h1>
+<p>火斗云智 AIOS 监控系统 | Prometheus 查询 API 使用指南</p>
+</div>
+
+<div class="section">
+<h2>📌 快速链接</h2>
+<div class="quick-links">
+<a href="https://huodouai.com/grafana/" class="quick-link" target="_blank">📈 Grafana 可视化面板</a>
+<a href="https://huodouai.com/server-monitor.html" class="quick-link" target="_blank">📊 服务器监控面板</a>
+<a href="https://huodouai.com/prometheus/api/v1/query?query=up" class="quick-link" target="_blank">🔍 测试 API 查询</a>
+<a href="https://huodouai.com/api/prometheus-metrics.json" class="quick-link" target="_blank">📡 实时指标 JSON</a>
+</div>
+</div>
+
+<div class="section">
+<h2>🌐 API 基础信息</h2>
+<table class="params-table">
+<tr><th>项目</th><th>值</th></tr>
+<tr><td>Base URL</td><td><code>https://huodouai.com/prometheus</code></td></tr>
+<tr><td>API 版本</td><td>v1</td></tr>
+<tr><td>认证方式</td><td>无需认证（只读查询）</td></tr>
+<tr><td>响应格式</td><td>JSON</td></tr>
+<tr><td>字符编码</td><td>UTF-8</td></tr>
+</table>
+<div class="note">
+⚠️ <strong>安全限制：</strong>仅开放查询 API（<code>/api/v1/*</code>），管理 API（<code>/admin</code>、<code>/-/reload</code>、<code>/-/quit</code>、<code>/tsdb</code> 等）已禁止外部访问。
+</div>
+</div>
+
+<div class="section">
+<h2>🔍 核心查询 API</h2>
+
+<h3>1. 即时查询 (Instant Query)</h3>
+<div class="api-endpoint">
+<span class="api-method method-get">GET</span>
+<span class="api-path">/api/v1/query</span>
+<div class="api-desc">在单个时间点评估 PromQL 表达式，返回即时查询结果。</div>
+</div>
+<table class="params-table">
+<tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr>
+<tr><td>query</td><td>string</td><td>是</td><td>PromQL 表达式</td></tr>
+<tr><td>time</td><td>rfc3339/unix</td><td>否</td><td>查询时间戳，默认当前时间</td></tr>
+<tr><td>timeout</td><td>duration</td><td>否</td><td>查询超时时间</td></tr>
+</table>
+<div class="code-block">
+<code><span class="comment"># 查询所有采集目标状态</span>
+GET /prometheus/api/v1/query?query=up
+
+<span class="comment"># 查询 CPU 使用率</span>
+GET /prometheus/api/v1/query?query=100-(avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))*100)
+
+<span class="comment"># 查询内存使用率</span>
+GET /prometheus/api/v1/query?query=(1-(node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes))*100
+</code>
+</div>
+
+<h3>2. 范围查询 (Range Query)</h3>
+<div class="api-endpoint">
+<span class="api-method method-get">GET</span>
+<span class="api-path">/api/v1/query_range</span>
+<div class="api-desc">在一段时间范围内评估 PromQL 表达式，返回时间序列数据。</div>
+</div>
+<table class="params-table">
+<tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr>
+<tr><td>query</td><td>string</td><td>是</td><td>PromQL 表达式</td></tr>
+<tr><td>start</td><td>rfc3339/unix</td><td>是</td><td>开始时间</td></tr>
+<tr><td>end</td><td>rfc3339/unix</td><td>是</td><td>结束时间</td></tr>
+<tr><td>step</td><td>duration|float</td><td>是</td><td>查询步长（如 15s, 1m）</td></tr>
+</table>
+<div class="code-block">
+<code><span class="comment"># 查询最近1小时 CPU 使用率趋势（每1分钟一个数据点）</span>
+GET /prometheus/api/v1/query_range?query=100-(avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))*100)&start=1h ago&end=now&step=1m
+</code>
+</div>
+</div>
+
+<div class="section">
+<h2>📊 常用指标查询示例</h2>
+
+<h3>系统资源指标</h3>
+<div class="code-block">
+<code><span class="comment"># CPU 使用率（百分比）</span>
+100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+<span class="comment"># 内存使用率（百分比）</span>
+(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+
+<span class="comment"># 磁盘使用率（根分区，百分比）</span>
+(1 - (node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay"})) * 100
+
+<span class="comment"># 系统负载（5分钟平均）</span>
+node_load5
+
+<span class="comment"># Swap 使用率（百分比）</span>
+(1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100
+
+<span class="comment"># 运行进程数</span>
+node_processes_pids
+
+<span class="comment"># 系统运行时间（秒）</span>
+node_time_seconds - node_boot_time_seconds
+</code>
+</div>
+
+<h3>网络指标</h3>
+<div class="code-block">
+<code><span class="comment"># 网络接收速率（字节/秒，排除虚拟接口）</span>
+rate(node_network_receive_bytes_total{device!~"lo|docker.*|veth.*|br.*"}[5m])
+
+<span class="comment"># 网络发送速率（字节/秒）</span>
+rate(node_network_transmit_bytes_total{device!~"lo|docker.*|veth.*|br.*"}[5m])
+
+<span class="comment"># 网络错误包接收速率</span>
+rate(node_network_receive_errs_total[5m])
+
+<span class="comment"># 网络错误包发送速率</span>
+rate(node_network_transmit_errs_total[5m])
+</code>
+</div>
+
+<h3>磁盘 IO 指标</h3>
+<div class="code-block">
+<code><span class="comment"># 磁盘读取速率（字节/秒）</span>
+rate(node_disk_read_bytes_total[5m])
+
+<span class="comment"># 磁盘写入速率（字节/秒）</span>
+rate(node_disk_written_bytes_total[5m])
+
+<span class="comment"># 磁盘 IO 等待时间</span>
+rate(node_disk_io_time_seconds_total[5m])
+</code>
+</div>
+
+<h3>Nginx 指标（如已配置）</h3>
+<div class="code-block">
+<code><span class="comment"># Nginx 活跃连接数</span>
+nginx_connections_active
+
+<span class="comment"># Nginx 请求速率（请求/秒）</span>
+rate(nginx_http_requests_total[5m])
+
+<span class="comment"># Nginx 读取中连接数</span>
+nginx_connections_reading
+
+<span class="comment"># Nginx 写入中连接数</span>
+nginx_connections_writing
+
+<span class="comment"># Nginx 等待中连接数</span>
+nginx_connections_waiting
+</code>
+</div>
+</div>
+
+<div class="section">
+<h2>🎯 元数据查询 API</h2>
+
+<h3>1. 查询标签值</h3>
+<div class="api-endpoint">
+<span class="api-method method-get">GET</span>
+<span class="api-path">/api/v1/label/&lt;label_name&gt;/values</span>
+<div class="api-desc">返回指定标签的所有可能值。</div>
+</div>
+<div class="code-block">
+<code><span class="comment"># 查询所有实例名称</span>
+GET /prometheus/api/v1/label/instance/values
+
+<span class="comment"># 查询所有作业名称</span>
+GET /prometheus/api/v1/label/job/values
+</code>
+</div>
+
+<h3>2. 查询序列</h3>
+<div class="api-endpoint">
+<span class="api-method method-get">GET</span>
+<span class="api-path">/api/v1/series</span>
+<div class="api-desc">返回匹配指定标签选择器的时间序列列表。</div>
+</div>
+<div class="code-block">
+<code><span class="comment"># 查询所有 node_cpu 相关序列</span>
+GET /prometheus/api/v1/series?match[]=node_cpu_seconds_total
+
+<span class="comment"># 查询所有采集目标的 up 序列</span>
+GET /prometheus/api/v1/series?match[]=up
+</code>
+</div>
+
+<h3>3. 查询目标状态</h3>
+<div class="api-endpoint">
+<span class="api-method method-get">GET</span>
+<span class="api-path">/api/v1/targets</span>
+<div class="api-desc">返回 Prometheus 抓取目标的当前状态。</div>
+</div>
+<div class="code-block">
+<code><span class="comment"># 查看所有采集目标状态</span>
+GET /prometheus/api/v1/targets
+
+<span class="comment"># 仅查看活跃目标</span>
+GET /prometheus/api/v1/targets?state=active
+</code>
+</div>
+
+<h3>4. 查询告警</h3>
+<div class="api-endpoint">
+<span class="api-method method-get">GET</span>
+<span class="api-path">/api/v1/alerts</span>
+<div class="api-desc">返回当前触发的所有告警。</div>
+</div>
+<div class="code-block">
+<code><span class="comment"># 查看当前所有告警</span>
+GET /prometheus/api/v1/alerts
+</code>
+</div>
+
+<h3>5. 查询告警规则</h3>
+<div class="api-endpoint">
+<span class="api-method method-get">GET</span>
+<span class="api-path">/api/v1/rules</span>
+<div class="api-desc">返回当前加载的所有告警规则和记录规则。</div>
+</div>
+<div class="code-block">
+<code><span class="comment"># 查看所有规则</span>
+GET /prometheus/api/v1/rules
+
+<span class="comment"># 仅查看告警规则</span>
+GET /prometheus/api/v1/rules?type=alert
+</code>
+</div>
+</div>
+
+<div class="section">
+<h2>📈 响应格式说明</h2>
+
+<h3>成功响应</h3>
+<div class="code-block">
+<code>{
+  <span class="keyword">"status"</span>: <span class="string">"success"</span>,
+  <span class="keyword">"data"</span>: {
+    <span class="keyword">"resultType"</span>: <span class="string">"vector"</span>,
+    <span class="keyword">"result"</span>: [
+      {
+        <span class="keyword">"metric"</span>: {
+          <span class="keyword">"__name__"</span>: <span class="string">"up"</span>,
+          <span class="keyword">"instance"</span>: <span class="string">"localhost:9090"</span>,
+          <span class="keyword">"job"</span>: <span class="string">"prometheus"</span>
+        },
+        <span class="keyword">"value"</span>: [<span class="string">1694448000</span>, <span class="string">"1"</span>]
+      }
+    ]
+  }
+}
+</code>
+</div>
+
+<h3>错误响应</h3>
+<div class="code-block">
+<code>{
+  <span class="keyword">"status"</span>: <span class="string">"error"</span>,
+  <span class="keyword">"errorType"</span>: <span class="string">"bad_data"</span>,
+  <span class="keyword">"error"</span>: <span class="string">"invalid parameter 'query': 1:0: parse error"</span>
+}
+</code>
+</div>
+
+<h3>结果类型</h3>
+<table class="params-table">
+<tr><th>resultType</th><th>说明</th></tr>
+<tr><td>vector</td><td>即时向量，单个时间点的结果</td></tr>
+<tr><td>matrix</td><td>范围向量，一段时间范围的结果</td></tr>
+<tr><td>scalar</td><td>标量值</td></tr>
+<tr><td>string</td><td>字符串值</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>💡 使用技巧</h2>
+
+<h3>1. 时间格式</h3>
+<div class="code-block">
+<code><span class="comment"># RFC3339 格式</span>
+2026-09-11T17:00:00Z
+
+<span class="comment"># Unix 时间戳（秒）</span>
+1757578800
+
+<span class="comment"># 相对时间（仅用于查询，不用于 API 参数）</span>
+5m, 1h, 1d  <span class="comment"># 在 PromQL 中使用</span>
+</code>
+</div>
+
+<h3>2. 常用 PromQL 函数</h3>
+<table class="params-table">
+<tr><th>函数</th><th>说明</th><th>示例</th></tr>
+<tr><td>rate()</td><td>计算速率</td><td>rate(node_cpu_seconds_total[5m])</td></tr>
+<tr><td>avg()</td><td>平均值</td><td>avg(rate(...))</td></tr>
+<tr><td>sum()</td><td>求和</td><td>sum(rate(...))</td></tr>
+<tr><td>max()</td><td>最大值</td><td>max(node_memory_MemTotal_bytes)</td></tr>
+<tr><td>min()</td><td>最小值</td><td>min(node_filesystem_avail_bytes)</td></tr>
+<tr><td>increase()</td><td>增量</td><td>increase(node_network_receive_bytes_total[1h])</td></tr>
+<tr><td>topk()</td><td>前N个</td><td>topk(5, rate(...))</td></tr>
+<tr><td>bottomk()</td><td>后N个</td><td>bottomk(5, ...)</td></tr>
+</table>
+
+<h3>3. 标签过滤</h3>
+<div class="code-block">
+<code><span class="comment"># 精确匹配</span>
+node_cpu_seconds_total{mode="idle"}
+
+<span class="comment"># 正则匹配</span>
+node_network_receive_bytes_total{device=~"eth.*"}
+
+<span class="comment"># 排除匹配</span>
+node_network_receive_bytes_total{device!~"lo|docker.*"}
+
+<span class="comment"># 多条件组合</span>
+node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"}
+</code>
+</div>
+</div>
+
+<div class="section">
+<h2>🔗 相关资源</h2>
+<div class="quick-links">
+<a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" class="quick-link" target="_blank">📖 Prometheus 官方文档</a>
+<a href="https://prometheus.io/docs/prometheus/latest/querying/functions/" class="quick-link" target="_blank">📐 PromQL 函数参考</a>
+<a href="https://huodouai.com/grafana/" class="quick-link" target="_blank">📈 Grafana 可视化面板</a>
+<a href="https://huodouai.com/server-monitor.html" class="quick-link" target="_blank">📊 服务器监控面板</a>
+</div>
+</div>
+
+<div class="footer">
+<p>火斗云智 AIOS | Prometheus API 文档 | DID-BR-000002 | Ω₀⊂⊙∞⊂Ω</p>
+<p>最后更新：2026-09-11</p>
+</div>
+
+</div>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products/">产品</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">架构</a>
+<a href="/whitepapers/aios-v1.html">白皮书</a>
+<a href="/docs/">文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务中台 API 文档 V1.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a0f;color:#e0e0e0;line-height:1.6}
+.header{background:linear-gradient(135deg,#0d1b2a 0%,#1b2838 100%);border-bottom:2px solid #d4af37;padding:24px 32px}
+.header h1{font-size:24px;color:#d4af37;margin-bottom:8px}
+.header .subtitle{color:#888;font-size:14px}
+.stats{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap}
+.stat-card{background:#1a1a2e;border:1px solid #333;border-radius:8px;padding:12px 20px;min-width:120px}
+.stat-card .num{font-size:28px;font-weight:700;color:#d4af37}
+.stat-card .label{font-size:12px;color:#888}
+.container{display:flex;min-height:calc(100vh - 140px)}
+.sidebar{width:260px;background:#11111a;border-right:1px solid #2a2a3e;padding:16px;overflow-y:auto;position:sticky;top:0;height:calc(100vh - 140px)}
+.sidebar h3{color:#d4af37;font-size:13px;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.sidebar a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:4px;margin-bottom:2px;transition:all .2s}
+.sidebar a:hover{background:#1a1a2e;color:#d4af37}
+.sidebar a .count{float:right;color:#666;font-size:11px}
+.main{flex:1;padding:24px 32px;overflow-y:auto}
+.category{margin-bottom:40px}
+.category h2{color:#d4af37;font-size:18px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #2a2a3e}
+.endpoint{background:#11111a;border:1px solid #2a2a3e;border-radius:8px;margin-bottom:12px;overflow:hidden;transition:all .2s}
+.endpoint:hover{border-color:#d4af37}
+.endpoint-header{display:flex;align-items:center;padding:12px 16px;cursor:pointer}
+.method-badge{padding:4px 10px;border-radius:4px;font-size:11px;font-weight:700;margin-right:12px;min-width:56px;text-align:center}
+.method-get{background:#1565c0;color:#fff}
+.method-post{background:#2e7d32;color:#fff}
+.endpoint-path{font-family:'Courier New',monospace;font-size:13px;color:#e0e0e0;flex:1}
+.endpoint-body{padding:0 16px 16px;display:none;border-top:1px solid #2a2a3e}
+.endpoint.open .endpoint-body{display:block}
+.endpoint-body h4{color:#888;font-size:12px;margin:12px 0 6px;text-transform:uppercase}
+.endpoint-body pre{background:#0a0a0f;border:1px solid #2a2a3e;border-radius:4px;padding:12px;font-size:12px;overflow-x:auto;color:#a0d0a0}
+.test-btn{padding:6px 14px;background:#d4af37;color:#000;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;margin-top:8px}
+.test-btn:hover{background:#e5c048}
+.test-result{margin-top:8px;padding:8px;background:#0a0a0f;border-radius:4px;font-size:11px;display:none;max-height:200px;overflow-y:auto}
+.footer{background:#11111a;border-top:1px solid #2a2a3e;padding:16px 32px;text-align:center;color:#666;font-size:12px}
+.footer .anchor{color:#d4af37;font-family:monospace}
+@media(max-width:768px){.sidebar{display:none}.main{padding:16px}}
+</style>
+    <link rel="canonical" href="https://huodouai.comgov-api-docs/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="header">
+  <h1>政务中台 API 文档</h1>
+  <div class="subtitle">ZONGYUAN-ROOT · 政务AI服务平台 · 自动生成于 2026-09-07 10:07</div>
+  <div class="stats">
+    <div class="stat-card"><div class="num">140</div><div class="label">API总数</div></div>
+    <div class="stat-card"><div class="num" style="color:#4fc3f7">96</div><div class="label">GET端点</div></div>
+    <div class="stat-card"><div class="num" style="color:#81c784">44</div><div class="label">POST端点</div></div>
+    <div class="stat-card"><div class="num">12</div><div class="label">分类数</div></div>
+  </div>
+</div>
+<div class="container">
+  <div class="sidebar">
+    <h3>API分类</h3>
+    <a href="#cat-政务核心">政务核心 <span class="count">16</span></a>
+    <a href="#cat-政策管理">政策管理 <span class="count">4</span></a>
+    <a href="#cat-办事指南">办事指南 <span class="count">3</span></a>
+    <a href="#cat-工作台">工作台 <span class="count">15</span></a>
+    <a href="#cat-RBAC权限">RBAC权限 <span class="count">12</span></a>
+    <a href="#cat-工作流">工作流 <span class="count">9</span></a>
+    <a href="#cat-自进化">自进化 <span class="count">15</span></a>
+    <a href="#cat-算子统计">算子统计 <span class="count">9</span></a>
+    <a href="#cat-用户数据">用户数据 <span class="count">10</span></a>
+    <a href="#cat-通知">通知 <span class="count">7</span></a>
+    <a href="#cat-系统">系统 <span class="count">10</span></a>
+    <a href="#cat-其他">其他 <span class="count">30</span></a>
+  </div>
+  <div class="main">
+    <div class="category" id="cat-政务核心">
+      <h2>政务核心 (16)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/model/status</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/model/status</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/model/status',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/model/list</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/model/list</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/model/list',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/model/select</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/model/select</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/model/select',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/doc/generate</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/doc/generate</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/doc/generate',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/image/generate</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/image/generate</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/image/generate',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/image/status</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/image/status</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/image/status',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/tts/generate</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/tts/generate</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/tts/generate',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/vector/search</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/vector/search</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/vector/search',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/agent/hub</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/agent/hub</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/agent/hub',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/agent/heartbeat</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/agent/heartbeat</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/agent/heartbeat',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/aios/status</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/aios/status</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/aios/status',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/aios/truth/distill</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/aios/truth/distill</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/aios/truth/distill',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/aios/causal/trace</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/aios/causal/trace</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/aios/causal/trace',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/system/monitor</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/system/monitor</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/system/monitor',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/aios/config</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/aios/config</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/aios/config',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/doc/polish</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/doc/polish</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/doc/polish',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-政策管理">
+      <h2>政策管理 (4)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/policy/search</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/policy/search</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/policy/search',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/policy/categories</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/policy/categories</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/policy/categories',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/analytics/policy-hotness</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/analytics/policy-hotness</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/analytics/policy-hotness',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/admin/policy</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/admin/policy</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/admin/policy',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-办事指南">
+      <h2>办事指南 (3)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/guide/list</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/guide/list</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/guide/list',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/guide/detail</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/guide/detail</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/guide/detail',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/admin/guide</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/admin/guide</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/admin/guide',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-工作台">
+      <h2>工作台 (15)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/todos</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/todos</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/todos',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/doc-templates</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/doc-templates</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/doc-templates',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/quick-actions</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/quick-actions</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/quick-actions',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/v11/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/v11/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/v11/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/approvals</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/approvals</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/approvals',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/approvals/create</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/approvals/create</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/approvals/create',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/consultations</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/consultations</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/consultations',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/consultations/create</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/consultations/create</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/consultations/create',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/doc-history</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/doc-history</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/doc-history',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/performance</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/performance</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/performance',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/workbench/users</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/users</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/workbench/users',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/workbench/consultations/update</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/consultations/update</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/workbench/consultations/update',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/workbench/doc-history/save</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/doc-history/save</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/workbench/doc-history/save',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/workbench/consultations/create</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/workbench/consultations/create</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/workbench/consultations/create',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-RBAC权限">
+      <h2>RBAC权限 (12)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rbac/verify</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/verify</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rbac/verify',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rbac/users</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/users</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rbac/users',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rbac/roles</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/roles</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rbac/roles',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rbac/permissions</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/permissions</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rbac/permissions',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rbac/audit</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/audit</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rbac/audit',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rbac/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rbac/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/rbac/login</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/login</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/rbac/login',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/rbac/logout</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/logout</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/rbac/logout',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/rbac/users/create</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/users/create</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/rbac/users/create',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/rbac/users/update</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/users/update</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/rbac/users/update',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/rbac/users/delete</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/users/delete</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/rbac/users/delete',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/rbac/roles/update</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rbac/roles/update</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/rbac/roles/update',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-工作流">
+      <h2>工作流 (9)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/workflow/list</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/workflow/list</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/workflow/list',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/workflow/get</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/workflow/get</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/workflow/get',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/workflow/templates</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/workflow/templates</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/workflow/templates',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/workflow/template/get</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/workflow/template/get</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/workflow/template/get',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/workflow/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/workflow/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/workflow/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/workflow/save</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/workflow/save</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/workflow/save',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/workflow/delete</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/workflow/delete</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/workflow/delete',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/workflow/template/apply</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/workflow/template/apply</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/workflow/template/apply',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/workflow/exec/log</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/workflow/exec/log</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/workflow/exec/log',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-自进化">
+      <h2>自进化 (15)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/status</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/status</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/status',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/cache/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/cache/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/cache/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/knowledge-gaps</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/knowledge-gaps</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/knowledge-gaps',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/daily-report</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/daily-report</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/daily-report',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/reports</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/reports</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/reports',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/config</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/config</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/config',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/v2/status</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/v2/status</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/v2/status',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/v2/quality/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/v2/quality/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/v2/quality/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/v2/quality/low-quality</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/v2/quality/low-quality</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/v2/quality/low-quality',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/v2/feedback/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/v2/feedback/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/v2/feedback/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/v2/strategy</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/v2/strategy</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/evolution/v2/strategy',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/analytics/evolution</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/analytics/evolution</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/analytics/evolution',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/v2/quality/record</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/v2/quality/record</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/evolution/v2/quality/record',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/v2/feedback/record</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/v2/feedback/record</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/evolution/v2/feedback/record',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/evolution/v2/strategy/check</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/evolution/v2/strategy/check</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/evolution/v2/strategy/check',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-算子统计">
+      <h2>算子统计 (9)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/operators/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/operators/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/operators/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/operators/summary</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/operators/summary</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/operators/summary',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/operators/logs</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/operators/logs</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/operators/logs',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/operators/meta</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/operators/meta</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/operators/meta',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/operators/trend</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/operators/trend</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/operators/trend',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/operators/hourly</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/operators/hourly</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/operators/hourly',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/operators/alerts</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/operators/alerts</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/operators/alerts',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/operators/alert-config</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/operators/alert-config</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/operators/alert-config',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/analytics/operators</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/analytics/operators</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/analytics/operators',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-用户数据">
+      <h2>用户数据 (10)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/appointments</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/appointments</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/appointments',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/appointments/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/appointments/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/appointments/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/favorites</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/favorites</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/favorites',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/favorites/check</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/favorites/check</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/favorites/check',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/user-actions/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/user-actions/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/user-actions/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/analytics/user-activity</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/analytics/user-activity</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/analytics/user-activity',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/appointments/create</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/appointments/create</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/appointments/create',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/appointments/update</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/appointments/update</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/appointments/update',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/favorites/toggle</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/favorites/toggle</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/favorites/toggle',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/user-actions/record</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/user-actions/record</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/user-actions/record',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-通知">
+      <h2>通知 (7)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/notifications/list</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/notifications/list</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/notifications/list',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/notifications/unread-count</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/notifications/unread-count</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/notifications/unread-count',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/notifications/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/notifications/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/notifications/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/notifications/read</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/notifications/read</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/notifications/read',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/notifications/read-all</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/notifications/read-all</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/notifications/read-all',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/notifications/create</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/notifications/create</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/notifications/create',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/notifications/delete</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/notifications/delete</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/notifications/delete',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-系统">
+      <h2>系统 (10)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rag/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rag/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rag/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/router/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/router/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/router/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/router/health</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/router/health</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/router/health',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/usage</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/usage</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/usage',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/admin/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/admin/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/admin/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/esign/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/esign/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/esign/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/tenants/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/tenants/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/tenants/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/ai-models/usage</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/ai-models/usage</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/ai-models/usage',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/gov/vector/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/vector/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/gov/vector/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/gov/vector/stats</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/gov/vector/stats</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/gov/vector/stats',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+    <div class="category" id="cat-其他">
+      <h2>其他 (30)</h2>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rag/search</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rag/search</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rag/search',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rag/context</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rag/context</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rag/context',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/rag/entities</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/rag/entities</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/rag/entities',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/multimodal/capabilities</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/multimodal/capabilities</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/multimodal/capabilities',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/multimodal/parse-doc</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/multimodal/parse-doc</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/multimodal/parse-doc',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/multimodal/analyze-image</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/multimodal/analyze-image</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/multimodal/analyze-image',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/multimodal/tts</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/multimodal/tts</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/multimodal/tts',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/multimodal/status</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/multimodal/status</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/multimodal/status',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/multimodal/config</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/multimodal/config</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/multimodal/config',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/router/select</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/router/select</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/router/select',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/router/models</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/router/models</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/router/models',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/hot</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/hot</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/hot',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/admin/logs</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/admin/logs</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/admin/logs',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/analytics/dashboard</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/analytics/dashboard</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/analytics/dashboard',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/analytics/trend</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/analytics/trend</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/analytics/trend',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/analytics/categories</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/analytics/categories</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/analytics/categories',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/analytics/export</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/analytics/export</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/analytics/export',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/esign/seals</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/esign/seals</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/esign/seals',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/esign/records</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/esign/records</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/esign/records',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/esign/verify</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/esign/verify</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/esign/verify',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/tenants/list</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/tenants/list</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/tenants/list',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/tenants/detail</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/tenants/detail</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/tenants/detail',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/ai-models/list</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/ai-models/list</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/ai-models/list',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/ai-models/route</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/ai-models/route</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/ai-models/route',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/ai-models/config</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/ai-models/config</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/ai-models/config',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/gov-api/api/ai-models/deploy-guide</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/ai-models/deploy-guide</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('GET','/gov-api/api/ai-models/deploy-guide',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/esign/create</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/esign/create</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/esign/create',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/esign/sign</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/esign/sign</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/esign/sign',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/tenants/create</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/tenants/create</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/tenants/create',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+      <div class="endpoint" onclick="this.classList.toggle('open')">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/gov-api/api/tenants/update</span>
+        </div>
+        <div class="endpoint-body">
+          <h4>请求URL</h4>
+          <pre>https://huodouai.com/gov-api/api/tenants/update</pre>
+          <h4>测试</h4>
+          <button class="test-btn" onclick="event.stopPropagation();testApi('POST','/gov-api/api/tenants/update',this)">发送测试请求</button>
+          <div class="test-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <div>政务中台 API 文档 V1.0 · 自动生成 · <span class="anchor">Ω₀⊂⊙∞⊂Ω</span> · DID-BR-000002</div>
+</div>
+<script>
+function testApi(method, url, btn) {
+  const resultDiv = btn.nextElementSibling;
+  resultDiv.style.display = 'block';
+  resultDiv.textContent = '请求中...';
+  const fullUrl = url.startsWith('http') ? url : 'https://huodouai.com' + url;
+  const options = {method: method, headers: {'Content-Type': 'application/json'}};
+  if (method === 'POST') options.body = JSON.stringify({});
+  fetch(fullUrl, options)
+    .then(r => r.text())
+    .then(data => {
+      try { resultDiv.textContent = JSON.stringify(JSON.parse(data), null, 2).substring(0, 2000); }
+      catch(e) { resultDiv.textContent = data.substring(0, 2000); }
+    })
+    .catch(e => { resultDiv.textContent = '错误: ' + e.message; });
+}
+</script>
+</body>
+</html>

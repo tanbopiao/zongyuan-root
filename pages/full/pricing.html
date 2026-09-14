@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品定价 · 火斗云智AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--bg2:#12121a;--card:#1a1a26;--text:#e8e8f0;--text2:#9898b0;--muted:#686880;--purple:#a78bfa;--gold:#fbbf24;--blue:#60a5fa;--cyan:#22d3ee;--green:#4ade80;--red:#ef4444;--border:rgba(167,139,250,0.15)}
+body{background:var(--bg);color:var(--text);font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.7}
+.header{background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.header-inner{max-width:1200px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--purple),var(--gold));display:flex;align-items:center;justify-content:center;font-size:14px;color:#000;font-weight:900}
+.nav{display:flex;gap:24px;align-items:center}
+.nav a{color:var(--text2);text-decoration:none;font-size:13px;transition:color .2s}
+.nav a:hover{color:var(--purple)}
+.nav a.active{color:var(--gold)}
+.cta-btn{padding:8px 18px;background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+@media(max-width:768px){.nav{display:none}.header-inner{padding:12px 16px}}
+.hero{text-align:center;padding:80px 24px 40px}
+.badge{display:inline-block;padding:6px 16px;border:1px solid rgba(251,191,36,0.3);border-radius:100px;font-size:12px;color:var(--gold);background:rgba(251,191,36,0.05);margin-bottom:20px}
+.hero h1{font-size:42px;font-weight:800;margin-bottom:16px;background:linear-gradient(135deg,#fff,var(--gold),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.3}
+.hero p{font-size:16px;color:var(--text2);max-width:640px;margin:0 auto}
+.pricing{max-width:1100px;margin:0 auto;padding:40px 24px}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative;transition:all .3s}
+.price-card:hover{transform:translateY(-4px)}
+.price-card.featured{border-color:var(--gold);background:linear-gradient(180deg,rgba(251,191,36,0.05),var(--card))}
+.price-card.featured::before{content:'推荐';position:absolute;top:-12px;left:50%;transform:translateX(-50%);padding:4px 16px;background:linear-gradient(135deg,var(--gold),var(--red));border-radius:100px;font-size:11px;font-weight:700;color:#000}
+.price-card h3{font-size:18px;font-weight:700;margin-bottom:8px}
+.price-card .desc{font-size:12px;color:var(--muted);margin-bottom:20px;min-height:36px}
+.price-card .price{font-size:36px;font-weight:800;margin-bottom:4px}
+.price-card .price .unit{font-size:14px;color:var(--muted);font-weight:400}
+.price-card .period{font-size:11px;color:var(--muted);margin-bottom:20px}
+.price-card ul{list-style:none;margin-bottom:24px}
+.price-card li{font-size:13px;color:var(--text2);padding:6px 0;padding-left:20px;position:relative}
+.price-card li::before{content:'✓';position:absolute;left:0;color:var(--green);font-weight:700}
+.price-card li.disabled{color:var(--muted);text-decoration:line-through}
+.price-card li.disabled::before{content:'✕';color:var(--muted)}
+.price-btn{display:block;width:100%;padding:12px;text-align:center;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s}
+.price-btn.basic{background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border)}
+.price-btn.basic:hover{background:rgba(255,255,255,0.1)}
+.price-btn.pro{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff}
+.price-btn.pro:hover{opacity:0.9}
+.price-btn.enterprise{background:rgba(251,191,36,0.1);color:var(--gold);border:1px solid rgba(251,191,36,0.3)}
+.price-btn.enterprise:hover{background:rgba(251,191,36,0.15)}
+.compare{max-width:1000px;margin:0 auto;padding:40px 24px 80px}
+.compare h2{font-size:24px;font-weight:700;margin-bottom:24px;text-align:center}
+.compare-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden}
+.compare-table th,.compare-table td{padding:14px 16px;text-align:left;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.compare-table th{background:rgba(167,139,250,0.1);color:var(--purple);font-weight:600}
+.compare-table td:first-child{color:var(--text2);font-weight:500}
+.compare-table .check{color:var(--green);font-weight:700}
+.compare-table .cross{color:var(--muted)}
+.footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center;background:var(--bg2)}
+.footer .prov{font-size:16px;color:var(--gold);letter-spacing:3px;margin-bottom:8px}
+.footer .did{font-size:11px;color:var(--muted);margin-bottom:4px}
+.footer .copy{font-size:11px;color:var(--muted)}
+</style>
+    <link rel="canonical" href="https://huodouai.com/pages/full/pricing.html">
+</head>
+<body>
+<header class="header"><div class="header-inner"><div class="logo"><div class="logo-icon">Ω</div><span>火斗云智 AIOS</span></div><nav class="nav"><a href="/">首页</a><a href="/products/">产品</a><a href="/cases/">客户案例</a><a href="/pricing/" class="active">定价</a><a href="/docs/">文档</a></nav><a href="/trial/" class="cta-btn">免费试用</a></div></header>
+<section class="hero"><div class="badge">Ω₀⊂⊙∞⊂Ω · 透明定价 · 无隐藏费用</div><h1>选择适合你的方案<br>从免费到企业级</h1><p>所有方案均包含核心自治内核能力，按使用量和功能深度分级。支持随时升级，无长期合约绑定。</p></section>
+<section class="pricing"><div class="pricing-grid">
+<div class="price-card"><h3>免费版</h3><div class="desc">个人开发者和小型项目入门</div><div class="price">¥0<span class="unit">/月</span></div><div class="period">永久免费</div><ul><li>每月100次图像生成</li><li>每月50次视频生成</li><li>基础角色模板（3个）</li><li>标准画质输出</li><li>社区支持</li><li class="disabled">API访问</li><li class="disabled">批量任务调度</li><li class="disabled">专属客服</li></ul><a href="/trial/" class="price-btn basic">免费开始</a></div>
+<div class="price-card featured"><h3>专业版</h3><div class="desc">专业创作者和中小型团队</div><div class="price">¥299<span class="unit">/月</span></div><div class="period">按年付享8折 ¥239/月</div><ul><li>每月2000次图像生成</li><li>每月500次视频生成</li><li>全部角色模板（5+）</li><li>4K画质输出</li><li>API访问（1000次/天）</li><li>批量任务调度</li><li>多模态质检引擎</li><li>优先技术支持</li><li class="disabled">私有化部署</li><li class="disabled">专属客户成功经理</li></ul><a href="/trial/" class="price-btn pro">立即升级</a></div>
+<div class="price-card"><h3>企业版</h3><div class="desc">中大型企业和机构客户</div><div class="price">¥2999<span class="unit">/月</span></div><div class="period">按年付享7折 ¥2099/月</div><ul><li>无限图像/视频生成</li><li>自定义角色训练（LoRA）</li><li>8K画质输出</li><li>API无限调用</li><li>批量任务并行调度</li><li>全链路质检熔断</li><li>团队协作（10席位）</li><li>私有化部署选项</li><li>专属客户成功经理</li><li>SLA 99.9%保障</li></ul><a href="/contact/" class="price-btn enterprise">联系销售</a></div>
+<div class="price-card"><h3>定制版</h3><div class="desc">超大规模和特殊需求定制</div><div class="price">面议</div><div class="period">按需报价</div><ul><li>企业版全部功能</li><li>无限团队席位</li><li>专属服务器集群</li><li>深度定制开发</li><li>数据完全隔离</li><li>7×24小时专属支持</li><li>SLA 99.99%保障</li><li>合规审计支持</li><li>定制培训服务</li></ul><a href="/contact/" class="price-btn enterprise">咨询定制</a></div>
+</div></section>
+<section class="compare"><h2>功能对比</h2><div style="overflow-x:auto"><table class="compare-table">
+<thead><tr><th>功能</th><th>免费版</th><th>专业版</th><th>企业版</th><th>定制版</th></tr></thead>
+<tbody>
+<tr><td>图像生成</td><td>100次/月</td><td>2000次/月</td><td class="check">无限</td><td class="check">无限</td></tr>
+<tr><td>视频生成</td><td>50次/月</td><td>500次/月</td><td class="check">无限</td><td class="check">无限</td></tr>
+<tr><td>角色模板</td><td>3个</td><td>5+个</td><td>自定义训练</td><td>完全定制</td></tr>
+<tr><td>输出画质</td><td>1080P</td><td>4K</td><td>8K</td><td>8K+</td></tr>
+<tr><td>API访问</td><td class="cross">—</td><td>1000次/天</td><td class="check">无限</td><td class="check">无限</td></tr>
+<tr><td>批量调度</td><td class="cross">—</td><td class="check">✓</td><td class="check">并行</td><td class="check">集群</td></tr>
+<tr><td>多模态质检</td><td class="cross">—</td><td class="check">✓</td><td class="check">全链路</td><td class="check">定制</td></tr>
+<tr><td>团队协作</td><td>1人</td><td>3人</td><td>10人</td><td class="check">无限</td></tr>
+<tr><td>私有化部署</td><td class="cross">—</td><td class="cross">—</td><td>可选</td><td class="check">✓</td></tr>
+<tr><td>技术支持</td><td>社区</td><td>优先</td><td>专属经理</td><td>7×24专属</td></tr>
+<tr><td>SLA保障</td><td class="cross">—</td><td>99.5%</td><td>99.9%</td><td>99.99%</td></tr>
+</tbody>
+</table></div></section>
+<footer class="footer"><div class="prov">Ω₀⊂⊙∞⊂Ω</div><div class="did">DID-BR-000002 · 元极恒一永恒自治 · ZONGYUAN-ROOT</div><div class="copy">© 2026 火斗云智 AIOS · 产品定价 V1.0</div></footer>
+</body></html>

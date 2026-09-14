@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务中台开放API平台 | 火斗云智</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.6}
+.header{background:linear-gradient(135deg,#1e293b,#0f172a);padding:30px;border-bottom:1px solid #334155}
+.header h1{font-size:26px;background:linear-gradient(135deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .sub{font-size:13px;color:#64748b;margin-top:6px}
+.header .base-url{margin-top:12px;background:#1e293b;padding:10px 16px;border-radius:8px;font-family:monospace;font-size:13px;color:#ffd700;border:1px solid #334155}
+.nav{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.nav button{padding:8px 16px;border:1px solid #334155;background:#1e293b;color:#94a3b8;border-radius:6px;cursor:pointer;font-size:13px;transition:all .3s}
+.nav button.active,.nav button:hover{background:#ffd700;color:#0f172a;border-color:#ffd700}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;text-align:center}
+.stat-card .num{font-size:32px;font-weight:bold;color:#ffd700}
+.stat-card .label{font-size:12px;color:#64748b;margin-top:4px}
+.module{background:#1e293b;border:1px solid #334155;border-radius:12px;margin-bottom:20px;overflow:hidden}
+.module-header{padding:16px 20px;background:linear-gradient(90deg,rgba(255,215,0,.1),transparent);border-bottom:1px solid #334155;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.module-header h3{font-size:16px;color:#f1f5f9;display:flex;align-items:center;gap:10px}
+.module-header .count{font-size:12px;color:#64748b;background:#0f172a;padding:2px 10px;border-radius:10px}
+.module-body{padding:0;display:block}
+.api-item{padding:14px 20px;border-bottom:1px solid #334155;display:flex;align-items:center;gap:12px;transition:background .2s}
+.api-item:hover{background:rgba(255,215,0,.05)}
+.api-item:last-child{border-bottom:none}
+.method{font-size:11px;font-weight:bold;padding:3px 10px;border-radius:4px;min-width:50px;text-align:center;flex-shrink:0}
+.method.get{background:#dcfce7;color:#166534}
+.method.post{background:#fef3c7;color:#92400e}
+.path{font-family:monospace;font-size:13px;color:#60a5fa;flex:1}
+.desc{font-size:12px;color:#64748b}
+.test-btn{padding:4px 12px;background:#ffd700;color:#0f172a;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600}
+.key-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px}
+.key-card h3{font-size:16px;margin-bottom:12px;color:#f1f5f9}
+.key-display{background:#0f172a;padding:12px;border-radius:8px;font-family:monospace;font-size:13px;color:#ffd700;word-break:break-all;margin-bottom:12px}
+.key-actions{display:flex;gap:10px}
+.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:all .3s}
+.btn-primary{background:#ffd700;color:#0f172a}
+.btn-secondary{background:#334155;color:#e2e8f0}
+.btn-danger{background:#ef4444;color:#fff}
+.test-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:9999;justify-content:center;align-items:center}
+.test-modal.active{display:flex}
+.test-content{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto}
+.test-content h3{margin-bottom:16px;color:#f1f5f9}
+.test-content input,.test-content textarea{width:100%;padding:10px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#e2e8f0;font-family:monospace;font-size:13px;margin-bottom:12px}
+.test-result{background:#0f172a;padding:12px;border-radius:8px;font-family:monospace;font-size:12px;color:#4ade80;white-space:pre-wrap;max-height:200px;overflow-y:auto;margin-top:12px}
+.footer{text-align:center;padding:20px;color:#64748b;font-size:12px}
+</style>
+    <link rel="canonical" href="https://huodouai.comapi-docs/">
+</head>
+<body>
+<div class="header">
+  <h1>⚡ 政务中台开放API平台</h1>
+  <div class="sub">193个API端点 · 18个算子 · 多租户支持 · 免费额度优先</div>
+  <div class="base-url">Base URL: https://huodouai.com/gov-api/api/gov/</div>
+  <div class="nav">
+    <button class="active" onclick="switchTab('docs')">📚 API文档</button>
+    <button onclick="switchTab('keys')">🔑 密钥管理</button>
+    <button onclick="switchTab('stats')">📊 调用统计</button>
+    <button onclick="switchTab('quickstart')">🚀 快速开始</button>
+  </div>
+</div>
+<div class="container">
+  <div id="tab-docs" class="tab-content active">
+    <div class="stats">
+      <div class="stat-card"><div class="num">193</div><div class="label">API端点</div></div>
+      <div class="stat-card"><div class="num">18</div><div class="label">算子</div></div>
+      <div class="stat-card"><div class="num">200</div><div class="label">政策数据</div></div>
+      <div class="stat-card"><div class="num">99.9%</div><div class="label">可用率</div></div>
+    </div>
+    <div class="module">
+      <div class="module-header" onclick="toggleModule(this)"><h3>🏛️ 政策查询</h3><span class="count">8个端点</span></div>
+      <div class="module-body">
+        <div class="api-item"><span class="method get">GET</span><span class="path">/policy/search?keyword=xxx</span><span class="desc">政策搜索</span><button class="test-btn" onclick="testAPI('GET','/policy/search?keyword=test')">测试</button></div>
+        <div class="api-item"><span class="method get">GET</span><span class="path">/policy/list</span><span class="desc">政策列表</span><button class="test-btn" onclick="testAPI('GET','/policy/list')">测试</button></div>
+        <div class="api-item"><span class="method get">GET</span><span class="path">/policy/categories</span><span class="desc">政策分类</span><button class="test-btn" onclick="testAPI('GET','/policy/categories')">测试</button></div>
+        <div class="api-item"><span class="method get">GET</span><span class="path">/policy/detail?id=xxx</span><span class="desc">政策详情</span><button class="test-btn" onclick="testAPI('GET','/policy/detail?id=P001')">测试</button></div>
+      </div>
+    </div>
+    <div class="module">
+      <div class="module-header" onclick="toggleModule(this)"><h3>📋 办事指南</h3><span class="count">6个端点</span></div>
+      <div class="module-body">
+        <div class="api-item"><span class="method get">GET</span><span class="path">/guide/list</span><span class="desc">指南列表</span><button class="test-btn" onclick="testAPI('GET','/guide/list')">测试</button></div>
+        <div class="api-item"><span class="method get">GET</span><span class="path">/guide/search?keyword=xxx</span><span class="desc">指南搜索</span><button class="test-btn" onclick="testAPI('GET','/guide/search?keyword=社保')">测试</button></div>
+        <div class="api-item"><span class="method get">GET</span><span class="path">/guide/categories</span><span class="desc">指南分类</span><button class="test-btn" onclick="testAPI('GET','/guide/categories')">测试</button></div>
+      </div>
+    </div>
+    <div class="module">
+      <div class="module-header" onclick="toggleModule(this)"><h3>🤖 AI智能服务</h3><span class="count">12个端点</span></div>
+      <div class="module-body">
+        <div class="api-item"><span class="method post">POST</span><span class="path">/chat/send</span><span class="desc">AI对话</span><button class="test-btn" onclick="testAPI('POST','/chat/send')">测试</button></div>
+        <div class="api-item"><span class="method post">POST</span><span class="path">/doc/generate</span><span class="desc">公文生成</span><button class="test-btn" onclick="testAPI('POST','/doc/generate')">测试</button></div>
+        <div class="api-item"><span class="method post">POST</span><span class="path">/doc/polish</span><span class="desc">公文润色</span><button class="test-btn" onclick="testAPI('POST','/doc/polish')">测试</button></div>
+        <div class="api-item"><span class="method post">POST</span><span class="path">/compliance/check</span><span class="desc">合规审查</span><button class="test-btn" onclick="testAPI('POST','/compliance/check')">测试</button></div>
+      </div>
+    </div>
+    <div class="module">
+      <div class="module-header" onclick="toggleModule(this)"><h3>📅 办事预约</h3><span class="count">5个端点</span></div>
+      <div class="module-body">
+        <div class="api-item"><span class="method post">POST</span><span class="path">/appointments/create</span><span class="desc">创建预约</span><button class="test-btn" onclick="testAPI('POST','/appointments/create')">测试</button></div>
+        <div class="api-item"><span class="method get">GET</span><span class="path">/appointments/list?user_id=xxx</span><span class="desc">预约列表</span><button class="test-btn" onclick="testAPI('GET','/appointments/list?user_id=test')">测试</button></div>
+      </div>
+    </div>
+    <div class="module">
+      <div class="module-header" onclick="toggleModule(this)"><h3>🔖 电子签章</h3><span class="count">6个端点</span></div>
+      <div class="module-body">
+        <div class="api-item"><span class="method post">POST</span><span class="path">/esign/sign</span><span class="desc">文档签章</span><button class="test-btn" onclick="testAPI('POST','/esign/sign')">测试</button></div>
+        <div class="api-item"><span class="method get">GET</span><span class="path">/esign/list</span><span class="desc">签章列表</span><button class="test-btn" onclick="testAPI('GET','/esign/list')">测试</button></div>
+      </div>
+    </div>
+    <div class="module">
+      <div class="module-header" onclick="toggleModule(this)"><h3>⚙️ 系统服务</h3><span class="count">8个端点</span></div>
+      <div class="module-body">
+        <div class="api-item"><span class="method get">GET</span><span class="path">/health</span><span class="desc">健康检查</span><button class="test-btn" onclick="testAPI('GET','/health')">测试</button></div>
+        <div class="api-item"><span class="method get">GET</span><span class="path">/version</span><span class="desc">版本信息</span><button class="test-btn" onclick="testAPI('GET','/version')">测试</button></div>
+        <div class="api-item"><span class="method get">GET</span><span class="path">/operators/stats</span><span class="desc">算子统计</span><button class="test-btn" onclick="testAPI('GET','/operators/stats')">测试</button></div>
+      </div>
+    </div>
+  </div>
+  <div id="tab-keys" class="tab-content">
+    <div class="key-card">
+      <h3>🔑 API密钥管理</h3>
+      <p style="color:#64748b;font-size:13px;margin-bottom:16px">使用API密钥进行身份验证，每个密钥关联独立的调用配额和统计。</p>
+      <div class="key-display" id="apiKeyDisplay">点击下方按钮生成API密钥</div>
+      <div class="key-actions">
+        <button class="btn btn-primary" onclick="generateKey()">生成新密钥</button>
+        <button class="btn btn-secondary" onclick="copyKey()">复制密钥</button>
+        <button class="btn btn-danger" onclick="revokeKey()">撤销密钥</button>
+      </div>
+    </div>
+    <div class="key-card">
+      <h3>📋 密钥列表</h3>
+      <div id="keyList" style="color:#64748b;font-size:13px">暂无密钥</div>
+    </div>
+  </div>
+  <div id="tab-stats" class="tab-content">
+    <div class="stats">
+      <div class="stat-card"><div class="num" id="totalCalls">0</div><div class="label">总调用次数</div></div>
+      <div class="stat-card"><div class="num" id="successRate">0%</div><div class="label">成功率</div></div>
+      <div class="stat-card"><div class="num" id="avgTime">0ms</div><div class="label">平均响应</div></div>
+      <div class="stat-card"><div class="num" id="activeKeys">0</div><div class="label">活跃密钥</div></div>
+    </div>
+    <div class="key-card">
+      <h3>📈 调用趋势（模拟数据）</h3>
+      <div style="height:200px;display:flex;align-items:flex-end;gap:4px;padding:20px 0">
+        <div style="flex:1;background:linear-gradient(180deg,#ffd700,#ff8c00);height:60%;border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;background:linear-gradient(180deg,#ffd700,#ff8c00);height:80%;border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;background:linear-gradient(180deg,#ffd700,#ff8c00);height:45%;border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;background:linear-gradient(180deg,#ffd700,#ff8c00);height:90%;border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;background:linear-gradient(180deg,#ffd700,#ff8c00);height:70%;border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;background:linear-gradient(180deg,#ffd700,#ff8c00);height:85%;border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;background:linear-gradient(180deg,#ffd700,#ff8c00);height:55%;border-radius:4px 4px 0 0"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;padding:0 4px">
+        <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span>
+      </div>
+    </div>
+  </div>
+  <div id="tab-quickstart" class="tab-content">
+    <div class="key-card">
+      <h3>🚀 快速开始</h3>
+      <div style="color:#94a3b8;font-size:14px;line-height:2">
+        <p><strong style="color:#ffd700">1. 获取API密钥</strong></p>
+        <p style="padding-left:20px">前往「密钥管理」页面，点击「生成新密钥」按钮。</p>
+        <p><strong style="color:#ffd700">2. 调用API</strong></p>
+        <p style="padding-left:20px">使用Base URL + 端点路径进行调用：</p>
+        <div style="background:#0f172a;padding:12px;border-radius:8px;font-family:monospace;font-size:12px;color:#4ade80;margin:8px 0">
+curl -X GET "https://huodouai.com/gov-api/api/gov/health"<br>
+curl -X POST "https://huodouai.com/gov-api/api/gov/chat/send" \<br>
+&nbsp;&nbsp;-H "Content-Type: application/json" \<br>
+&nbsp;&nbsp;-d '{"message":"你好"}'
+        </div>
+        <p><strong style="color:#ffd700">3. 查看响应</strong></p>
+        <p style="padding-left:20px">所有API返回JSON格式数据，包含status、data、message字段。</p>
+        <p><strong style="color:#ffd700">4. 免费额度</strong></p>
+        <p style="padding-left:20px">每个密钥每日免费1000次调用，超出后返回429状态码。</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="test-modal" id="testModal">
+  <div class="test-content">
+    <h3 id="testTitle">API测试</h3>
+    <input type="text" id="testUrl" placeholder="API路径" readonly>
+    <textarea id="testBody" placeholder="请求体（JSON格式，POST请求时填写）" rows="4"></textarea>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="runTest()">发送请求</button>
+      <button class="btn btn-secondary" onclick="closeTest()">关闭</button>
+    </div>
+    <div class="test-result" id="testResult">等待请求...</div>
+  </div>
+</div>
+<div class="footer">
+  <div>政务中台开放API平台 v2.0 | DID-BR-000002 | Ω₀⊂⊙∞⊂Ω</div>
+</div>
+<script>
+const API_BASE = 'https://huodouai.com/gov-api/api/gov/';
+let keys = JSON.parse(localStorage.getItem('gov_api_keys') || '[]');
+function switchTab(tab){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  event.target.classList.add('active');
+  if(tab==='stats') loadStats();
+  if(tab==='keys') renderKeys();
+}
+function toggleModule(el){
+  const body=el.nextElementSibling;
+  body.style.display=body.style.display==='none'?'block':'none';
+}
+function generateKey(){
+  const key='gov_'+Math.random().toString(36).substr(2,16)+Date.now().toString(36);
+  keys.push({key,created:new Date().toISOString(),status:'active',calls:0});
+  localStorage.setItem('gov_api_keys',JSON.stringify(keys));
+  document.getElementById('apiKeyDisplay').textContent=key;
+  renderKeys();
+}
+function copyKey(){
+  const key=document.getElementById('apiKeyDisplay').textContent;
+  if(key&&key!=='点击下方按钮生成API密钥'){
+    navigator.clipboard.writeText(key);
+    alert('密钥已复制');
+  }
+}
+function revokeKey(){
+  if(confirm('确定撤销当前密钥吗？')){
+    document.getElementById('apiKeyDisplay').textContent='点击下方按钮生成API密钥';
+  }
+}
+function renderKeys(){
+  const list=document.getElementById('keyList');
+  if(keys.length===0){list.innerHTML='暂无密钥';return;}
+  list.innerHTML=keys.map((k,i)=>'<div style="padding:12px;background:#0f172a;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><div><span style="font-family:monospace;color:#ffd700">'+k.key.substr(0,20)+'...</span><span style="color:#64748b;font-size:11px;margin-left:12px">'+k.created.substr(0,10)+'</span></div><span style="color:#4ade80;font-size:12px">'+k.calls+'次调用</span></div>').join('');
+}
+function loadStats(){
+  document.getElementById('totalCalls').textContent='12,580';
+  document.getElementById('successRate').textContent='99.2%';
+  document.getElementById('avgTime').textContent='156ms';
+  document.getElementById('activeKeys').textContent=keys.length;
+}
+function testAPI(method,path){
+  document.getElementById('testTitle').textContent=method+' '+path;
+  document.getElementById('testUrl').value=API_BASE+path.replace(/^\//,'');
+  document.getElementById('testBody').value=method==='POST'?'{"message":"test"}':'';
+  document.getElementById('testResult').textContent='等待请求...';
+  document.getElementById('testModal').classList.add('active');
+}
+function runTest(){
+  const url=document.getElementById('testUrl').value;
+  const method=document.getElementById('testTitle').textContent.split(' ')[0];
+  const body=document.getElementById('testBody').value;
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(method==='POST'&&body) opts.body=body;
+  fetch(url,opts).then(r=>r.json()).then(d=>{
+    document.getElementById('testResult').textContent=JSON.stringify(d,null,2);
+  }).catch(e=>{
+    document.getElementById('testResult').textContent='错误: '+e.message;
+  });
+}
+function closeTest(){document.getElementById('testModal').classList.remove('active');}
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务AI中台 V3.0 - 实时数据大屏</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;background:#0a0e17;color:#e0e0e0;min-height:100vh}
+.nav{position:fixed;top:0;left:0;right:0;z-index:99998;background:rgba(10,10,15,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06);padding:6px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.nav a{font-size:12px;color:#9ca3af;text-decoration:none}
+.nav a:hover{color:#d4af37}
+.nav .brand{font-size:13px;font-weight:700;color:#c9a7e8}
+.header{background:linear-gradient(135deg,#0d1117 0%,#161b22 100%);border-bottom:2px solid #d4af37;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;margin-top:32px}
+.header h1{font-size:24px;color:#d4af37;font-weight:600}
+.header .status{display:flex;gap:20px;align-items:center}
+.status-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#3fb950;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.container{max-width:1400px;margin:0 auto;padding:30px 40px}
+.stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:30px}
+.stat-card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;text-align:center;transition:all .3s}
+.stat-card:hover{border-color:#d4af37;transform:translateY(-2px)}
+.stat-card .value{font-size:32px;font-weight:700;color:#d4af37;margin-bottom:6px}
+.stat-card .label{font-size:12px;color:#8b949e}
+.stat-card .sub{font-size:10px;color:#586069;margin-top:4px}
+.section{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;margin-bottom:24px}
+.section h2{font-size:18px;color:#d4af37;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center}
+.section h2 .refresh{font-size:12px;color:#8b949e;cursor:pointer;font-weight:normal}
+.section h2 .refresh:hover{color:#d4af37}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.models-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.model-card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:14px;display:flex;justify-content:space-between;align-items:center}
+.model-card .name{font-size:13px;font-weight:600}
+.model-card .badge{font-size:10px;padding:2px 8px;border-radius:10px}
+.badge-active{background:#dcfce7;color:#166534}
+.badge-standby{background:#fef3c7;color:#92400e}
+.badge-offline{background:#fee2e2;color:#991b1b}
+.hot-list{max-height:300px;overflow-y:auto}
+.hot-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #21262d}
+.hot-item:hover{background:#0d1117}
+.hot-item .rank{width:24px;height:24px;border-radius:50%;background:#30363d;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:12px}
+.hot-item:nth-child(1) .rank{background:#d4af37;color:#000}
+.hot-item:nth-child(2) .rank{background:#c0c0c0;color:#000}
+.hot-item:nth-child(3) .rank{background:#cd7f32;color:#000}
+.hot-item .question{flex:1;font-size:13px;color:#e0e0e0}
+.hot-item .count{font-size:12px;color:#8b949e;background:#21262d;padding:2px 8px;border-radius:10px}
+.usage-bars{margin-top:16px}
+.usage-bar{margin-bottom:12px}
+.usage-bar .label{display:flex;justify-content:space-between;font-size:12px;color:#8b949e;margin-bottom:4px}
+.usage-bar .bar{height:8px;background:#21262d;border-radius:4px;overflow:hidden}
+.usage-bar .fill{height:100%;background:linear-gradient(90deg,#d4af37,#f0c040);border-radius:4px;transition:width .5s}
+.recent-list{max-height:300px;overflow-y:auto;font-family:monospace;font-size:11px}
+.recent-item{padding:8px 12px;border-bottom:1px solid #21262d;display:flex;justify-content:space-between}
+.recent-item:hover{background:#0d1117}
+.recent-item .endpoint{color:#d4af37}
+.recent-item .time{color:#586069}
+.recent-item .status-200{color:#3fb950}
+.recent-item .status-500{color:#f85149}
+.scenes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.scene-card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:16px;cursor:pointer;transition:all .3s;text-align:center}
+.scene-card:hover{border-color:#d4af37;background:#161b22}
+.scene-card .icon{font-size:32px;margin-bottom:8px}
+.scene-card .title{font-size:14px;font-weight:600;color:#e0e0e0;margin-bottom:4px}
+.scene-card .desc{font-size:11px;color:#8b949e;line-height:1.5}
+.footer{text-align:center;padding:30px;color:#8b949e;font-size:12px;border-top:1px solid #30363d;margin-top:40px}
+.footer .trace{color:#d4af37;font-family:monospace}
+</style>
+
+<!-- ============ 政务中台算子库 V3.2.0（17算子）============ -->
+<script src="../gov-ai/js/operators/gov_api_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_user_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_modal_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_loading_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_audit_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_chat_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_policy_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_doc_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_guide_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_verification_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_compliance_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_review_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_policy_lifecycle_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_session_timeout_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_export_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_notification_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_analytics_operator.js"></script>
+<script src="../gov-ai/js/operators/index.js"></script>
+<script src="../gov-ai/js/operator_tracker.js"></script>
+
+    <link rel="canonical" href="https://huodouai.comgov-canvas/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<!-- 统一导航栏 -->
+<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #ffd700;position:sticky;top:0;z-index:9999">
+  <div style="display:flex;align-items:center;gap:12px">
+    <span style="color:#ffd700;font-weight:700;font-size:16px">⚡ 政务中台</span>
+    <span style="color:#888;font-size:12px">v4.0</span>
+  </div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+    <a href="/gov-ai/" style="color:#fff;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:4px;background:rgba(255,215,0,0.1)">群众端</a>
+    <a href="/workbench/" style="color:#fff;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:4px">工作台</a>
+    <a href="/gov-operator-admin/" style="color:#fff;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:4px">算子后台</a>
+    <a href="/gov-dashboard/" style="color:#fff;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:4px">数据看板</a>
+    <a href="/api-docs/" style="color:#fff;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:4px">API文档</a>
+    <a href="/" style="color:#ffd700;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:4px">官网</a>
+  </div>
+</div>
+<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,167,232,.2);padding:8px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:12px">
+  <span style="font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap">火斗云智·政务</span>
+  <a href="/gov-ai/" style="color:#c9a7e8;text-decoration:none;padding:4px 10px;border-radius:6px;background:rgba(201,167,232,.15)">政务服务</a>
+  <a href="/workbench/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">工作台</a>
+  <a href="/gov-admin/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">管理后台</a>
+<a href="/experience/" style="color:#d4af37;text-decoration:none;padding:4px 10px;border-radius:6px;background:rgba(212,175,55,.15)">✨ AI体验版</a>
+  <a href="/gov-operator-admin/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">算子管理</a>
+  <a href="/gov-mobile/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">移动版</a>
+  <a href="/gov-canvas/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">Canvas版</a>
+  <a href="/portal/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px;margin-left:auto">智能中台</a>
+</div>
+<div style="height:40px"></div>
+<div class="nav">
+<a href="/" class="brand">🏠 火斗云智</a>
+<a href="/products/">产品</a>
+<a href="/showcase/">演示</a>
+<a href="/status/">状态</a>
+<a href="/api-platform/">API平台</a>
+<a href="/gov-ai/">政务AI</a>
+<a href="/gov-mobile/">移动端</a>
+<a href="/gov-admin/">管理后台</a>
+</div>
+
+<div class="header">
+<h1>政务AI中台 V3.0 · 实时数据大屏</h1>
+<div class="status">
+<div class="status-item"><div class="status-dot"></div><span>系统运行中</span></div>
+<div class="status-item"><span id="last-update">--:--:--</span></div>
+</div>
+</div>
+
+<div class="container">
+<div class="stats-grid">
+<div class="stat-card"><div class="value" id="stat-policies">--</div><div class="label">政策数据库</div><div class="sub" id="sub-policies">加载中...</div></div>
+<div class="stat-card"><div class="value" id="stat-guides">--</div><div class="label">办事指南</div><div class="sub" id="sub-guides">加载中...</div></div>
+<div class="stat-card"><div class="value" id="stat-calls">--</div><div class="label">API总调用</div><div class="sub" id="sub-calls">累计次数</div></div>
+<div class="stat-card"><div class="value" id="stat-avg">--</div><div class="label">平均响应</div><div class="sub" id="sub-avg">毫秒</div></div>
+<div class="stat-card"><div class="value" id="stat-models">--</div><div class="label">AI模型通道</div><div class="sub" id="sub-models">加载中...</div></div>
+<div class="stat-card"><div class="value" id="stat-apis">--</div><div class="label">API端点</div><div class="sub" id="sub-apis">加载中...</div></div>
+</div>
+
+<div class="two-col">
+<div class="section">
+<h2>AI模型通道状态 <span class="refresh" onclick="loadModels()">🔄 刷新</span></h2>
+<div class="models-grid" id="models-grid">加载中...</div>
+</div>
+<div class="section">
+<h2>API调用分布 <span class="refresh" onclick="loadUsage()">🔄 刷新</span></h2>
+<div class="usage-bars" id="usage-bars">加载中...</div>
+</div>
+</div>
+
+<div class="two-col">
+<div class="section">
+<h2>热门问题 TOP10 <span class="refresh" onclick="loadHot()">🔄 刷新</span></h2>
+<div class="hot-list" id="hot-list">
+<div style="text-align:center;padding:40px;color:#586069">暂无数据，用户提问后自动统计</div>
+</div>
+</div>
+<div class="section">
+<h2>最近调用记录 <span class="refresh" onclick="loadUsage()">🔄 刷新</span></h2>
+<div class="recent-list" id="recent-list">
+<div style="text-align:center;padding:40px;color:#586069">暂无调用记录</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>核心应用场景</h2>
+<div class="scenes-grid">
+<div class="scene-card" onclick="location.href='/gov-ai/'"><div class="icon">🤖</div><div class="title">智能问答助手</div><div class="desc">政策咨询、办事指引、AI智能问答</div></div>
+<div class="scene-card" onclick="location.href='/gov-mobile/'"><div class="icon">📱</div><div class="title">移动端服务</div><div class="desc">群众版移动端，随时随地办事</div></div>
+<div class="scene-card" onclick="location.href='/gov-admin/'"><div class="icon">⚙️</div><div class="title">工作人员后台</div><div class="desc">政策管理、指南维护、操作审计</div></div>
+<div class="scene-card" onclick="location.href='/gov-ai/'"><div class="icon">📄</div><div class="title">公文智能生成</div><div class="desc">通知、报告、请示等公文自动生成</div></div>
+<div class="scene-card" onclick="location.href='/gov-operator-admin/'"><div class="icon">🏛️</div><div class="title">政务数据治理</div><div class="desc">数据清洗、标准化、血缘追踪</div></div>
+<div class="scene-card" onclick="location.href='/workbench/'"><div class="icon">🎯</div><div class="title">智能决策支持</div><div class="desc">多维度数据分析、决策建议生成</div></div>
+</div>
+</div>
+
+<div class="footer">
+<p>政务AI中台 V3.0 · 火斗云智AIOS驱动</p>
+<p class="trace">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZONGYUAN-ROOT</p>
+</div>
+</div>
+
+<script>
+
+
+// ============ 算子库初始化 ============
+let ops = null;
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    ops = GovOperators.init({ apiBase: '/gov-api' });
+    console.log('✅ 政务算子库V3.2.0初始化成功，17个算子就绪');
+    // 启动会话超时检测
+    if (ops.sessionTimeout) {
+      ops.sessionTimeout.createSession({user_id: 'anonymous'});
+      ops.sessionTimeout.startAutoCheck({check_interval_seconds: 60});
+    }
+    // 运营统计
+    if (ops.analytics) {
+      ops.analytics.trackPageView('mobile');
+      ops.analytics.trackSessionStart();
+    }
+  } catch(e) {
+    console.warn('算子库初始化降级:', e);
+  }
+});
+
+const GOV_API = '/gov-api';
+const modelStatus = {
+  'zhipu': {name:'智谱 GLM-4-Flash', status:'active', note:'永久免费·主力'},
+  'siliconflow': {name:'硅基流动 Qwen2.5-7B', status:'active', note:'第二优先级'},
+  'aliyun': {name:'阿里云 qwen-turbo', status:'active', note:'第三优先级'},
+  'kimi': {name:'KIMI kimi-k2.6', status:'active', note:'速率限制RPM:3'},
+  'doubao': {name:'火山方舟 doubao', status:'standby', note:'限额暂停'},
+  'hunyuan': {name:'腾讯混元 hy4', status:'standby', note:'额度用完'},
+  'ollama-local': {name:'本地 Ollama', status:'offline', note:'建议本地部署'},
+};
+
+async function loadStats() {
+  try {
+    const [govRes, usageRes] = await Promise.all([
+      fetch(GOV_API + '/health').then(r=>r.json()).catch(()=>({})),
+      fetch(GOV_API + '/api/usage').then(r=>r.json()).catch(()=>({}))
+    ]);
+    document.getElementById('stat-policies').textContent = govRes.policies || '--';
+    document.getElementById('stat-guides').textContent = govRes.guides || '--';
+    document.getElementById('sub-policies').textContent = govRes.status === 'healthy' ? '数据正常' : '连接中...';
+    document.getElementById('sub-guides').textContent = '10大类全覆盖';
+    document.getElementById('stat-calls').textContent = usageRes.total_calls || 0;
+    document.getElementById('stat-avg').textContent = usageRes.avg_response_time || 0;
+    document.getElementById('sub-avg').textContent = '毫秒/次';
+    document.getElementById('stat-models').textContent = '7';
+    document.getElementById('sub-models').textContent = '4可用+2备用+1兜底';
+    document.getElementById('stat-apis').textContent = '12+';
+    document.getElementById('sub-apis').textContent = '政务+内核+管理';
+    document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+  } catch(e) { console.error('加载统计失败', e); }
+}
+
+function loadModels() {
+  const grid = document.getElementById('models-grid');
+  grid.innerHTML = Object.entries(modelStatus).map(([key, m]) => {
+    const badgeClass = m.status === 'active' ? 'badge-active' : m.status === 'standby' ? 'badge-standby' : 'badge-offline';
+    const badgeText = m.status === 'active' ? '● 可用' : m.status === 'standby' ? '◐ 备用' : '○ 离线';
+    return `<div class="model-card"><div><div class="name">${m.name}</div><div style="font-size:10px;color:#8b949e;margin-top:4px">${m.note}</div></div><span class="badge ${badgeClass}">${badgeText}</span></div>`;
+  }).join('');
+}
+
+async function loadUsage() {
+  try {
+    const usage = await fetch(GOV_API + '/api/usage').then(r=>r.json());
+    // 调用分布
+    const byEndpoint = usage.by_endpoint || {};
+    const maxVal = Math.max(...Object.values(byEndpoint), 1);
+    const bars = document.getElementById('usage-bars');
+    if (Object.keys(byEndpoint).length === 0) {
+      bars.innerHTML = '<div style="text-align:center;padding:40px;color:#586069">暂无调用数据</div>';
+    } else {
+      bars.innerHTML = Object.entries(byEndpoint).sort((a,b)=>b[1]-a[1]).map(([ep, count]) => `
+        <div class="usage-bar">
+          <div class="label"><span>${ep}</span><span>${count}次</span></div>
+          <div class="bar"><div class="fill" style="width:${(count/maxVal*100).toFixed(1)}%"></div></div>
+        </div>
+      `).join('');
+    }
+    // 最近调用
+    const recent = usage.recent_calls || [];
+    const recentList = document.getElementById('recent-list');
+    if (recent.length === 0) {
+      recentList.innerHTML = '<div style="text-align:center;padding:40px;color:#586069">暂无调用记录</div>';
+    } else {
+      recentList.innerHTML = recent.slice().reverse().map(r => `
+        <div class="recent-item">
+          <span class="endpoint">${r.endpoint}</span>
+          <span class="status-${r.status}">${r.status}</span>
+          <span>${r.elapsed_ms}ms</span>
+          <span class="time">${r.timestamp ? r.timestamp.slice(11,19) : ''}</span>
+        </div>
+      `).join('');
+    }
+  } catch(e) { console.error('加载用量失败', e); }
+}
+
+async function loadHot() {
+  try {
+    const data = await fetch(GOV_API + '/api/hot').then(r=>r.json());
+    const hot = data.hot_questions || [];
+    const list = document.getElementById('hot-list');
+    if (hot.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:40px;color:#586069">暂无数据，用户提问后自动统计</div>';
+    } else {
+      list.innerHTML = hot.map((item, i) => `
+        <div class="hot-item">
+          <div class="rank">${i+1}</div>
+          <div class="question">${item.question}</div>
+          <div class="count">${item.count}次</div>
+        </div>
+      `).join('');
+    }
+  } catch(e) { console.error('加载热门问题失败', e); }
+}
+
+loadStats();
+loadModels();
+loadUsage();
+loadHot();
+setInterval(() => { loadStats(); loadUsage(); loadHot(); }, 30000);
+</script>
+</body>
+</html>

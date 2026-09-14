@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI角色一致性生成工具 - 火斗云智AIOS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .hero { padding: 80px 0 60px; text-align: center; }
+        .hero-badge {
+            display: inline-block; padding: 6px 16px;
+            background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px; font-size: 14px; color: #a5b4fc; margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: 48px; font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 20px;
+        }
+        .hero .subtitle { font-size: 20px; color: #94a3b8; max-width: 800px; margin: 0 auto 40px; }
+        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 500;
+            text-decoration: none; transition: all 0.3s; display: inline-block;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.05); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+        .section { padding: 60px 0; }
+        .section-title { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 16px; color: #f1f5f9; }
+        .section-desc { text-align: center; color: #94a3b8; max-width: 700px; margin: 0 auto 48px; font-size: 16px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+        .grid-8 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+        .card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px; padding: 28px; transition: all 0.3s;
+        }
+        .card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-4px); }
+        .card .icon { font-size: 32px; margin-bottom: 16px; }
+        .card h3 { font-size: 18px; margin-bottom: 12px; color: #f1f5f9; }
+        .card p { color: #94a3b8; font-size: 14px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px; padding: 36px 28px; position: relative; transition: all 0.3s;
+        }
+        .pricing-card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-4px); }
+        .pricing-card.popular { border-color: rgba(99, 102, 241, 0.5); background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); }
+        .popular-badge {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
+        }
+        .pricing-name { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #f1f5f9; }
+        .pricing-price { font-size: 36px; font-weight: 700; margin-bottom: 4px; color: #fff; }
+        .pricing-price span { font-size: 14px; font-weight: 400; color: #94a3b8; }
+        .pricing-desc { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+        .pricing-features { list-style: none; margin-bottom: 28px; }
+        .pricing-features li { padding: 8px 0; color: #cbd5e1; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .pricing-features li::before { content: "✓"; color: #10b981; font-weight: bold; }
+        .customers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+        .customer-card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px; padding: 20px; text-align: center;
+        }
+        .customer-card .icon { font-size: 28px; margin-bottom: 8px; }
+        .customer-card .name { font-size: 15px; font-weight: 500; color: #f1f5f9; margin-bottom: 4px; }
+        .customer-card .desc { font-size: 13px; color: #a5b4fc; }
+        .cta-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 20px; padding: 60px 40px; text-align: center; margin: 60px 0;
+        }
+        .cta-section h2 { font-size: 32px; margin-bottom: 16px; color: #f1f5f9; }
+        .cta-section p { color: #94a3b8; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .footer { padding: 40px 0; text-align: center; color: #64748b; font-size: 14px; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 60px; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .hero .subtitle { font-size: 16px; }
+            .section-title { font-size: 24px; }
+        }
+    </style>
+
+<meta name="description" content="AI角色一致性生成工具 - 火斗云智，保证多轮生成中角色形象、性格、风格的一致性，适用于短剧、动画、游戏等内容生产场景。">
+<meta name="keywords" content="AI角色,角色一致性,角色生成,短剧AI,动画AI,火斗云智">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI角色一致性生成工具 - 火斗云智，保证多轮生成中角色形象、性格、风格的一致性，适用于短剧、动画、游戏等内容生产场景。">
+<meta property="og:description" content="AI角色一致性生成工具 - 火斗云智，保证多轮生成中角色形象、性格、风格的一致性，适用于短剧、动画、游戏等内容生产场景。">
+<meta property="og:url" content="https://huodouai.com/character-ai.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI角色一致性生成工具 - 火斗云智，保证多轮生成中角色形象、性格、风格的一致性，适用于短剧、动画、游戏等内容生产场景。">
+<meta name="twitter:description" content="AI角色一致性生成工具 - 火斗云智，保证多轮生成中角色形象、性格、风格的一致性，适用于短剧、动画、游戏等内容生产场景。">
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/products/character-ai.html">
+</head>
+<body><nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products/">产品中心</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">技术架构</a>
+<a href="/whitepapers/aios-v1.html">技术白皮书</a>
+<a href="/blog/">技术博客</a>
+<a href="/docs/">开发者文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">🎨 AI角色生成</div>
+            <h1>AI角色一致性生成工具</h1>
+            <p class="subtitle">同一角色多轮生成形象/色调/风格不漂移，纯东方神女视觉规范</p>
+            <div class="hero-buttons">
+                <a href="/products/agent-studio.html" class="btn btn-gold">在线体验</a>
+                <a href="/about/book-demo.html" class="btn btn-outline">预约演示</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">你是否面临这些痛点？</h2>
+            <p class="section-desc">解决企业在AI应用中的核心难题</p>
+            <div class="grid-4">
+                
+                <div class="card">
+                    <div class="icon">🎭</div>
+                    <h3 style="color: #fca5a5;">角色形象总变样</h3>
+                    <p>AI画的角色每次都不一样，换个姿势就变个人，根本没法用</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🎨</div>
+                    <h3 style="color: #fca5a5;">风格不统一</h3>
+                    <p>同一部作品，不同页面画风不一样，看起来就像拼凑的</p>
+                </div>
+                <div class="card">
+                    <div class="icon">👤</div>
+                    <h3 style="color: #fca5a5;">不符合品牌调性</h3>
+                    <p>生成的人物总是外国人/白发，不符合东方品牌审美</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📐</div>
+                    <h3 style="color: #fca5a5;">角色设定难维护</h3>
+                    <p>每次生成都要写一大堆Prompt描述角色，太麻烦了</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <div class="container">
+            <h2 class="section-title">核心功能</h2>
+            <p class="section-desc">技术驱动的产品设计，解决真实业务问题</p>
+            <div class="grid-8">
+                
+                <div class="card">
+                    <div class="icon">👤</div>
+                    <h3>角色库持久化</h3>
+                    <p>创建一次角色，永久保存，随时调用生成</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🎯</div>
+                    <h3>形象一致性</h3>
+                    <p>同一角色任意角度/姿势/表情生成，五官特征不漂移</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🎨</div>
+                    <h3>风格固化</h3>
+                    <p>整体画风/色调/光影风格锁定，多图保持统一</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🌌</div>
+                    <h3>东方视觉规范</h3>
+                    <p>纯东方神女、黑头发、无白发、无外国人种元素</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📐</div>
+                    <h3>多视角生成</h3>
+                    <p>正面/侧面/背面/全身/半身，任意角度自由生成</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🎭</div>
+                    <h3>表情动作库</h3>
+                    <p>预设多种表情/动作模板，一键套用</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔄</div>
+                    <h3>批量生成</h3>
+                    <p>一次提交批量生成多张，适合漫画/分镜制作</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📦</div>
+                    <h3>角色导出</h3>
+                    <p>导出角色设定包，包含多视角+设定说明</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="pricing">
+        <div class="container">
+            <h2 class="section-title">定价方案</h2>
+            <p class="section-desc">从免费体验到企业级私有化部署，满足不同规模需求</p>
+            <div class="pricing-grid">
+                
+                <div class="pricing-card">
+                    
+                    <div class="pricing-name">Lite版</div>
+                    <div class="pricing-price">¥0 <span>/免费</span></div>
+                    <div class="pricing-desc">个人体验</div>
+                    <ul class="pricing-features">
+                        <li>3个角色</li><li>10张/月 生成</li><li>标准画质</li><li>基础功能</li>
+                    </ul>
+                    <a href="/trial.html" class="btn btn-primary" style="width:100%; text-align:center; display:block;">免费开始</a>
+                </div>
+                <div class="pricing-card popular">
+                    <div class="popular-badge">最受欢迎</div>
+                    <div class="pricing-name">Pro版</div>
+                    <div class="pricing-price">¥99 <span>/月</span></div>
+                    <div class="pricing-desc">创作者日常使用</div>
+                    <ul class="pricing-features">
+                        <li>无限角色</li><li>1000张/月 生成</li><li>高清画质</li><li>批量生成</li><li>角色导出</li>
+                    </ul>
+                    <a href="/trial.html" class="btn btn-primary" style="width:100%; text-align:center; display:block;">立即升级</a>
+                </div>
+                <div class="pricing-card">
+                    
+                    <div class="pricing-name">企业版</div>
+                    <div class="pricing-price">¥999 <span>/月起</span></div>
+                    <div class="pricing-desc">团队/工作室</div>
+                    <ul class="pricing-features">
+                        <li>无限生成</li><li>团队协作</li><li>专属角色风格</li><li>API接入</li><li>商用授权</li>
+                    </ul>
+                    <a href="/trial.html" class="btn btn-primary" style="width:100%; text-align:center; display:block;">联系销售</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">谁在用？</h2>
+            <p class="section-desc">为不同行业的企业提供专业解决方案</p>
+            <div class="customers-grid">
+                
+                <div class="customer-card">
+                    <div class="icon">🎨</div>
+                    <div class="name">AI绘画创作者</div>
+                    <div class="desc">角色设计</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">📖</div>
+                    <div class="name">漫画作者</div>
+                    <div class="desc">漫画分镜制作</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">🎮</div>
+                    <div class="name">游戏美术</div>
+                    <div class="desc">角色原画</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">📱</div>
+                    <div class="name">短视频作者</div>
+                    <div class="desc">数字人形象</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">🎭</div>
+                    <div class="name">剧本杀</div>
+                    <div class="desc">角色立绘</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">🏛️</div>
+                    <div class="name">文化IP</div>
+                    <div class="desc">IP形象开发</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="cta-section">
+                <h2>开始使用AI角色一致性生成工具</h2>
+                <p>5分钟快速接入，立即提升你的业务效率</p>
+                <div class="hero-buttons">
+                    <a href="/trial.html" class="btn btn-primary">免费试用30天</a>
+                    <a href="/internal/demo.html" class="btn btn-secondary">查看Demo</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>火斗云智AIOS · AI角色一致性生成工具 | Ω₀⊂⊙∞⊂Ω</p>
+            <p style="margin-top: 8px; opacity: 0.6;">DID-BR-000002 · ZONGYUAN-ROOT · 企业级AI解决方案</p>
+        </div>
+    </footer>
+</body>
+</html>

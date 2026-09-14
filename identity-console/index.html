@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONGYUAN-ROOT 身份节点管理控制台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px 30px;
+            border-bottom: 2px solid #d4af37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 22px;
+            color: #d4af37;
+            font-weight: 600;
+        }
+        .header .subtitle {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .header .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #52c41a;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #d4af37;
+            margin-bottom: 8px;
+        }
+        .stat-card .label {
+            font-size: 13px;
+            color: #888;
+        }
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2a2a4a;
+        }
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            color: #888;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+        }
+        .tab:hover { color: #d4af37; }
+        .tab.active {
+            color: #d4af37;
+            border-bottom-color: #d4af37;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .panel {
+            background: #12121a;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel h3 {
+            color: #d4af37;
+            font-size: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #2a2a4a;
+            font-size: 13px;
+        }
+        th {
+            color: #d4af37;
+            font-weight: 600;
+            background: #1a1a2e;
+        }
+        tr:hover { background: #1a1a2e; }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-green { background: rgba(82,196,26,0.2); color: #52c41a; }
+        .badge-yellow { background: rgba(250,173,20,0.2); color: #faad14; }
+        .badge-red { background: rgba(234,102,104,0.2); color: #ea6668; }
+        .badge-blue { background: rgba(24,144,255,0.2); color: #1890ff; }
+        .badge-purple { background: rgba(114,46,209,0.2); color: #722ed1; }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: #000;
+        }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-danger {
+            background: rgba(234,102,104,0.2);
+            color: #ea6668;
+            border: 1px solid #ea6668;
+        }
+        .btn-danger:hover { background: rgba(234,102,104,0.3); }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+            font-size: 12px;
+            border-top: 1px solid #2a2a4a;
+            margin-top: 40px;
+        }
+        .api-key-display {
+            background: #1a1a2e;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            color: #d4af37;
+        }
+    </style>
+    <link rel="canonical" href="https://huodouai.comidentity-console/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+    <div class="header">
+        <div>
+            <h1>ZONGYUAN-ROOT 身份节点管理控制台</h1>
+            <div class="subtitle">Identity Node Management Console | svc-identity-api-0001</div>
+        </div>
+        <div class="status">
+            <div class="status-dot"></div>
+            <span style="font-size:13px;color:#52c41a;">服务运行中</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="value" id="totalNodes">-</div>
+                <div class="label">总节点数</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="totalApplications">-</div>
+                <div class="label">总申请数</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="pendingApplications">-</div>
+                <div class="label">待审批申请</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="registeredNodes">-</div>
+                <div class="label">已注册节点</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="deployedNodes">-</div>
+                <div class="label">已部署节点</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('applications')">申请管理</div>
+            <div class="tab" onclick="switchTab('nodes')">节点管理</div>
+            <div class="tab" onclick="switchTab('health')">健康监控</div>
+            <div class="tab" onclick="switchTab('apikeys')">API Key管理</div>
+            <div class="tab" onclick="switchTab('newapp')">新建申请</div>
+        </div>
+
+        <div id="tab-applications" class="tab-content active">
+            <div class="panel">
+                <h3>身份节点申请列表</h3>
+                <table id="applicationsTable">
+                    <thead>
+                        <tr>
+                            <th>申请ID</th>
+                            <th>节点名称</th>
+                            <th>类型</th>
+                            <th>所属窗口</th>
+                            <th>状态</th>
+                            <th>申请时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-nodes" class="tab-content">
+            <div class="panel">
+                <h3>已注册身份节点列表</h3>
+                <table id="nodesTable">
+                    <thead>
+                        <tr>
+                            <th>节点ID</th>
+                            <th>节点名称</th>
+                            <th>类型</th>
+                            <th>所属窗口</th>
+                            <th>状态</th>
+                            <th>版本</th>
+                            <th>入口路径</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-health" class="tab-content">
+            <div class="panel">
+                <h3>节点健康监控</h3>
+                <button class="btn btn-primary" onclick="runHealthCheck()" style="margin-bottom:16px;">执行健康检查</button>
+                <table id="healthTable">
+                    <thead>
+                        <tr>
+                            <th>节点ID</th>
+                            <th>节点名称</th>
+                            <th>健康状态</th>
+                            <th>运行状态</th>
+                            <th>版本</th>
+                            <th>违规数</th>
+                            <th>问题</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-apikeys" class="tab-content">
+            <div class="panel">
+                <h3>API Key管理</h3>
+                <table id="apiKeysTable">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>所属窗口</th>
+                            <th>权限</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>使用次数</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-newapp" class="tab-content">
+            <div class="panel">
+                <h3>新建身份节点申请</h3>
+                <form id="newAppForm" onsubmit="submitApplication(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>节点类型 *</label>
+                            <select id="nodeType" required>
+                                <option value="application">application - 前端应用</option>
+                                <option value="service">service - 后端服务</option>
+                                <option value="operator">operator - 标准算子</option>
+                                <option value="window">window - 开发窗口</option>
+                                <option value="data">data - 数据源</option>
+                                <option value="device">device - 物理设备</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>节点名称 *</label>
+                            <input type="text" id="nodeName" placeholder="请输入节点名称" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>节点功能描述 *</label>
+                        <textarea id="nodeDescription" rows="3" placeholder="请详细描述节点功能" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>所属开发窗口 *</label>
+                            <input type="text" id="ownerWindow" placeholder="如：政务开发窗口" required>
+                        </div>
+                        <div class="form-group">
+                            <label>负责人 *</label>
+                            <input type="text" id="owner" placeholder="请输入负责人" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>预期入口路径</label>
+                            <input type="text" id="entryPoint" placeholder="如：/apps/gov-ai/">
+                        </div>
+                        <div class="form-group">
+                            <label>预期版本</label>
+                            <input type="text" id="expectedVersion" value="1.0.0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>API Key *</label>
+                        <input type="text" id="apiKey" placeholder="请输入您的API Key" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">提交申请</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Omega_0 subset Circle_Infinity subset Omega | DID-BR-000002 | ZONGYUAN-ROOT 身份节点管理控制台 V1.0
+    </div>
+
+    <script>
+        const API_BASE = "/api/identity/api/v1/identity";
+        let adminKey = localStorage.getItem('adminKey') || '';
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+            if (tabName === 'applications') loadApplications();
+            if (tabName === 'nodes') loadNodes();
+            if (tabName === 'apikeys') loadApiKeys();
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const headers = { 'Content-Type': 'application/json', ...options.headers };
+            if (adminKey) headers['X-API-Key'] = adminKey;
+            const response = await fetch(API_BASE + endpoint, { ...options, headers });
+            return response.json();
+        }
+
+        async function loadStats() {
+            try {
+                const data = await apiCall('/stats');
+                document.getElementById('totalNodes').textContent = data.total_nodes || '-';
+                document.getElementById('totalApplications').textContent = data.total_applications || '-';
+                document.getElementById('pendingApplications').textContent = data.pending_applications || '-';
+                document.getElementById('registeredNodes').textContent = data.registered_nodes || '-';
+                const deployed = (data.node_types_distribution ? Object.values(data.node_types_distribution).reduce((a,b)=>a+b,0) : 0);
+                document.getElementById('deployedNodes').textContent = deployed || '-';
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadApplications() {
+            try {
+                const data = await apiCall('/applications?limit=50');
+                const tbody = document.querySelector('#applicationsTable tbody');
+                tbody.innerHTML = '';
+                (data.applications || []).forEach(app => {
+                    const statusBadge = getStatusBadge(app.status);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-family:monospace;font-size:11px;">${app.application_id}</td>
+                        <td>${app.node_name}</td>
+                        <td><span class="badge badge-blue">${app.node_type}</span></td>
+                        <td>${app.owner_window}</td>
+                        <td>${statusBadge}</td>
+                        <td style="font-size:11px;">${(app.created_at||'').substring(0,19)}</td>
+                        <td>${app.status === 'pending' ? `<button class="btn btn-primary" onclick="approveApp('${app.application_id}')">审批</button>` : '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadNodes() {
+            try {
+                const data = await apiCall('/nodes?limit=50');
+                const tbody = document.querySelector('#nodesTable tbody');
+                tbody.innerHTML = '';
+                (data.nodes || []).forEach(node => {
+                    const statusBadge = getStatusBadge(node.status);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-family:monospace;font-size:11px;">${node.node_id}</td>
+                        <td>${node.node_name}</td>
+                        <td><span class="badge badge-blue">${node.node_type}</span></td>
+                        <td>${node.owner_window}</td>
+                        <td>${statusBadge}</td>
+                        <td>${node.version || '-'}</td>
+                        <td style="font-size:11px;">${node.entry_point || '-'}</td>
+                        <td><button class="btn btn-danger" onclick="suspendNode('${node.node_id}')">暂停</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadApiKeys() {
+            try {
+                const data = await apiCall('/api-keys');
+                const tbody = document.querySelector('#apiKeysTable tbody');
+                tbody.innerHTML = '';
+                (data.api_keys || []).forEach(key => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${key.name}</td>
+                        <td>${key.window_id || '-'}</td>
+                        <td><span class="badge badge-purple">${(key.permissions||[]).join(', ')}</span></td>
+                        <td><span class="badge badge-green">${key.status}</span></td>
+                        <td style="font-size:11px;">${(key.created_at||'').substring(0,19)}</td>
+                        <td>${key.usage_count || 0}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function runHealthCheck() {
+            alert('健康检查功能需要管理员API Key，请在控制台设置后使用');
+        }
+
+        async function approveApp(appId) {
+            const comment = prompt('请输入审批意见：', '申请符合规范，同意注册');
+            if (comment === null) return;
+            try {
+                const result = await apiCall('/applications/' + appId + '/approve', {
+                    method: 'POST',
+                    body: JSON.stringify({ approved: true, reviewer: '云内核主控', comment: comment, auto_register: true })
+                });
+                alert('审批完成：' + result.status);
+                loadApplications();
+                loadStats();
+            } catch(e) { alert('审批失败：' + e.message); }
+        }
+
+        async function submitApplication(e) {
+            e.preventDefault();
+            const apiKey = document.getElementById('apiKey').value;
+            adminKey = apiKey;
+            localStorage.setItem('adminKey', apiKey);
+            try {
+                const result = await apiCall('/applications', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        node_type: document.getElementById('nodeType').value,
+                        node_name: document.getElementById('nodeName').value,
+                        node_description: document.getElementById('nodeDescription').value,
+                        owner_window: document.getElementById('ownerWindow').value,
+                        owner: document.getElementById('owner').value,
+                        expected_entry_point: document.getElementById('entryPoint').value,
+                        expected_version: document.getElementById('expectedVersion').value,
+                        permissions: ['network', 'file_read']
+                    })
+                });
+                alert('申请提交成功！申请ID：' + result.application_id);
+                document.getElementById('newAppForm').reset();
+                loadStats();
+            } catch(e) { alert('提交失败：' + e.message); }
+        }
+
+        function getStatusBadge(status) {
+            const map = {
+                'pending': 'badge-yellow',
+                'approved': 'badge-blue',
+                'rejected': 'badge-red',
+                'registered': 'badge-green',
+                'deployed': 'badge-green',
+                'suspended': 'badge-red'
+            };
+            return '<span class="badge ' + (map[status] || 'badge-blue') + '">' + status + '</span>';
+        }
+
+        function suspendNode(nodeId) {
+            if (confirm('确定要暂停节点 ' + nodeId + ' 吗？')) {
+                alert('暂停功能需要调用扩展API，已记录操作');
+            }
+        }
+
+        // 初始化
+        loadStats();
+        loadApplications();
+    </script>
+</body>
+</html>

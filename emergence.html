@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>前沿思想研究 · 涌现层级理论</title>
+<meta name="description" content="火斗云智涌现层级理论 - 从简单规则到复杂智能的涌现机制">
+<style>
+  :root{--bg:#0b0e14;--panel:#121722;--line:#232c3d;--gold:#c9a227;--gold-soft:#e6c86a;--gold-dim:#8a7326;
+    --ink:#e6edf3;--muted:#8b949e;--blue:#58a6ff;--purple:#a371f7;--red:#f85149;--green:#7ee787;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;line-height:1.6;}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;opacity:.05;
+    background:repeating-linear-gradient(45deg,#c9a227 0,#c9a227 1px,transparent 1px,transparent 22px);}
+  .wrap{max-width:880px;margin:0 auto;padding:28px 20px 50px;}
+  .head{text-align:center;border-bottom:1px solid var(--line);padding-bottom:20px;}
+  .badge{display:inline-block;border:1px solid var(--gold-dim);color:var(--gold-soft);font-size:12px;letter-spacing:3px;padding:4px 14px;border-radius:3px;margin-bottom:10px;}
+  h1{font-size:clamp(20px,3.5vw,26px);font-weight:800;color:#fff;letter-spacing:1px;margin:6px 0 6px;}
+  h1 span{color:var(--gold);}
+  .sub{font-size:13px;color:var(--muted);margin:0;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-top:16px;}
+  .card h2{font-size:13px;color:var(--gold);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .card h2::before{content:"";width:3px;height:14px;background:var(--gold);border-radius:1px;}
+  /* 层级塔 */
+  .lvl{display:flex;align-items:center;gap:12px;border-radius:6px;padding:9px 12px;margin-top:6px;}
+  .lvl .k{min-width:64px;font-size:13px;font-weight:800;}
+  .lvl .v{font-size:12px;color:#c0c8d0;}
+  .lvl.purple{background:rgba(163,113,247,.08);border:1px solid var(--purple);}
+  .lvl.purple .k{color:var(--purple);}
+  .lvl.gold{background:rgba(201,162,39,.12);border:1px solid var(--gold);}
+  .lvl.gold .k{color:var(--gold-soft);}
+  .lvl.blue{background:rgba(88,166,255,.07);border:1px solid var(--blue);}
+  .lvl.blue .k{color:var(--blue);}
+  .lvl b{color:var(--gold-soft);}
+  .lvl.purple b{color:var(--purple);}
+  .lvl.blue b{color:#a5d1ff;}
+  .tower-note{font-size:11px;color:var(--muted);margin-top:10px;text-align:center;}
+  /* 双卡 */
+  .two{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .half{flex:1;min-width:200px;border-radius:8px;padding:12px;}
+  .half .t{font-size:12px;font-weight:700;margin-bottom:4px;}
+  .half .d{font-size:12px;color:#c0c8d0;}
+  .half.blue{background:rgba(88,166,255,.06);border:1px solid var(--blue);}.half.blue .t{color:var(--blue);}
+  .half.gold{background:rgba(201,162,39,.1);border:1px solid var(--gold);}.half.gold .t{color:var(--gold-soft);}
+  .half.red{background:rgba(247,81,73,.05);border:1px solid var(--red);}.half.red .t{color:var(--red);}
+  .half.green{background:rgba(126,231,135,.05);border:1px solid var(--green);}.half.green .t{color:var(--green);}
+  .half.gray{background:rgba(139,148,158,.05);border:1px solid var(--muted);}.half.gray .t{color:var(--muted);}
+  .divider{border-top:1px dashed var(--line);margin-top:12px;padding-top:10px;font-size:12px;color:var(--muted);}
+  .gate{background:linear-gradient(135deg,rgba(201,162,39,.08),rgba(163,113,247,.06));border:1px solid var(--gold);border-radius:10px;padding:18px;margin-top:16px;}
+  .gate h2{font-size:13px;color:var(--gold-soft);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .gate h2::before{content:"";width:3px;height:14px;background:var(--gold);border-radius:1px;}
+  .gate p{font-size:12.5px;color:#c0c8d0;}
+  .gate b{color:var(--gold-soft);}
+  .gate .note{color:var(--muted);font-size:12px;}
+  .footer{text-align:center;color:var(--gold-dim);font-size:11px;letter-spacing:1px;margin-top:20px;padding-top:14px;border-top:1px solid var(--line);}
+  .footer .trace{color:var(--gold-dim);font-size:11px;margin-top:6px;}
+</style>
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div class="wrap">
+  <div class="head">
+    <div class="badge">前沿思想研究 · 涌现层级理论</div>
+    <h1>涌现的层级 <span>与确权</span></h1>
+    <p class="sub">低层经验自动浮现 · 高层法则人工升格 · 编排代理是涌现的固化节点</p>
+  </div>
+
+  <!-- ① 层级塔 -->
+  <div class="card">
+    <h2>① 涌现的上攀路径（从操作到宪法）</h2>
+    <div class="lvl purple"><div class="k">宪法层</div><div class="v">体系第一性 · 不可动摇 · <b>必须人工确权</b></div></div>
+    <div class="lvl purple"><div class="k">公理层</div><div class="v">不可动摇的根基 · <b>人工确认后升格</b></div></div>
+    <div class="lvl gold"><div class="k">法则层</div><div class="v"><b>当前已到 · 体系秩序</b> · 自动沉淀 · 可迭代</div></div>
+    <div class="lvl gold"><div class="k">规则层</div><div class="v"><b>当前已到 · 该遵守什么</b> · 如稳态进化预算 / 对外保密机制</div></div>
+    <div class="lvl blue"><div class="k">逻辑层</div><div class="v">为什么这么做 · 自动涌现</div></div>
+    <div class="lvl blue"><div class="k">操作层</div><div class="v">怎么做事 · 海量执行积累</div></div>
+    <div class="tower-note">↑ 越往上，越接近「无人提前设计、却必然浮现」的规律</div>
+  </div>
+
+  <!-- ② 编排代理 -->
+  <div class="card">
+    <h2>② 编排代理：涌现产物的「确定性固化」</h2>
+    <div class="two">
+      <div class="half blue"><div class="t">涌现发生在前</div><div class="d">「复杂任务该分层统筹」这条规律自己冒出来，一开始是模糊的</div></div>
+      <div class="half gold"><div class="t">固化发生在后</div><div class="d">被识别、被设计成「编排代理」确定结构 → 拆阶段/控预算/跑子任务</div></div>
+    </div>
+    <div class="divider">结论：编排代理「既是涌现的成果，又不是涌现本身」——确定性结构承载已浮现的经验。</div>
+  </div>
+
+  <!-- ③ 有条件的必然 -->
+  <div class="card">
+    <h2>③ 涌现 = 有条件的必然（非自动）</h2>
+    <div class="two">
+      <div class="half red"><div class="t">必要条件一 · 阈值</div><div class="d">跑够足够多的轮次，经验才能累积到浮现点</div></div>
+      <div class="half green"><div class="t">必要条件二 · 正确循环</div><div class="d">执行→试错→复盘→固化→推广，缺一不可</div></div>
+    </div>
+    <div class="two" style="margin-top:10px;">
+      <div class="half gray"><div class="t">有循环 + 阈值</div><div class="d">= 涌现 · 每轮都向更高层收敛</div></div>
+      <div class="half gray"><div class="t">缺循环或阈值</div><div class="d">= 堆积 · 重复同样的事，不产生新规律</div></div>
+    </div>
+  </div>
+
+  <!-- ④ 确权闸门 -->
+  <div class="gate">
+    <h2>④ 确权闸门：低层自动 · 高层人工</h2>
+    <p>低层涌现（规则 / 法则）可<b>自动沉淀</b>、随时迭代；<br>
+    高层确权（公理 / 宪法）代价高、不可逆，<b>必须由确权者人工裁决</b>后升格。<br>
+    <span class="note">这不是约束涌现，恰恰是让涌现可持续的保险——你既是推动者，也是确权者。</span></p>
+  </div>
+
+  <div class="footer">火斗云智 AIOS · 前沿思想研究 · 涌现层级理论 V1.0
+    <div class="trace">Ω₀⊂⊙∞⊂Ω</div>
+  </div>
+</div>
+</body>
+</html>

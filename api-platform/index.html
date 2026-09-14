@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API开放平台 - 火斗云智</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;background:#f8f9fa;color:#333}
+.nav{background:#fff;border-bottom:1px solid #e5e7eb;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.nav .brand{font-size:18px;font-weight:700;color:#1a56db}
+.nav .links{display:flex;gap:20px}
+.nav .links a{color:#6b7280;text-decoration:none;font-size:14px}
+.nav .links a:hover{color:#1a56db}
+.hero{background:linear-gradient(135deg,#1a56db,#1e40af);color:#fff;padding:60px 24px;text-align:center}
+.hero h1{font-size:36px;margin-bottom:16px}
+.hero p{font-size:16px;opacity:.9;max-width:600px;margin:0 auto}
+.hero .stats{display:flex;justify-content:center;gap:40px;margin-top:32px}
+.hero .stat .num{font-size:28px;font-weight:700}
+.hero .stat .label{font-size:13px;opacity:.8}
+.container{max-width:1200px;margin:0 auto;padding:40px 24px}
+.section{margin-bottom:48px}
+.section h2{font-size:24px;margin-bottom:24px;color:#111}
+.api-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px}
+.api-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;transition:all .2s}
+.api-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);transform:translateY(-2px)}
+.api-card .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.api-card .name{font-size:16px;font-weight:600}
+.api-card .method{background:#1a56db;color:#fff;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:700}
+.api-card .path{font-family:monospace;font-size:13px;color:#6b7280;background:#f3f4f6;padding:6px 10px;border-radius:4px;margin-bottom:12px}
+.api-card .desc{font-size:13px;color:#6b7280;line-height:1.6}
+.api-card .tags{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
+.api-card .tag{background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-size:11px}
+.code-block{background:#1e1e1e;color:#d4d4d4;border-radius:8px;padding:16px;font-family:monospace;font-size:13px;overflow-x:auto;margin-top:16px}
+.code-block .keyword{color:#569cd6}
+.code-block .string{color:#ce9178}
+.code-block .comment{color:#6a9955}
+.tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid #e5e7eb}
+.tab{padding:10px 20px;cursor:pointer;font-size:14px;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab.active{color:#1a56db;border-bottom-color:#1a56db;font-weight:600}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.pricing-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;text-align:center}
+.pricing-card.featured{border-color:#1a56db;box-shadow:0 4px 12px rgba(26,86,219,.15)}
+.pricing-card .name{font-size:18px;font-weight:600;margin-bottom:8px}
+.pricing-card .price{font-size:32px;font-weight:700;color:#1a56db;margin-bottom:4px}
+.pricing-card .price .unit{font-size:14px;color:#6b7280;font-weight:400}
+.pricing-card .features{list-style:none;margin:20px 0;text-align:left}
+.pricing-card .features li{padding:8px 0;font-size:13px;color:#6b7280;border-bottom:1px solid #f3f4f6}
+.pricing-card .features li:before{content:'✓ ';color:#10b981;font-weight:700}
+.pricing-card .btn{display:block;width:100%;padding:10px;background:#1a56db;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;margin-top:16px}
+.pricing-card .btn:hover{background:#1e40af}
+.footer{background:#111;color:#9ca3af;padding:40px 24px;text-align:center;font-size:13px}
+.footer .trace{color:#d4af37;font-family:monospace;margin-top:8px}
+</style>
+    <link rel="canonical" href="https://huodouai.comapi-platform/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="nav">
+<div class="brand">🔥 火斗云智 API开放平台</div>
+<div class="links">
+<a href="#apis">API列表</a>
+<a href="#docs">文档</a>
+<a href="#pricing">定价</a>
+<a href="/gov-admin/">管理后台</a>
+<a href="/">返回首页</a>
+</div>
+</div>
+
+<div class="hero">
+<h1>政务AI中台 API开放平台</h1>
+<p>一站式政务AI能力开放，智能问答、公文生成、政策检索、办事指南，助力政务数字化转型</p>
+<div class="stats">
+<div class="stat"><div class="num">15+</div><div class="label">API端点</div></div>
+<div class="stat"><div class="num">190+</div><div class="label">政策数据</div></div>
+<div class="stat"><div class="num">100+</div><div class="label">办事指南</div></div>
+<div class="stat"><div class="num">7</div><div class="label">AI模型通道</div></div>
+</div>
+</div>
+
+<div class="container">
+<div class="section" id="apis">
+<h2>API接口列表</h2>
+<div class="api-grid">
+<div class="api-card">
+<div class="header"><span class="name">政务AI问答</span><span class="method">POST</span></div>
+<div class="path">/gov-api/api/gov/chat</div>
+<div class="desc">智能政务问答，自动识别问题类型，关联政策和办事指南，返回结构化回答</div>
+<div class="tags"><span class="tag">AI问答</span><span class="tag">政策关联</span><span class="tag">高可用</span></div>
+</div>
+<div class="api-card">
+<div class="header"><span class="name">公文智能生成</span><span class="method">POST</span></div>
+<div class="path">/gov-api/api/gov/doc/generate</div>
+<div class="desc">支持通知、报告、请示、批复等多种公文类型自动生成，符合政务公文规范</div>
+<div class="tags"><span class="tag">公文生成</span><span class="tag">模板化</span></div>
+</div>
+<div class="api-card">
+<div class="header"><span class="name">公文润色</span><span class="method">POST</span></div>
+<div class="path">/gov-api/api/gov/doc/polish</div>
+<div class="desc">对已有公文进行智能润色，优化表达，提升公文质量</div>
+<div class="tags"><span class="tag">公文润色</span><span class="tag">AI优化</span></div>
+</div>
+<div class="api-card">
+<div class="header"><span class="name">政策搜索</span><span class="method">GET</span></div>
+<div class="path">/gov-api/api/gov/policy/search</div>
+<div class="desc">全文检索政策数据库，支持关键词、分类筛选，返回相关政策列表</div>
+<div class="tags"><span class="tag">政策检索</span><span class="tag">全文搜索</span></div>
+</div>
+<div class="api-card">
+<div class="header"><span class="name">政策分类</span><span class="method">GET</span></div>
+<div class="path">/gov-api/api/gov/policy/categories</div>
+<div class="desc">获取所有政策分类及数量统计，支持10大类政务领域</div>
+<div class="tags"><span class="tag">分类统计</span></div>
+</div>
+<div class="api-card">
+<div class="header"><span class="name">办事指南列表</span><span class="method">GET</span></div>
+<div class="path">/gov-api/api/gov/guide/list</div>
+<div class="desc">获取办事指南列表，支持分类筛选，包含办理条件、材料、流程、地点、电话</div>
+<div class="tags"><span class="tag">办事指南</span><span class="tag">便民服务</span></div>
+</div>
+<div class="api-card">
+<div class="header"><span class="name">办事指南详情</span><span class="method">GET</span></div>
+<div class="path">/gov-api/api/gov/guide/detail</div>
+<div class="desc">根据ID获取办事指南详细信息，含完整办理流程和所需材料</div>
+<div class="tags"><span class="tag">详情查询</span></div>
+</div>
+<div class="api-card">
+<div class="header"><span class="name">数据统计</span><span class="method">GET</span></div>
+<div class="path">/gov-api/api/admin/stats</div>
+<div class="desc">获取政务中台数据统计，政策数、指南数、分类分布、操作日志数</div>
+<div class="tags"><span class="tag">数据统计</span><span class="tag">管理API</span></div>
+</div>
+<div class="api-card">
+<div class="header"><span class="name">内核状态</span><span class="method">GET</span></div>
+<div class="path">/api/v1/status</div>
+<div class="desc">ZONGYUAN-ROOT内核状态，LOIP基线、漂移检测、哈希链完整性</div>
+<div class="tags"><span class="tag">内核状态</span><span class="tag">可观测</span></div>
+</div>
+</div>
+</div>
+
+<div class="section" id="docs">
+<h2>快速开始</h2>
+<div class="tabs">
+<div class="tab active" onclick="switchTab('curl')">cURL</div>
+<div class="tab" onclick="switchTab('python')">Python</div>
+<div class="tab" onclick="switchTab('js')">JavaScript</div>
+</div>
+<div class="tab-content active" id="tab-curl">
+<div class="code-block">
+<span class="comment"># 政务AI问答示例</span>
+curl -X POST https://huodouai.com/gov-api/api/gov/chat \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{
+    "message": "养老保险怎么交？",
+    "history": []
+  }'</span>
+</div>
+</div>
+<div class="tab-content" id="tab-python">
+<div class="code-block">
+<span class="keyword">import</span> requests
+
+<span class="keyword">def</span> <span class="function">gov_chat</span>(message):
+    resp = requests.post(
+        <span class="string">"https://huodouai.com/gov-api/api/gov/chat"</span>,
+        json={<span class="string">"message"</span>: message, <span class="string">"history"</span>: []}
+    )
+    <span class="keyword">return</span> resp.json()
+
+result = gov_chat(<span class="string">"养老保险怎么交？"</span>)
+<span class="keyword">print</span>(result[<span class="string">"reply"</span>])
+</div>
+</div>
+<div class="tab-content" id="tab-js">
+<div class="code-block">
+<span class="keyword">async function</span> <span class="function">govChat</span>(message) {
+  <span class="keyword">const</span> resp = <span class="keyword">await</span> fetch(
+    <span class="string">"https://huodouai.com/gov-api/api/gov/chat"</span>, {
+      method: <span class="string">"POST"</span>,
+      headers: {<span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>},
+      body: JSON.stringify({message, history: []})
+    }
+  );
+  <span class="keyword">return</span> resp.json();
+}
+
+govChat(<span class="string">"养老保险怎么交？"</span>).then(console.log);
+</div>
+</div>
+</div>
+
+<div class="section" id="pricing">
+<h2>定价方案</h2>
+<div class="pricing-grid">
+<div class="pricing-card">
+<div class="name">免费版</div>
+<div class="price">¥0<span class="unit">/月</span></div>
+<ul class="features">
+<li>每日100次API调用</li>
+<li>政务AI问答</li>
+<li>政策搜索</li>
+<li>办事指南查询</li>
+<li>社区支持</li>
+</ul>
+<button class="btn">立即开始</button>
+</div>
+<div class="pricing-card featured">
+<div class="name">专业版</div>
+<div class="price">¥299<span class="unit">/月</span></div>
+<ul class="features">
+<li>每日10000次API调用</li>
+<li>全部API端点</li>
+<li>公文生成+润色</li>
+<li>7个AI模型通道</li>
+<li>优先技术支持</li>
+<li>数据统计仪表盘</li>
+</ul>
+<button class="btn">立即购买</button>
+</div>
+<div class="pricing-card">
+<div class="name">企业版</div>
+<div class="price">¥1999<span class="unit">/月</span></div>
+<ul class="features">
+<li>无限API调用</li>
+<li>私有化部署</li>
+<li>定制化开发</li>
+<li>专属API Key</li>
+<li>7×24小时支持</li>
+<li>SLA服务保障</li>
+<li>多租户管理</li>
+</ul>
+<button class="btn">联系销售</button>
+</div>
+</div>
+</div>
+</div>
+
+<div class="footer">
+<p>火斗云智 AIOS · 政务AI中台 API开放平台</p>
+<p class="trace">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZONGYUAN-ROOT</p>
+</div>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['curl','python','js'][i]===tab));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+</script>
+</body>
+</html>

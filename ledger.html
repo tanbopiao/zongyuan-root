@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域资产台账 · 火斗云智AIOS</title>
+<meta name="description" content="火斗云智全域资产台账 - Merkle-DAG账本、资产锁档、哈希确权">
+<style>
+  :root{
+    --bg:#0a0a0f; --panel:#12121a; --panel2:#181824;
+    --gold:#c9a45c; --gold2:#e6c37e; --line:#2a2a38;
+    --txt:#e8e6df; --sub:#9a97a8; --dim:#6b6878;
+    --ok:#7fd6a3; --warn:#d6b25f; --in:#6f9fe0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--txt);font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;line-height:1.6}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+  header{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:24px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:42px;height:42px;border:1px solid var(--gold);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:20px;background:radial-gradient(circle at 30% 30%,#1c1c28,#0d0d15)}
+  h1{font-size:26px;letter-spacing:1px}
+  .sub{color:var(--sub);font-size:13px;margin-top:4px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .chip{border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-size:12px;color:var(--sub);background:var(--panel)}
+  .chip b{color:var(--gold2);font-weight:600}
+  .sec{margin-top:26px}
+  .sec h2{font-size:17px;color:var(--gold2);border-left:3px solid var(--gold);padding-left:10px;margin-bottom:12px;letter-spacing:.5px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .mini{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 14px}
+  .mini h4{font-size:13px;color:var(--gold2);margin-bottom:6px}
+  .mini p{font-size:12px;color:var(--sub)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--gold2);font-weight:600;background:var(--panel2)}
+  td:first-child{color:var(--txt);font-weight:500}
+  .tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:11px;margin-left:6px;vertical-align:middle}
+  .ok{background:rgba(127,214,163,.14);color:var(--ok);border:1px solid rgba(127,214,163,.3)}
+  .in{background:rgba(111,159,224,.14);color:var(--in);border:1px solid rgba(111,159,224,.3)}
+  .warn{background:rgba(214,178,95,.14);color:var(--warn);border:1px solid rgba(214,178,95,.3)}
+  .muted{color:var(--dim)}
+  .foot{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);color:var(--dim);font-size:12px;text-align:center}
+  code{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:12px;color:var(--gold2)}
+</style>
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">Ω</div>
+      <div>
+        <h1>全域资产台账</h1>
+        <div class="sub">火斗云智AIOS · GLOBAL-LEDGER-001 · 同源节点统一索引 · 避免重复探索</div>
+      </div>
+    </div>
+    <div class="meta">
+      <span class="chip">DID <b>BR-000002</b></span>
+      <span class="chip">溯源 <b>Ω₀⊂⊙∞⊂Ω</b></span>
+      <span class="chip">协议 <b>ZONGYUAN-ROOT</b></span>
+      <span class="chip">真值 <b>539</b> 条</span>
+      <span class="chip">版本 <b>V1.0</b></span>
+    </div>
+  </header>
+
+  <!-- 一、核心基础设施 -->
+  <div class="sec"><h2>一 · 核心基础设施</h2>
+    <div class="grid">
+      <div class="mini"><h4>云服务器</h4><p>123.207.202.158 · 腾讯云 2核2G 40GB · ACTIVE</p></div>
+      <div class="mini"><h4>nginx</h4><p>/www/server/nginx · <b>systemd自管</b><span class="tag ok">自管化</span></p></div>
+      <div class="mini"><h4>nginx配置</h4><p>/www/server/nginx/conf/sites/ · 12站点 · 已脱离宝塔</p></div>
+      <div class="mini"><h4>SSL</h4><p>/root/.acme.sh · acme.sh 独立管理</p></div>
+      <div class="mini"><h4>宝塔面板</h4><p>/www/server/panel · 面板UI弃用<span class="tag warn">待停</span></p></div>
+      <div class="mini"><h4>本地云电脑</h4><p>/home/user/.super_doubao/super-doubao-runtime/workspace</p></div>
+    </div>
+  </div>
+
+  <!-- 二、云端服务矩阵 -->
+  <div class="sec"><h2>二 · 云端服务矩阵（核心端口）</h2>
+    <div class="card">
+    <table>
+      <tr><th>端口</th><th>服务</th><th>归属</th></tr>
+      <tr><td>9120</td><td>记忆网关 UnifiedGateway（truth 538 · node 4）</td><td>中枢</td></tr>
+      <tr><td>9200</td><td>vector_server（真值向量化）</td><td>中枢</td></tr>
+      <tr><td>8001/8010</td><td>kg-api（知识图谱）</td><td>中枢</td></tr>
+      <tr><td>8077</td><td>记忆网关内网 HMAC</td><td>网关</td></tr>
+      <tr><td>8080</td><td>业务网关（对外 JWT）</td><td>网关</td></tr>
+      <tr><td>8021/8023/8029</td><td>智能体 hub / 网关</td><td>业务</td></tr>
+      <tr><td>8040/8046</td><td>HRM 系统 / 体验中心</td><td>业务</td></tr>
+      <tr><td>8626</td><td>KD-PIPELINE 短剧产线</td><td>短剧</td></tr>
+      <tr><td>9090/9093</td><td>Prometheus / Alertmanager</td><td>监控</td></tr>
+      <tr><td>3000/9121-9123</td><td>Grafana / 网关附加</td><td>监控</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <!-- 三、对外站点 -->
+  <div class="sec"><h2>三 · 对外站点（子域）</h2>
+    <div class="card">
+    <table>
+      <tr><th>子域</th><th>用途</th><th>公网</th></tr>
+      <tr><td>www.huodouai.com</td><td>官网新版多页（30页）</td><td><span class="tag ok">200</span></td></tr>
+      <tr><td>huodouai.com</td><td>根域（301→www）</td><td><span class="tag ok">200</span></td></tr>
+      <tr><td>api.huodouai.com</td><td>API 网关（真值同步等）</td><td><span class="tag ok">200</span></td></tr>
+      <tr><td>console.huodouai.com</td><td>控制台</td><td><span class="tag ok">200</span></td></tr>
+      <tr><td>gov/docs/drama/status</td><td>政务/文档/短剧/状态</td><td><span class="tag ok">200</span></td></tr>
+      <tr><td>kunlun/ops/grafana</td><td>昆仑洞天/运维/监控</td><td><span class="tag in">内部·方案A</span></td></tr>
+    </table>
+    </div>
+  </div>
+
+  <!-- 四、本地基座 -->
+  <div class="sec"><h2>四 · 本地云电脑基座（关键目录）</h2>
+    <div class="grid">
+      <div class="mini"><h4>自治内核</h4><p>autonomy/ · kernel/ · kernel_snaps/</p></div>
+      <div class="mini"><h4>哈希链/归档</h4><p>chains/ · cold_archive/</p></div>
+      <div class="mini"><h4>商业化</h4><p>commercial/ · commercial_launch/</p></div>
+      <div class="mini"><h4>短剧产线</h4><p>drama_pipeline/</p></div>
+      <div class="mini"><h4>进化任务</h4><p>evolution/ · evolution_reports/</p></div>
+      <div class="mini"><h4>算子/锁档</h4><p>operators/ · scripts/ · locks/(12)</p></div>
+      <div class="mini"><h4>意图/经验</h4><p>intent_library/ · experience/ · hardening_records/</p></div>
+      <div class="mini"><h4>政务优化</h4><p>gov_*（优化/版本管理）</p></div>
+    </div>
+  </div>
+
+  <!-- 五、体系技能库 -->
+  <div class="sec"><h2>五 · 体系技能库（25 算子 · 统一入口 zongyuan-hub）</h2>
+    <div class="card">
+    <table>
+      <tr><th>层</th><th>算子</th></tr>
+      <tr><td>中枢</td><td>zongyuan-hub · unified-orchestrator · meta-order-scheduler</td></tr>
+      <tr><td>双内核</td><td>truth-value-engine · causal-singularity-core · fused-kernel · meta-learning-evolution</td></tr>
+      <tr><td>四大产线</td><td>decision-pipeline · research-pipeline · drama-pipeline · shield-pipeline</td></tr>
+      <tr><td>基建</td><td>meta-order-archive · meta-lock-sop · data-forge · doc-forge · compute-scheduler</td></tr>
+      <tr><td>展示/关联</td><td>collection-card-generator · knowledge-association-engine · knowledge-retriever · cte-agent/fusion/link · self-organizing-arch</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <!-- 六、产线能力速查 -->
+  <div class="sec"><h2>六 · 产线能力速查</h2>
+    <div class="card">
+    <table>
+      <tr><th>需求</th><th>入口</th><th>已有资产</th></tr>
+      <tr><td>短剧/昆仑洞天</td><td>drama_pipeline + 子域drama</td><td>九天玄女基准/母版</td></tr>
+      <tr><td>决策评估</td><td>decision-pipeline</td><td>三维稳态公式</td></tr>
+      <tr><td>研究/白皮书</td><td>research-pipeline</td><td>转义SOP/白皮书</td></tr>
+      <tr><td>法务/合规</td><td>shield-pipeline</td><td>法律意见书</td></tr>
+      <tr><td>锁档确权</td><td>meta-order-archive</td><td>哈希链/eFuse</td></tr>
+      <tr><td>官网/商业化</td><td>www站点 + commercial/</td><td>产品矩阵/定价</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <!-- 七、真值资产 -->
+  <div class="sec"><h2>七 · 真值资产</h2>
+    <div class="grid">
+      <div class="mini"><h4>云端记忆网关</h4><p>539 条真值 · 127.0.0.1:9120</p></div>
+      <div class="mini"><h4>统一锁档清单</h4><p>12075 资产 · UNIFIED_GLOBAL_LOCK_MANIFEST.json</p></div>
+      <div class="mini"><h4>本地锁档凭证</h4><p>12 份 · locks/</p></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    维护：新增功能/服务/目录时同步追加台账并推送记忆网关 · 版本递增 GLOBAL-LEDGER-002<br>
+    火斗云智AIOS · 全域资产台账 · Ω₀⊂⊙∞⊂Ω · DID-BR-000002
+  </div>
+</div>
+</body>
+</html>

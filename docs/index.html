@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文档中心 | 火斗云智AIOS</title>
+<style>
+:root{--bg:#0a0e17;--bg2:#111827;--gold:#D4AF37;--text:#e5e7eb;--text2:#9ca3af;--text3:#6b7280;--border:rgba(212,175,55,0.15)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.hero{text-align:center;padding:40px 20px 30px;margin-bottom:30px}
+.hero h1{font-size:28px;font-weight:800;margin-bottom:10px;background:linear-gradient(90deg,var(--gold),#F4E4BC,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:14px;color:var(--text2);max-width:600px;margin:0 auto}
+.section{margin-bottom:30px}
+.section-title{font-size:16px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:var(--gold)}
+.section-title::before{content:"";width:3px;height:18px;background:linear-gradient(180deg,var(--gold),#8B6914);border-radius:2px}
+.docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.doc-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;transition:all .3s;cursor:pointer;text-decoration:none;display:block}
+.doc-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.1)}
+.doc-icon{font-size:28px;margin-bottom:10px}
+.doc-title{font-size:14px;font-weight:600;color:var(--gold);margin-bottom:6px}
+.doc-desc{font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:10px}
+.doc-meta{display:flex;gap:10px;font-size:10px;color:var(--text3)}
+.doc-tag{padding:2px 8px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);border-radius:10px;color:var(--gold)}
+.footer{text-align:center;padding:30px 20px;border-top:1px solid var(--border);margin-top:40px}
+.footer-text{font-size:11px;color:var(--text3)}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="四大类12个文档入口：技术白皮书、API开发文档、产品使用指南、运维与监控。">
+<meta name="keywords" content="文档中心,技术白皮书,API文档,使用指南,运维监控">
+<meta property="og:title" content="文档中心 | 火斗云智AIOS">
+<meta property="og:description" content="四大类12个文档入口：技术白皮书、API开发文档、产品使用指南、运维与监控。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/docs.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="文档中心 | 火斗云智AIOS">
+<meta name="twitter:description" content="四大类12个文档入口：技术白皮书、API开发文档、产品使用指南、运维与监控。">
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/docs/">
+</head>
+<body><nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products/">产品中心</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">技术架构</a>
+<a href="/whitepapers/aios-v1.html">技术白皮书</a>
+<a href="/blog/">技术博客</a>
+<a href="/docs/">开发者文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<!-- ZONGYUAN-ROOT Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">ZONGYUAN-ROOT · DID-BR-000002</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/about/philosophy.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">思想</a>
+      <a href="/about/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/about/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/about/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/products/engines.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">引擎</a>
+      <a href="/architecture/governance.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">治理</a>
+      <a href="/internal/monitor.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">监控</a>
+      <a href="/products/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/gov/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">政务AI</a>
+      <a href="/drama/demo.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">短剧</a>
+      <a href="/sovereignty/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">主权根</a>
+      <a href="/products/vector-kb.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">向量库</a>
+      <a href="/docs/developers.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">开发者</a>
+      <a href="/docs/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /ZONGYUAN-ROOT Unified Navigation -->
+<div class="container">
+  <div class="hero">
+    <h1>📚 文档中心</h1>
+    <p>火斗云智AIOS · ZONGYUAN-ROOT 全域技术文档与使用指南</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📖 技术白皮书</div>
+    <div class="docs-grid">
+      <a class="doc-card" href="/whitepapers/">
+        <div class="doc-icon">📄</div>
+        <div class="doc-title">技术白皮书库</div>
+        <div class="doc-desc">20+篇技术白皮书，涵盖架构设计、核心引擎、治理体系等</div>
+        <div class="doc-meta"><span class="doc-tag">20+篇</span><span>技术文档</span></div>
+      </a>
+      <a class="doc-card" href="/architecture/">
+        <div class="doc-icon">🏗️</div>
+        <div class="doc-title">架构总览</div>
+        <div class="doc-desc">七层纵向架构、四大横向治理、双业务核心闭环完整解析</div>
+        <div class="doc-meta"><span class="doc-tag">架构</span><span>可视化</span></div>
+      </a>
+      <a class="doc-card" href="/products/engines.html">
+        <div class="doc-icon">⚙️</div>
+        <div class="doc-title">核心引擎</div>
+        <div class="doc-desc">自进化引擎、自愈引擎、知识图谱、配置中心、算子库详解</div>
+        <div class="doc-meta"><span class="doc-tag">引擎</span><span>6大核心</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔧 API 开发文档</div>
+    <div class="docs-grid">
+      <a class="doc-card" href="/docs/developers.html">
+        <div class="doc-icon">👨‍💻</div>
+        <div class="doc-title">开发者中心</div>
+        <div class="doc-desc">33+API端点完整列表、5步快速接入、四级权限体系、SDK下载</div>
+        <div class="doc-meta"><span class="doc-tag">33+端点</span><span>API</span></div>
+      </a>
+      <a class="doc-card" href="/architecture/governance.html">
+        <div class="doc-icon">🛡️</div>
+        <div class="doc-title">治理与安全</div>
+        <div class="doc-desc">元法则体系、Merkle-DAG锁档、双向互控权限矩阵、国家主权根</div>
+        <div class="doc-meta"><span class="doc-tag">治理</span><span>安全</span></div>
+      </a>
+      <a class="doc-card" href="/products/vector-kb.html">
+        <div class="doc-icon">🧠</div>
+        <div class="doc-title">向量知识库</div>
+        <div class="doc-desc">四大向量集合、2560维高维真值召回、语义检索技术架构</div>
+        <div class="doc-meta"><span class="doc-tag">向量库</span><span>4集合</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎯 产品使用指南</div>
+    <div class="docs-grid">
+      <a class="doc-card" href="/gov/">
+        <div class="doc-icon">🏛️</div>
+        <div class="doc-title">政务AI中台</div>
+        <div class="doc-desc">v3.0可视化编排工作台，拖拽组件→连线→配置→运行监控</div>
+        <div class="doc-meta"><span class="doc-tag">政务AI</span><span>v3.0</span></div>
+      </a>
+      <a class="doc-card" href="/drama/demo.html">
+        <div class="doc-icon">🎬</div>
+        <div class="doc-title">短剧流水线</div>
+        <div class="doc-desc">昆仑洞天短剧全自动生产，剧本→分镜→关键帧→视频全流程</div>
+        <div class="doc-meta"><span class="doc-tag">短剧</span><span>全自动</span></div>
+      </a>
+      <a class="doc-card" href="/products/workbench.html">
+        <div class="doc-icon">🖥️</div>
+        <div class="doc-title">AI智能体工作台</div>
+        <div class="doc-desc">多智能体协同工作台，78+智能体统一管理与调度</div>
+        <div class="doc-meta"><span class="doc-tag">工作台</span><span>78+智能体</span></div>
+      </a>
+      <a class="doc-card" href="/sovereignty/">
+        <div class="doc-icon">👑</div>
+        <div class="doc-title">国家主权根</div>
+        <div class="doc-desc">主权根治理架构，四层规则体系，三大引擎，权力制衡机制</div>
+        <div class="doc-meta"><span class="doc-tag">主权根</span><span>97.25分</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📊 运维与监控</div>
+    <div class="docs-grid">
+      <a class="doc-card" href="/internal/monitor.html">
+        <div class="doc-icon">📈</div>
+        <div class="doc-title">实时监控大屏</div>
+        <div class="doc-desc">30+服务状态、20+端口监听、CPU/内存/磁盘实时监控、5秒刷新</div>
+        <div class="doc-meta"><span class="doc-tag">监控</span><span>实时</span></div>
+      </a>
+      <a class="doc-card" href="/internal/status.html">
+        <div class="doc-icon">✅</div>
+        <div class="doc-title">系统状态</div>
+        <div class="doc-desc">内核状态、服务健康度、锁档记录、真值资产统计</div>
+        <div class="doc-meta"><span class="doc-tag">状态</span><span>总览</span></div>
+      </a>
+      <a class="doc-card" href="/products/">
+        <div class="doc-icon">📦</div>
+        <div class="doc-title">产品矩阵</div>
+        <div class="doc-desc">六大核心产品详细介绍、能力对比、路线图规划</div>
+        <div class="doc-meta"><span class="doc-tag">产品</span><span>6大产品</span></div>
+      </a>
+    </div>
+  </div>
+
+</div>
+<div class="footer">
+  <div class="footer-text">火斗云智AIOS · 文档中心 · ZONGYUAN-ROOT V1.7 · Ω₀⊂⊙∞⊂Ω · DID-BR-000002</div>
+</div>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/docs/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/internal/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/internal/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products/">产品</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">架构</a>
+<a href="/whitepapers/aios-v1.html">白皮书</a>
+<a href="/docs/">文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天·短剧生产线</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a14;color:#fff;overflow:hidden;height:100vh}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,20,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.logo{font-size:16px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#F4B393);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo .ver{font-size:10px;color:#666;-webkit-text-fill-color:#666;margin-left:6px}
+.topbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.view-tabs{display:flex;gap:4px;background:rgba(255,255,255,0.05);border-radius:8px;padding:3px}
+.view-tab{padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;color:#888;transition:all .2s}
+.view-tab.active{background:rgba(201,167,232,0.2);color:#c9a7e8}
+.btn{padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600}
+.btn-primary{background:linear-gradient(135deg,#c9a7e8,#9EACEA);color:#1a1a2e}
+.btn-gold{background:linear-gradient(135deg,#b8860b,#F4B393);color:#1a1a2e}
+.btn-ghost{background:rgba(255,255,255,0.08);color:#ccc;border:1px solid rgba(255,255,255,0.1)}
+.btn-sm{padding:4px 8px;font-size:11px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.layout{display:flex;height:100vh;padding-top:45px}
+.sidebar{width:200px;min-width:200px;background:rgba(255,255,255,0.02);border-right:1px solid rgba(255,255,255,0.06);overflow-y:auto;padding:12px}
+.sidebar h3{font-size:11px;color:#666;text-transform:uppercase;margin-bottom:8px;letter-spacing:1px}
+.cluster-group{margin-bottom:14px}
+.cluster-title{font-size:12px;font-weight:600;color:#c9a7e8;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between}
+.cluster-title .count{color:#666;font-weight:400}
+.agent-item{font-size:11px;color:#aaa;padding:4px 8px;border-radius:6px;cursor:pointer;margin-bottom:2px;transition:all 0.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent-item:hover{background:rgba(201,167,232,0.1);color:#fff}
+.agent-item.on-canvas{background:rgba(82,196,26,0.1);color:#52C41A}
+.canvas-area{flex:1;position:relative;overflow:hidden;cursor:grab}
+.canvas-area:active{cursor:grabbing}
+#canvas{width:100%;height:100%}
+.detail-panel{width:260px;min-width:260px;background:rgba(255,255,255,0.02);border-left:1px solid rgba(255,255,255,0.06);padding:16px;overflow-y:auto}
+.detail-panel h3{font-size:14px;font-weight:700;margin-bottom:8px;color:#c9a7e8}
+.detail-panel .field{font-size:11px;color:#888;margin-bottom:6px;line-height:1.5}
+.detail-panel .field span{color:#ccc}
+.detail-panel .tools{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.detail-panel .tool-tag{font-size:10px;background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;color:#9EACEA}
+.workflow-bar{position:fixed;bottom:0;left:200px;right:260px;background:rgba(10,10,20,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.08);padding:10px 16px;display:flex;align-items:center;gap:12px;z-index:50;flex-wrap:wrap}
+.wf-info{font-size:12px;color:#888;flex:1;min-width:200px}
+.wf-info b{color:#F4B393}
+.wf-status{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600}
+.wf-status.idle{background:#2a2a3a;color:#888}
+.wf-status.running{background:#3d2d5c;color:#c9a7e8;animation:pulse 1.5s infinite}
+.wf-status.ready{background:#1a3d2d;color:#52c41a}
+.wf-status.done{background:#1a3d2d;color:#52c41a}
+.wf-status.error{background:#3d1a1a;color:#ea6668}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.node-group{cursor:pointer}
+.node-rect{rx:12;stroke-width:2;transition:all 0.3s}
+.node-text{font-size:12px;fill:#fff;text-anchor:middle;pointer-events:none;font-weight:600}
+.node-sub{font-size:9px;fill:#888;text-anchor:middle;pointer-events:none}
+.node-status{font-size:10px;text-anchor:middle;pointer-events:none}
+.edge{stroke:rgba(201,167,232,0.3);stroke-width:2;fill:none;marker-end:url(#arrow)}
+.edge-active{stroke:#F4B393;stroke-width:3;stroke-dasharray:6,4;animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-20}}
+.zoom-controls{position:absolute;bottom:60px;right:16px;display:flex;flex-direction:column;gap:4px;z-index:40}
+.zoom-btn{width:32px;height:32px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#ccc;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.zoom-btn:hover{background:rgba(255,255,255,0.12)}
+.log-panel{position:absolute;top:12px;left:12px;right:12px;max-height:120px;overflow-y:auto;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-size:10px;font-family:monospace;color:#6b8b6b;z-index:30;display:none}
+.log-panel.show{display:block}
+.ep-select{background:#0d0d1a;border:1px solid #2a2040;color:#e0dce8;font-size:12px;padding:4px 8px;border-radius:6px;outline:none}
+@media(max-width:768px){
+  .sidebar{width:140px;min-width:140px}
+  .detail-panel{width:180px;min-width:180px}
+  .workflow-bar{left:140px;right:180px}
+}
+</style>
+    <link rel="canonical" href="https://huodouai.comdrama/kunlun/canvas/">
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:99998;background:rgba(10,10,15,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06);padding:6px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:'PingFang SC',sans-serif">
+<a href="/" style="font-size:13px;font-weight:700;color:#c9a7e8;text-decoration:none">🏠 火斗云智</a>
+<a href="/products/" style="color:#9ca3af;text-decoration:none;font-size:11px">产品</a>
+<a href="/showcase/" style="color:#9ca3af;text-decoration:none;font-size:11px">演示</a>
+<a href="/status/" style="color:#9ca3af;text-decoration:none;font-size:11px">状态</a>
+<a href="/docs/" style="color:#9ca3af;text-decoration:none;font-size:11px">文档</a>
+<a href="/pricing/" style="color:#9ca3af;text-decoration:none;font-size:11px">定价</a>
+<a href="/contact/" style="color:#94D8C3;text-decoration:none;font-size:11px">联系</a>
+</div><div style="height:36px"></div>
+<div class="topbar">
+  <div class="logo">昆仑洞天·短剧生产线 <span class="ver">无限画布编排</span></div>
+  <div class="topbar-actions">
+    <div class="view-tabs">
+      <div class="view-tab active" onclick="switchView('pipeline')">🎬 生产线</div>
+      <div class="view-tab" onclick="switchView('topology')">🔗 AIOS拓扑</div>
+    </div>
+    <select class="ep-select" id="epSelect" onchange="changeEp()">
+      <option value="EP01">EP01</option>
+      <option value="EP02">EP02</option>
+      <option value="EP03">EP03</option>
+    </select>
+    <span id="agent-count" style="font-size:11px;color:#666"></span>
+    <button class="btn btn-ghost btn-sm" onclick="resetView()">重置视图</button>
+    <button class="btn btn-gold" id="btnRun" onclick="runFull()">🚀 全流程</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar">
+    <h3 id="sidebarTitle">生产阶段</h3>
+    <div id="stage-list"></div>
+    <div id="cluster-list" style="display:none"></div>
+  </div>
+
+  <div class="canvas-area" id="canvasArea">
+    <svg id="canvas">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="rgba(201,167,232,0.3)"/>
+        </marker>
+        <marker id="arrow-active" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="#F4B393"/>
+        </marker>
+      </defs>
+      <g id="viewport"></g>
+    </svg>
+    <div class="log-panel" id="logPanel"></div>
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoom(1.2)">+</button>
+      <button class="zoom-btn" onclick="zoom(0.8)">−</button>
+      <button class="zoom-btn" onclick="resetView()">⌂</button>
+    </div>
+  </div>
+
+  <div class="detail-panel" id="detail">
+    <h3>点击阶段节点</h3>
+    <div class="field">查看详情并触发对应生产阶段</div>
+    <div class="field">绿色=已完成 | 紫色=进行中 | 灰色=待执行 | 红色=失败</div>
+    <div class="field" style="margin-top:12px">
+      <b style="color:#F4B393">七阶段生产线</b><br>
+      ① 项目初始化<br>
+      ② 分镜推演<br>
+      ③ 关键帧生成<br>
+      ④ 视频生成<br>
+      ⑤ 字幕构建<br>
+      ⑥ FFmpeg合成<br>
+      ⑦ 四真值校验+锁档
+    </div>
+  </div>
+</div>
+
+<div class="workflow-bar">
+  <div class="wf-info">当前：<b id="currentEp">EP01</b> ｜ 状态：<span class="wf-status idle" id="wfStatus">idle</span> ｜ <span id="wfNote">等待启动</span></div>
+  <button class="btn btn-ghost btn-sm" onclick="toggleLog()">📜 日志</button>
+  <button class="btn btn-ghost btn-sm" onclick="location.href='/drama/kunlun/'">← 管理面板</button>
+</div>
+
+<script>
+const _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  if (typeof opts.headers === "object" && !opts.headers.append) {
+    opts.headers["Authorization"] = "Basic " + btoa("zongyuan:8v4iGrYBK2Fz9UC");
+  }
+  return _origFetch.call(this, url, opts);
+};
+</script>
+<script>
+const API="/api/drama/api";
+let currentEp="EP01";
+let currentView="pipeline";
+let svg=document.getElementById('canvas'),viewport=document.getElementById('viewport');
+let scale=1,tx=0,ty=0,dragging=false,dragNode=null,lastX=0,lastY=0;
+let nodes=[],edges=[],nodeMap={},selected=null;
+let allAgents=[];
+
+const STAGES=[
+  {id:"init",name:"项目初始化",icon:"📁",desc:"加载设计真值，创建项目目录",api:null,color:"#9EACEA"},
+  {id:"storyboard",name:"分镜推演",icon:"📝",desc:"AIOS生成5镜分镜脚本",api:"storyboard",color:"#c9a7e8"},
+  {id:"keyframes",name:"关键帧生成",icon:"🖼️",desc:"用户API批量生成图片",api:"keyframes",color:"#F4B393"},
+  {id:"videos",name:"视频生成",icon:"🎥",desc:"图生视频批量生产",api:"videos",color:"#8BC8EA"},
+  {id:"subtitle",name:"字幕构建",icon:"💬",desc:"生成SRT字幕时间轴",api:null,color:"#94D8C3"},
+  {id:"compose",name:"FFmpeg合成",icon:"🎞️",desc:"拼接片段+烧录字幕",api:"compose",color:"#A2DDAA"},
+  {id:"lock",name:"锁档归档",icon:"🔒",desc:"四真值校验+Merkle快照",api:null,color:"#EA6668"}
+];
+
+const STATUS_MAP={
+  idle:"待开始",generating_storyboard:"分镜生成中",storyboard_ready:"分镜就绪",
+  generating_keyframes:"关键帧生成中",keyframes_ready:"关键帧就绪",keyframes_pending:"待配置图片API",
+  generating_videos:"视频生成中",videos_ready:"视频就绪",videos_pending:"待配置视频API",
+  composing:"合成中",completed:"已完成",failed:"失败",drift_abort:"漂移熔断",error_abort:"错误终止"
+};
+
+function transform(){viewport.setAttribute('transform','translate('+tx+','+ty+') scale('+scale+')')}
+function zoom(f){scale*=f;transform()}
+function resetView(){scale=1;tx=80;ty=100;transform()}
+
+document.getElementById('canvasArea').addEventListener('wheel',function(e){e.preventDefault();zoom(e.deltaY<0?1.1:0.9)},{passive:false});
+document.getElementById('canvasArea').addEventListener('mousedown',function(e){
+  if(e.target.closest('.node-group')){dragNode=e.target.closest('.node-group');lastX=e.clientX;lastY=e.clientY}
+  else{dragging=true;lastX=e.clientX;lastY=e.clientY}
+});
+window.addEventListener('mousemove',function(e){
+  if(dragging){tx+=e.clientX-lastX;ty+=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;transform()}
+  if(dragNode){var dx=(e.clientX-lastX)/scale,dy=(e.clientY-lastY)/scale;var n=nodeMap[dragNode.dataset.id];n.x+=dx;n.y+=dy;dragNode.setAttribute('transform','translate('+n.x+','+n.y+')');lastX=e.clientX;lastY=e.clientY;renderEdges()}
+});
+window.addEventListener('mouseup',function(){dragging=false;dragNode=null});
+
+function stageStatus(stageId,epStatus){
+  const order=["init","storyboard","keyframes","videos","subtitle","compose","lock"];
+  const idx=order.indexOf(stageId);
+  if(epStatus==="completed")return "done";
+  if(epStatus==="failed"||epStatus==="drift_abort"||epStatus==="error_abort")return "error";
+  if(epStatus==="idle")return idx===0?"ready":"idle";
+  if(epStatus==="generating_storyboard")return stageId==="storyboard"?"running":idx<1?"done":"idle";
+  if(epStatus==="storyboard_ready")return idx<=1?"done":idx===2?"ready":"idle";
+  if(epStatus==="generating_keyframes")return stageId==="keyframes"?"running":idx<2?"done":"idle";
+  if(epStatus==="keyframes_ready"||epStatus==="keyframes_pending")return idx<=2?"done":idx===3?"ready":"idle";
+  if(epStatus==="generating_videos")return stageId==="videos"?"running":idx<3?"done":"idle";
+  if(epStatus==="videos_ready"||epStatus==="videos_pending")return idx<=3?"done":idx<=5?"ready":"idle";
+  if(epStatus==="composing")return stageId==="compose"?"running":idx<5?"done":"idle";
+  return "idle";
+}
+
+function statusColor(s){
+  return {done:"#52C41A",running:"#c9a7e8",ready:"#F4B393",idle:"#444",error:"#EA6668"}[s]||"#444";
+}
+
+function renderPipeline(epStatus){
+  viewport.innerHTML="";nodes=[];edges=[];nodeMap={};
+  const startX=120,startY=200,spacing=180;
+  STAGES.forEach(function(stage,i){
+    const x=startX+i*spacing,y=startY+(i%2===0?0:60);
+    const st=stageStatus(stage.id,epStatus);
+    const color=statusColor(st);
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','node-group');g.setAttribute('data-id',stage.id);
+    g.setAttribute('transform','translate('+x+','+y+')');
+    const w=130;
+    g.innerHTML='<rect class="node-rect" x="'+(-w/2)+'" y="-28" width="'+w+'" height="56" fill="rgba(10,10,20,0.9)" stroke="'+color+'" '+(st==="running"?'style="filter:drop-shadow(0 0 8px '+color+')"':'')+'/>'
+      +'<text class="node-text" y="-8">'+stage.icon+' '+stage.name+'</text>'
+      +'<text class="node-sub" y="8">'+(st==="done"?"✓ 已完成":st==="running"?"⟳ 进行中":st==="ready"?"▶ 可执行":st==="error"?"✗ 失败":"○ 待执行")+'</text>'
+      +'<text class="node-status" y="22" fill="'+color+'">'+stage.id.toUpperCase()+'</text>';
+    g.addEventListener('click',function(e){e.stopPropagation();selectStage(stage)});
+    viewport.appendChild(g);
+    nodes.push({id:stage.id,x:x,y:y,w:w,stage:stage,el:g});
+    nodeMap[stage.id]=nodes[nodes.length-1];
+    if(i>0)edges.push({from:STAGES[i-1].id,to:stage.id,active:st==="running"||st==="done"});
+  });
+  renderEdges();
+  resetView();
+}
+
+function renderEdges(){
+  viewport.querySelectorAll('.edge,.edge-active').forEach(function(e){e.remove()});
+  edges.forEach(function(e){
+    var f=nodeMap[e.from],t=nodeMap[e.to];if(!f||!t)return;
+    var line=document.createElementNS('http://www.w3.org/2000/svg','path');
+    var mx=(f.x+t.x)/2,my=(f.y+t.y)/2-20;
+    line.setAttribute('d','M'+f.x+','+f.y+' Q'+mx+','+my+' '+t.x+','+t.y);
+    line.setAttribute('class',e.active?'edge-active':'edge');
+    line.setAttribute('marker-end',e.active?'url(#arrow-active)':'url(#arrow)');
+    viewport.insertBefore(line,viewport.firstChild);
+  });
+}
+
+function selectStage(stage){
+  selected=stage.id;
+  const st=stageStatus(stage.id,currentStatus);
+  document.getElementById('detail').innerHTML='<h3>'+stage.icon+' '+stage.name+'</h3>'
+    +'<div class="field">阶段ID: <span>'+stage.id.toUpperCase()+'</span></div>'
+    +'<div class="field">描述: <span>'+stage.desc+'</span></div>'
+    +'<div class="field">状态: <span style="color:'+statusColor(st)+'">'+(st==="done"?"已完成":st==="running"?"进行中":st==="ready"?"可执行":st==="error"?"失败":"待执行")+'</span></div>'
+    +(stage.api?'<div style="margin-top:12px"><button class="btn btn-primary btn-sm" onclick="runStage(\''+stage.api+'\')" '+(st==="running"?"disabled":"")+'>▶ 执行此阶段</button></div>':'<div class="field" style="margin-top:8px;color:#666">此阶段自动执行，无需手动触发</div>')
+    +'<div class="field" style="margin-top:12px;color:#666;font-size:10px">点击画布空白处取消选中</div>';
+}
+
+function renderStageSidebar(epStatus){
+  const list=document.getElementById('stage-list');
+  list.innerHTML="";
+  STAGES.forEach(function(stage){
+    const st=stageStatus(stage.id,epStatus);
+    const item=document.createElement('div');
+    item.className='agent-item';
+    item.style.borderLeft='3px solid '+statusColor(st);
+    item.textContent=stage.icon+' '+stage.name;
+    item.onclick=function(){selectStage(stage)};
+    list.appendChild(item);
+  });
+}
+
+function switchView(view){
+  currentView=view;
+  document.querySelectorAll('.view-tab').forEach(function(t,i){t.classList.toggle('active',(i===0&&view==='pipeline')||(i===1&&view==='topology'))});
+  if(view==='pipeline'){
+    document.getElementById('sidebarTitle').textContent='生产阶段';
+    document.getElementById('stage-list').style.display='block';
+    document.getElementById('cluster-list').style.display='none';
+    renderPipeline(currentStatus);
+    renderStageSidebar(currentStatus);
+  }else{
+    document.getElementById('sidebarTitle').textContent='智能体集群';
+    document.getElementById('stage-list').style.display='none';
+    document.getElementById('cluster-list').style.display='block';
+    renderTopology();
+  }
+}
+
+function renderTopology(){
+  viewport.innerHTML="";nodes=[];edges=[];nodeMap={};
+  var CLUSTER_COLORS={"短剧集群":"#F4B393","HC-AGI集群":"#c9a7e8","内核级母版":"#EA6668","昆仑洞天":"#94D8C3","L1主控":"#9EACEA","L2高阶协同":"#8BC8EA","L3专业执行":"#A2DDAA","基础智能体":"#666","体验版业务":"#E4D48F","施工管理":"#DEBEF8"};
+  fetch('/drama/kunlun/canvas/aios_topology.json').then(function(r){return r.json()}).then(function(data){
+    document.getElementById('agent-count').textContent=data.total_agents+'智能体';
+    var sidebar=document.getElementById('cluster-list');sidebar.innerHTML="";
+    allAgents=[];
+    Object.keys(data.clusters).forEach(function(cname){
+      var agents=data.clusters[cname];agents.forEach(function(a){a.cluster=cname;allAgents.push(a)});
+      var group=document.createElement('div');group.className='cluster-group';
+      group.innerHTML='<div class="cluster-title">'+cname+'<span class="count">'+agents.length+'</span></div>';
+      var list=document.createElement('div');
+      agents.forEach(function(a){
+        var item=document.createElement('div');item.className='agent-item';item.textContent=a.name;item.dataset.id=a.id;
+        item.addEventListener('click',function(){
+          var n=nodeMap[a.id];if(n){selectAgent(a.id);return}
+          var cx=200+Math.random()*400,cy=100+Math.random()*300;
+          addAgentNode(a,cx,cy,CLUSTER_COLORS);renderEdges();selectAgent(a.id);
+        });
+        list.appendChild(item);
+      });
+      group.appendChild(list);sidebar.appendChild(group);
+    });
+    var wf=data.workflows.find(function(w){return w.name.indexOf('短剧')>=0});
+    if(wf){
+      var stepAgents=wf.steps.map(function(s){return allAgents.find(function(a){return a.id===s.agent_id})}).filter(Boolean);
+      var startX=150,startY=200,spacing=220;
+      stepAgents.forEach(function(a,i){addAgentNode(a,startX+i*spacing,startY+(i%2)*80,CLUSTER_COLORS)});
+      for(var i=0;i<stepAgents.length-1;i++){edges.push({from:stepAgents[i].id,to:stepAgents[i+1].id,active:true})}
+      renderEdges();
+      if(stepAgents[0])selectAgent(stepAgents[0].id);
+    }
+    resetView();
+  });
+}
+
+function addAgentNode(agent,x,y,colors){
+  if(nodeMap[agent.id])return;
+  var color=colors[agent.cluster]||"#666";
+  var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('class','node-group');g.setAttribute('data-id',agent.id);
+  g.setAttribute('transform','translate('+x+','+y+')');
+  var w=Math.max(100,agent.name.length*11+20);
+  g.innerHTML='<rect class="node-rect" x="'+(-w/2)+'" y="-18" width="'+w+'" height="36" fill="rgba(10,10,20,0.9)" stroke="'+color+'"/>'
+    +'<text class="node-text" y="2">'+agent.name+'</text><text class="node-sub" y="14">'+agent.role+'</text>';
+  g.addEventListener('click',function(e){e.stopPropagation();selectAgent(agent.id)});
+  viewport.appendChild(g);
+  nodes.push({id:agent.id,x:x,y:y,w:w,agent:agent,el:g});
+  nodeMap[agent.id]=nodes[nodes.length-1];
+  var item=document.querySelector('.agent-item[data-id="'+agent.id+'"]');
+  if(item)item.classList.add('on-canvas');
+}
+
+function selectAgent(id){
+  var n=nodeMap[id];if(!n)return;selected=id;var a=n.agent;
+  document.getElementById('detail').innerHTML='<h3>'+a.name+'</h3>'
+    +'<div class="field">ID: <span>'+a.id+'</span></div>'
+    +'<div class="field">角色: <span>'+a.role+'</span></div>'
+    +'<div class="field">集群: <span>'+a.cluster+'</span></div>'
+    +'<div class="field">模型: <span>'+a.model+'</span></div>'
+    +'<div class="field">工具:</div><div class="tools">'+a.tools.map(function(t){return '<span class="tool-tag">'+t+'</span>'}).join('')+'</div>';
+}
+
+let currentStatus="idle";
+async function refreshStatus(){
+  try{
+    var r=await fetch("/ai-proxy/drama/oneclick/status");var d=await r.json();
+    var ep=d.episodes[currentEp]||{status:"idle"};
+    currentStatus=ep.status||"idle";
+    var stClass=currentStatus.includes("ready")||currentStatus==="completed"?"done":currentStatus.includes("generating")||currentStatus==="composing"?"running":currentStatus.includes("fail")||currentStatus.includes("abort")?"error":"idle";
+    document.getElementById('wfStatus').className='wf-status '+stClass;
+    document.getElementById('wfStatus').textContent=STATUS_MAP[currentStatus]||currentStatus;
+    document.getElementById('wfNote').textContent=ep.topic?ep.topic+" · "+(ep.note||""):"等待启动";
+    document.getElementById('btnRun').disabled=stClass==="running";
+    if(currentView==='pipeline'){renderPipeline(currentStatus);renderStageSidebar(currentStatus)}
+    if(ep.logs&&ep.logs.length){
+      var lp=document.getElementById('logPanel');
+      lp.textContent=ep.logs.slice(-8).join('\n');
+    }
+  }catch(e){}
+}
+
+function changeEp(){
+  currentEp=document.getElementById('epSelect').value;
+  document.getElementById('currentEp').textContent=currentEp;
+  refreshStatus();
+}
+
+function getApiConfig(){
+  try{
+    var img=JSON.parse(localStorage.getItem("zr_img_api")||"{}");
+    var vid=JSON.parse(localStorage.getItem("zr_vid_api")||"{}");
+    return {image_api:img.api_key?img:null,video_api:vid.api_key?vid:null};
+  }catch(e){return {image_api:null,video_api:null}}
+}
+
+async function runFull(){
+  var cfg=getApiConfig();
+  if(!cfg.image_api&&!cfg.video_api){
+    if(!confirm("未配置媒体生成API，将只生成分镜。继续？"))return;
+  }
+  document.getElementById('btnRun').disabled=true;
+  try{
+    var r=await fetch("/ai-proxy/drama/oneclick",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({episode:currentEp,stage:"full",topic:"昆仑洞天·太阴月神觉醒",image_api:cfg.image_api,video_api:cfg.video_api})});
+    var d=await r.json();
+    document.getElementById('logPanel').classList.add('show');
+    document.getElementById('logPanel').textContent="已启动全流程: "+JSON.stringify(d);
+  }catch(e){alert("启动失败: "+e)}
+  setTimeout(function(){document.getElementById('btnRun').disabled=false},3000);
+}
+
+async function runStage(stage){
+  var cfg=getApiConfig();
+  try{
+    var r=await fetch("/ai-proxy/drama/oneclick",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({episode:currentEp,stage:stage,image_api:cfg.image_api,video_api:cfg.video_api})});
+    var d=await r.json();
+    alert("已启动: "+d.status);
+    refreshStatus();
+  }catch(e){alert("失败: "+e)}
+}
+
+function toggleLog(){
+  document.getElementById('logPanel').classList.toggle('show');
+}
+
+window.resetView=resetView;window.zoom=zoom;window.switchView=switchView;
+window.changeEp=changeEp;window.runFull=runFull;window.runStage=runStage;window.toggleLog=toggleLog;
+window.selectStage=selectStage;
+
+renderPipeline("idle");
+renderStageSidebar("idle");
+refreshStatus();
+setInterval(refreshStatus,4000);
+</script>
+
+<!-- ZONGYUAN-ROOT 短剧版本统一导航 -->
+<style>
+#drama-version-bar{position:fixed;bottom:0;left:0;right:0;z-index:99999;background:rgba(10,10,18,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,215,0,.25);padding:8px 10px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;align-items:center}
+.drama-ver-btn{display:flex;flex-direction:column;align-items:center;padding:5px 8px;border-radius:10px;text-decoration:none;color:#777;font-size:10px;transition:all .2s;min-width:52px;border:1px solid transparent;line-height:1.2}
+.drama-ver-btn .dvi{font-size:18px;margin-bottom:2px}
+.drama-ver-btn.active{color:#ffd700;border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.1);font-weight:600}
+.drama-ver-btn:hover{color:#ffd700;background:rgba(255,215,0,.06)}
+.drama-ver-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(255,215,0,.5);white-space:nowrap;letter-spacing:1px}
+body{padding-bottom:72px !important}
+</style>
+<div id="drama-version-bar"><span class="drama-ver-label">版本切换</span></div>
+<script>
+(function(){
+  var V=[
+    {id:"full",n:"全功能",i:"🎬",u:"/drama/kunlun/"},
+    {id:"desktop",n:"专业版",i:"💻",u:"/drama/kunlun/desktop.html"},
+    {id:"mobile",n:"移动版",i:"📱",u:"/drama/kunlun/m/"},
+    {id:"canvas",n:"画布版",i:"🎨",u:"/drama/kunlun/canvas/"},
+    {id:"senior",n:"长辈版",i:"👴",u:"/drama/kunlun/senior/"}
+  ];
+  var CUR="canvas";
+  var bar=document.getElementById("drama-version-bar");
+  V.forEach(function(v){
+    var a=document.createElement("a");
+    a.href=v.u;a.className="drama-ver-btn"+(v.id===CUR?" active":"");
+    a.innerHTML='<span class="dvi">'+v.i+"</span><span>"+v.n+"</span>";
+    bar.appendChild(a);
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务大数据看板 | 火斗云智</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1e293b,#0f172a);padding:20px 30px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:22px;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .sub{font-size:12px;color:#64748b;margin-top:4px}
+.header .actions{display:flex;gap:10px}
+.btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white}
+.btn-primary:hover{opacity:.9}
+.btn-outline{background:transparent;border:1px solid #475569;color:#94a3b8}
+.btn-outline:hover{border-color:#60a5fa;color:#60a5fa}
+.container{padding:24px 30px;max-width:1400px;margin:0 auto}
+.stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #334155;border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#3b82f6,#8b5cf6)}
+.stat-card .icon{font-size:24px;margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:bold;color:#f1f5f9}
+.stat-card .label{font-size:12px;color:#64748b;margin-top:4px}
+.stat-card .trend{font-size:11px;margin-top:6px}
+.trend.up{color:#10b981}
+.trend.down{color:#ef4444}
+.charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px}
+.chart-card h3{font-size:15px;color:#f1f5f9;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.chart-card h3 .tag{font-size:11px;color:#64748b;font-weight:normal}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:200px;padding-top:10px}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;max-width:40px;border-radius:4px 4px 0 0;transition:all .3s;position:relative}
+.bar:hover{opacity:.8}
+.bar-label{font-size:10px;color:#64748b}
+.bar-value{font-size:10px;color:#94a3b8;margin-bottom:2px}
+.legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+.pie-container{display:flex;align-items:center;gap:20px}
+.pie{width:140px;height:140px;border-radius:50%;position:relative;flex-shrink:0}
+.pie-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.pie-center .num{font-size:24px;font-weight:bold;color:#f1f5f9}
+.pie-center .lbl{font-size:10px;color:#64748b}
+.pie-legend{flex:1}
+.pie-legend-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334155;font-size:12px}
+.pie-legend-item:last-child{border-bottom:none}
+.pie-legend-item .name{display:flex;align-items:center;gap:8px;color:#94a3b8}
+.pie-legend-item .count{color:#f1f5f9;font-weight:600}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.rank-list{list-style:none}
+.rank-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #334155}
+.rank-item:last-child{border-bottom:none}
+.rank-num{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0}
+.rank-num.top1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1e293b}
+.rank-num.top2{background:linear-gradient(135deg,#94a3b8,#64748b);color:#1e293b}
+.rank-num.top3{background:linear-gradient(135deg,#d97706,#92400e);color:#fff}
+.rank-num.normal{background:#334155;color:#94a3b8}
+.rank-info{flex:1;min-width:0}
+.rank-title{font-size:13px;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-meta{font-size:11px;color:#64748b;margin-top:2px}
+.rank-score{font-size:14px;font-weight:bold;color:#60a5fa;flex-shrink:0}
+.evo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.evo-item{background:#0f172a;border-radius:8px;padding:14px;text-align:center}
+.evo-item .num{font-size:24px;font-weight:bold}
+.evo-item .lbl{font-size:11px;color:#64748b;margin-top:4px}
+.progress-bar{height:6px;background:#334155;border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:3px;transition:width .5s}
+.footer{text-align:center;padding:20px;color:#475569;font-size:11px;border-top:1px solid #1e293b;margin-top:20px}
+@media(max-width:1024px){.stats-grid{grid-template-columns:repeat(3,1fr)}.charts-grid{grid-template-columns:1fr}.two-col{grid-template-columns:1fr}}
+@media(max-width:640px){.stats-grid{grid-template-columns:repeat(2,1fr)}.container{padding:16px}.header{padding:16px}}
+</style>
+    <link rel="canonical" href="https://huodouai.comgov-dashboard/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="header">
+  <div>
+    <h1>📊 政务大数据看板</h1>
+    <div class="sub">实时数据监控 · 智能分析 · 决策支持 | Ω₀⊂⊙∞⊂Ω</div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-outline" onclick="refreshData()">🔄 刷新</button>
+    <button class="btn btn-primary" onclick="exportData()">📥 导出报告</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- 核心指标 -->
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <!-- 趋势图 + 分类分布 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3>📈 7日业务趋势 <span class="tag" id="trendTag">加载中...</span></h3>
+      <div class="bar-chart" id="trendChart"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>咨询量</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>预约量</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>公文量</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>📋 咨询分类分布</h3>
+      <div class="pie-container">
+        <div class="pie" id="pieChart"></div>
+        <div class="pie-legend" id="pieLegend"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 政策热度 + 自进化效果 -->
+  <div class="two-col">
+    <div class="chart-card">
+      <h3>🔥 政策热度TOP10</h3>
+      <ul class="rank-list" id="policyRank"></ul>
+    </div>
+    <div class="chart-card">
+      <h3>🧠 自进化引擎效果</h3>
+      <div class="evo-grid" id="evoGrid"></div>
+      <div style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#94a3b8;margin-bottom:6px">
+          <span>缓存命中率</span><span id="hitRateText">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="hitRateBar" style="width:0%;background:linear-gradient(90deg,#3b82f6,#8b5cf6)"></div></div>
+      </div>
+      <div style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#94a3b8;margin-bottom:6px">
+          <span>算子成功率</span><span id="opRateText">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="opRateBar" style="width:0%;background:linear-gradient(90deg,#10b981,#059669)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 算子调用 + 用户活跃 -->
+  <div class="two-col">
+    <div class="chart-card">
+      <h3>⚙️ 算子调用排行</h3>
+      <ul class="rank-list" id="operatorRank"></ul>
+    </div>
+    <div class="chart-card">
+      <h3>👥 用户行为分析</h3>
+      <div id="userActivity"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  政务中台大数据看板 V1.0 | 数据来源：政务API聚合引擎 | DID-BR-000002 | ZONGYUAN-ROOT
+</div>
+
+<script>
+const API_BASE = '/gov-api/api/analytics';
+
+async function loadDashboard() {
+  try {
+    const [dash, trend, hot, evo, ops, act] = await Promise.all([
+      fetch(API_BASE + '/dashboard').then(r=>r.json()),
+      fetch(API_BASE + '/trend?days=7').then(r=>r.json()),
+      fetch(API_BASE + '/policy-hotness').then(r=>r.json()),
+      fetch(API_BASE + '/evolution').then(r=>r.json()),
+      fetch(API_BASE + '/operators').then(r=>r.json()),
+      fetch(API_BASE + '/user-activity').then(r=>r.json()),
+    ]);
+    renderStats(dash.overview);
+    renderTrend(trend);
+    renderPie(dash.consultation_categories);
+    renderPolicyRank(hot.top_policies);
+    renderEvolution(evo);
+    renderOperatorRank(ops.top_operators);
+    renderUserActivity(act);
+    document.getElementById('trendTag').textContent = '最近7天';
+  } catch(e) {
+    console.error('加载失败', e);
+  }
+}
+
+function renderStats(o) {
+  const cards = [
+    {icon:'💬', value:o.total_consultations, label:'咨询总量', trend:'+今日'+o.today_consultations, up:true},
+    {icon:'📅', value:o.total_appointments, label:'预约总量', trend:'+今日'+o.today_appt, up:true},
+    {icon:'✍️', value:o.total_documents, label:'公文生成', trend:'+今日'+o.today_doc, up:true},
+    {icon:'📋', value:o.total_policies, label:'政策库', trend:'10大分类', up:true},
+    {icon:'📖', value:o.total_guides, label:'办事指南', trend:'10大分类', up:true},
+    {icon:'⚖️', value:o.pending_approvals, label:'待审批', trend:'需处理', up:false},
+  ];
+  document.getElementById('statsGrid').innerHTML = cards.map(c=>`
+    <div class="stat-card">
+      <div class="icon">${c.icon}</div>
+      <div class="value">${c.value}</div>
+      <div class="label">${c.label}</div>
+      <div class="trend ${c.up?'up':'down'}">${c.trend}</div>
+    </div>
+  `).join('');
+}
+
+function renderTrend(t) {
+  const max = Math.max(...t.consultations, ...t.appointments, ...t.documents, 1);
+  const chart = document.getElementById('trendChart');
+  chart.innerHTML = t.dates.map((d,i)=>`
+    <div class="bar-group">
+      <div class="bar-value">${t.consultations[i]}</div>
+      <div style="display:flex;gap:2px;align-items:flex-end;height:160px;width:100%;justify-content:center">
+        <div class="bar" style="height:${t.consultations[i]/max*100}%;background:#3b82f6;width:10px" title="咨询:${t.consultations[i]}"></div>
+        <div class="bar" style="height:${t.appointments[i]/max*100}%;background:#10b981;width:10px" title="预约:${t.appointments[i]}"></div>
+        <div class="bar" style="height:${t.documents[i]/max*100}%;background:#f59e0b;width:10px" title="公文:${t.documents[i]}"></div>
+      </div>
+      <div class="bar-label">${d.slice(5)}</div>
+    </div>
+  `).join('');
+}
+
+function renderPie(cats) {
+  const entries = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const total = entries.reduce((s,[,v])=>s+v,0) || 1;
+  const colors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#6366f1'];
+  let gradient = 'conic-gradient(';
+  let start = 0;
+  entries.forEach(([name,val],i)=>{
+    const pct = val/total*100;
+    gradient += `${colors[i%colors.length]} ${start}% ${start+pct}%`;
+    if(i<entries.length-1) gradient += ',';
+    start += pct;
+  });
+  gradient += ')';
+  document.getElementById('pieChart').style.background = gradient;
+  document.getElementById('pieChart').innerHTML = `<div class="pie-center"><div class="num">${total}</div><div class="lbl">总咨询</div></div>`;
+  document.getElementById('pieLegend').innerHTML = entries.slice(0,6).map(([name,val],i)=>`
+    <div class="pie-legend-item">
+      <div class="name"><div class="legend-dot" style="background:${colors[i%colors.length]}"></div>${name}</div>
+      <div class="count">${val}条</div>
+    </div>
+  `).join('');
+}
+
+function renderPolicyRank(policies) {
+  document.getElementById('policyRank').innerHTML = (policies||[]).map((p,i)=>`
+    <li class="rank-item">
+      <div class="rank-num ${i<3?'top'+(i+1):'normal'}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-title">${p.title}</div>
+        <div class="rank-meta">${p.category} · 浏览${p.views} · 收藏${p.favorites}</div>
+      </div>
+      <div class="rank-score">${p.hot_score}</div>
+    </li>
+  `).join('') || '<li style="text-align:center;padding:30px;color:#64748b">暂无数据</li>';
+}
+
+function renderEvolution(evo) {
+  document.getElementById('evoGrid').innerHTML = `
+    <div class="evo-item"><div class="num" style="color:#3b82f6">${evo.cache_entries}</div><div class="lbl">缓存条目</div></div>
+    <div class="evo-item"><div class="num" style="color:#10b981">${evo.total_cached_queries}</div><div class="lbl">缓存查询</div></div>
+    <div class="evo-item"><div class="num" style="color:#f59e0b">${evo.knowledge_gaps}</div><div class="lbl">知识缺口</div></div>
+  `;
+  document.getElementById('hitRateText').textContent = evo.cache_hit_rate + '%';
+  document.getElementById('hitRateBar').style.width = evo.cache_hit_rate + '%';
+}
+
+function renderOperatorRank(ops) {
+  document.getElementById('operatorRank').innerHTML = (ops||[]).map((o,i)=>`
+    <li class="rank-item">
+      <div class="rank-num ${i<3?'top'+(i+1):'normal'}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-title">${o.operator_id}</div>
+        <div class="rank-meta">成功${o.success}次 · 成功率${o.success_rate}%</div>
+      </div>
+      <div class="rank-score">${o.calls}</div>
+    </li>
+  `).join('') || '<li style="text-align:center;padding:30px;color:#64748b">暂无数据</li>';
+}
+
+function renderUserActivity(act) {
+  const types = Object.entries(act.action_types||{}).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const max = Math.max(...types.map(([,v])=>v),1);
+  document.getElementById('userActivity').innerHTML = `
+    <div style="margin-bottom:16px;display:flex;gap:12px">
+      <div style="flex:1;background:#0f172a;border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:bold;color:#60a5fa">${act.total_actions}</div>
+        <div style="font-size:11px;color:#64748b">总行为</div>
+      </div>
+      <div style="flex:1;background:#0f172a;border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:bold;color:#a78bfa">${act.active_users}</div>
+        <div style="font-size:11px;color:#64748b">活跃用户</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">行为类型分布</div>
+    ${types.map(([name,val])=>`
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-bottom:3px">
+          <span>${name}</span><span>${val}次</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${val/max*100}%;background:linear-gradient(90deg,#60a5fa,#a78bfa)"></div></div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function refreshData() {
+  loadDashboard();
+}
+
+async function exportData() {
+  try {
+    const res = await fetch(API_BASE + '/export');
+    const data = await res.json();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '政务数据报告_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    alert('导出失败');
+  }
+}
+
+loadDashboard();
+setInterval(loadDashboard, 60000);
+</script>
+</body>
+</html>

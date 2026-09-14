@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="火斗云智 FireHD AIOS — 垂直领域自治AI操作系统，理论驱动、资产自治、永续演化，昆仑洞天本源体系工程底座">
+    <meta name="keywords" content="火斗云智,FireHD AIOS,AI操作系统,多模态资产,智能体仿真,数字资产确权,昆仑洞天,黑金藏品">
+    <!-- OpenGraph社交预览标签 -->
+    <meta property="og:title" content="火斗云智 FireHD AIOS | 自治AI操作系统">
+    <meta property="og:description" content="理论基准驱动｜多模态资产自治｜全域确权存续｜永续闭环演化">
+    <meta property="og:type" content="website">
+    <title>火斗云智 FireHD AIOS | 自治AI操作系统 · 官方公开架构</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        baseblack: '#060608',
+                        darkgold: '#8A7248',
+                        lightgold: '#D4BC8C',
+                        darkgray: '#141418',
+                        borderline: '#332C22'
+                    },
+                    fontFamily: {
+                        cnserif: ['"Noto Serif SC"', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth;}
+        body {
+            background-color: #060608;
+            background-image: radial-gradient(rgba(138, 114, 72, 0.08) 1px, transparent 1px);
+            background-size: 32px 32px;
+            overflow-x:hidden;
+        }
+        /* 粒子背景 强制置于最底层 */
+        #particles{
+            position:fixed;
+            top:0;left:0;width:100%;height:100%;
+            z-index:-1 !important;
+            pointer-events:none;
+        }
+        /* 加载动画 */
+        .loader-wrap{
+            position:fixed;
+            inset:0;
+            background:#060608;
+            z-index:9999;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            transition: opacity 0.6s ease;
+        }
+        .loader-wrap.hidden-loader{
+            opacity:0;
+            pointer-events:none;
+        }
+        .loader-circle{
+            width:48px;height:48px;
+            border:2px solid rgba(212,188,140,0.15);
+            border-top-color:#D4BC8C;
+            border-radius:50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin{
+            to{transform:rotate(360deg);}
+        }
+        /* 渐变金字 */
+        .gold-text-gradient {
+            background: linear-gradient(135deg, #D4BC8C, #8A7248);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        /* 内容卡片 */
+        .content-block{
+            border:1px solid #332C22;
+            background: rgba(20,20,24,0.65);
+            backdrop-filter: blur(6px);
+            transition: all 0.4s ease;
+        }
+        .content-block:hover{
+            border-color:rgba(212,188,140,0.3);
+            box-shadow: 0 0 24px rgba(138,114,72,0.12);
+        }
+        /* 溯源暗印 */
+        .trace-symbol{
+            opacity:0.2;
+            user-select:none;
+            letter-spacing:6px;
+            cursor:pointer;
+            transition:opacity 0.3s;
+        }
+        .trace-symbol:hover{
+            opacity:0.7;
+        }
+        /* 滚动渐入动画：保底显示防止黑屏 */
+        .fade-in{
+            opacity:0.85 !important;
+            transform:translateY(0) !important;
+            transition:all 0.7s ease-out;
+        }
+        .fade-in.hidden-init{
+            opacity:0;
+            transform:translateY(24px);
+        }
+        .fade-in.active{
+            opacity:1;
+            transform:translateY(0);
+        }
+        /* 导航悬浮 */
+        .nav-item{
+            position:relative;
+        }
+        .nav-item::after{
+            content:"";
+            position:absolute;
+            width:0;height:1px;
+            bottom:-4px;left:50%;
+            background:#D4BC8C;
+            transition:all 0.3s ease;
+            transform:translateX(-50%);
+        }
+        .nav-item:hover::after{
+            width:100%;
+        }
+        /* 移动端菜单 */
+        .mobile-menu{
+            max-height:0;
+            overflow:hidden;
+            transition:max-height 0.4s ease;
+        }
+        .mobile-menu.open{
+            max-height:380px;
+        }
+        /* 架构SVG连线样式 */
+        .arch-line{
+            stroke:#8A7248;
+            stroke-opacity:0.5;
+        }
+        /* FAQ折叠面板 */
+        .faq-title{
+            cursor:pointer;
+        }
+        .faq-content{
+            max-height:0;
+            overflow:hidden;
+            transition:max-height 0.35s ease;
+        }
+        .faq-content.open{
+            max-height:600px;
+        }
+        /* 按钮通用样式 */
+        .gold-btn{
+            border:1px solid #8A7248;
+            color:#D4BC8C;
+            padding:0.6rem 1.2rem;
+            border-radius:6px;
+            transition:all 0.3s;
+            display:inline-block;
+        }
+        .gold-btn:hover{
+            background:rgba(212,188,140,0.1);
+            box-shadow:0 0 12px rgba(138,114,72,0.25);
+        }
+        /* 藏品卡片样式 */
+        .card-item{
+            border:1px solid rgba(138,114,72,0.3);
+            border-radius:8px;
+            padding:1rem;
+            background:rgba(20,20,24,0.5);
+            transition:0.3s;
+        }
+        .card-item:hover{
+            transform:translateY(-4px);
+            box-shadow:0 8px 20px rgba(138,114,72,0.15);
+        }
+        /* 弹窗样式 */
+        .modal-wrap{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.75);
+            z-index:10000;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:1rem;
+            opacity:0;
+            pointer-events:none;
+            transition:opacity 0.3s;
+        }
+        .modal-wrap.open{
+            opacity:1;
+            pointer-events:auto;
+        }
+        .modal-box{
+            max-w-lg;
+            width:100%;
+            border:1px solid #8A7248;
+            background:#141418;
+            border-radius:10px;
+            padding:1.5rem;
+        }
+    </style>
+</head>
+<body class="text-gray-200 font-cnserif relative">
+    <!-- 溯源弹窗 -->
+    <div class="modal-wrap" id="traceModal">
+        <div class="modal-box">
+            <h3 class="text-lightgold text-lg mb-4">全域确权溯源信息</h3>
+            <p class="text-gray-300 mb-2">溯源标识：Ω₀⊂⊙∞⊂Ω</p>
+            <p class="text-gray-300 mb-2">确权DID：DID-BR-000002</p>
+            <p class="text-gray-300 mb-2">归档根节点：ZONGYUAN-ROOT</p>
+            <p class="text-gray-300 mb-4">归属体系：昆仑洞天自治内核</p>
+            <p class="text-gray-400 text-sm mb-5">所有理论、视觉资产执行全域哈希锁档，永久存证，版本可回溯。</p>
+            <button class="gold-btn close-modal">关闭</button>
+        </div>
+    </div>
+    <!-- 全局加载动画 -->
+    <div class="loader-wrap" id="loader">
+        <div class="loader-circle"></div>
+    </div>
+
+    <!-- 粒子背景图层 -->
+    <canvas id="particles"></canvas>
+
+    <!-- 顶部导航 -->
+    <nav class="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-baseblack/80 border-b border-borderline">
+        <div class="max-w-5xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="lightgold font-bold tracking-wide">FireHD AIOS</div>
+                <!-- PC导航 -->
+                <div class="hidden sm:flex gap-6 text-sm text-gray-300">
+                    <a href="#overview" class="nav-item hover:text-lightgold transition-colors">系统概述</a>
+                    <a href="#structure" class="nav-item hover:text-lightgold transition-colors">七层架构</a>
+                    <a href="#collection" class="nav-item hover:text-lightgold transition-colors">黑金藏品</a>
+                    <a href="#case" class="nav-item hover:text-lightgold transition-colors">落地案例</a>
+                    <a href="#plan" class="nav-item hover:text-lightgold transition-colors">部署方案</a>
+                    <a href="#faq" class="nav-item hover:text-lightgold transition-colors">常见问题</a>
+                    <a href="#contact" class="nav-item hover:text-lightgold transition-colors">商务咨询</a>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="langSwitch" class="text-sm text-gray-400 hover:text-lightgold">繁/简</button>
+                    <!-- 移动端汉堡按钮 -->
+                    <button class="sm:hidden text-lightgold text-xl" id="menuBtn">☰</button>
+                </div>
+            </div>
+            <!-- 移动端下拉菜单 -->
+            <div class="mobile-menu sm:hidden text-center mt-3 text-sm text-gray-300 border-t border-borderline pt-3 space-y-3" id="mobileMenu">
+                <a href="#overview" class="block hover:text-lightgold transition-colors">系统概述</a>
+                <a href="#structure" class="block hover:text-lightgold transition-colors">七层架构</a>
+                <a href="#collection" class="block hover:text-lightgold transition-colors">黑金藏品</a>
+                <a href="#case" class="block hover:text-lightgold transition-colors">落地案例</a>
+                <a href="#plan" class="block hover:text-lightgold transition-colors">部署方案</a>
+                <a href="#faq" class="block hover:text-lightgold transition-colors">常见问题</a>
+                <a href="#contact" class="block hover:text-lightgold transition-colors">商务咨询</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-28 md:py-36 relative z-10">
+        <!-- 头部标题 -->
+        <header class="mb-16 text-center fade-in hidden-init">
+            <h1 class="text-[clamp(2rem,5vw,3rem)] gold-text-gradient font-bold mb-4">
+                火斗云智 FireHD AIOS
+            </h1>
+            <p class="text-lightgold/70 text-xl mb-2">垂直领域 · 自治AI操作系统</p>
+            <p class="text-gray-400 text-sm max-w-xl mx-auto">理论基准驱动｜多模态资产自治｜全域确权存续｜永续闭环演化</p>
+            <div class="w-36 h-[1px] mx-auto mt-8 bg-gradient-to-r from-transparent via-darkgold/60 to-transparent"></div>
+            <div class="mt-8">
+                <a class="gold-btn" id="downloadWhitepaper">📄 公开白皮书（脱敏版）下载</a>
+            </div>
+        </header>
+
+        <!-- 概述 -->
+        <section id="overview" class="content-block rounded-xl p-6 sm:p-10 mb-10 fade-in hidden-init">
+            <h2 class="text-xl text-lightgold mb-5">系统概述</h2>
+            <p class="leading-loose text-gray-300">
+                火斗云智 FireHD AIOS 是一套以统一底层逻辑为核心、分层域隔离、时序事件驱动、原生内置资产存证闭环的混合型自治AI操作系统。
+                系统不定位为通用大模型，也非单一渲染工具，而是面向<strong class="text-lightgold">智能体长时序推演、东方范式多模态资产工业化生产、高价值知识资产全生命周期治理</strong>的垂直底座系统。
+                通过算力调度、仿真推演、模态生成、确权归档四层体系联动，实现自观测、自校验、自迭代、永续存续的闭环能力。作为昆仑洞天本源体系官方工程运行底座，承载全部理论仿真与视觉资产量产任务。
+            </p>
+        </section>
+
+        <!-- 七层架构 -->
+        <section id="structure" class="content-block rounded-xl p-6 sm:p-10 mb-10 fade-in hidden-init">
+            <h2 class="text-xl text-lightgold mb-5">七层全域架构秩序（公开标准版）</h2>
+            <!-- 七层架构矢量可视化SVG -->
+            <div class="mb-8 overflow-x-auto">
+                <svg width="100%" height="520" viewBox="0 0 700 520">
+                    <line x1="350" y1="40" x2="350" y2="85" class="arch-line" />
+                    <line x1="350" y1="120" x2="350" y2="165" class="arch-line" />
+                    <line x1="350" y1="200" x2="350" y2="245" class="arch-line" />
+                    <line x1="350" y1="280" x2="350" y2="325" class="arch-line" />
+                    <line x1="350" y1="360" x2="350" y2="405" class="arch-line" />
+                    <line x1="350" y1="440" x2="350" y2="485" class="arch-line" />
+                    <rect x="180" y="10" width="340" height="36" rx="4" fill="rgba(212,188,140,0.12)" stroke="#8A7248" stroke-opacity="0.6"/>
+                    <text x="350" y="32" text-anchor="middle" fill="#D4BC8C" font-size="14">第七层 · 显现交付域</text>
+                    <rect x="180" y="95" width="340" height="36" rx="4" fill="rgba(212,188,140,0.12)" stroke="#8A7248" stroke-opacity="0.6"/>
+                    <text x="350" y="117" text-anchor="middle" fill="#D4BC8C" font-size="14">第六层 · 自治中枢域</text>
+                    <rect x="180" y="175" width="340" height="36" rx="4" fill="rgba(212,188,140,0.12)" stroke="#8A7248" stroke-opacity="0.6"/>
+                    <text x="350" y="197" text-anchor="middle" fill="#D4BC8C" font-size="14">第五层 · 映射推演域</text>
+                    <rect x="180" y="255" width="340" height="36" rx="4" fill="rgba(212,188,140,0.12)" stroke="#8A7248" stroke-opacity="0.6"/>
+                    <text x="350" y="277" text-anchor="middle" fill="#D4BC8C" font-size="14">第四层 · 真值基准域</text>
+                    <rect x="180" y="335" width="340" height="36" rx="4" fill="rgba(212,188,140,0.12)" stroke="#8A7248" stroke-opacity="0.6"/>
+                    <text x="350" y="357" text-anchor="middle" fill="#D4BC8C" font-size="14">第三层 · 模态显现域</text>
+                    <rect x="180" y="415" width="340" height="36" rx="4" fill="rgba(212,188,140,0.12)" stroke="#8A7248" stroke-opacity="0.6"/>
+                    <text x="350" y="437" text-anchor="middle" fill="#D4BC8C" font-size="14">第二层 · 算力承载域</text>
+                    <rect x="180" y="495" width="340" height="36" rx="4" fill="rgba(212,188,140,0.12)" stroke="#8A7248" stroke-opacity="0.6"/>
+                    <text x="350" y="517" text-anchor="middle" fill="#D4BC8C" font-size="14">第一层 · 存续确权域</text>
+                </svg>
+            </div>
+            <div class="space-y-6 text-gray-300 leading-loose">
+                <div><strong class="text-lightgold">第七层 · 显现交付域</strong><br>对外标准化成果出口，统一管控所有文档、视觉资产、结构化内容的输出规范与脱敏标准，实现合规、统一、可控的对外显现。</div>
+                <div><strong class="text-lightgold">第六层 · 自治中枢域</strong><br>全域总控调度核心，负责指令解析、任务排队、资源均衡、子域隔离、版本快照与全域归档确权，维持系统整体自治秩序。</div>
+                <div><strong class="text-lightgold">第五层 · 映射推演域</strong><br>长时序仿真实验载体，支持多组并行对照推演、临界演化观测、时序数据捕捉，用于验证模型规律与系统演化趋势。</div>
+                <div><strong class="text-lightgold">第四层 · 真值基准域</strong><br>全域统一逻辑基准，为推演、生成、校验、判定提供稳定底层标尺，保障跨场景、跨周期的全局逻辑自洽。</div>
+                <div><strong class="text-lightgold">第三层 · 模态显现域</strong><br>多模态视觉资产工业化管线，采用双引擎协同机制，统一画风基线、抑制时序漂移、规范东方纯粹美学体系，实现序列资产稳定量产。</div>
+                <div><strong class="text-lightgold">第二层 · 算力承载域</strong><br>异构算力统一调度层，纳管云端与本地算力资源，根据推演、渲染、编译任务自动分配负载，保障全域运行稳态。</div>
+                <div><strong class="text-lightgold">第一层 · 存续确权域</strong><br>系统最底层基座，提供哈希快照、版本锁档、全域索引、溯源标识、资产存续体系，实现全生命周期可追溯、可确权、可归档。</div>
+            </div>
+        </section>
+
+        <!-- 【新增P3】黑金藏品展示专区 -->
+        <section id="collection" class="content-block rounded-xl p-6 sm:p-10 mb-10 fade-in hidden-init">
+            <h2 class="text-xl text-lightgold mb-5">BLACKGOLD黑金藏品体系展示（样例）</h2>
+            <p class="text-gray-300 mb-6">本源真值可视化载体，基于模态显现域标准化管线生成，所有藏品内置隐秘溯源刻印，执行全域锁档管理。完整序列仅限授权渠道交付。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="card-item">
+                    <h3 class="text-lightgold mb-2">ORIGIN本源序列</h3>
+                    <p class="text-gray-400 text-sm">底层公理、真值架构视觉化，全域理论根基藏品</p>
+                </div>
+                <div class="card-item">
+                    <h3 class="text-lightgold mb-2">BRIDGE桥梁序列</h3>
+                    <p class="text-gray-400 text-sm">层级之间逻辑耦合、信息传导演化载体</p>
+                </div>
+                <div class="card-item">
+                    <h3 class="text-lightgold mb-2">INTERPLAY交互扰动序列</h3>
+                    <p class="text-gray-400 text-sm">变量扰动、临界演化、仿真观测可视化成果</p>
+                </div>
+                <div class="card-item">
+                    <h3 class="text-lightgold mb-2">TRANSCEND跃迁序列</h3>
+                    <p class="text-gray-400 text-sm">高阶演化定理、稳态跃迁、拓扑变换藏品</p>
+                </div>
+            </div>
+            <div class="mt-6 text-center">
+                <span class="text-gray-400 text-sm">完整001~024全套序列仅在私有化部署环境内预览</span>
+            </div>
+        </section>
+
+        <!-- 落地实践案例 -->
+        <section id="case" class="content-block rounded-xl p-6 sm:p-10 mb-10 fade-in hidden-init">
+            <h2 class="text-xl text-lightgold mb-5">落地实践案例（脱敏公开）</h2>
+            <div class="space-y-6 text-gray-300 leading-loose">
+                <div class="p-4 border border-borderline rounded-lg bg-darkgray/40">
+                    <h3 class="text-lightgold mb-2">案例一｜黑金藏品IP资产工业化管线</h3>
+                    <p>搭建标准化视觉资产生产流水线，建立统一美学约束、防漂移校验机制，批量生成体系联动藏品序列；底层绑定哈希确权、溯源刻印、版本快照，构建闭环数字资产管理规范。</p>
+                </div>
+                <div class="p-4 border border-borderline rounded-lg bg-darkgray/40">
+                    <h3 class="text-lightgold mb-2">案例二｜本源智能仿真推演沙箱</h3>
+                    <p>搭建并行仿真实验环境，支持多对照组临界演化观测、扰动变量实验、时序数据留存；输出标准化观测报告，支撑底层理论体系持续迭代优化。</p>
+                </div>
+                <div class="p-4 border border-borderline rounded-lg bg-darkgray/40">
+                    <h3 class="text-lightgold mb-2">案例三｜昆仑洞天世界观全域资产治理</h3>
+                    <p>统一世界观设定、分镜脚本、角色素材、技术文档集中归档；搭建全域锁档机制，实现所有创作资产分层索引、永久存证，规避版本混乱、素材外泄风险。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 分级部署合作方案 -->
+        <section id="plan" class="content-block rounded-xl p-6 sm:p-10 mb-10 fade-in hidden-init">
+            <h2 class="text-xl text-lightgold mb-5">分级部署合作方案</h2>
+            <div class="space-y-6 text-gray-300 leading-loose">
+                <div class="p-4 border border-borderline rounded-lg bg-darkgray/40">
+                    <h3 class="text-lightgold mb-2">方案A｜轻量化部署（前期验证首选）</h3>
+                    <p>适用：技术预研、小型项目、概念验证。<br>内容：标准化基础内核部署、基础资产管线、基础归档确权模块、标准操作文档；算力需求较低，交付周期短。</p>
+                </div>
+                <div class="p-4 border border-borderline rounded-lg bg-darkgray/40">
+                    <h3 class="text-lightgold mb-2">方案B｜标准私有化部署（商用主流）</h3>
+                    <p>适用：文创团队、企业内部自研管线、常态化资产量产。<br>内容：完整七层基础架构、并行仿真沙箱、全套多模态生产管线、私有化本地存证、基础运维支持；支持本地服务器独立部署，数据不出内网。</p>
+                </div>
+                <div class="p-4 border border-borderline rounded-lg bg-darkgray/40">
+                    <h3 class="text-lightgold mb-2">方案C｜深度定制共建（长期战略项目）</h3>
+                    <p>适用：大型IP机构、算力服务商、长期技术研发平台。<br>内容：全架构开放适配、专属模块定制、联合迭代底层机制、专属技术顾问、持续体系升级；支持双向技术共建，深度业务绑定。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="content-block rounded-xl p-6 sm:p-10 mb-10 fade-in hidden-init">
+            <h2 class="text-xl text-lightgold mb-5">常见问题 FAQ</h2>
+            <div class="space-y-4 text-gray-300">
+                <div class="border border-borderline rounded-lg bg-darkgray/40">
+                    <div class="faq-title p-4 flex justify-between items-center text-lightgold" data-target="faq1">
+                        FireHD AIOS 是否对外开源？
+                        <span>+</span>
+                    </div>
+                    <div class="faq-content px-4 pb-4" id="faq1">
+                        核心内核不开放开源。可以通过私有化部署、项目共建形式授权使用，根据合作方案开放对应层级接口与模块。
+                    </div>
+                </div>
+                <div class="border border-borderline rounded-lg bg-darkgray/40">
+                    <div class="faq-title p-4 flex justify-between items-center text-lightgold" data-target="faq2">
+                        <span>部署最低需要什么硬件算力？</span>
+                        <span>+</span>
+                    </div>
+                    <div class="faq-content px-4 pb-4" id="faq2">
+                        轻量化方案可使用中端本地显卡或小型云端实例；标准私有化部署推荐独立GPU算力集群，可根据渲染、仿真任务规模弹性调整算力配置。
+                    </div>
+                </div>
+                <div class="border border-borderline rounded-lg bg-darkgray/40">
+                    <div class="faq-title p-4 flex justify-between items-center text-lightgold" data-target="faq3">
+                        <span>系统生成的所有资产数据归属如何界定？</span>
+                        <span>+</span>
+                    </div>
+                    <div class="faq-content px-4 pb-4" id="faq3">
+                        依据合作协议约定，私有化项目产出资产所有权归合作方；系统底层确权机制仅做存证溯源，不占有资产版权。
+                    </div>
+                </div>
+                <div class="border border-borderline rounded-lg bg-darkgray/40">
+                    <div class="faq-title p-4 flex justify-between items-center text-lightgold" data-target="faq4">
+                        <span>能否对接第三方大模型、渲染引擎？</span>
+                        <span>+</span>
+                    </div>
+                    <div class="faq-content px-4 pb-4" id="faq4">
+                        支持。系统设计模块化接口，可接入主流基座模型、UE5渲染管线、多模态生成引擎，统一由自治中枢完成调度与校验。
+                    </div>
+                </div>
+                <div class="border border-borderline rounded-lg bg-darkgray/40">
+                    <div class="faq-title p-4 flex justify-between items-center text-lightgold" data-target="faq5">
+                        <span>资产锁档与溯源标识可以自定义吗？</span>
+                        <span>+</span>
+                    </div>
+                    <div class="faq-content px-4 pb-4" id="faq5">
+                        基础溯源范式固定保障全域兼容性；溯源符号、附加元数据、DID身份标识可根据项目需求配置调整。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 双线演化体系 -->
+        <section id="evolve" class="content-block rounded-xl p-6 sm:p-10 mb-10 fade-in hidden-init">
+            <h2 class="text-xl text-lightgold mb-5">双线永续演化体系</h2>
+            <div class="space-y-4 text-gray-300 leading-loose">
+                <p><strong class="text-lightgold">理论深化路线</strong>：持续完善底层公理体系、演化模型、临界判定机制，通过大规模数字推演提升全域自洽度与理论完备度。</p>
+                <p><strong class="text-lightgold">工程落地路线</strong>：持续优化多模态资产、虚拟场景、技术文档、标准化交付管线，形成可商用、可交付、可迭代的工业化产能。</p>
+                <p class="pt-2">双路线双向印证、双向优化，构成 FireHD AIOS 独有的<strong class="text-lightgold">永续闭环演化秩序</strong>。</p>
+            </div>
+        </section>
+
+        <!-- 商务咨询 -->
+        <section id="contact" class="content-block rounded-xl p-6 sm:p-10 fade-in hidden-init">
+            <h2 class="text-xl text-lightgold mb-5">商务合作与技术咨询</h2>
+            <p class="text-gray-300 leading-loose">
+                欢迎企业机构、技术团队、文创IP方、算力服务商开展合作对接。<br>
+                可提供：AI系统架构适配、多模态资产工业化定制、智能体仿真方案、数字资产确权体系搭建、技术文档体系建设等服务。
+            </p>
+            <div class="mt-6 p-4 border border-borderline rounded-lg bg-darkgray/60">
+                <p class="text-lightgold text-sm">合作方向：体系定制 · 资产量产 · 技术对接 · 架构部署 · 项目共建</p>
+            </div>
+        </section>
+
+        <!-- 页脚溯源与版权 -->
+        <footer class="mt-16 text-center fade-in">
+            <div class="trace-symbol text-base" id="traceClick">Ω₀⊂⊙∞⊂Ω</div>
+            <p class="text-gray-500 mt-4 text-sm">
+                © 2026 火斗云智 FireHD AIOS | 昆仑洞天 · ZONGYUAN-ROOT 归档版本
+            </p>
+            <p class="text-gray-600 mt-2 text-xs">页面版本：V1.0-Ultimate | SHA256资产哈希绑定 | DID-BR-000002</p>
+        </footer>
+    </div>
+
+    <script>
+        // 全局异常捕获，防止脚本崩溃阻塞页面
+        try{
+            // 溯源弹窗交互
+            const traceModal = document.getElementById("traceModal");
+            document.getElementById("traceClick").addEventListener("click",()=>{
+                traceModal.classList.add("open");
+            })
+            document.querySelector(".close-modal").addEventListener("click",()=>{
+                traceModal.classList.remove("open");
+            })
+            traceModal.addEventListener("click",(e)=>{
+                if(e.target === traceModal) traceModal.classList.remove("open");
+            })
+            // 白皮书模拟下载
+            document.getElementById("downloadWhitepaper").addEventListener("click",()=>{
+                alert("脱敏版《火斗云智架构公开白皮书》将通过商务渠道交付，请联系咨询获取文档包。");
+            })
+            // 繁简切换简易逻辑
+            let isTrad = false;
+            document.getElementById("langSwitch").addEventListener("click",()=>{
+                isTrad = !isTrad;
+                alert(isTrad ? "繁体中文模式已激活（完整繁体文本待资源部署）" : "简体中文模式");
+            })
+            // 移动端菜单逻辑
+            const menuBtn = document.getElementById("menuBtn");
+            const mobileMenu = document.getElementById("mobileMenu");
+            menuBtn.addEventListener("click",()=>{
+                mobileMenu.classList.toggle("open");
+            })
+            mobileMenu.querySelectorAll("a").forEach(link=>{
+                link.onclick = ()=> mobileMenu.classList.remove("open");
+            })
+
+            const canvas = document.getElementById("particles");
+            const ctx = canvas.getContext("2d");
+            let w,h,particles=[];
+            const particleCount = /Android|iPhone|iPad/i.test(navigator.userAgent) ? 60 : 120;
+
+            function resize(){
+                w=canvas.width=window.innerWidth;
+                h=canvas.height=window.innerHeight;
+            }
+            window.addEventListener("resize",resize);
+            resize();
+
+            class Particle{
+                constructor(){
+                    this.x=Math.random()*w;
+                    this.y=Math.random()*h;
+                    this.r=Math.random()*1.2+0.2;
+                    this.sx=(Math.random()-0.5)*0.4;
+                    this.sy=(Math.random()-0.5)*0.4;
+                    this.alpha=Math.random()*0.4+0.1;
+                }
+                update(){
+                    this.x+=this.sx;
+                    this.y+=this.sy;
+                    if(this.x<0||this.x>w)this.sx*=-1;
+                    if(this.y<0||this.y>h)this.sy*=-1;
+                }
+                draw(){
+                    ctx.beginPath();
+                    ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+                    ctx.fillStyle=`rgba(212,188,140,${this.alpha})`;
+                    ctx.fill();
+                }
+            }
+
+            for(let i=0;i<particleCount;i++) particles.push(new Particle());
+
+            function animate(){
+                ctx.clearRect(0,0,w,h);
+                particles.forEach(p=>{p.update();p.draw();});
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            // 滚动渐入监听
+            const fadeList=document.querySelectorAll(".fade-in.hidden-init");
+            function check(){
+                fadeList.forEach(el=>{
+                    const rect = el.getBoundingClientRect();
+                    if(rect.top < window.innerHeight*0.88) el.classList.add("active");
+                });
+            }
+            // 锚点偏移修正
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetEl = document.querySelector(targetId);
+                    if(targetEl){
+                        const offsetTop = targetEl.offsetTop - 90;
+                        window.scrollTo({top: offsetTop, behavior:'smooth'});
+                    }
+                });
+            });
+
+            // FAQ折叠交互
+            document.querySelectorAll(".faq-title").forEach(item=>{
+                item.addEventListener("click",function(){
+                    const targetId = this.dataset.target;
+                    const contentDom = document.getElementById(targetId);
+                    contentDom.classList.toggle("open");
+                    const symbol = this.querySelector("span:last-child");
+                    symbol.textContent = contentDom.classList.contains("open") ? "-" : "+";
+                })
+            })
+
+            window.addEventListener("scroll",check);
+            window.addEventListener("load",()=>{
+                setTimeout(check,150);
+                setTimeout(()=>{
+                    document.getElementById("loader").classList.add("hidden-loader");
+                },350);
+            })
+            // 访问统计埋点预留点位，可接入第三方统计平台
+            console.log("页面初始化完成，访问埋点接口预留就绪");
+        }catch(err){
+            console.error("脚本运行异常：",err);
+        }
+    </script>
+</body>
+</html>

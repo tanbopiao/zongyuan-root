@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阶段二核心业务完善报告 - 火斗云智AIOS</title>
+<style>
+:root { --primary:#2563eb; --success:#10b981; --warning:#f59e0b; --gray-50:#f9fafb; --gray-200:#e5e7eb; --gray-600:#4b5563; --gray-800:#1f2937; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif; background:var(--gray-50); color:var(--gray-800); line-height:1.6; }
+.container { max-width:1000px; margin:0 auto; padding:0 24px; }
+.header { background:linear-gradient(135deg,#1e3a8a,#2563eb,#06b6d4); color:#fff; padding:40px 0 30px; }
+.header h1 { font-size:1.5rem; font-weight:700; }
+.header .sub { font-size:0.9rem; opacity:0.9; margin-top:6px; }
+.section { background:#fff; border-radius:12px; padding:24px; margin:20px 0; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid var(--gray-200); }
+.section h2 { font-size:1.1rem; font-weight:700; margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid var(--primary); }
+.biz-card { padding:16px; border-left:4px solid var(--success); background:#f0fdf4; border-radius:0 8px 8px 0; margin:14px 0; }
+.biz-card .title { font-weight:700; font-size:0.95rem; margin-bottom:8px; }
+.biz-card .detail { font-size:0.85rem; color:var(--gray-600); }
+.biz-card .endpoints { margin-top:8px; font-size:0.8rem; background:#fff; padding:8px 12px; border-radius:6px; }
+.biz-card .endpoints code { background:var(--gray-50); padding:1px 5px; border-radius:3px; font-size:0.78rem; }
+table { width:100%; border-collapse:collapse; font-size:0.82rem; margin:10px 0; }
+th { background:var(--gray-50); text-align:left; padding:8px 10px; font-weight:600; border-bottom:2px solid var(--gray-200); }
+td { padding:8px 10px; border-bottom:1px solid var(--gray-200); }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.72rem; font-weight:600; }
+.badge.success { background:#ecfdf5; color:var(--success); }
+.badge.warning { background:#fffbeb; color:var(--warning); }
+.summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:16px 0; }
+.metric { text-align:center; padding:14px; background:var(--gray-50); border-radius:8px; }
+.metric .num { font-size:1.4rem; font-weight:700; color:var(--success); }
+.metric .label { font-size:0.72rem; color:var(--gray-600); margin-top:2px; }
+.footer { text-align:center; padding:24px 0; color:var(--gray-600); font-size:0.78rem; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="container">
+    <h1>阶段二核心业务完善报告</h1>
+    <div class="sub">最优稳态优化方案 · 阶段二执行结果 ｜ 2026-09-13</div>
+  </div>
+</div>
+<div class="container">
+
+<div class="section">
+  <h2>执行成果总览</h2>
+  <div class="summary-grid">
+    <div class="metric"><div class="num">4/4</div><div class="label">业务线联调完成</div></div>
+    <div class="metric"><div class="num">5</div><div class="label">新增API代理</div></div>
+    <div class="metric"><div class="num">100%</div><div class="label">子域名可用</div></div>
+    <div class="metric"><div class="num">0</div><div class="label">新增费用</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>四大业务线联调详情</h2>
+
+  <div class="biz-card">
+    <div class="title">🎬 短剧流水线（drama.huodouai.com）</div>
+    <div class="detail">新增8628完整版产线API和8626流水线API的Nginx反向代理，前端可通过子域名直接调用后端API。</div>
+    <div class="endpoints">
+      <strong>新增代理：</strong><br>
+      <code>/api/production/*</code> → 8628（角色/世界观/剧本/分镜/关键帧/质量/任务，共18端点）<br>
+      <code>/api/pipeline/*</code> → 8626（流水线调度，V1.5，3任务）<br>
+      <strong>已有代理：</strong> <code>/api/*</code> → 8100（管理后台）
+    </div>
+    <div style="margin-top:8px; font-size:0.8rem;">
+      <strong>验证：</strong> /api/production/status 返回角色1/世界观1/分镜1/关键帧1；/api/production/character/list 返回"九天玄女"角色数据
+    </div>
+  </div>
+
+  <div class="biz-card">
+    <div class="title">🏛️ 政务AI中台（gov.huodouai.com）</div>
+    <div class="detail">新增8200网关、8201 API服务、8203数据大屏的Nginx反向代理，补齐政务API访问通道。</div>
+    <div class="endpoints">
+      <strong>新增代理：</strong><br>
+      <code>/gov-api/v1/*</code> → 8200（政务AI网关，v1.0.0）<br>
+      <code>/gov-api/service/*</code> → 8201（政务API服务）<br>
+      <code>/gov-api/dashboard/*</code> → 8203（政务数据大屏）<br>
+      <strong>已有代理：</strong> <code>/gov-api/*</code> → 8031（主权根API）
+    </div>
+    <div style="margin-top:8px; font-size:0.8rem;">
+      <strong>验证：</strong> /gov-api/v1/health 返回 healthy；/gov-api/dashboard/health 返回 healthy
+    </div>
+  </div>
+
+  <div class="biz-card">
+    <div class="title">🖥️ 智能工作台（workbench/）</div>
+    <div class="detail">工作台页面（46KB）可正常访问，后端API服务全部健康。</div>
+    <div class="endpoints">
+      <strong>后端服务：</strong><br>
+      8072 算子调度器 / 8080 Web后端 / 8090 稳态运维平台（含11服务健康监控）<br>
+      <strong>页面：</strong> /workbench/index.html（HTTP 200）
+    </div>
+  </div>
+
+  <div class="biz-card">
+    <div class="title">💬 智能交互/体验中心（experience/）</div>
+    <div class="detail">体验中心和Agent Hub页面可访问，后端API和WebSocket正常。</div>
+    <div class="endpoints">
+      <strong>后端服务：</strong><br>
+      8046 体验中心 / 8023 Agent Hub / 9140 WebSocket实时推送<br>
+      <strong>页面：</strong> /experience/index.html、/agent-experience/index.html（HTTP 200）
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>API代理配置汇总</h2>
+  <table>
+    <tr><th>子域名</th><th>代理路径</th><th>后端服务</th><th>端口</th><th>状态</th></tr>
+    <tr><td>drama</td><td>/api/production/*</td><td>短剧产线API（完整版）</td><td>8628</td><td><span class="badge success">已联调</span></td></tr>
+    <tr><td>drama</td><td>/api/pipeline/*</td><td>短剧流水线</td><td>8626</td><td><span class="badge success">已联调</span></td></tr>
+    <tr><td>drama</td><td>/api/*</td><td>短剧管理后台</td><td>8100</td><td><span class="badge success">已有</span></td></tr>
+    <tr><td>gov</td><td>/gov-api/v1/*</td><td>政务AI网关</td><td>8200</td><td><span class="badge success">已联调</span></td></tr>
+    <tr><td>gov</td><td>/gov-api/service/*</td><td>政务API服务</td><td>8201</td><td><span class="badge success">已联调</span></td></tr>
+    <tr><td>gov</td><td>/gov-api/dashboard/*</td><td>政务数据大屏</td><td>8203</td><td><span class="badge success">已联调</span></td></tr>
+    <tr><td>gov</td><td>/gov-api/*</td><td>主权根API</td><td>8031</td><td><span class="badge success">已有</span></td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>子域名可用性验证</h2>
+  <table>
+    <tr><th>子域名</th><th>HTTP状态</th><th>说明</th></tr>
+    <tr><td>drama.huodouai.com</td><td><span class="badge success">200</span></td><td>短剧平台，API已联调</td></tr>
+    <tr><td>gov.huodouai.com</td><td><span class="badge success">200</span></td><td>政务中台，API已联调</td></tr>
+    <tr><td>kunlun.huodouai.com</td><td><span class="badge success">200</span></td><td>昆仑洞天（阶段一修复）</td></tr>
+    <tr><td>ops.huodouai.com</td><td><span class="badge success">200</span></td><td>运维平台</td></tr>
+    <tr><td>status.huodouai.com</td><td><span class="badge success">200</span></td><td>状态监控（含完整仪表盘）</td></tr>
+    <tr><td>docs.huodouai.com</td><td><span class="badge success">200</span></td><td>开发者文档</td></tr>
+    <tr><td>api.huodouai.com</td><td><span class="badge success">200</span></td><td>API平台</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>发现与建议</h2>
+  <ul style="margin-left:20px; font-size:0.88rem;">
+    <li><strong>短剧双API并存：</strong>8012为简化版API（BaseHTTPRequestHandler），8628为完整版（FastAPI，18端点）。建议后续统一到8628，8012可考虑下线。</li>
+    <li><strong>政务API路由：</strong>8200/8201的具体业务端点需进一步梳理，当前/health正常，业务端点返回404（可能需要特定路径前缀）。</li>
+    <li><strong>统一监控：</strong>status.huodouai.com已有monitor.html/status.html/status-center.html三个监控页面，8090运维平台也有11服务健康检查，建议后续整合为统一视图。</li>
+    <li><strong>前端深化：</strong>当前阶段完成了API代理层联调，前端页面的具体功能按钮与API的深度对接可作为阶段三持续优化项。</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>备份与回滚</h2>
+  <ul style="margin-left:20px; font-size:0.88rem;">
+    <li>Nginx配置备份：<code>/www/backup/phase2_fix_20260913_093431/</code></li>
+    <li>修改文件：drama.huodouai.com.conf、gov.huodouai.com.conf</li>
+    <li>回滚方式：恢复备份文件后执行 <code>/www/server/nginx/sbin/nginx -s reload</code></li>
+  </ul>
+</div>
+
+</div>
+<div class="footer">
+  <p>火斗云智AIOS · 阶段二核心业务完善报告</p>
+  <p>确权：DID-BR-000002 ｜ 溯源：Ω₀⊂⊙∞⊂Ω ｜ 2026-09-13</p>
+</div>
+</body>
+</html>

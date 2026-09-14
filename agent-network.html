@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能体网络 · 火斗云智AIOS</title>
+<meta name="description" content="ZONGYUAN-ROOT八大智能体网络拓扑，中枢大脑统合所有智能体，形成群体智能协作网络">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Noto Sans SC',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 50% 50%,rgba(212,175,55,0.08) 0%,transparent 60%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:50px 24px}
+.back{display:inline-block;color:#d4af37;text-decoration:none;font-size:0.9em;margin-bottom:20px}
+.hero{text-align:center;padding:30px 0 40px}
+.hero .symbol{font-size:13px;color:#d4af37;letter-spacing:4px;margin-bottom:14px;font-family:monospace}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2.4em;font-weight:900;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.hero .subtitle{color:#aaa;font-size:1em;max-width:700px;margin:0 auto;line-height:1.8}
+.network-viz{position:relative;height:500px;margin:30px 0;background:rgba(0,0,0,0.2);border-radius:16px;border:1px solid rgba(212,175,55,0.15);overflow:hidden}
+.center-node{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,#d4af37,#8B6914);box-shadow:0 0 50px rgba(212,175,55,0.5);display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:10;animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 50px rgba(212,175,55,0.5)}50%{box-shadow:0 0 80px rgba(212,175,55,0.8)}}
+.center-node .cn-icon{font-size:2em}
+.center-node .cn-label{font-size:0.7em;color:#fff;font-weight:bold;margin-top:2px}
+.agent-node{position:absolute;width:70px;height:70px;border-radius:50%;background:rgba(139,200,234,0.15);border:2px solid rgba(139,200,234,0.5);display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;transition:all 0.3s;z-index:5}
+.agent-node:hover{transform:scale(1.15);background:rgba(139,200,234,0.3);border-color:#8BC8EA}
+.agent-node .an-icon{font-size:1.5em}
+.agent-node .an-label{font-size:0.6em;color:#8BC8EA;margin-top:2px;text-align:center}
+.connection-line{position:absolute;background:linear-gradient(90deg,rgba(212,175,55,0.3),rgba(139,200,234,0.3));height:2px;transform-origin:left center;z-index:1}
+.section{margin:45px 0}
+.section h2{font-family:'Noto Serif SC',serif;font-size:1.4em;color:#d4af37;margin-bottom:18px;padding-left:16px;border-left:4px solid #d4af37}
+.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.agent-card{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(139,200,234,0.2);border-radius:12px;padding:18px;transition:all 0.3s}
+.agent-card:hover{border-color:rgba(212,175,55,0.4);transform:translateY(-2px)}
+.agent-card .ac-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.agent-card .ac-icon{font-size:1.8em}
+.agent-card h3{color:#8BC8EA;font-size:1.05em}
+.agent-card .ac-url{color:#666;font-size:0.75em}
+.agent-card .ac-desc{color:#999;font-size:0.83em;line-height:1.6;margin-bottom:8px}
+.agent-card .ac-status{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.72em}
+.status-online{background:rgba(74,222,128,0.15);color:#4ade80}
+.status-evolving{background:rgba(251,191,36,0.15);color:#fbbf24}
+.comm-protocols{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.proto-item{background:rgba(0,0,0,0.25);border-radius:10px;padding:14px;text-align:center;border:1px solid rgba(212,175,55,0.15)}
+.proto-item .p-icon{font-size:1.5em;margin-bottom:6px}
+.proto-item .p-name{color:#d4af37;font-weight:bold;font-size:0.9em;margin-bottom:4px}
+.proto-item .p-desc{color:#888;font-size:0.78em}
+footer{text-align:center;margin-top:50px;padding-top:24px;border-top:1px solid rgba(212,175,55,0.1);color:#666;font-size:0.8em}
+footer .did{margin-top:6px;color:#d4af37;font-family:monospace}
+@media(max-width:640px){.hero h1{font-size:1.6em}.network-viz{height:400px}.agent-node{width:55px;height:55px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">← 返回首页</a>
+  <div class="hero">
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT · DID-BR-000002</div>
+    <h1>智能体网络</h1>
+    <div class="subtitle">中枢大脑统合八大智能体，A2A协议互联互通<br>从单体智能到群体智能，每个智能体都是有身体的实体</div>
+  </div>
+
+  <!-- 网络拓扑可视化 -->
+  <div class="network-viz" id="networkViz">
+    <div class="center-node">
+      <div class="cn-icon">🧠</div>
+      <div class="cn-label">中枢大脑</div>
+    </div>
+    <!-- 8个智能体节点，用JS动态定位 -->
+  </div>
+
+  <!-- 八大智能体详情 -->
+  <div class="section">
+    <h2>八大智能体矩阵</h2>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="ac-head"><div class="ac-icon">🏛️</div><div><h3>政务AI智能体</h3><div class="ac-url">gov.huodouai.com</div></div></div>
+        <div class="ac-desc">政务数字化中台，16个子页面，画布组件44个，智慧城市/政务服务/应急指挥三大垂直方案</div>
+        <span class="ac-status status-online">● 在线运行</span>
+      </div>
+      <div class="agent-card">
+        <div class="ac-head"><div class="ac-icon">🎬</div><div><h3>短剧智能体</h3><div class="ac-url">drama.huodouai.com</div></div></div>
+        <div class="ac-desc">工业化短剧生产流水线，166作品/31成片，角色一致性引擎，全链路大纲→分镜→关键帧→视频</div>
+        <span class="ac-status status-online">● 在线运行</span>
+      </div>
+      <div class="agent-card">
+        <div class="ac-head"><div class="ac-icon">⛰️</div><div><h3>昆仑洞天IP智能体</h3><div class="ac-url">kunlun.huodouai.com</div></div></div>
+        <div class="ac-desc">东方神话IP宇宙，6大角色（九天玄女/烛龙/女娲等），工作台v3.0，藏品卡生成</div>
+        <span class="ac-status status-online">● 在线运行</span>
+      </div>
+      <div class="agent-card">
+        <div class="ac-head"><div class="ac-icon">📚</div><div><h3>教育智能体</h3><div class="ac-url">/edu-chat</div></div></div>
+        <div class="ac-desc">普惠教育AI教师，知识图谱+对话闭环，K12核心学科，个性化学习路径</div>
+        <span class="ac-status status-evolving">◐ 进化中</span>
+      </div>
+      <div class="agent-card">
+        <div class="ac-head"><div class="ac-icon">🧮</div><div><h3>元内核智能体</h3><div class="ac-url">/kernel</div></div></div>
+        <div class="ac-desc">自治内核，5216真值/91元法则，元认知/元学习/自我发展三算子，自愈守护+自动扩缩容</div>
+        <span class="ac-status status-online">● 在线运行</span>
+      </div>
+      <div class="agent-card">
+        <div class="ac-head"><div class="ac-icon">📊</div><div><h3>数字资产智能体</h3><div class="ac-url">/digital-assets</div></div></div>
+        <div class="ac-desc">2000+数字资产实时管理，图片/视频/文档/代码分类归档，自动标签+语义搜索</div>
+        <span class="ac-status status-online">● 在线运行</span>
+      </div>
+      <div class="agent-card">
+        <div class="ac-head"><div class="ac-icon">📖</div><div><h3>经验库智能体</h3><div class="ac-url">/experience-kb</div></div></div>
+        <div class="ac-desc">全域经验萃取，7类分类+去重+质量评分，80分以上自动推广，教一次全域永会</div>
+        <span class="ac-status status-online">● 在线运行</span>
+      </div>
+      <div class="agent-card">
+        <div class="ac-head"><div class="ac-icon">🔬</div><div><h3>真值中枢智能体</h3><div class="ac-url">9120端口</div></div></div>
+        <div class="ac-desc">全域唯一真相源，5216真值，46节点接入，自动吸收+冲突消解+Merkle完整性</div>
+        <span class="ac-status status-online">● 在线运行</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通讯协议层 -->
+  <div class="section">
+    <h2>智能体通讯协议层</h2>
+    <div class="comm-protocols">
+      <div class="proto-item"><div class="p-icon">📡</div><div class="p-name">A2A协议</div><div class="p-desc">智能体间任务派发/结果回传/共识互证</div></div>
+      <div class="proto-item"><div class="p-icon">🗄️</div><div class="p-name">9120真值总线</div><div class="p-desc">所有智能体共享的唯一真相源</div></div>
+      <div class="proto-item"><div class="p-icon">📢</div><div class="p-name">全域指令通道</div><div class="p-desc">中枢大脑下发指令，所有节点确认回执</div></div>
+      <div class="proto-item"><div class="p-icon">📋</div><div class="p-name">飞书审批流</div><div class="p-desc">高风险变更统一审批，P0-P4分级</div></div>
+      <div class="proto-item"><div class="p-icon">🔄</div><div class="p-name">经验共享池</div><div class="p-desc">一个节点经验自动推广所有节点</div></div>
+      <div class="proto-item"><div class="p-icon">⚡</div><div class="p-name">自动流水线</div><div class="p-desc">上报→处理→部署→可视化→固化全闭环</div></div>
+    </div>
+  </div>
+
+  <!-- 群体智能进化方向 -->
+  <div class="section">
+    <h2>群体智能进化方向</h2>
+    <div style="background:linear-gradient(145deg,#1a1a2e,#0f1a2e);border:1px solid rgba(212,175,55,0.25);border-radius:14px;padding:24px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px">
+        <div><strong style="color:#d4af37">当前：单体智能</strong><p style="color:#999;font-size:0.85em;margin-top:6px">8个智能体独立运行，通过9120共享数据</p></div>
+        <div><strong style="color:#8BC8EA">进化中：协作智能</strong><p style="color:#999;font-size:0.85em;margin-top:6px">A2A协议任务派发，多智能体辩论决策</p></div>
+        <div><strong style="color:#4ade80">目标：群体智能</strong><p style="color:#999;font-size:0.85em;margin-top:6px">蜂群协作，拆解复杂任务，自适应角色分工</p></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    火斗云智AIOS · 元极恒一超认知永恒自治体系 · 智能体网络V1.0
+    <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · MR-085智能体实体化公理</div>
+  </footer>
+</div>
+<script>
+// 动态定位8个智能体节点围绕中心
+const agents = [
+  {icon:"🏛️", label:"政务AI", angle:0},
+  {icon:"🎬", label:"短剧", angle:45},
+  {icon:"⛰️", label:"昆仑洞天", angle:90},
+  {icon:"📚", label:"教育", angle:135},
+  {icon:"🧮", label:"元内核", angle:180},
+  {icon:"📊", label:"数字资产", angle:225},
+  {icon:"📖", label:"经验库", angle:270},
+  {icon:"🔬", label:"真值中枢", angle:315}
+];
+const viz = document.getElementById("networkViz");
+const cx = 50, cy = 50, radius = 38;
+agents.forEach((a, i) => {
+  const rad = (a.angle - 90) * Math.PI / 180;
+  const x = cx + radius * Math.cos(rad);
+  const y = cy + radius * Math.sin(rad);
+  const node = document.createElement("div");
+  node.className = "agent-node";
+  node.style.left = x + "%";
+  node.style.top = y + "%";
+  node.style.transform = "translate(-50%,-50%)";
+  node.innerHTML = '<div class="an-icon">' + a.icon + '</div><div class="an-label">' + a.label + '</div>';
+  viz.appendChild(node);
+  // 连接线
+  const line = document.createElement("div");
+  line.className = "connection-line";
+  const dx = (x - cx) * viz.offsetWidth / 100;
+  const dy = (y - cy) * viz.offsetHeight / 100;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  line.style.left = "50%";
+  line.style.top = "50%";
+  line.style.width = len + "px";
+  line.style.transform = "rotate(" + angle + "deg)";
+  viz.appendChild(line);
+});
+</script>
+</body>
+</html>

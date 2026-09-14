@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps运维控制台 · 元极恒一</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a0f;color:#e8e8e8;min-height:100vh}
+.header{background:#0d0d14;border-bottom:1px solid rgba(255,255,255,.06);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header .logo{display:flex;align-items:center;gap:10px}
+.header .logo .icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#94D4D0,#8BC8EA);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#0a0a0f}
+.header .logo h1{font-size:15px;background:linear-gradient(90deg,#94D4D0,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .logo p{font-size:11px;color:#6b7280;margin-top:2px}
+.tabs{display:flex;gap:4px;padding:12px 20px;background:#0d0d14;border-bottom:1px solid rgba(255,255,255,.06);overflow-x:auto}
+.tab{padding:8px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;color:#9ca3af}
+.tab.active{background:linear-gradient(135deg,rgba(148,212,208,.2),rgba(139,200,234,.15));border-color:#94D4D0;color:#94D4D0}
+.container{padding:20px;max-width:1200px;margin:0 auto}
+.panel{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:20px;margin-bottom:16px}
+.panel h2{font-size:14px;color:#94D4D0;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel h2 .badge{font-size:10px;padding:2px 8px;background:rgba(148,212,208,.15);border-radius:4px;color:#94D4D0;font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px}
+.card .label{font-size:11px;color:#6b7280;margin-bottom:6px}
+.card .value{font-size:20px;font-weight:600;color:#e8e8e8}
+.card .value.ok{color:#52C41A}.card .value.warn{color:#FAAD14}.card .value.err{color:#EA6668}
+.server-item{display:flex;align-items:center;justify-content:space-between;padding:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:10px}
+.server-item .info{flex:1}
+.server-item .name{font-size:14px;font-weight:600;margin-bottom:4px}
+.server-item .meta{font-size:11px;color:#6b7280}
+.server-item .status{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600}
+.status.connected{background:rgba(82,196,26,.15);color:#52C41A}
+.status.failed{background:rgba(234,102,104,.15);color:#EA6668}
+.status.pending{background:rgba(250,173,20,.15);color:#FAAD14}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;cursor:pointer;transition:opacity .2s;font-weight:600}
+.btn:hover{opacity:.85}
+.btn-primary{background:linear-gradient(90deg,#94D4D0,#8BC8EA);color:#0a0a0f}
+.btn-danger{background:rgba(234,102,104,.15);color:#EA6668;border:1px solid rgba(234,102,104,.3)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.terminal{background:#000;border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;font-family:'Courier New',monospace}
+.terminal .header-bar{background:#1a1a1a;padding:8px 12px;font-size:11px;color:#6b7280;display:flex;justify-content:space-between}
+.terminal .output{padding:12px;min-height:200px;max-height:400px;overflow-y:auto;font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-all;color:#94D4D0}
+.terminal .input-row{display:flex;border-top:1px solid rgba(255,255,255,.1)}
+.terminal .input-row input{flex:1;background:transparent;border:none;padding:10px 12px;color:#e8e8e8;font-family:inherit;font-size:12px;outline:none}
+.terminal .input-row button{background:rgba(148,212,208,.15);border:none;color:#94D4D0;padding:0 16px;cursor:pointer;font-weight:600}
+.form-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.form-row input,.form-row select{flex:1;min-width:120px;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e8e8e8;font-size:13px;outline:none}
+.form-row input:focus{border-color:#94D4D0}
+.chat-box{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
+.chat-messages{padding:16px;min-height:300px;max-height:500px;overflow-y:auto}
+.chat-msg{margin-bottom:14px}
+.chat-msg .role{font-size:11px;color:#6b7280;margin-bottom:4px}
+.chat-msg.user .role{color:#94D4D0}
+.chat-msg.ai .role{color:#8BC8EA}
+.chat-msg .content{font-size:13px;line-height:1.7;background:rgba(255,255,255,.03);padding:10px 14px;border-radius:8px;white-space:pre-wrap}
+.chat-input{display:flex;border-top:1px solid rgba(255,255,255,.06)}
+.chat-input input{flex:1;background:transparent;border:none;padding:12px 16px;color:#e8e8e8;font-size:13px;outline:none}
+.chat-input button{background:linear-gradient(90deg,#94D4D0,#8BC8EA);border:none;color:#0a0a0f;padding:0 20px;cursor:pointer;font-weight:700}
+.hidden{display:none}
+@media(max-width:768px){
+  .container{padding:12px}
+  .grid{grid-template-columns:1fr}
+  .header{padding:10px 14px}
+  .tabs{padding:8px 12px}
+  .tab{padding:6px 12px;font-size:12px}
+}
+</style>
+    <link rel="canonical" href="https://huodouai.comops/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,167,232,.15);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+<a href="/" style="font-size:15px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none">火斗云智 AIOS</a>
+<a href="/products/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">产品矩阵</a>
+<a href="/showcase/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">演示中心</a>
+<a href="/status/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">服务状态</a>
+<a href="/solutions/government/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">解决方案</a>
+<a href="/cases/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">客户案例</a>
+<a href="/docs/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">文档</a>
+<a href="/pricing/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">定价</a>
+<a href="/blog/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">博客</a>
+<a href="/about/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">关于</a>
+<a href="/contact/" style="color:#c9a7e8;text-decoration:none;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid rgba(201,167,232,.3)">联系我们</a>
+</div><div style="height:50px"></div>
+
+<div class="header">
+<div class="logo">
+<div class="icon">Ops</div>
+<div>
+<h1>DevOps运维控制台</h1>
+<p>元极恒一 · 远程部署运维工程AI</p>
+</div>
+</div>
+<div style="font-size:12px;color:#52C41A">● 在线</div>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="switchTab('overview')">总览</div>
+<div class="tab" onclick="switchTab('servers')">服务器管理</div>
+<div class="tab" onclick="switchTab('terminal')">远程终端</div>
+<div class="tab" onclick="switchTab('services')">服务管理</div>
+<div class="tab" onclick="switchTab('ai-ops')">AI运维助手</div>
+</div>
+
+<div class="container">
+
+<!-- 总览 -->
+<div id="tab-overview" class="tab-content">
+<div class="panel">
+<h2>系统总览 <span class="badge">实时</span></h2>
+<div class="grid">
+<div class="card"><div class="label">托管服务器</div><div class="value" id="stat-servers">-</div></div>
+<div class="card"><div class="label">运行服务</div><div class="value" id="stat-services">-</div></div>
+<div class="card"><div class="label">AI Agent</div><div class="value ok" id="stat-ai">-</div></div>
+<div class="card"><div class="label">稳态评分</div><div class="value ok" id="stat-stability">-</div></div>
+</div>
+</div>
+<div class="panel">
+<h2>资源监控 <span class="badge" id="monitor-server">-</span></h2>
+<div class="grid">
+<div class="card"><div class="label">CPU负载</div><div class="value" id="mon-cpu">-</div></div>
+<div class="card"><div class="label">内存使用</div><div class="value" id="mon-mem">-</div></div>
+<div class="card"><div class="label">磁盘使用</div><div class="value" id="mon-disk">-</div></div>
+<div class="card"><div class="label">运行时间</div><div class="value" id="mon-uptime">-</div></div>
+</div>
+</div>
+</div>
+
+<!-- 服务器管理 -->
+<div id="tab-servers" class="tab-content hidden">
+<div class="panel">
+<h2>添加服务器 <span class="badge">支持密钥/密码/本地</span></h2>
+<div class="form-row">
+<input type="text" id="srv-name" placeholder="服务器名称（如：腾讯云生产）">
+<input type="text" id="srv-host" placeholder="IP地址（127.0.0.1为本地）">
+<input type="number" id="srv-port" placeholder="端口" value="22" style="max-width:80px">
+<input type="text" id="srv-user" placeholder="用户名" value="root" style="max-width:100px">
+<select id="srv-auth" style="max-width:120px" onchange="toggleAuth()">
+<option value="local">本地模式</option>
+<option value="password">密码</option>
+<option value="key">SSH密钥</option>
+</select>
+</div>
+<div class="form-row">
+<input type="password" id="srv-cred" placeholder="密码或私钥内容" style="display:none">
+<button class="btn btn-primary" onclick="addServer()">添加服务器</button>
+</div>
+</div>
+<div class="panel">
+<h2>服务器列表</h2>
+<div id="server-list"></div>
+</div>
+</div>
+
+<!-- 远程终端 -->
+<div id="tab-terminal" class="tab-content hidden">
+<div class="panel">
+<h2>远程命令终端 <span class="badge" id="term-server">选择服务器</span></h2>
+<div class="form-row">
+<select id="term-server-select" onchange="updateTermServer()" style="max-width:200px">
+<option value="">选择服务器</option>
+</select>
+</div>
+<div class="terminal">
+<div class="header-bar"><span>bash</span><span id="term-status">就绪</span></div>
+<div class="output" id="term-output">等待执行命令...</div>
+<div class="input-row">
+<input type="text" id="term-input" placeholder="输入命令，如: systemctl status nginx" onkeydown="if(event.key==='Enter')execCmd()">
+<button onclick="execCmd()">执行</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 服务管理 -->
+<div id="tab-services" class="tab-content hidden">
+<div class="panel">
+<h2>服务管理 <span class="badge">systemd</span></h2>
+<div class="form-row">
+<select id="svc-server" style="max-width:200px"><option value="">选择服务器</option></select>
+<input type="text" id="svc-name" placeholder="服务名称，如: nginx" style="max-width:200px">
+<button class="btn btn-primary btn-sm" onclick="svcAction('status')">状态</button>
+<button class="btn btn-primary btn-sm" onclick="svcAction('restart')">重启</button>
+<button class="btn btn-primary btn-sm" onclick="svcAction('logs')">日志</button>
+</div>
+<div id="svc-result" style="font-family:monospace;font-size:12px;background:#000;padding:12px;border-radius:8px;min-height:100px;color:#94D4D0;white-space:pre-wrap">等待操作...</div>
+</div>
+</div>
+
+<!-- AI运维助手 -->
+<div id="tab-ai-ops" class="tab-content hidden">
+<div class="panel">
+<h2>AI运维助手 <span class="badge">元极恒一 DevOps Agent</span></h2>
+<p style="font-size:12px;color:#6b7280;margin-bottom:12px">用自然语言描述运维需求，AI会自动选择工具执行。例如："检查nginx服务状态"、"查看服务器资源使用情况"、"重启中台服务"</p>
+<div class="chat-box">
+<div class="chat-messages" id="chat-msgs">
+<div class="chat-msg ai"><div class="role">元极恒一</div><div class="content">你好，我是DevOps运维助手。我可以帮你远程管理服务器、执行命令、监控资源、排查故障。请问需要什么帮助？</div></div>
+</div>
+<div class="chat-input">
+<input type="text" id="chat-input" placeholder="输入运维指令..." onkeydown="if(event.key==='Enter')sendChat()">
+<button onclick="sendChat()">发送</button>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+const API = '';
+const KEY = '';
+let currentServer = null;
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  event.target.classList.add('active');
+  if (name === 'overview') loadOverview();
+  if (name === 'servers') loadServers();
+  if (name === 'terminal') loadServerSelects();
+  if (name === 'services') loadServerSelects();
+}
+
+function toggleAuth() {
+  const auth = document.getElementById('srv-auth').value;
+  document.getElementById('srv-cred').style.display = auth === 'local' ? 'none' : 'block';
+}
+
+async function api(url, method='GET', body=null) {
+  const opts = {method, headers: {'Content-Type':'application/json','X-API-Key':KEY}};
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + url, opts);
+  return r.json();
+}
+
+async function loadOverview() {
+  const servers = await api('/smartai/api/v1/servers');
+  document.getElementById('stat-servers').textContent = servers.count || 0;
+  const info = await api('/smartai/api/v1/ai/info');
+  document.getElementById('stat-ai').textContent = info.version || '-';
+  try {
+    const stab = await api('/api/v1/meta/stability');
+    document.getElementById('stat-stability').textContent = (stab.overall_stability || '?') + ' ' + (stab.grade || '');
+  } catch(e) {}
+  // 资源监控
+  if (servers.servers && servers.servers.length > 0) {
+    const srv = servers.servers[0];
+    currentServer = srv.id;
+    document.getElementById('monitor-server').textContent = srv.name;
+    const mon = await api(`/smartai/api/v1/servers/${srv.id}/monitor`);
+    if (mon.output) {
+      const lines = mon.output.split('\n');
+      document.getElementById('mon-uptime').textContent = (lines.find(l=>l.includes('up'))||'').split(',')[0].trim().substring(0,20) || '-';
+      const memLine = lines.find(l=>l.includes('Mem:'));
+      if (memLine) document.getElementById('mon-mem').textContent = memLine.split(/\s+/).slice(2,4).join(' ');
+      const diskLine = lines.find(l=>l.includes('/') && l.includes('%'));
+      if (diskLine) document.getElementById('mon-disk').textContent = diskLine.split(/\s+/).find(x=>x.includes('%')) || '-';
+      const loadLine = lines.find(l=>l.includes('load average'));
+      if (loadLine) document.getElementById('mon-cpu').textContent = loadLine.split('load average:')[1].split(',')[0].trim();
+    }
+  }
+  document.getElementById('stat-services').textContent = '14';
+}
+
+async function loadServers() {
+  const data = await api('/smartai/api/v1/servers');
+  const list = document.getElementById('server-list');
+  list.innerHTML = data.servers.map(s => `
+    <div class="server-item">
+      <div class="info">
+        <div class="name">${s.name}</div>
+        <div class="meta">${s.host}:${s.port} | ${s.username} | ${s.auth_type}</div>
+      </div>
+      <span class="status ${s.status}">${s.status}</span>
+      <button class="btn btn-danger btn-sm" style="margin-left:10px" onclick="delServer(${s.id})">删除</button>
+    </div>
+  `).join('') || '<p style="color:#6b7280;font-size:13px">暂无服务器</p>';
+}
+
+async function addServer() {
+  const body = {
+    name: document.getElementById('srv-name').value,
+    host: document.getElementById('srv-host').value,
+    port: parseInt(document.getElementById('srv-port').value) || 22,
+    username: document.getElementById('srv-user').value,
+    auth_type: document.getElementById('srv-auth').value,
+    credential: document.getElementById('srv-cred').value || 'local'
+  };
+  if (!body.name || !body.host) { alert('名称和IP必填'); return; }
+  const r = await api('/smartai/api/v1/servers', 'POST', body);
+  alert('服务器添加: ' + (r.status || r.error));
+  loadServers();
+}
+
+async function delServer(id) {
+  if (!confirm('确认删除？')) return;
+  await api('/smartai/api/v1/servers/' + id, 'DELETE');
+  loadServers();
+}
+
+async function loadServerSelects() {
+  const data = await api('/smartai/api/v1/servers');
+  const opts = '<option value="">选择服务器</option>' + data.servers.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  document.getElementById('term-server-select').innerHTML = opts;
+  document.getElementById('svc-server').innerHTML = opts;
+}
+
+function updateTermServer() {
+  const id = document.getElementById('term-server-select').value;
+  document.getElementById('term-server').textContent = id ? '服务器#' + id : '选择服务器';
+}
+
+async function execCmd() {
+  const sid = document.getElementById('term-server-select').value;
+  const cmd = document.getElementById('term-input').value;
+  if (!sid) { alert('先选择服务器'); return; }
+  if (!cmd) return;
+  document.getElementById('term-status').textContent = '执行中...';
+  document.getElementById('term-output').textContent += '\n$ ' + cmd + '\n';
+  const r = await api(`/smartai/api/v1/servers/${sid}/exec`, 'POST', {command: cmd});
+  document.getElementById('term-output').textContent += (r.output || '') + (r.error ? 'ERROR: ' + r.error : '') + '\n';
+  document.getElementById('term-status').textContent = '退出码: ' + (r.exit_code ?? '-');
+  document.getElementById('term-input').value = '';
+  document.getElementById('term-output').scrollTop = document.getElementById('term-output').scrollHeight;
+}
+
+async function svcAction(action) {
+  const sid = document.getElementById('svc-server').value;
+  const svc = document.getElementById('svc-name').value;
+  if (!sid || !svc) { alert('选择服务器并输入服务名'); return; }
+  let cmd;
+  if (action === 'status') cmd = `systemctl status ${svc} --no-pager | head -20`;
+  else if (action === 'restart') cmd = `systemctl restart ${svc} && systemctl is-active ${svc}`;
+  else cmd = `journalctl -u ${svc} -n 50 --no-pager`;
+  const r = await api(`/smartai/api/v1/servers/${sid}/exec`, 'POST', {command: cmd});
+  document.getElementById('svc-result').textContent = r.output || r.error || '无输出';
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const msgs = document.getElementById('chat-msgs');
+  msgs.innerHTML += `<div class="chat-msg user"><div class="role">你</div><div class="content">${msg}</div></div>`;
+  input.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  const r = await api('/smartai/api/v1/ai/chat', 'POST', {message: msg, stream: false, session_id: 'ops-console'});
+  let tools = r.tools ? r.tools.join(', ') : '';
+  msgs.innerHTML += `<div class="chat-msg ai"><div class="role">元极恒一 ${tools ? '| 工具: '+tools : ''}</div><div class="content">${r.reply || r.error || '无响应'}</div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// 初始化
+loadOverview();
+</script>
+<div style="background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:30px 20px;text-align:center;font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+<div style="max-width:800px;margin:0 auto">
+<div style="margin-bottom:12px">
+<a href="/products/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">产品矩阵</a>
+<a href="/showcase/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">演示中心</a>
+<a href="/status/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">服务状态</a>
+<a href="/docs/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">文档</a>
+<a href="/pricing/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">定价</a>
+<a href="/blog/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">博客</a>
+<a href="/about/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">关于</a>
+<a href="/contact/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">联系</a>
+<a href="/privacy/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">隐私</a>
+<a href="/terms/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">条款</a>
+</div>
+<p style="color:#4b5563;font-size:11px;margin:0">© 2026 火斗云智 AIOS · Ω₀⊂⊙∞⊂Ω · DID-BR-000002</p>
+</div>
+</div></body>
+</html>

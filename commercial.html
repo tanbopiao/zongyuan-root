@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZR-MHP 元极恒一商业化方案 V1.0</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a0f; color:#e0e0e0; font-family:'PingFang SC','Microsoft YaHei',sans-serif; line-height:1.6; }
+.header { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%); padding:40px 30px; border-bottom:2px solid #d4af37; text-align:center; }
+.header h1 { color:#d4af37; font-size:32px; letter-spacing:3px; margin-bottom:10px; }
+.header .subtitle { color:#888; font-size:14px; }
+.header .meta { margin-top:15px; color:#666; font-size:12px; }
+.header .meta span { color:#d4af37; }
+.container { max-width:1200px; margin:0 auto; padding:30px 20px; }
+.section { margin-bottom:40px; }
+.section-title { color:#d4af37; font-size:20px; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid #333; display:flex; align-items:center; gap:10px; }
+.section-title .icon { font-size:24px; }
+.grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(350px,1fr)); gap:20px; }
+.grid-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; }
+.grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px; }
+.card { background:#1a1a2e; border:1px solid #333; border-radius:10px; padding:20px; position:relative; overflow:hidden; transition:transform .2s,box-shadow .2s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(212,175,55,0.15); }
+.card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,#d4af37,transparent); }
+.card.featured { border-color:#d4af37; }
+.card.featured::before { background:linear-gradient(90deg,#d4af37,#f0c040,#d4af37); }
+.card h3 { color:#d4af37; font-size:16px; margin-bottom:12px; }
+.card .price { font-size:28px; font-weight:bold; color:#fff; margin:10px 0; }
+.card .price .unit { font-size:12px; color:#888; font-weight:normal; }
+.card .desc { color:#aaa; font-size:13px; margin-bottom:15px; }
+.card ul { list-style:none; }
+.card ul li { padding:6px 0; font-size:12px; color:#bbb; border-bottom:1px solid #222; }
+.card ul li:last-child { border-bottom:none; }
+.card ul li::before { content:'✓ '; color:#4ade80; }
+.card ul li.no::before { content:'✗ '; color:#666; }
+.badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:10px; font-weight:bold; }
+.badge.free { background:#166534; color:#4ade80; }
+.badge.basic { background:#1e3a5f; color:#60a5fa; }
+.badge.pro { background:#713f12; color:#fbbf24; }
+.badge.enterprise { background:#7f1d1d; color:#f87171; }
+.badge.hot { background:#d4af37; color:#0a0a0f; }
+.product-icon { font-size:32px; margin-bottom:10px; }
+.product-meta { display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding-top:10px; border-top:1px solid #222; }
+.product-meta .tag { font-size:10px; color:#888; }
+.product-meta .status { font-size:10px; padding:2px 8px; border-radius:3px; }
+.status.online { background:#166534; color:#4ade80; }
+.status.beta { background:#713f12; color:#fbbf24; }
+.status.planning { background:#333; color:#888; }
+.tier-header { text-align:center; padding:15px; background:rgba(212,175,55,0.05); border-radius:8px; margin-bottom:15px; }
+.tier-header .tier-name { font-size:18px; font-weight:bold; color:#d4af37; }
+.tier-header .tier-price { font-size:24px; color:#fff; margin:5px 0; }
+.tier-header .tier-desc { font-size:11px; color:#888; }
+.compare-table { width:100%; border-collapse:collapse; font-size:12px; }
+.compare-table th { background:#1e1e2e; color:#d4af37; padding:10px; text-align:left; border-bottom:2px solid #d4af37; }
+.compare-table td { padding:8px 10px; border-bottom:1px solid #222; color:#bbb; }
+.compare-table tr:hover { background:rgba(212,175,55,0.05); }
+.compare-table .yes { color:#4ade80; }
+.compare-table .no { color:#666; }
+.roadmap-item { display:flex; gap:15px; padding:15px; background:#1a1a2e; border-radius:8px; margin-bottom:10px; border-left:3px solid #d4af37; }
+.roadmap-item .phase { min-width:80px; }
+.roadmap-item .phase .num { font-size:24px; font-weight:bold; color:#d4af37; }
+.roadmap-item .phase .label { font-size:10px; color:#888; }
+.roadmap-item .content h4 { color:#fff; font-size:14px; margin-bottom:5px; }
+.roadmap-item .content p { color:#aaa; font-size:12px; }
+.footer { text-align:center; padding:30px; color:#555; font-size:11px; border-top:1px solid #222; margin-top:40px; }
+.footer span { color:#d4af37; }
+.highlight-box { background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.05)); border:1px solid rgba(212,175,55,0.3); border-radius:10px; padding:20px; margin:20px 0; }
+.highlight-box h4 { color:#d4af37; margin-bottom:10px; }
+.highlight-box p { color:#ccc; font-size:13px; }
+</style>
+<meta name="description" content="火斗云智 AIOS 商业方案 - 企业级解决方案，定制化服务，技术支持">
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/commercial.html">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products.html">产品中心</a>
+<a href="/solutions.html">解决方案</a>
+<a href="/architecture.html">技术架构</a>
+<a href="/whitepaper.html">技术白皮书</a>
+<a href="/blog.html">技术博客</a>
+<a href="/docs.html">开发者文档</a>
+<a href="/pricing.html">定价</a>
+<a href="/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+<!-- 统一导航栏 -->
+<div style="position:sticky;top:0;z-index:1000;background:rgba(10,10,15,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(212,175,55,0.2);padding:12px 24px;">
+  <div style="max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">🔥</span>
+      <span style="font-size:14px;font-weight:600;background:linear-gradient(135deg,#d4af37,#f4e4a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">火斗云智 AIOS</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 首页</a>
+      <a href="/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="/microkernel-architecture.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📐 架构白皮书</a>
+      <a href="/ops-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">⚙️ 运维中枢</a>
+    </div>
+  </div>
+</div>
+
+<div class="header">
+  <h1>⚡ 火斗云智系统 · 商业化方案</h1>
+  <div class="subtitle">火斗云智 AIOS · 企业级AI稳态运维系统 · 产品矩阵与定价策略 V1.0</div>
+  <div class="meta">DID: <span>DID-BR-000002</span> | 协议: <span>ZR-MHP V1.2.0</span> | 元极恒一自治体系</div>
+</div>
+<div class="container">
+
+  <!-- 商业定位 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🎯</span> 商业定位与核心价值</div>
+    <div class="highlight-box">
+      <h4>核心定位：企业级AI稳态运维系统</h4>
+      <p>不做又一个大模型，不做又一个应用。做AI时代的"运维底座"——让企业的AI系统从"能跑"到"稳跑"，从"人工运维"到"自治运维"。核心价值：降低AI系统运维成本60%，提升系统稳定性99.9%，实现多节点统一治理。</p>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <h3>📉 降本</h3>
+        <p class="desc">自动化运维替代人工，大模型路由优化调用成本</p>
+        <div class="price">60%<span class="unit"> 运维成本降低</span></div>
+      </div>
+      <div class="card">
+        <h3>📈 增效</h3>
+        <p class="desc">多节点统一治理，自治巡检自愈，7x24无人值守</p>
+        <div class="price">99.9%<span class="unit"> 系统稳定性</span></div>
+      </div>
+      <div class="card">
+        <h3>🔒 确权</h3>
+        <p class="desc">Merkle-DAG链式哈希确权，真值验证，防篡改溯源</p>
+        <div class="price">100%<span class="unit"> 资产可追溯</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 产品矩阵 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📦</span> 七大产品线矩阵</div>
+    <div class="grid-3">
+      <div class="card featured">
+        <div class="product-icon">⚙️</div>
+        <h3>火斗云智 · 元运维平台</h3>
+        <p class="desc">企业级AI系统稳态运维平台，实时监控、自动巡检、智能自愈、多节点统一治理</p>
+        <ul>
+          <li>实时监控Dashboard</li>
+          <li>自动巡检+自愈</li>
+          <li>多节点统一管理</li>
+          <li>健康评分+告警</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">核心产品</span>
+          <span class="status online">已上线</span>
+        </div>
+      </div>
+      <div class="card featured">
+        <div class="product-icon">🔗</div>
+        <h3>火斗云智 · 同源微内核</h3>
+        <p class="desc">ZR-MHP同源节点微内核分发协议，多节点身份认证、任务分发、对账确认</p>
+        <ul>
+          <li>26个API端点</li>
+          <li>Ed25519密码学信任链</li>
+          <li>节点身份+角色体系</li>
+          <li>任务分发+对账确认</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">基础设施</span>
+          <span class="status online">已上线</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="product-icon">🤖</div>
+        <h3>火斗云智 · 大模型网关</h3>
+        <p class="desc">多模型统一接入，智能路由，免费优先调度，成本优化，故障自动切换</p>
+        <ul>
+          <li>5+模型统一API</li>
+          <li>智能路由+负载均衡</li>
+          <li>免费优先调度策略</li>
+          <li>故障自动切换</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">AI能力</span>
+          <span class="status online">已上线</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="product-icon">🎬</div>
+        <h3>火斗云智 · 短剧工业化</h3>
+        <p class="desc">昆仑洞天短剧全链路自动化生产，从大纲到分镜到关键帧到视频</p>
+        <ul>
+          <li>分集大纲自动生成</li>
+          <li>分镜表+关键帧</li>
+          <li>角色一致性保障</li>
+          <li>9:16竖屏输出</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">内容生产</span>
+          <span class="status beta">Beta</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="product-icon">✅</div>
+        <h3>火斗云智 · 真值确权</h3>
+        <p class="desc">基于SM-BS语义-黎曼流形的真值提炼，Merkle-DAG哈希确权，防篡改溯源</p>
+        <ul>
+          <li>真值提炼+漂移检测</li>
+          <li>SHA256哈希确权</li>
+          <li>链式继承+eFuse熔断</li>
+          <li>黑金藏品卡生成</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">数据资产</span>
+          <span class="status online">已上线</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="product-icon">🧠</div>
+        <h3>火斗云智 · 决策支持</h3>
+        <p class="desc">三维稳态决策系统（利益40%/风险35%/成本25%），多方案生成+评估+推荐</p>
+        <ul>
+          <li>多方案自动生成</li>
+          <li>三维稳态评估</li>
+          <li>风险识别分级</li>
+          <li>因果链溯源</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">企业服务</span>
+          <span class="status beta">Beta</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="product-icon">📚</div>
+        <h3>火斗云智 · 企业知识库</h3>
+        <p class="desc">RAG语义检索，向量存储，飞书/腾讯文档/百度网盘多端同步</p>
+        <ul>
+          <li>RAG语义召回</li>
+          <li>向量数据库</li>
+          <li>多端文档同步</li>
+          <li>权限管理</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">数据服务</span>
+          <span class="status planning">规划中</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分层定价 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">💰</span> 分层定价策略</div>
+    <div class="grid-4">
+      <div class="card">
+        <div class="tier-header">
+          <div class="tier-name">🆓 个人版</div>
+          <div class="tier-price">¥0<span class="unit">/月</span></div>
+          <div class="tier-desc">个人开发者/学习</div>
+        </div>
+        <ul>
+          <li>元运维Dashboard</li>
+          <li>1个节点管理</li>
+          <li>大模型网关（免费额度）</li>
+          <li>基础真值确权</li>
+          <li class="no">自动巡检自愈</li>
+          <li class="no">多节点治理</li>
+          <li class="no">技术支持</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="tier-header">
+          <div class="tier-name">🔵 基础版</div>
+          <div class="tier-price">¥299<span class="unit">/月</span></div>
+          <div class="tier-desc">小微企业/创业团队</div>
+        </div>
+        <ul>
+          <li>全部个人版功能</li>
+          <li>5个节点管理</li>
+          <li>自动巡检+自愈</li>
+          <li>大模型网关（100万token/月）</li>
+          <li>真值确权（100次/月）</li>
+          <li>邮件技术支持</li>
+          <li class="no">私有化部署</li>
+        </ul>
+      </div>
+      <div class="card featured">
+        <div class="tier-header">
+          <div class="tier-name">🟡 专业版 <span class="badge hot">推荐</span></div>
+          <div class="tier-price">¥999<span class="unit">/月</span></div>
+          <div class="tier-desc">中型企业/AI团队</div>
+        </div>
+        <ul>
+          <li>全部基础版功能</li>
+          <li>20个节点管理</li>
+          <li>同源微内核授权</li>
+          <li>大模型网关（500万token/月）</li>
+          <li>真值确权（无限次）</li>
+          <li>决策支持系统</li>
+          <li>短剧流水线（10集/月）</li>
+          <li>7x24技术支持</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="tier-header">
+          <div class="tier-name">🔴 企业版</div>
+          <div class="tier-price">定制<span class="unit">/年</span></div>
+          <div class="tier-desc">大型企业/集团</div>
+        </div>
+        <ul>
+          <li>全部专业版功能</li>
+          <li>无限节点管理</li>
+          <li>私有化部署</li>
+          <li>大模型网关（无限）</li>
+          <li>定制化开发</li>
+          <li>专属客户经理</li>
+          <li>SLA 99.99%</li>
+          <li>安全合规审计</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 单品定价 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🏷️</span> 单品定价明细</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>产品</th>
+          <th>计费方式</th>
+          <th>个人版</th>
+          <th>基础版</th>
+          <th>专业版</th>
+          <th>企业版</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>⚙️ 元运维平台</td>
+          <td>按节点/月</td>
+          <td>1节点 免费</td>
+          <td>5节点 ¥299</td>
+          <td>20节点 ¥599</td>
+          <td>无限 定制</td>
+        </tr>
+        <tr>
+          <td>🔗 同源微内核</td>
+          <td>按节点授权/年</td>
+          <td class="no">不包含</td>
+          <td class="no">不包含</td>
+          <td>20节点 ¥2000/年</td>
+          <td>无限 定制</td>
+        </tr>
+        <tr>
+          <td>🤖 大模型网关</td>
+          <td>按token/月</td>
+          <td>10万 免费</td>
+          <td>100万 ¥99</td>
+          <td>500万 ¥399</td>
+          <td>无限 定制</td>
+        </tr>
+        <tr>
+          <td>🎬 短剧流水线</td>
+          <td>按集/项目</td>
+          <td class="no">不包含</td>
+          <td>3集/月 ¥199</td>
+          <td>10集/月 ¥499</td>
+          <td>无限 定制</td>
+        </tr>
+        <tr>
+          <td>✅ 真值确权</td>
+          <td>按次/月</td>
+          <td>10次 免费</td>
+          <td>100次 ¥49</td>
+          <td>无限 ¥199</td>
+          <td>无限 定制</td>
+        </tr>
+        <tr>
+          <td>🧠 决策支持</td>
+          <td>按项目/月</td>
+          <td class="no">不包含</td>
+          <td class="no">不包含</td>
+          <td>5项目 ¥299</td>
+          <td>无限 定制</td>
+        </tr>
+        <tr>
+          <td>📚 企业知识库</td>
+          <td>按存储/月</td>
+          <td>1GB 免费</td>
+          <td>10GB ¥99</td>
+          <td>50GB ¥299</td>
+          <td>无限 定制</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 报价方案 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📋</span> 典型客户报价方案</div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>方案A：AI创业团队（5-10人）</h3>
+        <p class="desc">适用：有AI产品，需要稳定运维，预算有限</p>
+        <div class="price">¥299<span class="unit">/月</span></div>
+        <ul>
+          <li>元运维平台（5节点）</li>
+          <li>大模型网关（100万token/月）</li>
+          <li>真值确权（100次/月）</li>
+          <li>自动巡检+自愈</li>
+          <li>邮件技术支持</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">首月免费试用</span>
+          <span class="status online">立即可用</span>
+        </div>
+      </div>
+      <div class="card featured">
+        <h3>方案B：中型AI企业（20-50人）</h3>
+        <p class="desc">适用：多节点部署，需要统一治理，追求效率</p>
+        <div class="price">¥999<span class="unit">/月</span></div>
+        <ul>
+          <li>元运维平台（20节点）</li>
+          <li>同源微内核授权</li>
+          <li>大模型网关（500万token/月）</li>
+          <li>真值确权（无限）</li>
+          <li>决策支持系统</li>
+          <li>短剧流水线（10集/月）</li>
+          <li>7x24技术支持</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">最受欢迎</span>
+          <span class="status online">立即可用</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>方案C：内容创作团队/MCN</h3>
+        <p class="desc">适用：短剧/短视频内容生产，需要工业化流水线</p>
+        <div class="price">¥1,499<span class="unit">/月</span></div>
+        <ul>
+          <li>短剧流水线（30集/月）</li>
+          <li>元运维平台（5节点）</li>
+          <li>大模型网关（200万token/月）</li>
+          <li>角色一致性保障</li>
+          <li>9:16竖屏输出</li>
+          <li>专属创作支持</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">内容专项</span>
+          <span class="status beta">Beta优惠</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>方案D：大型企业私有化</h3>
+        <p class="desc">适用：数据敏感，需要私有化部署，定制化需求</p>
+        <div class="price">¥100,000+<span class="unit">/年</span></div>
+        <ul>
+          <li>全部产品私有化部署</li>
+          <li>无限节点+无限调用</li>
+          <li>定制化功能开发</li>
+          <li>专属客户经理+技术团队</li>
+          <li>SLA 99.99%保障</li>
+          <li>安全合规审计</li>
+          <li>年度架构优化</li>
+        </ul>
+        <div class="product-meta">
+          <span class="tag">联系销售</span>
+          <span class="status planning">定制方案</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 商业化路径 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🚀</span> 商业化路径规划</div>
+    <div class="roadmap-item">
+      <div class="phase"><div class="num">P1</div><div class="label">2026 Q4</div></div>
+      <div class="content">
+        <h4>验证期：产品打磨+种子用户</h4>
+        <p>火斗云智元运维平台+同源微内核正式商用，免费版+基础版上线，招募50家种子用户，验证产品-market fit，目标MRR ¥10,000</p>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="phase"><div class="num">P2</div><div class="label">2027 Q1</div></div>
+      <div class="content">
+        <h4>增长期：专业版上线+渠道拓展</h4>
+        <p>专业版发布，大模型网关+真值确权商用，建立合作伙伴渠道，目标客户200家，MRR ¥100,000</p>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="phase"><div class="num">P3</div><div class="label">2027 Q2-Q3</div></div>
+      <div class="content">
+        <h4>扩张期：企业版+行业解决方案</h4>
+        <p>企业版私有化部署，短剧流水线+决策支持商用，推出金融/政务/制造行业解决方案，目标客户500家，MRR ¥500,000</p>
+      </div>
+    </div>
+    <div class="roadmap-item">
+      <div class="phase"><div class="num">P4</div><div class="label">2027 Q4+</div></div>
+      <div class="content">
+        <h4>生态期：平台化+开发者生态</h4>
+        <p>开放API市场，第三方应用接入，开发者分成机制，构建AI运维生态，目标客户1000+，ARR ¥10,000,000</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 核心优势 -->
+  <div class="section">
+    <div class="section-title"><span class="icon">💎</span> 核心竞争优势</div>
+    <div class="grid-3">
+      <div class="card">
+        <h3>🧬 同源架构</h3>
+        <p class="desc">ZR-MHP同源节点协议，多节点天然统一治理，避免异构系统集成难题</p>
+      </div>
+      <div class="card">
+        <h3>🤖 自治运维</h3>
+        <p class="desc">自动巡检+智能自愈+自动晋升，7x24无人值守，降低人工运维成本</p>
+      </div>
+      <div class="card">
+        <h3>🔐 真值确权</h3>
+        <p class="desc">Merkle-DAG链式哈希，SM-BS流形真值验证，企业级数据资产确权</p>
+      </div>
+      <div class="card">
+        <h3>⚡ 免费优先</h3>
+        <p class="desc">大模型网关智能路由，免费模型优先调度，大幅降低AI调用成本</p>
+      </div>
+      <div class="card">
+        <h3>🏗️ 从根系生长</h3>
+        <p class="desc">火斗云智架构从内核生长，避免熵增堆积，长期可维护性强</p>
+      </div>
+      <div class="card">
+        <h3>🔄 持续进化</h3>
+        <p class="desc">元学习自进化引擎，系统持续优化，越用越智能</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="footer">
+  Ω₀⊂⊙∞⊂Ω | <span>DID-BR-000002</span> | 火斗云智系统 商业化方案 V1.0 | 企业级AI稳态运维系统
+</div>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products.html">产品</a>
+<a href="/solutions.html">解决方案</a>
+<a href="/architecture.html">架构</a>
+<a href="/whitepaper.html">白皮书</a>
+<a href="/docs.html">文档</a>
+<a href="/pricing.html">定价</a>
+<a href="/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3.0 生产流水线控制台 · 火斗云智 AIOS</title>
+<style>
+:root {
+  --bg-0: #05070d;
+  --bg-1: #0a0e17;
+  --bg-2: #0f1420;
+  --bg-3: #151b2b;
+  --surface: rgba(255,255,255,0.03);
+  --surface-hover: rgba(255,255,255,0.06);
+  --surface-elevated: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.14);
+  --border-accent: rgba(99,179,237,0.3);
+  --text-1: #f1f5f9;
+  --text-2: #94a3b8;
+  --text-3: #64748b;
+  --text-4: #475569;
+  --accent: #63b3ed;
+  --accent-2: #4fd1c5;
+  --accent-dim: rgba(99,179,237,0.15);
+  --accent-glow: rgba(99,179,237,0.25);
+  --success: #68d391;
+  --warning: #f6e05e;
+  --danger: #fc8181;
+  --purple: #b794f4;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'PingFang SC', 'Noto Sans SC', sans-serif;
+  background: var(--bg-0);
+  color: var(--text-1);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+.bg-atmosphere { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.bg-noise { position: absolute; inset: 0; opacity: 0.025; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.bg-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.1; }
+.bg-orb-1 { width: 500px; height: 500px; top: -150px; right: -100px; background: radial-gradient(circle, var(--accent), transparent 70%); }
+.bg-orb-2 { width: 400px; height: 400px; bottom: -100px; left: -100px; background: radial-gradient(circle, var(--purple), transparent 70%); }
+
+.navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 2rem; background: rgba(5,7,13,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.navbar-inner { max-width: 1600px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 1rem; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brand-mark { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--purple)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: white; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+.brand-name { font-size: 14px; font-weight: 600; color: var(--text-1); }
+.brand-sub { font-size: 10px; color: var(--text-3); }
+.nav-links { display: flex; gap: 4px; }
+.nav-link { padding: 8px 14px; border-radius: var(--radius-md); color: var(--text-2); font-size: 13px; text-decoration: none; transition: all 0.2s; cursor: pointer; }
+.nav-link:hover { background: var(--surface-hover); color: var(--text-1); }
+.nav-link.active { background: var(--accent-dim); color: var(--accent); }
+.nav-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); padding: 6px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.main { max-width: 1600px; margin: 0 auto; padding: 80px 2rem 4rem; position: relative; z-index: 1; }
+
+.page-header { margin-bottom: 2rem; }
+.page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; display: flex; align-items: center; gap: 12px; }
+.page-title-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: linear-gradient(135deg, var(--accent-dim), rgba(183,148,244,0.15)); border: 1px solid var(--border-accent); color: var(--accent); font-weight: 500; }
+.page-subtitle { font-size: 14px; color: var(--text-3); }
+
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; transition: all 0.3s; }
+.stat-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.stat-label { font-size: 12px; color: var(--text-3); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.stat-value { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stat-value.accent { color: var(--accent); }
+.stat-value.success { color: var(--success); }
+.stat-value.warning { color: var(--warning); }
+.stat-value.purple { color: var(--purple); }
+.stat-trend { font-size: 11px; color: var(--text-4); margin-top: 4px; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+.tab { padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--text-3); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; margin-bottom: -1px; }
+.tab:hover { color: var(--text-1); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-content { display: none; animation: fadeIn 0.3s; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; }
+.panel-title { font-size: 16px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+.panel-title-icon { width: 24px; height: 24px; border-radius: 6px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.form-group { margin-bottom: 1rem; }
+.form-label { display: block; font-size: 12px; color: var(--text-3); margin-bottom: 6px; font-weight: 500; }
+.form-input, .form-textarea, .form-select {
+  width: 100%; padding: 10px 14px; background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius-md); color: var(--text-1); font-size: 13px; outline: none;
+  transition: all 0.2s; font-family: inherit;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--border-accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+.form-textarea { min-height: 80px; resize: vertical; }
+.form-full { grid-column: 1 / -1; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 20px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none; transition: all 0.2s; font-family: inherit;
+}
+.btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #0a0e17; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-secondary { background: var(--surface-elevated); color: var(--text-1); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--surface-hover); }
+.btn-danger { background: rgba(252,129,129,0.15); color: var(--danger); border: 1px solid rgba(252,129,129,0.3); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.project-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.project-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem; background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;
+}
+.project-item:hover { border-color: var(--border-accent); background: var(--surface-hover); }
+.project-info { flex: 1; }
+.project-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.project-meta { font-size: 11px; color: var(--text-4); display: flex; gap: 12px; }
+.project-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+.status-created { background: rgba(148,163,184,0.15); color: var(--text-2); }
+.status-running { background: rgba(99,179,237,0.15); color: var(--accent); }
+.status-completed { background: rgba(104,211,145,0.15); color: var(--success); }
+.status-failed { background: rgba(252,129,129,0.15); color: var(--danger); }
+
+.pipeline-steps { display: flex; gap: 0; margin: 1.5rem 0; }
+.pipeline-step { flex: 1; text-align: center; position: relative; }
+.pipeline-step::after {
+  content: ''; position: absolute; top: 16px; left: 50%; width: 100%; height: 2px;
+  background: var(--border); z-index: 0;
+}
+.pipeline-step:last-child::after { display: none; }
+.step-circle {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--bg-3);
+  border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; margin: 0 auto 8px; position: relative; z-index: 1;
+  transition: all 0.3s;
+}
+.step-circle.completed { background: var(--success); border-color: var(--success); color: #0a0e17; }
+.step-circle.running { background: var(--accent); border-color: var(--accent); color: #0a0e17; animation: stepPulse 1.5s infinite; }
+.step-circle.failed { background: var(--danger); border-color: var(--danger); color: white; }
+@keyframes stepPulse { 0%,100% { box-shadow: 0 0 0 0 var(--accent-glow); } 50% { box-shadow: 0 0 0 8px transparent; } }
+.step-name { font-size: 11px; color: var(--text-3); }
+.step-name.completed { color: var(--success); }
+.step-name.running { color: var(--accent); }
+
+.quality-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.quality-item {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 0.875rem;
+}
+.quality-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.quality-name { font-size: 12px; color: var(--text-2); font-weight: 500; }
+.quality-score { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.quality-bar { height: 4px; background: var(--bg-3); border-radius: 2px; overflow: hidden; }
+.quality-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+.score-pass { color: var(--success); }
+.score-pass .quality-bar-fill { background: var(--success); }
+.score-warning { color: var(--warning); }
+.score-warning .quality-bar-fill { background: var(--warning); }
+.score-fail { color: var(--danger); }
+.score-fail .quality-bar-fill { background: var(--danger); }
+
+.overall-score {
+  text-align: center; padding: 2rem; background: linear-gradient(135deg, var(--accent-dim), rgba(183,148,244,0.1));
+  border: 1px solid var(--border-accent); border-radius: var(--radius-lg); margin-bottom: 1.5rem;
+}
+.overall-value { font-size: 56px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.overall-label { font-size: 13px; color: var(--text-3); margin-top: 8px; }
+.overall-badge { display: inline-block; margin-top: 12px; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.badge-pass { background: rgba(104,211,145,0.2); color: var(--success); }
+.badge-fail { background: rgba(252,129,129,0.2); color: var(--danger); }
+
+.asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+.asset-card {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+  overflow: hidden; transition: all 0.2s;
+}
+.asset-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.asset-thumb { height: 120px; background: linear-gradient(135deg, var(--bg-3), var(--bg-2)); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+.asset-info { padding: 0.75rem; }
+.asset-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asset-type { font-size: 10px; color: var(--text-4); padding: 2px 8px; border-radius: 4px; background: var(--surface); display: inline-block; }
+
+.log-panel { background: #0a0e17; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; line-height: 1.6; max-height: 300px; overflow-y: auto; }
+.log-line { color: var(--text-3); }
+.log-line.info { color: var(--accent); }
+.log-line.success { color: var(--success); }
+.log-line.error { color: var(--danger); }
+.log-line.warning { color: var(--warning); }
+.log-time { color: var(--text-4); margin-right: 8px; }
+
+.empty-state { text-align: center; padding: 3rem; color: var(--text-4); }
+.empty-state-icon { font-size: 48px; margin-bottom: 1rem; opacity: 0.3; }
+.empty-state-text { font-size: 14px; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 2000; display: none; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--radius-xl); padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+.modal-title { font-size: 18px; font-weight: 600; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; }
+.modal-close { cursor: pointer; color: var(--text-3); font-size: 20px; background: none; border: none; }
+.modal-close:hover { color: var(--text-1); }
+
+.toast {
+  position: fixed; top: 80px; right: 2rem; z-index: 3000; padding: 12px 20px;
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+  font-size: 13px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); transform: translateX(120%);
+  transition: transform 0.3s; display: flex; align-items: center; gap: 10px;
+}
+.toast.show { transform: translateX(0); }
+.toast.success { border-color: rgba(104,211,145,0.3); }
+.toast.error { border-color: rgba(252,129,129,0.3); }
+.toast.info { border-color: var(--border-accent); }
+
+@media (max-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .quality-grid { grid-template-columns: repeat(2, 1fr); }
+  .form-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .quality-grid { grid-template-columns: 1fr; }
+  .navbar { padding: 0 1rem; }
+  .main { padding: 70px 1rem 2rem; }
+  .nav-links { display: none; }
+  .pipeline-steps { flex-wrap: wrap; }
+  .pipeline-step { flex: 0 0 33%; margin-bottom: 1rem; }
+  .pipeline-step::after { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-atmosphere">
+  <div class="bg-noise"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="brand">
+      <div class="brand-mark">V3</div>
+      <div class="brand-text">
+        <div class="brand-name">火斗云智 AIOS</div>
+        <div class="brand-sub">生产流水线控制台</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">资产中枢</a>
+      <span class="nav-link active">V3.0 流水线</span>
+      <a href="/ops/" class="nav-link">运维平台</a>
+    </div>
+    <div class="nav-status">
+      <div class="status-dot"></div>
+      <span id="apiStatus">连接中...</span>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <div class="page-title">
+      V3.0 七步生产流水线
+      <span class="page-title-badge">BETA</span>
+    </div>
+    <div class="page-subtitle">剧本开发 → 视觉开发 → 分镜设计 → 关键帧生成 → 视频生成 → 后期制作 → 质量评估</div>
+  </div>
+
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card">
+      <div class="stat-label">流水线步数</div>
+      <div class="stat-value accent" id="statSteps">--</div>
+      <div class="stat-trend">七步全链路</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">质量评估维度</div>
+      <div class="stat-value purple" id="statQuality">--</div>
+      <div class="stat-trend">十二项专业评估</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">项目总数</div>
+      <div class="stat-value" id="statProjects">--</div>
+      <div class="stat-trend" id="statProjectsTrend">加载中</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">真实生成API</div>
+      <div class="stat-value success" id="statRealAPI">--</div>
+      <div class="stat-trend">Agnes + ARK + 通义</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="projects">项目管理</div>
+    <div class="tab" data-tab="pipeline">流水线监控</div>
+    <div class="tab" data-tab="quality">质量评估</div>
+    <div class="tab" data-tab="generate">真实生成</div>
+    <div class="tab" data-tab="assets">资产浏览</div>
+    <div class="tab" data-tab="omega">模块化智能体</div>
+  </div>
+
+  <!-- 项目管理 -->
+  <div class="tab-content active" id="tab-projects">
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-title-icon">+</div>
+        创建新项目
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">项目ID</label>
+          <input type="text" class="form-input" id="projectId" placeholder="自动生成或自定义">
+        </div>
+        <div class="form-group">
+          <label class="form-label">项目标题</label>
+          <input type="text" class="form-input" id="projectTitle" placeholder="例如：九天玄女 EP04">
+        </div>
+        <div class="form-group">
+          <label class="form-label">集数</label>
+          <input type="number" class="form-input" id="projectEpisode" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">风格</label>
+          <select class="form-select" id="projectStyle">
+            <option value="Eastern Fantasy">东方玄幻</option>
+            <option value="Chinese Mythology">中国神话</option>
+            <option value="Xianxia">仙侠</option>
+            <option value="Cyberpunk">赛博朋克</option>
+          </select>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">场景描述（JSON数组，可选）</label>
+          <textarea class="form-textarea" id="projectScenes" placeholder='[{"id":"S01","description":"昆仑山巅","shot_type":"wide","duration":3}]'></textarea>
+        </div>
+        <div class="form-group form-full" style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="createProject()">创建项目</button>
+          <button class="btn btn-secondary" onclick="loadProjects()">刷新列表</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-title-icon">L</div>
+        项目列表
+      </div>
+      <div class="project-list" id="projectList">
+        <div class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <div class="empty-state-text">暂无项目，创建第一个项目开始生产</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 流水线监控 -->
+  <div class="tab-content" id="tab-pipeline">
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-title-icon">▶</div>
+        流水线执行监控
+      </div>
+      <div class="form-group">
+        <label class="form-label">选择项目</label>
+        <select class="form-select" id="pipelineProjectSelect" onchange="loadProjectDetail()">
+          <option value="">请选择项目...</option>
+        </select>
+      </div>
+      <div id="pipelineDetail" style="display:none;">
+        <div class="pipeline-steps" id="pipelineSteps"></div>
+        <div class="form-group" style="display:flex;gap:10px;margin-top:1rem;">
+          <button class="btn btn-primary" id="runPipelineBtn" onclick="runPipeline()">运行流水线</button>
+          <button class="btn btn-secondary" onclick="refreshPipelineStatus()">刷新状态</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-title-icon">L</div>
+        执行日志
+      </div>
+      <div class="log-panel" id="pipelineLog">
+        <div class="log-line"><span class="log-time">[--:--:--]</span> 等待执行...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 质量评估 -->
+  <div class="tab-content" id="tab-quality">
+    <div id="qualityEmpty" class="empty-state">
+      <div class="empty-state-icon">📊</div>
+      <div class="empty-state-text">运行流水线后查看十二项质量评估结果</div>
+    </div>
+    <div id="qualityResult" style="display:none;">
+      <div class="overall-score">
+        <div class="overall-value" id="qualityOverall">--</div>
+        <div class="overall-label">综合质量评分 / 100</div>
+        <div class="overall-badge" id="qualityBadge">--</div>
+      </div>
+      <div class="quality-grid" id="qualityGrid"></div>
+    </div>
+  </div>
+
+  <!-- 真实生成 -->
+  <div class="tab-content" id="tab-generate">
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-title-icon">🖼</div>
+        关键帧生成（Agnes AI）
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">场景描述</label>
+          <input type="text" class="form-input" id="kfSceneDesc" placeholder="例如：九天玄女立于昆仑山巅">
+        </div>
+        <div class="form-group">
+          <label class="form-label">集数ID</label>
+          <input type="text" class="form-input" id="kfEpId" value="EP00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">关键帧名称</label>
+          <input type="text" class="form-input" id="kfName" value="KF001">
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end;">
+          <button class="btn btn-primary" onclick="generateKeyframe()">生成关键帧</button>
+        </div>
+      </div>
+      <div id="kfResult" style="margin-top:1rem;display:none;">
+        <div class="asset-card" style="max-width:300px;">
+          <div class="asset-thumb" id="kfThumb">🖼</div>
+          <div class="asset-info">
+            <div class="asset-name" id="kfResultName">--</div>
+            <span class="asset-type">关键帧</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-title-icon">🎬</div>
+        视频生成（ARK Seedance + 通义万相）
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">输入图片路径</label>
+          <input type="text" class="form-input" id="vidImagePath" placeholder="/images/EP00-KF001.png">
+        </div>
+        <div class="form-group">
+          <label class="form-label">视频Prompt</label>
+          <input type="text" class="form-input" id="vidPrompt" placeholder="镜头缓慢推进，仙气缭绕">
+        </div>
+        <div class="form-group">
+          <label class="form-label">集数ID</label>
+          <input type="text" class="form-input" id="vidEpId" value="EP00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">视频名称</label>
+          <input type="text" class="form-input" id="vidName" value="VID001">
+        </div>
+        <div class="form-group form-full" style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="generateVideo()">生成视频</button>
+          <span style="font-size:11px;color:var(--text-4);align-self:center;">多API自动调度：ARK Seedance优先，通义万相兜底</span>
+        </div>
+      </div>
+      <div id="vidResult" style="margin-top:1rem;display:none;">
+        <div class="asset-card" style="max-width:300px;">
+          <div class="asset-thumb">🎬</div>
+          <div class="asset-info">
+            <div class="asset-name" id="vidResultName">--</div>
+            <span class="asset-type">视频</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 资产浏览 -->
+  <div class="tab-content" id="tab-assets">
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-title-icon">📁</div>
+        当前项目资产
+      </div>
+      <div class="asset-grid" id="assetGrid">
+        <div class="empty-state" style="grid-column:1/-1;">
+          <div class="empty-state-icon">📦</div>
+          <div class="empty-state-text">运行流水线后查看生成的资产</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast">
+  <span id="toastIcon">✓</span>
+  <span id="toastMsg">操作成功</span>
+</div>
+
+
+  <!-- 模块化智能体编排引擎 -->
+  <div class="tab-content" id="tab-omega">
+    <div class="panel">
+      <div class="panel-title">
+        <div class="panel-title-icon">Ω</div>
+        Ω-Modular Engine 模块化智能体编排引擎
+        <span class="badge" style="margin-left:auto;background:linear-gradient(135deg,#d4af37,#f0d98c);color:#0b1220;font-size:11px;padding:2px 10px;border-radius:10px;">V1.0.0</span>
+      </div>
+      <div style="padding:1rem 1.5rem;color:var(--text-2);font-size:13px;line-height:1.7;">
+        一个功能 = 一个节点 = 一个智能体 = 可组合单元。端口协议保证类型安全，DAG运行时自动拓扑排序执行，闭环验证器自动检测模块组合是否可执行。
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+      <div class="stat-card">
+        <div class="stat-label">已注册模块</div>
+        <div class="stat-value" id="omegaModules">--</div>
+        <div class="stat-trend">智能体单元</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">可用工作流</div>
+        <div class="stat-value" id="omegaWorkflows">--</div>
+        <div class="stat-trend">模块组合</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">执行记录</div>
+        <div class="stat-value" id="omegaExecutions">--</div>
+        <div class="stat-trend">历史运行</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">引擎状态</div>
+        <div class="stat-value success" id="omegaStatus">--</div>
+        <div class="stat-trend">Ω-Modular Engine</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <div class="panel">
+        <div class="panel-title">
+          <div class="panel-title-icon">M</div>
+          已注册模块智能体
+          <button class="btn btn-secondary" style="margin-left:auto;padding:4px 12px;font-size:12px;" onclick="loadOmegaModules()">刷新</button>
+        </div>
+        <div id="omegaModuleList" style="padding:1rem;max-height:400px;overflow-y:auto;">
+          <div style="color:var(--text-3);text-align:center;padding:2rem;">加载中...</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <div class="panel-title-icon">W</div>
+          可用工作流
+          <button class="btn btn-secondary" style="margin-left:auto;padding:4px 12px;font-size:12px;" onclick="loadOmegaWorkflows()">刷新</button>
+        </div>
+        <div id="omegaWorkflowList" style="padding:1rem;max-height:400px;overflow-y:auto;">
+          <div style="color:var(--text-3);text-align:center;padding:2rem;">加载中...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:1.5rem;">
+      <div class="panel-title">
+        <div class="panel-title-icon">▶</div>
+        工作流执行控制台
+      </div>
+      <div style="padding:1.5rem;">
+        <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1rem;">
+          <select id="omegaWorkflowSelect" style="flex:1;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-1);font-size:13px;">
+            <option value="">选择工作流...</option>
+          </select>
+          <button class="btn btn-primary" onclick="executeOmegaWorkflow()" id="omegaExecuteBtn">执行工作流</button>
+          <button class="btn btn-secondary" onclick="validateOmegaWorkflow()">验证闭环</button>
+        </div>
+        <div id="omegaExecutionResult" style="display:none;">
+          <div style="padding:1rem;background:var(--surface);border-radius:var(--radius-md);border:1px solid var(--border);">
+            <div style="font-weight:600;margin-bottom:0.5rem;color:var(--accent);">执行结果</div>
+            <pre id="omegaExecutionOutput" style="font-size:12px;color:var(--text-2);white-space:pre-wrap;max-height:300px;overflow-y:auto;margin:0;"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const API_BASE = '/api/v3';
+let currentProject = null;
+let logPolling = null;
+
+// ========== 初始化 ==========
+async function init() {
+  await loadSystemStatus();
+  await loadProjects();
+  await loadOmegaSystemStatus();
+  await loadOmegaModules();
+  await loadOmegaWorkflows();
+}
+
+// ========== 系统状态 ==========
+async function loadSystemStatus() {
+  try {
+    const res = await fetch(API_BASE + '/system/status');
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('statSteps').textContent = data.pipeline_steps;
+      document.getElementById('statQuality').textContent = data.quality_dimensions;
+      document.getElementById('statProjects').textContent = data.projects.total;
+      document.getElementById('statProjectsTrend').textContent =
+        '运行中 ' + data.projects.running + ' / 完成 ' + data.projects.completed;
+      document.getElementById('statRealAPI').textContent = data.real_pipeline_available ? '已对接' : '未对接';
+      document.getElementById('apiStatus').textContent = 'API 正常';
+    }
+  } catch (e) {
+    document.getElementById('apiStatus').textContent = '连接失败';
+    console.error('System status error:', e);
+  }
+}
+
+// ========== Tab切换 ==========
+function setupTabs() {
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+}
+
+// ========== 项目管理 ==========
+async function createProject() {
+  const projectId = document.getElementById('projectId').value.trim() ||
+    'PROJ-' + Date.now();
+  const title = document.getElementById('projectTitle').value.trim() || '未命名项目';
+  const episode = parseInt(document.getElementById('projectEpisode').value) || 1;
+  const style = document.getElementById('projectStyle').value;
+  const scenesText = document.getElementById('projectScenes').value.trim();
+
+  let scenes = [];
+  if (scenesText) {
+    try { scenes = JSON.parse(scenesText); } catch (e) {
+      showToast('场景JSON格式错误', 'error');
+      return;
+    }
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/project/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ project_id: projectId, title, episode, style, scenes })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('项目创建成功: ' + data.project_id, 'success');
+      document.getElementById('projectId').value = '';
+      document.getElementById('projectTitle').value = '';
+      await loadProjects();
+      await loadSystemStatus();
+    } else {
+      showToast('创建失败: ' + (data.error || '未知错误'), 'error');
+    }
+  } catch (e) {
+    showToast('请求失败: ' + e.message, 'error');
+  }
+}
+
+async function loadProjects() {
+  try {
+    const res = await fetch(API_BASE + '/project/list');
+    const data = await res.json();
+    const list = document.getElementById('projectList');
+    const select = document.getElementById('pipelineProjectSelect');
+
+    if (data.success && data.projects.length > 0) {
+      list.innerHTML = data.projects.map(p => `
+        <div class="project-item" onclick="selectProject('${p.project_id}')">
+          <div class="project-info">
+            <div class="project-name">${p.title || p.project_id}</div>
+            <div class="project-meta">
+              <span>${p.project_id}</span>
+              <span>${p.created_at ? new Date(p.created_at).toLocaleString() : ''}</span>
+            </div>
+          </div>
+          <span class="project-status status-${p.status}">${statusText(p.status)}</span>
+        </div>
+      `).join('');
+
+      select.innerHTML = '<option value="">请选择项目...</option>' +
+        data.projects.map(p => `<option value="${p.project_id}">${p.title || p.project_id} (${statusText(p.status)})</option>`).join('');
+    } else {
+      list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">暂无项目</div></div>`;
+    }
+  } catch (e) {
+    console.error('Load projects error:', e);
+  }
+}
+
+function statusText(status) {
+  const map = { created: '已创建', running: '运行中', completed: '已完成', failed: '失败' };
+  return map[status] || status;
+}
+
+function selectProject(projectId) {
+  document.getElementById('pipelineProjectSelect').value = projectId;
+  document.querySelector('.tab[data-tab="pipeline"]').click();
+  loadProjectDetail();
+}
+
+// ========== 流水线监控 ==========
+async function loadProjectDetail() {
+  const projectId = document.getElementById('pipelineProjectSelect').value;
+  if (!projectId) {
+    document.getElementById('pipelineDetail').style.display = 'none';
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE + '/project/status/' + projectId);
+    const data = await res.json();
+    if (data.success) {
+      currentProject = data;
+      document.getElementById('pipelineDetail').style.display = 'block';
+      renderPipelineSteps(data);
+      renderAssets(data);
+      renderQuality(data);
+      updateRunButton(data.status);
+
+      if (data.status === 'running') {
+        startLogPolling(projectId);
+      }
+    }
+  } catch (e) {
+    console.error('Load project detail error:', e);
+  }
+}
+
+function renderPipelineSteps(data) {
+  const steps = [
+    { id: 'S1', name: '剧本开发' },
+    { id: 'S2', name: '视觉开发' },
+    { id: 'S3', name: '分镜设计' },
+    { id: 'S4', name: '关键帧生成' },
+    { id: 'S5', name: '视频生成' },
+    { id: 'S6', name: '后期制作' },
+    { id: 'S7', name: '质量评估' },
+  ];
+
+  const stepsStatus = data.steps_status || {};
+  const container = document.getElementById('pipelineSteps');
+
+  container.innerHTML = steps.map((step, i) => {
+    const s = stepsStatus[step.id];
+    let status = 'pending';
+    if (s) status = s.status;
+    else if (data.status === 'completed') status = 'completed';
+    else if (data.status === 'failed') status = 'failed';
+
+    return `
+      <div class="pipeline-step">
+        <div class="step-circle ${status}">${status === 'completed' ? '✓' : (i + 1)}</div>
+        <div class="step-name ${status}">${step.name}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateRunButton(status) {
+  const btn = document.getElementById('runPipelineBtn');
+  if (status === 'running') {
+    btn.disabled = true;
+    btn.textContent = '运行中...';
+  } else if (status === 'completed') {
+    btn.disabled = false;
+    btn.textContent = '重新运行';
+  } else {
+    btn.disabled = false;
+    btn.textContent = '运行流水线';
+  }
+}
+
+async function runPipeline() {
+  const projectId = document.getElementById('pipelineProjectSelect').value;
+  if (!projectId) return;
+
+  addLog('info', '启动七步流水线: ' + projectId);
+
+  try {
+    const res = await fetch(API_BASE + '/project/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ project_id: projectId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('流水线已启动', 'success');
+      addLog('info', '流水线异步运行中，7步全链路执行');
+      updateRunButton('running');
+      startLogPolling(projectId);
+    } else {
+      showToast('启动失败: ' + (data.error || '未知错误'), 'error');
+      addLog('error', '启动失败: ' + (data.error || '未知错误'));
+    }
+  } catch (e) {
+    showToast('请求失败: ' + e.message, 'error');
+    addLog('error', '请求失败: ' + e.message);
+  }
+}
+
+async function refreshPipelineStatus() {
+  const projectId = document.getElementById('pipelineProjectSelect').value;
+  if (!projectId) return;
+  await loadProjectDetail();
+  addLog('info', '状态已刷新');
+}
+
+function startLogPolling(projectId) {
+  if (logPolling) clearInterval(logPolling);
+  let count = 0;
+  logPolling = setInterval(async () => {
+    count++;
+    await loadProjectDetail();
+    if (currentProject && currentProject.status !== 'running') {
+      clearInterval(logPolling);
+      logPolling = null;
+      if (currentProject.status === 'completed') {
+        addLog('success', '流水线执行完成！质量评分: ' +
+          (currentProject.pipeline_result?.quality_score || '--'));
+        showToast('流水线执行完成', 'success');
+      } else if (currentProject.status === 'failed') {
+        addLog('error', '流水线执行失败: ' + (currentProject.error || '未知错误'));
+        showToast('流水线执行失败', 'error');
+      }
+      await loadSystemStatus();
+    }
+    if (count > 60) {
+      clearInterval(logPolling);
+      logPolling = null;
+    }
+  }, 3000);
+}
+
+// ========== 质量评估 ==========
+function renderQuality(data) {
+  const empty = document.getElementById('qualityEmpty');
+  const result = document.getElementById('qualityResult');
+
+  if (!data.quality_scores || !data.quality_scores.dimensions) {
+    empty.style.display = 'block';
+    result.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  result.style.display = 'block';
+
+  const qs = data.quality_scores;
+  document.getElementById('qualityOverall').textContent = qs.overall;
+  const badge = document.getElementById('qualityBadge');
+  badge.textContent = qs.passed ? '通过 (≥85)' : '未通过 (<85)';
+  badge.className = 'overall-badge ' + (qs.passed ? 'badge-pass' : 'badge-fail');
+
+  const grid = document.getElementById('qualityGrid');
+  grid.innerHTML = Object.entries(qs.dimensions).map(([id, d]) => {
+    const scoreClass = d.score >= 85 ? 'score-pass' : (d.score >= 70 ? 'score-warning' : 'score-fail');
+    return `
+      <div class="quality-item ${scoreClass}">
+        <div class="quality-header">
+          <span class="quality-name">${id} ${d.name}</span>
+          <span class="quality-score">${d.score}</span>
+        </div>
+        <div class="quality-bar"><div class="quality-bar-fill" style="width:${d.score}%"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ========== 真实生成 ==========
+async function generateKeyframe() {
+  const sceneDesc = document.getElementById('kfSceneDesc').value.trim();
+  const epId = document.getElementById('kfEpId').value.trim();
+  const kfName = document.getElementById('kfName').value.trim();
+
+  if (!sceneDesc) {
+    showToast('请输入场景描述', 'error');
+    return;
+  }
+
+  showToast('正在生成关键帧...', 'info');
+  addLog('info', '关键帧生成: ' + kfName + ' (' + sceneDesc.substring(0, 30) + '...)');
+
+  try {
+    const res = await fetch(API_BASE + '/generate/keyframe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scene_desc: sceneDesc, ep_id: epId, kf_name: kfName })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('关键帧生成成功', 'success');
+      addLog('success', '关键帧已保存: ' + data.image_path);
+      document.getElementById('kfResult').style.display = 'block';
+      document.getElementById('kfResultName').textContent = kfName + '.png';
+      if (data.public_url) {
+        document.getElementById('kfThumb').innerHTML = '<img src="' + data.public_url + '" style="width:100%;height:100%;object-fit:cover;">';
+      }
+    } else {
+      showToast('生成失败: ' + (data.error || '未知错误'), 'error');
+      addLog('error', '生成失败: ' + (data.error || '未知错误'));
+    }
+  } catch (e) {
+    showToast('请求失败: ' + e.message, 'error');
+    addLog('error', '请求失败: ' + e.message);
+  }
+}
+
+async function generateVideo() {
+  const imagePath = document.getElementById('vidImagePath').value.trim();
+  const prompt = document.getElementById('vidPrompt').value.trim();
+  const epId = document.getElementById('vidEpId').value.trim();
+  const vidName = document.getElementById('vidName').value.trim();
+
+  if (!imagePath) {
+    showToast('请输入输入图片路径', 'error');
+    return;
+  }
+
+  showToast('正在生成视频（多API调度）...', 'info');
+  addLog('info', '视频生成: ' + vidName + ' (多API自动调度)');
+
+  try {
+    const res = await fetch(API_BASE + '/generate/video', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image_path: imagePath, prompt, ep_id: epId, kf_name: vidName })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('视频生成成功', 'success');
+      addLog('success', '视频已保存: ' + data.video_path);
+      document.getElementById('vidResult').style.display = 'block';
+      document.getElementById('vidResultName').textContent = vidName + '.mp4';
+    } else {
+      showToast('生成失败: ' + (data.error || '所有API均失败'), 'error');
+      addLog('error', '生成失败: ' + (data.error || '所有API均失败'));
+    }
+  } catch (e) {
+    showToast('请求失败: ' + e.message, 'error');
+    addLog('error', '请求失败: ' + e.message);
+  }
+}
+
+// ========== 资产浏览 ==========
+function renderAssets(data) {
+  const grid = document.getElementById('assetGrid');
+  const assets = data.assets || [];
+
+  if (assets.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📦</div><div class="empty-state-text">暂无资产</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = assets.map(a => `
+    <div class="asset-card">
+      <div class="asset-thumb">${a.type === 'video' ? '🎬' : '🖼'}</div>
+      <div class="asset-info">
+        <div class="asset-name">${a.id}</div>
+        <span class="asset-type">${a.type === 'video' ? '视频' : '关键帧'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ========== 工具函数 ==========
+function addLog(type, msg) {
+  const panel = document.getElementById('pipelineLog');
+  const time = new Date().toLocaleTimeString();
+  const line = document.createElement('div');
+  line.className = 'log-line ' + type;
+  line.innerHTML = '<span class="log-time">[' + time + ']</span> ' + msg;
+  panel.appendChild(line);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+
+// ========== Ω-Modular Engine 模块化智能体编排引擎 ==========
+async function loadOmegaSystemStatus() {
+  try {
+    const res = await fetch('/api/omega/system/status');
+    const data = await res.json();
+    document.getElementById('omegaModules').textContent = data.modules.total;
+    document.getElementById('omegaWorkflows').textContent = data.workflows.total;
+    document.getElementById('omegaExecutions').textContent = data.executions.total;
+    document.getElementById('omegaStatus').textContent = data.engine.status;
+  } catch(e) {
+    console.error('Ω-Engine status error:', e);
+  }
+}
+
+async function loadOmegaModules() {
+  try {
+    const res = await fetch('/api/omega/modules');
+    const data = await res.json();
+    const container = document.getElementById('omegaModuleList');
+    if (data.modules.length === 0) {
+      container.innerHTML = '<div style="color:var(--text-3);text-align:center;padding:2rem;">暂无模块</div>';
+      return;
+    }
+    const typeColors = {
+      'generator': '#37d4c0',
+      'processor': '#d4af37',
+      'storage': '#7c6ff5',
+      'decision': '#f56565',
+      'perception': '#48bb78',
+      'orchestrator': '#ed8936'
+    };
+    container.innerHTML = data.modules.map(m => `
+      <div style="padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:0.5rem;background:var(--surface);">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+          <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${typeColors[m.module_type] || '#666'}22;color:${typeColors[m.module_type] || '#666'};font-weight:600;">${m.module_type}</span>
+          <span style="font-weight:600;font-size:13px;color:var(--text-1);">${m.module_name}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-3);font-family:monospace;">${m.module_id}</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:0.25rem;">${m.description || ''}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:0.25rem;">
+          输入: ${(m.input_ports||[]).length}端口 | 输出: ${(m.output_ports||[]).length}端口 | 成功率: ${m.memory ? Math.round(m.memory.success_rate*100) + '%' : '--'}
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('omegaModuleList').innerHTML = '<div style="color:#f56565;text-align:center;padding:2rem;">加载失败: ' + e.message + '</div>';
+  }
+}
+
+async function loadOmegaWorkflows() {
+  try {
+    const res = await fetch('/api/omega/workflows');
+    const data = await res.json();
+    const container = document.getElementById('omegaWorkflowList');
+    const select = document.getElementById('omegaWorkflowSelect');
+    if (data.workflows.length === 0) {
+      container.innerHTML = '<div style="color:var(--text-3);text-align:center;padding:2rem;">暂无工作流</div>';
+      return;
+    }
+    select.innerHTML = '<option value="">选择工作流...</option>' + data.workflows.map(w =>
+      `<option value="${w.workflow_id}">${w.name} (${w.modules.length}模块)</option>`
+    ).join('');
+    container.innerHTML = data.workflows.map(w => `
+      <div style="padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:0.5rem;background:var(--surface);cursor:pointer;" onclick="document.getElementById('omegaWorkflowSelect').value='${w.workflow_id}'">
+        <div style="font-weight:600;font-size:13px;color:var(--text-1);margin-bottom:0.25rem;">${w.name}</div>
+        <div style="font-size:11px;color:var(--text-3);font-family:monospace;">${w.workflow_id}</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:0.25rem;">${w.description || ''}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:0.25rem;">
+          模块: ${w.modules.join(' → ')} | ${w.edges_count}条连接
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('omegaWorkflowList').innerHTML = '<div style="color:#f56565;text-align:center;padding:2rem;">加载失败: ' + e.message + '</div>';
+  }
+}
+
+async function validateOmegaWorkflow() {
+  const workflowId = document.getElementById('omegaWorkflowSelect').value;
+  if (!workflowId) {
+    showToast('请先选择工作流', 'error');
+    return;
+  }
+  try {
+    const res = await fetch('/api/omega/workflow/validate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({workflow_id: workflowId})
+    });
+    const data = await res.json();
+    const resultDiv = document.getElementById('omegaExecutionResult');
+    const output = document.getElementById('omegaExecutionOutput');
+    resultDiv.style.display = 'block';
+    output.textContent = JSON.stringify(data, null, 2);
+    showToast(data.passed ? '闭环验证通过' : '闭环验证失败', data.passed ? 'success' : 'error');
+  } catch(e) {
+    showToast('验证失败: ' + e.message, 'error');
+  }
+}
+
+async function executeOmegaWorkflow() {
+  const workflowId = document.getElementById('omegaWorkflowSelect').value;
+  if (!workflowId) {
+    showToast('请先选择工作流', 'error');
+    return;
+  }
+  const btn = document.getElementById('omegaExecuteBtn');
+  btn.disabled = true;
+  btn.textContent = '执行中...';
+  try {
+    const res = await fetch('/api/omega/workflow/execute', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({workflow_id: workflowId})
+    });
+    const data = await res.json();
+    showToast('工作流已开始执行: ' + data.execution_id, 'success');
+    // 轮询执行状态
+    pollOmegaExecution(data.execution_id);
+  } catch(e) {
+    showToast('执行失败: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = '执行工作流';
+  }
+}
+
+async function pollOmegaExecution(executionId) {
+  const resultDiv = document.getElementById('omegaExecutionResult');
+  const output = document.getElementById('omegaExecutionOutput');
+  resultDiv.style.display = 'block';
+  output.textContent = '执行中... (执行ID: ' + executionId + ')';
+  
+  const poll = async () => {
+    try {
+      const res = await fetch('/api/omega/workflow/status/' + executionId);
+      const data = await res.json();
+      output.textContent = JSON.stringify(data, null, 2);
+      if (data.status === 'running' || data.status === 'pending') {
+        setTimeout(poll, 2000);
+      } else {
+        document.getElementById('omegaExecuteBtn').disabled = false;
+        document.getElementById('omegaExecuteBtn').textContent = '执行工作流';
+        showToast('执行完成: ' + data.status, data.status === 'success' ? 'success' : 'error');
+        loadOmegaSystemStatus();
+      }
+    } catch(e) {
+      output.textContent = '轮询失败: ' + e.message;
+      document.getElementById('omegaExecuteBtn').disabled = false;
+      document.getElementById('omegaExecuteBtn').textContent = '执行工作流';
+    }
+  };
+  poll();
+}
+
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  const icon = document.getElementById('toastIcon');
+  const text = document.getElementById('toastMsg');
+  toast.className = 'toast ' + type;
+  icon.textContent = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
+  text.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// 启动
+init();
+</script>
+</body>
+</html>

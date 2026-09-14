@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智 AIOS · 平台能力全景</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#121722; --panel2:#161c2a; --line:#232c3d;
+    --gold:#c9a227; --gold-soft:#e6c86a; --gold-dim:#8a7326;
+    --ink:#e6edf3; --muted:#8b949e; --blue:#58a6ff; --red:#f85149;
+    --green:#7ee787; --purple:#a371f7; --orange:#d29922;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;line-height:1.6;}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px;}
+  /* 暗纹背景 */
+  body::before{content:"";position:fixed;inset:0;z-index:-1;opacity:.05;
+    background:repeating-linear-gradient(45deg,#c9a227 0,#c9a227 1px,transparent 1px,transparent 22px);}
+
+  /* ===== Header ===== */
+  .hero{text-align:center;padding:34px 0 26px;border-bottom:1px solid var(--line);position:relative;}
+  .hero .badge{display:inline-block;border:1px solid var(--gold-dim);color:var(--gold-soft);
+    font-size:12px;letter-spacing:3px;padding:4px 16px;border-radius:3px;margin-bottom:16px;}
+  .hero h1{font-size:clamp(26px,4vw,38px);font-weight:800;color:#fff;letter-spacing:1px;}
+  .hero h1 span{color:var(--gold);}
+  .hero p{color:var(--muted);margin-top:10px;font-size:14px;max-width:620px;margin-left:auto;margin-right:auto;}
+  .trace{color:var(--gold-dim);font-size:12px;margin-top:14px;letter-spacing:1px;}
+
+  /* ===== KPI row ===== */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0;}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 14px;text-align:center;}
+  .kpi .num{font-size:26px;font-weight:800;color:var(--gold);}
+  .kpi .lbl{font-size:12px;color:var(--muted);margin-top:4px;}
+
+  /* ===== Section ===== */
+  .sec{margin:30px 0;}
+  .sec-title{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;color:#fff;margin-bottom:16px;}
+  .sec-title::before{content:"";width:4px;height:18px;background:var(--gold);border-radius:2px;}
+  .sec-title .sub{font-size:12px;color:var(--muted);font-weight:400;}
+
+  /* 自进化闭环 */
+  .loop{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px;}
+  .loop-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative;}
+  .loop-node{text-align:center;padding:10px 6px;position:relative;}
+  .loop-node .n{width:34px;height:34px;margin:0 auto 8px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#0b0e14;}
+  .loop-node .t{font-size:13px;font-weight:600;}
+  .loop-node .d{font-size:11px;color:var(--muted);margin-top:3px;}
+  .loop-arrow{position:absolute;top:26px;right:-8px;width:16px;height:2px;background:var(--gold-dim);}
+  .loop-arrow::after{content:"";position:absolute;right:0;top:-3px;border:4px solid transparent;border-left-color:var(--gold-dim);}
+  @media(max-width:720px){.loop-grid{grid-template-columns:1fr;}.loop-arrow{display:none;}
+    .loop-node{border-bottom:1px dashed var(--line);padding:12px 6px;}}
+
+  /* 双栏 */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:760px){.cols{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;}
+  .card h3{font-size:14px;color:var(--gold-soft);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+  /* SOP 步骤 */
+  .sop-steps{display:flex;flex-direction:column;gap:0;}
+  .sop-step{display:flex;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);}
+  .sop-step:last-child{border-bottom:none;}
+  .sop-step .s{min-width:44px;height:26px;background:rgba(201,162,39,.12);border:1px solid var(--gold-dim);
+    color:var(--gold-soft);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .sop-step .c{font-size:13px;}
+  .sop-step .c b{color:#fff;}
+  .sop-step .c .d{color:var(--muted);font-size:12px;}
+
+  /* 特性 chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);}
+  .chip b{color:var(--gold-soft);font-weight:600;}
+
+  /* 工程纪律 */
+  .rule{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);}
+  .rule:last-child{border-bottom:none;}
+  .rule .rn{min-width:22px;height:22px;background:var(--gold);color:#0b0e14;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;margin-top:2px;}
+  .rule .c{font-size:13px;}
+  .rule .c b{color:#fff;}
+
+  /* 六大核心能力矩阵 */
+  .cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:900px){.cap-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.cap-grid{grid-template-columns:1fr;}}
+  .cap{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;
+    transition:border-color .2s, transform .2s;}
+  .cap:hover{border-color:var(--gold-dim);transform:translateY(-2px);}
+  .cap .ico{width:38px;height:38px;border-radius:8px;background:rgba(201,162,39,.12);
+    border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;
+    font-size:18px;margin-bottom:12px;}
+  .cap h4{font-size:15px;color:#fff;margin-bottom:4px;}
+  .cap .one{font-size:12.5px;color:var(--gold-soft);margin-bottom:10px;}
+  .cap ul{list-style:none;}
+  .cap li{font-size:12.5px;color:var(--muted);padding:3px 0 3px 14px;position:relative;}
+  .cap li::before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--gold);}
+
+  /* 时间轴 */
+  .timeline{position:relative;padding-left:24px;}
+  .timeline::before{content:"";position:absolute;left:8px;top:4px;bottom:4px;width:2px;background:var(--line);}
+  .tl-item{position:relative;padding:0 0 16px 12px;}
+  .tl-item::before{content:"";position:absolute;left:-20px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--gold);}
+  .tl-item .date{font-size:11px;color:var(--gold-dim);letter-spacing:1px;}
+  .tl-item .tt{font-size:13.5px;font-weight:600;color:#fff;}
+  .tl-item .td{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .footer{text-align:center;color:var(--gold-dim);font-size:12px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line);letter-spacing:1px;}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:12px;font-size:11px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== Header ===== -->
+  <div class="hero">
+    <div class="badge">企业级 AI 操作系统</div>
+    <h1>火斗云智 <span>AIOS</span> · 平台能力全景</h1>
+    <p>企业级AI操作系统 · 自进化 · 可溯源 · 稳态调度 —— 一套围绕"标准化交付 + 质量工程 + 能力沉淀"构建的平台内核</p>
+    <div class="trace">Ω₀⊂⊙∞⊂Ω</div>
+  </div>
+
+  <!-- ===== KPI ===== -->
+  <div class="kpis">
+    <div class="kpi"><div class="num">7步</div><div class="lbl">标准化交付流程</div></div>
+    <div class="kpi"><div class="num">3条</div><div class="lbl">工程纪律</div></div>
+    <div class="kpi"><div class="num">6大</div><div class="lbl">核心能力</div></div>
+    <div class="kpi"><div class="num">持续进化</div><div class="lbl">平台能力迭代中</div></div>
+    <div class="kpi"><div class="num">稳态运行</div><div class="lbl">全链路健康守护</div></div>
+  </div>
+
+  <!-- ===== 自进化闭环 ===== -->
+  <div class="sec">
+    <div class="sec-title">自进化闭环 <span class="sub">每一次执行都在强化平台能力内核</span></div>
+    <div class="loop">
+      <div class="loop-grid">
+        <div class="loop-node"><div class="n" style="background:#58a6ff;">1</div><div class="t">执行</div><div class="d">按标准化流程推进</div></div>
+        <div class="loop-arrow"></div>
+        <div class="loop-node"><div class="n" style="background:#f85149;">2</div><div class="t">试错</div><div class="d">遇到问题·真实发生</div></div>
+        <div class="loop-arrow"></div>
+        <div class="loop-node"><div class="n" style="background:#d29922;">3</div><div class="t">复盘</div><div class="d">提炼根因·沉淀教训</div></div>
+        <div class="loop-arrow"></div>
+        <div class="loop-node"><div class="n" style="background:#7ee787;">4</div><div class="t">固化</div><div class="d">上下文持久化+资产锁档</div></div>
+        <div class="loop-arrow"></div>
+        <div class="loop-node"><div class="n" style="background:#a371f7;">5</div><div class="t">推广</div><div class="d">能力复用与横向推广</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 核心方法论: 标准化交付 + 工程质量保障 ===== -->
+  <div class="sec">
+    <div class="sec-title">核心方法论 <span class="sub">标准化交付流程 + 工程质量保障</span></div>
+    <div class="cols">
+      <div class="card">
+        <h3>标准化交付流程</h3>
+        <div class="sop-steps">
+          <div class="sop-step"><div class="s">S1</div><div class="c"><b>意图校准</b><div class="d">识别任务类型·模糊先澄清</div></div></div>
+          <div class="sop-step"><div class="s">S2</div><div class="c"><b>上下文加载</b><div class="d">云端记忆中枢拉取全量上下文·阶段·健康状态</div></div></div>
+          <div class="sop-step"><div class="s">S3</div><div class="c"><b>全域对比</b><div class="d">云端与当前态对齐·识别差距与漂移</div></div></div>
+          <div class="sop-step"><div class="s">S4</div><div class="c"><b>规划裁决</b><div class="d">多维度加权·利益风险成本智能收敛</div></div></div>
+          <div class="sop-step"><div class="s">S5</div><div class="c"><b>执行</b><div class="d">沙箱环境开发·仿真验证·失败走容错闭环</div></div></div>
+          <div class="sop-step"><div class="s">S6</div><div class="c"><b>审核发布</b><div class="d">人工确认→云端发布→验证</div></div></div>
+          <div class="sop-step"><div class="s">S7</div><div class="c"><b>沉淀归档</b><div class="d">打包哈希确权·质量度量·持续观测</div></div></div>
+        </div>
+        <div class="chips" style="margin-top:12px;">
+          <span class="chip"><b>权威源</b> 云端上下文为唯一基线</span>
+          <span class="chip"><b>真值优先</b> 以校验通过的资产为准</span>
+          <span class="chip"><b>标准化</b> 步骤可复用可审计</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>工程质量保障</h3>
+        <div class="rule"><div class="rn">1</div><div class="c"><b>先完整理解再精确动手</b><div style="color:var(--muted);font-size:12px;margin-top:2px;">通读全局看结构与变体，勿凭片段推断</div></div></div>
+        <div class="rule"><div class="rn">2</div><div class="c"><b>先验证最小链路再扩展</b><div style="color:var(--muted);font-size:12px;margin-top:2px;">用已知值打通关键一跳，勿假设接口行为</div></div></div>
+        <div class="rule"><div class="rn">3</div><div class="c"><b>失败立即回滚不带病运行</b><div style="color:var(--muted);font-size:12px;margin-top:2px;">校验失败当场恢复，生产安全优先</div></div></div>
+        <div class="chips" style="margin-top:14px;">
+          <span class="chip">一次收敛 &gt; 三次盲改</span>
+          <span class="chip">先看清 + 先验证 + 失败即退</span>
+        </div>
+        <div style="margin-top:14px;font-size:12px;color:var(--muted);">平台特性标签：</div>
+        <div class="chips" style="margin-top:8px;">
+          <span class="chip"><b>自进化</b> 执行即沉淀</span>
+          <span class="chip"><b>可溯源</b> 资产哈希确权</span>
+          <span class="chip"><b>稳态</b> 三维加权裁决</span>
+          <span class="chip"><b>容错</b> 失败即进化输入</span>
+          <span class="chip"><b>标准化</b> 流程固化复用</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 六大核心能力矩阵 ===== -->
+  <div class="sec">
+    <div class="sec-title">六大核心能力 <span class="sub">平台能力矩阵</span></div>
+    <div class="cap-grid">
+      <div class="cap">
+        <div class="ico">⇄</div>
+        <h4>API 网关</h4>
+        <div class="one">统一流量入口与路由分发</div>
+        <ul>
+          <li>统一接入与路由分发</li>
+          <li>限流与熔断保护</li>
+          <li>全链路可观测</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">⚙</div>
+        <h4>智能调度</h4>
+        <div class="one">负载感知的自适应任务分配</div>
+        <ul>
+          <li>负载感知动态选路</li>
+          <li>热升级不停服</li>
+          <li>漂移检测与告警</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">✦</div>
+        <h4>真值锁档</h4>
+        <div class="one">资产哈希确权与完整性校验</div>
+        <ul>
+          <li>SHA256 锚定每份资产</li>
+          <li>链式校验防篡改</li>
+          <li>版本快照可回溯</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">☁</div>
+        <h4>记忆中枢</h4>
+        <div class="one">跨会话上下文持久化与召回</div>
+        <ul>
+          <li>全量上下文拉取</li>
+          <li>阶段状态持续留存</li>
+          <li>健康快照可观测</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">◈</div>
+        <h4>稳态调度</h4>
+        <div class="one">利益·风险·成本三维加权裁决</div>
+        <ul>
+          <li>多维度加权裁决</li>
+          <li>阈值分级告警</li>
+          <li>方案收敛与对比</li>
+        </ul>
+      </div>
+      <div class="cap">
+        <div class="ico">⬡</div>
+        <h4>同源认证</h4>
+        <div class="one">密钥即身份的轻量认证体系</div>
+        <ul>
+          <li>密钥统一鉴权</li>
+          <li>关键路径统一拦截</li>
+          <li>零侵入横向扩展</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 进化里程碑 ===== -->
+  <div class="sec">
+    <div class="sec-title">进化里程碑 <span class="sub">从安全加固到智能调度</span></div>
+    <div class="cols">
+      <div class="card">
+        <div class="timeline">
+          <div class="tl-item"><div class="date">阶段一 · 安全加固</div><div class="tt">访问安全与稳态收敛</div><div class="td">缓存修复 · 访问加固 · 最优稳态收敛 · 健康率校准</div></div>
+          <div class="tl-item"><div class="date">阶段二 · 开放认证</div><div class="tt">轻量认证体系上线</div><div class="td">密钥即身份，开放环境下的轻量方案</div></div>
+          <div class="tl-item"><div class="date">阶段二 · 开放认证</div><div class="tt">密钥管理面板</div><div class="td">三维稳态裁决 · 纯新增零侵入</div></div>
+          <div class="tl-item"><div class="date">阶段二 · 开放认证</div><div class="tt">认证扩展 · 关键路径拦截</div><div class="td">统一鉴权 · 受保护路径全部拦截校验</div></div>
+          <div class="tl-item"><div class="date">阶段三 · 智能调度</div><div class="tt">稳态智能 · 自适应调度</div><div class="td">负载感知选路 · 热升级 · 漂移检测</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>方法论沉淀</h3>
+        <div class="timeline">
+          <div class="tl-item"><div class="date">内核</div><div class="tt">上下文驱动闭环</div><div class="td">先加载云端上下文再动手，减少出错</div></div>
+          <div class="tl-item"><div class="date">内核</div><div class="tt">容错闭环</div><div class="td">遇错先扫再动，错误即进化输入</div></div>
+          <div class="tl-item"><div class="date">内核</div><div class="tt">标准化交付流程</div><div class="td">7步主流程 + 3条工程纪律</div></div>
+          <div class="tl-item"><div class="date">内核</div><div class="tt">少试错纪律</div><div class="td">3条操作铁律，全域横向推广</div></div>
+          <div class="tl-item"><div class="date">内核</div><div class="tt">自进化闭环</div><div class="td">执行→试错→复盘→固化→推广→更优执行</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <div class="footer">火斗云智 AIOS · 平台能力全景 V1.0 · Ω₀⊂⊙∞⊂Ω</div>
+  <div class="legend">企业级 AI 操作系统 · 自进化 · 可溯源 · 稳态调度 · 2026-09-11</div>
+
+</div>
+</body>
+</html>

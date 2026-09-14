@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服务状态 - 火斗云智 AIOS</title>
+<meta name="description" content="火斗云智AIOS 20+微服务实时健康状态">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a0f;color:#e8e8e8;line-height:1.6}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:12px 20px}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.nav-logo{font-size:18px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.nav-links a{color:#9ca3af;text-decoration:none;font-size:13px}
+.nav-links a:hover{color:#c9a7e8}
+.nav-links a.active{color:#c9a7e8}
+.hero{min-height:35vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:110px 20px 30px;background:linear-gradient(135deg,#0a0a0f 0%,#1a1a2e 50%,#0a0a0f 100%)}
+.hero h1{font-size:clamp(26px,5vw,38px);font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.hero p{color:#9ca3af;max-width:650px;font-size:15px}
+.container{max-width:1200px;margin:0 auto;padding:35px 20px 60px}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;margin-bottom:16px;transition:all .3s}
+.card:hover{border-color:rgba(201,167,232,.3);transform:translateY(-2px)}
+.card h3{font-size:17px;margin-bottom:8px;color:#fff}
+.card p{color:#9ca3af;font-size:13px;line-height:1.7}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:16px}
+.tag{display:inline-block;padding:3px 10px;background:rgba(201,167,232,.1);border-radius:4px;color:#c9a7e8;font-size:11px;margin:2px}
+.tag-green{background:rgba(148,216,195,.1);color:#94D8C3}
+.tag-blue{background:rgba(139,200,234,.1);color:#8BC8EA}
+.tag-orange{background:rgba(251,191,36,.1);color:#fbbf24}
+.btn{display:inline-block;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:none}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.btn-secondary{background:transparent;color:#c9a7e8;border:1px solid #c9a7e8}
+.btn-sm{padding:6px 14px;font-size:12px}
+.version-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.version-item{padding:6px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:12px;color:#b0b0b0;text-decoration:none;transition:all .2s}
+.version-item:hover{border-color:#c9a7e8;color:#c9a7e8}
+.version-item.current{border-color:#94D8C3;color:#94D8C3}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.status-online{background:#94D8C3;box-shadow:0 0 8px #94D8C3}
+.status-offline{background:#ef4444}
+.metric{text-align:center;padding:16px}
+.metric .num{font-size:32px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.metric .label{color:#9ca3af;font-size:12px;margin-top:4px}
+.video-card{position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:16/9}
+.video-card video{width:100%;height:100%;object-fit:cover}
+.video-card .overlay{position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06)}
+th{color:#c9a7e8;font-weight:600;background:rgba(201,167,232,.05)}
+td{color:#b0b0b0}
+footer{text-align:center;padding:35px 20px;border-top:1px solid rgba(255,255,255,.06);color:#4b5563;font-size:12px}
+footer a{color:#6b7280;text-decoration:none;margin:0 8px}
+@media(max-width:768px){.nav-links{display:none}.grid-2{grid-template-columns:1fr}}
+</style>
+    <link rel="canonical" href="https://huodouai.comstatus/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<nav class="nav"><div class="nav-inner">
+<div class="nav-logo">火斗云智 AIOS</div>
+<div class="nav-links">
+<a href="/">首页</a><a href="/products/" class="active">产品矩阵</a><a href="/showcase/">演示中心</a><a href="/status/">服务状态</a><a href="/architecture/">架构</a><a href="/docs/">文档</a><a href="/pricing/">定价</a><a href="/blog/">博客</a><a href="/about/">关于</a><a href="/contact/">联系</a>
+</div>
+</div></nav>
+
+<div class="hero"><h1>服务状态</h1><p>20+微服务实时健康状态 · 全链路可观测</p></div>
+<div class="container">
+
+<div style="display:flex;gap:20px;justify-content:center;margin-bottom:30px;flex-wrap:wrap">
+<div class="metric"><div class="num" style="color:#94D8C3">20</div><div class="label">运行中服务</div></div>
+<div class="metric"><div class="num">0</div><div class="label">异常服务</div></div>
+<div class="metric"><div class="num">99.9%</div><div class="label">可用性</div></div>
+<div class="metric"><div class="num">0</div><div class="label">真值漂移</div></div>
+</div>
+
+<h3 style="margin:10px 0 16px;color:#c9a7e8">核心AI服务</h3>
+<div class="card" style="padding:0">
+<table>
+<tr><th>服务名称</th><th>端口</th><th>状态</th><th>说明</th></tr>
+<tr><td>Ω-Brainμ 真值引擎</td><td>8000</td><td><span class="status-dot status-online"></span>正常</td><td>118条真值 · 131向量文档 · 健康度100%</td></tr>
+<tr><td>LOIP API 真值校验</td><td>8001</td><td><span class="status-dot status-online"></span>正常</td><td>基线已锁定 · 0漂移 · 哈希链有效</td></tr>
+<tr><td>ANCE 近似最近邻</td><td>8002</td><td><span class="status-dot status-online"></span>正常</td><td>向量检索加速引擎</td></tr>
+<tr><td>Vector DB 向量数据库</td><td>8003</td><td><span class="status-dot status-online"></span>正常</td><td>Chroma · MiniLM 384d语义嵌入</td></tr>
+<tr><td>Monitor 监控服务</td><td>8004</td><td><span class="status-dot status-online"></span>正常</td><td>全链路监控告警</td></tr>
+<tr><td>Gov Compliance 政务合规</td><td>8005</td><td><span class="status-dot status-online"></span>正常</td><td>4类12条合规规则引擎</td></tr>
+<tr><td>Anchor API 锚点服务</td><td>8006</td><td><span class="status-dot status-online"></span>正常</td><td>114真值 · 81协议 · 19记忆链种子</td></tr>
+<tr><td>License 授权服务</td><td>8007</td><td><span class="status-dot status-online"></span>正常</td><td>许可证管理与校验</td></tr>
+<tr><td>Meta API 元数据服务</td><td>8009</td><td><span class="status-dot status-online"></span>正常</td><td>元数据管理</td></tr>
+<tr><td>Platform API 平台服务</td><td>8010</td><td><span class="status-dot status-online"></span>正常</td><td>统一平台API</td></tr>
+<tr><td>SmartAI 智能AI服务</td><td>8011</td><td><span class="status-dot status-online"></span>正常</td><td>智能AI推理</td></tr>
+<tr><td>Drama API 短剧服务</td><td>8012</td><td><span class="status-dot status-online"></span>正常</td><td>短剧生产API</td></tr>
+</table>
+</div>
+
+<h3 style="margin:25px 0 16px;color:#8BC8EA">平台与基础设施</h3>
+<div class="card" style="padding:0">
+<table>
+<tr><th>服务名称</th><th>端口</th><th>状态</th><th>说明</th></tr>
+<tr><td>AIOS 主系统</td><td>systemd</td><td><span class="status-dot status-online"></span>正常</td><td>AIOS V3.0主系统</td></tr>
+<tr><td>AI Proxy 代理服务</td><td>—</td><td><span class="status-dot status-online"></span>正常</td><td>多模型路由代理</td></tr>
+<tr><td>Drift Service 漂移检测</td><td>—</td><td><span class="status-dot status-online"></span>正常</td><td>语义漂移量化巡检</td></tr>
+<tr><td>Event Service 事件驱动</td><td>—</td><td><span class="status-dot status-online"></span>正常</td><td>事件驱动架构</td></tr>
+<tr><td>Federation 联邦服务</td><td>—</td><td><span class="status-dot status-online"></span>正常</td><td>跨节点联邦学习</td></tr>
+<tr><td>Idle Engine 闲置引擎</td><td>—</td><td><span class="status-dot status-online"></span>正常</td><td>闲置资源调度</td></tr>
+<tr><td>Omega Brain Ω脑</td><td>—</td><td><span class="status-dot status-online"></span>正常</td><td>全局决策大脑</td></tr>
+<tr><td>Deploy API 部署服务</td><td>8766</td><td><span class="status-dot status-online"></span>正常</td><td>7端点全部HTTP 200</td></tr>
+<tr><td>AI工作台后端</td><td>8765</td><td><span class="status-dot status-online"></span>正常</td><td>工作台API服务</td></tr>
+</table>
+</div>
+
+<h3 style="margin:25px 0 16px;color:#94D8C3">基础设施</h3>
+<div class="grid">
+<div class="card"><h3>🌐 Nginx</h3><p><span class="status-dot status-online"></span> 运行中 · 80/443端口</p><p style="font-size:11px;color:#6b7280">反向代理+SSL+静态资源</p></div>
+<div class="card"><h3>🗄️ MySQL</h3><p><span class="status-dot status-online"></span> 运行中 · 3306端口</p><p style="font-size:11px;color:#6b7280">innodb_buffer_pool=64M</p></div>
+<div class="card"><h3>⚡ Redis</h3><p><span class="status-dot status-online"></span> 运行中 · 6379端口</p><p style="font-size:11px;color:#6b7280">缓存+会话存储</p></div>
+<div class="card"><h3>📡 Prometheus</h3><p><span class="status-dot status-online"></span> 运行中 · 9090端口</p><p style="font-size:11px;color:#6b7280">指标采集与告警</p></div>
+<div class="card"><h3>🔌 frps</h3><p><span class="status-dot status-online"></span> 运行中 · 7100端口</p><p style="font-size:11px;color:#6b7280">内网穿透服务端</p></div>
+<div class="card"><h3>🖥️ 云服务器</h3><p><span class="status-dot status-online"></span> 运行中 · 31天+</p><p style="font-size:11px;color:#6b7280">腾讯云·上海四区·2核2GB</p></div>
+</div>
+
+<div style="text-align:center;margin-top:30px">
+<a href="/products/" class="btn btn-primary">查看产品矩阵</a>
+<a href="/showcase/" class="btn btn-secondary" style="margin-left:10px">演示中心</a>
+</div>
+</div>
+
+<footer>
+<p><a href="/products/">产品矩阵</a>|<a href="/showcase/">演示中心</a>|<a href="/status/">服务状态</a>|<a href="/architecture/">技术架构</a>|<a href="/docs/">文档</a>|<a href="/contact/">联系</a></p>
+<p style="margin-top:8px">© 2026 火斗云智 AIOS · Ω₀⊂⊙∞⊂Ω · DID-BR-000002</p>
+</footer>
+</body>
+</html>

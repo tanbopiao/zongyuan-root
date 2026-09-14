@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务智能体管理后台 V1.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);padding:20px 30px;border-bottom:2px solid #d4af37;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:22px;color:#d4af37;font-weight:600}
+.header .status{font-size:13px;color:#888}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:25px}
+.stat-card{background:#151520;border:1px solid #2a2a3a;border-radius:10px;padding:18px}
+.stat-card .label{font-size:12px;color:#888;margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:700;color:#d4af37}
+.stat-card .sub{font-size:11px;color:#666;margin-top:5px}
+.tabs{display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid #2a2a3a}
+.tab{padding:12px 24px;cursor:pointer;border-bottom:2px solid transparent;color:#888;font-size:14px;transition:all .3s}
+.tab.active{color:#d4af37;border-bottom-color:#d4af37}
+.tab:hover{color:#ccc}
+.panel{display:none}
+.panel.active{display:block}
+.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:15px}
+.agent-card{background:#151520;border:1px solid #2a2a3a;border-radius:10px;padding:20px;transition:all .3s}
+.agent-card:hover{border-color:#d4af37;transform:translateY(-2px)}
+.agent-card .avatar{font-size:36px;margin-bottom:10px}
+.agent-card .name{font-size:18px;font-weight:600;color:#fff;margin-bottom:5px}
+.agent-card .title{font-size:13px;color:#d4af37;margin-bottom:10px}
+.agent-card .desc{font-size:12px;color:#888;line-height:1.6;margin-bottom:12px}
+.agent-card .caps{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.agent-card .cap{background:#1a1a2e;border:1px solid #2a2a3a;padding:3px 8px;border-radius:4px;font-size:11px;color:#aaa}
+.agent-card .status-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.status-active{background:#1a3a1a;color:#4ade80;border:1px solid #4ade80}
+.status-planned{background:#3a2a1a;color:#fbbf24;border:1px solid #fbbf24}
+.workflow-list{display:flex;flex-direction:column;gap:12px}
+.workflow-card{background:#151520;border:1px solid #2a2a3a;border-radius:10px;padding:18px;cursor:pointer;transition:all .3s}
+.workflow-card:hover{border-color:#d4af37}
+.workflow-card .wf-name{font-size:16px;font-weight:600;color:#fff;margin-bottom:5px}
+.workflow-card .wf-desc{font-size:12px;color:#888;margin-bottom:10px}
+.workflow-card .wf-steps{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wf-step{background:#1a1a2e;padding:5px 12px;border-radius:5px;font-size:12px;color:#d4af37;border:1px solid #2a2a3a}
+.wf-arrow{color:#666;font-size:14px}
+.log-area{background:#0d0d15;border:1px solid #2a2a3a;border-radius:10px;padding:15px;font-family:monospace;font-size:12px;max-height:400px;overflow-y:auto}
+.log-line{padding:4px 0;border-bottom:1px solid #1a1a2e}
+.log-time{color:#666}
+.log-info{color:#4ade80}
+.log-warn{color:#fbbf24}
+.log-error{color:#f87171}
+.btn{background:linear-gradient(135deg,#d4af37,#b8941f);color:#0a0a0f;border:none;padding:10px 24px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;transition:all .3s}
+.btn:hover{opacity:.9;transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.input-group{display:flex;gap:10px;margin-bottom:15px}
+.input-group input,.input-group select{flex:1;background:#151520;border:1px solid #2a2a3a;border-radius:6px;padding:10px 14px;color:#fff;font-size:14px}
+.input-group input:focus,.input-group select:focus{outline:none;border-color:#d4af37}
+.footer{text-align:center;padding:20px;color:#555;font-size:12px;border-top:1px solid #2a2a3a;margin-top:30px}
+</style>
+    <link rel="canonical" href="https://huodouai.comagent-admin/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="header">
+<h1>⚡ 政务智能体矩阵管理后台</h1>
+<div class="status">ZONGYUAN-ROOT V2.0 | DID-BR-000002 | Ω₀⊂⊙∞⊂Ω</div>
+</div>
+<div class="container">
+<div class="stats-grid">
+<div class="stat-card"><div class="label">智能体总数</div><div class="value" id="stat-agents">7</div><div class="sub">已激活 7 / 规划 0</div></div>
+<div class="stat-card"><div class="label">协同工作流</div><div class="value" id="stat-workflows">4</div><div class="sub">3类协同模式</div></div>
+<div class="stat-card"><div class="label">API端点</div><div class="value" id="stat-apis">7</div><div class="sub">列表/详情/对话/路由/协同</div></div>
+<div class="stat-card"><div class="label">系统状态</div><div class="value" style="color:#4ade80">正常</div><div class="sub">AI Proxy 8021 | Gov API 8025</div></div>
+</div>
+<div class="tabs">
+<div class="tab active" onclick="switchTab('agents')">🤖 智能体管理</div>
+<div class="tab" onclick="switchTab('workflows')">🔗 协同工作流</div>
+<div class="tab" onclick="switchTab('execute')">▶️ 工作流执行</div>
+<div class="tab" onclick="switchTab('logs')">📋 运行日志</div>
+</div>
+<div id="panel-agents" class="panel active">
+<div class="agent-grid" id="agent-grid"></div>
+</div>
+<div id="panel-workflows" class="panel">
+<div class="workflow-list" id="workflow-list"></div>
+</div>
+<div id="panel-execute" class="panel">
+<div class="input-group">
+<select id="wf-select"><option value="">选择工作流...</option></select>
+<input type="text" id="wf-input" placeholder="输入初始任务，如：营业执照办理">
+<select id="wf-model"><option value="zhipu">智谱GLM</option><option value="kimi">Kimi</option><option value="doubao">豆包</option><option value="agnes">Agnes</option></select>
+<button class="btn" onclick="executeWorkflow()">执行工作流</button>
+</div>
+<div id="wf-result" style="background:#0d0d15;border:1px solid #2a2a3a;border-radius:10px;padding:20px;min-height:200px;font-size:13px;line-height:1.8;white-space:pre-wrap"></div>
+</div>
+<div id="panel-logs" class="panel">
+<div class="log-area" id="log-area"><div class="log-line"><span class="log-time">[系统]</span> <span class="log-info">管理后台已启动，等待操作...</span></div></div>
+</div>
+</div>
+<div class="footer">政务智能体矩阵 V2.0 | 7大专业智能体 | 4类协同工作流 | ZONGYUAN-ROOT 自治内核</div>
+<script>
+const API_BASE='/gov-api/api/agents';
+let agents=[],workflows=[];
+function log(msg,type='info'){const area=document.getElementById('log-area');const time=new Date().toLocaleTimeString();area.innerHTML+=`<div class="log-line"><span class="log-time">[${time}]</span> <span class="log-${type}">${msg}</span></div>`;area.scrollTop=area.scrollHeight}
+function switchTab(name){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['agents','workflows','execute','logs'][i]===name));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+name).classList.add('active')}
+async function loadAgents(){try{const r=await fetch(API_BASE+'/list');const d=await r.json();agents=d.data||[];document.getElementById('stat-agents').textContent=d.total||agents.length;const grid=document.getElementById('agent-grid');grid.innerHTML=agents.map(a=>`<div class="agent-card"><div class="avatar">${a.avatar}</div><div class="name">${a.name}</div><div class="title">${a.title}</div><div class="desc">${a.description}</div><div class="caps">${a.capabilities.map(c=>`<span class="cap">${c}</span>`).join('')}</div><span class="status-badge status-${a.status}">${a.status==='active'?'已激活':'规划中'}</span></div>`).join('');log(`加载 ${agents.length} 个智能体`)}catch(e){log('加载智能体失败: '+e,'error')}}
+async function loadWorkflows(){try{const r=await fetch(API_BASE+'/workflows');const d=await r.json();workflows=d.data||[];document.getElementById('stat-workflows').textContent=d.total||workflows.length;const list=document.getElementById('workflow-list');list.innerHTML=workflows.map(w=>`<div class="workflow-card" onclick="document.getElementById('wf-select').value='${w.id}';switchTab('execute')"><div class="wf-name">${w.name}</div><div class="wf-desc">${w.description}</div><div class="wf-steps">${w.steps.map((s,i)=>`<span class="wf-step">${s.agent_id}</span>${i<w.steps.length-1?'<span class="wf-arrow">→</span>':''}`).join('')}</div></div>`).join('');const sel=document.getElementById('wf-select');sel.innerHTML='<option value="">选择工作流...</option>'+workflows.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');log(`加载 ${workflows.length} 个工作流`)}catch(e){log('加载工作流失败: '+e,'error')}}
+async function executeWorkflow(){const wfId=document.getElementById('wf-select').value;const input=document.getElementById('wf-input').value;const model=document.getElementById('wf-model').value;if(!wfId||!input){alert('请选择工作流并输入任务');return}const result=document.getElementById('wf-result');result.textContent='执行中，请稍候...';log(`执行工作流: ${wfId}, 任务: ${input}`);try{const r=await fetch(API_BASE+'/workflow/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workflow_id:wfId,input,model})});const d=await r.json();const data=d.data||{};let out=`工作流: ${data.workflow_name}\n执行ID: ${data.execution_id}\n\n`;data.steps.forEach(s=>{out+=`步骤${s.step}: ${s.agent_id} - ${s.action} - ${s.status==='success'?'✅成功':'❌失败'} (${s.output_length}字)\n`});out+=`\n=== 最终结果 ===\n${data.final_result}`;result.textContent=out;log(`工作流执行完成，${data.steps.filter(s=>s.status==='success').length}/${data.steps.length}步成功`)}catch(e){result.textContent='执行失败: '+e;log('执行失败: '+e,'error')}}
+loadAgents();loadWorkflows();
+</script>
+</body>
+</html>

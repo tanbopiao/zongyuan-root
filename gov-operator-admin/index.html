@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务中台算子管理后台 · V3.2.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#0f172a;color:#e2e8f0;font-size:14px;line-height:1.6;min-height:100vh}
+.header{background:linear-gradient(135deg,#1e293b,#0f172a);border-bottom:1px solid #334155;padding:20px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.header h1{font-size:20px;font-weight:600;color:#f1f5f9;display:flex;align-items:center;gap:10px}
+.header h1 .icon{font-size:24px}
+.header .meta{font-size:12px;color:#94a3b8;text-align:right}
+.header .meta .version{color:#38bdf8;font-weight:600}
+.container{max-width:1400px;margin:0 auto;padding:24px 32px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #334155;border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#38bdf8,#818cf8)}
+.stat-card .label{font-size:12px;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.stat-card .value{font-size:32px;font-weight:700;color:#f1f5f9}
+.stat-card .value .unit{font-size:14px;color:#94a3b8;margin-left:4px}
+.stat-card .trend{font-size:12px;margin-top:8px}
+.stat-card .trend.up{color:#4ade80}
+.stat-card .trend.down{color:#f87171}
+.section{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;margin-bottom:24px}
+.section-title{font-size:16px;font-weight:600;color:#f1f5f9;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title .badge{background:#38bdf8;color:#0f172a;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.filter-bar{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#94a3b8;font-size:12px;cursor:pointer;transition:all 0.2s}
+.filter-btn:hover{border-color:#38bdf8;color:#38bdf8}
+.filter-btn.active{background:#38bdf8;color:#0f172a;border-color:#38bdf8;font-weight:600}
+.operator-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.operator-card{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:16px;transition:all 0.2s;cursor:pointer}
+.operator-card:hover{border-color:#38bdf8;transform:translateY(-2px);box-shadow:0 8px 24px rgba(56,189,248,0.1)}
+.operator-card .op-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.operator-card .op-id{font-size:11px;color:#64748b;font-family:monospace}
+.operator-card .op-name{font-size:15px;font-weight:600;color:#f1f5f9;margin-top:2px}
+.operator-card .op-status{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.operator-card .op-status.active{background:#065f46;color:#4ade80}
+.operator-card .op-status.warning{background:#78350f;color:#fbbf24}
+.operator-card .op-status.error{background:#7f1d1d;color:#f87171}
+.operator-card .op-desc{font-size:12px;color:#94a3b8;margin-bottom:12px;line-height:1.5}
+.operator-card .op-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px}
+.operator-card .op-meta .meta-item{color:#64748b}
+.operator-card .op-meta .meta-item span{color:#e2e8f0;font-weight:500}
+.operator-card .op-progress{margin-top:12px}
+.operator-card .progress-bar{height:4px;background:#334155;border-radius:2px;overflow:hidden}
+.operator-card .progress-fill{height:100%;background:linear-gradient(90deg,#38bdf8,#818cf8);border-radius:2px;transition:width 0.3s}
+.operator-card .progress-label{font-size:10px;color:#64748b;margin-top:4px;display:flex;justify-content:space-between}
+.layer-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-right:4px}
+.layer-infra{background:#1e3a5f;color:#38bdf8}
+.layer-core{background:#1e3a2f;color:#4ade80}
+.layer-compliance{background:#3a1e3f;color:#c084fc}
+.layer-business{background:#3a2f1e;color:#fbbf24}
+.layer-ops{background:#3f1e1e;color:#f87171}
+.dependency-graph{background:#0f172a;border-radius:8px;padding:20px;min-height:300px;position:relative}
+.dep-node{position:absolute;padding:8px 12px;background:#1e293b;border:2px solid #334155;border-radius:8px;font-size:11px;text-align:center;cursor:pointer;transition:all 0.2s;z-index:2}
+.dep-node:hover{border-color:#38bdf8;z-index:3}
+.dep-node .node-name{font-weight:600;color:#f1f5f9}
+.dep-node .node-id{font-size:9px;color:#64748b;font-family:monospace}
+.dep-line{position:absolute;height:2px;background:#334155;transform-origin:left center;z-index:1}
+.health-monitor{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.health-item{text-align:center;padding:16px;background:#0f172a;border-radius:8px;border:1px solid #334155}
+.health-item .health-icon{font-size:28px;margin-bottom:8px}
+.health-item .health-label{font-size:11px;color:#94a3b8;margin-bottom:4px}
+.health-item .health-value{font-size:20px;font-weight:700}
+.health-item .health-value.good{color:#4ade80}
+.health-item .health-value.warning{color:#fbbf24}
+.health-item .health-value.error{color:#f87171}
+.log-panel{background:#0f172a;border-radius:8px;padding:16px;font-family:monospace;font-size:11px;max-height:300px;overflow-y:auto}
+.log-entry{padding:6px 0;border-bottom:1px solid #1e293b;display:flex;gap:12px}
+.log-entry .log-time{color:#64748b;flex-shrink:0}
+.log-entry .log-level{flex-shrink:0;font-weight:600}
+.log-entry .log-level.info{color:#38bdf8}
+.log-entry .log-level.success{color:#4ade80}
+.log-entry .log-level.warning{color:#fbbf24}
+.log-entry .log-level.error{color:#f87171}
+.log-entry .log-msg{color:#94a3b8;flex:1}
+.footer{text-align:center;padding:24px;color:#64748b;font-size:12px;border-top:1px solid #334155;margin-top:24px}
+.footer .did{color:#38bdf8;font-family:monospace}
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .operator-grid{grid-template-columns:1fr}
+  .health-monitor{grid-template-columns:repeat(2,1fr)}
+  .container{padding:16px}
+}
+.alert-item{padding:12px 16px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.alert-item.error{background:#7f1d1d;border:1px solid #991b1b}
+.alert-item.warning{background:#78350f;border:1px solid #92400e}
+.alert-item .alert-icon{font-size:20px}
+.alert-item .alert-content{flex:1}
+.alert-item .alert-title{font-size:13px;font-weight:600;color:#f1f5f9}
+.alert-item .alert-desc{font-size:11px;color:#94a3b8;margin-top:2px}
+.alert-item .alert-time{font-size:10px;color:#64748b;font-family:monospace}
+</style>
+    <link rel="canonical" href="https://huodouai.comgov-operator-admin/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,167,232,.2);padding:8px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:12px">
+  <span style="font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap">火斗云智·政务</span>
+  <a href="/gov-ai/" style="color:#c9a7e8;text-decoration:none;padding:4px 10px;border-radius:6px;background:rgba(201,167,232,.15)">政务服务</a>
+  <a href="/workbench/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">工作台</a>
+  <a href="/gov-admin/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">管理后台</a>
+  <a href="/gov-operator-admin/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">算子管理</a>
+  <a href="/gov-mobile/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">移动版</a>
+  <a href="/gov-canvas/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px">Canvas版</a>
+  <a href="/portal/" style="color:#9ca3af;text-decoration:none;padding:4px 10px;border-radius:6px;margin-left:auto">智能中台</a>
+</div>
+<div style="height:40px"></div>
+<div class="header">
+  <h1><span class="icon">⚙️</span>政务中台算子管理后台</h1>
+  <div class="meta">
+    <div>算子库版本：<span class="version">V3.2.0</span></div>
+    <div id="currentTime">加载中...</div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- 总览统计 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">算子总数</div>
+      <div class="value">17<span class="unit">个</span></div>
+      <div class="trend up">↑ 5层完备架构</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">运行状态</div>
+      <div class="value" id="activeCount">17<span class="unit">/17</span></div>
+      <div class="trend up">↑ 100% 在线</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">今日调用</div>
+      <div class="value" id="totalCalls">0<span class="unit">次</span></div>
+      <div class="trend up">↑ 实时统计</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">平均成功率</div>
+      <div class="value" id="avgSuccess">99.8<span class="unit">%</span></div>
+      <div class="trend up">↑ 稳态运行</div>
+    </div>
+  </div>
+
+  <!-- 健康度监控 -->
+  <div class="section">
+    <div class="section-title">💊 系统健康度监控 <span class="badge">实时</span></div>
+    <div class="health-monitor">
+      <div class="health-item">
+        <div class="health-icon">🔗</div>
+        <div class="health-label">API连接</div>
+        <div class="health-value good">正常</div>
+      </div>
+      <div class="health-item">
+        <div class="health-icon">📦</div>
+        <div class="health-label">算子加载</div>
+        <div class="health-value good">17/17</div>
+      </div>
+      <div class="health-item">
+        <div class="health-icon">⚡</div>
+        <div class="health-label">响应延迟</div>
+        <div class="health-value good">1.2s</div>
+      </div>
+      <div class="health-item">
+        <div class="health-icon">🔒</div>
+        <div class="health-label">哈希链</div>
+        <div class="health-value good">有效</div>
+      </div>
+      <div class="health-item">
+        <div class="health-icon">🛡️</div>
+        <div class="health-label">合规状态</div>
+        <div class="health-value good">合规</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 性能趋势图表 -->
+  <div class="section">
+    <div class="section-title">📈 性能趋势 <span class="badge">实时</span>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="filter-btn active" onclick="loadTrend(7,this)">7天</button>
+        <button class="filter-btn" onclick="loadTrend(30,this)">30天</button>
+        <button class="filter-btn" onclick="loadTrend(90,this)">90天</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">每日调用量</div>
+        <canvas id="trendChart" width="500" height="200" style="width:100%;background:#0f172a;border-radius:8px"></canvas>
+      </div>
+      <div>
+        <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">成功率趋势</div>
+        <canvas id="successChart" width="500" height="200" style="width:100%;background:#0f172a;border-radius:8px"></canvas>
+      </div>
+    </div>
+    <div id="trendSummary" style="margin-top:12px;font-size:12px;color:#94a3b8"></div>
+  </div>
+
+  <!-- 告警面板 -->
+  <div class="section">
+    <div class="section-title">🚨 健康度告警 <span class="badge" id="alertBadge">0</span>
+      <div style="margin-left:auto">
+        <button class="filter-btn" onclick="loadAlerts()">刷新告警</button>
+      </div>
+    </div>
+    <div id="alertPanel" style="min-height:100px">
+      <div style="text-align:center;padding:40px;color:#64748b">
+        <div style="font-size:32px;margin-bottom:8px">✅</div>
+        <div>所有算子运行正常，无告警</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:12px;background:#0f172a;border-radius:8px;font-size:11px;color:#64748b">
+      <strong style="color:#94a3b8">告警阈值配置：</strong>
+      成功率警告 &lt;95% / 错误 &lt;80% | 
+      延迟警告 &gt;3s / 错误 &gt;5s | 
+      最少调用次数 ≥5次触发
+    </div>
+  </div>
+
+  <!-- 自进化引擎面板 -->
+  <div class="section">
+    <div class="section-title">🧬 自进化引擎 <span class="badge" id="evoStatus">运行中</span>
+      <div style="margin-left:auto">
+        <button class="filter-btn" onclick="loadEvolutionStatus()">刷新</button>
+        <button class="filter-btn" onclick="generateReport()">生成日报</button>
+      </div>
+    </div>
+    
+    <!-- 进化机制状态 -->
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+      <div class="stat-card" style="padding:16px">
+        <div class="label">高频问答缓存</div>
+        <div class="value" id="cacheHitRate" style="font-size:24px">0%</div>
+        <div class="trend" id="cacheDetail">0条缓存</div>
+      </div>
+      <div class="stat-card" style="padding:16px">
+        <div class="label">知识缺口追踪</div>
+        <div class="value" id="gapCount" style="font-size:24px">0</div>
+        <div class="trend" id="gapDetail">0个待分析</div>
+      </div>
+      <div class="stat-card" style="padding:16px">
+        <div class="label">每日自动报告</div>
+        <div class="value" id="reportCount" style="font-size:24px">0</div>
+        <div class="trend">每天凌晨2点自动生成</div>
+      </div>
+    </div>
+    
+    <!-- 知识缺口列表 -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">🔍 知识缺口（用户搜索无结果的高频问题）</div>
+      <div id="gapList" style="min-height:60px">
+        <div style="text-align:center;padding:20px;color:#64748b;font-size:12px">加载中...</div>
+      </div>
+    </div>
+    
+    <!-- 最近进化动作 -->
+    <div>
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">📋 最近进化动作</div>
+      <div id="evolutionLog" style="max-height:150px;overflow-y:auto">
+        <div style="text-align:center;padding:20px;color:#64748b;font-size:12px">加载中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 算子列表 -->
+  <div class="section">
+    <div class="section-title">📋 算子清单 <span class="badge" id="filterCount">17个算子</span></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterOperators('all')">全部</button>
+      <button class="filter-btn" onclick="filterOperators('infra')">基础设施层</button>
+      <button class="filter-btn" onclick="filterOperators('core')">核心功能层</button>
+      <button class="filter-btn" onclick="filterOperators('compliance')">合规治理层</button>
+      <button class="filter-btn" onclick="filterOperators('business')">业务闭环层</button>
+      <button class="filter-btn" onclick="filterOperators('ops')">运营完善层</button>
+    </div>
+    <div class="operator-grid" id="operatorGrid"></div>
+  </div>
+
+  <!-- 调用日志 -->
+  <div class="section">
+    <div class="section-title">📜 实时调用日志 <span class="badge">最近20条</span></div>
+    <div class="log-panel" id="logPanel">
+      <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-level info">INFO</span><span class="log-msg">等待算子调用...</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div>Ω₀⊂⊙∞⊂Ω · 政务中台算子管理后台 V3.2.0</div>
+  <div class="did">DID-BR-000002 · ZONGYUAN-ROOT V1.7</div>
+</div>
+
+<!-- 算子库引入 -->
+<script src="../gov-ai/js/operators/gov_api_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_user_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_modal_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_loading_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_audit_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_chat_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_policy_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_doc_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_guide_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_verification_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_compliance_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_review_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_policy_lifecycle_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_session_timeout_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_export_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_notification_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_analytics_operator.js"></script>
+<script src="../gov-ai/js/operators/index.js"></script>
+
+<script>
+// 算子数据（从API加载）
+let OPERATORS = [];
+let currentFilter = 'all';zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务中台算子管理后台 · V3.2.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#0f172a;color:#e2e8f0;font-size:14px;line-height:1.6;min-height:100vh}
+.header{background:linear-gradient(135deg,#1e293b,#0f172a);border-bottom:1px solid #334155;padding:20px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.header h1{font-size:20px;font-weight:600;color:#f1f5f9;display:flex;align-items:center;gap:10px}
+.header h1 .icon{font-size:24px}
+.header .meta{font-size:12px;color:#94a3b8;text-align:right}
+.header .meta .version{color:#38bdf8;font-weight:600}
+.container{max-width:1400px;margin:0 auto;padding:24px 32px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #334155;border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#38bdf8,#818cf8)}
+.stat-card .label{font-size:12px;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.stat-card .value{font-size:32px;font-weight:700;color:#f1f5f9}
+.stat-card .value .unit{font-size:14px;color:#94a3b8;margin-left:4px}
+.stat-card .trend{font-size:12px;margin-top:8px}
+.stat-card .trend.up{color:#4ade80}
+.stat-card .trend.down{color:#f87171}
+.section{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;margin-bottom:24px}
+.section-title{font-size:16px;font-weight:600;color:#f1f5f9;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title .badge{background:#38bdf8;color:#0f172a;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.filter-bar{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#94a3b8;font-size:12px;cursor:pointer;transition:all 0.2s}
+.filter-btn:hover{border-color:#38bdf8;color:#38bdf8}
+.filter-btn.active{background:#38bdf8;color:#0f172a;border-color:#38bdf8;font-weight:600}
+.operator-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.operator-card{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:16px;transition:all 0.2s;cursor:pointer}
+.operator-card:hover{border-color:#38bdf8;transform:translateY(-2px);box-shadow:0 8px 24px rgba(56,189,248,0.1)}
+.operator-card .op-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.operator-card .op-id{font-size:11px;color:#64748b;font-family:monospace}
+.operator-card .op-name{font-size:15px;font-weight:600;color:#f1f5f9;margin-top:2px}
+.operator-card .op-status{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.operator-card .op-status.active{background:#065f46;color:#4ade80}
+.operator-card .op-status.warning{background:#78350f;color:#fbbf24}
+.operator-card .op-status.error{background:#7f1d1d;color:#f87171}
+.operator-card .op-desc{font-size:12px;color:#94a3b8;margin-bottom:12px;line-height:1.5}
+.operator-card .op-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px}
+.operator-card .op-meta .meta-item{color:#64748b}
+.operator-card .op-meta .meta-item span{color:#e2e8f0;font-weight:500}
+.operator-card .op-progress{margin-top:12px}
+.operator-card .progress-bar{height:4px;background:#334155;border-radius:2px;overflow:hidden}
+.operator-card .progress-fill{height:100%;background:linear-gradient(90deg,#38bdf8,#818cf8);border-radius:2px;transition:width 0.3s}
+.operator-card .progress-label{font-size:10px;color:#64748b;margin-top:4px;display:flex;justify-content:space-between}
+.layer-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-right:4px}
+.layer-infra{background:#1e3a5f;color:#38bdf8}
+.layer-core{background:#1e3a2f;color:#4ade80}
+.layer-compliance{background:#3a1e3f;color:#c084fc}
+.layer-business{background:#3a2f1e;color:#fbbf24}
+.layer-ops{background:#3f1e1e;color:#f87171}
+.dependency-graph{background:#0f172a;border-radius:8px;padding:20px;min-height:300px;position:relative}
+.dep-node{position:absolute;padding:8px 12px;background:#1e293b;border:2px solid #334155;border-radius:8px;font-size:11px;text-align:center;cursor:pointer;transition:all 0.2s;z-index:2}
+.dep-node:hover{border-color:#38bdf8;z-index:3}
+.dep-node .node-name{font-weight:600;color:#f1f5f9}
+.dep-node .node-id{font-size:9px;color:#64748b;font-family:monospace}
+.dep-line{position:absolute;height:2px;background:#334155;transform-origin:left center;z-index:1}
+.health-monitor{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.health-item{text-align:center;padding:16px;background:#0f172a;border-radius:8px;border:1px solid #334155}
+.health-item .health-icon{font-size:28px;margin-bottom:8px}
+.health-item .health-label{font-size:11px;color:#94a3b8;margin-bottom:4px}
+.health-item .health-value{font-size:20px;font-weight:700}
+.health-item .health-value.good{color:#4ade80}
+.health-item .health-value.warning{color:#fbbf24}
+.health-item .health-value.error{color:#f87171}
+.log-panel{background:#0f172a;border-radius:8px;padding:16px;font-family:monospace;font-size:11px;max-height:300px;overflow-y:auto}
+.log-entry{padding:6px 0;border-bottom:1px solid #1e293b;display:flex;gap:12px}
+.log-entry .log-time{color:#64748b;flex-shrink:0}
+.log-entry .log-level{flex-shrink:0;font-weight:600}
+.log-entry .log-level.info{color:#38bdf8}
+.log-entry .log-level.success{color:#4ade80}
+.log-entry .log-level.warning{color:#fbbf24}
+.log-entry .log-level.error{color:#f87171}
+.log-entry .log-msg{color:#94a3b8;flex:1}
+.footer{text-align:center;padding:24px;color:#64748b;font-size:12px;border-top:1px solid #334155;margin-top:24px}
+.footer .did{color:#38bdf8;font-family:monospace}
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .operator-grid{grid-template-columns:1fr}
+  .health-monitor{grid-template-columns:repeat(2,1fr)}
+  .container{padding:16px}
+}
+.alert-item{padding:12px 16px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.alert-item.error{background:#7f1d1d;border:1px solid #991b1b}
+.alert-item.warning{background:#78350f;border:1px solid #92400e}
+.alert-item .alert-icon{font-size:20px}
+.alert-item .alert-content{flex:1}
+.alert-item .alert-title{font-size:13px;font-weight:600;color:#f1f5f9}
+.alert-item .alert-desc{font-size:11px;color:#94a3b8;margin-top:2px}
+.alert-item .alert-time{font-size:10px;color:#64748b;font-family:monospace}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1><span class="icon">⚙️</span>政务中台算子管理后台</h1>
+  <div class="meta">
+    <div>算子库版本：<span class="version">V3.2.0</span></div>
+    <div id="currentTime">加载中...</div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- 总览统计 -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">算子总数</div>
+      <div class="value">17<span class="unit">个</span></div>
+      <div class="trend up">↑ 5层完备架构</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">运行状态</div>
+      <div class="value" id="activeCount">17<span class="unit">/17</span></div>
+      <div class="trend up">↑ 100% 在线</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">今日调用</div>
+      <div class="value" id="totalCalls">0<span class="unit">次</span></div>
+      <div class="trend up">↑ 实时统计</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">平均成功率</div>
+      <div class="value" id="avgSuccess">99.8<span class="unit">%</span></div>
+      <div class="trend up">↑ 稳态运行</div>
+    </div>
+  </div>
+
+  <!-- 健康度监控 -->
+  <div class="section">
+    <div class="section-title">💊 系统健康度监控 <span class="badge">实时</span></div>
+    <div class="health-monitor">
+      <div class="health-item">
+        <div class="health-icon">🔗</div>
+        <div class="health-label">API连接</div>
+        <div class="health-value good">正常</div>
+      </div>
+      <div class="health-item">
+        <div class="health-icon">📦</div>
+        <div class="health-label">算子加载</div>
+        <div class="health-value good">17/17</div>
+      </div>
+      <div class="health-item">
+        <div class="health-icon">⚡</div>
+        <div class="health-label">响应延迟</div>
+        <div class="health-value good">1.2s</div>
+      </div>
+      <div class="health-item">
+        <div class="health-icon">🔒</div>
+        <div class="health-label">哈希链</div>
+        <div class="health-value good">有效</div>
+      </div>
+      <div class="health-item">
+        <div class="health-icon">🛡️</div>
+        <div class="health-label">合规状态</div>
+        <div class="health-value good">合规</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 性能趋势图表 -->
+  <div class="section">
+    <div class="section-title">📈 性能趋势 <span class="badge">实时</span>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="filter-btn active" onclick="loadTrend(7,this)">7天</button>
+        <button class="filter-btn" onclick="loadTrend(30,this)">30天</button>
+        <button class="filter-btn" onclick="loadTrend(90,this)">90天</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">每日调用量</div>
+        <canvas id="trendChart" width="500" height="200" style="width:100%;background:#0f172a;border-radius:8px"></canvas>
+      </div>
+      <div>
+        <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">成功率趋势</div>
+        <canvas id="successChart" width="500" height="200" style="width:100%;background:#0f172a;border-radius:8px"></canvas>
+      </div>
+    </div>
+    <div id="trendSummary" style="margin-top:12px;font-size:12px;color:#94a3b8"></div>
+  </div>
+
+  <!-- 告警面板 -->
+  <div class="section">
+    <div class="section-title">🚨 健康度告警 <span class="badge" id="alertBadge">0</span>
+      <div style="margin-left:auto">
+        <button class="filter-btn" onclick="loadAlerts()">刷新告警</button>
+      </div>
+    </div>
+    <div id="alertPanel" style="min-height:100px">
+      <div style="text-align:center;padding:40px;color:#64748b">
+        <div style="font-size:32px;margin-bottom:8px">✅</div>
+        <div>所有算子运行正常，无告警</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:12px;background:#0f172a;border-radius:8px;font-size:11px;color:#64748b">
+      <strong style="color:#94a3b8">告警阈值配置：</strong>
+      成功率警告 &lt;95% / 错误 &lt;80% | 
+      延迟警告 &gt;3s / 错误 &gt;5s | 
+      最少调用次数 ≥5次触发
+    </div>
+  </div>
+
+  <!-- 自进化引擎面板 -->
+  <div class="section">
+    <div class="section-title">🧬 自进化引擎 <span class="badge" id="evoStatus">运行中</span>
+      <div style="margin-left:auto">
+        <button class="filter-btn" onclick="loadEvolutionStatus()">刷新</button>
+        <button class="filter-btn" onclick="generateReport()">生成日报</button>
+      </div>
+    </div>
+    
+    <!-- 进化机制状态 -->
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+      <div class="stat-card" style="padding:16px">
+        <div class="label">高频问答缓存</div>
+        <div class="value" id="cacheHitRate" style="font-size:24px">0%</div>
+        <div class="trend" id="cacheDetail">0条缓存</div>
+      </div>
+      <div class="stat-card" style="padding:16px">
+        <div class="label">知识缺口追踪</div>
+        <div class="value" id="gapCount" style="font-size:24px">0</div>
+        <div class="trend" id="gapDetail">0个待分析</div>
+      </div>
+      <div class="stat-card" style="padding:16px">
+        <div class="label">每日自动报告</div>
+        <div class="value" id="reportCount" style="font-size:24px">0</div>
+        <div class="trend">每天凌晨2点自动生成</div>
+      </div>
+    </div>
+    
+    <!-- 知识缺口列表 -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">🔍 知识缺口（用户搜索无结果的高频问题）</div>
+      <div id="gapList" style="min-height:60px">
+        <div style="text-align:center;padding:20px;color:#64748b;font-size:12px">加载中...</div>
+      </div>
+    </div>
+    
+    <!-- 最近进化动作 -->
+    <div>
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:8px">📋 最近进化动作</div>
+      <div id="evolutionLog" style="max-height:150px;overflow-y:auto">
+        <div style="text-align:center;padding:20px;color:#64748b;font-size:12px">加载中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 算子列表 -->
+  <div class="section">
+    <div class="section-title">📋 算子清单 <span class="badge" id="filterCount">17个算子</span></div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterOperators('all')">全部</button>
+      <button class="filter-btn" onclick="filterOperators('infra')">基础设施层</button>
+      <button class="filter-btn" onclick="filterOperators('core')">核心功能层</button>
+      <button class="filter-btn" onclick="filterOperators('compliance')">合规治理层</button>
+      <button class="filter-btn" onclick="filterOperators('business')">业务闭环层</button>
+      <button class="filter-btn" onclick="filterOperators('ops')">运营完善层</button>
+    </div>
+    <div class="operator-grid" id="operatorGrid"></div>
+  </div>
+
+  <!-- 调用日志 -->
+  <div class="section">
+    <div class="section-title">📜 实时调用日志 <span class="badge">最近20条</span></div>
+    <div class="log-panel" id="logPanel">
+      <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-level info">INFO</span><span class="log-msg">等待算子调用...</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div>Ω₀⊂⊙∞⊂Ω · 政务中台算子管理后台 V3.2.0</div>
+  <div class="did">DID-BR-000002 · ZONGYUAN-ROOT V1.7</div>
+</div>
+
+<!-- 算子库引入 -->
+<script src="../gov-ai/js/operators/gov_api_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_user_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_modal_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_loading_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_audit_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_chat_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_policy_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_doc_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_guide_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_verification_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_compliance_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_review_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_policy_lifecycle_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_session_timeout_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_export_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_notification_operator.js"></script>
+<script src="../gov-ai/js/operators/gov_analytics_operator.js"></script>
+<script src="../gov-ai/js/operators/index.js"></script>
+
+<script>
+// 17个算子元数据
+const OPERATORS = [
+  {id:'GOV-OP-001',name:'API通信算子',layer:'infra',layerName:'基础设施层',desc:'统一API请求封装，支持超时重试、错误处理、请求审计',status:'active',calls:1247,success:99.9,latency:0.8,version:'3.2.0'},
+  {id:'GOV-OP-002',name:'用户状态算子',layer:'infra',layerName:'基础设施层',desc:'用户登录态管理、权限校验、会话保持、本地存储',status:'active',calls:892,success:100,latency:0.1,version:'3.2.0'},
+  {id:'GOV-OP-003',name:'弹窗模态算子',layer:'infra',layerName:'基础设施层',desc:'统一弹窗组件，支持确认框、详情页、表单弹窗',status:'active',calls:567,success:100,latency:0.05,version:'3.2.0'},
+  {id:'GOV-OP-004',name:'加载状态算子',layer:'infra',layerName:'基础设施层',desc:'全局加载指示器、骨架屏、进度条、异步状态管理',status:'active',calls:2103,success:100,latency:0.02,version:'3.2.0'},
+  {id:'GOV-OP-005',name:'审计日志算子',layer:'infra',layerName:'基础设施层',desc:'全链路操作审计、行为追踪、合规日志、不可篡改记录',status:'active',calls:3421,success:100,latency:0.15,version:'3.2.0'},
+  {id:'GOV-OP-006',name:'智能问答算子',layer:'core',layerName:'核心功能层',desc:'政务AI对话引擎，支持多轮对话、上下文理解、真值核验',status:'active',calls:456,success:98.7,latency:2.5,version:'3.2.0'},
+  {id:'GOV-OP-007',name:'政策查询算子',layer:'core',layerName:'核心功能层',desc:'政策法规检索、分类筛选、全文搜索、政策详情',status:'active',calls:789,success:99.5,latency:0.6,version:'3.2.0'},
+  {id:'GOV-OP-008',name:'公文助手算子',layer:'core',layerName:'核心功能层',desc:'公文生成、模板套用、格式校验、合规审查、导出',status:'active',calls:234,success:97.2,latency:3.2,version:'3.2.0'},
+  {id:'GOV-OP-009',name:'办事指南算子',layer:'core',layerName:'核心功能层',desc:'办事流程查询、材料清单、在线预约、进度跟踪',status:'active',calls:678,success:99.8,latency:0.5,version:'3.2.0'},
+  {id:'GOV-OP-010',name:'合规审查算子',layer:'compliance',layerName:'合规治理层',desc:'敏感词过滤、涉密拦截、违规识别、用语规范校验',status:'active',calls:345,success:99.1,latency:0.9,version:'3.2.0'},
+  {id:'GOV-OP-011',name:'政策真值核验算子',layer:'compliance',layerName:'合规治理层',desc:'AI答复置信度评估、真值溯源、高风险自动转人工',status:'active',calls:456,success:98.9,latency:1.1,version:'3.2.0'},
+  {id:'GOV-OP-015',name:'人工复核工单算子',layer:'compliance',layerName:'合规治理层',desc:'高风险内容复核工单创建、流转、审批、归档',status:'active',calls:89,success:100,latency:0.3,version:'3.2.0'},
+  {id:'GOV-OP-012',name:'会话超时回收算子',layer:'business',layerName:'业务闭环层',desc:'会话超时检测、自动登出、敏感信息清除、预警提醒',status:'active',calls:1234,success:100,latency:0.01,version:'3.2.0'},
+  {id:'GOV-OP-016',name:'政策版本生命周期算子',layer:'business',layerName:'业务闭环层',desc:'政策生效/过期/废止状态管理、版本追踪、变更提醒',status:'active',calls:234,success:99.6,latency:0.4,version:'3.2.0'},
+  {id:'GOV-OP-013',name:'批量导出算子',layer:'ops',layerName:'运营完善层',desc:'政策库/公文/报表多格式导出（PDF/Word/Excel/CSV）',status:'active',calls:156,success:98.5,latency:1.8,version:'3.2.0'},
+  {id:'GOV-OP-014',name:'消息通知算子',layer:'ops',layerName:'运营完善层',desc:'系统公告、站内消息、未读计数、静默时段、通知中心',status:'active',calls:567,success:99.3,latency:0.2,version:'3.2.0'},
+  {id:'GOV-OP-017',name:'运营统计算子',layer:'ops',layerName:'运营完善层',desc:'PV/UV统计、功能使用排行、用户行为分析、报表生成',status:'active',calls:2345,success:99.7,latency:0.3,version:'3.2.0'}
+];
+
+let currentFilter = 'all';
+let callLogs = [];
+let totalCalls = 0;
+
+// API基础路径
+const API_BASE = '/gov-api/api/gov/operators';
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+  // 初始化算子库
+  try {
+    const ops = GovOperators.init({ apiBase: '/gov-api' });
+    console.log('✅ 算子库初始化成功，17个算子就绪');
+    addLog('success', '算子库V3.2.0初始化成功，17个算子全部加载');
+  } catch(e) {
+    addLog('warning', '算子库初始化降级: ' + e.message);
+  }
+  
+  loadOperatorStats();
+  loadOperatorLogs();
+  loadTrend(7);
+  loadAlerts();
+  loadEvolutionStatus();
+  setInterval(loadAlerts, 30000);
+  setInterval(loadEvolutionStatus, 60000);  // 每分钟刷新进化状态  // 每30秒刷新告警
+  updateTime();
+  setInterval(updateTime, 1000);
+  setInterval(loadOperatorStats, 10000);  // 每10秒刷新统计
+  setInterval(loadOperatorLogs, 15000);   // 每15秒刷新日志
+});
+
+// 从API加载算子统计
+async function loadOperatorStats() {
+  try {
+    const res = await fetch(API_BASE + '/stats?hours=24');
+    const data = await res.json();
+    if (data.ok && data.operators) {
+      // 转换为前端格式
+      OPERATORS = Object.values(data.operators).map(op => ({
+        id: op.op_id,
+        name: op.op_name,
+        layer: op.layer,
+        layerName: op.layer_name,
+        desc: op.desc,
+        status: op.status,
+        calls: op.total_calls,
+        success: op.success_rate,
+        latency: (op.avg_latency_ms / 1000).toFixed(2),
+        version: '3.2.0',
+        health: op.health_score
+      }));
+      renderOperators();
+      updateSummary();
+      addLog('info', '算子统计数据已刷新（' + OPERATORS.length + '个算子）');
+    }
+  } catch(e) {
+    addLog('warning', '加载算子统计失败: ' + e.message);
+  }
+}
+
+// 从API加载调用日志
+async function loadOperatorLogs() {
+  try {
+    const res = await fetch(API_BASE + '/logs?limit=20');
+    const data = await res.json();
+    if (data.ok && data.logs) {
+      callLogs = data.logs.slice().reverse().map(log => ({
+        time: log.timestamp ? log.timestamp.split('T')[1].split('.')[0] : '--:--:--',
+        level: log.success ? 'success' : 'error',
+        msg: log.op_id + ' ' + log.op_name + ' 调用' + (log.success ? '成功' : '失败') + ' (' + log.latency_ms + 'ms)'
+      }));
+      renderLogs();
+    }
+  } catch(e) {
+    console.warn('加载调用日志失败:', e);
+  }
+}
+
+// 更新汇总统计
+function updateSummary() {
+  const totalCalls = OPERATORS.reduce((sum, op) => sum + op.calls, 0);
+  const avgSuccess = OPERATORS.length > 0 
+    ? (OPERATORS.reduce((sum, op) => sum + op.success, 0) / OPERATORS.length).toFixed(1)
+    : 0;
+  const activeCount = OPERATORS.filter(op => op.status === 'active').length;
+  
+  document.getElementById('totalCalls').textContent = totalCalls.toLocaleString();
+  document.getElementById('avgSuccess').textContent = avgSuccess;
+  document.getElementById('activeCount').textContent = activeCount + '<span class="unit">/17</span>';
+}
+
+// 渲染日志
+function renderLogs() {
+  const panel = document.getElementById('logPanel');
+  panel.innerHTML = callLogs.map(log => `
+    <div class="log-entry">
+      <span class="log-time">${log.time}</span>
+      <span class="log-level ${log.level}">${log.level.toUpperCase()}</span>
+      <span class="log-msg">${log.msg}</span>
+    </div>
+  `).join('');
+}
+
+function updateTime() {
+  const now = new Date();
+  document.getElementById('currentTime').textContent = now.toLocaleString('zh-CN');
+}
+
+function renderOperators() {
+  const grid = document.getElementById('operatorGrid');
+  const filtered = currentFilter === 'all' ? OPERATORS : OPERATORS.filter(op => op.layer === currentFilter);
+  
+  document.getElementById('filterCount').textContent = filtered.length + '个算子';
+  
+  grid.innerHTML = filtered.map(op => `
+    <div class="operator-card" onclick="showOperatorDetail('${op.id}')">
+      <div class="op-header">
+        <div>
+          <div class="op-id">${op.id}</div>
+          <div class="op-name">${op.name}</div>
+        </div>
+        <div class="op-status ${op.status}">${op.status === 'active' ? '运行中' : '异常'}</div>
+      </div>
+      <div style="margin-bottom:8px">
+        <span class="layer-tag layer-${op.layer}">${op.layerName}</span>
+      </div>
+      <div class="op-desc">${op.desc}</div>
+      <div class="op-meta">
+        <div class="meta-item">调用: <span>${op.calls.toLocaleString()}</span></div>
+        <div class="meta-item">成功率: <span>${op.success}%</span></div>
+        <div class="meta-item">延迟: <span>${op.latency}s</span></div>
+        <div class="meta-item">版本: <span>${op.version}</span></div>
+      </div>
+      <div class="op-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${op.health || op.success}%"></div>
+        </div>
+        <div class="progress-label">
+          <span>健康度</span>
+          <span>${op.health || op.success}%</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterOperators(layer) {
+  currentFilter = layer;
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  renderOperators();
+}
+
+function showOperatorDetail(opId) {
+  const op = OPERATORS.find(o => o.id === opId);
+  if (op) {
+    addLog('info', `查看算子详情: ${op.id} ${op.name}`);
+    alert(`算子详情\n\nID: ${op.id}\n名称: ${op.name}\n层级: ${op.layerName}\n状态: ${op.status === 'active' ? '运行中' : '异常'}\n调用次数: ${op.calls}\n成功率: ${op.success}%\n平均延迟: ${op.latency}s\n版本: ${op.version}\n\n描述: ${op.desc}`);
+  }
+}
+
+function addLog(level, msg) {
+  const now = new Date();
+  const time = now.toTimeString().split(' ')[0];
+  // 系统消息不覆盖API日志，单独显示在控制台
+  console.log('[' + level.toUpperCase() + '] ' + msg);
+}
+
+function renderLogs() {
+  const panel = document.getElementById('logPanel');
+  if (callLogs.length === 0) {
+    panel.innerHTML = '<div class="log-entry"><span class="log-time">--:--:--</span><span class="log-level info">INFO</span><span class="log-msg">等待算子调用记录...</span></div>';
+    return;
+  }
+  panel.innerHTML = callLogs.map(log => `
+    <div class="log-entry">
+      <span class="log-time">${log.time}</span>
+      <span class="log-level ${log.level}">${log.level.toUpperCase()}</span>
+      <span class="log-msg">${log.msg}</span>
+    </div>
+  `).join('');
+}
+
+// 实时数据从API加载，无需模拟调用
+
+// ============ 自进化引擎面板 ============
+const EVO_API = '/gov-api/api/gov/evolution';
+
+async function loadEvolutionStatus() {
+  try {
+    const res = await fetch(EVO_API + '/status');
+    const data = await res.json();
+    if (data.ok && data.status) {
+      const s = data.status;
+      
+      // 缓存统计
+      document.getElementById('cacheHitRate').textContent = s.cache.hit_rate + '%';
+      document.getElementById('cacheDetail').textContent = s.cache.total_entries + '条缓存 / 命中' + s.cache.cache_hits + '次';
+      
+      // 知识缺口
+      document.getElementById('gapCount').textContent = s.knowledge_gaps.total;
+      document.getElementById('gapDetail').textContent = s.knowledge_gaps.needs_analysis + '个待分析 / ' + s.knowledge_gaps.resolved + '个已解决';
+      
+      // 进化日志
+      renderEvolutionLog(s.recent_evolution_actions);
+      
+      document.getElementById('evoStatus').textContent = '运行中';
+      document.getElementById('evoStatus').style.background = '#065f46';
+      document.getElementById('evoStatus').style.color = '#4ade80';
+    }
+  } catch(e) {
+    console.warn('加载进化状态失败:', e);
+    document.getElementById('evoStatus').textContent = '异常';
+  }
+  
+  // 加载知识缺口详情
+  loadKnowledgeGaps();
+}
+
+async function loadKnowledgeGaps() {
+  try {
+    const res = await fetch(EVO_API + '/knowledge-gaps?limit=5');
+    const data = await res.json();
+    if (data.ok && data.gaps) {
+      const gaps = data.gaps.top_gaps || [];
+      const container = document.getElementById('gapList');
+      
+      if (gaps.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:12px">暂无知识缺口，知识库覆盖良好</div>';
+        return;
+      }
+      
+      container.innerHTML = gaps.map(gap => `
+        <div style="padding:8px 12px;background:#0f172a;border-radius:6px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <span style="color:#e2e8f0;font-size:13px">${gap.query}</span>
+            <span style="color:#64748b;font-size:11px;margin-left:8px">${gap.type}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="color:#fbbf24;font-size:11px">${gap.count}次搜索</span>
+            <span class="layer-tag layer-${gap.status === 'resolved' ? 'infra' : 'ops'}" style="font-size:10px">${gap.status}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch(e) {
+    console.warn('加载知识缺口失败:', e);
+  }
+}
+
+function renderEvolutionLog(logs) {
+  const container = document.getElementById('evolutionLog');
+  if (!logs || logs.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:12px">暂无进化动作记录</div>';
+    return;
+  }
+  
+  container.innerHTML = logs.slice().reverse().map(log => {
+    const time = log.timestamp ? log.timestamp.split('T')[1].split('.')[0] : '';
+    const levelColor = log.level === 'success' ? '#4ade80' : (log.level === 'warning' ? '#fbbf24' : '#38bdf8');
+    const details = typeof log.details === 'object' ? JSON.stringify(log.details).substring(0, 60) : log.details;
+    return `
+      <div style="padding:6px 12px;border-bottom:1px solid #1e293b;font-size:11px">
+        <span style="color:#64748b">${time}</span>
+        <span style="color:${levelColor};margin-left:8px">[${log.action}]</span>
+        <span style="color:#94a3b8;margin-left:8px">${details}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+async function generateReport() {
+  try {
+    const btn = event.target;
+    btn.textContent = '生成中...';
+    btn.disabled = true;
+    
+    const res = await fetch(EVO_API + '/daily-report');
+    const data = await res.json();
+    if (data.ok && data.report) {
+      const r = data.report;
+      alert(`日报生成完成！\n\n日期: ${r.date}\n总调用: ${r.summary.total_calls}\n成功率: ${r.summary.success_rate}%\n平均延迟: ${r.summary.avg_latency_ms}ms\n优化建议: ${r.recommendations.length}条\n\n${r.recommendations.map(rec => '[' + rec.priority + '] ' + rec.message).join('\n')}`);
+      loadEvolutionStatus();
+    }
+  } catch(e) {
+    alert('生成日报失败: ' + e.message);
+  } finally {
+    event.target.textContent = '生成日报';
+    event.target.disabled = false;
+  }
+}
+
+// ============ 性能趋势图表 ============
+let currentTrendDays = 7;
+
+async function loadTrend(days, btn) {
+  currentTrendDays = days;
+  if (btn) {
+    btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  
+  try {
+    const res = await fetch(API_BASE + '/trend?days=' + days);
+    const data = await res.json();
+    if (data.ok && data.trend) {
+      drawTrendChart(data.trend);
+      drawSuccessChart(data.trend);
+      updateTrendSummary(data.trend);
+    }
+  } catch(e) {
+    console.warn('加载趋势失败:', e);
+  }
+}
+
+function drawTrendChart(trend) {
+  const canvas = document.getElementById('trendChart');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  
+  if (!trend || trend.length === 0) return;
+  
+  const maxCalls = Math.max(...trend.map(t => t.total_calls), 1);
+  const barWidth = (w - 60) / trend.length * 0.6;
+  const gap = (w - 60) / trend.length * 0.4;
+  
+  // 绘制柱状图
+  trend.forEach((t, i) => {
+    const x = 40 + i * (barWidth + gap) + gap/2;
+    const barHeight = (t.total_calls / maxCalls) * (h - 50);
+    const y = h - 30 - barHeight;
+    
+    // 渐变
+    const grad = ctx.createLinearGradient(x, y, x, h-30);
+    grad.addColorStop(0, '#38bdf8');
+    grad.addColorStop(1, '#0ea5e9');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, barWidth, barHeight);
+    
+    // 数值
+    if (t.total_calls > 0) {
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(t.total_calls, x + barWidth/2, y - 4);
+    }
+    
+    // 日期
+    ctx.fillStyle = '#64748b';
+    ctx.font = '9px sans-serif';
+    ctx.fillText(t.date.substring(5), x + barWidth/2, h - 10);
+  });
+}
+
+function drawSuccessChart(trend) {
+  const canvas = document.getElementById('successChart');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  
+  if (!trend || trend.length === 0) return;
+  
+  // 绘制折线图
+  const padding = 40;
+  const chartW = w - padding * 2;
+  const chartH = h - 50;
+  
+  // 网格线
+  ctx.strokeStyle = '#1e293b';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = 20 + (chartH / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(w - 20, y);
+    ctx.stroke();
+    ctx.fillStyle = '#64748b';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText((100 - i * 5) + '%', padding - 5, y + 3);
+  }
+  
+  // 折线
+  ctx.strokeStyle = '#4ade80';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  trend.forEach((t, i) => {
+    const x = padding + (chartW / (trend.length - 1 || 1)) * i;
+    const y = 20 + chartH * (1 - (t.success_rate - 80) / 20);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  
+  // 数据点
+  trend.forEach((t, i) => {
+    const x = padding + (chartW / (trend.length - 1 || 1)) * i;
+    const y = 20 + chartH * (1 - (t.success_rate - 80) / 20);
+    ctx.fillStyle = '#4ade80';
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function updateTrendSummary(trend) {
+  const totalCalls = trend.reduce((sum, t) => sum + t.total_calls, 0);
+  const avgSuccess = trend.length > 0 
+    ? (trend.reduce((sum, t) => sum + t.success_rate, 0) / trend.length).toFixed(1)
+    : 0;
+  const avgLatency = trend.length > 0
+    ? (trend.reduce((sum, t) => sum + t.avg_latency_ms, 0) / trend.length).toFixed(0)
+    : 0;
+  
+  document.getElementById('trendSummary').innerHTML = 
+    `<strong style="color:#e2e8f0">${currentTrendDays}天汇总：</strong> ` +
+    `总调用 <span style="color:#38bdf8">${totalCalls}</span> 次 | ` +
+    `平均成功率 <span style="color:#4ade80">${avgSuccess}%</span> | ` +
+    `平均延迟 <span style="color:#fbbf24">${avgLatency}ms</span>`;
+}
+
+// ============ 告警面板 ============
+async function loadAlerts() {
+  try {
+    const res = await fetch(API_BASE + '/alerts?limit=50');
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('alertBadge').textContent = data.total;
+      renderAlerts(data.alerts);
+    }
+  } catch(e) {
+    console.warn('加载告警失败:', e);
+  }
+}
+
+function renderAlerts(alerts) {
+  const panel = document.getElementById('alertPanel');
+  
+  if (!alerts || alerts.length === 0) {
+    panel.innerHTML = `
+      <div style="text-align:center;padding:40px;color:#64748b">
+        <div style="font-size:32px;margin-bottom:8px">✅</div>
+        <div>所有算子运行正常，无告警</div>
+      </div>`;
+    return;
+  }
+  
+  panel.innerHTML = alerts.slice(0, 10).map(alert => `
+    <div class="alert-item ${alert.level}">
+      <div class="alert-icon">${alert.level === 'error' ? '🔴' : '🟡'}</div>
+      <div class="alert-content">
+        <div class="alert-title">${alert.message}</div>
+        <div class="alert-desc">类型: ${alert.type} | 当前值: ${alert.value} | 阈值: ${alert.threshold}</div>
+      </div>
+      <div class="alert-time">${alert.timestamp ? alert.timestamp.split('T')[1].split('.')[0] : ''}</div>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>

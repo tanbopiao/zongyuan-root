@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全自动吸收部署流水线 · 火斗云智AIOS</title>
+<meta name="description" content="ZONGYUAN-ROOT全自动吸收部署流水线，自动吸收同源节点上报真值，分类处理，自动部署，可视化集成，全闭环SOP">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Noto Sans SC',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 20% 0%,rgba(212,175,55,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(139,200,234,0.06) 0%,transparent 50%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1150px;margin:0 auto;padding:50px 24px}
+.back{display:inline-block;color:#d4af37;text-decoration:none;font-size:0.9em;margin-bottom:20px}
+.hero{text-align:center;padding:30px 0 40px}
+.hero .symbol{font-size:13px;color:#d4af37;letter-spacing:4px;margin-bottom:14px;font-family:monospace}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2.4em;font-weight:900;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.hero .subtitle{color:#aaa;font-size:1em;max-width:750px;margin:0 auto;line-height:1.8}
+.stats{display:flex;justify-content:center;gap:30px;margin:25px 0;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-item .num{font-size:1.8em;color:#d4af37;font-weight:bold;font-family:'Noto Serif SC',serif}
+.stat-item .label{color:#888;font-size:0.8em}
+.section{margin:45px 0}
+.section h2{font-family:'Noto Serif SC',serif;font-size:1.4em;color:#d4af37;margin-bottom:18px;padding-left:16px;border-left:4px solid #d4af37}
+.pipeline-flow{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.25);border-radius:14px;padding:28px}
+.flow-steps{display:flex;justify-content:center;align-items:stretch;gap:6px;flex-wrap:wrap}
+.flow-step{flex:1;min-width:140px;background:rgba(0,0,0,0.25);border-radius:10px;padding:16px 12px;text-align:center;border:1px solid rgba(212,175,55,0.15)}
+.flow-step .f-num{color:#d4af37;font-weight:bold;font-size:0.8em;font-family:monospace}
+.flow-step .f-icon{font-size:1.6em;margin:6px 0}
+.flow-step .f-title{color:#fff;font-size:0.9em;font-weight:bold;margin-bottom:4px}
+.flow-step .f-desc{color:#888;font-size:0.75em;line-height:1.4}
+.flow-arrow{display:flex;align-items:center;color:#d4af37;font-size:1.4em}
+.rule-card{background:linear-gradient(145deg,#1a1a2e,#0f1a2e);border:1px solid rgba(139,200,234,0.2);border-radius:12px;padding:20px;margin-bottom:14px}
+.rule-card h3{color:#8BC8EA;font-size:1.1em;margin-bottom:10px}
+.rule-card p{color:#999;font-size:0.88em;line-height:1.7}
+.rule-card .rule-tag{display:inline-block;background:rgba(212,175,55,0.15);color:#d4af37;padding:2px 8px;border-radius:4px;font-size:0.75em;margin-right:6px}
+.category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.cat-item{background:rgba(0,0,0,0.25);border-radius:10px;padding:14px;border-left:3px solid #d4af37}
+.cat-item .cat-name{color:#d4af37;font-weight:bold;font-size:0.95em;margin-bottom:4px}
+.cat-item .cat-action{color:#8BC8EA;font-size:0.82em;margin-bottom:4px}
+.cat-item .cat-risk{color:#888;font-size:0.78em}
+.threshold{background:linear-gradient(145deg,#1e1a10,#1a1a2e);border:1px solid rgba(212,175,55,0.3);border-radius:14px;padding:24px}
+.threshold h3{color:#d4af37;text-align:center;margin-bottom:16px}
+.threshold-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.th-item{background:rgba(0,0,0,0.2);border-radius:8px;padding:12px;text-align:center}
+.th-item .th-label{color:#888;font-size:0.8em;margin-bottom:4px}
+.th-item .th-value{color:#d4af37;font-size:1.3em;font-weight:bold}
+.th-item .th-desc{color:#666;font-size:0.75em;margin-top:4px}
+.guarantee{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.g-item{background:rgba(139,200,234,0.08);border-radius:10px;padding:14px;border-left:3px solid #8BC8EA}
+.g-item .g-icon{font-size:1.4em;margin-bottom:6px}
+.g-item .g-title{color:#8BC8EA;font-weight:bold;font-size:0.9em;margin-bottom:4px}
+.g-item .g-desc{color:#999;font-size:0.8em;line-height:1.5}
+footer{text-align:center;margin-top:50px;padding-top:24px;border-top:1px solid rgba(212,175,55,0.1);color:#666;font-size:0.8em}
+footer .did{margin-top:6px;color:#d4af37;font-family:monospace}
+@media(max-width:640px){.hero h1{font-size:1.6em}.flow-steps{flex-direction:column}.flow-arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back">← 返回首页</a>
+  <div class="hero">
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT · DID-BR-000002</div>
+    <h1>全自动吸收部署流水线</h1>
+    <div class="subtitle">自动吸收同源节点上报真值 → 分类处理 → 自动部署 → 可视化集成 → 上报固化<br>全闭环SOP，无需人工逐步指令，教一次全域永会</div>
+    <div class="stats">
+      <div class="stat-item"><div class="num">每小时</div><div class="label">自动运行</div></div>
+      <div class="stat-item"><div class="num">7类</div><div class="label">自动分类</div></div>
+      <div class="stat-item"><div class="num">80分</div><div class="label">自动部署阈值</div></div>
+      <div class="stat-item"><div class="num">100%</div><div class="label">部署可视化</div></div>
+    </div>
+  </div>
+
+  <!-- 全闭环五阶段 -->
+  <div class="section">
+    <h2>全闭环五阶段流水线</h2>
+    <div class="pipeline-flow">
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="f-num">STAGE 1</div>
+          <div class="f-icon">📥</div>
+          <div class="f-title">自动吸收</div>
+          <div class="f-desc">从9120拉取所有节点新上报真值，去重+质量评分</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="f-num">STAGE 2</div>
+          <div class="f-icon">🧩</div>
+          <div class="f-title">分类处理</div>
+          <div class="f-desc">7类自动分类，冲突检测，风险评估</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="f-num">STAGE 3</div>
+          <div class="f-icon">⚡</div>
+          <div class="f-title">自动部署</div>
+          <div class="f-desc">五方评分≥80自动部署，高风险生成审批单</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="f-num">STAGE 4</div>
+          <div class="f-icon">🌐</div>
+          <div class="f-title">可视化集成</div>
+          <div class="f-desc">每个部署必须有可视化页面，自动集成官网新模块</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="f-num">STAGE 5</div>
+          <div class="f-icon">🔒</div>
+          <div class="f-title">上报固化</div>
+          <div class="f-desc">结果写入9120+飞书通知+经验沉淀+基准更新</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 七类自动分类处理规则 -->
+  <div class="section">
+    <h2>七类自动分类处理规则</h2>
+    <div class="category-grid">
+      <div class="cat-item">
+        <div class="cat-name">📜 元法则类</div>
+        <div class="cat-action">低风险自动写入，高风险生成审批单</div>
+        <div class="cat-risk">风险：高（涉及核心规则）</div>
+      </div>
+      <div class="cat-item">
+        <div class="cat-name">📖 经验类</div>
+        <div class="cat-action">自动归档经验库，80分以上自动推广</div>
+        <div class="cat-risk">风险：低</div>
+      </div>
+      <div class="cat-item">
+        <div class="cat-name">🌐 页面/可视化类</div>
+        <div class="cat-action">五方评分≥80自动生成页面+集成官网</div>
+        <div class="cat-risk">风险：低-中</div>
+      </div>
+      <div class="cat-item">
+        <div class="cat-name">⚙️ 功能/服务类</div>
+        <div class="cat-action">五方评分≥80自动部署，高风险审批</div>
+        <div class="cat-risk">风险：中-高</div>
+      </div>
+      <div class="cat-item">
+        <div class="cat-name">📊 资产/数据类</div>
+        <div class="cat-action">自动归档到对应存储，自动标签</div>
+        <div class="cat-risk">风险：低</div>
+      </div>
+      <div class="cat-item">
+        <div class="cat-name">📢 全域指令类</div>
+        <div class="cat-action">自动记录+飞书通知+所有节点确认</div>
+        <div class="cat-risk">风险：低</div>
+      </div>
+      <div class="cat-item">
+        <div class="cat-name">🎯 进化任务类</div>
+        <div class="cat-action">自动派发给对应智能体，跟踪进度</div>
+        <div class="cat-risk">风险：低</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 五方评分与自动部署阈值 -->
+  <div class="section">
+    <h2>五方评分与自动部署阈值</h2>
+    <div class="threshold">
+      <h3>⚖️ 五方权重评分（满分100）</h3>
+      <div class="threshold-grid">
+        <div class="th-item"><div class="th-label">安全</div><div class="th-value">25%</div><div class="th-desc">是否引入安全风险</div></div>
+        <div class="th-item"><div class="th-label">稳定</div><div class="th-value">25%</div><div class="th-desc">是否影响现有服务</div></div>
+        <div class="th-item"><div class="th-label">成本</div><div class="th-value">20%</div><div class="th-desc">零成本优先，付费需审批</div></div>
+        <div class="th-item"><div class="th-label">价值</div><div class="th-value">20%</div><div class="th-desc">对体系的增益价值</div></div>
+        <div class="th-item"><div class="th-label">合规</div><div class="th-value">10%</div><div class="th-desc">是否符合元法则</div></div>
+      </div>
+      <div style="text-align:center;margin-top:18px;padding:12px;background:rgba(74,222,128,0.1);border-radius:8px">
+        <span style="color:#4ade80;font-weight:bold">≥80分</span> <span style="color:#bbb">自动部署</span>
+        <span style="margin:0 12px;color:#666">|</span>
+        <span style="color:#fbbf24;font-weight:bold">60-79分</span> <span style="color:#bbb">生成审批单</span>
+        <span style="margin:0 12px;color:#666">|</span>
+        <span style="color:#f87171;font-weight:bold">&lt;60分/高风险</span> <span style="color:#bbb">必须人工审批</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 四大铁律 -->
+  <div class="section">
+    <h2>全自动流水线四大铁律</h2>
+    <div class="guarantee">
+      <div class="g-item">
+        <div class="g-icon">🏗️</div>
+        <div class="g-title">工程化可落地</div>
+        <div class="g-desc">每个系统必须真实部署，不接受纸面方案，部署后必须可访问可验证</div>
+      </div>
+      <div class="g-item">
+        <div class="g-icon">✅</div>
+        <div class="g-title">功能真实可行</div>
+        <div class="g-desc">每块功能必须真实可用，禁止空壳页面，禁止无意义跳转</div>
+      </div>
+      <div class="g-item">
+        <div class="g-icon">🌐</div>
+        <div class="g-title">部署必须可视化</div>
+        <div class="g-desc">所有部署必须有可视化页面，页面必须集成到官网新模块</div>
+      </div>
+      <div class="g-item">
+        <div class="g-icon">🔒</div>
+        <div class="g-title">成果必须固化</div>
+        <div class="g-desc">每步完成即四层固化：chattr+基准+元法则+记忆网关</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自动化运行机制 -->
+  <div class="section">
+    <h2>自动化运行机制</h2>
+    <div class="rule-card">
+      <h3>⏰ 定时运行</h3>
+      <p><span class="rule-tag">crontab</span> 每小时自动运行一次，拉取新增真值并处理。低峰期（凌晨3点）执行深度处理（经验萃取+进化扫描+基准验证）。</p>
+    </div>
+    <div class="rule-card">
+      <h3>📋 审批通道</h3>
+      <p><span class="rule-tag">飞书审批</span> 高风险变更自动生成审批单，推送到飞书审批流程。人工审核通过后自动部署，不通过则记录原因并归档。</p>
+    </div>
+    <div class="rule-card">
+      <h3>📊 运行报告</h3>
+      <p><span class="rule-tag">自动上报</span> 每次运行生成报告：新增真值数/自动部署数/待审批数/失败数/分类统计。推送到飞书群，写入记忆网关。</p>
+    </div>
+    <div class="rule-card">
+      <h3>🛡️ 安全兜底</h3>
+      <p><span class="rule-tag">零成本约束</span> 所有自动部署必须零成本，涉及付费的一律转人工审批。部署前自动备份，部署后自动验证HTTP 200。</p>
+    </div>
+  </div>
+
+  <footer>
+    火斗云智AIOS · 元极恒一超认知永恒自治体系 · 全自动吸收部署流水线V1.0
+    <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · MR-089 全自动吸收部署闭环</div>
+  </footer>
+</div>
+</body>
+</html>

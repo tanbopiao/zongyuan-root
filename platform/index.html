@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>稳态通用全能中台 · 火斗云智 AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a0f;color:#e8e8e8;line-height:1.6}
+.mobile-header{display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#0d0d14;border-bottom:1px solid rgba(255,255,255,.06);padding:12px 16px;align-items:center;justify-content:space-between}
+.mobile-header .logo{font-size:15px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.mobile-header .menu-btn{background:rgba(255,255,255,.08);border:none;color:#e8e8e8;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer}
+.sidebar{width:220px;background:#0d0d14;border-right:1px solid rgba(255,255,255,.06);padding:20px 0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;transition:left .3s}
+.sidebar.open{left:0}
+.sidebar-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99}
+.sidebar-overlay.show{display:block}
+.sidebar-logo{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:12px}
+.sidebar-logo h2{font-size:16px;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-logo p{font-size:11px;color:#6b7280;margin-top:4px}
+.nav-item{padding:10px 20px;cursor:pointer;color:#9ca3af;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:10px;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.03);color:#e8e8e8}
+.nav-item.active{background:rgba(201,167,232,.08);color:#c9a7e8;border-left-color:#c9a7e8}
+.main{margin-left:220px;padding:24px;min-height:100vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.topbar h1{font-size:22px;color:#fff}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#52C41A;display:inline-block;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.panel{display:none}
+.panel.active{display:block}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s}
+.stat-card:hover{border-color:rgba(201,167,232,.3);transform:translateY(-2px)}
+.stat-card .label{font-size:12px;color:#6b7280;margin-bottom:6px}
+.stat-card .value{font-size:28px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-card .sub{font-size:11px;color:#52C41A;margin-top:4px}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px;margin-bottom:20px}
+.card h3{font-size:15px;color:#fff;margin-bottom:16px}
+.chat-box{height:400px;overflow-y:auto;background:rgba(0,0,0,.2);border-radius:8px;padding:16px;margin-bottom:16px}
+.msg{margin-bottom:12px;padding:10px 14px;border-radius:8px;max-width:80%}
+.msg.user{background:rgba(201,167,232,.15);margin-left:auto}
+.msg.ai{background:rgba(255,255,255,.05)}
+.msg .role{font-size:11px;color:#6b7280;margin-bottom:4px}
+.chat-input{display:flex;gap:10px}
+.chat-input input{flex:1;padding:12px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e8e8e8;font-size:14px;outline:none;min-height:44px}
+.chat-input input:focus{border-color:#c9a7e8}
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;font-weight:600;min-height:44px}
+.btn-primary{background:linear-gradient(90deg,#c9a7e8,#8BC8EA);color:#0a0a0f}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{background:rgba(255,255,255,.08);color:#e8e8e8;border:1px solid rgba(255,255,255,.1)}
+.search-box{margin-bottom:16px;position:relative}
+.search-box input{width:100%;padding:12px 16px 12px 40px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e8e8e8;font-size:14px;outline:none;min-height:44px}
+.search-box input:focus{border-color:#c9a7e8}
+.search-box:before{content:"\1F50D";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px}
+.scene-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.scene-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;text-align:center}
+.scene-card:hover{border-color:rgba(139,200,234,.4);transform:translateY(-2px)}
+.scene-card .icon{font-size:28px;margin-bottom:8px}
+.scene-card .name{font-size:13px;color:#e8e8e8;font-weight:600}
+.scene-card .desc{font-size:11px;color:#6b7280;margin-top:4px}
+.truth-table{width:100%;border-collapse:collapse;font-size:13px}
+.truth-table th{text-align:left;padding:10px 12px;color:#c9a7e8;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);font-size:12px}
+.truth-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:#9ca3af}
+.truth-table .id{color:#8BC8EA;font-family:monospace;font-size:12px}
+.type-tag{display:inline-block;padding:2px 8px;border-radius:8px;font-size:11px}
+.type-axiom{background:rgba(201,167,232,.15);color:#c9a7e8}
+.type-snapshot{background:rgba(139,200,234,.15);color:#8BC8EA}
+.type-config{background:rgba(148,216,195,.15);color:#94D8C3}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#0d0d14;border-top:1px solid rgba(255,255,255,.06);z-index:100;padding:6px 0}
+.bottom-nav .bn-item{flex:1;text-align:center;padding:6px 4px;cursor:pointer;color:#6b7280;font-size:10px}
+.bottom-nav .bn-item.active{color:#c9a7e8}
+.bottom-nav .bn-item .icon{font-size:18px;display:block;margin-bottom:2px}
+textarea{width:100%;padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#e8e8e8;font-size:13px;outline:none;resize:vertical;min-height:100px;font-family:inherit}
+textarea:focus{border-color:#c9a7e8}
+.result-box{background:rgba(0,0,0,.2);border-radius:8px;padding:16px;margin-top:16px;font-size:13px;color:#94D8C3;white-space:pre-wrap;max-height:300px;overflow-y:auto}
+.footer{text-align:center;padding:20px;color:#4b5563;font-size:11px;border-top:1px solid rgba(255,255,255,.06);margin-top:40px}
+@media(max-width:768px){
+  body{padding-top:52px;padding-bottom:70px}
+  .mobile-header{display:flex}
+  .sidebar{left:-260px;width:240px;padding-top:60px}
+  .main{margin-left:0;padding:16px 12px}
+  .topbar h1{font-size:18px}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat-card{padding:14px}
+  .stat-card .value{font-size:22px}
+  .card{padding:14px}
+  .chat-box{height:300px}
+  .truth-table{display:block;overflow-x:auto;white-space:nowrap}
+  .bottom-nav{display:flex}
+  .scene-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+    <link rel="canonical" href="https://huodouai.complatform/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+<div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,167,232,.15);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+<a href="/" style="font-size:15px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none">火斗云智 AIOS</a>
+<a href="/products/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">产品矩阵</a>
+<a href="/showcase/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">演示中心</a>
+<a href="/status/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">服务状态</a>
+<a href="/solutions/government/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">解决方案</a>
+<a href="/cases/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">客户案例</a>
+<a href="/docs/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">文档</a>
+<a href="/pricing/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">定价</a>
+<a href="/blog/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">博客</a>
+<a href="/about/" style="color:#9ca3af;text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px">关于</a>
+<a href="/contact/" style="color:#c9a7e8;text-decoration:none;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid rgba(201,167,232,.3)">联系我们</a>
+</div><div style="height:50px"></div>
+
+<div class="mobile-header">
+<div class="logo">全能中台</div>
+<button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open');document.querySelector('.sidebar-overlay').classList.toggle('show')">☰ 菜单</button>
+</div>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show')"></div>
+
+<div class="sidebar">
+<div class="sidebar-logo">
+<h2>火斗云智 AIOS</h2>
+<p>稳态通用全能中台 v1.1</p>
+</div>
+<div class="nav-item active" onclick="switchPanel('overview',this)"><span>📊</span> 总览</div>
+<div class="nav-item" onclick="switchPanel('chat',this)"><span>💬</span> 智能问答</div>
+<div class="nav-item" onclick="switchPanel('knowledge',this)"><span>📚</span> 知识库</div>
+<div class="nav-item" onclick="switchPanel('document',this)"><span>📄</span> 文档处理</div>
+<div class="nav-item" onclick="switchPanel('scenes',this)"><span>🎯</span> 场景中心</div>
+<div class="nav-item" onclick="switchPanel('truth',this)"><span>📐</span> 真值管理</div>
+<div class="nav-item" onclick="switchPanel('meta',this)"><span>⚖️</span> 元秩序</div>
+</div>
+
+<div class="main">
+<div class="topbar">
+<h1 id="page-title">总览仪表盘</h1>
+<div style="font-size:13px"><span class="status-dot"></span>系统运行中 · v9.11</div>
+</div>
+
+<!-- 总览 -->
+<div class="panel active" id="panel-overview">
+<div class="stat-grid">
+<div class="stat-card"><div class="label">稳态评分</div><div class="value" id="ov-stability">--</div><div class="sub">S级 · 稳态优秀</div></div>
+<div class="stat-card"><div class="label">运行服务</div><div class="value">13</div><div class="sub">全部active</div></div>
+<div class="stat-card"><div class="label">真值条目</div><div class="value">182</div><div class="sub">L0/L1/L2/L3</div></div>
+<div class="stat-card"><div class="label">场景模板</div><div class="value">15</div><div class="sub">政务+企业+个人</div></div>
+<div class="stat-card"><div class="label">连续锁档</div><div class="value">14</div><div class="sub">BLOWN_PERMANENT</div></div>
+<div class="stat-card"><div class="label">记忆种子</div><div class="value">19</div><div class="sub">链式哈希完整</div></div>
+</div>
+<div class="card">
+<h3>能力域概览</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+<div style="padding:14px;background:rgba(201,167,232,.08);border-radius:8px;text-align:center"><div style="font-size:24px">💬</div><div style="font-size:12px;color:#c9a7e8;margin-top:4px">智能问答</div><div style="font-size:10px;color:#6b7280">OpenAI兼容</div></div>
+<div style="padding:14px;background:rgba(139,200,234,.08);border-radius:8px;text-align:center"><div style="font-size:24px">📚</div><div style="font-size:12px;color:#8BC8EA;margin-top:4px">知识库RAG</div><div style="font-size:10px;color:#6b7280">语义搜索</div></div>
+<div style="padding:14px;background:rgba(148,216,195,.08);border-radius:8px;text-align:center"><div style="font-size:24px">📄</div><div style="font-size:12px;color:#94D8C3;margin-top:4px">文档处理</div><div style="font-size:10px;color:#6b7280">摘要/提取</div></div>
+<div style="padding:14px;background:rgba(244,179,147,.08);border-radius:8px;text-align:center"><div style="font-size:24px">🎯</div><div style="font-size:12px;color:#F4B393;margin-top:4px">场景模板</div><div style="font-size:10px;color:#6b7280">15个场景</div></div>
+<div style="padding:14px;background:rgba(228,212,143,.08);border-radius:8px;text-align:center"><div style="font-size:24px">📐</div><div style="font-size:12px;color:#E4D48F;margin-top:4px">真值管理</div><div style="font-size:10px;color:#6b7280">182条真值</div></div>
+<div style="padding:14px;background:rgba(234,167,178,.08);border-radius:8px;text-align:center"><div style="font-size:24px">⚖️</div><div style="font-size:12px;color:#EAA7B2;margin-top:4px">元秩序</div><div style="font-size:10px;color:#6b7280">四层法权</div></div>
+</div>
+</div>
+</div>
+
+<!-- 智能问答 -->
+<div class="panel" id="panel-chat">
+<div class="card">
+<h3>智能问答（OpenAI兼容格式）</h3>
+<div class="chat-box" id="chat-box">
+<div class="msg ai"><div class="role">AI助手</div>你好！我是火斗云智AIOS的智能问答引擎，基于豆包大模型，受182条真值约束。请问有什么可以帮你？</div>
+</div>
+<div class="chat-input">
+<input type="text" id="chat-input" placeholder="输入问题，回车发送..." onkeypress="if(event.key==='Enter')sendChat()">
+<button class="btn btn-primary" onclick="sendChat()">发送</button>
+</div>
+</div>
+</div>
+
+<!-- 知识库 -->
+<div class="panel" id="panel-knowledge">
+<div class="card">
+<h3>知识库语义搜索</h3>
+<div class="search-box"><input type="text" id="kb-search" placeholder="搜索知识库内容..." onkeypress="if(event.key==='Enter')searchKB()"></div>
+<button class="btn btn-primary" onclick="searchKB()">搜索</button>
+<div id="kb-results" style="margin-top:16px"></div>
+</div>
+<div class="card">
+<h3>知识入库</h3>
+<textarea id="kb-content" placeholder="输入要入库的知识内容..."></textarea>
+<div style="margin-top:12px"><button class="btn btn-primary" onclick="ingestKB()">入库</button></div>
+</div>
+</div>
+
+<!-- 文档处理 -->
+<div class="panel" id="panel-document">
+<div class="card">
+<h3>文档智能摘要</h3>
+<textarea id="doc-text" placeholder="粘贴需要摘要的文档内容..."></textarea>
+<div style="margin-top:12px;display:flex;gap:10px">
+<button class="btn btn-primary" onclick="summarizeDoc()">生成摘要</button>
+<button class="btn btn-secondary" onclick="extractDoc()">关键信息提取</button>
+</div>
+<div id="doc-result" class="result-box" style="display:none"></div>
+</div>
+</div>
+
+<!-- 场景中心 -->
+<div class="panel" id="panel-scenes">
+<div class="card">
+<h3>场景模板中心（15个场景）</h3>
+<div class="scene-grid" id="scene-grid"></div>
+</div>
+</div>
+
+<!-- 真值管理 -->
+<div class="panel" id="panel-truth">
+<div class="card">
+<h3>真值库（182条）</h3>
+<div class="search-box"><input type="text" id="truth-search" placeholder="搜索真值ID或内容..." oninput="filterTruth()"></div>
+<div style="overflow-x:auto"><table class="truth-table" id="truth-table"><thead><tr><th>ID</th><th>类型</th><th>层级</th><th>内容摘要</th></tr></thead><tbody></tbody></table></div>
+</div>
+</div>
+
+<!-- 元秩序 -->
+<div class="panel" id="panel-meta">
+<div class="stat-grid">
+<div class="stat-card"><div class="label">逻辑态</div><div class="value" id="meta-logic">--</div><div class="sub">结构秩序</div></div>
+<div class="stat-card"><div class="label">信息态</div><div class="value" id="meta-info">--</div><div class="sub">内容真值</div></div>
+<div class="stat-card"><div class="label">能量态</div><div class="value" id="meta-energy">--</div><div class="sub">动态演化</div></div>
+<div class="stat-card"><div class="label">综合稳态</div><div class="value" id="meta-overall">--</div><div class="sub" id="meta-grade">--</div></div>
+</div>
+<div class="card">
+<h3>四层法权架构</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+<div style="padding:16px;background:rgba(201,167,232,.08);border-radius:8px"><div style="color:#c9a7e8;font-weight:600;font-size:14px">⚖️ 立法权</div><div style="font-size:12px;color:#9ca3af;margin-top:6px">元宪法形式化，L0公理禁止修改，哈希防篡改</div></div>
+<div style="padding:16px;background:rgba(139,200,234,.08);border-radius:8px"><div style="color:#8BC8EA;font-weight:600;font-size:14px">🏛️ 行政权</div><div style="font-size:12px;color:#9ca3af;margin-top:6px">zongyuan.target统一编排，13服务依赖链管理</div></div>
+<div style="padding:16px;background:rgba(148,216,195,.08);border-radius:8px"><div style="color:#94D8C3;font-weight:600;font-size:14px">🔍 司法权</div><div style="font-size:12px;color:#9ca3af;margin-top:6px">4写入者身份注册，版本向量冲突检测</div></div>
+<div style="padding:16px;background:rgba(244,179,147,.08);border-radius:8px"><div style="color:#F4B393;font-weight:600;font-size:14px">📡 监督权</div><div style="font-size:12px;color:#9ca3af;margin-top:6px">7项告警阈值，稳态评分器，异常自动告警</div></div>
+</div>
+</div>
+</div>
+
+<div class="footer">Ω₀⊂⊙∞⊂Ω｜稳态通用全能中台 v1.1 · ZONGYUAN-ROOT · DID-BR-000002</div>
+</div>
+
+<div class="bottom-nav">
+<div class="bn-item active" onclick="switchPanel('overview',this)"><span class="icon">📊</span>总览</div>
+<div class="bn-item" onclick="switchPanel('chat',this)"><span class="icon">💬</span>问答</div>
+<div class="bn-item" onclick="switchPanel('knowledge',this)"><span class="icon">📚</span>知识</div>
+<div class="bn-item" onclick="switchPanel('scenes',this)"><span class="icon">🎯</span>场景</div>
+<div class="bn-item" onclick="switchPanel('meta',this)"><span class="icon">⚖️</span>元秩序</div>
+</div>
+
+<script>
+const API_BASE = '';
+const API_KEY = '';
+
+function switchPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item, .bn-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelector('.sidebar').classList.remove('open');
+  document.querySelector('.sidebar-overlay').classList.remove('show');
+  const titles = {overview:'总览仪表盘',chat:'智能问答',knowledge:'知识库RAG',document:'文档处理',scenes:'场景中心',truth:'真值管理',meta:'元秩序监控'};
+  document.getElementById('page-title').textContent = titles[id] || id;
+  if (id === 'meta') loadMeta();
+  if (id === 'truth') loadTruth();
+  if (id === 'scenes') loadScenes();
+}
+
+async function loadMeta() {
+  try {
+    const r = await fetch(API_BASE + '/api/v1/meta/stability');
+    const d = await r.json();
+    document.getElementById('meta-logic').textContent = d.logic_state;
+    document.getElementById('meta-info').textContent = d.info_state;
+    document.getElementById('meta-energy').textContent = d.energy_state;
+    document.getElementById('meta-overall').textContent = d.overall_stability;
+    document.getElementById('meta-grade').textContent = d.grade + '级 · ' + d.recommendation;
+  } catch(e) { console.error(e); }
+}
+
+async function loadTruth() {
+  try {
+    const r = await fetch(API_BASE + '/api/v1/truth?limit=100');
+    const d = await r.json();
+    const tbody = document.querySelector('#truth-table tbody');
+    tbody.innerHTML = d.truths.map(t => `<tr><td class="id">${t.id||''}</td><td><span class="type-tag type-${t.type||'config'}">${t.type||''}</span></td><td>${t.level||''}</td><td>${(t.content||'').substring(0,60)}...</td></tr>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+function filterTruth() {
+  const q = document.getElementById('truth-search').value.toLowerCase();
+  document.querySelectorAll('#truth-table tbody tr').forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+async function loadScenes() {
+  try {
+    const r = await fetch(API_BASE + '/api/v1/scenes');
+    const d = await r.json();
+    const scenes = d.scenes || [];
+    const icons = ['📝','📋','🔍','📊','💬','📅','⚖️','🏛️','📈','🚨','🤖','📑','🎯','📊','🛡️'];
+    document.getElementById('scene-grid').innerHTML = scenes.map((s,i) => 
+      `<div class="scene-card"><div class="icon">${icons[i%icons.length]}</div><div class="name">${s.name||s.title||s.id||('场景'+(i+1))}</div><div class="desc">${(s.description||s.desc||'').substring(0,30)}</div></div>`
+    ).join('');
+  } catch(e) { console.error(e); }
+}
+
+let currentConvId = null;
+async function sendChat() {
+  const input = document.getElementById("chat-input");
+  const text = input.value.trim();
+  if (!text) return;
+  const box = document.getElementById("chat-box");
+  box.innerHTML += "<div class="msg user"><div class="role">你</div>" + text + "</div>";
+  input.value = "";
+  box.scrollTop = box.scrollHeight;
+  const aiMsg = document.createElement("div");
+  aiMsg.className = "msg ai";
+  aiMsg.innerHTML = "<div class="role">AI助手</div><span class="typing">思考中...</span>";
+  box.appendChild(aiMsg);
+  try {
+    const r = await fetch(API_BASE + "/api/v1/chat/completions", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","X-API-Key":API_KEY},
+      body: JSON.stringify({model:"doubao-seed-2-0-lite",messages:[{role:"user",content:text}],conversation_id:currentConvId,stream:true})
+    });
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let full = "";
+    aiMsg.querySelector(".typing").textContent = "";
+    while(true) {
+      const {done, value} = await reader.read();
+      if(done) break;
+      const chunk = decoder.decode(value);
+      const lines = chunk.split("
+").filter(l => l.startsWith("data: "));
+      for(const line of lines) {
+        try {
+          const data = JSON.parse(line.slice(6));
+          if(data.done) { currentConvId = data.conversation_id; break; }
+          const delta = data.choices?.[0]?.delta?.content || "";
+          if(delta) { full += delta; aiMsg.querySelector(".typing").textContent = full; box.scrollTop = box.scrollHeight; }
+        } catch(e) {}
+      }
+    }
+    if(!full) aiMsg.querySelector(".typing").textContent = "（响应完成）";
+  } catch(e) {
+    aiMsg.querySelector(".typing").textContent = "请求失败: " + e.message;
+  }
+  box.scrollTop = box.scrollHeight;
+}
+
+async function searchKB() {
+  const q = document.getElementById('kb-search').value;
+  if (!q) return;
+  try {
+    const r = await fetch(API_BASE + `/api/v1/knowledge/search?q=${encodeURIComponent(q)}`, {headers:{'X-API-Key':API_KEY}});
+    const d = await r.json();
+    const results = d.results || d.data || [];
+    document.getElementById('kb-results').innerHTML = results.length ? 
+      results.map((r,i) => `<div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;margin-bottom:8px"><div style="color:#8BC8EA;font-size:13px;font-weight:600">${i+1}. ${r.id||r.title||'结果'}</div><div style="color:#9ca3af;font-size:12px;margin-top:4px">${(r.content||r.text||JSON.stringify(r)).substring(0,200)}</div></div>`).join('')
+      : '<div style="color:#6b7280;font-size:13px">未找到相关结果</div>';
+  } catch(e) { document.getElementById('kb-results').innerHTML = `<div style="color:#EA6668">搜索失败: ${e.message}</div>`; }
+}
+
+async function ingestKB() {
+  const content = document.getElementById('kb-content').value;
+  if (!content) return;
+  try {
+    const r = await fetch(API_BASE + '/api/v1/knowledge/ingest', {method:'POST',headers:{'Content-Type':'application/json','X-API-Key':API_KEY},body:JSON.stringify({content})});
+    const d = await r.json();
+    alert('入库成功: ' + JSON.stringify(d));
+    document.getElementById('kb-content').value = '';
+  } catch(e) { alert('入库失败: ' + e.message); }
+}
+
+async function summarizeDoc() {
+  const text = document.getElementById('doc-text').value;
+  if (!text) return;
+  const result = document.getElementById('doc-result');
+  result.style.display = 'block';
+  result.textContent = '处理中...';
+  try {
+    const r = await fetch(API_BASE + '/api/v1/document/summarize', {method:'POST',headers:{'Content-Type':'application/json','X-API-Key':API_KEY},body:JSON.stringify({text})});
+    const d = await r.json();
+    result.textContent = d.summary || JSON.stringify(d);
+  } catch(e) { result.textContent = '失败: ' + e.message; }
+}
+
+function extractDoc() {
+  document.getElementById('doc-result').style.display = 'block';
+  document.getElementById('doc-result').textContent = '关键信息提取功能：标题、日期、人物、核心观点（需配置提取模板）';
+}
+
+// 初始化
+loadMeta();
+</script>
+<div style="background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:30px 20px;text-align:center;font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+<div style="max-width:800px;margin:0 auto">
+<div style="margin-bottom:12px">
+<a href="/products/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">产品矩阵</a>
+<a href="/showcase/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">演示中心</a>
+<a href="/status/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">服务状态</a>
+<a href="/docs/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">文档</a>
+<a href="/pricing/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">定价</a>
+<a href="/blog/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">博客</a>
+<a href="/about/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">关于</a>
+<a href="/contact/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">联系</a>
+<a href="/privacy/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">隐私</a>
+<a href="/terms/" style="color:#6b7280;text-decoration:none;font-size:12px;margin:0 8px">条款</a>
+</div>
+<p style="color:#4b5563;font-size:11px;margin:0">© 2026 火斗云智 AIOS · Ω₀⊂⊙∞⊂Ω · DID-BR-000002</p>
+</div>
+</div></body>
+</html>

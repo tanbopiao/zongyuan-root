@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火斗云智 AIOS - 服务器监控面板</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .header .subtitle { color: #888; font-size: 14px; }
+        .header .timestamp { color: #666; font-size: 12px; margin-top: 8px; }
+        .health-score {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            border: 1px solid rgba(255,215,0,0.15);
+        }
+        .health-score .score {
+            font-size: 72px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .health-score .label { color: #888; font-size: 16px; margin-top: 8px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            border-color: rgba(255,215,0,0.3);
+            transform: translateY(-2px);
+        }
+        .card h3 {
+            font-size: 16px;
+            color: #ffd700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card h3::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border-radius: 2px;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .metric:last-child { border-bottom: none; }
+        .metric .label { color: #aaa; font-size: 14px; }
+        .metric .value { font-size: 14px; font-weight: 600; }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        .progress-fill.green { background: linear-gradient(90deg, #00ff88, #00cc66); }
+        .progress-fill.yellow { background: linear-gradient(90deg, #ffd700, #ffaa00); }
+        .progress-fill.red { background: linear-gradient(90deg, #ff4444, #cc0000); }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-badge.active {
+            background: rgba(0,255,136,0.15);
+            color: #00ff88;
+            border: 1px solid rgba(0,255,136,0.3);
+        }
+        .status-badge.inactive {
+            background: rgba(255,68,68,0.15);
+            color: #ff4444;
+            border: 1px solid rgba(255,68,68,0.3);
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+            font-size: 12px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 30px;
+        }
+        .refresh-btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        .refresh-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(255,215,0,0.4);
+        }
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 22px; }
+            .health-score .score { font-size: 48px; }
+        }
+    </style>
+
+<meta name="description" content="火斗云智AIOS服务器监控面板 - 实时监控CPU、内存、磁盘、网络、服务状态，支持告警通知、历史趋势、性能分析，保障服务器稳定运行。">
+<meta name="keywords" content="服务器监控,性能监控,运维监控,告警,CPU监控,内存监控,火斗云智">
+<meta property="og:type" content="website">
+<meta property="og:title" content="火斗云智AIOS服务器监控面板 - 实时监控CPU、内存、磁盘、网络、服务状态，支持告警通知、历史趋势、性能分析，保障服">
+<meta property="og:description" content="火斗云智AIOS服务器监控面板 - 实时监控CPU、内存、磁盘、网络、服务状态，支持告警通知、历史趋势、性能分析，保障服务器稳定运行。">
+<meta property="og:url" content="https://huodouai.com/server-monitor.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="火斗云智AIOS服务器监控面板 - 实时监控CPU、内存、磁盘、网络、服务状态，支持告警通知、历史趋势、性能分析，保障服">
+<meta name="twitter:description" content="火斗云智AIOS服务器监控面板 - 实时监控CPU、内存、磁盘、网络、服务状态，支持告警通知、历史趋势、性能分析，保障服务器稳定运行。">
+    <link rel="canonical" href="https://huodouai.com/server-monitor.html">
+</head>
+<body>
+<!-- 统一导航 -->
+<style>
+.nav-unified {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,15,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    padding: 0 30px; display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+}
+.nav-unified .brand {
+    color: #d4af37; font-size: 1.05em; font-weight: bold; text-decoration: none;
+    letter-spacing: 0.5px;
+}
+.nav-unified .links { display: flex; align-items: center; gap: 0; }
+.nav-unified .links a {
+    color: #aaa; text-decoration: none; font-size: 0.88em;
+    padding: 0 14px; height: 52px; display: flex; align-items: center;
+    transition: color 0.3s, background 0.3s;
+    border-left: 1px solid rgba(255,255,255,0.05);
+}
+.nav-unified .links a:first-child { border-left: none; }
+.nav-unified .links a:hover { color: #d4af37; background: rgba(212,175,55,0.08); }
+.nav-unified .links a.external { color: #8BC8EA; }
+.nav-unified .links a.external:hover { color: #d4af37; }
+@media (max-width: 768px) {
+    .nav-unified { padding: 0 12px; height: 44px; }
+    .nav-unified .brand { font-size: 0.9em; }
+    .nav-unified .links a { padding: 0 8px; font-size: 0.75em; height: 44px; }
+    body { padding-top: 44px !important; }
+}
+body { padding-top: 52px !important; }
+</style>
+<nav class="nav-unified">
+    <a href="/" class="brand">火斗云智 AIOS</a>
+    <div class="links">
+        <a href="/architecture.html">架构</a>
+        <a href="/engines.html">引擎</a>
+        <a href="/digital-assets.html">数字资产</a>
+        <a href="/philosophy.html">思想</a>
+        <a href="/governance.html">治理</a>
+        <a href="/domains/">业务域</a>
+        <a href="/experience-kb.html">经验库</a>
+        <a href="https://drama.huodouai.com" target="_blank" class="external">短剧 ↗</a>
+        <a href="https://gov.huodouai.com" target="_blank" class="external">政务 ↗</a>
+        <a href="https://docs.huodouai.com" target="_blank" class="external">文档 ↗</a>
+    </div>
+</nav>
+<div class="container">
+        <div class="header">
+            <h1>火斗云智 AIOS 服务器监控面板</h1>
+            <div class="subtitle">实时服务器状态监控 · 健康度评估 · 服务状态追踪</div>
+            <div class="timestamp" id="timestamp">加载中...</div>
+            <button class="refresh-btn" onclick="loadStatus()">刷新数据</button>
+        </div>
+
+        <div class="health-score">
+            <div class="score" id="healthScore">--</div>
+            <div class="label">系统健康评分</div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>内存使用</h3>
+                <div class="metric">
+                    <span class="label">使用率</span>
+                    <span class="value" id="memoryPercent">--%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill green" id="memoryBar" style="width: 0%"></div>
+                </div>
+                <div class="metric" style="margin-top: 12px;">
+                    <span class="label">已用 / 总量</span>
+                    <span class="value" id="memoryUsed">-- / -- MB</span>
+                </div>
+                <div class="metric">
+                    <span class="label">可用</span>
+                    <span class="value" id="memoryAvailable">-- MB</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>磁盘使用</h3>
+                <div class="metric">
+                    <span class="label">使用率</span>
+                    <span class="value" id="diskPercent">--%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill green" id="diskBar" style="width: 0%"></div>
+                </div>
+                <div class="metric" style="margin-top: 12px;">
+                    <span class="label">已用 / 总量</span>
+                    <span class="value" id="diskUsed">-- / --</span>
+                </div>
+                <div class="metric">
+                    <span class="label">可用</span>
+                    <span class="value" id="diskAvailable">--</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>CPU 状态</h3>
+                <div class="metric">
+                    <span class="label">使用率</span>
+                    <span class="value" id="cpuPercent">--%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill green" id="cpuBar" style="width: 0%"></div>
+                </div>
+                <div class="metric" style="margin-top: 12px;">
+                    <span class="label">CPU 核心数</span>
+                    <span class="value" id="cpuCores">--</span>
+                </div>
+                <div class="metric">
+                    <span class="label">负载均衡</span>
+                    <span class="value" id="loadAverage">--</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>系统信息</h3>
+                <div class="metric">
+                    <span class="label">主机名</span>
+                    <span class="value" id="hostname">--</span>
+                </div>
+                <div class="metric">
+                    <span class="label">运行时间</span>
+                    <span class="value" id="uptime">--</span>
+                </div>
+                <div class="metric">
+                    <span class="label">监听端口数</span>
+                    <span class="value" id="listeningPorts">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 30px;">
+            <h3>关键服务状态</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div class="metric">
+                    <span class="label">Nginx Web服务</span>
+                    <span class="status-badge active" id="nginxStatus">--</span>
+                </div>
+                <div class="metric">
+                    <span class="label">统一网关 (9120)</span>
+                    <span class="status-badge active" id="unifiedGatewayStatus">--</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Redis 缓存</span>
+                    <span class="status-badge active" id="redisStatus">--</span>
+                </div>
+                <div class="metric">
+                    <span class="label">FRP 内网穿透</span>
+                    <span class="status-badge active" id="frpsStatus">--</span>
+                </div>
+                <div class="metric">
+                    <span class="label">SSH 暴力破解防护</span>
+                    <span class="status-badge active" id="sshGuardStatus">--</span>
+                </div>
+                <div class="metric">
+                    <span class="label">AIOS 智能体工作台</span>
+                    <span class="status-badge active" id="aiosStatus">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>火斗云智 AIOS · 服务器监控面板 · 数据每60秒自动刷新</p>
+            <p style="margin-top: 8px;">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 元极恒一超认知永恒自治体系</p>
+        </div>
+    </div>
+
+    <script>
+        function getProgressClass(percent) {
+            if (percent < 60) return 'green';
+            if (percent < 80) return 'yellow';
+            return 'red';
+        }
+
+        function loadStatus() {
+            fetch('/api/server-status.json?t=' + Date.now())
+                .then(response => response.json())
+                .then(data => {
+                    // 时间戳
+                    document.getElementById('timestamp').textContent = '最后更新: ' + data.timestamp;
+
+                    // 健康评分
+                    document.getElementById('healthScore').textContent = data.health_score;
+
+                    // 内存
+                    document.getElementById('memoryPercent').textContent = data.memory.usage_percent + '%';
+                    document.getElementById('memoryUsed').textContent = data.memory.used_mb + ' / ' + data.memory.total_mb + ' MB';
+                    document.getElementById('memoryAvailable').textContent = data.memory.available_mb + ' MB';
+                    const memoryBar = document.getElementById('memoryBar');
+                    memoryBar.style.width = data.memory.usage_percent + '%';
+                    memoryBar.className = 'progress-fill ' + getProgressClass(data.memory.usage_percent);
+
+                    // 磁盘
+                    document.getElementById('diskPercent').textContent = data.disk.usage_percent + '%';
+                    document.getElementById('diskUsed').textContent = data.disk.used + ' / ' + data.disk.total;
+                    document.getElementById('diskAvailable').textContent = data.disk.available;
+                    const diskBar = document.getElementById('diskBar');
+                    diskBar.style.width = data.disk.usage_percent + '%';
+                    diskBar.className = 'progress-fill ' + getProgressClass(data.disk.usage_percent);
+
+                    // CPU
+                    document.getElementById('cpuPercent').textContent = data.cpu.usage_percent + '%';
+                    document.getElementById('cpuCores').textContent = data.cpu.cores + ' 核';
+                    document.getElementById('loadAverage').textContent = data.cpu.load_average;
+                    const cpuBar = document.getElementById('cpuBar');
+                    cpuBar.style.width = data.cpu.usage_percent + '%';
+                    cpuBar.className = 'progress-fill ' + getProgressClass(data.cpu.usage_percent);
+
+                    // 系统信息
+                    document.getElementById('hostname').textContent = data.hostname;
+                    document.getElementById('uptime').textContent = data.uptime;
+                    document.getElementById('listeningPorts').textContent = data.network.listening_ports + ' 个';
+
+                    // 服务状态
+                    const services = ['nginx', 'unified_gateway', 'redis', 'frps', 'ssh_guard', 'aios'];
+                    services.forEach(service => {
+                        const element = document.getElementById(service + 'Status');
+                        if (element) {
+                            const status = data.services[service];
+                            element.textContent = status === 'active' ? '运行中' : '未运行';
+                            element.className = 'status-badge ' + status;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('加载状态失败:', error);
+                    document.getElementById('timestamp').textContent = '加载失败，请稍后重试';
+                });
+        }
+
+        // 初始加载
+        loadStatus();
+
+        // 每60秒自动刷新
+        setInterval(loadStatus, 60000);
+    </script>
+</body>
+</html>

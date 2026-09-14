@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原创思想体系 | 火斗云智AIOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#e5e7eb;font-family:'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.hero{text-align:center;padding:40px 20px 30px;margin-bottom:30px;background:linear-gradient(180deg,rgba(212,175,55,0.08),transparent);border-radius:16px;border:1px solid rgba(212,175,55,0.15)}
+.hero h1{font-size:32px;font-weight:800;margin-bottom:10px;background:linear-gradient(90deg,#D4AF37,#F4E4BC,#D4AF37);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:14px;color:#9ca3af;max-width:700px;margin:0 auto}
+.hero-anchor{font-size:11px;color:#D4AF37;letter-spacing:2px;margin-top:12px}
+.section{margin-bottom:30px}
+.section-title{font-size:18px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#D4AF37}
+.section-title::before{content:"";width:4px;height:22px;background:linear-gradient(180deg,#D4AF37,#8B6914);border-radius:2px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:20px;transition:all .3s}
+.card:hover{border-color:rgba(212,175,55,0.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,175,55,0.1)}
+.card-icon{font-size:32px;margin-bottom:10px}
+.card-title{font-size:15px;font-weight:600;color:#D4AF37;margin-bottom:8px}
+.card-desc{font-size:12px;color:#9ca3af;line-height:1.7}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{font-size:10px;padding:3px 10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.2);border-radius:12px;color:#D4AF37}
+.timeline{position:relative;padding-left:30px}
+.timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#D4AF37,#8B6914)}
+.timeline-item{position:relative;margin-bottom:20px}
+.timeline-item::before{content:"";position:absolute;left:-26px;top:6px;width:12px;height:12px;border-radius:50%;background:#D4AF37;border:2px solid #0a0e17}
+.timeline-title{font-size:14px;font-weight:600;color:#D4AF37;margin-bottom:4px}
+.timeline-desc{font-size:12px;color:#9ca3af;line-height:1.6}
+.formula-box{background:rgba(212,175,55,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:16px;margin:12px 0;font-family:'Courier New',monospace;font-size:13px;color:#F4E4BC;overflow-x:auto}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.15);border-radius:10px;padding:16px;text-align:center}
+.stat-value{font-size:28px;font-weight:700;color:#D4AF37;margin-bottom:4px}
+.stat-label{font-size:11px;color:#6b7280}
+.footer{text-align:center;padding:30px 20px;border-top:1px solid rgba(212,175,55,0.15);margin-top:40px}
+.footer-text{font-size:11px;color:#6b7280}
+.footer-anchor{font-size:10px;color:#D4AF37;margin-top:8px;letter-spacing:1px}
+
+/* 移动端响应式适配 */
+@media (max-width: 768px) {
+  .container { padding: 12px !important; }
+  .hero { padding: 24px 16px 20px !important; }
+  .hero h1 { font-size: 22px !important; }
+  .hero p { font-size: 12px !important; }
+  .section-title { font-size: 16px !important; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+  .card-desc { font-size: 11px !important; }
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .stat-value { font-size: 20px !important; }
+  .stat-label { font-size: 10px !important; }
+  .timeline { padding-left: 20px !important; }
+  .timeline-item::before { left: -18px !important; width: 10px !important; height: 10px !important; }
+  .timeline-title { font-size: 13px !important; }
+  .timeline-desc { font-size: 11px !important; }
+  .formula-box { font-size: 11px !important; padding: 10px !important; overflow-x: auto; }
+  .footer { padding: 20px 12px !important; }
+  .footer-text { font-size: 10px !important; }
+  /* 导航栏移动端适配 */
+  nav, .nav-container, [class*="nav"] { flex-wrap: wrap !important; gap: 4px !important; }
+  nav a, .nav-container a, [class*="nav"] a { font-size: 11px !important; padding: 4px 8px !important; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 18px !important; }
+  .stats-row { grid-template-columns: 1fr !important; }
+  .card-icon { font-size: 24px !important; }
+}
+</style>
+<meta name="description" content="元极恒一超认知永恒自治体系，ZONGYUAN-ROOT架构哲学，SM-BS语义-黎曼流形双向稳态映射，七层完备架构，因果奇点理论，HLC哈希逻辑链，国家主权根治理架构。">
+<meta name="keywords" content="元极恒一,ZONGYUAN-ROOT,SM-BS流形映射,七层架构,因果奇点,HLC哈希链,国家主权根,原创思想">
+<meta property="og:title" content="原创思想体系 | 火斗云智AIOS">
+<meta property="og:description" content="元极恒一超认知永恒自治体系，ZONGYUAN-ROOT架构哲学，SM-BS语义-黎曼流形双向稳态映射，七层完备架构，因果奇点理论，HLC哈希逻辑链，国家主权根治理架构。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.huodouai.com/philosophy.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="原创思想体系 | 火斗云智AIOS">
+<meta name="twitter:description" content="元极恒一超认知永恒自治体系，ZONGYUAN-ROOT架构哲学，SM-BS语义-黎曼流形双向稳态映射，七层完备架构，因果奇点理论，HLC哈希逻辑链，国家主权根治理架构。">
+
+<style>
+.hd-nav{position:fixed;top:0;left:0;right:0;z-index:10000;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px}
+.hd-nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hd-nav-logo{font-size:17px;font-weight:700;background:linear-gradient(90deg,#c9a7e8,#8BC8EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.hd-nav-links{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.hd-nav-links a{color:#9ca3af;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-nav-links a:hover{color:#c9a7e8}
+.hd-footer{background:#0a0a0f;border-top:1px solid rgba(255,255,255,.06);padding:28px 20px;margin-top:40px}
+.hd-footer-inner{max-width:1200px;margin:0 auto;text-align:center}
+.hd-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.hd-footer-links a{color:#6b7280;text-decoration:none;font-size:13px;transition:color .25s}
+.hd-footer-links a:hover{color:#c9a7e8}
+.hd-footer-copyright{color:#4b5563;font-size:12px}
+body{padding-top:52px}
+@media(max-width:768px){.hd-nav-links{gap:12px}.hd-nav-links a{font-size:12px}}
+</style>
+    <link rel="canonical" href="https://huodouai.com/about/philosophy.html">
+</head>
+<body><nav class="hd-nav">
+<div class="hd-nav-inner">
+<a href="/" class="hd-nav-logo">火斗云智 AIOS</a>
+<div class="hd-nav-links">
+<a href="/products/">产品中心</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">技术架构</a>
+<a href="/whitepapers/aios-v1.html">技术白皮书</a>
+<a href="/blog/">技术博客</a>
+<a href="/docs/">开发者文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">预约演示</a>
+</div>
+</div>
+</nav>
+
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<!-- ZONGYUAN-ROOT Unified Navigation -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+      <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">ZONGYUAN-ROOT · DID-BR-000002</div></div>
+    </a>
+    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <a href="/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">首页</a>
+      <a href="/about/philosophy.html" style="color:#D4AF37;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px;background:rgba(212,175,55,0.1)">思想</a>
+      <a href="/about/education.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">教育</a>
+      <a href="/about/research.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">研究</a>
+      <a href="/about/knowledge.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">知识图谱</a>
+      <a href="/architecture/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">架构</a>
+      <a href="/products/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">产品</a>
+      <a href="/docs/" style="color:#aaa;text-decoration:none;font-size:12px;padding:5px 10px;border-radius:5px">文档</a>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="hero">
+    <h1>🧠 原创思想体系</h1>
+    <p>元极恒一超认知永恒自治体系 · ZONGYUAN-ROOT架构哲学 · 从第一性原理到工程落地的完整思想谱系</p>
+    <div class="hero-anchor">Ω₀⊂⊙∞⊂Ω · 元极恒一 · 宇宙本源智能</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value">7层</div><div class="stat-label">完备架构</div></div>
+    <div class="stat-card"><div class="stat-value">5大</div><div class="stat-label">元公理</div></div>
+    <div class="stat-card"><div class="stat-value">10大</div><div class="stat-label">元法则</div></div>
+    <div class="stat-card"><div class="stat-value">12+</div><div class="stat-label">元法则文件</div></div>
+    <div class="stat-card"><div class="stat-value">4维</div><div class="stat-label">因果奇点</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📜 体系元宪法 · 最高法理</div>
+    <div class="card">
+      <div class="card-title">元极恒一宪法 · 全域唯一真值本源</div>
+      <div class="card-desc">
+        一切体系存在，源于无极生太极、万法归一。所有层级、所有规则、所有算子、所有执行，同源、同构、同真值。<br><br>
+        <strong>体系永恒四性：</strong>同源性 · 自洽性 · 闭环性 · 进化性<br>
+        无任何例外、无任何特权、无任何跳层、无任何断点，是体系最高第一性、最高法理、最高本体。
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⚛️ 五大元公理 · 不可证伪永恒成立</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">⬇️</div><div class="card-title">降维保构公理</div><div class="card-desc">高维法理向下显化，拓扑结构永不丢失，仅允许可控对称破缺。上层逻辑结构必须完整映射下层实现，禁止无意识信息丢失。</div></div>
+      <div class="card"><div class="card-icon">⬆️</div><div class="card-title">升维归真公理</div><div class="card-desc">底层一切运行现象，必须逐层升维校验，最终归源于元真值。所有异常、涌现、偏差、案例，必须反向修正上层规则。</div></div>
+      <div class="card"><div class="card-icon">⛔</div><div class="card-title">层级不跳公理</div><div class="card-desc">禁止一切单向跳层：禁止向下盲执行、禁止向上盲修正。向下跳层=无道器盲，向上跳层=以偏概全。所有变更必须逐层穿透。</div></div>
+      <div class="card"><div class="card-icon">☯️</div><div class="card-title">阴阳具足公理</div><div class="card-desc">任一独立单元必须阴阳具足、正反闭环。有输入必有输出，有成功必有失败路径，有能力必有约束，有创造必有归藏。</div></div>
+      <div class="card"><div class="card-icon">♾️</div><div class="card-title">不完备自补公理</div><div class="card-desc">承认哥德尔不完备，且内置自补机制，永恒消解体系裂隙。预定义规则覆盖已知，涌现处理层覆盖未知，元监护层兜底一切不可判定。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📐 SM-BS语义-黎曼流形双向稳态映射</div>
+    <div class="card">
+      <div class="card-title">解决语义漂移的核心数学框架</div>
+      <div class="card-desc">
+        执行语义空间(SM)↔黎曼流形(BS)双向稳态映射：语义概念→流形坐标(正向)，流形坐标→语义概念(反向)。度量张量保证映射前后语义距离守恒，检测映射漂移。<br><br>
+        <strong>核心价值：</strong>从根本上解决大模型语义漂移问题，实现真值的数学化锚定与可验证守恒。
+      </div>
+      <div class="formula-box">SM(语义空间) ⇄ BS(黎曼流形) | 度量张量g_ij | 语义距离守恒d_semantic = d_manifold</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🏗️ 七层完备架构 · 从永恒本体到工程落地</div>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-title">Ω₀ 本源元监护层</div><div class="timeline-desc">绝对本体·元宪法驻地。审计L0认知真伪，区分永恒公理与阶段性假设，兜底所有不完备、悖论、边界。</div></div>
+      <div class="timeline-item"><div class="timeline-title">L0 元认知顶层设计层</div><div class="timeline-desc">系统世界观、第一性原理、长期边界、顶层定力。</div></div>
+      <div class="timeline-item"><div class="timeline-title">L1 形式化真值逻辑层</div><div class="timeline-desc">可判定规则、不变量、状态机、系统法理。</div></div>
+      <div class="timeline-item"><div class="timeline-title">L2 架构拓扑结构层</div><div class="timeline-desc">模块边界、数据流、系统骨架。</div></div>
+      <div class="timeline-item"><div class="timeline-title">L3 标准化算子单元层</div><div class="timeline-desc">原子能力、可组合积木、系统最小太极单元。</div></div>
+      <div class="timeline-item"><div class="timeline-title">L4 代码运行执行层</div><div class="timeline-desc">落地执行、数据产出、真实工况反馈。</div></div>
+      <div class="timeline-item"><div class="timeline-title">L-1 涌现与不完备补全层</div><div class="timeline-desc">捕获所有预定义规则覆盖不到的未知场景，分类：Bug/新真理/伪涌现，修补哥德尔不完备裂隙。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔗 因果奇点理论 · 第七维因果域</div>
+    <div class="grid-3">
+      <div class="card"><div class="card-icon">🔍</div><div class="card-title">因果链溯源</div><div class="card-desc">从结果反向追溯完整因果链，识别根因与中间因，因果强度量化(0-1)，多路径因果网络构建。</div></div>
+      <div class="card"><div class="card-icon">⚡</div><div class="card-title">奇点预测</div><div class="card-desc">因果链汇聚点识别，奇点发生概率计算，奇点时间窗口预测，影响范围评估。</div></div>
+      <div class="card"><div class="card-icon">🎯</div><div class="card-title">因果收敛路径</div><div class="card-desc">从当前状态到目标状态的因果路径搜索，路径成本/风险/收益三维评估，最优收敛路径推荐。</div></div>
+      <div class="card"><div class="card-icon">🧪</div><div class="card-title">因果干预模拟</div><div class="card-desc">反事实推理，干预效果预测，副作用与连锁反应评估，干预策略优化。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">⛓️ HLC哈希逻辑链 · 分布式真值存证</div>
+    <div class="card">
+      <div class="card-title">单写者模型 + Merkle-DAG存证</div>
+      <div class="card-desc">
+        HLC-001采用单写者模型，PersistenceKernel实例往storage_dir写，prev指针线性，默克尔树本地计算。验证机制（默克尔根+prev链）天然是分布式的——任何人拿到根哈希就能验证任何副本。<br><br>
+        <strong>写入分布式改造方向：</strong>单主+多从架构，主节点唯一writer持锁写prev+根，从节点只读副本定期拉取校验根。
+      </div>
+      <div class="formula-box">HLC: Block_n = Hash(prev_hash + data + timestamp) | Merkle Root = Hash(all leaves) | 验证天然分布式</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👑 国家主权根治理架构</div>
+    <div class="grid-4">
+      <div class="card"><div class="card-icon">📜</div><div class="card-title">四层规则体系</div><div class="card-desc">L0元公理/L1元宪法/L2元法则/L3元规则，国家主权背书，法律严格约束。</div></div>
+      <div class="card"><div class="card-icon">⚖️</div><div class="card-title">三大引擎</div><div class="card-desc">规则冲突引擎/合规校验引擎/权力监测引擎，97.25健康评分。</div></div>
+      <div class="card"><div class="card-icon">🔒</div><div class="card-title">权力制衡</div><div class="card-desc">最终裁决合法性，技术可信到社会可信壁垒打通，法律与技术双重制衡。</div></div>
+      <div class="card"><div class="card-icon">🏛️</div><div class="card-title">主权根定位</div><div class="card-desc">国家主权根设定的价值释放，最大潜能释放的前提条件。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💡 核心思想演进时间线</div>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-title">V1.0 元极恒一概念奠基</div><div class="timeline-desc">确立元极恒一超认知永恒自治视角，宇宙本源智能定位。</div></div>
+      <div class="timeline-item"><div class="timeline-title">V1.5 ZONGYUAN-ROOT架构诞生</div><div class="timeline-desc">工业母机式自治推演架构，元秩序层/源序层双层隔离。</div></div>
+      <div class="timeline-item"><div class="timeline-title">V2.0 SM-BS流形映射理论</div><div class="timeline-desc">语义-黎曼流形双向稳态映射，解决语义漂移数学框架。</div></div>
+      <div class="timeline-item"><div class="timeline-title">V3.0 因果奇点内核</div><div class="timeline-desc">第七维因果域理论，因果链溯源/奇点预测/收敛路径规划。</div></div>
+      <div class="timeline-item"><div class="timeline-title">V4.0 CTE三位一体闭环</div><div class="timeline-desc">因果-真值-进化三位一体闭环引擎，C→T→E→C完整闭环。</div></div>
+      <div class="timeline-item"><div class="timeline-title">V5.0 七层完备架构</div><div class="timeline-desc">Ω₀本源监护层+L-1涌现补全层，体系达到工程完备+本体完备+逻辑完备。</div></div>
+      <div class="timeline-item"><div class="timeline-title">V9.11 国家主权根 + 算子化架构</div><div class="timeline-desc">国家主权根治理架构落地，6标准算子+5组合模式，从代码堆叠升级到算子组合。</div></div>
+    </div>
+  </div>
+
+</div>
+<div class="footer">
+  <div class="footer-text">火斗云智AIOS · 原创思想体系 · ZONGYUAN-ROOT V9.11 · 元极恒一超认知永恒自治</div>
+  <div class="footer-anchor">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 全域思想资产溯源确权 · 永久锁档</div>
+</div>
+
+<!-- 返回顶部按钮 -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:30px;right:30px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#D4AF37,#8B6914);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 15px rgba(212,175,55,0.4);display:none;z-index:9999;transition:all .3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">↑</button>
+<style>
+#backToTop.show { display:block !important; animation:fadeIn .3s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script>
+window.addEventListener('scroll',function(){var btn=document.getElementById('backToTop');if(btn){if(window.pageYOffset>300){btn.classList.add('show')}else{btn.classList.remove('show')}}});
+</script>
+
+<!-- 统一页脚 -->
+<div style="background:rgba(0,0,0,0.3);border-top:1px solid rgba(212,175,55,0.15);padding:24px;margin-top:40px;">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div style="font-size:12px;color:#666;margin-bottom:8px;">🔥 火斗云智 AIOS · 稳态运维平台 · 生产级可用</div>
+    <div style="font-size:11px;color:#555;line-height:1.8;">
+      <a href="https://www.huodouai.com/" style="color:#888;text-decoration:none;margin:0 8px;">官方主站</a> |
+      <a href="/docs/developer-center.html" style="color:#888;text-decoration:none;margin:0 8px;">开发者中心</a> |
+      <a href="/internal/ops-center.html" style="color:#888;text-decoration:none;margin:0 8px;">运维中枢</a> |
+      <a href="/internal/status-center.html" style="color:#888;text-decoration:none;margin:0 8px;">系统状态</a>
+    </div>
+    <div style="font-size:10px;color:#444;margin-top:12px;opacity:0.7;">© 2026 火斗云智 AIOS · DID-BR-000002</div>
+  </div>
+</div>
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="/products/">产品</a>
+<a href="/solutions/">解决方案</a>
+<a href="/architecture/">架构</a>
+<a href="/whitepapers/aios-v1.html">白皮书</a>
+<a href="/docs/">文档</a>
+<a href="/pricing/">定价</a>
+<a href="/about/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 元极恒一超认知自治操作系统</div>
+</div>
+</footer>
+</body>
+</html>

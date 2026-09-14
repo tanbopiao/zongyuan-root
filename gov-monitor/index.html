@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务中台 · 运维监控中心 V2.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#0a0a0f 0%,#1a1a2e 50%,#16213e 100%);color:#fff;min-height:100vh;padding:20px}
+.container{max-width:1200px;margin:0 auto}
+.header{text-align:center;margin-bottom:20px;padding:20px}
+.header h1{font-size:28px;background:linear-gradient(90deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.header p{color:#8892b0;font-size:14px}
+.alert-banner{padding:12px 20px;border-radius:10px;margin-bottom:20px;text-align:center;font-weight:600;display:none}
+.alert-ok{background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:#4ade80}
+.alert-warn{background:rgba(250,204,21,0.15);border:1px solid rgba(250,204,21,0.3);color:#facc15}
+.alert-error{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:#f87171}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:20px}
+.card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,215,0,0.2);border-radius:16px;padding:24px;backdrop-filter:blur(10px)}
+.card h3{font-size:16px;color:#ffd700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.metric{margin-bottom:14px}
+.metric-label{font-size:12px;color:#8892b0;margin-bottom:4px}
+.metric-value{font-size:24px;font-weight:700}
+.metric-bar{height:8px;background:rgba(255,255,255,0.1);border-radius:4px;margin-top:6px;overflow:hidden}
+.metric-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.green{color:#4ade80}.yellow{color:#facc15}.red{color:#f87171}
+.bg-green{background:linear-gradient(90deg,#22c55e,#4ade80)}
+.bg-yellow{background:linear-gradient(90deg,#eab308,#facc15)}
+.bg-red{background:linear-gradient(90deg,#ef4444,#f87171)}
+.bg-gold{background:linear-gradient(90deg,#d4af37,#ffd700)}
+.service-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.service-item:last-child{border-bottom:none}
+.service-name{font-size:14px}
+.service-status{font-size:12px;padding:4px 10px;border-radius:12px;font-weight:600}
+.status-active{background:rgba(74,222,128,0.2);color:#4ade80}
+.status-failed{background:rgba(248,113,113,0.2);color:#f87171}
+.status-inactive{background:rgba(148,163,184,0.2);color:#94a3b8}
+.api-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.api-item:last-child{border-bottom:none}
+.api-name{font-size:13px;color:#ccc}
+.api-status{font-size:12px;font-weight:600}
+.refresh-btn{display:inline-block;padding:10px 24px;background:linear-gradient(135deg,#d4af37,#ffd700);color:#000;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:10px}
+.refresh-btn:hover{opacity:.9}
+.timestamp{text-align:center;color:#666;font-size:12px;margin-top:20px}
+.vector-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.vector-stat{text-align:center;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px}
+.vector-stat .num{font-size:20px;font-weight:700;color:#ffd700}
+.vector-stat .label{font-size:11px;color:#8892b0;margin-top:2px}
+</style>
+    <link rel="canonical" href="https://huodouai.comgov-monitor/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+<div class="container">
+  <div class="header">
+    <h1>⚡ 政务中台 · 运维监控中心 V2.0</h1>
+    <p>Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZONGYUAN-ROOT | 实时系统状态</p>
+  </div>
+  <div class="alert-banner" id="alertBanner"></div>
+  <div class="grid">
+    <div class="card">
+      <h3>🖥️ CPU 状态</h3>
+      <div class="metric">
+        <div class="metric-label">CPU 使用率</div>
+        <div class="metric-value" id="cpuPercent">--</div>
+        <div class="metric-bar"><div class="metric-bar-fill" id="cpuBar" style="width:0%"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">负载均衡 (1/5/15min)</div>
+        <div class="metric-value" style="font-size:16px" id="loadAvg">--</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>💾 内存状态</h3>
+      <div class="metric">
+        <div class="metric-label">内存使用率</div>
+        <div class="metric-value" id="memPercent">--</div>
+        <div class="metric-bar"><div class="metric-bar-fill" id="memBar" style="width:0%"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">已用 / 总计</div>
+        <div class="metric-value" style="font-size:16px" id="memDetail">--</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>💿 磁盘状态</h3>
+      <div class="metric">
+        <div class="metric-label">磁盘使用率</div>
+        <div class="metric-value" id="diskPercent">--</div>
+        <div class="metric-bar"><div class="metric-bar-fill" id="diskBar" style="width:0%"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">已用 / 总计</div>
+        <div class="metric-value" style="font-size:16px" id="diskDetail">--</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>⏱️ 系统运行</h3>
+      <div class="metric">
+        <div class="metric-label">运行时长</div>
+        <div class="metric-value" id="uptime">--</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">监控状态</div>
+        <div class="metric-value green" style="font-size:16px">● 实时监控中</div>
+      </div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>🔧 核心服务状态 (8个)</h3>
+      <div id="servicesList"></div>
+    </div>
+    <div class="card">
+      <h3>🔌 API 端点健康检查</h3>
+      <div id="apiList"></div>
+    </div>
+    <div class="card">
+      <h3>📊 Vector DB 状态</h3>
+      <div class="vector-info">
+        <div class="vector-stat"><div class="num" id="vectorDocs">--</div><div class="label">文档总数</div></div>
+        <div class="vector-stat"><div class="num" id="vectorDim">--</div><div class="label">向量维度</div></div>
+        <div class="vector-stat"><div class="num" id="vectorModel">--</div><div class="label">嵌入模型</div></div>
+        <div class="vector-stat"><div class="num" id="vectorStatus">--</div><div class="label">服务状态</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center">
+    <button class="refresh-btn" onclick="loadAll()">🔄 立即刷新</button>
+  </div>
+  <div class="timestamp" id="timestamp"></div>
+</div>
+<script>
+const GOV_API = '/gov-api/api/gov';
+function fmtBytes(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';if(b<1073741824)return(b/1048576).toFixed(1)+'MB';return(b/1073741824).toFixed(2)+'GB'}
+function fmtUptime(s){const d=Math.floor(s/86400);const h=Math.floor((s%86400)/3600);const m=Math.floor((s%3600)/60);return d+'天 '+h+'时 '+m+'分'}
+function getColor(v){if(v<60)return'green';if(v<80)return'yellow';return'red'}
+function getBg(v){if(v<60)return'bg-green';if(v<80)return'bg-yellow';return'bg-red'}
+async function loadMonitor(){
+  try{
+    const resp=await fetch(GOV_API+'/system/monitor',{method:'POST'});
+    const d=await resp.json();
+    if(d.success){
+      const cpuC=getColor(d.cpu.percent);
+      document.getElementById('cpuPercent').className='metric-value '+cpuC;
+      document.getElementById('cpuPercent').textContent=d.cpu.percent.toFixed(1)+'%';
+      document.getElementById('cpuBar').className='metric-bar-fill '+getBg(d.cpu.percent);
+      document.getElementById('cpuBar').style.width=d.cpu.percent+'%';
+      document.getElementById('loadAvg').textContent=d.cpu.load_avg.map(function(x){return x.toFixed(2)}).join(' / ');
+      const memC=getColor(d.memory.percent);
+      document.getElementById('memPercent').className='metric-value '+memC;
+      document.getElementById('memPercent').textContent=d.memory.percent.toFixed(1)+'%';
+      document.getElementById('memBar').className='metric-bar-fill '+getBg(d.memory.percent);
+      document.getElementById('memBar').style.width=d.memory.percent+'%';
+      document.getElementById('memDetail').textContent=fmtBytes(d.memory.used)+' / '+fmtBytes(d.memory.total);
+      const diskC=getColor(d.disk.percent);
+      document.getElementById('diskPercent').className='metric-value '+diskC;
+      document.getElementById('diskPercent').textContent=d.disk.percent.toFixed(1)+'%';
+      document.getElementById('diskBar').className='metric-bar-fill '+getBg(d.disk.percent);
+      document.getElementById('diskBar').style.width=d.disk.percent+'%';
+      document.getElementById('diskDetail').textContent=fmtBytes(d.disk.used)+' / '+fmtBytes(d.disk.total);
+      document.getElementById('uptime').textContent=fmtUptime(d.uptime);
+      let svcHtml='';let failedCount=0;
+      const entries=Object.entries(d.services);
+      for(let i=0;i<entries.length;i++){
+        const name=entries[i][0];const status=entries[i][1];
+        const cls=status==='active'?'status-active':status==='failed'?'status-failed':'status-inactive';
+        const icon=status==='active'?'✅':status==='failed'?'❌':'⚪';
+        if(status!=='active')failedCount++;
+        svcHtml+='<div class="service-item"><span class="service-name">'+icon+' '+name+'</span><span class="service-status '+cls+'">'+status+'</span></div>';
+      }
+      document.getElementById('servicesList').innerHTML=svcHtml;
+      document.getElementById('timestamp').textContent='最后更新: '+new Date().toLocaleString('zh-CN');
+      return {failedCount:failedCount,cpu:d.cpu.percent,mem:d.memory.percent,disk:d.disk.percent};
+    }
+  }catch(e){console.error(e)}
+  return {failedCount:99};
+}
+async function loadApiHealth(){
+  const apis=[
+    {name:'政务API',path:'/gov-api/api/gov/policy/search?q=test',method:'GET'},
+    {name:'智能问答',path:'/gov-api/api/gov/chat',method:'POST',body:{message:'你好',history:[]}},
+    {name:'Vector检索',path:'/gov-api/api/gov/vector/search',method:'POST',body:{query:'test',top_k:1}},
+    {name:'系统监控',path:'/gov-api/api/gov/system/monitor',method:'POST'},
+    {name:'模型路由',path:'/gov-api/api/gov/model/status',method:'GET'}
+  ];
+  let html='';let okCount=0;
+  for(let i=0;i<apis.length;i++){
+    try{
+      const opts={method:apis[i].method};
+      if(apis[i].body){opts.headers={'Content-Type':'application/json'};opts.body=JSON.stringify(apis[i].body)}
+      const r=await fetch(apis[i].path,opts);
+      const ok=r.status===200;
+      if(ok)okCount++;
+      html+='<div class="api-item"><span class="api-name">'+apis[i].name+'</span><span class="api-status '+(ok?'green':'red')+'">'+(ok?'✅ '+r.status:'❌ '+r.status)+'</span></div>';
+    }catch(e){
+      html+='<div class="api-item"><span class="api-name">'+apis[i].name+'</span><span class="api-status red">❌ 超时</span></div>';
+    }
+  }
+  document.getElementById('apiList').innerHTML=html;
+  return okCount;
+}
+async function loadVectorStatus(){
+  try{
+    const resp=await fetch(GOV_API+'/vector/stats',{method:'GET'});
+    const d=await resp.json();
+    document.getElementById('vectorDocs').textContent=d.doc_count||'--';
+    document.getElementById('vectorDim').textContent=d.dimension||'--';
+    document.getElementById('vectorModel').textContent=(d.model||'--').substring(0,8);
+    document.getElementById('vectorStatus').textContent='✅';
+    return true;
+  }catch(e){
+    document.getElementById('vectorStatus').textContent='❌';
+    return false;
+  }
+}
+function showAlert(type,msg){
+  const banner=document.getElementById('alertBanner');
+  banner.className='alert-banner alert-'+type;
+  banner.style.display='block';
+  banner.textContent=msg;
+}
+async function loadAll(){
+  const sys=await loadMonitor();
+  const apiOk=await loadApiHealth();
+  const vecOk=await loadVectorStatus();
+  if(sys.failedCount>0||apiOk<5||!vecOk){
+    showAlert('warn','⚠️ 系统存在异常：'+sys.failedCount+'个服务异常 / '+(5-apiOk)+'个API异常，请检查');
+  }else if(sys.cpu>80||sys.mem>80||sys.disk>80){
+    showAlert('warn','⚠️ 资源使用率偏高，请关注');
+  }else{
+    showAlert('ok','✅ 系统运行正常，所有服务和API状态良好');
+  }
+}
+loadAll();
+setInterval(loadAll,30000);
+</script>
+</body>
+</html>

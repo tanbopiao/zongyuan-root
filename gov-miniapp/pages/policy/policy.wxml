@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="search-box">
+    <input class="search-input" placeholder="搜索政策关键词" value="{{keyword}}" bindinput="onInput" confirm-type="search" bindconfirm="onSearch" />
+    <text class="search-btn" bindtap="onSearch">搜索</text>
+  </view>
+  <scroll-view class="category-scroll" scroll-x>
+    <view class="category-list">
+      <view class="category-item {{currentCategory === item ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" bindtap="selectCategory" data-cat="{{item}}">{{item}}</view>
+    </view>
+  </scroll-view>
+  <view class="policy-list">
+    <view class="policy-card" wx:for="{{policies}}" wx:key="id" bindtap="viewDetail" data-id="{{item.id}}">
+      <view class="policy-title">{{item.title}}</view>
+      <view class="policy-desc">{{item.summary || item.content}}</view>
+      <view class="policy-footer">
+        <text class="policy-cat">{{item.category}}</text>
+        <text class="policy-date">{{item.date || '2024-01-01'}}</text>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{policies.length === 0}}">暂无政策数据</view>
+  </view>
+</view>

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONGYUAN-ROOT 节点能力市场</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 30px 40px;
+            border-bottom: 2px solid #d4af37;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+        .header-content { position: relative; z-index: 1; }
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #d4af37;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+        .stats-bar {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            padding: 12px 20px;
+            min-width: 120px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #d4af37;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 40px;
+        }
+        .toolbar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .search-box input:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 10px 18px;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #a0a0a0;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-btn:hover {
+            border-color: #d4af37;
+            color: #d4af37;
+        }
+        .filter-btn.active {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: #d4af37;
+            color: #d4af37;
+        }
+        .capability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        .capability-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .capability-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #d4af37, #f0c040, #d4af37);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .capability-card:hover {
+            transform: translateY(-4px);
+            border-color: #d4af37;
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.15);
+        }
+        .capability-card:hover::before { opacity: 1; }
+        .capability-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .capability-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f0f0f0;
+        }
+        .capability-status {
+            padding: 4px 10px;
+            background: rgba(82, 196, 26, 0.15);
+            border: 1px solid rgba(82, 196, 26, 0.3);
+            border-radius: 12px;
+            font-size: 11px;
+            color: #52c41a;
+        }
+        .capability-id {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+        .capability-desc {
+            font-size: 13px;
+            color: #a0a0a0;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            min-height: 40px;
+        }
+        .capability-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 16px;
+            border-top: 1px solid #2a2a4a;
+        }
+        .meta-tag {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: #888;
+        }
+        .meta-tag .icon { font-size: 13px; }
+        .provider-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 4px;
+            font-size: 11px;
+            color: #d4af37;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #d4af37;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-header {
+            padding: 24px 30px;
+            border-bottom: 1px solid #2a2a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #d4af37;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+        .modal-close:hover { color: #d4af37; }
+        .modal-body { padding: 24px 30px; }
+        .info-section { margin-bottom: 24px; }
+        .info-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .info-value {
+            font-size: 14px;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        .info-value code {
+            background: #0a0a0f;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #d4af37;
+        }
+        .method-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: monospace;
+        }
+        .method-get { background: rgba(82, 196, 26, 0.15); color: #52c41a; border: 1px solid rgba(82, 196, 26, 0.3); }
+        .method-post { background: rgba(24, 144, 255, 0.15); color: #1890ff; border: 1px solid rgba(24, 144, 255, 0.3); }
+        .test-section {
+            background: #0a0a0f;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .test-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #d4af37;
+            margin-bottom: 15px;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px 15px;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 13px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+        .test-input:focus { border-color: #d4af37; }
+        .test-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #d4af37, #f0c040);
+            border: none;
+            border-radius: 6px;
+            color: #1a1a2e;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .test-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3); }
+        .test-result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #1a1a2e;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #a0a0a0;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #555;
+            font-size: 12px;
+            border-top: 1px solid #1a1a2e;
+            margin-top: 40px;
+        }
+        .footer .trace-mark {
+            color: #d4af37;
+            font-family: monospace;
+            margin-top: 8px;
+        }
+        @media (max-width: 768px) {
+            .header { padding: 20px; }
+            .container { padding: 20px; }
+            .title { font-size: 22px; }
+            .stats-bar { gap: 15px; }
+            .stat-item { min-width: 100px; padding: 10px 15px; }
+            .capability-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+    <link rel="canonical" href="https://huodouai.comidentity-market/">
+</head>
+<body>
+
+<!-- 双域名统一导航：应用平台顶部栏 -->
+<div style="background:rgba(10,14,23,0.95);border-bottom:1px solid rgba(212,175,55,0.2);padding:10px 24px;position:sticky;top:0;z-index:10000;backdrop-filter:blur(10px);font-family:'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="https://www.huodouai.com/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,#D4AF37,#8B6914);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px">火</div>
+        <div><div style="font-size:15px;font-weight:700;color:#fff">火斗云智<span style="color:#D4AF37">AIOS</span></div><div style="font-size:10px;color:#888">应用平台 · huodouai.com</div></div>
+      </a>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <a href="https://www.huodouai.com/" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🏠 主站首页</a>
+      <a href="https://www.huodouai.com/status-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">📊 系统状态</a>
+      <a href="https://www.huodouai.com/developer-center.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔌 开发者中心</a>
+      <a href="https://www.huodouai.com/search.html" style="color:#aaa;text-decoration:none;font-size:12px;padding:6px 12px;border-radius:6px;transition:all .2s" onmouseover="this.style.color='#D4AF37';this.style.background='rgba(212,175,55,0.1)'" onmouseout="this.style.color='#aaa';this.style.background='transparent'">🔍 全站搜索</a>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:15px;font-size:10px;color:#10B981;margin-left:6px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#10B981;animation:pulse 2s infinite"></div>应用平台运行中
+      </div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+<!-- /双域名统一导航 -->
+
+    <div class="header">
+        <div class="header-content">
+            <div class="title">⚡ ZONGYUAN-ROOT 节点能力市场</div>
+            <div class="subtitle">全域节点能力注册、发现、调用市场 · 元极恒一自治体系</div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalCapabilities">0</div>
+                    <div class="stat-label">总能力数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="activeCapabilities">0</div>
+                    <div class="stat-label">活跃能力</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalNodes">0</div>
+                    <div class="stat-label">提供节点</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalCategories">0</div>
+                    <div class="stat-label">能力分类</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索能力名称、描述、提供节点..." oninput="filterCapabilities()">
+            </div>
+            <div class="filter-group" id="categoryFilters">
+                <button class="filter-btn active" data-category="all" onclick="setCategory('all')">全部</button>
+            </div>
+        </div>
+
+        <div class="capability-grid" id="capabilityGrid">
+            <div class="empty-state">
+                <div class="icon">⚡</div>
+                <div>加载能力市场数据中...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">能力详情</div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>ZONGYUAN-ROOT 元极恒一自治体系 · 节点能力市场 V1.0</div>
+        <div class="trace-mark">Ω₀⊂⊙∞⊂Ω · DID-BR-000002</div>
+    </div>
+
+    <script>
+        let allCapabilities = [];
+        let currentCategory = 'all';
+        let currentSearch = '';
+
+        // API基础路径
+        const API_BASE = '/api/identity/api/v1/identity';
+
+        // 加载能力市场数据
+        async function loadCapabilities() {
+            try {
+                // 尝试从API加载
+                const response = await fetch(`${API_BASE}/capabilities/market`);
+                if (response.ok) {
+                    const data = await response.json();
+                    allCapabilities = data.capabilities || [];
+                    updateStats(data);
+                    renderCategories(data.categories || []);
+                    renderCapabilities();
+                    return;
+                }
+            } catch (e) {
+                console.log('API加载失败，使用内置数据');
+            }
+
+            // 内置示例数据（API不可用时使用）
+            allCapabilities = [
+                {capability_id:'CAP-001',name:'政策问答',description:'基于政策知识库的智能问答系统',provider_node:'app-gov-ai-0001',provider_node_name:'政务AI中台',category:'identity',status:'active',api_endpoint:'/gov-api/policy/qa',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-002',name:'公文生成',description:'AI辅助公文生成，支持多种公文类型',provider_node:'app-gov-ai-0001',provider_node_name:'政务AI中台',category:'identity',status:'active',api_endpoint:'/gov-api/document/generate',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-003',name:'预约管理',description:'政务服务预约管理，支持预约创建、查询、取消',provider_node:'app-gov-ai-0001',provider_node_name:'政务AI中台',category:'identity',status:'active',api_endpoint:'/gov-api/appointments',method:'GET',version:'1.0.0'},
+                {capability_id:'CAP-004',name:'审批流转',description:'政务审批流程管理，支持多级审批',provider_node:'app-gov-ai-0001',provider_node_name:'政务AI中台',category:'identity',status:'active',api_endpoint:'/gov-api/approvals',method:'GET',version:'1.0.0'},
+                {capability_id:'CAP-005',name:'智能体编排',description:'多智能体协同编排，支持复杂任务分解',provider_node:'app-workbench-0001',provider_node_name:'智能工作台',category:'identity',status:'active',api_endpoint:'/workbench-api/agents/orchestrate',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-006',name:'工作流设计',description:'可视化工作流设计器，支持拖拽编排',provider_node:'app-workbench-0001',provider_node_name:'智能工作台',category:'identity',status:'active',api_endpoint:'/workbench-api/workflows',method:'GET',version:'1.0.0'},
+                {capability_id:'CAP-007',name:'多模态交互',description:'支持文本、语音、图像等多模态交互',provider_node:'app-workbench-0001',provider_node_name:'智能工作台',category:'identity',status:'active',api_endpoint:'/workbench-api/multimodal',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-008',name:'数据分析',description:'智能数据分析，支持多种图表和洞察',provider_node:'app-workbench-0001',provider_node_name:'智能工作台',category:'identity',status:'active',api_endpoint:'/workbench-api/analytics',method:'GET',version:'1.0.0'},
+                {capability_id:'CAP-009',name:'剧本生成',description:'AI短剧剧本生成，支持分集大纲和完整剧本',provider_node:'app-drama-0001',provider_node_name:'昆仑洞天短剧引擎',category:'identity',status:'active',api_endpoint:'/api/drama/script/generate',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-010',name:'分镜表',description:'自动生成分镜表，包含镜号、画面、提示词、音效',provider_node:'app-drama-0001',provider_node_name:'昆仑洞天短剧引擎',category:'identity',status:'active',api_endpoint:'/api/drama/storyboard',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-011',name:'关键帧生成',description:'国风仙侠写实厚涂关键帧生成，支持角色一致性',provider_node:'app-drama-0001',provider_node_name:'昆仑洞天短剧引擎',category:'identity',status:'active',api_endpoint:'/api/drama/keyframe',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-012',name:'视频合成',description:'关键帧到视频一键合成，支持多段拼接',provider_node:'app-drama-0001',provider_node_name:'昆仑洞天短剧引擎',category:'identity',status:'active',api_endpoint:'/api/drama/video/compose',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-013',name:'向量检索',description:'基于bge-large-zh的向量检索，F1≥75%',provider_node:'app-vector-kb-0001',provider_node_name:'源域通识知识库',category:'identity',status:'active',api_endpoint:'/vector/api/search',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-014',name:'知识关联',description:'跨文档知识关联，实体关系抽取',provider_node:'app-vector-kb-0001',provider_node_name:'源域通识知识库',category:'identity',status:'active',api_endpoint:'/vector/api/associate',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-015',name:'语义搜索',description:'语义级搜索，支持同义词和概念匹配',provider_node:'app-vector-kb-0001',provider_node_name:'源域通识知识库',category:'identity',status:'active',api_endpoint:'/vector/api/semantic',method:'GET',version:'1.0.0'},
+                {capability_id:'CAP-016',name:'真值提炼',description:'从非结构化文本中提炼高纯度真值',provider_node:'app-vector-kb-0001',provider_node_name:'源域通识知识库',category:'identity',status:'active',api_endpoint:'/vector/api/truth',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-017',name:'页面展示',description:'官网页面展示，响应式设计',provider_node:'app-website-0001',provider_node_name:'火斗云智官网',category:'identity',status:'active',api_endpoint:'/',method:'GET',version:'1.0.0'},
+                {capability_id:'CAP-018',name:'产品介绍',description:'产品体系介绍，火斗云智AIOS、昆仑洞天等',provider_node:'app-website-0001',provider_node_name:'火斗云智官网',category:'identity',status:'active',api_endpoint:'/products',method:'GET',version:'1.0.0'},
+                {capability_id:'CAP-019',name:'案例展示',description:'客户案例和成功案例展示',provider_node:'app-website-0001',provider_node_name:'火斗云智官网',category:'identity',status:'active',api_endpoint:'/cases',method:'GET',version:'1.0.0'},
+                {capability_id:'CAP-020',name:'联系表单',description:'联系我们表单，支持留言和咨询',provider_node:'app-website-0001',provider_node_name:'火斗云智官网',category:'identity',status:'active',api_endpoint:'/contact',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-021',name:'身份节点申请',description:'提交身份节点申请，等待审批注册',provider_node:'svc-identity-api-0001',provider_node_name:'身份节点申请API服务',category:'identity',status:'active',api_endpoint:'/api/v1/identity/applications',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-022',name:'身份节点审批',description:'审批身份节点申请，自动注册节点',provider_node:'svc-identity-api-0001',provider_node_name:'身份节点申请API服务',category:'identity',status:'active',api_endpoint:'/api/v1/identity/applications/{id}/approve',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-023',name:'节点健康检查',description:'检查节点健康状态，识别问题节点',provider_node:'svc-identity-api-0001',provider_node_name:'身份节点申请API服务',category:'identity',status:'active',api_endpoint:'/api/v1/identity/nodes/{id}/health',method:'GET',version:'1.0.0'},
+                {capability_id:'CAP-024',name:'节点违规记录',description:'记录节点违规行为，严重违规自动暂停',provider_node:'svc-identity-api-0001',provider_node_name:'身份节点申请API服务',category:'identity',status:'active',api_endpoint:'/api/v1/identity/nodes/{id}/violations',method:'POST',version:'1.0.0'},
+                {capability_id:'CAP-025',name:'节点版本管理',description:'管理节点版本，记录版本历史，支持回滚',provider_node:'svc-identity-api-0001',provider_node_name:'身份节点申请API服务',category:'identity',status:'active',api_endpoint:'/api/v1/identity/nodes/{id}/version',method:'PUT',version:'1.0.0'}
+            ];
+
+            updateStats({
+                total_capabilities: allCapabilities.length,
+                active_capabilities: allCapabilities.filter(c => c.status === 'active').length,
+                categories: ['identity', 'monitoring', 'governance', 'management', 'compute', 'storage', 'network']
+            });
+            renderCategories(['identity', 'monitoring', 'governance', 'management', 'compute', 'storage', 'network']);
+            renderCapabilities();
+        }
+
+        function updateStats(data) {
+            document.getElementById('totalCapabilities').textContent = data.total_capabilities || allCapabilities.length;
+            document.getElementById('activeCapabilities').textContent = data.active_capabilities || allCapabilities.filter(c => c.status === 'active').length;
+            document.getElementById('totalNodes').textContent = new Set(allCapabilities.map(c => c.provider_node)).size;
+            document.getElementById('totalCategories').textContent = (data.categories || []).length;
+        }
+
+        function renderCategories(categories) {
+            const container = document.getElementById('categoryFilters');
+            let html = '<button class="filter-btn active" data-category="all" onclick="setCategory(\'all\')">全部</button>';
+            categories.forEach(cat => {
+                const count = allCapabilities.filter(c => c.category === cat).length;
+                html += `<button class="filter-btn" data-category="${cat}" onclick="setCategory('${cat}')">${cat} (${count})</button>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function setCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === category);
+            });
+            renderCapabilities();
+        }
+
+        function filterCapabilities() {
+            currentSearch = document.getElementById('searchInput').value.toLowerCase();
+            renderCapabilities();
+        }
+
+        function renderCapabilities() {
+            const grid = document.getElementById('capabilityGrid');
+            let filtered = allCapabilities;
+
+            if (currentCategory !== 'all') {
+                filtered = filtered.filter(c => c.category === currentCategory);
+            }
+
+            if (currentSearch) {
+                filtered = filtered.filter(c =>
+                    c.name.toLowerCase().includes(currentSearch) ||
+                    c.description.toLowerCase().includes(currentSearch) ||
+                    (c.provider_node_name || '').toLowerCase().includes(currentSearch)
+                );
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="icon">🔍</div>
+                        <div>未找到匹配的能力</div>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(cap => `
+                <div class="capability-card" onclick="showDetail('${cap.capability_id}')">
+                    <div class="capability-header">
+                        <div class="capability-name">${cap.name}</div>
+                        <div class="capability-status">${cap.status === 'active' ? '● 活跃' : cap.status}</div>
+                    </div>
+                    <div class="capability-id">${cap.capability_id} · v${cap.version}</div>
+                    <div class="capability-desc">${cap.description}</div>
+                    <div class="capability-meta">
+                        <span class="provider-badge">${cap.provider_node_name || cap.provider_node}</span>
+                        <span class="meta-tag"><span class="icon">${cap.method === 'GET' ? '📥' : '📤'}</span>${cap.method}</span>
+                        <span class="meta-tag"><span class="icon">🏷️</span>${cap.category}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showDetail(capabilityId) {
+            const cap = allCapabilities.find(c => c.capability_id === capabilityId);
+            if (!cap) return;
+
+            document.getElementById('modalTitle').textContent = cap.name;
+
+            const methodClass = cap.method === 'GET' ? 'method-get' : 'method-post';
+
+            document.getElementById('modalBody').innerHTML = `
+                <div class="info-section">
+                    <div class="info-label">能力ID</div>
+                    <div class="info-value"><code>${cap.capability_id}</code></div>
+                </div>
+                <div class="info-section">
+                    <div class="info-label">能力描述</div>
+                    <div class="info-value">${cap.description}</div>
+                </div>
+                <div class="info-section">
+                    <div class="info-label">提供节点</div>
+                    <div class="info-value">
+                        <span class="provider-badge">${cap.provider_node_name || cap.provider_node}</span>
+                        <div style="margin-top:8px;font-size:12px;color:#888;">节点ID: <code>${cap.provider_node}</code></div>
+                    </div>
+                </div>
+                <div class="info-section">
+                    <div class="info-label">API端点</div>
+                    <div class="info-value">
+                        <span class="method-badge ${methodClass}">${cap.method}</span>
+                        <code style="margin-left:10px;">${cap.api_endpoint}</code>
+                    </div>
+                </div>
+                <div class="info-section">
+                    <div class="info-label">分类 / 版本 / 状态</div>
+                    <div class="info-value">
+                        🏷️ ${cap.category} &nbsp;&nbsp; 📌 v${cap.version} &nbsp;&nbsp;
+                        <span style="color:#52c41a;">● ${cap.status}</span>
+                    </div>
+                </div>
+                <div class="test-section">
+                    <div class="test-title">🧪 在线调用测试</div>
+                    <input type="text" class="test-input" id="testParams" placeholder="请求参数（JSON格式，GET请求可留空）..." value="{}">
+                    <button class="test-btn" onclick="testCapability('${cap.capability_id}')">发送请求</button>
+                    <div class="test-result" id="testResult" style="display:none;"></div>
+                </div>
+            `;
+
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        async function testCapability(capabilityId) {
+            const cap = allCapabilities.find(c => c.capability_id === capabilityId);
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = '请求发送中...';
+
+            try {
+                const params = document.getElementById('testParams').value || '{}';
+                let url = cap.api_endpoint;
+
+                // 简单的路径参数替换
+                url = url.replace('{id}', 'test-id').replace('{node_id}', 'test-node');
+
+                const options = {
+                    method: cap.method,
+                    headers: { 'Content-Type': 'application/json' }
+                };
+
+                if (cap.method === 'POST') {
+                    options.body = params;
+                }
+
+                const response = await fetch(url, options);
+                const data = await response.text();
+
+                resultDiv.textContent = `状态码: ${response.status}\n响应内容:\n${data.substring(0, 500)}${data.length > 500 ? '...' : ''}`;
+            } catch (e) {
+                resultDiv.textContent = `请求失败: ${e.message}\n\n提示：部分能力可能需要API Key认证或内网访问。`;
+            }
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'modalOverlay') {
+                document.getElementById('modalOverlay').classList.remove('active');
+            }
+        }
+
+        // ESC键关闭弹窗
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // 页面加载时获取数据
+        loadCapabilities();
+    </script>
+</body>
+</html>
