@@ -366,7 +366,23 @@ body::before{content:'';position:fixed;inset:0;background:
 
 <!-- === 节点实时看板 === -->
 <section style="max-width:1200px;margin:40px auto;padding:0 20px">
-  <h2 style="color:#e0e0e0;margin-bottom:20px;font-size:1.5rem">节点实时状态</h2>
+  <h2 style="color:#e0e0e0;margin-bottom:20px;font-size:1.5rem"><section style="max-width:1200px;margin:40px auto;padding:0 20px">
+  <h2 style="color:#e0e0e0;margin-bottom:20px;font-size:1.5rem">全站健康状态</h2>
+  <div id="health-bar" style="display:flex;gap:12px;align-items:center;background:#1a1a2e;padding:20px;border-radius:12px">
+    <div id="health-dot" style="width:12px;height:12px;border-radius:50%;background:#4caf50"></div>
+    <div id="health-text" style="color:#e0e0e0">加载中...</div>
+  </div>
+</section>
+<script>
+fetch('/monitor/status.json')
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById('health-dot').style.background = d.status==='healthy' ? '#4caf50' : '#ff9800';
+    document.getElementById('health-text').textContent = d.status==='healthy' ? '全部在线 '+d.online+'/'+d.total : '异常 '+d.details;
+  })
+  .catch(()=>{document.getElementById('health-text').textContent='状态加载失败'});
+</script>
+节点实时状态</h2>
   <div id="node-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
     <div style="color:#888;text-align:center;padding:40px">加载中...</div>
   </div>
