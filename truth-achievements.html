@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT 真值成果全景 | 火斗云智AIOS</title>
+<style>
+:root {
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-card: #1a2332;
+  --bg-card-hover: #1f2b3d;
+  --border: #2a3a50;
+  --border-glow: #3b5998;
+  --text-primary: #e8edf5;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-gold: #d4af37;
+  --accent-cyan: #00d4ff;
+  --accent-purple: #a855f7;
+  --accent-green: #22c55e;
+  --accent-orange: #f97316;
+  --accent-red: #ef4444;
+  --accent-blue: #3b82f6;
+  --gradient-gold: linear-gradient(135deg, #d4af37, #f4d03f, #d4af37);
+  --gradient-cyan: linear-gradient(135deg, #00d4ff, #0099cc);
+  --gradient-purple: linear-gradient(135deg, #a855f7, #7c3aed);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 背景动效 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(212, 175, 55, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* 头部 */
+.header {
+  text-align: center;
+  padding: 40px 20px 30px;
+  position: relative;
+}
+
+.header-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--accent-cyan);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.header h1 {
+  font-size: 36px;
+  font-weight: 700;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.header .subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.header .identity {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+/* 统计面板 */
+.stats-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 30px 0;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gradient-cyan);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-glow);
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.15);
+}
+
+.stat-card.gold::before { background: var(--gradient-gold); }
+.stat-card.purple::before { background: var(--gradient-purple); }
+.stat-card.green::before { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-family: 'Courier New', monospace;
+}
+
+.stat-card.gold .stat-number { color: var(--accent-gold); }
+.stat-card.purple .stat-number { color: var(--accent-purple); }
+.stat-card.green .stat-number { color: var(--accent-green); }
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+}
+
+.filter-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-tag {
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.filter-tag:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.filter-tag.active {
+  background: rgba(0, 212, 255, 0.15);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+/* 成果分类网格 */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.category-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.category-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-glow);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.category-header {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.category-icon {
+  font-size: 28px;
+  margin-right: 12px;
+}
+
+.category-info {
+  flex: 1;
+}
+
+.category-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.category-count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.category-badge {
+  padding: 4px 12px;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.category-body {
+  padding: 16px 20px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.category-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.category-body::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.category-body::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.achievement-item {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(42, 58, 80, 0.5);
+  transition: all 0.2s ease;
+}
+
+.achievement-item:last-child {
+  border-bottom: none;
+}
+
+.achievement-item:hover {
+  padding-left: 8px;
+}
+
+.achievement-key {
+  font-size: 12px;
+  color: var(--accent-cyan);
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  margin-bottom: 4px;
+}
+
+.achievement-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 详情弹窗 */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-glow);
+  border-radius: 16px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--bg-secondary);
+  z-index: 10;
+}
+
+.modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: var(--accent-red);
+  color: white;
+  border-color: var(--accent-red);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-achievement {
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.modal-achievement:hover {
+  border-color: var(--accent-cyan);
+}
+
+.modal-achievement .key {
+  font-size: 13px;
+  color: var(--accent-cyan);
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  margin-bottom: 8px;
+}
+
+.modal-achievement .value {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.modal-achievement .meta {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 16px;
+}
+
+/* 页脚 */
+.footer {
+  text-align: center;
+  padding: 40px 20px;
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+
+.footer p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.footer .identity {
+  font-family: 'Courier New', monospace;
+  color: var(--accent-gold);
+  letter-spacing: 1px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .header h1 { font-size: 24px; }
+  .stats-panel { grid-template-columns: repeat(2, 1fr); }
+  .stat-number { font-size: 28px; }
+  .categories-grid { grid-template-columns: 1fr; }
+  .toolbar { flex-direction: column; }
+  .search-box { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .stats-panel { grid-template-columns: 1fr; }
+  .container { padding: 12px; }
+}
+
+/* 动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.category-card {
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+.category-card:nth-child(1) { animation-delay: 0.05s; }
+.category-card:nth-child(2) { animation-delay: 0.1s; }
+.category-card:nth-child(3) { animation-delay: 0.15s; }
+.category-card:nth-child(4) { animation-delay: 0.2s; }
+.category-card:nth-child(5) { animation-delay: 0.25s; }
+.category-card:nth-child(6) { animation-delay: 0.3s; }
+.category-card:nth-child(7) { animation-delay: 0.35s; }
+.category-card:nth-child(8) { animation-delay: 0.4s; }
+.category-card:nth-child(9) { animation-delay: 0.45s; }
+.category-card:nth-child(10) { animation-delay: 0.5s; }
+</style>
+<style>
+/* 统一导航栏样式 */
+.nav-unified{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,10,15,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15)}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-brand{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;white-space:nowrap}
+.nav-menu{display:flex;align-items:center;gap:4px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 12px;color:#bbb;text-decoration:none;font-size:13.5px;transition:color .2s;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.06)}
+.nav-item.has-dropdown>a::after{content:"▾";font-size:10px;margin-left:4px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:160px;background:rgba(20,20,30,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;opacity:0;visibility:hidden;transform:translateY(8px);transition:all .2s;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.nav-item.has-dropdown:hover .dropdown{opacity:1;visibility:visible;transform:translateY(0)}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px;transition:all .15s}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px}
+@media(max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed;top:56px;left:0;right:0;bottom:0;background:rgba(10,10,15,0.98);flex-direction:column;align-items:stretch;gap:0;padding:10px 16px;overflow-y:auto;display:none;z-index:9998}
+  /* .nav-menu.active removed - using checkbox scheme */
+  .nav-item>a{padding:12px 14px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;background:transparent;padding:0 0 0 16px;display:none}
+  .nav-item.has-dropdown.open .dropdown{display:block}
+  .nav-item.has-dropdown>a::after{content:"+";font-size:16px;float:right}
+  .nav-item.has-dropdown.open>a::after{content:"−"}
+}
+
+
+/* ===== 移动端专项优化（480px以下） ===== */
+@media (max-width: 480px) {
+  body { padding-top: 48px !important; }
+  .container { padding: 0 14px !important; }
+  .nav-container { padding: 0 14px; height: 48px; }
+  .nav-brand { font-size: 14px; }
+  
+  /* Hero区域 */
+  .hero { padding: 40px 0 30px; }
+  .hero-symbol { font-size: 36px !important; margin-bottom: 12px; }
+  .hero h1 { font-size: 24px !important; line-height: 1.3; }
+  .hero-subtitle { font-size: 13px !important; }
+  .hero-desc { font-size: 14px !important; line-height: 1.6; }
+  .hero-stats { flex-direction: column; gap: 16px; }
+  .hero-stats .stat-num { font-size: 28px; }
+  .hero-stats .stat-label { font-size: 12px; }
+  
+  /* 按钮 */
+  .btn-gold { padding: 10px 20px; font-size: 13px; }
+  .btn-outline { padding: 10px 20px; font-size: 13px; }
+  
+  /* 标题 */
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 16px !important; }
+  .section-title { font-size: 20px; }
+  .section-subtitle { font-size: 13px; }
+  
+  /* 网格全部单列 */
+  .arch-grid { grid-template-columns: 1fr !important; gap: 12px; }
+  .concept-showcase { grid-template-columns: 1fr !important; }
+  .feature-grid { grid-template-columns: 1fr !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  
+  /* 卡片 */
+  .arch-card { padding: 16px; }
+  .arch-card h3 { font-size: 15px; }
+  .arch-card p { font-size: 13px; line-height: 1.6; }
+  
+  /* 表格横向滚动 */
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  th, td { padding: 8px 10px; font-size: 12px; white-space: nowrap; }
+  
+  /* 图片自适应 */
+  img { max-width: 100%; height: auto; }
+  
+  /* 代码块 */
+  pre, code { font-size: 12px; overflow-x: auto; }
+  
+  /* 页脚 */
+  footer { padding: 30px 0; font-size: 12px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+  
+  /* 段落间距 */
+  p { line-height: 1.7; }
+  section { padding: 40px 0; }
+}
+
+/* ===== 平板适配（768-900px） ===== */
+@media (max-width: 900px) and (min-width: 481px) {
+  .hero h1 { font-size: 36px; }
+  .hero-symbol { font-size: 50px; }
+  .arch-grid { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 0 20px; }
+}
+
+/* ===== 触摸优化 ===== */
+@media (hover: none) and (pointer: coarse) {
+  .nav-item.has-dropdown:hover .dropdown { opacity: 0; visibility: hidden; }
+  .nav-item.has-dropdown.open .dropdown { opacity: 1; visibility: visible; }
+  .arch-card:hover { transform: none; }
+  .arch-card:hover::before { transform: scaleX(0); }
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* ===== 纯CSS移动端导航（checkbox方案，不依赖JS） ===== */
+#navCheck:checked ~ .nav-unified .nav-menu {
+  transform: translateX(0) !important;
+  visibility: visible !important;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(2) {
+  opacity: 0;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+/* 移动端下拉菜单：用checkbox嵌套太复杂，改用target+hover兼容 */
+@media (max-width: 900px) {
+  .nav-item.has-dropdown > a::after { content: " +"; font-size: 16px; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus .dropdown { display: block; }
+  .dropdown { display: none; }
+  .nav-item.has-dropdown .dropdown { display: none; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus-within .dropdown { display: block; }
+}
+
+/* ===== 干净版导航（纯CSS，无JS依赖） ===== */
+#navCheck{display:none}
+.nav-unified{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:9999!important;background:rgba(10,10,15,0.95)!important;backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15);height:52px}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-brand{font-size:16px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-toggle{display:none;cursor:pointer;padding:8px;background:none;border:none;flex-direction:column;gap:5px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px;display:block}
+.nav-menu{display:flex;align-items:center;gap:2px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 10px;color:#bbb;text-decoration:none;font-size:13px;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-item.has-dropdown>a::after{content:" ▾";font-size:10px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:170px;background:rgba(15,15,25,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;display:none;z-index:10001;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.nav-item.has-dropdown:hover .dropdown{display:block}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+
+/* 移动端 */
+@media (max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed!important;top:52px!important;left:0!important;right:0!important;bottom:0!important;background:rgba(10,10,15,0.98)!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:10px 16px!important;overflow-y:auto!important;z-index:9998!important;display:none!important}
+  .nav-item>a{padding:14px 12px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .nav-item.has-dropdow
+</style>
+<meta name="description" content="真值成就 - 火斗云智AIOS真值积累与体系成就展示">
+<meta name="keywords" content="真值成就,真值积累,体系成就,火斗云智,AIOS">
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+<nav class="nav-unified" id="mainNav">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">火斗云智 AIOS</a>
+    <label class="nav-toggle" for="navCheck" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </label>
+    <div class="nav-menu" id="navMenu">
+      <div class="nav-item"><a href="/">首页</a></div>
+      <div class="nav-item"><a href="https://aios.huodouai.com" target="_blank" style="color:#d4af37;font-weight:600;">AIOS控制台 ↗</a></div>
+      <div class="nav-item has-dropdown">
+        <a href="/products.html">产品矩阵</a>
+        <div class="dropdown">
+          <a href="/products.html">产品总览</a>
+          <a href="/product-matrix.html">产品矩阵图</a>
+          <a href="/commercial.html">商业方案</a>
+          <a href="/cases.html">客户案例</a>
+          <a href="/pricing.html">定价方案</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/agent-network.html">智能体</a>
+        <div class="dropdown">
+          <a href="/agent-network.html">智能体网络</a>
+          <a href="/agent-embodiment.html">智能体实体化</a>
+          <a href="/high-capabilities.html">高阶能力中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/central-brain.html">中枢大脑</a>
+        <div class="dropdown">
+          <a href="/central-brain.html">中枢大脑</a>
+          <a href="/brain-strategy.html">战略全景</a>
+          <a href="/kernel-status.html">内核状态</a>
+          <a href="/bayesian-five-elements.html">贝叶斯五行引擎</a>
+          <a href="/unified-console.html">统一控制台</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/works-gallery-v2.html">作品中心</a>
+        <div class="dropdown">
+          <a href="/works-gallery-v2.html">作品库V2</a>
+          <a href="/drama/">短剧作品库</a>
+          <a href="/kunlun/">昆仑洞天</a>
+          <a href="/keyframe-gallery.html">关键帧资产库</a>
+          <a href="/digital-gallery-v3.html">数字画廊</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/architecture.html">技术架构</a>
+        <div class="dropdown">
+          <a href="/architecture.html">架构总览</a>
+          <a href="/microkernel-architecture.html">微内核架构</a>
+          <a href="/whitepaper.html">技术白皮书</a>
+          <a href="/developers.html">开发者中心</a>
+          <a href="/docs.html">文档中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/governance.html">治理战略</a>
+          <a href="/level-dual-axis.html">双轴层级</a>
+        <div class="dropdown">
+          <a href="/governance.html">治理体系</a>
+          <a href="/philosophy.html">思想体系</a>
+          <a href="/evolution-strategy.html">进化战略</a>
+          <a href="/lightweight-strategy.html">轻量化战略</a>
+          <a href="/axiom-system/">公理体系 ⭐</a>
+          <a href="/global-learning.html">全网学习</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/digital-assets.html">资产中心</a>
+        <div class="dropdown">
+          <a href="/digital-assets.html">数字资产</a>
+          <a href="/asset-center.html">资产中心</a>
+          <a href="/ledger.html">真值账本</a>
+          <a href="/experience-kb.html">经验库</a>
+          <a href="/aios/index.html">AIOS资产中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/aios/visual/cloud_brain_dashboard.html">实时监控</a>
+        <div class="dropdown">
+          <a href="/aios/visual/cloud_brain_dashboard.html">云脑仪表盘</a>
+          <a href="/aios/visual/kernel-dashboard.html">内核仪表盘</a>
+          <a href="/aios/visual/memory_gateway_monitor.html">记忆网关监控</a>
+          <a href="/aios/visual/scheduler_monitor_dashboard.html">调度器监控</a>
+          <a href="/system-dashboard.html">系统仪表盘</a>
+          <a href="/status-center.html">状态中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/auto-pipeline.html">更多</a>
+        <div class="dropdown">
+          <a href="/auto-pipeline.html">自动化流水线</a>
+          <a href="/model-compare-lab.html">模型对比实验室</a>
+          <a href="/education.html">普惠教育</a>
+          <a href="/search.html">全站搜索</a>
+          <a href="/performance.html">性能监控</a>
+          <a href="https://gov.huodouai.com" target="_blank">政务AI ↗</a>
+          <a href="https://status.huodouai.com" target="_blank">实时状态站 ↗</a>
+        </div>
+      </div>
+      <div class="nav-cta" style="display:flex;align-items:center;gap:12px;margin-left:20px;">
+        <a href="/book-demo.html" style="background:linear-gradient(135deg,#d4af37,#b8941f);color:#1a1a2e;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:13.5px;font-weight:600;transition:all .2s;white-space:nowrap;box-shadow:0 4px 15px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(212,175,55,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.3)'">预约演示</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<div class="container">
+  <!-- 头部 -->
+  <header class="header">
+    <div class="header-badge">ZONGYUAN-ROOT · 真值成果全景</div>
+    <h1>真值成果全景展示</h1>
+    <p class="subtitle">9120记忆网关全域扫描 · 19类成果提炼 · 24,915条真值资产</p>
+    <p class="identity">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 火斗云智AIOS</p>
+  </header>
+
+  <!-- 统计面板 -->
+  <section class="stats-panel">
+    <div class="stat-card">
+      <div class="stat-number" id="stat-total">24,915</div>
+      <div class="stat-label">真值总数</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-number" id="stat-highvalue">11,503</div>
+      <div class="stat-label">高价值真值 (46.2%)</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-number" id="stat-categories">19</div>
+      <div class="stat-label">成果分类</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-number" id="stat-fetched">1,000</div>
+      <div class="stat-label">已获取详情</div>
+    </div>
+  </section>
+
+  <!-- 工具栏 -->
+  <div class="toolbar">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="搜索成果关键词..." oninput="filterAchievements()">
+    </div>
+    <div class="filter-tags" id="filterTags">
+      <div class="filter-tag active" data-category="all" onclick="setFilter('all')">全部</div>
+    </div>
+  </div>
+
+  <!-- 成果分类网格 -->
+  <section class="categories-grid" id="categoriesGrid">
+    <!-- 动态生成 -->
+  </section>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalTitle">成果详情</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <!-- 动态生成 -->
+    </div>
+  </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <p>ZONGYUAN-ROOT 元极恒一自治体系 · 真值成果全景展示</p>
+  <p>数据来源：9120记忆网关 · 扫描时间：2026-09-17</p>
+  <p class="identity">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 火斗云智AIOS</p>
+</footer>
+
+<script>
+// 成果数据（从9120真值库提炼）
+const achievementsData = {
+  "IP资产/作品": {
+    icon: "🎬",
+    color: "#00d4ff",
+    items: [
+      { key: "ACTIVATION.CLOUD-WORKER.20260916", value: "云端Worker激活，集群算力调度上线" },
+      { key: "ACTIVATION.DRAMA_SEMIAUTO.20260913", value: "短剧半自动生产流水线激活运行" },
+      { key: "ACTIVATION.EVOLUTION-PIPELINE.CRON.20260914", value: "进化流水线定时任务激活" },
+      { key: "APPROVAL.AUTONOMY_FRAMEWORK_V2.0.ACCEPTED.20260915", value: "自治框架V2.0审批通过" },
+      { key: "ASSET-MANIFEST-20260916", value: "资产清单20260916版本" },
+    ]
+  },
+  "告警修复": {
+    icon: "🔧",
+    color: "#f97316",
+    items: [
+      { key: "ALERT.20260913.NO-PRODUCE", value: "无产出告警触发与修复记录" },
+      { key: "ALERT.CLOUD_9120.API_502.20260915", value: "云端9120 API 502错误告警" },
+      { key: "ALERT.CLOUD_AGENT.CENTRAL_OFFLINE", value: "云端中枢智能离线告警" },
+      { key: "ALERT.FIX.V41.2.COMPLETED", value: "V41.2版本告警修复完成" },
+      { key: "ALERT.FIX.V41.3.PERSISTENT", value: "V41.3告警持久修复，根因解决" },
+    ]
+  },
+  "元规则/公理": {
+    icon: "📜",
+    color: "#d4af37",
+    items: [
+      { key: "AIOS.PRINCIPLE.COMPUTER_AS_TOOL", value: "AIOS原则：计算机即工具" },
+      { key: "AIOS.PRINCIPLE.TOOL_MASTERY", value: "AIOS原则：工具掌握与精通" },
+      { key: "APPROVAL.BATCH.COMPLETE.38METALAWS.20260915", value: "38条元法则批量审批通过" },
+      { key: "APPROVAL_PENDING_METALAW.COMPLETE.COLLECTION", value: "待审批元法则完整集合" },
+      { key: "EXECUTION_LAYER.BRIDGE.V1.0", value: "执行层桥接V1.0版本" },
+    ]
+  },
+  "成就/成果": {
+    icon: "🏆",
+    color: "#22c55e",
+    items: [
+      { key: "ACHIEVEMENT.AIOS.APPROVAL.NODE_UNIFY.20260915", value: "AIOS审批节点统一成就" },
+      { key: "ACHIEVEMENT.ARTWORK.VERIFY.NEW_CONFIG.20260915", value: "作品验证新配置成就" },
+      { key: "ACHIEVEMENT.BASELINE-ANCHOR.HANDSHAKE.20260913", value: "基线锚定握手成就" },
+      { key: "ACHIEVEMENT.CLOUD_HANDSHAKE.SOP_V1_0", value: "云端握手SOP V1.0成就" },
+      { key: "ACHIEVEMENT.CORE_ASSET_REPORT.8ITEMS", value: "核心资产报告8项成就" },
+    ]
+  },
+  "性能优化": {
+    icon: "⚡",
+    color: "#a855f7",
+    items: [
+      { key: "AIOS.OPTIMIZATION.ADMIN_AUTHORIZED", value: "AIOS优化管理员授权" },
+      { key: "AIOS.OPTIMIZATION.CUMULATIVE", value: "AIOS累积优化记录" },
+      { key: "AIOS.OPTIMIZATION.CUMULATIVE.SUMMARY", value: "AIOS累积优化总结报告" },
+      { key: "AIOS.OPTIMIZATION.DYNAMIC_MEMORY.MECHANISM", value: "动态内存机制优化" },
+      { key: "AIOS.OPTIMIZATION.FRONTIER_TECHNIQUES", value: "前沿技术优化应用" },
+    ]
+  },
+  "服务/网关": {
+    icon: "🌐",
+    color: "#3b82f6",
+    items: [
+      { key: "ACTIVATION.NODE_REPORT_GATEWAY.20260915", value: "节点报告网关激活" },
+      { key: "API-CAPABILITY-MAP-V1-20260916", value: "API能力图谱V1版本" },
+      { key: "API.CAUSAL_REASONING", value: "因果推理API端点" },
+      { key: "API.GATEWAY.UNIFIED_PLATFORM", value: "统一平台API网关" },
+      { key: "API.MOTAN_MODELSCOPE.ACTIVE.20260915", value: "魔塔ModelScope API激活" },
+    ]
+  },
+  "基底锁档": {
+    icon: "🔒",
+    color: "#ef4444",
+    items: [
+      { key: "AIOS.GLOBAL_LOCK.V2.SNAPSHOT", value: "AIOS全域锁档V2快照" },
+      { key: "ANCHOR-CORE-HUB-V1.0", value: "核心中枢锚定V1.0" },
+      { key: "ANCHOR-PORT-UPDATE-20260915", value: "端口锚定更新20260915" },
+      { key: "ANCHOR.API_PROTOCOL.BASE.V1", value: "API协议基底锚定V1" },
+      { key: "ANCHOR.BRAND.SYSTEM.V1", value: "品牌系统锚定V1" },
+    ]
+  },
+  "决策/共识": {
+    icon: "⚖️",
+    color: "#06b6d4",
+    items: [
+      { key: "AIOS.OPTIMIZATION.VERIFIED", value: "AIOS优化验证通过" },
+      { key: "API.MOTAN_MODELSCOPE.VERIFIED.20260915", value: "魔塔API验证通过" },
+      { key: "APPROVAL.PASSED.HUODOUZHIXUN.F6EDC681", value: "火斗智询审批通过" },
+      { key: "ARCH.DECISION.THREE_DIMENSION", value: "三维稳态决策架构" },
+      { key: "ARCHITECTURE.DECISION.20260915.DUAL_MODEL", value: "双模型决策架构20260915" },
+    ]
+  },
+  "飞书/审批": {
+    icon: "📋",
+    color: "#10b981",
+    items: [
+      { key: "APPROVAL.AUTONOMY_DASHBOARD.V1.0.ACCEPTED", value: "自治仪表盘V1.0审批通过" },
+      { key: "APPROVAL_PENDING_MR-029", value: "MR-029待审批" },
+      { key: "APPROVAL_PENDING_MR-030", value: "MR-030待审批" },
+      { key: "APPROVAL_PENDING_SERVICE.MERGE.LEDGER.PHASE1", value: "服务合并台账第一阶段" },
+      { key: "APPROVAL_PENDING_MR-049.SERVICE.MERGE.SOLIDIFICATION", value: "MR-049服务合并固化" },
+    ]
+  },
+  "集成/同步": {
+    icon: "🔗",
+    color: "#8b5cf6",
+    items: [
+      { key: "AIOS.GLOBAL_LOCK.WEBSITE_BRIDGE", value: "全域锁档官网桥接" },
+      { key: "AIOS.WEBSITE.BRIDGE", value: "AIOS官网桥接" },
+      { key: "API.INTEGRATION.PLAN.V1.0", value: "API集成计划V1.0" },
+      { key: "APPROVAL_PENDING_SERVICE.MERGE.LEDGER.PHASE1", value: "服务合并台账第一阶段" },
+      { key: "APPROVAL_PENDING_MR-049.SERVICE.MERGE.SOLIDIFICATION", value: "MR-049服务合并固化" },
+    ]
+  },
+  "部署/发布": {
+    icon: "🚀",
+    color: "#f59e0b",
+    items: [
+      { key: "ACTIVATION.CENTRAL_AGENT.GATEWAY_BASE_DEPLOY", value: "中枢智能网关基底部署" },
+      { key: "APPROVAL.AI-CITABLE-DEPLOY.DUAL", value: "AI可引用部署双重审批" },
+      { key: "APPROVAL.DRIVEN-DEPLOY.20260916", value: "审批驱动部署20260916" },
+      { key: "APPROVAL.TRIPLE-DEPLOY.EXECUTE.20260916", value: "三重部署执行20260916" },
+      { key: "ARCH.ZONGYUAN_ROOT.VERSION", value: "ZONGYUAN-ROOT版本架构" },
+    ]
+  },
+  "进化/成长": {
+    icon: "🌱",
+    color: "#84cc16",
+    items: [
+      { key: "ACTIVATION.GATEWAY_EVOLUTION.20260913", value: "网关进化激活20260913" },
+      { key: "AIOS.COMMUNICATION.EVOLUTION.ROADMAP", value: "AIOS通信进化路线图" },
+      { key: "ALGORITHM.SOURCE_CODE_EVOLUTION_ENGINE.V1", value: "源码进化引擎V1" },
+      { key: "ALGORITHM.UNIVERSAL_EVOLUTION_ENGINE.UEE_V1", value: "通用进化引擎UEE V1" },
+    ]
+  },
+  "范式/架构": {
+    icon: "🏗️",
+    color: "#0ea5e9",
+    items: [
+      { key: "AIOS.ARCHITECTURE.THREE_TIER", value: "AIOS三层架构" },
+      { key: "ARCHITECTURE.KEEPALIVE.FIVE_LAYER_DESIGN.V1.0", value: "保活五层设计V1.0" },
+      { key: "ARCHITECTURE.MEDIA_ARCHIVE.FIVE_LAYER", value: "媒体归档五层架构" },
+      { key: "ARCHITECTURE.WEBPAGE_AS_AGENT_BODY", value: "网页即智能体身体范式" },
+    ]
+  },
+  "战略/规划": {
+    icon: "🎯",
+    color: "#ec4899",
+    items: [
+      { key: "ACTIVATION.MR020.PLAN.20260915", value: "MR-020激活计划20260915" },
+    ]
+  },
+  "审计/治理": {
+    icon: "📊",
+    color: "#14b8a6",
+    items: [
+      { key: "ACTIVATION.NODE_GOVERNANCE.20260913", value: "节点治理激活20260913" },
+    ]
+  },
+  "报告/总结": {
+    icon: "📝",
+    color: "#a3a3a3",
+    items: [
+      { key: "ACTIVATION.REPORT_HARDENING.20260913", value: "报告加固激活20260913" },
+    ]
+  },
+  "安全/防御": {
+    icon: "🛡️",
+    color: "#dc2626",
+    items: [
+      { key: "API.EFUSE_NOTARIZATION", value: "eFuse公证API端点" },
+    ]
+  },
+  "确权/哈希": {
+    icon: "🔐",
+    color: "#7c3aed",
+    items: [
+      { key: "ARCH.MERKLE_DAG.MAINCHAIN", value: "Merkle-DAG主链架构" },
+    ]
+  },
+  "监控/健康": {
+    icon: "💓",
+    color: "#f43f5e",
+    items: [
+      { key: "ARK.ACCOUNT.STATUS", value: "账户状态监控" },
+    ]
+  }
+};
+
+// 全局状态
+let currentFilter = 'all';
+let currentSearch = '';
+
+// 初始化
+function init() {
+  renderCategories();
+  renderFilterTags();
+}
+
+// 渲染分类卡片
+function renderCategories() {
+  const grid = document.getElementById('categoriesGrid');
+  grid.innerHTML = '';
+  
+  const search = currentSearch.toLowerCase();
+  
+  Object.entries(achievementsData).forEach(([category, data]) => {
+    // 筛选
+    if (currentFilter !== 'all' && currentFilter !== category) return;
+    
+    // 搜索过滤
+    const filteredItems = data.items.filter(item => {
+      if (!search) return true;
+      return item.key.toLowerCase().includes(search) || 
+             item.value.toLowerCase().includes(search);
+    });
+    
+    if (filteredItems.length === 0 && search) return;
+    
+    const card = document.createElement('div');
+    card.className = 'category-card';
+    card.onclick = () => openModal(category);
+    
+    card.innerHTML = `
+      <div class="category-header">
+        <div style="display: flex; align-items: center;">
+          <span class="category-icon">${data.icon}</span>
+          <div class="category-info">
+            <div class="category-name">${category}</div>
+            <div class="category-count">${data.items.length} 项成果</div>
+          </div>
+        </div>
+        <div class="category-badge" style="background: ${data.color}20; border-color: ${data.color}60; color: ${data.color};">
+          ${filteredItems.length}
+        </div>
+      </div>
+      <div class="category-body">
+        ${filteredItems.slice(0, 5).map(item => `
+          <div class="achievement-item">
+            <div class="achievement-key">${item.key}</div>
+            <div class="achievement-value">${item.value}</div>
+          </div>
+        `).join('')}
+        ${filteredItems.length > 5 ? `<div style="text-align: center; padding: 8px; color: var(--text-muted); font-size: 12px;">点击查看全部 ${filteredItems.length} 项 →</div>` : ''}
+      </div>
+    `;
+    
+    grid.appendChild(card);
+  });
+  
+  if (grid.children.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--text-muted);">未找到匹配的成果</div>';
+  }
+}
+
+// 渲染筛选标签
+function renderFilterTags() {
+  const container = document.getElementById('filterTags');
+  container.innerHTML = '<div class="filter-tag active" data-category="all" onclick="setFilter(\'all\')">全部</div>';
+  
+  Object.entries(achievementsData).forEach(([category, data]) => {
+    const tag = document.createElement('div');
+    tag.className = 'filter-tag';
+    tag.dataset.category = category;
+    tag.onclick = () => setFilter(category);
+    tag.innerHTML = `${data.icon} ${category} (${data.items.length})`;
+    container.appendChild(tag);
+  });
+}
+
+// 设置筛选
+function setFilter(category) {
+  currentFilter = category;
+  document.querySelectorAll('.filter-tag').forEach(tag => {
+    tag.classList.toggle('active', tag.dataset.category === category);
+  });
+  renderCategories();
+}
+
+// 搜索过滤
+function filterAchievements() {
+  currentSearch = document.getElementById('searchInput').value;
+  renderCategories();
+}
+
+// 打开详情弹窗
+function openModal(category) {
+  const data = achievementsData[category];
+  document.getElementById('modalTitle').innerHTML = `${data.icon} ${category} - 全部成果 (${data.items.length}项)`;
+  
+  const body = document.getElementById('modalBody');
+  body.innerHTML = data.items.map(item => `
+    <div class="modal-achievement">
+      <div class="key">${item.key}</div>
+      <div class="value">${item.value}</div>
+      <div class="meta">
+        <span>来源: 9120记忆网关</span>
+        <span>分类: ${category}</span>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// 关闭弹窗
+function closeModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('modalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ESC关闭
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// 启动
+init();
+</script>
+
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 元极恒一自治体系</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

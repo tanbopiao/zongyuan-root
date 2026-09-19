@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>决策效果持续监控仪表盘 | 元极恒一公理体系</title>
+  <meta name="description" content="元极恒一公理体系决策效果持续监控仪表盘，实时展示决策体系健康状态、各项指标、趋势图表、预警信息">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(139,0,0,0.1) 100%);
+      border-radius: 16px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(212,175,55,0.3);
+    }
+    .header h1 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 2.5em;
+      background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 50%, #d4af37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    .header .subtitle { color: #a0a0a0; font-size: 1.1em; }
+    .header .timestamp { color: #d4af37; font-size: 0.9em; margin-top: 10px; }
+    
+    /* Health Status Card */
+    .health-card {
+      background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(139,0,0,0.1) 100%);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 2px solid rgba(212,175,55,0.4);
+      text-align: center;
+    }
+    .health-score {
+      font-size: 4em;
+      font-weight: 900;
+      font-family: 'Noto Serif SC', serif;
+      margin: 10px 0;
+    }
+    .health-status {
+      font-size: 1.8em;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .health-note { color: #a0a0a0; font-size: 1em; }
+    .health-excellent { color: #00ff88; }
+    .health-good { color: #00ccff; }
+    .health-fair { color: #ffaa00; }
+    .health-poor { color: #ff6644; }
+    .health-critical { color: #ff0044; }
+    
+    /* Metric Grid */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .metric-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 25px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+    }
+    .metric-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(212,175,55,0.5);
+      box-shadow: 0 10px 30px rgba(212,175,55,0.2);
+    }
+    .metric-label { color: #a0a0a0; font-size: 0.9em; margin-bottom: 10px; }
+    .metric-value {
+      font-size: 2.5em;
+      font-weight: 700;
+      font-family: 'Noto Serif SC', serif;
+      color: #d4af37;
+    }
+    .metric-unit { font-size: 0.5em; color: #a0a0a0; }
+    .metric-trend { font-size: 0.85em; margin-top: 8px; }
+    .trend-up { color: #00ff88; }
+    .trend-down { color: #ff6644; }
+    .trend-stable { color: #a0a0a0; }
+    
+    /* Chart Section */
+    .chart-section {
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .chart-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.5em;
+      color: #d4af37;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(212,175,55,0.3);
+    }
+    .chart-container { width: 100%; height: 400px; }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 30px;
+    }
+    
+    /* Alert Section */
+    .alert-section {
+      background: rgba(255,100,100,0.05);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255,100,100,0.3);
+    }
+    .alert-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.5em;
+      color: #ff6644;
+      margin-bottom: 20px;
+    }
+    .alert-item {
+      background: rgba(255,100,100,0.1);
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin-bottom: 10px;
+      border-left: 4px solid #ff6644;
+    }
+    .alert-level {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-weight: 700;
+      margin-right: 10px;
+    }
+    .alert-critical { background: #ff0044; color: white; }
+    .alert-high { background: #ff6644; color: white; }
+    .alert-medium { background: #ffaa00; color: black; }
+    .alert-low { background: #00ccff; color: black; }
+    .alert-message { color: #e0e0e0; }
+    .alert-time { color: #808080; font-size: 0.85em; margin-top: 5px; }
+    .no-alerts { color: #00ff88; text-align: center; padding: 20px; font-size: 1.2em; }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 30px;
+      color: #606060;
+      font-size: 0.9em;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: 30px;
+    }
+    .footer .identity { color: #d4af37; margin-top: 10px; }
+    
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: #d4af37;
+      font-size: 1.2em;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header h1 { font-size: 1.8em; }
+      .health-score { font-size: 3em; }
+      .metric-value { font-size: 2em; }
+      .chart-grid { grid-template-columns: 1fr; }
+      .chart-container { height: 300px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>决策效果持续监控仪表盘</h1>
+      <div class="subtitle">元极恒一公理体系 · 决策体系健康状态实时监控</div>
+      <div class="timestamp" id="timestamp">加载中...</div>
+    </div>
+    
+    <!-- Health Status -->
+    <div class="health-card" id="healthCard">
+      <div class="loading">正在加载健康状态...</div>
+    </div>
+    
+    <!-- Metric Grid -->
+    <div class="metric-grid" id="metricGrid">
+      <div class="loading">正在加载指标数据...</div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="chart-section">
+      <div class="chart-title">决策质量趋势分析</div>
+      <div class="chart-grid">
+        <div class="chart-container" id="scoreTrendChart"></div>
+        <div class="chart-container" id="successRateChart"></div>
+      </div>
+    </div>
+    
+    <div class="chart-section">
+      <div class="chart-title">决策体系分布分析</div>
+      <div class="chart-grid">
+        <div class="chart-container" id="decisionTypeChart"></div>
+        <div class="chart-container" id="effectLevelChart"></div>
+      </div>
+    </div>
+    
+    <!-- Alerts -->
+    <div class="alert-section" id="alertSection">
+      <div class="alert-title">预警信息</div>
+      <div id="alertList">
+        <div class="loading">正在加载预警信息...</div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <div>元极恒一公理体系 · 决策效果持续监控仪表盘 V1.0</div>
+      <div>数据每10分钟自动更新 · 基于9数据源聚合分析</div>
+      <div class="identity">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZONGYUAN-ROOT元极恒一自治体系</div>
+    </div>
+  </div>
+  
+  <script>
+    // 监控数据（从后端API获取，此处使用示例数据）
+    let monitorData = null;
+    
+    // 健康状态配置
+    const healthConfig = {
+      excellent: { color: '#00ff88', label: '优秀', note: '决策体系运行优秀，持续保持' },
+      good: { color: '#00ccff', label: '良好', note: '决策体系运行良好，部分领域可优化' },
+      fair: { color: '#ffaa00', label: '一般', note: '决策体系运行一般，需要加强优化' },
+      poor: { color: '#ff6644', label: '较差', note: '决策体系运行较差，需要紧急优化' },
+      critical: { color: '#ff0044', label: '危急', note: '决策体系运行危急，需要立即干预' }
+    };
+    
+    // 初始化页面
+    async function initDashboard() {
+      updateTimestamp();
+      await loadMonitorData();
+      renderHealthCard();
+      renderMetricGrid();
+      renderCharts();
+      renderAlerts();
+      
+      // 每60秒刷新时间戳
+      setInterval(updateTimestamp, 60000);
+    }
+    
+    // 更新时间戳
+    function updateTimestamp() {
+      const now = new Date();
+      document.getElementById('timestamp').textContent = 
+        '最后更新: ' + now.toLocaleString('zh-CN');
+    }
+    
+    // 加载监控数据
+    async function loadMonitorData() {
+      try {
+        // 尝试从API获取数据
+        const response = await fetch('/decision-monitor/data.json');
+        if (response.ok) {
+          monitorData = await response.json();
+        } else {
+          throw new Error('API not available');
+        }
+      } catch (error) {
+        // 使用示例数据
+        monitorData = getSampleData();
+      }
+    }
+    
+    // 示例数据
+    function getSampleData() {
+      return {
+        version: 'DECISION-MONITOR-V1.0',
+        generated_at: new Date().toISOString(),
+        health_status: {
+          health_score: 48,
+          health_status: 'poor',
+          health_note: '决策体系运行较差，需要紧急优化',
+          last_updated: new Date().toISOString()
+        },
+        metrics: {
+          overview: {
+            total_decisions: 12,
+            total_optimizations: 1,
+            total_verifications: 1,
+            total_best_practices: 12,
+            total_failure_lessons: 5,
+            current_optimization_phase: 'idle'
+          },
+          decision_quality: {
+            avg_effect_score: 67.5,
+            avg_success_rate: 50,
+            excellent_count: 0,
+            good_count: 2,
+            fair_count: 1,
+            poor_count: 1,
+            total_evaluations: 4
+          },
+          optimization_status: {
+            total_optimizations: 1,
+            optimization_level_distribution: { medium: 1 },
+            current_phase: 'idle'
+          },
+          verification_status: {
+            overall_status: 'poor',
+            pass_rate: 33.33,
+            passed_count: 1,
+            partial_count: 0,
+            failed_count: 2,
+            total_verifications: 1
+          },
+          trend_analysis: {
+            score_trend: 'stable',
+            success_rate_trend: 'stable',
+            volatility_trend: 'stable',
+            predicted_next_score: 67.5,
+            predicted_next_success_rate: 50
+          },
+          recent_decisions: [
+            { time: '2026-09-17 14:00', type: 'plan_evaluation', status: 'completed', score: 62.05 },
+            { time: '2026-09-17 12:00', type: 'risk_assessment', status: 'completed', score: 70.5 },
+            { time: '2026-09-17 10:00', type: 'priority_ruling', status: 'completed', score: 65.0 },
+            { time: '2026-09-17 08:00', type: 'resource_optimization', status: 'completed', score: 72.5 }
+          ],
+          decision_type_distribution: {
+            plan_evaluation: 5,
+            risk_assessment: 3,
+            priority_ruling: 2,
+            resource_optimization: 2
+          }
+        }
+      };
+    }
+    
+    // 渲染健康状态卡片
+    function renderHealthCard() {
+      const health = monitorData.health_status;
+      const config = healthConfig[health.health_status] || healthConfig.poor;
+      
+      document.getElementById('healthCard').innerHTML = ;
+    }
+    
+    // 渲染指标网格
+    function renderMetricGrid() {
+      const m = monitorData.metrics;
+      const trendIcons = { up: '↑ 上升', down: '↓ 下降', stable: '→ 稳定' };
+      
+      document.getElementById('metricGrid').innerHTML = ;
+    }
+    
+    // 渲染图表
+    function renderCharts() {
+      renderScoreTrendChart();
+      renderSuccessRateChart();
+      renderDecisionTypeChart();
+      renderEffectLevelChart();
+    }
+    
+    // 评分趋势图
+    function renderScoreTrendChart() {
+      const chart = echarts.init(document.getElementById('scoreTrendChart'));
+      const recent = monitorData.metrics.recent_decisions || [];
+      const times = recent.map(d => d.time.split(' ')[1] || d.time);
+      const scores = recent.map(d => d.score);
+      
+      chart.setOption({
+        backgroundColor: 'transparent',
+        title: { text: '决策评分趋势', textStyle: { color: '#d4af37', fontSize: 16 } },
+        tooltip: { trigger: 'axis' },
+        grid: { left: '10%', right: '5%', bottom: '15%' },
+        xAxis: { type: 'category', data: times, axisLabel: { color: '#a0a0a0' } },
+        yAxis: { type: 'value', min: 0, max: 100, axisLabel: { color: '#a0a0a0' } },
+        series: [{
+          name: '决策评分',
+          type: 'line',
+          data: scores,
+          smooth: true,
+          lineStyle: { color: '#d4af37', width: 3 },
+          itemStyle: { color: '#d4af37' },
+          areaStyle: { color: 'rgba(212,175,55,0.2)' },
+          markLine: {
+            data: [{ type: 'average', name: '平均值' }],
+            lineStyle: { color: '#00ccff' }
+          }
+        }]
+      });
+    }
+    
+    // 成功率图
+    function renderSuccessRateChart() {
+      const chart = echarts.init(document.getElementById('successRateChart'));
+      const quality = monitorData.metrics.decision_quality;
+      
+      chart.setOption({
+        backgroundColor: 'transparent',
+        title: { text: '决策效果等级分布', textStyle: { color: '#d4af37', fontSize: 16 } },
+        tooltip: { trigger: 'item' },
+        legend: { bottom: '5%', textStyle: { color: '#a0a0a0' } },
+        series: [{
+          name: '效果等级',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          itemStyle: { borderRadius: 10, borderColor: '#0a0a1a', borderWidth: 2 },
+          label: { show: false, position: 'center' },
+          emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold' } },
+          labelLine: { show: false },
+          data: [
+            { value: quality.excellent_count, name: '优秀', itemStyle: { color: '#00ff88' } },
+            { value: quality.good_count, name: '良好', itemStyle: { color: '#00ccff' } },
+            { value: quality.fair_count, name: '一般', itemStyle: { color: '#ffaa00' } },
+            { value: quality.poor_count, name: '较差', itemStyle: { color: '#ff6644' } }
+          ]
+        }]
+      });
+    }
+    
+    // 决策类型图
+    function renderDecisionTypeChart() {
+      const chart = echarts.init(document.getElementById('decisionTypeChart'));
+      const types = monitorData.metrics.decision_type_distribution || {};
+      const typeNames = { plan_evaluation: '方案评估', risk_assessment: '风险评估', priority_ruling: '优先级裁决', resource_optimization: '资源优化' };
+      
+      chart.setOption({
+        backgroundColor: 'transparent',
+        title: { text: '决策类型分布', textStyle: { color: '#d4af37', fontSize: 16 } },
+        tooltip: { trigger: 'axis' },
+        grid: { left: '15%', right: '5%', bottom: '15%' },
+        xAxis: { type: 'value', axisLabel: { color: '#a0a0a0' } },
+        yAxis: { 
+          type: 'category', 
+          data: Object.keys(types).map(t => typeNames[t] || t),
+          axisLabel: { color: '#a0a0a0' }
+        },
+        series: [{
+          name: '决策数量',
+          type: 'bar',
+          data: Object.values(types),
+          itemStyle: { 
+            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+              { offset: 0, color: '#8b0000' },
+              { offset: 1, color: '#d4af37' }
+            ]),
+            borderRadius: [0, 5, 5, 0]
+          },
+          label: { show: true, position: 'right', color: '#d4af37' }
+        }]
+      });
+    }
+    
+    // 效果等级图
+    function renderEffectLevelChart() {
+      const chart = echarts.init(document.getElementById('effectLevelChart'));
+      const verification = monitorData.metrics.verification_status;
+      
+      chart.setOption({
+        backgroundColor: 'transparent',
+        title: { text: '验证结果分布', textStyle: { color: '#d4af37', fontSize: 16 } },
+        tooltip: { trigger: 'item' },
+        series: [{
+          name: '验证结果',
+          type: 'gauge',
+          startAngle: 180,
+          endAngle: 0,
+          min: 0,
+          max: 100,
+          splitNumber: 4,
+          itemStyle: { color: '#d4af37' },
+          progress: { show: true, width: 18 },
+          pointer: { show: true, length: '60%', width: 6 },
+          axisLine: { lineStyle: { width: 18, color: [[0.25, '#ff6644'], [0.5, '#ffaa00'], [0.75, '#00ccff'], [1, '#00ff88']] } },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: { show: false },
+          title: { show: true, offsetCenter: [0, '20%'], fontSize: 16, color: '#a0a0a0' },
+          detail: {
+            valueAnimation: true,
+            fontSize: 30,
+            offsetCenter: [0, '-10%'],
+            color: '#d4af37',
+            formatter: '{value}%'
+          },
+          data: [{ value: verification.pass_rate, name: '验证通过率' }]
+        }]
+      });
+    }
+    
+    // 渲染预警信息
+    function renderAlerts() {
+      const health = monitorData.health_status;
+      const alerts = [];
+      
+      // 根据健康状态生成预警
+      if (health.health_status === 'poor' || health.health_status === 'critical') {
+        alerts.push({
+          level: 'high',
+          message: '决策体系健康状态较差，需要立即启动紧急优化流程',
+          time: health.last_updated
+        });
+      }
+      
+      // 验证通过率预警
+      const passRate = monitorData.metrics.verification_status.pass_rate;
+      if (passRate < 50) {
+        alerts.push({
+          level: 'high',
+          message: ,
+          time: monitorData.generated_at
+        });
+      }
+      
+      // 成功率预警
+      const successRate = monitorData.metrics.decision_quality.avg_success_rate;
+      if (successRate < 60) {
+        alerts.push({
+          level: 'medium',
+          message: ,
+          time: monitorData.generated_at
+        });
+      }
+      
+      // 优化活跃度预警
+      const optCount = monitorData.metrics.overview.total_optimizations;
+      if (optCount < 3) {
+        alerts.push({
+          level: 'low',
+          message: ,
+          time: monitorData.generated_at
+        });
+      }
+      
+      const levelLabels = { critical: '危急', high: '高', medium: '中', low: '低' };
+      
+      if (alerts.length === 0) {
+        document.getElementById('alertList').innerHTML = '<div class="no-alerts">✓ 当前无预警信息，决策体系运行正常</div>';
+      } else {
+        document.getElementById('alertList').innerHTML = alerts.map(alert => ).join('');
+      }
+    }
+    
+    // 页面加载完成后初始化
+    window.addEventListener('load', initDashboard);
+    
+    // 窗口大小变化时重绘图表
+    window.addEventListener('resize', function() {
+      const charts = ['scoreTrendChart', 'successRateChart', 'decisionTypeChart', 'effectLevelChart'];
+      charts.forEach(id => {
+        const chart = echarts.getInstanceByDom(document.getElementById(id));
+        if (chart) chart.resize();
+      });
+    });
+  </script>
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 元极恒一自治体系</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

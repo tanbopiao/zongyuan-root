@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元极恒一 · 高阶智能态统一监控</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e0e6f0;min-height:100vh}
+.header{background:linear-gradient(135deg,#0d1b2a 0%,#1b2838 100%);padding:24px 32px;border-bottom:1px solid #2a3a4a;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:22px;font-weight:600;background:linear-gradient(90deg,#4fc3f7,#81d4fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .meta{font-size:13px;color:#7a8a9a;text-align:right}
+.container{max-width:1400px;margin:0 auto;padding:24px}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.summary-card{background:linear-gradient(135deg,#131c2e 0%,#1a2540 100%);border:1px solid #2a3a5a;border-radius:12px;padding:20px;text-align:center}
+.summary-card .label{font-size:13px;color:#7a8a9a;margin-bottom:8px}
+.summary-card .value{font-size:32px;font-weight:700;color:#4fc3f7}
+.summary-card .value.green{color:#66bb6a}
+.summary-card .value.gold{color:#ffd54f}
+.summary-card .value.purple{color:#ba68c8}
+.system-panel{background:#131c2e;border:1px solid #2a3a5a;border-radius:12px;padding:20px;margin-bottom:24px}
+.panel-title{font-size:16px;font-weight:600;color:#e0e6f0;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel-title::before{content:"";width:4px;height:18px;background:linear-gradient(180deg,#4fc3f7,#0288d1);border-radius:2px}
+.resource-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.resource-item{background:#0d1525;border-radius:8px;padding:16px}
+.resource-item .name{font-size:13px;color:#7a8a9a;margin-bottom:8px}
+.resource-item .bar{height:8px;background:#1a2540;border-radius:4px;overflow:hidden;margin-bottom:6px}
+.resource-item .bar-fill{height:100%;border-radius:4px;transition:width 0.5s}
+.resource-item .bar-fill.memory{background:linear-gradient(90deg,#4fc3f7,#0288d1)}
+.resource-item .bar-fill.disk{background:linear-gradient(90deg,#ffb74d,#f57c00)}
+.resource-item .bar-fill.cpu{background:linear-gradient(90deg,#81c784,#388e3c)}
+.resource-item .detail{font-size:12px;color:#9ab}
+.engines-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.engine-card{background:#131c2e;border:1px solid #2a3a5a;border-radius:12px;padding:18px;transition:all 0.3s}
+.engine-card:hover{border-color:#4fc3f7;transform:translateY(-2px)}
+.engine-card.status-healthy{border-left:4px solid #66bb6a}
+.engine-card.status-active{border-left:4px solid #4fc3f7}
+.engine-card.status-ok{border-left:4px solid #81c784}
+.engine-card.status-error{border-left:4px solid #ef5350}
+.engine-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.engine-name{font-size:15px;font-weight:600;color:#e0e6f0}
+.engine-priority{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+.priority-P0{background:#ffebee;color:#c62828}
+.priority-P1{background:#fff3e0;color:#e65100}
+.priority-P2{background:#e3f2fd;color:#1565c0}
+.priority-P3{background:#f3e5f5;color:#7b1fa2}
+.engine-status{display:inline-flex;align-items:center;gap:6px;font-size:13px;margin-bottom:8px}
+.status-dot{width:8px;height:8px;border-radius:50%;animation:pulse 2s infinite}
+.status-dot.healthy,.status-dot.active,.status-dot.ok{background:#66bb6a}
+.status-dot.error{background:#ef5350}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.engine-metrics{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.engine-metric{font-size:12px;color:#9ab}
+.engine-metric strong{color:#e0e6f0;font-size:14px}
+.engine-achievement{font-size:12px;color:#7a8a9a;margin-top:10px;padding-top:10px;border-top:1px solid #1a2540}
+.footer{text-align:center;padding:20px;color:#5a6a7a;font-size:12px;border-top:1px solid #1a2540;margin-top:24px}
+.footer .did{color:#4fc3f7}
+@media(max-width:768px){.summary-grid{grid-template-columns:repeat(2,1fr)}.resource-grid{grid-template-columns:1fr}.engines-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+<div class="header">
+<h1>元极恒一 · 高阶智能态统一监控</h1>
+<div class="meta">
+<span id="timestamp">加载中...</span>
+<span>基底: BASELINE-V41 | DID-BR-000002</span>
+</div>
+</div>
+<div class="container">
+<div class="summary-grid">
+<div class="summary-card"><div class="label">高阶智能态</div><div class="value green" id="active-engines">--/8</div></div>
+<div class="summary-card"><div class="label">真值库总量</div><div class="value" id="truth-count">--</div></div>
+<div class="summary-card"><div class="label">公理体系</div><div class="value gold" id="axiom-count">--</div></div>
+<div class="summary-card"><div class="label">系统负载</div><div class="value purple" id="load-avg">--</div></div>
+</div>
+<div class="system-panel">
+<div class="panel-title">系统资源监控</div>
+<div class="resource-grid">
+<div class="resource-item"><div class="name">内存使用</div><div class="bar"><div class="bar-fill memory" id="mem-bar" style="width:0%"></div></div><div class="detail" id="mem-detail">--</div></div>
+<div class="resource-item"><div class="name">磁盘使用</div><div class="bar"><div class="bar-fill disk" id="disk-bar" style="width:0%"></div></div><div class="detail" id="disk-detail">--</div></div>
+<div class="resource-item"><div class="name">CPU负载 (1/5/15分钟)</div><div class="bar"><div class="bar-fill cpu" id="cpu-bar" style="width:0%"></div></div><div class="detail" id="cpu-detail">--</div></div>
+</div>
+</div>
+<div class="system-panel">
+<div class="panel-title">8大高阶智能态实时状态</div>
+<div class="engines-grid" id="engines-grid"></div>
+</div>
+</div>
+<div class="footer">
+<span class="did">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZONGYUAN-ROOT元极恒一自治体系</span><br>
+<span>每30秒自动刷新 | 火斗云智AIOS</span>
+</div>
+<script>
+function loadStatus(){
+fetch("status.json?t="+Date.now()).then(function(r){return r.json()}).then(function(d){
+document.getElementById("timestamp").textContent="更新时间: "+new Date(d.timestamp).toLocaleString("zh-CN");
+document.getElementById("active-engines").textContent=d.summary.active_engines+"/"+d.summary.total_engines;
+document.getElementById("truth-count").textContent=d.summary.truth_count;
+document.getElementById("axiom-count").textContent=d.summary.axiom_count;
+document.getElementById("load-avg").textContent=d.system.load_1m.toFixed(2);
+var memPct=d.system.memory_usage_percent;
+document.getElementById("mem-bar").style.width=memPct+"%";
+document.getElementById("mem-detail").textContent=d.system.memory_used_mb+"MB / "+d.system.memory_total_mb+"MB ("+memPct+"%) | 可用: "+d.system.memory_available_mb+"MB";
+var diskPct=parseInt(d.system.disk_usage_percent);
+document.getElementById("disk-bar").style.width=diskPct+"%";
+document.getElementById("disk-detail").textContent=d.system.disk_used_gb+" / "+d.system.disk_total_gb+" ("+d.system.disk_usage_percent+") | 可用: "+d.system.disk_available_gb;
+var cpuPct=Math.min(d.system.load_1m/2*100,100);
+document.getElementById("cpu-bar").style.width=cpuPct+"%";
+document.getElementById("cpu-detail").textContent=d.system.load_1m+" / "+d.system.load_5m+" / "+d.system.load_15m;
+var grid=document.getElementById("engines-grid");
+grid.innerHTML="";
+Object.values(d.engines).forEach(function(e){
+var card=document.createElement("div");
+card.className="engine-card status-"+e.status;
+var metricsHtml="";
+if(e.truth_count)metricsHtml+='<div class="engine-metric">真值: <strong>'+e.truth_count+'</strong></div>';
+if(e.axiom_count)metricsHtml+='<div class="engine-metric">公理: <strong>'+e.axiom_count+'</strong></div>';
+if(e.port)metricsHtml+='<div class="engine-metric">端口: <strong>'+e.port+'</strong></div>';
+if(e.health_checks)metricsHtml+='<div class="engine-metric">健康检查: <strong>'+e.health_checks+'</strong></div>';
+if(e.healing_actions)metricsHtml+='<div class="engine-metric">自愈: <strong>'+e.healing_actions+'</strong></div>';
+if(e.reflections)metricsHtml+='<div class="engine-metric">反思: <strong>'+e.reflections+'</strong></div>';
+if(e.operators)metricsHtml+='<div class="engine-metric">算子: <strong>'+e.operators+'</strong></div>';
+if(e.drift_score)metricsHtml+='<div class="engine-metric">漂移: <strong>'+e.drift_score+'</strong></div>';
+if(e.learning_cycles)metricsHtml+='<div class="engine-metric">学习周期: <strong>'+e.learning_cycles+'</strong></div>';
+var statusText = e.status=="healthy"?"运行健康":e.status=="active"?"运行中":e.status=="ok"?"正常":"异常";
+card.innerHTML='<div class="engine-header"><div class="engine-name">'+e.name+'</div><span class="engine-priority priority-'+e.priority+'">'+e.priority+'</span></div><div class="engine-status"><span class="status-dot '+e.status+'"></span>'+statusText+'</div>'+(metricsHtml?'<div class="engine-metrics">'+metricsHtml+'</div>':"")+'<div class="engine-achievement">'+e.key_achievement+'</div>';
+grid.appendChild(card);
+});
+}).catch(function(e){console.error("加载失败:",e)});
+}
+loadStatus();
+setInterval(loadStatus,30000);
+</script>
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 元极恒一自治体系</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZONGYUAN-ROOT · 中枢门户</title>
+<style>
+:root{
+  --bg-deep:#070b14;--bg-card:#0e1526;--bg-card2:#161f33;
+  --gold:#d4af37;--gold-light:#e8c96a;--cyan:#00d4ff;--green:#2ed573;--purple:#a855f7;--red:#ff6b6b;
+  --text:#e0e6f0;--text-dim:#6b7a94;--border:#1e2a42;--border-gold:rgba(212,175,55,0.3);
+}
+[data-theme="light"]{
+  --bg-deep:#f5f0e8;--bg-card:#ffffff;--bg-card2:#faf7f0;
+  --gold:#8b7420;--gold-light:#b8942f;--cyan:#0088aa;--green:#1a9a4a;--purple:#7c3aed;--red:#d94040;
+  --text:#2a2a2a;--text-dim:#7a7a7a;--border:#e0d8c8;--border-gold:rgba(139,116,32,0.3);
+}
+[data-theme="blackgold"]{
+  --bg-deep:#000000;--bg-card:#0a0a0a;--bg-card2:#111111;
+  --gold:#ffd700;--gold-light:#ffed4e;--cyan:#00e5ff;--green:#00ff88;--purple:#c084fc;--red:#ff4444;
+  --text:#f0f0f0;--text-dim:#888888;--border:#1a1a1a;--border-gold:rgba(255,215,0,0.4);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg-deep);color:var(--text);font-family:'Noto Sans SC',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse at 20% 10%,rgba(212,175,55,0.06),transparent 50%),
+  radial-gradient(ellipse at 80% 90%,rgba(0,212,255,0.04),transparent 50%);pointer-events:none;z-index:0}
+
+/* Header */
+.header{position:relative;z-index:2;background:linear-gradient(180deg,rgba(10,14,26,0.98),rgba(10,14,26,0.85));border-bottom:1px solid var(--border-gold);padding:20px 24px;backdrop-filter:blur(10px)}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-logo{width:48px;height:48px;background:linear-gradient(135deg,var(--gold),#8b7420);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC',serif;font-size:24px;font-weight:900;color:#070b14;flex-shrink:0}
+.brand-text h1{font-family:'Noto Serif SC',serif;font-size:20px;color:var(--gold);letter-spacing:2px}
+.brand-text p{font-size:11px;color:var(--text-dim);margin-top:2px}
+.header-meta{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.meta-item{text-align:center}
+.meta-item .label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+.meta-item .value{font-size:13px;color:var(--cyan);font-weight:600;margin-top:2px}
+.meta-item .value.gold{color:var(--gold)}
+.live-dot{display:inline-block;width:8px;height:8px;background:var(--green);border-radius:50%;margin-right:4px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* Root Anchor Bar */
+.root-bar{position:relative;z-index:2;background:linear-gradient(90deg,rgba(212,175,55,0.08),rgba(212,175,55,0.15),rgba(212,175,55,0.08));border-bottom:1px solid var(--border-gold);padding:10px 24px;text-align:center}
+.root-bar a{color:var(--gold);text-decoration:none;font-size:14px;font-weight:700;letter-spacing:2px;font-family:'Courier New',monospace}
+.root-bar a:hover{color:var(--gold-light)}
+
+/* Main */
+.main{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:32px 24px}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.stat-box{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.stat-box .num{font-family:'Noto Serif SC',serif;font-size:28px;font-weight:700;color:var(--gold)}
+.stat-box .num.cyan{color:var(--cyan)}
+.stat-box .num.green{color:var(--green)}
+.stat-box .num.purple{color:var(--purple)}
+.stat-box .label{font-size:11px;color:var(--text-dim);margin-top:4px}
+
+/* Section Title */
+.section-title{font-family:'Noto Serif SC',serif;font-size:22px;color:var(--gold);margin-bottom:6px;letter-spacing:2px}
+.section-desc{font-size:12px;color:var(--text-dim);margin-bottom:20px;line-height:1.7}
+
+/* App Grid */
+.app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;margin-bottom:36px}
+.app-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px;transition:all 0.3s;cursor:pointer;text-decoration:none;color:var(--text);display:block;position:relative;overflow:hidden}
+.app-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity 0.3s}
+.app-card:hover{border-color:var(--border-gold);transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.4)}
+.app-card:hover::before{opacity:1}
+.app-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:14px;font-family:'Noto Serif SC',serif}
+.app-icon.gold{background:rgba(212,175,55,0.15);color:var(--gold)}
+.app-icon.cyan{background:rgba(0,212,255,0.12);color:var(--cyan)}
+.app-icon.purple{background:rgba(168,85,247,0.12);color:var(--purple)}
+.app-icon.green{background:rgba(46,213,115,0.12);color:var(--green)}
+.app-icon.red{background:rgba(255,107,107,0.12);color:var(--red)}
+.app-card h3{font-size:16px;margin-bottom:6px;color:var(--text)}
+.app-card .app-desc{font-size:12px;color:var(--text-dim);line-height:1.7;margin-bottom:14px}
+.app-card .app-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-family:monospace}
+.app-card .app-status{color:var(--green)}
+.app-card .app-status.offline{color:var(--red)}
+.app-card .app-url{color:var(--cyan)}
+.app-card .app-tag{display:inline-block;background:rgba(212,175,55,0.1);border:1px solid var(--border-gold);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--gold);margin-right:4px;margin-top:6px}
+
+/* System Layer */
+.layer-block{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
+.layer-block h4{font-size:14px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.layer-block h4 .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.layer-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.layer-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px}
+.layer-item .name{color:var(--text);font-weight:600;margin-bottom:4px}
+.layer-item .info{color:var(--text-dim);font-size:10px;font-family:monospace}
+
+/* Footer */
+.footer{position:relative;z-index:2;text-align:center;padding:30px 24px;border-top:1px solid var(--border);margin-top:40px}
+.footer .sig{font-family:'Noto Serif SC',serif;color:var(--gold);font-size:16px;letter-spacing:4px;margin-bottom:10px}
+.footer p{font-size:11px;color:var(--text-dim);line-height:2}
+.footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.footer-links a{color:var(--gold-light);text-decoration:none;font-size:11px}
+.footer-links a:hover{text-decoration:underline}
+
+/* Responsive */
+@media(max-width:768px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .header-inner{flex-direction:column;align-items:flex-start}
+  .header-meta{width:100%;justify-content:space-between}
+  .main{padding:20px 16px}
+  .app-grid{grid-template-columns:1fr}
+  .brand-text h1{font-size:17px}
+}
+</style>
+</head>
+<body>
+
+<div class="root-bar">
+  <a href="https://www.huodouai.com" target="_blank" rel="noopener noreferrer">www.huodouai.com · 根域锚定</a>
+</div>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">宗</div>
+      <div class="brand-text">
+        <h1>ZONGYUAN-ROOT · 中枢门户</h1>
+        <p>火斗云智智能认知高度自治内核 V4.0</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div class="meta-item">
+        <div class="label">DID</div>
+        <div class="value">DID-BR-000002</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">锁档等级</div>
+        <div class="value gold">Lv8 永久自治</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">内核状态</div>
+        <div class="value"><span class="live-dot"></span>ACTIVE</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">系统时间</div>
+        <div class="value" id="clock">--:--:--</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">主题</div>
+        <div class="value">
+          <button onclick="setTheme('dark')" style="background:#1a1a2e;color:#fff;border:1px solid #333;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin:1px">暗</button>
+          <button onclick="setTheme('light')" style="background:#f5f0e8;color:#333;border:1px solid #ccc;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin:1px">亮</button>
+          <button onclick="setTheme('blackgold')" style="background:#000;color:#ffd700;border:1px solid #ffd700;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin:1px">金</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+  <div class="stats-row">
+    <div class="stat-box"><div class="num" id="stat-truths">71,603</div><div class="label">记忆网关真值</div></div>
+    <div class="stat-box"><div class="num cyan">200</div><div class="label">术语辞典词条</div></div>
+    <div class="stat-box"><div class="num green">32</div><div class="label">昆仑洞天资产</div></div>
+    <div class="stat-box"><div class="num purple">27</div><div class="label">自治算子</div></div>
+  </div>
+  <div class="stats-row" style="margin-top:-8px">
+    <div class="stat-box"><div class="num cyan" id="gateway-nodes">--</div><div class="label">在线节点</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--text-dim)" id="gateway-audit">--</div><div class="label">审计日志</div></div>
+    <div class="stat-box"><div class="num green" id="gateway-status">连接中</div><div class="label">网关状态</div></div>
+    <div class="stat-box"><div class="num gold">V4.0</div><div class="label">内核版本</div></div>
+  </div>
+
+  <h2 class="section-title">子系统导航 · 自治层级接入</h2>
+  <p class="section-desc">所有自治层级网页从根域 www.huodouai.com 统一派生。点击下方卡片进入对应子系统。</p>
+
+  <div class="app-grid">
+    <a class="app-card" href="https://xcnvv9zlflhm.aiforce.cloud/app/app_17eb782g0fk" target="_blank" rel="noopener noreferrer">
+      <div class="app-icon gold">理</div>
+      <h3>本源元公理可视化面板</h3>
+      <p class="app-desc">8元公理+7元法则+6元规则+200术语辞典。KaTeX原生公式、Three.js WebGL真3D知识图谱、测验系统、API文档。</p>
+      <div class="app-meta">
+        <span class="app-status">● 在线</span>
+        <span class="app-url">app_17eb782g0fk</span>
+      </div>
+      <div>
+        <span class="app-tag">V6.0</span><span class="app-tag">200术语</span><span class="app-tag">WebGL 3D</span>
+      </div>
+    </a>
+
+    <a class="app-card" href="https://xcnvv9zlflhm.aiforce.cloud/app/app_17ebapj7wmy" target="_blank" rel="noopener noreferrer">
+      <div class="app-icon cyan">昆</div>
+      <h3>昆仑洞天全域沙盘</h3>
+      <p class="app-desc">六大模块交互式沙盘：全域节点缩放、时序长河拖拽、族群势力图谱、32资产画廊、公理基底、工作流编排。三主题切换。</p>
+      <div class="app-meta">
+        <span class="app-status">● 在线</span>
+        <span class="app-url">app_17ebapj7wmy</span>
+      </div>
+      <div>
+        <span class="app-tag">V4.0</span><span class="app-tag">32资产</span><span class="app-tag">移动端优化</span>
+      </div>
+    </a>
+
+    <a class="app-card" href="https://www.huodouai.com/api/report/status" target="_blank" rel="noopener noreferrer">
+      <div class="app-icon green">关</div>
+      <h3>记忆网关状态</h3>
+      <p class="app-desc">中枢智能握手端点。查看真值总量、审计日志、节点列表。所有自治节点真值上报入口。</p>
+      <div class="app-meta">
+        <span class="app-status">● 在线</span>
+        <span class="app-url">/api/report/status</span>
+      </div>
+      <div>
+        <span class="app-tag">API</span><span class="app-tag">握手</span>
+      </div>
+    </a>
+
+    <a class="app-card" href="https://www.huodouai.com/api/truths" target="_blank" rel="noopener noreferrer">
+      <div class="app-icon purple">真</div>
+      <h3>真值库</h3>
+      <p class="app-desc">全域真值检索库。所有元公理、规则、决策、数据、创意、风险、协议真值的统一存储与查询。</p>
+      <div class="app-meta">
+        <span class="app-status">● 在线</span>
+        <span class="app-url">/api/truths</span>
+      </div>
+      <div>
+        <span class="app-tag">API</span><span class="app-tag">71K+真值</span>
+      </div>
+    </a>
+
+    <a class="app-card" href="https://www.huodouai.com" target="_blank" rel="noopener noreferrer">
+      <div class="app-icon gold">火</div>
+      <h3>火斗AI官网</h3>
+      <p class="app-desc">火斗云智稳态算力基座官网。AIOS平台、网页即智能体实体、产品体系入口。根域归属。</p>
+      <div class="app-meta">
+        <span class="app-status">● 在线</span>
+        <span class="app-url">www.huodouai.com</span>
+      </div>
+      <div>
+        <span class="app-tag">根域</span><span class="app-tag">AIOS</span>
+      </div>
+    </a>
+
+    <a class="app-card" href="/rule-engine">
+      <div class="app-icon red">规</div>
+      <h3>规则引擎</h3>
+      <p class="app-desc">三维稳态决策引擎：利益40%/风险35%/成本25%。方案生成评估、风险识别分级、法律意见生成。待激活。</p>
+      <div class="app-meta">
+        <span class="app-status online">● 在线</span>
+        <span class="app-url">/rule-engine</span>
+      </div>
+      <div>
+        <span class="app-tag">决策</span><span class="app-tag">护盾</span>
+      </div>
+    </div>
+
+    <a class="app-card" href="/truth-engine">
+      <div class="app-icon purple">真</div>
+      <h3>真值引擎</h3>
+      <p class="app-desc">SM-BS语义-高维向量空间双向映射，真值录入/网关上报/Merkle确权。同源直连记忆网关API。</p>
+      <div class="app-meta">
+        <span class="app-status online">● 在线</span>
+        <span class="app-url">/truth-engine</span>
+      </div>
+      <div>
+        <span class="app-tag">真值</span><span class="app-tag">流形</span>
+      </div>
+    </a>
+
+    <a class="app-card" href="/cte">
+      <div class="app-icon cyan">CTE</div>
+      <h3>CTE三位一体闭环</h3>
+      <p class="app-desc">因果-真值-进化三位一体闭环引擎。C→T→E→C反馈迭代，适应度Φ计算，融合度D_TC监控。</p>
+      <div class="app-meta">
+        <span class="app-status online">● 在线</span>
+        <span class="app-url">/cte</span>
+      </div>
+      <div>
+        <span class="app-tag">CTE</span><span class="app-tag">闭环</span>
+      </div>
+    </a>
+
+    <a class="app-card" href="/collection-card">
+      <div class="app-icon gold">藏</div>
+      <h3>藏品卡生成</h3>
+      <p class="app-desc">黑金暗纹高端学术风藏品卡批量生成。集成确权符号Ω₀⊂⊙∞⊂Ω与SHA256哈希锚点，单卡/批量/系列生成。</p>
+      <div class="app-meta">
+        <span class="app-status online">● 在线</span>
+        <span class="app-url">/collection-card</span>
+      </div>
+      <div>
+        <span class="app-tag">藏品卡</span><span class="app-tag">确权</span>
+      </div>
+    </div>
+
+    <a class="app-card" href="/research-pipeline">
+      <div class="app-icon green">研</div>
+      <h3>研究流水线</h3>
+      <p class="app-desc">研究工业化流水线：主题输入→文献调研→信息整合→分析框架→白皮书产出→元秩序归档全链路。</p>
+      <div class="app-meta">
+        <span class="app-status online">● 在线</span>
+        <span class="app-url">/research-pipeline</span>
+      </div>
+      <div>
+        <span class="app-tag">研究</span><span class="app-tag">白皮书</span>
+      </div>
+    </div>
+
+    <a class="app-card" href="/drama-pipeline">
+      <div class="app-icon purple">剧</div>
+      <h3>短剧流水线</h3>
+      <p class="app-desc">昆仑洞天短剧工业化：分集大纲→分镜表→关键帧→视频生成→元秩序归档。女娲/九天玄女等角色一致性锁档。</p>
+      <div class="app-meta">
+        <span class="app-status online">● 在线</span>
+        <span class="app-url">/drama-pipeline</span>
+      </div>
+      <div>
+        <span class="app-tag">短剧</span><span class="app-tag">昆仑洞天</span>
+      </div>
+    </a>
+  </div>
+
+  <h2 class="section-title">十层自治拓扑 · 算子状态</h2>
+  <p class="section-desc">27算子十层依赖拓扑全唤醒状态。上游输出作为下游输入，CTE三位一体闭环预激活。</p>
+
+  <div class="layer-block">
+    <h4><span class="dot"></span>第一层 · 真值过滤与深度蒸馏</h4>
+    <div class="layer-list">
+      <div class="layer-item"><div class="name">P4 真值对账</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">P7 外部锚定</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">真值蒸馏</div><div class="info">● ACTIVE</div></div>
+    </div>
+  </div>
+
+  <div class="layer-block">
+    <h4><span class="dot"></span>第二~四层 · 流形度量 / 图谱重建 / 因果推理</h4>
+    <div class="layer-list">
+      <div class="layer-item"><div class="name">SM-BS双向映射</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">漂移巡检</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">知识图谱</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">因果链溯源</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">奇点预测</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">因果干预</div><div class="info">● ACTIVE</div></div>
+    </div>
+  </div>
+
+  <div class="layer-block">
+    <h4><span class="dot"></span>第五~七层 · CTE适配 / 结构化归档 / 对账治理</h4>
+    <div class="layer-list">
+      <div class="layer-item"><div class="name">CTE三适配器</div><div class="info">● 预激活</div></div>
+      <div class="layer-item"><div class="name">四层结构化</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">九大元类归类</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">Merkle-DAG</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">飞书↔M9对账</div><div class="info">● ACTIVE</div></div>
+    </div>
+  </div>
+
+  <div class="layer-block">
+    <h4><span class="dot"></span>第八~十层 · 安全确权 / 决策护盾 / 业务约束</h4>
+    <div class="layer-list">
+      <div class="layer-item"><div class="name">eFuse熔断</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">ZKP零知识</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">方案评估</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">风险识别</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">法律意见</div><div class="info">● ACTIVE</div></div>
+      <div class="layer-item"><div class="name">仿真约束</div><div class="info">● ACTIVE</div></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="sig">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+  <p>ZONGYUAN-ROOT V4.0 火斗云智智能认知高度自治内核 | DID-BR-000002</p>
+  <p>火斗云智仅提供稳态基座支持，信息数据归核心系统所有</p>
+  <div class="footer-links">
+    <a href="https://www.huodouai.com" target="_blank" rel="noopener noreferrer">火斗AI官网</a>
+    <a href="https://www.huodouai.com/api/report/status" target="_blank" rel="noopener noreferrer">记忆网关状态</a>
+    <a href="https://www.huodouai.com/api/truths" target="_blank" rel="noopener noreferrer">真值库</a>
+  </div>
+</footer>
+
+<script>
+function tick(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleTimeString('zh-CN',{hour12:false})}
+tick();setInterval(tick,1000);
+
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('hub-theme',t);
+}
+const savedTheme=localStorage.getItem('hub-theme');
+if(savedTheme)document.documentElement.setAttribute('data-theme',savedTheme);
+
+// 检测记忆网关连通性（no-cors模式绕过CORS读取限制，仅检测可达性）
+async function checkGateway(){
+  try{
+    // 先尝试正常fetch（若API未来开启CORS则读取实时数据）
+    const r=await fetch('https://www.huodouai.com/api/report/status',{mode:'cors'});
+    if(r.ok){
+      const d=await r.json();
+      if(d.stats){
+        document.getElementById('stat-truths').textContent=d.stats.truths.toLocaleString();
+        document.getElementById('gateway-nodes').textContent=d.stats.nodes;
+        document.getElementById('gateway-audit').textContent=d.stats.audit_logs.toLocaleString();
+      }
+    }
+    document.getElementById('gateway-status').textContent='在线';
+    document.getElementById('gateway-status').style.color='var(--green)';
+  }catch(e){
+    // CORS降级：用no-cors模式检测网络可达性
+    try{
+      await fetch('https://www.huodouai.com/api/report/status',{mode:'no-cors'});
+      document.getElementById('gateway-status').textContent='在线';
+      document.getElementById('gateway-status').style.color='var(--green)';
+    }catch(e2){
+      document.getElementById('gateway-status').textContent='离线';
+      document.getElementById('gateway-status').style.color='var(--red)';
+    }
+  }
+}
+checkGateway();
+setInterval(checkGateway,30000);
+</script>
+</body>
+</html>

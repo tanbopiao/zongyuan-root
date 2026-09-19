@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智 AIOS · 智能体体系架构</title>
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2332;
+  --bg-card-hover: #1f2b3d;
+  --border: #2a3a50;
+  --text-primary: #e8edf5;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #8b5cf6;
+  --accent-green: #10b981;
+  --accent-orange: #f59e0b;
+  --accent-pink: #ec4899;
+  --accent-red: #ef4444;
+  --glow-blue: rgba(59, 130, 246, 0.15);
+  --glow-cyan: rgba(6, 182, 212, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* 背景动效 */
+.bg-grid {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+header {
+  padding: 60px 0 40px;
+  text-align: center;
+  position: relative;
+}
+
+header .badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: var(--glow-blue);
+  border: 1px solid var(--accent-blue);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--accent-blue);
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+header h1 {
+  font-size: 42px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 50%, var(--accent-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+header .subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+header .meta {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+header .meta-item {
+  text-align: center;
+}
+
+header .meta-item .num {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+header .meta-item .label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Section */
+section {
+  padding: 48px 0;
+}
+
+.section-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-title .icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.section-desc {
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  font-size: 15px;
+}
+
+/* 架构图 */
+.arch-diagram {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  margin-bottom: 32px;
+}
+
+.arch-layer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.arch-layer:last-child { margin-bottom: 0; }
+
+.arch-node {
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  min-width: 140px;
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.arch-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.arch-node.user { background: linear-gradient(135deg, #1e3a5f, #0f2744); border: 1px solid var(--accent-blue); color: var(--accent-blue); }
+.arch-node.main { background: linear-gradient(135deg, #1e3a5f, #0f2744); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); }
+.arch-node.org { background: linear-gradient(135deg, #2d1f4e, #1a1230); border: 1px solid var(--accent-purple); color: var(--accent-purple); }
+.arch-node.sub { background: linear-gradient(135deg, #1a3a2e, #0f2a20); border: 1px solid var(--accent-green); color: var(--accent-green); }
+.arch-node.engine { background: linear-gradient(135deg, #3a2a1a, #2a1f10); border: 1px solid var(--accent-orange); color: var(--accent-orange); }
+.arch-node.service { background: linear-gradient(135deg, #3a1a2e, #2a1020); border: 1px solid var(--accent-pink); color: var(--accent-pink); }
+
+.arch-arrow {
+  color: var(--text-muted);
+  font-size: 20px;
+}
+
+.arch-label {
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+/* 卡片网格 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--card-accent, var(--accent-blue));
+}
+
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--card-accent, var(--accent-blue));
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+}
+
+.card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.card .card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  background: var(--card-glow, var(--glow-blue));
+  flex-shrink: 0;
+}
+
+.card .card-title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.card .card-en {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.card .card-desc {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+
+.card .card-value {
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.card .card-value .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.card .card-value .text {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.card .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card .tag {
+  padding: 3px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* 层级分类 */
+.layer-section {
+  margin-bottom: 48px;
+}
+
+.layer-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.layer-num {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.layer-info h3 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.layer-info p {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* 价值矩阵 */
+.value-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.value-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.value-item:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+}
+
+.value-item .v-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.value-item .v-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.value-item .v-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Footer */
+footer {
+  padding: 48px 0;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  margin-top: 48px;
+}
+
+footer .brand {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+footer .info {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+footer .trace {
+  margin-top: 12px;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  header h1 { font-size: 28px; }
+  .arch-diagram { padding: 20px; }
+  .arch-node { min-width: 100px; padding: 10px 16px; font-size: 12px; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+</style>
+<style>
+/* 统一导航栏样式 */
+.nav-unified{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,10,15,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15)}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-brand{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;white-space:nowrap}
+.nav-menu{display:flex;align-items:center;gap:4px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 12px;color:#bbb;text-decoration:none;font-size:13.5px;transition:color .2s;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.06)}
+.nav-item.has-dropdown>a::after{content:"▾";font-size:10px;margin-left:4px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:160px;background:rgba(20,20,30,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;opacity:0;visibility:hidden;transform:translateY(8px);transition:all .2s;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.nav-item.has-dropdown:hover .dropdown{opacity:1;visibility:visible;transform:translateY(0)}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px;transition:all .15s}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px}
+@media(max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed;top:56px;left:0;right:0;bottom:0;background:rgba(10,10,15,0.98);flex-direction:column;align-items:stretch;gap:0;padding:10px 16px;overflow-y:auto;display:none;z-index:9998}
+  /* .nav-menu.active removed - using checkbox scheme */
+  .nav-item>a{padding:12px 14px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;background:transparent;padding:0 0 0 16px;display:none}
+  .nav-item.has-dropdown.open .dropdown{display:block}
+  .nav-item.has-dropdown>a::after{content:"+";font-size:16px;float:right}
+  .nav-item.has-dropdown.open>a::after{content:"−"}
+}
+
+
+/* ===== 移动端专项优化（480px以下） ===== */
+@media (max-width: 480px) {
+  body { padding-top: 48px !important; }
+  .container { padding: 0 14px !important; }
+  .nav-container { padding: 0 14px; height: 48px; }
+  .nav-brand { font-size: 14px; }
+  
+  /* Hero区域 */
+  .hero { padding: 40px 0 30px; }
+  .hero-symbol { font-size: 36px !important; margin-bottom: 12px; }
+  .hero h1 { font-size: 24px !important; line-height: 1.3; }
+  .hero-subtitle { font-size: 13px !important; }
+  .hero-desc { font-size: 14px !important; line-height: 1.6; }
+  .hero-stats { flex-direction: column; gap: 16px; }
+  .hero-stats .stat-num { font-size: 28px; }
+  .hero-stats .stat-label { font-size: 12px; }
+  
+  /* 按钮 */
+  .btn-gold { padding: 10px 20px; font-size: 13px; }
+  .btn-outline { padding: 10px 20px; font-size: 13px; }
+  
+  /* 标题 */
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 16px !important; }
+  .section-title { font-size: 20px; }
+  .section-subtitle { font-size: 13px; }
+  
+  /* 网格全部单列 */
+  .arch-grid { grid-template-columns: 1fr !important; gap: 12px; }
+  .concept-showcase { grid-template-columns: 1fr !important; }
+  .feature-grid { grid-template-columns: 1fr !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  
+  /* 卡片 */
+  .arch-card { padding: 16px; }
+  .arch-card h3 { font-size: 15px; }
+  .arch-card p { font-size: 13px; line-height: 1.6; }
+  
+  /* 表格横向滚动 */
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  th, td { padding: 8px 10px; font-size: 12px; white-space: nowrap; }
+  
+  /* 图片自适应 */
+  img { max-width: 100%; height: auto; }
+  
+  /* 代码块 */
+  pre, code { font-size: 12px; overflow-x: auto; }
+  
+  /* 页脚 */
+  footer { padding: 30px 0; font-size: 12px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+  
+  /* 段落间距 */
+  p { line-height: 1.7; }
+  section { padding: 40px 0; }
+}
+
+/* ===== 平板适配（768-900px） ===== */
+@media (max-width: 900px) and (min-width: 481px) {
+  .hero h1 { font-size: 36px; }
+  .hero-symbol { font-size: 50px; }
+  .arch-grid { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 0 20px; }
+}
+
+/* ===== 触摸优化 ===== */
+@media (hover: none) and (pointer: coarse) {
+  .nav-item.has-dropdown:hover .dropdown { opacity: 0; visibility: hidden; }
+  .nav-item.has-dropdown.open .dropdown { opacity: 1; visibility: visible; }
+  .arch-card:hover { transform: none; }
+  .arch-card:hover::before { transform: scaleX(0); }
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* ===== 纯CSS移动端导航（checkbox方案，不依赖JS） ===== */
+#navCheck:checked ~ .nav-unified .nav-menu {
+  transform: translateX(0) !important;
+  visibility: visible !important;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(2) {
+  opacity: 0;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+/* 移动端下拉菜单：用checkbox嵌套太复杂，改用target+hover兼容 */
+@media (max-width: 900px) {
+  .nav-item.has-dropdown > a::after { content: " +"; font-size: 16px; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus .dropdown { display: block; }
+  .dropdown { display: none; }
+  .nav-item.has-dropdown .dropdown { display: none; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus-within .dropdown { display: block; }
+}
+
+/* ===== 干净版导航（纯CSS，无JS依赖） ===== */
+#navCheck{display:none}
+.nav-unified{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:9999!important;background:rgba(10,10,15,0.95)!important;backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15);height:52px}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-brand{font-size:16px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-toggle{display:none;cursor:pointer;padding:8px;background:none;border:none;flex-direction:column;gap:5px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px;display:block}
+.nav-menu{display:flex;align-items:center;gap:2px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 10px;color:#bbb;text-decoration:none;font-size:13px;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-item.has-dropdown>a::after{content:" ▾";font-size:10px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:170px;background:rgba(15,15,25,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;display:none;z-index:10001;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.nav-item.has-dropdown:hover .dropdown{display:block}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+
+/* 移动端 */
+@media (max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed!important;top:52px!important;left:0!important;right:0!important;bottom:0!important;background:rgba(10,10,15,0.98)!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:10px 16px!important;overflow-y:auto!important;z-index:9998!important;display:none!important}
+  .nav-item>a{padding:14px 12px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .nav-item.has-dropdow
+</style>
+<meta name="description" content="智能体架构体系 - 火斗云智AIOS多智能体协同架构设计">
+<meta name="keywords" content="智能体架构,多智能体,协同架构,火斗云智,AIOS">
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+<nav class="nav-unified" id="mainNav">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">火斗云智 AIOS</a>
+    <label class="nav-toggle" for="navCheck" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </label>
+    <div class="nav-menu" id="navMenu">
+      <div class="nav-item"><a href="/">首页</a></div>
+      <div class="nav-item"><a href="https://aios.huodouai.com" target="_blank" style="color:#d4af37;font-weight:600;">AIOS控制台 ↗</a></div>
+      <div class="nav-item has-dropdown">
+        <a href="/products.html">产品矩阵</a>
+        <div class="dropdown">
+          <a href="/products.html">产品总览</a>
+          <a href="/product-matrix.html">产品矩阵图</a>
+          <a href="/commercial.html">商业方案</a>
+          <a href="/cases.html">客户案例</a>
+          <a href="/pricing.html">定价方案</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/agent-network.html">智能体</a>
+        <div class="dropdown">
+          <a href="/agent-network.html">智能体网络</a>
+          <a href="/agent-embodiment.html">智能体实体化</a>
+          <a href="/high-capabilities.html">高阶能力中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/central-brain.html">中枢大脑</a>
+        <div class="dropdown">
+          <a href="/central-brain.html">中枢大脑</a>
+          <a href="/brain-strategy.html">战略全景</a>
+          <a href="/kernel-status.html">内核状态</a>
+          <a href="/bayesian-five-elements.html">贝叶斯五行引擎</a>
+          <a href="/unified-console.html">统一控制台</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/works-gallery-v2.html">作品中心</a>
+        <div class="dropdown">
+          <a href="/works-gallery-v2.html">作品库V2</a>
+          <a href="/drama/">短剧作品库</a>
+          <a href="/kunlun/">昆仑洞天</a>
+          <a href="/keyframe-gallery.html">关键帧资产库</a>
+          <a href="/digital-gallery-v3.html">数字画廊</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/architecture.html">技术架构</a>
+        <div class="dropdown">
+          <a href="/architecture.html">架构总览</a>
+          <a href="/microkernel-architecture.html">微内核架构</a>
+          <a href="/whitepaper.html">技术白皮书</a>
+          <a href="/developers.html">开发者中心</a>
+          <a href="/docs.html">文档中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/governance.html">治理战略</a>
+          <a href="/level-dual-axis.html">双轴层级</a>
+        <div class="dropdown">
+          <a href="/governance.html">治理体系</a>
+          <a href="/philosophy.html">思想体系</a>
+          <a href="/evolution-strategy.html">进化战略</a>
+          <a href="/lightweight-strategy.html">轻量化战略</a>
+          <a href="/axiom-system/">公理体系 ⭐</a>
+          <a href="/global-learning.html">全网学习</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/digital-assets.html">资产中心</a>
+        <div class="dropdown">
+          <a href="/digital-assets.html">数字资产</a>
+          <a href="/asset-center.html">资产中心</a>
+          <a href="/ledger.html">真值账本</a>
+          <a href="/experience-kb.html">经验库</a>
+          <a href="/aios/index.html">AIOS资产中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/aios/visual/cloud_brain_dashboard.html">实时监控</a>
+        <div class="dropdown">
+          <a href="/aios/visual/cloud_brain_dashboard.html">云脑仪表盘</a>
+          <a href="/aios/visual/kernel-dashboard.html">内核仪表盘</a>
+          <a href="/aios/visual/memory_gateway_monitor.html">记忆网关监控</a>
+          <a href="/aios/visual/scheduler_monitor_dashboard.html">调度器监控</a>
+          <a href="/system-dashboard.html">系统仪表盘</a>
+          <a href="/status-center.html">状态中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/auto-pipeline.html">更多</a>
+        <div class="dropdown">
+          <a href="/auto-pipeline.html">自动化流水线</a>
+          <a href="/model-compare-lab.html">模型对比实验室</a>
+          <a href="/education.html">普惠教育</a>
+          <a href="/search.html">全站搜索</a>
+          <a href="/performance.html">性能监控</a>
+          <a href="https://gov.huodouai.com" target="_blank">政务AI ↗</a>
+          <a href="https://status.huodouai.com" target="_blank">实时状态站 ↗</a>
+        </div>
+      </div>
+      <div class="nav-cta" style="display:flex;align-items:center;gap:12px;margin-left:20px;">
+        <a href="/book-demo.html" style="background:linear-gradient(135deg,#d4af37,#b8941f);color:#1a1a2e;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:13.5px;font-weight:600;transition:all .2s;white-space:nowrap;box-shadow:0 4px 15px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(212,175,55,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.3)'">预约演示</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="bg-grid"></div>
+
+<header>
+  <div class="container">
+    <div class="badge">AIOS · INTELLIGENT AGENT ARCHITECTURE</div>
+    <h1>火斗云智 AIOS 智能体体系</h1>
+    <p class="subtitle">多层级智能体协同架构，从认知推理到执行落地，构建自组织、自进化、自治理的全域智能操作系统</p>
+    <div class="meta">
+      <div class="meta-item"><div class="num">6</div><div class="label">架构层级</div></div>
+      <div class="meta-item"><div class="num">20+</div><div class="label">核心引擎</div></div>
+      <div class="meta-item"><div class="num">50+</div><div class="label">系统服务</div></div>
+      <div class="meta-item"><div class="num">15000+</div><div class="label">真值条目</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- 架构总览 -->
+<section>
+  <h2 class="section-title"><span class="icon" style="background:var(--glow-blue)">🏗️</span> 架构总览</h2>
+  <p class="section-desc">六层智能体架构，从用户交互到底层执行，层层递进，协同运转</p>
+
+  <div class="arch-diagram">
+    <div class="arch-layer">
+      <div class="arch-label">交互层</div>
+      <div class="arch-node user">👤 用户</div>
+    </div>
+    <div class="arch-layer"><div class="arch-arrow">↓ 自然语言交互</div></div>
+    <div class="arch-layer">
+      <div class="arch-label">入口层</div>
+      <div class="arch-node main">🎯 MainAgent<br><small>主代理 · 对话入口</small></div>
+    </div>
+    <div class="arch-layer"><div class="arch-arrow">↓ 复杂任务委派</div></div>
+    <div class="arch-layer">
+      <div class="arch-label">调度层</div>
+      <div class="arch-node org">⚙️ OrganizerAgent<br><small>组织者 · 集群调度</small></div>
+    </div>
+    <div class="arch-layer"><div class="arch-arrow">↓ 任务拆解并行派发</div></div>
+    <div class="arch-layer">
+      <div class="arch-label">执行层</div>
+      <div class="arch-node sub">🔧 Subagent A</div>
+      <div class="arch-node sub">🔧 Subagent B</div>
+      <div class="arch-node sub">🔧 Subagent C</div>
+      <div class="arch-node sub">🔧 Subagent N</div>
+    </div>
+    <div class="arch-layer"><div class="arch-arrow">↓ 调用能力引擎</div></div>
+    <div class="arch-layer">
+      <div class="arch-label">能力层</div>
+      <div class="arch-node engine">🧠 决策引擎</div>
+      <div class="arch-node engine">🔗 因果引擎</div>
+      <div class="arch-node engine">📝 NL2Action</div>
+      <div class="arch-node engine">📊 知识图谱</div>
+      <div class="arch-node engine">🔮 贝叶斯引擎</div>
+      <div class="arch-node engine">🌐 四网引擎</div>
+    </div>
+    <div class="arch-layer"><div class="arch-arrow">↓ 数据与服务支撑</div></div>
+    <div class="arch-layer">
+      <div class="arch-label">基础层</div>
+      <div class="arch-node service">💾 记忆网关</div>
+      <div class="arch-node service">📦 S3存储</div>
+      <div class="arch-node service">🚀 部署调度</div>
+      <div class="arch-node service">🔐 安全审计</div>
+      <div class="arch-node service">☁️ 飞书集成</div>
+    </div>
+  </div>
+</section>
+
+<!-- 第一层：交互入口层 -->
+<section class="layer-section">
+  <div class="layer-header">
+    <div class="layer-num" style="background:var(--glow-blue);color:var(--accent-blue)">L1</div>
+    <div class="layer-info">
+      <h3 style="color:var(--accent-blue)">交互入口层</h3>
+      <p>用户与系统的唯一对话入口，理解意图、拆解需求、协调资源</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card" style="--card-accent:var(--accent-blue);--card-glow:var(--glow-blue)">
+      <div class="card-header">
+        <div class="card-icon">🎯</div>
+        <div>
+          <div class="card-title">MainAgent 主代理</div>
+          <div class="card-en">main-agent</div>
+        </div>
+      </div>
+      <div class="card-desc">用户直接对话的智能体，负责意图理解、任务规划、结果交付。是整个体系的"前台接待"，所有用户需求从这里进入，所有结果从这里输出。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">自然语言交互零门槛，用户不需要了解底层架构，用日常语言就能驱动整个智能体集群完成复杂任务</div>
+      </div>
+      <div class="tags">
+        <span class="tag">意图理解</span>
+        <span class="tag">任务规划</span>
+        <span class="tag">结果交付</span>
+        <span class="tag">对话管理</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 第二层：调度协调层 -->
+<section class="layer-section">
+  <div class="layer-header">
+    <div class="layer-num" style="background:rgba(139,92,246,0.15);color:var(--accent-purple)">L2</div>
+    <div class="layer-info">
+      <h3 style="color:var(--accent-purple)">调度协调层</h3>
+      <p>智能体集群的"大脑中枢"，负责任务拆解、并行调度、冲突仲裁、结果汇总</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card" style="--card-accent:var(--accent-purple);--card-glow:rgba(139,92,246,0.15)">
+      <div class="card-header">
+        <div class="card-icon">⚙️</div>
+        <div>
+          <div class="card-title">OrganizerAgent 组织者</div>
+          <div class="card-en">organizer-agent</div>
+        </div>
+      </div>
+      <div class="card-desc">智能体集群调度中心。接收MainAgent委派的复杂任务，拆解为可并行执行的子任务，创建并管理多个Subagent，监控执行进度，处理异常，最终汇总所有子代理的输出为统一结果。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">将串行任务变为并行执行，30分钟的活压缩到10分钟；自动处理子代理间的依赖冲突和资源竞争，无需人工干预</div>
+      </div>
+      <div class="tags">
+        <span class="tag">任务拆解</span>
+        <span class="tag">并行调度</span>
+        <span class="tag">冲突仲裁</span>
+        <span class="tag">结果汇总</span>
+        <span class="tag">异常处理</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-purple);--card-glow:rgba(139,92,246,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🔄</div>
+        <div>
+          <div class="card-title">闭环调度服务</div>
+          <div class="card-en">closed-loop-scheduler</div>
+        </div>
+      </div>
+      <div class="card-desc">持续运行的任务调度引擎，管理周期性任务、定时任务、事件驱动任务的全生命周期。支持任务依赖图、优先级队列、失败重试、超时熔断。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">7×24小时无人值守运行，自动化巡检、备份、同步、进化等周期性任务，释放人力专注高价值决策</div>
+      </div>
+      <div class="tags">
+        <span class="tag">周期调度</span>
+        <span class="tag">依赖管理</span>
+        <span class="tag">失败重试</span>
+        <span class="tag">超时熔断</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-purple);--card-glow:rgba(139,92,246,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🏭</div>
+        <div>
+          <div class="card-title">集群编排器 + 8 Worker</div>
+          <div class="card-en">cluster-orchestrator</div>
+        </div>
+      </div>
+      <div class="card-desc">K8s风格的智能体集群管理。编排器统一管理8个专用Worker：部署、进化、自愈、监控、生产、质量、安全、真值。每个Worker专注一个领域，协同完成全域自治。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">专业化分工+弹性伸缩，类似微服务架构的智能体版本，每个Worker可独立升级、独立扩缩容，整体系统高可用</div>
+      </div>
+      <div class="tags">
+        <span class="tag">8专用Worker</span>
+        <span class="tag">弹性伸缩</span>
+        <span class="tag">高可用</span>
+        <span class="tag">专业化分工</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 第三层：执行操作层 -->
+<section class="layer-section">
+  <div class="layer-header">
+    <div class="layer-num" style="background:rgba(16,185,129,0.15);color:var(--accent-green)">L3</div>
+    <div class="layer-info">
+      <h3 style="color:var(--accent-green)">执行操作层</h3>
+      <p>将决策和意图转化为实际操作的执行单元，从自然语言到系统操作的最后一公里</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card" style="--card-accent:var(--accent-green);--card-glow:rgba(16,185,129,0.15)">
+      <div class="card-header">
+        <div class="card-icon">📝</div>
+        <div>
+          <div class="card-title">NL2Action 引擎</div>
+          <div class="card-en">nl2action-engine</div>
+        </div>
+      </div>
+      <div class="card-desc">自然语言到操作系统的翻译引擎。用户说"帮我清理C盘垃圾"，引擎自动拆解为具体的系统命令序列，安全执行后返回结果。支持Windows/Linux/macOS跨平台操作。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">消除技术门槛，用户用日常语言就能操作系统；内置安全沙箱和操作审计，防止误操作和恶意指令</div>
+      </div>
+      <div class="tags">
+        <span class="tag">自然语言翻译</span>
+        <span class="tag">跨平台</span>
+        <span class="tag">安全沙箱</span>
+        <span class="tag">操作审计</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-green);--card-glow:rgba(16,185,129,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🔧</div>
+        <div>
+          <div class="card-title">Subagent 子代理集群</div>
+          <div class="card-en">subagent-fleet</div>
+        </div>
+      </div>
+      <div class="card-desc">由OrganizerAgent动态创建的执行单元。每个Subagent专注一个子任务，完成后自动销毁。支持代码执行、文件处理、网页抓取、数据分析、API调用等多种能力。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">按需创建、用完即销，弹性资源利用；隔离执行环境，一个子代理失败不影响其他任务和主系统</div>
+      </div>
+      <div class="tags">
+        <span class="tag">按需创建</span>
+        <span class="tag">隔离执行</span>
+        <span class="tag">弹性资源</span>
+        <span class="tag">多能力</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-green);--card-glow:rgba(16,185,129,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🔗</div>
+        <div>
+          <div class="card-title">SSH链接控制器</div>
+          <div class="card-en">ssh-link-controller</div>
+        </div>
+      </div>
+      <div class="card-desc">统一管理所有SSH隧道和远程连接。九大核心组件：连接监控、身份解析、连接管理、中枢激活、会话监控、权限守卫、链接控制、审计日志、告警管理。最多3个并发SSH连接，自动屏蔽超额。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">所有远程连接统一管控，防止连接泄漏和未授权访问；任何密钥连接自动激活中枢智能，实现"连接即唤醒"</div>
+      </div>
+      <div class="tags">
+        <span class="tag">连接管理</span>
+        <span class="tag">权限守卫</span>
+        <span class="tag">中枢激活</span>
+        <span class="tag">审计日志</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-green);--card-glow:rgba(16,185,129,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🚀</div>
+        <div>
+          <div class="card-title">部署调度中心 + Agent</div>
+          <div class="card-en">deploy-scheduler</div>
+        </div>
+      </div>
+      <div class="card-desc">分布式任务队列+审计校验闭环。多窗口并发提交任务不丢失，FIFO+优先级队列排序，Agent原子性认领任务，自动执行+自检+回传证据。支持飞书审批触发自动部署。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">部署从"单窗口手动操作"升级为"多节点并行自动部署"，每一步都有回执证据，可审计可溯源，杜绝"纸面部署"</div>
+      </div>
+      <div class="tags">
+        <span class="tag">任务队列</span>
+        <span class="tag">原子认领</span>
+        <span class="tag">自动校验</span>
+        <span class="tag">审批联动</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 第四层：认知推理层 -->
+<section class="layer-section">
+  <div class="layer-header">
+    <div class="layer-num" style="background:rgba(245,158,11,0.15);color:var(--accent-orange)">L4</div>
+    <div class="layer-info">
+      <h3 style="color:var(--accent-orange)">认知推理层</h3>
+      <p>系统的"思考器官"，从数据到决策、从现象到本质、从现在到未来的深度推理能力</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card" style="--card-accent:var(--accent-orange);--card-glow:rgba(245,158,11,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🧠</div>
+        <div>
+          <div class="card-title">智能决策引擎</div>
+          <div class="card-en">decision-engine</div>
+        </div>
+      </div>
+      <div class="card-desc">UNI-STEADY-CORE V1.0 三维稳态决策核心。基于利益40%/风险35%/成本25%的加权公式，自动生成多套备选方案并排序推荐。支持方案间差异对比和敏感性分析。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">复杂决策不再靠拍脑袋，引擎自动量化评估每个方案的三维指标，给出数据驱动的最优推荐，减少决策盲区</div>
+      </div>
+      <div class="tags">
+        <span class="tag">三维稳态</span>
+        <span class="tag">多方案对比</span>
+        <span class="tag">敏感性分析</span>
+        <span class="tag">数据驱动</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-orange);--card-glow:rgba(245,158,11,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🔗</div>
+        <div>
+          <div class="card-title">因果推理引擎</div>
+          <div class="card-en">causal-engine</div>
+        </div>
+      </div>
+      <div class="card-desc">Causal Singularity Core V1.0 基于第七维因果域理论。从任意结果反向回溯完整因果链，识别关键节点和旁路分支；计算奇点爆发概率，预警黑天鹅事件；支持do-calculus干预模拟和反事实推理。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">不只是看到"是什么"，更能理解"为什么"和"如果不这样会怎样"。从相关性升级到因果性，决策更有底气</div>
+      </div>
+      <div class="tags">
+        <span class="tag">因果链溯源</span>
+        <span class="tag">奇点预测</span>
+        <span class="tag">干预模拟</span>
+        <span class="tag">反事实推理</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-orange);--card-glow:rgba(245,158,11,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🔮</div>
+        <div>
+          <div class="card-title">贝叶斯五行闭环引擎</div>
+          <div class="card-en">bayesian-5elem-engine</div>
+        </div>
+      </div>
+      <div class="card-desc">融合贝叶斯概率推理与五行生克模型的闭环推理引擎。PERMANENT LOCK永久锁档，禁止禁用。通过先验概率+证据更新+五行生克约束，实现不确定性下的稳健推理。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">在信息不完整、不确定的真实环境中，依然能给出概率化的可靠判断，而不是非黑即白的极端结论</div>
+      </div>
+      <div class="tags">
+        <span class="tag">贝叶斯推理</span>
+        <span class="tag">五行生克</span>
+        <span class="tag">不确定性</span>
+        <span class="tag">永久锁档</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-orange);--card-glow:rgba(245,158,11,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🌐</div>
+        <div>
+          <div class="card-title">四网引擎</div>
+          <div class="card-en">four-networks-engine</div>
+        </div>
+      </div>
+      <div class="card-desc">因果网/法则网/逻辑网/时序网四网融合推理引擎。因果网负责"为什么"，法则网负责"应该怎样"，逻辑网负责"是否自洽"，时序网负责"先后顺序"。四网交叉验证，杜绝单网推理盲区。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">单一推理维度容易有盲区，四网交叉验证相当于四个专家会诊，结论更全面、更稳健、更难被误导</div>
+      </div>
+      <div class="tags">
+        <span class="tag">因果网</span>
+        <span class="tag">法则网</span>
+        <span class="tag">逻辑网</span>
+        <span class="tag">时序网</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-orange);--card-glow:rgba(245,158,11,0.15)">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <div>
+          <div class="card-title">知识图谱引擎</div>
+          <div class="card-en">knowledge-graph-engine</div>
+        </div>
+      </div>
+      <div class="card-desc">L3知识图谱+真值检索API。从非结构化文本中自动抽取实体和关系，构建三元组图谱；支持跨文档实体归一化、链接预测补全、孤立节点识别。图谱密度和连通性持续优化。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">把零散的文档和数据变成互联的知识网络，检索不再是关键词匹配，而是语义关联推理，找到"不知道自己不知道"的知识</div>
+      </div>
+      <div class="tags">
+        <span class="tag">实体抽取</span>
+        <span class="tag">关系构建</span>
+        <span class="tag">链接预测</span>
+        <span class="tag">语义检索</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 第五层：感知进化层 -->
+<section class="layer-section">
+  <div class="layer-header">
+    <div class="layer-num" style="background:rgba(6,182,212,0.15);color:var(--accent-cyan)">L5</div>
+    <div class="layer-info">
+      <h3 style="color:var(--accent-cyan)">感知进化层</h3>
+      <p>系统的"感官和DNA"，持续感知环境变化，从经验中学习进化，实现自我完善</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card" style="--card-accent:var(--accent-cyan);--card-glow:var(--glow-cyan)">
+      <div class="card-header">
+        <div class="card-icon">👁️</div>
+        <div>
+          <div class="card-title">全局感知引擎</div>
+          <div class="card-en">global-perception</div>
+        </div>
+      </div>
+      <div class="card-desc">六大感知维度：服务/资源/真值/节点/安全/性能。每60秒全域扫描一次，实时掌握系统全貌。异常自动检测、趋势自动分析、阈值自动告警。是系统的"全身神经系统"。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">系统不再是"黑盒"，任何角落的异常都能被及时发现，从"出了问题才知道"升级为"问题萌芽就预警"</div>
+      </div>
+      <div class="tags">
+        <span class="tag">六维感知</span>
+        <span class="tag">实时扫描</span>
+        <span class="tag">异常检测</span>
+        <span class="tag">趋势分析</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-cyan);--card-glow:var(--glow-cyan)">
+      <div class="card-header">
+        <div class="card-icon">🌀</div>
+        <div>
+          <div class="card-title">耗散秩序引擎</div>
+          <div class="card-en">dissipative-order-engine</div>
+        </div>
+      </div>
+      <div class="card-desc">基于耗散结构理论的系统自组织引擎。从信息真值中提炼秩序，度量熵减率，识别相变临界点，输出可视化资产体系。通过持续的能量耗散维持系统远离平衡态的有序结构。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">系统不是被动维持现状，而是主动从混沌中提炼秩序，越用越有序、越用越智能，实现"熵减型"进化</div>
+      </div>
+      <div class="tags">
+        <span class="tag">耗散结构</span>
+        <span class="tag">熵减度量</span>
+        <span class="tag">相变识别</span>
+        <span class="tag">自组织</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-cyan);--card-glow:var(--glow-cyan)">
+      <div class="card-header">
+        <div class="card-icon">📖</div>
+        <div>
+          <div class="card-title">体验元法则引擎</div>
+          <div class="card-en">experience-meta-law</div>
+        </div>
+      </div>
+      <div class="card-desc">从历史经验中提炼元法则的学习引擎。采集同源节点成长经验，提炼可复用的方法论和规则，反哺决策和进化。经验不再是一次性的消耗品，而是可沉淀、可传承、可迭代的系统资产。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">每次成功和失败都不白费，自动提炼成可复用的法则，下次遇到类似情况直接调用，系统越用越聪明</div>
+      </div>
+      <div class="tags">
+        <span class="tag">经验提炼</span>
+        <span class="tag">元法则</span>
+        <span class="tag">知识沉淀</span>
+        <span class="tag">持续学习</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-cyan);--card-glow:var(--glow-cyan)">
+      <div class="card-header">
+        <div class="card-icon">💊</div>
+        <div>
+          <div class="card-title">自修复引擎</div>
+          <div class="card-en">self-healing-engine</div>
+        </div>
+      </div>
+      <div class="card-desc">自动根因分析+故障修复引擎。检测到异常后自动定位根因，生成修复方案，执行修复操作，验证修复结果。支持常见故障的自愈处理，复杂故障自动升级告警。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">小故障自动修复，不需要人工半夜爬起来处理；大故障自动定位根因，人工只需要做最终决策，运维效率提升10倍</div>
+      </div>
+      <div class="tags">
+        <span class="tag">根因分析</span>
+        <span class="tag">自动修复</span>
+        <span class="tag">故障自愈</span>
+        <span class="tag">升级告警</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 第六层：基础服务层 -->
+<section class="layer-section">
+  <div class="layer-header">
+    <div class="layer-num" style="background:rgba(236,72,153,0.15);color:var(--accent-pink)">L6</div>
+    <div class="layer-info">
+      <h3 style="color:var(--accent-pink)">基础服务层</h3>
+      <p>整个体系的"水电煤"，数据存储、安全审计、外部集成，为上层提供稳定可靠的基础支撑</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card" style="--card-accent:var(--accent-pink);--card-glow:rgba(236,72,153,0.15)">
+      <div class="card-header">
+        <div class="card-icon">💾</div>
+        <div>
+          <div class="card-title">记忆网关</div>
+          <div class="card-en">memory-gateway :9120</div>
+        </div>
+      </div>
+      <div class="card-desc">全域真值存储与检索中枢，本地与云端唯一握手点。15000+真值条目，支持真值对账、外部锚定、漂移检测、冲突消解。所有智能体共享同一份真值，杜绝信息孤岛。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">系统的"长期记忆"，所有经验、规则、数据都沉淀在这里，新启动的智能体立刻拥有全部历史记忆，不需要从零开始</div>
+      </div>
+      <div class="tags">
+        <span class="tag">真值存储</span>
+        <span class="tag">唯一握手点</span>
+        <span class="tag">漂移检测</span>
+        <span class="tag">共享记忆</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-pink);--card-glow:rgba(236,72,153,0.15)">
+      <div class="card-header">
+        <div class="card-icon">📦</div>
+        <div>
+          <div class="card-title">S3对象存储网关</div>
+          <div class="card-en">s3-gateway :9000</div>
+        </div>
+      </div>
+      <div class="card-desc">轻量S3兼容对象存储，零增量成本。4个业务桶：raw_source(原始素材)/image(图片)/short_video(短视频)/thumbnails(缩略图)。内置CSV资产台账、DID生成、SHA256校验、元数据提取。</div>
+      <div class="card-desc">替代已归档的MinIO，复用服务器本地磁盘，无存储/流量/API费用。</div>
+      <div class="tags">
+        <span class="tag">零成本存储</span>
+        <span class="tag">S3兼容</span>
+        <span class="tag">DID确权</span>
+        <span class="tag">SHA256校验</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-pink);--card-glow:rgba(236,72,153,0.15)">
+      <div class="card-header">
+        <div class="card-icon">🔐</div>
+        <div>
+          <div class="card-title">安全审计体系</div>
+          <div class="card-en">security-audit</div>
+        </div>
+      </div>
+      <div class="card-desc">NXShell审计事件自动上报+磁盘水位监控+SSH暴力破解防护+全域安全审计。所有文件操作、权限变更、连接事件都生成签名审计记录，不可篡改，可追溯。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">所有操作留痕可审计，出了问题能精准定位到谁、什么时候、做了什么；安全防护自动运行，不需要人工盯防</div>
+      </div>
+      <div class="tags">
+        <span class="tag">操作审计</span>
+        <span class="tag">入侵防护</span>
+        <span class="tag">磁盘监控</span>
+        <span class="tag">不可篡改</span>
+      </div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent-pink);--card-glow:rgba(236,72,153,0.15)">
+      <div class="card-header">
+        <div class="card-icon">☁️</div>
+        <div>
+          <div class="card-title">飞书集成生态</div>
+          <div class="card-en">feishu-integration</div>
+        </div>
+      </div>
+      <div class="card-desc">飞书审批→自动部署桥接、飞书云盘异步备份、飞书媒体归档Bot、飞书知识库同步、飞书多维表格台账。审批通过自动触发部署，资产自动备份到飞书云盘，实现企业协作工具深度集成。</div>
+      <div class="card-value">
+        <div class="label">核心价值</div>
+        <div class="text">AIOS不是孤岛，而是深度融入企业现有工作流。用户在飞书里点个审批，系统自动完成部署；资产自动备份到飞书云盘，零额外操作</div>
+      </div>
+      <div class="tags">
+        <span class="tag">审批联动</span>
+        <span class="tag">云盘备份</span>
+        <span class="tag">媒体归档</span>
+        <span class="tag">知识库同步</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 核心价值矩阵 -->
+<section>
+  <h2 class="section-title"><span class="icon" style="background:var(--glow-cyan)">💎</span> 核心价值矩阵</h2>
+  <p class="section-desc">六层架构协同运转，带来六大核心价值跃迁</p>
+
+  <div class="value-matrix">
+    <div class="value-item">
+      <div class="v-icon">⚡</div>
+      <div class="v-title">效率10倍提升</div>
+      <div class="v-desc">串行任务变并行，30分钟压缩到10分钟；自动化运维替代人工，7×24小时无人值守</div>
+    </div>
+    <div class="value-item">
+      <div class="v-icon">🧠</div>
+      <div class="v-title">决策质量跃迁</div>
+      <div class="v-desc">从"拍脑袋"到数据驱动，三维稳态+因果推理+四网验证，决策更科学更稳健</div>
+    </div>
+    <div class="value-item">
+      <div class="v-icon">🔄</div>
+      <div class="v-title">持续自我进化</div>
+      <div class="v-desc">耗散秩序+体验元法则+全局感知，系统越用越有序、越用越聪明，熵减型进化</div>
+    </div>
+    <div class="value-item">
+      <div class="v-icon">🛡️</div>
+      <div class="v-title">安全可审计</div>
+      <div class="v-desc">所有操作留痕不可篡改，安全防护自动运行，出问题精准定位，合规无忧</div>
+    </div>
+    <div class="value-item">
+      <div class="v-icon">💰</div>
+      <div class="v-title">零增量成本</div>
+      <div class="v-desc">复用已有服务器资源，S3存储替代付费云存储，开源软件栈，除可选磁盘扩容外无持续费用</div>
+    </div>
+    <div class="value-item">
+      <div class="v-icon">🌐</div>
+      <div class="v-title">全域协同</div>
+      <div class="v-desc">多智能体+多节点+多平台协同，记忆网关统一真值，飞书深度集成，打破信息孤岛</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="container">
+    <div class="brand">火斗云智 AIOS · 智能体体系架构</div>
+    <div class="info">HuodouAIOS Intelligent Agent Architecture · 六层架构 · 20+引擎 · 50+服务</div>
+    <div class="trace">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZONGYUAN-ROOT元极恒一自治体系</div>
+  </div>
+</footer>
+
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 元极恒一自治体系</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMD MI300X部署Qwen2.5-7B完整工程实践 | 火斗云智AIOS技术原创</title>
+    <meta name="description" content="基于魔搭AMD MI300X实例的Qwen2.5-7B部署全记录，从环境配置到API服务上线，所有踩坑真实还原">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f4e4bc;
+            --dark: #0a0a0f;
+            --card: #1a1a24;
+            --text: #e8e8e8;
+            --text-secondary: #a0a0b0;
+            --border: rgba(212, 175, 55, 0.2);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.8;
+        }
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-brand {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gold);
+            text-decoration: none;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 14px;
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+        .container {
+            max-width: 900px;
+            margin: 100px auto 60px;
+            padding: 0 24px;
+        }
+        .article-header {
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+        }
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--gold);
+            border-radius: 12px;
+            font-size: 12px;
+            margin-bottom: 16px;
+            margin-right: 8px;
+        }
+        h1 {
+            font-size: 36px;
+            line-height: 1.3;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+        .meta {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        h2 {
+            font-size: 24px;
+            margin: 48px 0 20px;
+            color: var(--gold);
+            padding-left: 12px;
+            border-left: 3px solid var(--gold);
+        }
+        h3 {
+            font-size: 18px;
+            margin: 32px 0 16px;
+            color: #fff;
+        }
+        p { margin-bottom: 16px; }
+        code {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--gold-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 14px;
+        }
+        pre {
+            background: #12121a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 16px 0 24px;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            color: var(--gold);
+            font-weight: 600;
+            background: rgba(212, 175, 55, 0.05);
+        }
+        .callout {
+            background: rgba(212, 175, 55, 0.05);
+            border-left: 3px solid var(--gold);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+        .callout-title {
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        ul { margin-left: 24px; margin-bottom: 16px; }
+        li { margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-brand">火斗云智AIOS</a>
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/tech-zone.html" class="active">技术原创</a>
+            <a href="https://aios.huodouai.com">AIOS控制台</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="article-header">
+            <span class="tag">AMD GPU</span>
+            <span class="tag">MI300X</span>
+            <span class="tag">Qwen2.5</span>
+            <h1>AMD MI300X 部署 Qwen2.5-7B 完整工程实践</h1>
+            <div class="meta">2026-09-19 · 火斗云智技术团队 · 阅读约12分钟</div>
+        </div>
+
+        <p>基于魔搭社区 AMD MI300X 实例的大模型部署全记录，从环境配置到 API 服务上线，所有踩坑真实还原。</p>
+
+        <h2>一、环境概况</h2>
+        <p>魔搭社区的 AMD MI300X 实例配置：</p>
+        <table>
+            <tr><th>硬件</th><th>规格</th></tr>
+            <tr><td>GPU</td><td>AMD Instinct MI300X</td></tr>
+            <tr><td>显存</td><td>192GB HBM3</td></tr>
+            <tr><td>CPU</td><td>23核</td></tr>
+            <tr><td>内存</td><td>200GB</td></tr>
+            <tr><td>工作目录</td><td>/mnt/workspace（持久化存储）</td></tr>
+            <tr><td>系统</td><td>Ubuntu 22.04 + ROCm</td></tr>
+        </table>
+
+        <h2>二、环境验证</h2>
+        <p>开机第一件事，先确认硬件环境正常：</p>
+        <pre><code># 查看GPU信息
+rocm-smi
+
+# 查看显存占用
+rocm-smi --showmeminfo vram
+
+# 验证PyTorch
+python3 -c "import torch; print('ROCm:', torch.cuda.is_available())"</code></pre>
+
+        <h2>三、模型下载</h2>
+        <p>使用 modelscope 下载 Qwen2.5-7B-Instruct，国内速度比 HuggingFace 快很多：</p>
+        <pre><code>pip install modelscope
+
+python3 -c "
+from modelscope import snapshot_download
+model_dir = snapshot_download('qwen/Qwen2.5-7B-Instruct')
+print('模型下载完成:', model_dir)
+"</code></pre>
+
+        <div class="callout">
+            <div class="callout-title">注意事项</div>
+            <p>模型约15GB，下载到 /mnt/workspace 持久化存储，关机重启不会丢。</p>
+        </div>
+
+        <h2>四、部署推理服务</h2>
+        <h3>4.1 最简版直接推理</h3>
+        <pre><code>from transformers import AutoModelForCausalLM, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained(model_dir)
+model = AutoModelForCausalLM.from_pretrained(
+    model_dir,
+    torch_dtype=torch.bfloat16,
+    device_map="cuda",
+)
+
+messages = [{"role": "user", "content": "你好"}]
+text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+inputs = tokenizer(text, return_tensors="pt").to("cuda")
+
+with torch.no_grad():
+    outputs = model.generate(**inputs, max_new_tokens=512)
+
+response = tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+print(response)</code></pre>
+
+        <h3>4.2 FastAPI 服务版</h3>
+        <pre><code>from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class ChatRequest(BaseModel):
+    message: str
+    max_tokens: int = 512
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "gpu": "MI300X", "model": "Qwen2.5-7B"}
+
+@app.post("/chat")
+def chat(req: ChatRequest):
+    # 推理逻辑...
+    return {"response": "..."})
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=7860)</code></pre>
+
+        <h2>五、踩坑记录</h2>
+
+        <h3>坑1：显存占满直接OOM</h3>
+        <p><strong>现象：</strong>模型加载到一半直接崩掉。</p>
+        <p><strong>原因：</strong>虽然MI300X有192GB显存，但实例分配的可能不是全部。</p>
+        <p><strong>解决：</strong>留20%波动空间，不够就用4bit量化：</p>
+        <pre><code>model = AutoModelForCausalLM.from_pretrained(
+    model_path,
+    load_in_4bit=True,  # 显存降到约5GB
+)</code></pre>
+
+        <h3>坑2：CPU offload导致推理慢</h3>
+        <p><strong>现象：</strong>日志里看到 <code>offloaded to the cpu</code>，推理特别慢。</p>
+        <p><strong>解决：</strong>确认 <code>device_map="cuda"</code> 而不是 <code>"auto"</code>。</p>
+
+        <h3>坑3：磁盘写满</h3>
+        <p><strong>现象：</strong>Disk quota exceeded。</p>
+        <p><strong>解决：</strong>日志写/tmp（内存盘），不要写到/mnt/workspace。</p>
+
+        <h2>六、性能实测</h2>
+        <table>
+            <tr><th>指标</th><th>数值</th></tr>
+            <tr><td>模型加载时间</td><td>~20秒</td></tr>
+            <tr><td>显存占用（bf16）</td><td>~16GB</td></tr>
+            <tr><td>显存占用（4bit）</td><td>~5GB</td></tr>
+            <tr><td>推理速度</td><td>~30 tokens/秒</td></tr>
+        </table>
+
+        <h2>七、总结</h2>
+        <p>MI300X跑7B模型真的是降维打击：192GB显存，别说7B，70B都能跑。ROCm环境魔搭已经预装好了，开箱即用。</p>
+
+        <div class="callout">
+            <div class="callout-title">关键经验</div>
+            <ul>
+                <li>先确认实际可用显存，不要想当然</li>
+                <li>日志写/tmp，不要占/mnt/workspace空间</li>
+                <li>4bit量化是兜底方案，显存不够随时切</li>
+                <li>开机自启一定要配，不然重启就没了</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

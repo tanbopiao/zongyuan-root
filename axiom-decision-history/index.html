@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>公理决策历史 | Axiom Decision History</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --gold: #d4af37; --purple: #8b5cf6; --blue: #3b82f6;
+      --bg-dark: #0a0a14; --bg-card: #12121f; --text-primary: #e8e8f0;
+      --text-secondary: #a0a0b8; --border: #2a2a3e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Serif SC', sans-serif; background: var(--bg-dark); color: var(--text-primary); line-height: 1.8; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .header-symbol { font-size: 24px; color: var(--gold); margin-bottom: 12px; }
+    .header h1 { font-size: 36px; background: linear-gradient(135deg, var(--gold), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+    .header p { color: var(--text-secondary); font-size: 14px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .stat-num { font-size: 32px; font-weight: 700; color: var(--gold); }
+    .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .chart-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; text-align: center; }
+    .chart { width: 100%; height: 350px; }
+    .table-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: rgba(212,175,55,0.1); color: var(--gold); padding: 10px 12px; text-align: left; font-size: 12px; border-bottom: 2px solid rgba(212,175,55,0.3); }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); }
+    tr:hover td { background: rgba(212,175,55,0.03); }
+    .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: rgba(16,185,129,0.2); color: #10b981; }
+    .badge-warning { background: rgba(245,158,11,0.2); color: #f59e0b; }
+    .badge-info { background: rgba(59,130,246,0.2); color: #3b82f6; }
+    .footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--border); margin-top: 40px; }
+    .footer p { color: var(--text-secondary); font-size: 12px; }
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .header h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+  <div class="container">
+    <div class="header">
+      <div class="header-symbol">Ω₀⊂⊙∞⊂Ω</div>
+      <h1>公理决策历史</h1>
+      <p>Axiom Decision History Dashboard · 基于三维稳态公理的决策记录与趋势分析</p>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">12</div><div class="stat-label">总决策数</div></div>
+      <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">自动通过</div></div>
+      <div class="stat-card"><div class="stat-num">2</div><div class="stat-label">人工审核</div></div>
+      <div class="stat-card"><div class="stat-num">77.8</div><div class="stat-label">平均得分</div></div>
+    </div>
+    
+    <div class="chart-container">
+      <div class="chart-title">决策类型分布</div>
+      <div id="typeChart" class="chart" style="height: 300px;"></div>
+    </div>
+    
+    <div class="chart-container">
+      <div class="chart-title">决策得分趋势</div>
+      <div id="trendChart" class="chart" style="height: 300px;"></div>
+    </div>
+    
+    <div class="table-container">
+      <div class="chart-title">决策记录明细</div>
+      <table>
+        <thead>
+          <tr><th>决策ID</th><th>类型</th><th>标题</th><th>推荐方案</th><th>得分</th><th>状态</th><th>时间</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>DEC-001</td><td><span class="badge badge-info">方案评估</span></td><td>算力调度方案评估</td><td>外部API优先</td><td>77.83</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-17 11:35</td></tr>
+          <tr><td>DEC-002</td><td><span class="badge badge-info">方案评估</span></td><td>公理体系后续工作优先级</td><td>公理体系白皮书</td><td>77.83</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-17 11:40</td></tr>
+          <tr><td>DEC-003</td><td><span class="badge badge-warning">风险评估</span></td><td>系统安全风险评估</td><td>SSH密钥泄露缓解</td><td>65.50</td><td><span class="badge badge-warning">需人工审核</span></td><td>2026-09-17 11:36</td></tr>
+          <tr><td>DEC-004</td><td><span class="badge badge-info">优先级裁决</span></td><td>任务优先级裁决</td><td>修复记忆网关502</td><td>82.50</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-17 11:36</td></tr>
+          <tr><td>DEC-005</td><td><span class="badge badge-info">资源调度</span></td><td>MR-010任务调度</td><td>混合调度</td><td>71.20</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-17 10:00</td></tr>
+          <tr><td>DEC-006</td><td><span class="badge badge-info">方案评估</span></td><td>本地LLM启用方案</td><td>禁用自动启动</td><td>85.00</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-17 09:30</td></tr>
+          <tr><td>DEC-007</td><td><span class="badge badge-warning">风险评估</span></td><td>记忆网关并发风险</td><td>SQLite WAL模式</td><td>68.30</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-16 22:00</td></tr>
+          <tr><td>DEC-008</td><td><span class="badge badge-info">方案评估</span></td><td>公理可视化方案</td><td>ECharts+黑金风格</td><td>79.50</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-16 20:00</td></tr>
+          <tr><td>DEC-009</td><td><span class="badge badge-info">优先级裁决</span></td><td>P0性能优化优先级</td><td>增量同步改造</td><td>88.00</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-14 15:00</td></tr>
+          <tr><td>DEC-010</td><td><span class="badge badge-info">资源调度</span></td><td>冷热数据分离</td><td>30天阈值</td><td>76.80</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-14 14:00</td></tr>
+          <tr><td>DEC-011</td><td><span class="badge badge-warning">风险评估</span></td><td>SSH多连接冲突</td><td>最多3个隧道</td><td>72.00</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-16 18:00</td></tr>
+          <tr><td>DEC-012</td><td><span class="badge badge-info">方案评估</span></td><td>官网重构方案</td><td>高端网页设计</td><td>81.50</td><td><span class="badge badge-success">已完成</span></td><td>2026-09-15 10:00</td></tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="footer">
+      <p>Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 公理决策历史仪表盘 V1.0</p>
+      <p style="margin-top: 8px;">© 2026 火斗云智AIOS · 元极恒一公理体系</p>
+    </div>
+  </div>
+  
+  <script>
+    const typeChart = echarts.init(document.getElementById('typeChart'));
+    typeChart.setOption({
+      tooltip: { trigger: 'item' },
+      legend: { bottom: '0%', textStyle: { color: '#a0a0b8' } },
+      series: [{
+        type: 'pie', radius: ['40%', '70%'], center: ['50%', '45%'],
+        itemStyle: { borderRadius: 8, borderColor: '#0a0a14', borderWidth: 2 },
+        label: { color: '#e8e8f0', fontSize: 12 },
+        data: [
+          { value: 5, name: '方案评估', itemStyle: { color: '#3b82f6' } },
+          { value: 2, name: '资源调度', itemStyle: { color: '#10b981' } },
+          { value: 3, name: '风险评估', itemStyle: { color: '#ef4444' } },
+          { value: 2, name: '优先级裁决', itemStyle: { color: '#d4af37' } }
+        ]
+      }]
+    });
+    
+    const trendChart = echarts.init(document.getElementById('trendChart'));
+    trendChart.setOption({
+      tooltip: { trigger: 'axis' },
+      grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+      xAxis: { type: 'category', data: ['09-15', '09-16', '09-17'], axisLabel: { color: '#a0a0b8' }, axisLine: { lineStyle: { color: '#2a2a3e' } } },
+      yAxis: { type: 'value', min: 60, max: 90, axisLabel: { color: '#a0a0b8' }, splitLine: { lineStyle: { color: '#1a1a2e' } } },
+      series: [
+        { name: '平均得分', type: 'line', data: [81.5, 70.15, 76.97], smooth: true, lineStyle: { color: '#d4af37', width: 3 }, itemStyle: { color: '#d4af37' }, areaStyle: { color: 'rgba(212,175,55,0.1)' } },
+        { name: '决策数量', type: 'bar', data: [1, 5, 6], itemStyle: { color: 'rgba(139,92,246,0.6)' }, yAxisIndex: 0 }
+      ]
+    });
+    
+    window.addEventListener('resize', () => { typeChart.resize(); trendChart.resize(); });
+  </script>
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 元极恒一自治体系</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

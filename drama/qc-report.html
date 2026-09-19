@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>质检报告 · 昆仑洞天 | 火斗云智AIOS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --gold-primary: #d4af37;
+      --gold-light: #f5e6a3;
+      --gold-dark: #b8941f;
+      --bg-primary: #050508;
+      --bg-secondary: #0a0a10;
+      --bg-card: rgba(20, 15, 10, 0.6);
+      --border-color: rgba(212, 175, 55, 0.2);
+      --text-primary: #f0e6d2;
+      --text-secondary: #a89880;
+      --text-muted: #6b5d4f;
+    }
+    body {
+      font-family: "Noto Serif SC", "PingFang SC", "Microsoft YaHei", serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.8;
+      padding-top: 56px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    .page-header { text-align: center; margin-bottom: 40px; }
+    .page-title { font-size: 36px; font-weight: 900; background: linear-gradient(135deg, var(--gold-light), var(--gold-primary), var(--gold-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+    .page-subtitle { color: var(--text-secondary); font-size: 15px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; text-align: center; transition: all 0.3s; }
+    .stat-card:hover { border-color: var(--gold-primary); transform: translateY(-2px); }
+    .stat-value { font-size: 42px; font-weight: 900; color: var(--gold-primary); margin-bottom: 8px; }
+    .stat-label { font-size: 13px; color: var(--text-secondary); }
+    .stat-pass .stat-value { color: #27ae60; }
+    .stat-fail .stat-value { color: #e74c3c; }
+    .progress-bar { width: 100%; height: 12px; background: var(--bg-secondary); border-radius: 6px; overflow: hidden; margin-top: 12px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dark), var(--gold-light)); border-radius: 6px; transition: width 1s; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 22px; font-weight: 700; color: var(--gold-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .section-title::before { content: ""; width: 4px; height: 24px; background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark)); border-radius: 2px; }
+    .qc-list { display: flex; flex-direction: column; gap: 12px; }
+    .qc-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px 20px; transition: all 0.3s; }
+    .qc-item:hover { border-color: var(--gold-primary); }
+    .qc-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .qc-item-name { font-size: 15px; font-weight: 600; color: var(--text-primary); word-break: break-all; }
+    .qc-item-score { font-size: 16px; font-weight: 700; padding: 4px 12px; border-radius: 12px; }
+    .score-pass { background: rgba(39,174,96,0.15); color: #27ae60; }
+    .score-fail { background: rgba(231,76,60,0.15); color: #e74c3c; }
+    .qc-item-details { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--text-secondary); }
+    .qc-item-details span { white-space: nowrap; }
+    .engine-status { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 40px; }
+    .engine-status-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(212,175,55,0.1); }
+    .engine-status-row:last-child { border-bottom: none; }
+    .engine-status-label { color: var(--text-secondary); font-size: 14px; }
+    .engine-status-value { color: var(--gold-primary); font-size: 14px; font-weight: 600; }
+    .status-running { color: #27ae60; }
+    @media (max-width: 768px) {
+      .page-title { font-size: 28px; }
+      .stat-value { font-size: 32px; }
+      .qc-item-details { flex-direction: column; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+  <!-- 统一导航栏 -->
+  <style>
+  .zy-unified-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: rgba(5, 5, 8, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; font-family: "Noto Serif SC", "PingFang SC", "Microsoft YaHei", serif; }
+  .zy-nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #d4af37; font-size: 18px; font-weight: 700; }
+  .zy-nav-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #d4af37, #b8941f); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #050508; font-size: 16px; font-weight: 900; }
+  .zy-nav-links { display: flex; align-items: center; gap: 24px; list-style: none; margin: 0; padding: 0; }
+  .zy-nav-links a { color: #a89880; text-decoration: none; font-size: 14px; transition: color 0.3s; white-space: nowrap; }
+  .zy-nav-links a:hover { color: #d4af37; }
+  .zy-nav-toggle { display: none; background: none; border: none; color: #d4af37; font-size: 24px; cursor: pointer; padding: 8px; }
+  .zy-nav-mobile { display: none; position: fixed; top: 56px; left: 0; right: 0; background: rgba(5, 5, 8, 0.98); border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding: 16px 20px; z-index: 9998; }
+  .zy-nav-mobile a { display: block; padding: 12px 0; color: #a89880; text-decoration: none; font-size: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.1); }
+  .zy-nav-mobile a:last-child { border-bottom: none; }
+  .zy-nav-mobile a:hover { color: #d4af37; }
+  @media (max-width: 768px) { .zy-nav-links { display: none; } .zy-nav-toggle { display: block; } .zy-nav-mobile.open { display: block; } }
+  </style>
+  <nav class="zy-unified-nav">
+    <a href="https://www.huodouai.com/" class="zy-nav-logo"><div class="zy-nav-logo-icon">昆</div><span>火斗云智AIOS</span></a>
+    <ul class="zy-nav-links">
+      <li><a href="https://www.huodouai.com/">首页</a></li>
+      <li><a href="https://www.huodouai.com/drama/">作品库</a></li>
+      <li><a href="https://www.huodouai.com/drama/characters/">角色宇宙</a></li>
+      <li><a href="https://www.huodouai.com/drama/pipeline.html">生产流水线</a></li>
+      <li><a href="https://www.huodouai.com/drama/qc-report.html" style="color:#d4af37;">质检报告</a></li>
+      <li><a href="https://www.huodouai.com/gov/">政务AI</a></li>
+    </ul>
+    <button class="zy-nav-toggle" onclick="document.querySelector('.zy-nav-mobile').classList.toggle('open')">☰</button>
+  </nav>
+  <div class="zy-nav-mobile">
+    <a href="https://www.huodouai.com/">首页</a>
+    <a href="https://www.huodouai.com/drama/">作品库</a>
+    <a href="https://www.huodouai.com/drama/characters/">角色宇宙</a>
+    <a href="https://www.huodouai.com/drama/pipeline.html">生产流水线</a>
+    <a href="https://www.huodouai.com/drama/qc-report.html">质检报告</a>
+    <a href="https://www.huodouai.com/gov/">政务AI</a>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">自动视觉质检报告</h1>
+      <p class="page-subtitle">昆仑洞天AI创世宇宙 · 全自动质量检测系统 · 智谱GLM-4V-Flash</p>
+    </div>
+
+    <!-- 质检引擎状态 -->
+    <div class="engine-status">
+      <div class="engine-status-row">
+        <span class="engine-status-label">质检引擎状态</span>
+        <span class="engine-status-value status-running">● 运行中 (zongyuan-auto-qc.service)</span>
+      </div>
+      <div class="engine-status-row">
+        <span class="engine-status-label">质检模型</span>
+        <span class="engine-status-value">智谱GLM-4V-Flash (免费)</span>
+      </div>
+      <div class="engine-status-row">
+        <span class="engine-status-label">检测维度</span>
+        <span class="engine-status-value">多手问题 / 肢体畸形 / 面部质量 / 清晰度 / AI瑕疵</span>
+      </div>
+      <div class="engine-status-row">
+        <span class="engine-status-label">扫描频率</span>
+        <span class="engine-status-value">每10分钟自动扫描新作品</span>
+      </div>
+      <div class="engine-status-row">
+        <span class="engine-status-label">问题文件处理</span>
+        <span class="engine-status-value">自动归档隔离 (不删除，保留溯源)</span>
+      </div>
+    </div>
+
+    <!-- 统计数据 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">70</div>
+        <div class="stat-label">总检测作品</div>
+      </div>
+      <div class="stat-card stat-pass">
+        <div class="stat-value">32</div>
+        <div class="stat-label">质检通过</div>
+      </div>
+      <div class="stat-card stat-fail">
+        <div class="stat-value">38</div>
+        <div class="stat-label">质检未通过</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">45.7%</div>
+        <div class="stat-label">通过率</div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 45.7%"></div></div>
+      </div>
+    </div>
+
+    <!-- 质检未通过的作品 -->
+    <div class="section">
+      <h2 class="section-title">质检未通过的作品 (38)</h2>
+      <div class="qc-list">
+        
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">EP001_Taiyin_Awakening.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:16.501452</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">EP-SUB-CN_sub_1788513036.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:17.915146</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">EP-SUB-CN-FINAL_sub_1788518486.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:18.573871</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">EP-MTO8TYNL_1788604320.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:20.001192</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">EP-SUB-MTO8TZA0_sub_1788604322.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:20.672285</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">concat_1788646380688.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:22.011469</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-005_玄女降临.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:22.684379</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-008_神兵斩妖.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:24.049768</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">ep091305.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:24.748747</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">ep091306.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:26.253837</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">ep091307.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:26.965025</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">ep091308.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:28.385018</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">ep091309.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:29.137974</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">EP03_dubbed.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:30.510082</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">EP04_dubbed.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:31.222781</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">DOUBAO-TEST-KF001.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:32.641314</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">E2E-001-KF001.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:33.494676</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">ROUTER-TEST-KF001.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:37.860979</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">TEST-LLMCK-0913B.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:38.776126</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">EP03_full.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:39.468628</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">EP04_full.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:16:40.829090</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">clip1.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:44.095331</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">clip2.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:44.788562</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">13d764a17d53df4a.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:46.140743</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">1c3b11c99c474d64.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:46.840257</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">4460a2cc363eef49.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:48.300083</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">77c759d4be2d5690.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:49.168016</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">826c27f35ee0990e.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:50.076763</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">8ac2b1f580b1db0e.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:50.753115</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">9108c7f2e5e58278.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:52.123445</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">a06e89826aa53003.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:52.815742</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">a993ea20d8383c8b.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:54.251187</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">af18d981a6c4ffcd.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:54.921208</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">b2868502ad2427ac.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:56.255922</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">b76e212a143fb9a1.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:56.973539</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">b8ab27bece05b360.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:58.362180</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">e092fa57c3ed75eb.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:06:59.035390</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">ec401ca5be6ab509.mp4</span>
+        <span class="qc-item-score score-fail">0分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T23:07:00.417570</span>
+      </div>
+    </div>
+    
+      </div>
+    </div>
+
+    <!-- 质检通过的作品 -->
+    <div class="section">
+      <h2 class="section-title">质检通过的作品 (32)</h2>
+      <div class="qc-list">
+        
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-001_墟境封印破裂.jpg</span>
+        <span class="qc-item-score score-pass">90分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:13:56.302326</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-002_万妖之眼.jpg</span>
+        <span class="qc-item-score score-pass">90分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:00.433250</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-003_玄汐山门警报.jpg</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:04.899099</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-004_妖云压境.jpg</span>
+        <span class="qc-item-score score-pass">90分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:09.817524</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-005_玄女战争形态降临.jpg</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:14.269740</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-006_玄女俯瞰山门.jpg</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:19.883755</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-007_万妖潮冲锋.jpg</span>
+        <span class="qc-item-score score-pass">90分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:23.908286</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-008_玄女神兵斩妖.jpg</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:29.316885</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-009_妖兽被击碎.jpg</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:33.176940</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-010_真武大帝结阵.jpg</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:39.058975</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-011_女娲天际剪影.jpg</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:42.953789</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-012_未知巨兽浮现结尾.jpg</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:47.274456</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-001_墟境封印破裂.webp</span>
+        <span class="qc-item-score score-pass">90分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:53.211032</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-002_万妖之眼.webp</span>
+        <span class="qc-item-score score-pass">90分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:14:56.800706</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-003_玄汐山门警报.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:00.134202</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-004_妖云压境.webp</span>
+        <span class="qc-item-score score-pass">90分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:02.776247</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-005_玄女战争形态降临.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:05.352618</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-006_玄女俯瞰山门.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:08.809715</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-007_万妖潮冲锋.webp</span>
+        <span class="qc-item-score score-pass">90分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:11.364013</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-008_玄女神兵斩妖.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:14.698518</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-009_妖兽被击碎.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:17.496068</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-010_真武大帝结阵.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:20.254964</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-011_女娲天际剪影.webp</span>
+        <span class="qc-item-score score-pass">90分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:23.268943</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">S01-012_未知巨兽浮现结尾.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:25.776074</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">hongqun_jiuweihu_keyframe_01_fullbody.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:28.370171</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">hongqun_jiuweihu_keyframe_02_scene.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:31.156045</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">jiutian_xuannv_keyframe_01_fullbody.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:35.913636</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">jiutian_xuannv_keyframe_02_scene.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:38.517678</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">taiyin_moon_god_keyframe_01_fullbody.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:41.841933</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">taiyin_moon_god_keyframe_02_scene.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:44.647291</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">xiwangmu_keyframe_01_fullbody.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:47.402798</span>
+      </div>
+    </div>
+    
+    <div class="qc-item">
+      <div class="qc-item-header">
+        <span class="qc-item-name">xiwangmu_keyframe_02_scene.webp</span>
+        <span class="qc-item-score score-pass">95分</span>
+      </div>
+      <div class="qc-item-details">
+        <span>多手问题: ✅ 无</span>
+        <span>肢体畸形: ✅ 无</span>
+        <span>问题: 无</span>
+        <span>检测时间: 2026-09-16T21:15:50.805329</span>
+      </div>
+    </div>
+    
+      </div>
+    </div>
+  </div>
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 元极恒一自治体系</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

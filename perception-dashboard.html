@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域智能感知仪表盘 | 火斗云智AIOS</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a14; color:#e0e0e0; font-family:'Noto Sans SC',sans-serif; }
+.header { background:linear-gradient(135deg,#1a1a2e,#16213e); padding:25px 40px; border-bottom:2px solid #d4af37; }
+.header h1 { color:#d4af37; font-size:24px; margin-bottom:5px; }
+.header .meta { color:#888; font-size:12px; }
+.container { max-width:1400px; margin:0 auto; padding:25px; }
+.health-score { text-align:center; margin-bottom:25px; }
+.health-score .score { font-size:72px; font-weight:bold; color:#4ade80; }
+.health-score .label { font-size:16px; color:#888; }
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:25px; }
+.stat-card { background:#1a1a2e; border:1px solid #333; border-radius:10px; padding:15px; text-align:center; }
+.stat-card .value { font-size:22px; color:#d4af37; font-weight:bold; }
+.stat-card .label { font-size:11px; color:#888; margin-top:3px; }
+.charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:25px; }
+.chart-box { background:#1a1a2e; border:1px solid #333; border-radius:12px; padding:18px; }
+.chart-box h3 { color:#d4af37; margin-bottom:12px; font-size:14px; }
+.chart { width:100%; height:250px; }
+.anomaly-box { background:#1a1a2e; border:1px solid #333; border-radius:12px; padding:18px; margin-bottom:20px; }
+.anomaly-box h3 { color:#ef4444; margin-bottom:12px; }
+.anomaly-item { padding:10px; border-left:3px solid #ef4444; margin-bottom:8px; background:#1a0a0a; }
+.anomaly-item .severity { color:#ef4444; font-weight:bold; font-size:12px; }
+.anomaly-item .message { color:#ccc; font-size:13px; margin-top:3px; }
+.rec-box { background:#1a1a2e; border:1px solid #333; border-radius:12px; padding:18px; margin-bottom:20px; }
+.rec-box h3 { color:#4ade80; margin-bottom:12px; }
+.rec-item { padding:10px; border-left:3px solid #4ade80; margin-bottom:8px; background:#0a1a0a; }
+.rec-item .title { color:#4ade80; font-weight:bold; font-size:13px; }
+.rec-item .suggestion { color:#ccc; font-size:12px; margin-top:3px; }
+.footer { text-align:center; padding:25px; color:#555; font-size:11px; border-top:1px solid #222; }
+@media (max-width:768px) { .charts-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🌐 全域智能感知仪表盘</h1>
+  <div class="meta">更新时间: 2026-09-19 08:50:27 | 确权: DID-BR-000002 | 溯源: Ω₀⊂⊙∞⊂Ω</div>
+</div>
+<div class="container">
+  <div class="health-score">
+    <div class="score">90.7</div>
+    <div class="label">体系整体健康评分 / 100</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="value">15/19</div><div class="label">服务在线</div></div>
+    <div class="stat-card"><div class="value">47.8%</div><div class="label">CPU使用率</div></div>
+    <div class="stat-card"><div class="value">75.9%</div><div class="label">内存使用率</div></div>
+    <div class="stat-card"><div class="value">71336</div><div class="label">真值总量</div></div>
+    <div class="stat-card"><div class="value">0/0</div><div class="label">节点在线</div></div>
+    <div class="stat-card"><div class="value">5</div><div class="label">活跃异常</div></div>
+    <div class="stat-card"><div class="value">79.8ms</div><div class="label">平均API响应</div></div>
+    <div class="stat-card"><div class="value">100.0%</div><div class="label">API成功率</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-box"><h3>服务状态分布</h3><div id="serviceChart" class="chart"></div></div>
+    <div class="chart-box"><h3>资源使用率</h3><div id="resourceChart" class="chart"></div></div>
+    <div class="chart-box"><h3>真值分类分布</h3><div id="truthChart" class="chart"></div></div>
+    <div class="chart-box"><h3>异常严重度分布</h3><div id="anomalyChart" class="chart"></div></div>
+  </div>
+  <div id="anomalySection"></div>
+  <div id="recSection"></div>
+</div>
+<div class="footer">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 全域智能感知引擎 v1.0.0</div>
+<script>
+var serviceData = [{"name": "\u8bb0\u5fc6\u7f51\u5173", "status": "online", "port": 9120}, {"name": "Nginx HTTP", "status": "online", "port": 80}, {"name": "Nginx HTTPS", "status": "online", "port": 443}, {"name": "SSH", "status": "online", "port": 22}, {"name": "SSH\u5907\u7528", "status": "online", "port": 2222}, {"name": "\u672c\u5730LLM", "status": "offline", "port": 8081}, {"name": "\u5411\u91cf\u6570\u636e\u5e93", "status": "online", "port": 8014}, {"name": "\u77e5\u8bc6\u56fe\u8c31", "status": "online", "port": 8070}, {"name": "AI\u4ee3\u7406", "status": "online", "port": 8021}, {"name": "Agent Hub", "status": "online", "port": 8023}, {"name": "Grafana", "status": "offline", "port": 3000}, {"name": "Prometheus", "status": "offline", "port": 9090}, {"name": "\u63a7\u5236\u53f0API", "status": "online", "port": 9170}, {"name": "\u7b97\u5b50\u7ba1\u7406\u9762\u677f", "status": "online", "port": 8170}, {"name": "\u670d\u52a1A", "status": "online", "port": 8099}, {"name": "\u670d\u52a1B", "status": "online", "port": 8098}, {"name": "\u670d\u52a1C", "status": "online", "port": 8064}, {"name": "\u95ed\u73af\u8c03\u5ea6\u5668", "status": "online", "port": 8094}, {"name": "\u81ea\u6211\u8bc6\u522b\u5f15\u64ce", "status": "offline", "port": 9150}];
+var serviceChart = echarts.init(document.getElementById('serviceChart'));
+serviceChart.setOption({
+  tooltip:{},
+  series:[{type:'pie',radius:['40%','70%'],
+    data:[
+      {value:serviceData.filter(s=>s.status==='online').length,name:'在线',itemStyle:{color:'#4ade80'}},
+      {value:serviceData.filter(s=>s.status==='offline').length,name:'离线',itemStyle:{color:'#ef4444'}}
+    ],label:{color:'#eee'},lineStyle:{color:'#0a0a14'}}]
+});
+
+var resourceChart = echarts.init(document.getElementById('resourceChart'));
+resourceChart.setOption({
+  tooltip:{},
+  xAxis:{type:'category',data:['CPU','内存','Swap'],axisLabel:{color:'#888'}},
+  yAxis:{type:'value',max:100,axisLabel:{color:'#888'}},
+  series:[{type:'bar',data:[
+    {value:47.8,itemStyle:{color:'#d4af37'}},
+    {value:75.9,itemStyle:{color:'#4ade80'}},
+    {value:29.6,itemStyle:{color:'#f59e0b'}}
+  ],barWidth:'40%'}],
+  grid:{left:50,right:20,top:20,bottom:30}
+});
+
+var truthData = [["SSH", 30936], ["PERCEPTION", 4440], ["other", 3988], ["predictive-engine", 3712], ["EXPERIENCE", 3629], ["INTELLIGENCE_CALL_MONITOR", 3513], ["HEARTBEAT", 2994], ["HEALTH", 2600]];
+var truthChart = echarts.init(document.getElementById('truthChart'));
+truthChart.setOption({
+  tooltip:{},
+  series:[{type:'pie',radius:['35%','65%'],
+    data:truthData.map(function(d){return {name:d[0],value:d[1]}}),
+    label:{color:'#eee',fontSize:10},lineStyle:{color:'#0a0a14'}}]
+});
+
+var anomalyChart = echarts.init(document.getElementById('anomalyChart'));
+anomalyChart.setOption({
+  tooltip:{},
+  series:[{type:'pie',radius:['40%','70%'],
+    data:[
+      {value:0,name:'严重',itemStyle:{color:'#ef4444'}},
+      {value:5,name:'警告',itemStyle:{color:'#f59e0b'}},
+      {value:0,name:'信息',itemStyle:{color:'#3b82f6'}}
+    ],label:{color:'#eee'},lineStyle:{color:'#0a0a14'}}]
+});
+
+var recommendations = [{"type": "optimization", "priority": "high", "title": "\u5185\u5b58\u4f7f\u7528\u7387\u8fc7\u9ad8", "suggestion": "\u68c0\u67e5\u5185\u5b58\u6cc4\u6f0f\uff0c\u6267\u884c\u670d\u52a1\u5408\u5e76\uff0c\u8003\u8651\u589e\u52a0swap", "related_anomaly": "resource_memory_1789779027"}, {"type": "preventive", "priority": "medium", "title": "\u5185\u5b58\u9884\u9632\u6027\u4f18\u5316", "suggestion": "\u5f53\u524d\u5185\u5b58\u4f7f\u7528\u7387\u8f83\u9ad8\uff0c\u5efa\u8bae\u63d0\u524d\u6267\u884c\u670d\u52a1\u5408\u5e76\u548c\u7f13\u5b58\u6e05\u7406"}];
+var recHtml = '<div class="rec-box"><h3>💡 智能优化建议</h3>';
+recommendations.forEach(function(r) {
+  recHtml += '<div class="rec-item"><div class="title">['+r.priority+'] '+r.title+'</div><div class="suggestion">'+r.suggestion+'</div></div>';
+});
+recHtml += '</div>';
+document.getElementById('recSection').innerHTML = recHtml;
+
+window.addEventListener('resize',function(){
+  serviceChart.resize();resourceChart.resize();truthChart.resize();anomalyChart.resize();
+});
+</script>
+</body>
+</html>

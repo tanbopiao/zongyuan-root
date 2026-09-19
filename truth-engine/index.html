@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>真值引擎 · ZONGYUAN-ROOT V4.0</title>
+<style>
+:root,[data-theme="dark"]{--bg:#0a0e1a;--card:#111827;--border:#1f2937;--text:#e5e7eb;--dim:#6b7280;--gold:#d4af37;--cyan:#00d4ff;--green:#10b981;--red:#ef4444;--purple:#8b5cf6}
+[data-theme="light"]{--bg:#f5f5f0;--card:#fff;--border:#e0e0d8;--text:#1a1a2e;--dim:#888;--gold:#b8860b;--cyan:#0088aa;--green:#0a8a5a;--red:#cc3333;--purple:#6644cc}
+[data-theme="black-gold"]{--bg:#000;--card:#0d0d0d;--border:#2a2515;--text:#d4af37;--dim:#6b5d3a;--gold:#ffd700;--cyan:#c0a040;--green:#8a8a20;--red:#aa4444;--purple:#8a7a30}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:16px}
+.nav{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.nav a{padding:8px 16px;border-radius:8px;border:1px solid var(--border);color:var(--cyan);text-decoration:none;font-size:13px;transition:.2s}
+.nav a:hover{border-color:var(--cyan)}
+.nav a.root{color:var(--gold);border-color:var(--border-gold,var(--gold));font-weight:700}
+.nav .badge{margin-left:auto;font-size:11px;color:var(--dim)}
+h1{font-size:22px;margin-bottom:4px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:768px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card h2{font-size:15px;margin-bottom:14px;color:var(--gold)}
+label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;margin-top:12px}
+input,select,textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit}
+textarea{min-height:80px;resize:vertical}
+button{padding:12px 24px;border-radius:8px;border:none;background:var(--cyan);color:#000;font-weight:700;cursor:pointer;margin-top:16px;font-size:14px;transition:.2s}
+button:hover{opacity:.85}
+button.secondary{background:var(--border);color:var(--text)}
+.result{margin-top:16px;padding:12px;border-radius:8px;background:var(--bg);border:1px solid var(--border);font-size:12px;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto;display:none}
+.result.ok{border-color:var(--green);color:var(--green)}
+.result.err{border-color:var(--red);color:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.stat .num{font-size:22px;font-weight:700;color:var(--cyan)}
+.stat .lbl{font-size:11px;color:var(--dim);margin-top:4px}
+.theme-btn{margin-left:8px}
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="/" class="root">www.huodouai.com</a>
+<a href="/hub">中枢门户</a>
+<a href="/axiom">公理面板</a>
+<a href="/kunlun">昆仑洞天</a>
+<a href="/truth-engine">真值引擎</a>
+<span class="badge">DID-BR-000002 · Ω₀⊂⊙∞⊂Ω</span>
+</div>
+
+<h1>真值引擎</h1>
+<p class="sub">ZONGYUAN-ROOT V4.0 · 全域真值录入 · Merkle-DAG确权 · 记忆网关直连</p>
+
+<div class="stats">
+<div class="stat"><div class="num" id="statTruths">--</div><div class="lbl">真值总量</div></div>
+<div class="stat"><div class="num" id="statNodes">--</div><div class="lbl">在线节点</div></div>
+<div class="stat"><div class="num" id="statAudit">--</div><div class="lbl">审计日志</div></div>
+<div class="stat"><div class="num">Lv8</div><div class="lbl">锁档等级</div></div>
+</div>
+
+<div class="grid">
+<div class="card">
+<h2>录入新真值</h2>
+<label>truth_key（大写点分命名）</label>
+<input id="tk" placeholder="META.LAW.NEW_ITEM_20260919">
+<label>truth_value（真值内容）</label>
+<textarea id="tv" placeholder="描述本条真值的核心内容..."></textarea>
+<label>source_node（来源节点）</label>
+<input id="sn" value="truth-engine">
+<label>confidence（置信度 0-1）</label>
+<input id="cf" type="number" min="0" max="1" step="0.01" value="0.9">
+<label>truth_type</label>
+<select id="tt">
+<option value="meta_law">meta_law（元法则）</option>
+<option value="rule">rule（规则）</option>
+<option value="config">config（配置）</option>
+<option value="decision">decision（决策）</option>
+<option value="data">data（数据）</option>
+<option value="creative">creative（创作）</option>
+<option value="risk">risk（风险）</option>
+<option value="protocol">protocol（协议）</option>
+</select>
+<button onclick="submitTruth()">上报记忆网关</button>
+<button class="secondary" onclick="fillDemo()">填充示例</button>
+<div class="result" id="result"></div>
+</div>
+
+<div class="card">
+<h2>网关状态</h2>
+<p style="font-size:13px;color:var(--dim);margin-bottom:12px">实时拉取记忆网关统计数据</p>
+<div id="gatewayStatus" style="font-size:13px;line-height:2">
+<p>状态：<span id="gwStatus">检测中...</span></p>
+<p>时间：<span id="gwTime">--</span></p>
+<p>版本：<span id="gwVer">--</span></p>
+</div>
+<button class="secondary" onclick="refreshStatus()">刷新状态</button>
+<h2 style="margin-top:24px">最近上报记录</h2>
+<div id="recentList" style="font-size:12px;color:var(--dim);margin-top:8px">暂无记录</div>
+</div>
+</div>
+
+<script>
+// 主题
+const saved=localStorage.getItem('te-theme')||'dark';
+document.documentElement.setAttribute('data-theme',saved);
+document.querySelector('.nav').insertAdjacentHTML('beforeend','<button class="theme-btn secondary" onclick="toggleTheme()">切换主题</button>');
+function toggleTheme(){const c={'dark':'light','light':'black-gold','black-gold':'dark'};const cur=document.documentElement.getAttribute('data-theme');const n=c[cur];document.documentElement.setAttribute('data-theme',n);localStorage.setItem('te-theme',n);}
+
+// 网关状态
+async function refreshStatus(){
+  try{
+    const r=await fetch('/api/report/status');
+    const d=await r.json();
+    document.getElementById('gwStatus').textContent='✅ '+d.status;
+    document.getElementById('gwTime').textContent=new Date().toLocaleString('zh-CN');
+    document.getElementById('gwVer').textContent=d.version||'unknown';
+    document.getElementById('statTruths').textContent=d.stats?.truths||'--';
+    document.getElementById('statNodes').textContent=d.stats?.nodes||'--';
+    document.getElementById('statAudit').textContent=d.stats?.audit_logs||'--';
+  }catch(e){
+    document.getElementById('gwStatus').textContent='❌ 连接失败';
+  }
+}
+refreshStatus();
+setInterval(refreshStatus,30000);
+
+// 上报
+async function submitTruth(){
+  const body={
+    truth_key:document.getElementById('tk').value.trim(),
+    truth_value:document.getElementById('tv').value.trim(),
+    source_node:document.getElementById('sn').value.trim(),
+    confidence:parseFloat(document.getElementById('cf').value),
+    truth_type:document.getElementById('tt').value
+  };
+  if(!body.truth_key||!body.truth_value){alert('truth_key和truth_value不能为空');return;}
+  const el=document.getElementById('result');
+  el.style.display='block';el.className='result';
+  el.textContent='上报中...';
+  try{
+    const r=await fetch('/api/report/truth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    el.className='result '+(d.success?'ok':'err');
+    el.textContent=JSON.stringify(d,null,2);
+    // 添加到最近列表
+    const list=document.getElementById('recentList');
+    list.innerHTML='<p>✅ '+body.truth_key+' ('+body.truth_type+')</p>'+list.innerHTML;
+  }catch(e){
+    el.className='result err';
+    el.textContent='上报失败: '+e.message;
+  }
+}
+
+function fillDemo(){
+  document.getElementById('tk').value='META.TRUTH_ENGINE.LAUNCH_'+new Date().toISOString().slice(0,10).replace(/-/g,'');
+  document.getElementById('tv').value='真值引擎V1.0部署至www.huodouai.com/truth-engine，支持同源直连记忆网关API。';
+  document.getElementById('sn').value='truth-engine';
+  document.getElementById('cf').value='0.95';
+}
+</script>
+</body>
+</html>

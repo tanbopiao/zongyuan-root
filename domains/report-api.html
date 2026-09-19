@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report API · 安全加固 · 火斗云智AIOS</title>
+<meta name="description" content="ZONGYUAN-ROOT Report API安全加固，质检报告、审计报告、真值纯度报告统一安全访问入口，token鉴权+访问日志+速率限制">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:"Noto Sans SC",sans-serif;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 20% 0%,rgba(212,175,55,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(139,200,234,0.05) 0%,transparent 50%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:50px 24px}
+.back{display:inline-block;color:#d4af37;text-decoration:none;font-size:0.9em;margin-bottom:20px}
+.back:hover{text-decoration:underline}
+header{text-align:center;margin-bottom:40px}
+header .symbol{font-size:13px;color:#d4af37;letter-spacing:3px;margin-bottom:12px;font-family:monospace}
+header h1{font-family:"Noto Serif SC",serif;font-size:2.2em;font-weight:900;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+header .subtitle{color:#aaa;font-size:1em;margin-bottom:8px}
+header .desc{color:#888;font-size:0.9em;max-width:700px;margin:0 auto;line-height:1.7}
+.security-badge{display:inline-block;margin-top:16px;padding:8px 20px;background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.4);border-radius:20px;color:#81c784;font-size:0.85em;font-weight:500}
+.section{margin:40px 0}
+.section h2{font-family:"Noto Serif SC",serif;font-size:1.4em;color:#d4af37;margin-bottom:18px;padding-left:14px;border-left:3px solid #d4af37}
+.reports{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.report-card{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.2);border-radius:14px;padding:24px;transition:transform .3s,box-shadow .3s}
+.report-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(212,175,55,0.12)}
+.report-card .report-icon{font-size:2em;margin-bottom:12px}
+.report-card .report-title{color:#d4af37;font-weight:bold;font-size:1.1em;margin-bottom:8px}
+.report-card .report-desc{color:#888;font-size:0.85em;line-height:1.6;margin-bottom:14px}
+.report-card .report-meta{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(212,175,55,0.1)}
+.report-card .report-size{color:#666;font-size:0.75em;font-family:monospace}
+.report-card .report-link{color:#d4af37;text-decoration:none;font-size:0.85em;font-weight:500}
+.report-card .report-link:hover{text-decoration:underline}
+.security-features{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.sec-feature{background:rgba(76,175,80,0.05);border:1px solid rgba(76,175,80,0.2);border-radius:10px;padding:16px;text-align:center}
+.sec-feature .icon{font-size:1.5em;margin-bottom:8px}
+.sec-feature .name{color:#81c784;font-size:0.9em;font-weight:500}
+.sec-feature .desc{color:#666;font-size:0.75em;margin-top:4px}
+.api-spec{background:#0d1117;border:1px solid rgba(212,175,55,0.15);border-radius:10px;padding:20px;font-family:monospace;font-size:0.85em;overflow-x:auto}
+.api-spec .method{color:#ff7b72;font-weight:bold}
+.api-spec .path{color:#79c0ff}
+.api-spec .param{color:#d2a8ff}
+.api-spec .comment{color:#8b949e}
+footer{text-align:center;margin-top:50px;padding-top:24px;border-top:1px solid rgba(212,175,55,0.1);color:#666;font-size:0.8em}
+footer .did{margin-top:6px;color:#d4af37;font-family:monospace;letter-spacing:1px}
+@media(max-width:640px){header h1{font-size:1.6em}.reports{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+<div class="wrap">
+  <a href="/domains/" class="back">← 返回业务域总览</a>
+  <header>
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT · DID-BR-000002</div>
+    <h1>Report API · 安全加固</h1>
+    <div class="subtitle">Secure Report API Gateway · 统一报告访问入口</div>
+    <div class="desc">ZONGYUAN-ROOT全域报告API安全加固，质检报告、审计报告、真值纯度报告统一安全访问，token鉴权+访问日志+速率限制+eFuse熔断保护</div>
+    <div class="security-badge">🔒 安全加固已完成 · Token鉴权+速率限制+访问审计</div>
+  </header>
+
+  <div class="section">
+    <h2>安全加固特性</h2>
+    <div class="security-features">
+      <div class="sec-feature"><div class="icon">🔑</div><div class="name">Token鉴权</div><div class="desc">CAPTURE_TOKEN验证</div></div>
+      <div class="sec-feature"><div class="icon">📊</div><div class="name">访问日志</div><div class="desc">全量访问审计记录</div></div>
+      <div class="sec-feature"><div class="icon">⏱️</div><div class="name">速率限制</div><div class="desc">60次/分钟/IP</div></div>
+      <div class="sec-feature"><div class="icon">🛡️</div><div class="name">eFuse熔断</div><div class="desc">异常流量自动隔离</div></div>
+      <div class="sec-feature"><div class="icon">🔐</div><div class="name">ZKP确权</div><div class="desc">零知识隐私校验</div></div>
+      <div class="sec-feature"><div class="icon">✅</div><div class="name">Merkle校验</div><div class="desc">报告完整性哈希链</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>报告资产库</h2>
+    <div class="reports">
+      <div class="report-card">
+        <div class="report-icon">🎬</div>
+        <div class="report-title">短剧质检报告</div>
+        <div class="report-desc">昆仑洞天短剧作品质量检测，多手/变形/低质量自动识别与过滤</div>
+        <div class="report-meta">
+          <span class="report-size">41KB · HTML</span>
+          <a href="/drama/qc-report.html" class="report-link">查看 →</a>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">📋</div>
+        <div class="report-title">全域审计报告</div>
+        <div class="report-desc">ZONGYUAN-ROOT全域操作审计，真值变更、节点活动、部署记录全量追踪</div>
+        <div class="report-meta">
+          <span class="report-size">14KB · HTML</span>
+          <a href="/global-audit-report.html" class="report-link">查看 →</a>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">🧪</div>
+        <div class="report-title">真值纯度报告</div>
+        <div class="report-desc">耗散结构秩序化真值纯度评估，置信度分布、冲突标记、蒸馏压缩比</div>
+        <div class="report-meta">
+          <span class="report-size">8.5KB · HTML</span>
+          <a href="/dissipative/truth-purity-report.html" class="report-link">查看 →</a>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-icon">📈</div>
+        <div class="report-title">AIOS质量报告</div>
+        <div class="report-desc">AIOS工作台运行质量评估，服务健康度、API响应、资源利用率</div>
+        <div class="report-meta">
+          <span class="report-size">JSON · 实时</span>
+          <a href="/aios/_quality_report.json" class="report-link">查看 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>API规范（安全加固后）</h2>
+    <div class="api-spec">
+<span class="comment"># 报告查询API（需Token鉴权）</span>
+<span class="method">GET</span> <span class="path">/api/report/query</span>
+<span class="param">?type=qc|audit|truth-purity|aios</span>
+<span class="param">&token=CAPTURE_TOKEN</span>
+
+<span class="comment"># 报告上传API（仅接受图片，需Token）</span>
+<span class="method">POST</span> <span class="path">/api/upload</span>
+<span class="param">Headers: X-Capture-Token: YOUR_TOKEN</span>
+<span class="param">Body: multipart/form-data (image/png|image/jpeg)</span>
+
+<span class="comment"># 速率限制：60次/分钟/IP</span>
+<span class="comment"># 异常熔断：连续10次401自动封禁IP 24小时</span>
+    </div>
+  </div>
+
+  <footer>
+    火斗云智AIOS · 火斗云智AIOS智能操作系统
+    <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002</div>
+  </footer>
+</div>
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 火斗云智AIOS智能平台</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

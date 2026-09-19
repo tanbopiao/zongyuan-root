@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>昆仑洞天 · 东方神话IP宇宙 | ZONGYUAN-ROOT 本源体系</title>
+    <meta name="description" content="昆仑洞天东方神话IP矩阵，基于Ω-Brainμ微内核自治产线，纯东方神女审美，角色视觉零漂移，资产全链路确权锁档。火斗云智 FireHD-AIOS">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f0d78c;
+            --gold-dark: #a8842a;
+            --red: #8b1a1a;
+            --red-light: #c43030;
+            --jade: #3d7a5c;
+            --jade-light: #5a9e7c;
+            --ink: #0d0d1a;
+            --ink-light: #1a1a2e;
+            --paper: #f8f4ec;
+            --paper-dark: #ede6d6;
+            --text: #2c2c2c;
+            --text-light: #666;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+            background: var(--paper);
+            color: var(--text);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+        /* 导航栏 */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(13,13,26,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            padding: 0 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 60px;
+            transition: all 0.3s;
+        }
+        .navbar.scrolled { background: rgba(13,13,26,0.98); box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+        .nav-logo { color: var(--gold); font-size: 1.2em; letter-spacing: 0.2em; font-weight: bold; }
+        .nav-logo span { color: var(--paper); font-size: 0.7em; margin-left: 10px; letter-spacing: 0.1em; }
+        .nav-links { display: flex; gap: 30px; list-style: none; }
+        .nav-links a { color: rgba(248,244,236,0.8); text-decoration: none; font-size: 0.9em; letter-spacing: 0.1em; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-status { font-size: 0.75em; color: var(--jade-light); display: flex; align-items: center; gap: 6px; }
+        .nav-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* 英雄区 */
+        .hero {
+            background: linear-gradient(135deg, var(--ink) 0%, #1a0a2e 40%, #2d1b4e 70%, var(--red) 100%);
+            color: var(--paper);
+            padding: 140px 20px 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 90vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .hero-stars { position: absolute; inset: 0; pointer-events: none; }
+        .star { position: absolute; width: 2px; height: 2px; background: var(--gold-light); border-radius: 50%; animation: twinkle 3s infinite; }
+        @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+        .hero::before {
+            content: "Ω₀⊂⊙∞⊂Ω";
+            position: absolute; font-size: 280px; opacity: 0.04;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-family: monospace;
+        }
+        .hero-ornament { width: 120px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 0 auto 30px; }
+        .hero h1 {
+            font-size: 4em; letter-spacing: 0.4em; margin-bottom: 20px;
+            background: linear-gradient(180deg, var(--gold-light), var(--gold), var(--gold-dark));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: none; animation: fadeInUp 1s ease;
+        }
+        .hero .subtitle { font-size: 1.3em; opacity: 0.9; letter-spacing: 0.3em; margin-bottom: 15px; animation: fadeInUp 1s ease 0.2s both; }
+        .hero .tagline { font-size: 0.95em; opacity: 0.6; letter-spacing: 0.15em; margin-bottom: 40px; animation: fadeInUp 1s ease 0.4s both; }
+        .hero .badge {
+            display: inline-block; padding: 10px 30px;
+            border: 1px solid rgba(212,175,55,0.5); border-radius: 30px;
+            font-size: 0.85em; color: var(--gold-light);
+            background: rgba(212,175,55,0.05);
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+        .hero-scroll { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); animation: bounce 2s infinite; }
+        .hero-scroll svg { width: 24px; height: 24px; stroke: var(--gold); fill: none; }
+        @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 实时状态条 */
+        .live-status {
+            background: var(--ink-light); color: var(--paper);
+            padding: 20px 40px; display: flex; justify-content: center; gap: 50px;
+            border-top: 1px solid rgba(212,175,55,0.2); border-bottom: 1px solid rgba(212,175,55,0.2);
+            flex-wrap: wrap;
+        }
+        .live-item { text-align: center; }
+        .live-item .val { font-size: 1.8em; color: var(--gold); font-weight: bold; }
+        .live-item .lbl { font-size: 0.75em; opacity: 0.6; letter-spacing: 0.1em; }
+        .live-item .val.loading { color: var(--text-light); font-size: 1em; }
+
+        /* 通用区块 */
+        .section { max-width: 1200px; margin: 0 auto; padding: 80px 20px; }
+        .section-title {
+            font-size: 2.2em; text-align: center; margin-bottom: 15px;
+            color: var(--ink); letter-spacing: 0.3em;
+        }
+        .section-subtitle { text-align: center; color: var(--text-light); margin-bottom: 50px; font-size: 0.95em; letter-spacing: 0.1em; }
+        .section-title::after {
+            content: ""; display: block; width: 80px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 15px auto 0;
+        }
+
+        /* 滚动动画 */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* 神女谱系 */
+        .characters { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; }
+        .character-card {
+            background: white; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.08);
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer; position: relative;
+            border: 1px solid rgba(212,175,55,0.15);
+        }
+        .character-card:hover { transform: translateY(-8px); box-shadow: 0 12px 40px rgba(139,26,26,0.15); border-color: var(--gold); }
+        .character-card .img-wrap { position: relative; overflow: hidden; height: 380px; }
+        .character-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+        .character-card:hover img { transform: scale(1.05); }
+        .character-card .img-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(13,13,26,0.8));
+            opacity: 0; transition: opacity 0.3s;
+            display: flex; align-items: flex-end; padding: 20px;
+        }
+        .character-card:hover .img-overlay { opacity: 1; }
+        .character-card .img-overlay span { color: var(--gold-light); font-size: 0.85em; letter-spacing: 0.1em; }
+        .character-info { padding: 22px; }
+        .character-info h3 { color: var(--red); font-size: 1.4em; margin-bottom: 6px; letter-spacing: 0.1em; }
+        .character-info .role { color: var(--jade); font-size: 0.85em; margin-bottom: 10px; letter-spacing: 0.05em; }
+        .character-info .symbol { font-size: 0.8em; color: var(--text-light); line-height: 1.6; }
+        .character-info .status {
+            display: inline-flex; align-items: center; gap: 5px;
+            margin-top: 12px; padding: 4px 14px;
+            background: linear-gradient(135deg, var(--jade), var(--jade-light));
+            color: white; border-radius: 12px; font-size: 0.72em; letter-spacing: 0.05em;
+        }
+        .character-info .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: white; }
+
+        /* 角色详情模态框 */
+        .modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--paper); border-radius: 20px; max-width: 800px; width: 100%;
+            max-height: 90vh; overflow-y: auto; position: relative;
+            border: 1px solid var(--gold); animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 1.8em; color: var(--text-light); cursor: pointer; z-index: 10; background: none; border: none; }
+        .modal-close:hover { color: var(--red); }
+        .modal-hero { height: 300px; overflow: hidden; border-radius: 20px 20px 0 0; }
+        .modal-hero img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-body { padding: 30px; }
+        .modal-body h2 { color: var(--red); font-size: 2em; margin-bottom: 8px; letter-spacing: 0.15em; }
+        .modal-body .role { color: var(--jade); margin-bottom: 20px; font-size: 1em; }
+        .modal-body .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .modal-body .detail-item { background: white; padding: 15px; border-radius: 10px; border-left: 3px solid var(--gold); }
+        .modal-body .detail-item .dt { font-size: 0.75em; color: var(--text-light); margin-bottom: 4px; }
+        .modal-body .detail-item .dv { font-size: 0.95em; color: var(--text); }
+
+        /* 产线能力 */
+        .features-bg { background: linear-gradient(180deg, var(--paper-dark), var(--paper)); }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .feature-card {
+            background: white; padding: 35px 30px; border-radius: 16px;
+            border-top: 3px solid var(--gold);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .feature-card::before {
+            content: ""; position: absolute; top: 0; right: 0; width: 80px; height: 80px;
+            background: radial-gradient(circle, rgba(212,175,55,0.1), transparent);
+        }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .feature-icon { width: 50px; height: 50px; border-radius: 12px; background: linear-gradient(135deg, var(--ink-light), var(--ink)); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; font-size: 1.5em; }
+        .feature-card h3 { color: var(--ink); margin-bottom: 12px; font-size: 1.2em; letter-spacing: 0.05em; }
+        .feature-card p { color: var(--text-light); font-size: 0.92em; line-height: 1.7; }
+
+        /* 产线流程 */
+        .pipeline { background: var(--ink); color: var(--paper); padding: 80px 20px; }
+        .pipeline .section-title { color: var(--gold); }
+        .pipeline .section-subtitle { color: rgba(248,244,236,0.5); }
+        .pipeline-steps { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; position: relative; }
+        .pipeline-step { flex: 1; min-width: 140px; text-align: center; position: relative; }
+        .pipeline-step .num {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--ink); display: flex; align-items: center; justify-content: center;
+            font-size: 1.3em; font-weight: bold; margin: 0 auto 15px;
+            box-shadow: 0 0 20px rgba(212,175,55,0.3);
+        }
+        .pipeline-step h4 { color: var(--gold-light); margin-bottom: 8px; font-size: 1em; letter-spacing: 0.05em; }
+        .pipeline-step p { font-size: 0.8em; opacity: 0.6; line-height: 1.6; }
+        .pipeline-arrow { color: var(--gold); font-size: 1.5em; align-self: center; opacity: 0.5; }
+
+        /* API区块 */
+        .api-section { background: linear-gradient(180deg, var(--ink), var(--ink-light)); color: var(--paper); padding: 80px 20px; }
+        .api-section .section-title { color: var(--gold); }
+        .api-endpoints { max-width: 850px; margin: 0 auto; }
+        .endpoint {
+            background: rgba(255,255,255,0.04); padding: 22px 25px;
+            margin-bottom: 15px; border-radius: 12px;
+            border: 1px solid rgba(212,175,55,0.15);
+            transition: all 0.3s; cursor: pointer;
+        }
+        .endpoint:hover { border-color: rgba(212,175,55,0.4); background: rgba(255,255,255,0.07); }
+        .endpoint-header { display: flex; align-items: center; gap: 12px; }
+        .endpoint .method {
+            display: inline-block; padding: 4px 12px; border-radius: 6px;
+            font-size: 0.75em; font-family: "Courier New", monospace; font-weight: bold;
+        }
+        .endpoint .method.get { background: var(--jade); color: white; }
+        .endpoint .method.post { background: var(--red-light); color: white; }
+        .endpoint .path { font-family: "Courier New", monospace; color: var(--gold-light); font-size: 0.95em; flex: 1; }
+        .endpoint .copy-btn { background: none; border: 1px solid rgba(212,175,55,0.3); color: var(--gold); padding: 4px 12px; border-radius: 6px; font-size: 0.75em; cursor: pointer; transition: all 0.3s; }
+        .endpoint .copy-btn:hover { background: rgba(212,175,55,0.1); }
+        .endpoint .desc { margin-top: 10px; font-size: 0.88em; opacity: 0.7; padding-left: 70px; }
+
+        /* 作品画廊 */
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .gallery-item { position: relative; border-radius: 12px; overflow: hidden; height: 350px; cursor: pointer; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .gallery-item:hover img { transform: scale(1.08); }
+        .gallery-item .g-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(13,13,26,0.9));
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 20px;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .gallery-item:hover .g-overlay { opacity: 1; }
+        .gallery-item .g-overlay h4 { color: var(--gold); margin-bottom: 5px; }
+        .gallery-item .g-overlay p { color: rgba(248,244,236,0.7); font-size: 0.8em; }
+
+        /* 页脚 */
+        .footer { background: var(--ink); color: rgba(255,255,255,0.5); text-align: center; padding: 50px 20px 30px; border-top: 1px solid rgba(212,175,55,0.15); }
+        .footer .symbol { color: var(--gold); font-size: 1.5em; margin-bottom: 15px; letter-spacing: 0.2em; }
+        .footer .brand { color: var(--paper); font-size: 1.1em; margin-bottom: 8px; letter-spacing: 0.15em; }
+        .footer .info { font-size: 0.82em; margin-bottom: 5px; }
+        .footer .rule { margin-top: 15px; font-size: 0.75em; color: rgba(255,255,255,0.3); padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.08); }
+
+        /* 回到顶部 */
+        .back-top {
+            position: fixed; bottom: 30px; right: 30px; width: 45px; height: 45px;
+            background: var(--ink); border: 1px solid var(--gold); border-radius: 50%;
+            color: var(--gold); cursor: pointer; display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 999; font-size: 1.2em;
+        }
+        .back-top.show { opacity: 1; visibility: visible; }
+        .back-top:hover { background: var(--gold); color: var(--ink); }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2.5em; letter-spacing: 0.2em; }
+            .hero .subtitle { font-size: 1em; }
+            .section { padding: 50px 15px; }
+            .section-title { font-size: 1.6em; }
+            .live-status { gap: 25px; padding: 15px; }
+            .live-item .val { font-size: 1.4em; }
+            .pipeline-steps { flex-direction: column; align-items: center; }
+            .pipeline-arrow { transform: rotate(90deg); }
+            .modal-body .detail-grid { grid-template-columns: 1fr; }
+            .endpoint .desc { padding-left: 0; margin-top: 8px; }
+        }
+    </style>
+    <link rel="canonical" href="https://kunlun.huodouai.com/">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-logo">昆仑洞天<span>ZONGYUAN-ROOT</span></div>
+        <ul class="nav-links">
+            <li><a href="#characters">神女谱系</a></li>
+            <li><a href="#features">产线能力</a></li>
+            <li><a href="drama-pipeline.html">短剧产线</a></li>
+            <li><a href="#pipeline">生产流程</a></li>
+            <li><a href="#gallery">作品画廊</a></li>
+            <li><a href="#api">API接口</a></li>
+        </ul>
+        <div class="nav-status"><span class="dot"></span><span id="navStatusText">内核运行中</span></div>
+    </nav>
+
+    <!-- 英雄区 -->
+    <section class="hero" id="hero">
+        <div class="hero-stars" id="stars"></div>
+        <div class="hero-ornament"></div>
+        <h1>昆仑洞天</h1>
+        <div class="subtitle">东方神话IP宇宙 · 自治智能产线基座</div>
+        <div class="tagline">纯东方神女审美 · 角色视觉零漂移 · 资产全链路确权锁档</div>
+        <div class="badge">DID-BR-000002 ｜ Ω-TAN-7-001 ｜ 火斗云智 FireHD-AIOS</div>
+        <div class="hero-scroll">
+            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </div>
+    </section>
+
+    <!-- 实时状态条 -->
+    <div class="live-status">
+        <div class="live-item"><div class="val" id="liveVersion">--</div><div class="lbl">全局根版本</div></div>
+        <div class="live-item"><div class="val" id="liveChars">--</div><div class="lbl">IP角色</div></div>
+        <div class="live-item"><div class="val" id="liveFrames">--</div><div class="lbl">锁档关键帧</div></div>
+        <div class="live-item"><div class="val" id="liveMode">--</div><div class="lbl">自治模式</div></div>
+        <div class="live-item"><div class="val" id="liveEvo">--</div><div class="lbl">进化谱系</div></div>
+    </div>
+
+    <!-- 神女谱系 -->
+    <section class="section" id="characters">
+        <h2 class="section-title reveal">神女谱系</h2>
+        <p class="section-subtitle reveal">四大核心神女角色 · 全部已锁档确权 · 视觉范式永久基准</p>
+        <div class="characters" id="charGrid"></div>
+    </section>
+
+    <!-- 产线能力 -->
+    <section class="features-bg">
+        <div class="section" id="features">
+            <h2 class="section-title reveal">产线能力</h2>
+            <p class="section-subtitle reveal">Ω-Brainμ微内核驱动 · 六大核心能力保障工业化量产</p>
+            <div class="features">
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>视觉零漂移</h3>
+                    <p>协议过滤网强制注入IP视觉范式，乌黑长发永久基准，禁止白发与西方元素，角色样貌跨批次稳定一致。</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🔗</div>
+                    <h3>全链路确权</h3>
+                    <p>每一份资产携带SHA256哈希与Merkle溯源凭证，四端归档（云服务器+Gitee+飞书+本地），不可篡改。</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🔄</div>
+                    <h3>自治巡检</h3>
+                    <p>小时/日/周三级巡检闭环，漂移检测Lv0-Lv3分级处置，僵死任务自动识别，异常资产强制留存。</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">⚡</div>
+                    <h3>多Agent并行</h3>
+                    <p>量产/校验/锁档/桥接/巡检五Agent微服务化，事件驱动解耦，单环节异常不影响整条流水线。</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">🌐</div>
+                    <h3>OpenAI兼容网关</h3>
+                    <p>标准/v1/chat/completions接口，第三方SDK无感接入，扩展控制放meta，溯源信息放z_meta响应头。</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div class="feature-icon">✅</div>
+                    <h3>部分成功机制</h3>
+                    <p>任务部分失败时已产出资产强制归档，不丢弃半成品，PARTIAL_SUCCESS状态确保物料零浪费。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 生产流程 -->
+    <section class="pipeline" id="pipeline">
+        <h2 class="section-title reveal">生产流程</h2>
+        <p class="section-subtitle reveal">六阶段工业化产线 · 事件驱动 · 全链路可追溯</p>
+        <div class="pipeline-steps">
+            <div class="pipeline-step reveal"><div class="num">1</div><h4>剧本调度</h4><p>IP故事库匹配，任务入队，视觉范式预加载</p></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step reveal"><div class="num">2</div><h4>关键帧生成</h4><p>多模型路由，协议过滤网强制校验，违禁拦截</p></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step reveal"><div class="num">3</div><h4>漂移检测</h4><p>视觉/参数/状态/元规则/谱系五维漂移检测</p></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step reveal"><div class="num">4</div><h4>哈希锁档</h4><p>SHA256确权，Merkle-DAG谱系挂载，eFuse熔断</p></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step reveal"><div class="num">5</div><h4>四端归档</h4><p>云服务器+Gitee+飞书+本地，Saga分布式事务</p></div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step reveal"><div class="num">6</div><h4>自治巡检</h4><p>定时巡检基线比对，漂移告警，自愈恢复</p></div>
+        </div>
+    </section>
+
+    <!-- 作品画廊 -->
+    <section class="section" id="gallery">
+        <h2 class="section-title reveal">作品画廊</h2>
+        <p class="section-subtitle reveal">昆仑洞天IP关键帧作品 · 全部已锁档确权</p>
+        <div class="gallery" id="galleryGrid"></div>
+    </section>
+
+    <!-- API接口 -->
+    <section class="api-section" id="api">
+        <h2 class="section-title reveal">API 接口</h2>
+        <p class="section-subtitle reveal">OpenAI兼容协议 · 点击路径可复制 · 基础URL: https://huodouai.com/kunlun-api</p>
+        <div class="api-endpoints" id="apiList"></div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="symbol">Ω₀⊂⊙∞⊂Ω</div>
+        <div class="brand">ZONGYUAN-ROOT 本源体系 · 火斗云智 FireHD-AIOS</div>
+        <div class="info">DID-BR-000002 ｜ 主权根 Ω-TAN-7-001 ｜ 云服务器 123.207.202.158</div>
+        <div class="info">昆仑洞天东方神话IP宇宙 ｜ Ω-Brainμ微内核自治产线</div>
+        <div class="rule">纯东方神女审美 · 乌黑长发永久基准 · 禁止西方元素与白发 · 所有资产携带溯源标识</div>
+    </footer>
+
+    <!-- 角色详情模态框 -->
+    <div class="modal" id="charModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="modal-hero"><img id="modalImg" src="" alt=""></div>
+            <div class="modal-body">
+                <h2 id="modalName"></h2>
+                <div class="role" id="modalRole"></div>
+                <p id="modalDesc" style="color:var(--text-light);font-size:0.95em;margin-bottom:20px;"></p>
+                <div class="detail-grid">
+                    <div class="detail-item"><div class="dt">主配色</div><div class="dv" id="modalColor"></div></div>
+                    <div class="detail-item"><div class="dt">符号元素</div><div class="dv" id="modalSymbol"></div></div>
+                    <div class="detail-item"><div class="dt">角色版本哈希</div><div class="dv" id="modalHash" style="font-family:monospace;font-size:0.85em;"></div></div>
+                    <div class="detail-item"><div class="dt">锁档状态</div><div class="dv" id="modalLock" style="color:var(--jade);"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 回到顶部 -->
+    <button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+    <script>
+        // 角色数据
+        const characters = [
+            { id:'taiyin', name:'太阴月神', role:'月神 · 清冷高远', img:'characters/taiyin_01.jpg',
+              desc:'太阴月神，主掌月宫，清冷高远，手持月牙法杖，身披青玉色仙裙，行走于云海之间。月神之光照耀昆仑，为众神女之首。',
+              color:'深空墨黑 + 青玉 + 赤金', symbol:'月牙法器 / 云海 / 月宫',
+              hash:'25faa0bc50731ea8...', lock:'已锁档 · KF-TAIYIN-001' },
+            { id:'jiutian', name:'九天玄女', role:'战神女神 · 威严英武', img:'characters/jiutian_01.jpg',
+              desc:'九天玄女，战神之女，威严英武，正红战神仙裙配赤金凤凰纹饰，手持古剑，凤凰虚影环绕，立于仙山之巅。',
+              color:'正红 + 深空墨黑 + 赤金', symbol:'凤凰 / 古剑 / 仙山',
+              hash:'087ca3e9680ad08f...', lock:'已锁档 · KF-JIUTIAN-001' },
+            { id:'xiwangmu', name:'西王母', role:'帝后女神 · 雍容华贵', img:'characters/xiwangmu_01.jpg',
+              desc:'西王母，昆仑之主，雍容华贵，深空墨黑青玉帝后仙裙，手持青玉如意，昆仑山瑶池仙鹤环绕，仙桃满园。',
+              color:'深空墨黑 + 青玉 + 赤金', symbol:'昆仑山 / 瑶池 / 仙鹤 / 仙桃',
+              hash:'9657af343eba43e9...', lock:'已锁档 · KF-XIWANGMU-001' },
+            { id:'hongqun', name:'红裙九尾狐', role:'青丘九尾狐 · 妖媚神圣', img:'characters/hongqun_01.jpg',
+              desc:'红裙九尾狐，青丘之灵，妖媚神圣，正红墨黑仙裙配赤金狐纹，身后九尾舒展，狐火环绕，青丘桃花纷飞。',
+              color:'正红 + 深空墨黑 + 赤金', symbol:'九尾 / 狐火 / 青丘 / 桃花',
+              hash:'d44e18dd06c6d639...', lock:'已锁档 · KF-HONGQUN-001' }
+        ];
+
+        // API数据
+        const apis = [
+            { method:'POST', path:'/v1/chat/completions', desc:'OpenAI兼容聊天补全端点，内置协议过滤网，响应携带z_meta确权信息' },
+            { method:'GET', path:'/v1/kunlun/characters', desc:'获取昆仑洞天IP角色库，包含角色设定、配色、符号元素与锁档状态' },
+            { method:'POST', path:'/v1/kunlun/generate', desc:'昆仑洞天IP专属生成端点，输入角色ID+场景描述，输出生成任务' },
+            { method:'GET', path:'/v1/kernel/status', desc:'内核状态查询，返回全局根版本、IP角色数、进化谱系、自治模式' },
+            { method:'GET', path:'/v1/models', desc:'OpenAI兼容模型列表，返回zongyuan-kernel-v1与kunlun-ip-generator' },
+            { method:'GET', path:'/health', desc:'健康检查端点，返回服务状态与确权元数据' }
+        ];
+
+        // 渲染角色卡片
+        const charGrid = document.getElementById('charGrid');
+        characters.forEach((c, i) => {
+            const card = document.createElement('div');
+            card.className = 'character-card reveal';
+            card.style.transitionDelay = (i * 0.1) + 's';
+            card.innerHTML = `
+                <div class="img-wrap">
+                    <img src="${c.img}" alt="${c.name}" loading="lazy">
+                    <div class="img-overlay"><span>点击查看详情 →</span></div>
+                </div>
+                <div class="character-info">
+                    <h3>${c.name}</h3>
+                    <div class="role">${c.role}</div>
+                    <div class="symbol">${c.symbol}</div>
+                    <span class="status">${c.lock.split(' · ')[0]}</span>
+                </div>`;
+            card.onclick = () => openModal(c);
+            charGrid.appendChild(card);
+        });
+
+        // 渲染画廊
+        const galleryGrid = document.getElementById('galleryGrid');
+        characters.forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'gallery-item reveal';
+            item.innerHTML = `
+                <img src="${c.img}" alt="${c.name}" loading="lazy">
+                <div class="g-overlay"><h4>${c.name}</h4><p>${c.role} · ${c.color}</p></div>`;
+            item.onclick = () => openModal(c);
+            galleryGrid.appendChild(item);
+        });
+
+        // 渲染API列表
+        const apiList = document.getElementById('apiList');
+        apis.forEach(api => {
+            const div = document.createElement('div');
+            div.className = 'endpoint reveal';
+            div.innerHTML = `
+                <div class="endpoint-header">
+                    <span class="method ${api.method.toLowerCase()}">${api.method}</span>
+                    <span class="path">${api.path}</span>
+                    <button class="copy-btn" onclick="copyPath('${api.path}', this)">复制</button>
+                </div>
+                <div class="desc">${api.desc}</div>`;
+            apiList.appendChild(div);
+        });
+
+        // 模态框
+        function openModal(c) {
+            document.getElementById('modalImg').src = c.img;
+            document.getElementById('modalName').textContent = c.name;
+            document.getElementById('modalRole').textContent = c.role;
+            document.getElementById('modalDesc').textContent = c.desc;
+            document.getElementById('modalColor').textContent = c.color;
+            document.getElementById('modalSymbol').textContent = c.symbol;
+            document.getElementById('modalHash').textContent = c.hash;
+            document.getElementById('modalLock').textContent = c.lock;
+            document.getElementById('charModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('charModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('charModal').onclick = (e) => { if(e.target.id==='charModal') closeModal(); };
+
+        // 复制路径
+        function copyPath(path, btn) {
+            navigator.clipboard.writeText('https://huodouai.com/kunlun-api' + path);
+            btn.textContent = '已复制';
+            setTimeout(() => btn.textContent = '复制', 1500);
+        }
+
+        // 星空背景
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
+            starsContainer.appendChild(star);
+        }
+
+        // 滚动动画
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // 导航栏滚动效果
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+            document.getElementById('backTop').classList.toggle('show', window.scrollY > 500);
+        });
+
+        // 实时API数据获取
+        async function fetchKernelStatus() {
+            try {
+                const res = await fetch('/kunlun-api/v1/kernel/status');
+                const data = await res.json();
+                document.getElementById('liveVersion').textContent = 'v' + data.global_root_version;
+                document.getElementById('liveChars').textContent = data.ip_characters;
+                document.getElementById('liveFrames').textContent = data.total_keyframes;
+                document.getElementById('liveMode').textContent = '元极恒一';
+                document.getElementById('liveEvo').textContent = data.evolution_spectrum.replace('COMPLETE','圆满');
+                document.getElementById('navStatusText').textContent = '内核运行中 · v' + data.global_root_version;
+            } catch(e) {
+                document.getElementById('liveVersion').textContent = 'v33';
+                document.getElementById('liveChars').textContent = '4';
+                document.getElementById('liveFrames').textContent = '8';
+                document.getElementById('liveMode').textContent = '元极恒一';
+                document.getElementById('liveEvo').textContent = 'Lv0-Lv9圆满';
+            }
+        }
+        fetchKernelStatus();
+        setInterval(fetchKernelStatus, 30000);
+    </script>
+</body>
+</html>

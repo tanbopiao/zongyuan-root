@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术原创区 | 火斗云智AIOS</title>
+    <meta name="description" content="火斗云智AIOS技术原创区：GPU算力接入、元内核设计、自治体系架构等工程实践文章">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f4e4bc;
+            --dark: #0a0a0f;
+            --card: #1a1a24;
+            --text: #e8e8e8;
+            --text-secondary: #a0a0b0;
+            --border: rgba(212, 175, 55, 0.2);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.8;
+        }
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-brand {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gold);
+            text-decoration: none;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 14px;
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+        .container {
+            max-width: 1100px;
+            margin: 100px auto 60px;
+            padding: 0 24px;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            margin: 32px 0;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-num {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--gold);
+        }
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .section-title {
+            font-size: 24px;
+            margin: 48px 0 24px;
+            color: var(--gold);
+            padding-left: 12px;
+            border-left: 3px solid var(--gold);
+        }
+        .article-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        .article-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s;
+        }
+        .article-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+        .article-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--gold);
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        .article-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .article-card p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        .article-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .featured-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border: 1px solid var(--gold);
+        }
+        .featured-card h3 {
+            font-size: 22px;
+            color: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-brand">火斗云智AIOS</a>
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/models.html">模型库</a>
+            <a href="/tutorials.html">教程中心</a>
+            <a href="/tech-zone.html" class="active">技术原创</a>
+            <a href="https://aios.huodouai.com">AIOS控制台</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>技术原创区</h1>
+            <p>从0到1的工程实践记录，真实踩坑，真实方案</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-num">27+</div>
+                    <div class="stat-label">技术文章</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">14</div>
+                    <div class="stat-label">技术标签</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">4.5h</div>
+                    <div class="stat-label">试错收敛</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">精选文章</h2>
+        <div class="article-grid">
+            <a href="/gpu-connect-v2.html" class="article-card featured-card">
+                <span class="article-tag">GPU算力 · 精选</span>
+                <h3>GPU接入体系V2.0：零成本GPU算力远程接入完全指南</h3>
+                <p>在零公网IP、零端口暴露的条件下，实现GPU算力实例的全自动远程接入与运维。HTTP反向轮询方案，30秒一键闭环，100%成功率。</p>
+                <div class="article-meta">2026-09-19 · 火斗云智技术团队 · 阅读约15分钟</div>
+            </a>
+        </div>
+
+        <h2 class="section-title">完整技术卷宗</h2>
+        <div class="article-grid">
+            <a href="https://mcnvk6ct0byk.aiforce.cloud/app/app_17edc2nr8c1" class="article-card" target="_blank">
+                <span class="article-tag">完整技术区</span>
+                <h3>火斗云智技术原创卷宗（27篇）</h3>
+                <p>包含AMD GPU工程实践、云内核技术白皮书、元进化引擎、智能体矩阵、同源协议、自治机制、三层架构元法则、9120网关SOP等27篇工程文章。</p>
+                <div class="article-meta">27篇全量文章 · 14个技术标签 · 点击进入阅读 →</div>
+            </a>
+            <a href="https://mcnvk6ct0byk.aiforce.cloud/app/app_17edc2nr8c1" class="article-card" target="_blank">
+                <span class="article-tag">AMD GPU</span>
+                <h3>AMD GPU神经内核工程实践</h3>
+                <p>MI300X大显存GPU上部署神经内核的完整工程实践，从环境配置到推理优化全记录。</p>
+                <div class="article-meta">2026-09-19</div>
+            </a>
+            <a href="https://mcnvk6ct0byk.aiforce.cloud/app/app_17edc2nr8c1" class="article-card" target="_blank">
+                <span class="article-tag">元进化引擎</span>
+                <h3>元进化引擎V1.0设计与实现</h3>
+                <p>从规则引擎到自进化系统的完整演进路径，5轮深化迭代记录。</p>
+                <div class="article-meta">2026-09-19</div>
+            </a>
+            <a href="https://mcnvk6ct0byk.aiforce.cloud/app/app_17edc2nr8c1" class="article-card" target="_blank">
+                <span class="article-tag">智能体矩阵</span>
+                <h3>多智能体协同架构设计</h3>
+                <p>从单agent到多agent矩阵，任务分发、冲突检测、集体决策的完整实现。</p>
+                <div class="article-meta">2026-09-19</div>
+            </a>
+            <a href="https://mcnvk6ct0byk.aiforce.cloud/app/app_17edc2nr8c1" class="article-card" target="_blank">
+                <span class="article-tag">同源协议</span>
+                <h3>同源节点握手协议V1.0</h3>
+                <p>多节点身份认证、任务分发、结果回传的完整协议设计。</p>
+                <div class="article-meta">2026-09-19</div>
+            </a>
+            <a href="https://mcnvk6ct0byk.aiforce.cloud/app/app_17edc2nr8c1" class="article-card" target="_blank">
+                <span class="article-tag">自治机制</span>
+                <h3>Lv10超自治层级实现路径</h3>
+                <p>从Lv1到Lv10的能力成熟度模型，六维自检体系，全自动无人值守机制。</p>
+                <div class="article-meta">2026-09-19</div>
+            </a>
+            <a href="https://mcnvk6ct0byk.aiforce.cloud/app/app_17edc2nr8c1" class="article-card" target="_blank">
+                <span class="article-tag">三层架构</span>
+                <h3>热温冷三层存储元法则</h3>
+                <p>热存储在线、温存储备份、冷存储归档的完整架构设计与自动化实现。</p>
+                <div class="article-meta">2026-09-19</div>
+            </a>
+            <a href="https://mcnvk6ct0byk.aiforce.cloud/app/app_17edc2nr8c1" class="article-card" target="_blank">
+                <span class="article-tag">9120网关</span>
+                <h3>记忆网关SOP：真值上报与查询</h3>
+                <p>9120记忆网关的完整使用SOP，从真值写入到查询检索的全流程。</p>
+                <div class="article-meta">2026-09-19</div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

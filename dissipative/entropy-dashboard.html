@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>耗散结构秩序化仪表盘 | 火斗云智AIOS</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a14; color:#e0e0e0; font-family:'Noto Sans SC',sans-serif; min-height:100vh; }
+.header { background:linear-gradient(135deg,#1a1a2e,#16213e); padding:30px 40px; border-bottom:2px solid #d4af37; }
+.header h1 { color:#d4af37; font-size:28px; margin-bottom:8px; }
+.header .meta { color:#888; font-size:13px; }
+.container { max-width:1400px; margin:0 auto; padding:30px; }
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-bottom:30px; }
+.stat-card { background:linear-gradient(135deg,#1a1a2e,#16213e); border:1px solid #333; border-radius:12px; padding:20px; text-align:center; }
+.stat-card .value { font-size:32px; font-weight:bold; color:#d4af37; }
+.stat-card .label { font-size:13px; color:#888; margin-top:5px; }
+.charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px; }
+.chart-box { background:#1a1a2e; border:1px solid #333; border-radius:12px; padding:20px; }
+.chart-box h3 { color:#d4af37; margin-bottom:15px; font-size:16px; }
+.chart { width:100%; height:300px; }
+.phase-banner { background:linear-gradient(135deg,#2d1b4e,#1a1a2e); border:2px solid #d4af37; border-radius:12px; padding:25px; margin-bottom:30px; text-align:center; }
+.phase-banner .state { font-size:24px; color:#d4af37; font-weight:bold; margin-bottom:8px; }
+.phase-banner .desc { color:#aaa; font-size:14px; }
+.footer { text-align:center; padding:30px; color:#555; font-size:12px; border-top:1px solid #222; }
+@media (max-width:768px) { .charts-grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>⚡ 耗散结构秩序化仪表盘</h1>
+  <div class="meta">运行ID: 20260919145309-999309 | 确权: DID-BR-000002 | 溯源: Ω₀⊂⊙∞⊂Ω | 生成时间: 2026-09-19 14:53:31</div>
+</div>
+<div class="container">
+  <div class="phase-banner">
+    <div class="state">相变状态: highly_ordered</div>
+    <div class="desc">系统处于高度有序态，耗散结构稳定形成 | 当前熵: 0.0000 | 临界熵: 0.5</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="value">0.0000</div><div class="label">初始系统熵</div></div>
+    <div class="stat-card"><div class="value">0.0000</div><div class="label">秩序化后熵</div></div>
+    <div class="stat-card"><div class="value">0.0%</div><div class="label">熵减率</div></div>
+    <div class="stat-card"><div class="value">0.3000</div><div class="label">秩序度</div></div>
+    <div class="stat-card"><div class="value">1.00</div><div class="label">结构密度</div></div>
+    <div class="stat-card"><div class="value">0.00</div><div class="label">连接度</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-box"><h3>📉 熵演化趋势</h3><div id="entropyTrend" class="chart"></div></div>
+    <div class="chart-box"><h3=">📊 秩序参数雷达</h3><div id="orderRadar" class="chart"></div></div>
+    <div class="chart-box"><h3>🔄 负熵注入流程</h3><div id="negentropyFlow" class="chart"></div></div>
+    <div class="chart-box"><h3>⚡ 相变状态</h3><div id="phaseGauge" class="chart"></div></div>
+  </div>
+</div>
+<div class="footer">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 耗散结构秩序化引擎 v1.0.0 | © 2026 火斗云智AIOS</div>
+<script>
+// 熵演化趋势
+var entropyTrend = echarts.init(document.getElementById('entropyTrend'));
+entropyTrend.setOption({
+  tooltip: { trigger:'axis' },
+  xAxis: { type:'category', data:["8.361058", "0.830132", "6.357772", "6.933667", "8.149796", "0.968912", "9.551705", "1.623693", "2.370045", "2.975839", "1.659169", "2.416049", "2.950832", "3.567749", "0.396343", "5.168259", "6.340202", "9.461856", "9.933385", "1.144523"], axisLabel:{color:'#888'} },
+  yAxis: { type:'value', name:'熵值', axisLabel:{color:'#888'} },
+  series: [{ data:[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], type:'line', smooth:true,
+    lineStyle:{color:'#d4af37',width:3}, itemStyle:{color:'#d4af37'},
+    areaStyle:{color:'rgba(212,175,55,0.1)'} }],
+  grid:{left:50,right:20,top:20,bottom:30}
+});
+// 秩序参数雷达
+var orderRadar = echarts.init(document.getElementById('orderRadar'));
+orderRadar.setOption({
+  tooltip:{},
+  radar:{ indicator:[
+    {name:'熵减率',max:1},{name:'结构密度',max:1},{name:'连接度',max:1},
+    {name:'秩序度',max:1},{name:'置信度',max:1},{name:'纯度',max:1}
+  ], axisName:{color:'#aaa'} },
+  series:[{ type:'radar', data:[{ value:[
+    0,
+    1.0,
+    0.0,
+    0.3,
+    0.75, 0.80
+  ], name:'当前秩序参数', areaStyle:{color:'rgba(212,175,55,0.3)'}, lineStyle:{color:'#d4af37'} }] }]
+});
+// 负熵注入流程
+var negentropyFlow = echarts.init(document.getElementById('negentropyFlow'));
+negentropyFlow.setOption({
+  tooltip:{trigger:'item'},
+  series:[{ type:'sankey', layout:'none',
+    data:[{name:'原始信息'},{name:'贝叶斯更新'},{name:'置信度蒸馏'},{name:'结构化'},{name:'分类关联'},{name:'有序真值'}],
+    links:[
+      {source:'原始信息',target:'贝叶斯更新',value:100},
+      {source:'贝叶斯更新',target:'置信度蒸馏',value:85},
+      {source:'置信度蒸馏',target:'结构化',value:75},
+      {source:'结构化',target:'分类关联',value:70},
+      {source:'分类关联',target:'有序真值',value:65}
+    ],
+    lineStyle:{color:'gradient',curveness:0.5}, label:{color:'#eee'}
+  }]
+});
+// 相变仪表盘
+var phaseGauge = echarts.init(document.getElementById('phaseGauge'));
+phaseGauge.setOption({
+  series:[{ type:'gauge', min:0, max:1,
+    axisLine:{lineStyle:{width:20,color:[[0.35,'#4ade80'],[0.5,'#d4af37'],[0.65,'#f59e0b'],[1,'#ef4444']]}},
+    pointer:{itemStyle:{color:'#d4af37'}},
+    detail:{valueAnimation:true,formatter:'{value}',color:'#d4af37',fontSize:24},
+    data:[{value:0.0000,name:'系统熵'}]
+  }]
+});
+window.addEventListener('resize',function(){
+  entropyTrend.resize(); orderRadar.resize(); negentropyFlow.resize(); phaseGauge.resize();
+});
+</script>
+</body>
+</html>

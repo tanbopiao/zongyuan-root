@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火斗云智AIOS - 元运维总控台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0e1a;
+            color: #e0e6f0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1f35 0%, #0d1225 100%);
+            border-bottom: 1px solid #2a3050;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .status {
+            display: flex;
+            gap: 24px;
+            font-size: 13px;
+        }
+        .status-item { display: flex; align-items: center; gap: 8px; }
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .nav {
+            background: #11162a;
+            border-bottom: 1px solid #2a3050;
+            padding: 0 32px;
+            display: flex;
+            gap: 4px;
+        }
+        .nav-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #8b95b0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .nav-item:hover { color: #c0c8e0; background: #1a1f35; }
+        .nav-item.active {
+            color: #00d4ff;
+            border-bottom-color: #00d4ff;
+            background: #1a1f35;
+        }
+        .main { padding: 24px 32px; }
+        .module { display: none; }
+        .module.active { display: block; }
+        .card {
+            background: #11162a;
+            border: 1px solid #2a3050;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #e0e6f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-title .badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 10px;
+            background: #1e3a5f;
+            color: #00d4ff;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #1a1f35 0%, #11162a 100%);
+            border: 1px solid #2a3050;
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .stat-label { font-size: 12px; color: #8b95b0; margin-bottom: 8px; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #00d4ff; }
+        .stat-value.green { color: #10b981; }
+        .stat-value.orange { color: #f59e0b; }
+        .stat-value.red { color: #ef4444; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th {
+            text-align: left;
+            padding: 12px;
+            background: #1a1f35;
+            color: #8b95b0;
+            font-weight: 500;
+            border-bottom: 1px solid #2a3050;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #1e2540;
+            color: #c0c8e0;
+        }
+        tr:hover { background: #1a1f35; }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .tag.online { background: #0d3b2e; color: #10b981; }
+        .tag.offline { background: #3b1a1a; color: #ef4444; }
+        .tag.critical { background: #3b1a1a; color: #ef4444; }
+        .tag.high { background: #3b2a0d; color: #f59e0b; }
+        .tag.medium { background: #1e3a5f; color: #00d4ff; }
+        .tag.low { background: #2a3050; color: #8b95b0; }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #0a0e1a;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,212,255,0.3); }
+        .btn-secondary {
+            background: #2a3050;
+            color: #c0c8e0;
+        }
+        .btn-secondary:hover { background: #3a4070; }
+        .btn-danger { background: #3b1a1a; color: #ef4444; }
+        .btn-danger:hover { background: #4b2a2a; }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 14px;
+            background: #1a1f35;
+            border: 1px solid #2a3050;
+            border-radius: 6px;
+            color: #e0e6f0;
+            font-size: 13px;
+        }
+        .search-box:focus { outline: none; border-color: #00d4ff; }
+        .log-box {
+            background: #0a0e1a;
+            border: 1px solid #2a3050;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            height: 300px;
+            overflow-y: auto;
+            color: #10b981;
+        }
+        .log-line { margin-bottom: 4px; }
+        .log-time { color: #8b95b0; }
+        .log-info { color: #00d4ff; }
+        .log-warn { color: #f59e0b; }
+        .log-error { color: #ef4444; }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #5a6580;
+            font-size: 12px;
+            border-top: 1px solid #2a3050;
+            margin-top: 40px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #11162a;
+            border: 1px solid #2a3050;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #8b95b0; margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            background: #1a1f35;
+            border: 1px solid #2a3050;
+            border-radius: 6px;
+            color: #e0e6f0;
+            font-size: 13px;
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚡ 火斗云智AIOS · 元运维总控台</h1>
+        <div class="status">
+            <div class="status-item"><div class="status-dot"></div><span>9120网关在线</span></div>
+            <div class="status-item"><span id="currentTime">--:--:--</span></div>
+        </div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-item active" onclick="switchModule('overview')">📊 全域概览</div>
+        <div class="nav-item" onclick="switchModule('nodes')">🖥️ 节点管理</div>
+        <div class="nav-item" onclick="switchModule('tasks')">📋 任务调度</div>
+        <div class="nav-item" onclick="switchModule('rules')">📜 规则管理</div>
+        <div class="nav-item" onclick="switchModule('truth')">💎 真值管理</div>
+        <div class="nav-item" onclick="switchModule('ops')">🔧 一键运维</div>
+        <div class="nav-item" onclick="switchModule('deploy')">🚀 部署流水线</div>
+        <div class="nav-item" onclick="switchModule('sync')">🔄 同步状态</div>
+    </div>
+
+    <div class="main">
+        <!-- 全域概览仪表盘 -->
+        <div id="module-overview" class="module active">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">同源节点总数</div><div class="stat-value" id="ovNodes">--</div></div>
+                <div class="stat-card"><div class="stat-label">在线节点</div><div class="stat-value green" id="ovOnline">--</div></div>
+                <div class="stat-card"><div class="stat-label">元规则总数</div><div class="stat-value" id="ovRules">--</div></div>
+                <div class="stat-card"><div class="stat-label">记忆锚点</div><div class="stat-value orange" id="ovAnchors">--</div></div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">9120网关状态</div><div class="stat-value green" id="ovGateway">--</div></div>
+                <div class="stat-card"><div class="stat-label">写入队列</div><div class="stat-value" id="ovQueue">--</div></div>
+                <div class="stat-card"><div class="stat-label">今日操作</div><div class="stat-value orange" id="ovOps">--</div></div>
+                <div class="stat-card"><div class="stat-label">系统健康度</div><div class="stat-value green" id="ovHealth">--%</div></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card">
+                    <div class="card-title">节点状态分布 <span class="badge">实时</span></div>
+                    <div id="nodeStatusChart" style="height: 200px; display: flex; align-items: center; justify-content: center; color: #8b95b0;">加载中...</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">规则优先级分布 <span class="badge">9120权威源</span></div>
+                    <div id="rulePriorityChart" style="height: 200px; display: flex; align-items: center; justify-content: center; color: #8b95b0;">加载中...</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">最近操作记录 <span class="badge">操作日志</span></div>
+                <table id="recentOpsTable">
+                    <thead><tr><th>时间</th><th>操作类型</th><th>目标</th><th>操作人</th><th>状态</th></tr></thead>
+                    <tbody><tr><td colspan="5" style="text-align:center;color:#8b95b0;">加载中...</td></tr></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <div class="card-title">快捷操作 <span class="badge">一键执行</span></div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                    <button class="btn btn-primary" onclick="runOp('health_check', '全节点健康检查')">🏥 健康检查</button>
+                    <button class="btn btn-primary" onclick="runOp('sync_rules', '同步最新规则')">📜 同步规则</button>
+                    <button class="btn btn-primary" onclick="runOp('pull_truth', '拉取云端真值')">💎 拉取真值</button>
+                    <button class="btn btn-secondary" onclick="runOp('clean_logs', '清理过期日志')">🧹 清理日志</button>
+                    <button class="btn btn-secondary" onclick="refreshOverview()">🔄 刷新概览</button>
+                    <button class="btn btn-secondary" onclick="switchModule('nodes')">🖥️ 节点管理</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 节点管理模块 -->
+        <div id="module-nodes" class="module">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">注册节点总数</div><div class="stat-value" id="nodeTotal">--</div></div>
+                <div class="stat-card"><div class="stat-label">在线节点</div><div class="stat-value green" id="nodeOnline">--</div></div>
+                <div class="stat-card"><div class="stat-label">离线节点</div><div class="stat-value red" id="nodeOffline">--</div></div>
+                <div class="stat-card"><div class="stat-label">今日心跳次数</div><div class="stat-value orange" id="nodeHeartbeats">--</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">同源节点列表 <span class="badge">实时同步</span></div>
+                <div class="action-bar">
+                    <input type="text" class="search-box" placeholder="搜索节点ID/名称..." oninput="filterNodes(this.value)">
+                    <button class="btn btn-primary" onclick="refreshNodes()">🔄 刷新节点</button>
+                    <button class="btn btn-secondary" onclick="showRegisterModal()">➕ 注册新节点</button>
+                </div>
+                <table id="nodesTable">
+                    <thead><tr><th>节点ID</th><th>节点名称</th><th>类型</th><th>状态</th><th>最后心跳</th><th>操作</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 任务调度模块 -->
+        <div id="module-tasks" class="module">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">待处理任务</div><div class="stat-value orange" id="taskPending">--</div></div>
+                <div class="stat-card"><div class="stat-label">执行中任务</div><div class="stat-value" id="taskRunning">--</div></div>
+                <div class="stat-card"><div class="stat-label">已完成任务</div><div class="stat-value green" id="taskDone">--</div></div>
+                <div class="stat-card"><div class="stat-label">失败任务</div><div class="stat-value red" id="taskFailed">--</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">任务队列 <span class="badge">分布式调度</span></div>
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="showTaskModal()">➕ 下发新任务</button>
+                    <button class="btn btn-secondary" onclick="refreshTasks()">🔄 刷新任务</button>
+                </div>
+                <table id="tasksTable">
+                    <thead><tr><th>任务ID</th><th>目标节点</th><th>任务类型</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 规则管理模块 -->
+        <div id="module-rules" class="module">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">元规则总数</div><div class="stat-value" id="ruleTotal">--</div></div>
+                <div class="stat-card"><div class="stat-label">Critical级</div><div class="stat-value red" id="ruleCritical">--</div></div>
+                <div class="stat-card"><div class="stat-label">High级</div><div class="stat-value orange" id="ruleHigh">--</div></div>
+                <div class="stat-card"><div class="stat-label">记忆锚点</div><div class="stat-value green" id="anchorTotal">--</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">元规则列表 <span class="badge">9120权威源</span></div>
+                <div class="action-bar">
+                    <input type="text" class="search-box" placeholder="搜索规则ID/名称..." oninput="filterRules(this.value)">
+                    <button class="btn btn-primary" onclick="syncRules()">🔄 同步最新规则</button>
+                    <button class="btn btn-secondary" onclick="refreshRules()">📋 刷新列表</button>
+                </div>
+                <table id="rulesTable">
+                    <thead><tr><th>规则ID</th><th>规则名称</th><th>版本</th><th>优先级</th><th>状态</th><th>操作</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 真值管理模块 -->
+        <div id="module-truth" class="module">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">真值总数</div><div class="stat-value" id="truthTotal">--</div></div>
+                <div class="stat-card"><div class="stat-label">今日新增</div><div class="stat-value green" id="truthToday">--</div></div>
+                <div class="stat-card"><div class="stat-label">高置信度</div><div class="stat-value orange" id="truthHighConf">--</div></div>
+                <div class="stat-card"><div class="stat-label">待验证</div><div class="stat-value red" id="truthPending">--</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">真值库 <span class="badge">真值优先</span></div>
+                <div class="action-bar">
+                    <input type="text" class="search-box" placeholder="搜索真值key..." id="truthSearchKey">
+                    <button class="btn btn-primary" onclick="searchTruth()">🔍 查询真值</button>
+                    <button class="btn btn-secondary" onclick="showTruthModal()">➕ 上报真值</button>
+                </div>
+                <div id="truthResult" style="margin-top: 16px;"></div>
+            </div>
+        </div>
+
+        <!-- 一键运维模块 -->
+        <div id="module-ops" class="module">
+            <div class="card">
+                <div class="card-title">一键运维操作 <span class="badge">安全可控</span></div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                    <button class="btn btn-primary" style="padding: 20px; font-size: 14px;" onclick="runOp('health_check', '全节点健康检查')">🏥 全节点健康检查</button>
+                    <button class="btn btn-primary" style="padding: 20px; font-size: 14px;" onclick="runOp('sync_rules', '同步最新规则')">📜 同步最新规则</button>
+                    <button class="btn btn-primary" style="padding: 20px; font-size: 14px;" onclick="runOp('pull_truth', '拉取云端真值')">💎 拉取云端真值</button>
+                    <button class="btn btn-secondary" style="padding: 20px; font-size: 14px;" onclick="runOp('clean_logs', '清理过期日志')">🧹 清理过期日志</button>
+                    <button class="btn btn-secondary" style="padding: 20px; font-size: 14px;" onclick="runOp('restart_gateway', '重启9120网关')">🔄 重启9120网关</button>
+                    <button class="btn btn-danger" style="padding: 20px; font-size: 14px;" onclick="runOp('full_backup', '全量备份')">💾 全量备份</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">操作日志 <span class="badge">实时输出</span></div>
+                <div class="log-box" id="opsLog">
+                    <div class="log-line"><span class="log-time">[系统]</span> <span class="log-info">元运维总控台已就绪，等待操作指令...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 部署流水线模块 -->
+        <div id="module-deploy" class="module">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">部署任务总数</div><div class="stat-value" id="deployTotal">--</div></div>
+                <div class="stat-card"><div class="stat-label">待审批</div><div class="stat-value orange" id="deployPending">--</div></div>
+                <div class="stat-card"><div class="stat-label">已部署</div><div class="stat-value green" id="deployDone">--</div></div>
+                <div class="stat-card"><div class="stat-label">部署成功率</div><div class="stat-value" id="deployRate">--%</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">部署流水线 <span class="badge">审批→部署→验证</span></div>
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="showDeployModal()">➕ 提交部署申请</button>
+                    <button class="btn btn-secondary" onclick="refreshDeploys()">🔄 刷新部署</button>
+                </div>
+                <table id="deployTable">
+                    <thead><tr><th>部署ID</th><th>包名称</th><th>目标节点</th><th>版本</th><th>状态</th><th>操作</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        火斗云智AIOS · 元运维总控台 V1.0 | Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 锚定元极恒一
+    </div>
+
+    <!-- 注册节点弹窗 -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-title">注册新节点</div>
+            <div class="form-group"><label>节点ID</label><input type="text" id="newNodeId" placeholder="NODE-XXX-001"></div>
+            <div class="form-group"><label>节点名称</label><input type="text" id="newNodeName" placeholder="我的开发终端"></div>
+            <div class="form-group"><label>节点类型</label>
+                <select id="newNodeType">
+                    <option value="development">开发节点</option>
+                    <option value="production">生产节点</option>
+                    <option value="research">研究节点</option>
+                    <option value="meta_order_engine">元秩序引擎</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('registerModal')">取消</button>
+                <button class="btn btn-primary" onclick="registerNode()">注册</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 下发任务弹窗 -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-title">下发新任务</div>
+            <div class="form-group"><label>目标节点</label><input type="text" id="taskTargetNode" placeholder="节点ID"></div>
+            <div class="form-group"><label>任务类型</label>
+                <select id="taskType">
+                    <option value="deploy">部署任务</option>
+                    <option value="backup">备份任务</option>
+                    <option value="cleanup">清理任务</option>
+                    <option value="sync">同步任务</option>
+                    <option value="custom">自定义任务</option>
+                </select>
+            </div>
+            <div class="form-group"><label>任务描述</label><textarea id="taskDesc" placeholder="详细描述任务内容..."></textarea></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('taskModal')">取消</button>
+                <button class="btn btn-primary" onclick="submitTask()">下发</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上报真值弹窗 -->
+    <div class="modal" id="truthModal">
+        <div class="modal-content">
+            <div class="modal-title">上报新真值</div>
+            <div class="form-group"><label>真值Key</label><input type="text" id="truthKey" placeholder="例如：SYSTEM.STATUS"></div>
+            <div class="form-group"><label>真值Value</label><textarea id="truthValue" placeholder="真值内容（JSON或文本）"></textarea></div>
+            <div class="form-group"><label>分类</label>
+                <select id="truthCategory">
+                    <option value="system">系统</option>
+                    <option value="deployment">部署</option>
+                    <option value="rule">规则</option>
+                    <option value="methodology">方法论</option>
+                    <option value="decision">决策</option>
+                    <option value="custom">自定义</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('truthModal')">取消</button>
+                <button class="btn btn-primary" onclick="submitTruth()">上报</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- 同步状态模块 -->
+        <div id="module-sync" class="module">
+            <div class="module-header">
+                <h2>🔄 自动记忆固化与双向同步状态</h2>
+                <p style="color:#8899bb;font-size:13px;">实时监控9120真值库 ↔ MR-019长期记忆库的自动同步状态</p>
+            </div>
+            <div id="sync-content" style="padding:20px;">
+                <div style="text-align:center;padding:40px;color:#8899bb;">点击「🔄 同步状态」加载数据...</div>
+            </div>
+        </div>
+
+    <!-- 部署申请弹窗 -->
+    <div class="modal" id="deployModal">
+        <div class="modal-content">
+            <div class="modal-title">提交部署申请</div>
+            <div class="form-group"><label>包名称</label><input type="text" id="deployName" placeholder="例如：memory-gateway-fix"></div>
+            <div class="form-group"><label>目标节点</label><input type="text" id="deployNode" placeholder="节点ID"></div>
+            <div class="form-group"><label>版本号</label><input type="text" id="deployVersion" placeholder="v1.0.0"></div>
+            <div class="form-group"><label>部署包URL</label><input type="text" id="deployUrl" placeholder="https://..."></div>
+            <div class="form-group"><label>部署说明</label><textarea id="deployDesc" placeholder="部署内容和变更说明..."></textarea></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('deployModal')">取消</button>
+                <button class="btn btn-primary" onclick="submitDeploy()">提交申请</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/memory-gateway';
+        let allNodes = [], allRules = [], allTasks = [], allDeploys = [];
+
+        // 时间更新
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('zh-CN');
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 模块切换
+        function switchModule(name) {
+            document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('module-' + name).classList.add('active');
+            event.target.classList.add('active');
+            if (name === 'overview') refreshOverview();
+            if (name === 'nodes') refreshNodes();
+            if (name === 'tasks') refreshTasks();
+            if (name === 'rules') refreshRules();
+            if (name === 'deploy') refreshDeploys();
+            if (name === 'sync') loadSyncStatus();
+        }
+
+        // 日志输出
+        function addLog(type, msg) {
+            const logBox = document.getElementById('opsLog');
+            const time = new Date().toLocaleTimeString('zh-CN');
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${msg}</span>`;
+            logBox.appendChild(line);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // 节点管理
+        async function refreshNodes() {
+            try {
+                const res = await fetch(API_BASE + '/api/nodes');
+                const data = await res.json();
+                allNodes = Object.values(data.nodes || {});
+                renderNodes(allNodes);
+                document.getElementById('nodeTotal').textContent = allNodes.length;
+                document.getElementById('nodeOnline').textContent = allNodes.filter(n => n.online_status === 'online').length;
+                document.getElementById('nodeOffline').textContent = allNodes.filter(n => n.online_status !== 'online').length;
+                addLog('info', `节点列表已刷新，共 ${allNodes.length} 个节点`);
+            } catch (e) {
+                addLog('error', '刷新节点失败: ' + e.message);
+            }
+        }
+
+        function renderNodes(nodes) {
+            const tbody = document.querySelector('#nodesTable tbody');
+            tbody.innerHTML = nodes.map(n => `
+                <tr>
+                    <td><code>${n.node_id}</code></td>
+                    <td>${n.node_name || '-'}</td>
+                    <td>${n.node_type || '-'}</td>
+                    <td><span class="tag ${n.online_status === 'online' ? 'online' : 'offline'}">${n.online_status || 'unknown'}</span></td>
+                    <td>${n.last_heartbeat ? new Date(n.last_heartbeat * 1000).toLocaleString('zh-CN') : '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="viewNode('${n.node_id}')">详情</button>
+                        <button class="btn btn-sm btn-primary" onclick="sendHeartbeat('${n.node_id}')">心跳</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterNodes(keyword) {
+            const filtered = allNodes.filter(n => 
+                n.node_id.toLowerCase().includes(keyword.toLowerCase()) ||
+                (n.node_name || '').toLowerCase().includes(keyword.toLowerCase())
+            );
+            renderNodes(filtered);
+        }
+
+        function viewNode(id) { addLog('info', `查看节点详情: ${id}`); }
+        function sendHeartbeat(id) { addLog('info', `向节点 ${id} 发送心跳指令`); }
+
+        // 任务管理
+        async function refreshTasks() {
+            try {
+                const statsRes = await fetch(API_BASE + '/api/scheduler/stats');
+                const statsData = await statsRes.json();
+                const stats = statsData.stats || {};
+                document.getElementById('taskPending').textContent = stats.pending || 0;
+                document.getElementById('taskRunning').textContent = stats.running || 0;
+                document.getElementById('taskSuccess').textContent = stats.success || 0;
+                document.getElementById('taskFailed').textContent = stats.failed || 0;
+                document.getElementById('taskTotal').textContent = stats.total || 0;
+                document.getElementById('taskActions').textContent = stats.schedule_actions || 0;
+                const tasksRes = await fetch(API_BASE + '/api/scheduler/tasks');
+                const tasksData = await tasksRes.json();
+                const tasks = tasksData.tasks || [];
+                const tbody = document.querySelector('#taskTable tbody');
+                if (tasks.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8b95b0;">暂无任务</td></tr>';
+                } else {
+                    tbody.innerHTML = tasks.map(function(task) {
+                        const statusText = {pending:'待处理',assigned:'已分配',running:'执行中',success:'已完成',failed:'失败'}[task.status] || task.status;
+                        return '<tr><td style="font-family:monospace;font-size:11px;">' + task.task_id + '</td><td>' + task.task_type + '</td><td>' + (task.task_name || '-') + '</td><td><span class="tag ' + task.priority + '">' + task.priority + '</span></td><td><span class="tag ' + task.status + '">' + statusText + '</span></td><td style="font-size:11px;">' + (task.created_at ? task.created_at.substring(0,19) : '-') + '</td><td>-</td></tr>';
+                    }).join('');
+                }
+                addLog('success', '任务列表已刷新，共 ' + tasks.length + ' 个任务');
+            } catch (e) {
+                addLog('error', '刷新任务失败: ' + e.message);
+            }
+        }
+
+        // 规则管理
+        async function refreshRules() {
+            try {
+                const res = await fetch(API_BASE + '/api/rules/list');
+                const data = await res.json();
+                allRules = data.rules || [];
+                renderRules(allRules);
+                document.getElementById('ruleTotal').textContent = allRules.length;
+                document.getElementById('ruleCritical').textContent = allRules.filter(r => r.priority === 'critical').length;
+                document.getElementById('ruleHigh').textContent = allRules.filter(r => r.priority === 'high').length;
+                addLog('info', `规则列表已刷新，共 ${allRules.length} 条规则`);
+            } catch (e) {
+                addLog('error', '刷新规则失败: ' + e.message);
+            }
+            // 锚点数量
+            try {
+                const res = await fetch(API_BASE + '/api/anchors/list');
+                const data = await res.json();
+                document.getElementById('anchorTotal').textContent = data.count || 0;
+            } catch (e) {}
+        }
+
+        function renderRules(rules) {
+            const tbody = document.querySelector('#rulesTable tbody');
+            tbody.innerHTML = rules.map(r => `
+                <tr>
+                    <td><code>${r.rule_id}</code></td>
+                    <td>${r.rule_name || '-'}</td>
+                    <td>${r.version || '-'}</td>
+                    <td><span class="tag ${r.priority || 'low'}">${r.priority || 'low'}</span></td>
+                    <td><span class="tag ${r.status === 'active' ? 'online' : 'offline'}">${r.status || 'unknown'}</span></td>
+                    <td><button class="btn btn-sm btn-secondary" onclick="viewRule('${r.rule_id}')">查看</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function filterRules(keyword) {
+            const filtered = allRules.filter(r =>
+                r.rule_id.toLowerCase().includes(keyword.toLowerCase()) ||
+                (r.rule_name || '').toLowerCase().includes(keyword.toLowerCase())
+            );
+            renderRules(filtered);
+        }
+
+        function viewRule(id) {
+            const rule = allRules.find(r => r.rule_id === id);
+            if (rule) {
+                alert(`规则详情:\n\nID: ${rule.rule_id}\n名称: ${rule.rule_name}\n版本: ${rule.version}\n优先级: ${rule.priority}\n\n描述: ${rule.description || '无'}`);
+            }
+        }
+
+        async function syncRules() {
+            addLog('info', '开始同步最新规则...');
+            try {
+                const res = await fetch(API_BASE + '/api/rules/sync');
+                const data = await res.json();
+                addLog('info', `同步完成: ${data.rules_count} 条规则, ${data.anchors_count} 条锚点`);
+                refreshRules();
+            } catch (e) {
+                addLog('error', '同步失败: ' + e.message);
+            }
+        }
+
+        // 真值管理
+        async function searchTruth() {
+            const key = document.getElementById('truthSearchKey').value.trim();
+            if (!key) { addLog('warn', '请输入要查询的真值key'); return; }
+            try {
+                const res = await fetch(API_BASE + '/api/truth/' + encodeURIComponent(key));
+                const data = await res.json();
+                const resultDiv = document.getElementById('truthResult');
+                if (data.truth) {
+                    resultDiv.innerHTML = `
+                        <div class="card" style="margin:0;">
+                            <div class="card-title">真值详情 <span class="badge">置信度: ${data.truth.confidence || 'N/A'}</span></div>
+                            <p><strong>Key:</strong> <code>${data.truth.truth_key}</code></p>
+                            <p style="margin-top:8px;"><strong>Value:</strong></p>
+                            <pre style="background:#0a0e1a;padding:12px;border-radius:6px;margin-top:8px;overflow-x:auto;">${JSON.stringify(data.truth.truth_value, null, 2)}</pre>
+                            <p style="margin-top:8px;"><strong>分类:</strong> ${data.truth.category || '-'}</p>
+                            <p style="margin-top:4px;"><strong>哈希:</strong> <code>${data.truth.truth_hash || '-'}</code></p>
+                        </div>
+                    `;
+                    addLog('info', `查询真值成功: ${key}`);
+                } else {
+                    resultDiv.innerHTML = `<p style="color:#f59e0b;">未找到真值: ${key}</p>`;
+                    addLog('warn', `未找到真值: ${key}`);
+                }
+            } catch (e) {
+                addLog('error', '查询失败: ' + e.message);
+            }
+        }
+
+        async function submitTruth() {
+            const key = document.getElementById('truthKey').value.trim();
+            const value = document.getElementById('truthValue').value.trim();
+            const category = document.getElementById('truthCategory').value;
+            if (!key || !value) { addLog('warn', '请填写key和value'); return; }
+            try {
+                const res = await fetch(API_BASE + '/api/truth/upsert', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({key, value, category, node_id: 'ops-console'})
+                });
+                const data = await res.json();
+                addLog('info', `真值上报成功: ${key}`);
+                closeModal('truthModal');
+            } catch (e) {
+                addLog('error', '上报失败: ' + e.message);
+            }
+        }
+
+        // 一键运维
+        function runOp(op, name) {
+            addLog('info', `执行操作: ${name} (${op})`);
+            setTimeout(() => {
+                addLog('info', `${name} 指令已下发到目标节点`);
+                addLog('info', `等待节点执行并回传结果...`);
+            }, 500);
+        }
+
+        // 部署管理
+        async function refreshDeploys() {
+            allDeploys = [];
+            document.getElementById('deployTotal').textContent = '0';
+            document.getElementById('deployPending').textContent = '0';
+            document.getElementById('deployDone').textContent = '0';
+            document.getElementById('deployRate').textContent = '--';
+            document.querySelector('#deployTable tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8b95b0;">暂无部署数据</td></tr>';
+        }
+
+        // 弹窗控制
+        function showRegisterModal() { document.getElementById('registerModal').classList.add('active'); }
+        function showTaskModal() { document.getElementById('taskModal').classList.add('active'); }
+        function showTruthModal() { document.getElementById('truthModal').classList.add('active'); }
+        function showDeployModal() { document.getElementById('deployModal').classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        async function registerNode() {
+            const id = document.getElementById('newNodeId').value.trim();
+            const name = document.getElementById('newNodeName').value.trim();
+            const type = document.getElementById('newNodeType').value;
+            if (!id || !name) { addLog('warn', '请填写节点ID和名称'); return; }
+            addLog('info', `注册节点: ${id} (${name})`);
+            closeModal('registerModal');
+            refreshNodes();
+        }
+
+        async function submitTask() {
+            const node = document.getElementById('taskTargetNode').value.trim();
+            const type = document.getElementById('taskType').value;
+            const desc = document.getElementById('taskDesc').value.trim();
+            if (!node) { addLog('warn', '请填写目标节点'); return; }
+            addLog('info', `任务已下发到节点 ${node}: ${type}`);
+            closeModal('taskModal');
+        }
+
+        async function submitDeploy() {
+            const name = document.getElementById('deployName').value.trim();
+            const node = document.getElementById('deployNode').value.trim();
+            const version = document.getElementById('deployVersion').value.trim();
+            if (!name || !node) { addLog('warn', '请填写包名称和目标节点'); return; }
+            addLog('info', `部署申请已提交: ${name} ${version} -> ${node}`);
+            addLog('info', '等待审批通过后自动部署...');
+            closeModal('deployModal');
+        }
+
+        // 全域概览仪表盘
+        async function refreshOverview() {
+            try {
+                // 节点统计
+                const nodeRes = await fetch(API_BASE + '/api/nodes');
+                const nodeData = await nodeRes.json();
+                const nodes = Object.values(nodeData.nodes || {});
+                document.getElementById('ovNodes').textContent = nodes.length;
+                const online = nodes.filter(n => n.online_status === 'online').length;
+                document.getElementById('ovOnline').textContent = online;
+                
+                // 规则统计
+                const ruleRes = await fetch(API_BASE + '/api/rules/list');
+                const ruleData = await ruleRes.json();
+                document.getElementById('ovRules').textContent = ruleData.count || 0;
+                
+                // 锚点统计
+                const anchorRes = await fetch(API_BASE + '/api/anchors/list');
+                const anchorData = await anchorRes.json();
+                document.getElementById('ovAnchors').textContent = anchorData.count || 0;
+                
+                // 网关状态
+                document.getElementById('ovGateway').textContent = '在线';
+                
+                // 写入队列统计
+                try {
+                    const queueRes = await fetch('/api/write-queue/api/write/stats');
+                    const queueData = await queueRes.json();
+                    document.getElementById('ovQueue').textContent = queueData.total_written || 0;
+                } catch(e) {
+                    document.getElementById('ovQueue').textContent = '--';
+                }
+                
+                // 健康度计算
+                const health = nodes.length > 0 ? Math.round((online / nodes.length) * 100) : 0;
+                document.getElementById('ovHealth').textContent = health;
+                
+                // 节点状态分布图
+                renderNodeStatusChart(nodes);
+                
+                // 规则优先级分布图
+                renderRulePriorityChart(ruleData.rules || []);
+                
+                // 最近操作记录
+                refreshRecentOps();
+                
+                addLog('info', '全域概览已刷新');
+            } catch (e) {
+                addLog('error', '刷新概览失败: ' + e.message);
+            }
+        }
+        
+        function renderNodeStatusChart(nodes) {
+            const online = nodes.filter(n => n.online_status === 'online').length;
+            const offline = nodes.length - online;
+            const chart = document.getElementById('nodeStatusChart');
+            chart.innerHTML = `
+                <div style="text-align:center;">
+                    <div style="font-size:48px;font-weight:700;color:#10b981;">${online}</div>
+                    <div style="color:#8b95b0;margin-top:4px;">在线 / ${nodes.length} 总数</div>
+                    <div style="margin-top:12px;display:flex;gap:16px;justify-content:center;">
+                        <span style="color:#10b981;">● 在线 ${online}</span>
+                        <span style="color:#ef4444;">● 离线 ${offline}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderRulePriorityChart(rules) {
+            const critical = rules.filter(r => r.priority === 'critical').length;
+            const high = rules.filter(r => r.priority === 'high').length;
+            const medium = rules.filter(r => r.priority === 'medium').length;
+            const low = rules.filter(r => r.priority === 'low' || !r.priority).length;
+            const chart = document.getElementById('rulePriorityChart');
+            chart.innerHTML = `
+                <div style="width:100%;padding:0 20px;">
+                    <div style="margin-bottom:8px;display:flex;justify-content:space-between;">
+                        <span style="color:#ef4444;">Critical</span><span>${critical}</span>
+                    </div>
+                    <div style="height:8px;background:#1a1f35;border-radius:4px;margin-bottom:12px;">
+                        <div style="height:100%;width:${rules.length?critical/rules.length*100:0}%;background:#ef4444;border-radius:4px;"></div>
+                    </div>
+                    <div style="margin-bottom:8px;display:flex;justify-content:space-between;">
+                        <span style="color:#f59e0b;">High</span><span>${high}</span>
+                    </div>
+                    <div style="height:8px;background:#1a1f35;border-radius:4px;margin-bottom:12px;">
+                        <div style="height:100%;width:${rules.length?high/rules.length*100:0}%;background:#f59e0b;border-radius:4px;"></div>
+                    </div>
+                    <div style="margin-bottom:8px;display:flex;justify-content:space-between;">
+                        <span style="color:#00d4ff;">Medium</span><span>${medium}</span>
+                    </div>
+                    <div style="height:8px;background:#1a1f35;border-radius:4px;margin-bottom:12px;">
+                        <div style="height:100%;width:${rules.length?medium/rules.length*100:0}%;background:#00d4ff;border-radius:4px;"></div>
+                    </div>
+                    <div style="margin-bottom:8px;display:flex;justify-content:space-between;">
+                        <span style="color:#8b95b0;">Low</span><span>${low}</span>
+                    </div>
+                    <div style="height:8px;background:#1a1f35;border-radius:4px;">
+                        <div style="height:100%;width:${rules.length?low/rules.length*100:0}%;background:#8b95b0;border-radius:4px;"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function refreshRecentOps() {
+            try {
+                const res = await fetch(API_BASE + '/api/operation-log/recent');
+                const data = await res.json();
+                const ops = data.data || [];
+                const tbody = document.querySelector('#recentOpsTable tbody');
+                if (ops.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#8b95b0;">暂无操作记录</td></tr>';
+                } else {
+                    tbody.innerHTML = ops.slice(0, 10).map(op => `
+                        <tr>
+                            <td>${op.timestamp ? new Date(op.timestamp).toLocaleString('zh-CN') : '-'}</td>
+                            <td>${op.operation_type || '-'}</td>
+                            <td>${op.target_file || '-'}</td>
+                            <td>${op.operator || '-'}</td>
+                            <td><span class="tag online">成功</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                document.querySelector('#recentOpsTable tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#8b95b0;">加载失败</td></tr>';
+            }
+        }
+
+        // 初始化
+        window.onload = function() {
+            refreshOverview();
+            addLog('info', '元运维总控台初始化完成');
+            addLog('info', '9120记忆网关连接正常');
+        };
+        
+        // 每30秒自动刷新概览
+        setInterval(() => {
+            if (document.getElementById('module-overview').classList.contains('active')) {
+                refreshOverview();
+            }
+        }, 30000);
+    
+        // ========== 同步状态看板 ==========
+        async function loadSyncStatus() {
+            const module = document.getElementById('sync-content');
+            if (!module) return;
+            
+            module.innerHTML = '<div style="text-align:center;padding:40px;color:#8899bb;">加载中...</div>';
+            
+            try {
+                const res = await fetch('/api/memory-gateway/api/sync-status/overview');
+                const data = await res.json();
+                
+                const statusColor = data.service_status === 'active' ? '#4ade80' : '#f87171';
+                const resultColor = data.last_run_result === 'success' ? '#4ade80' : '#f87171';
+                
+                module.innerHTML = `
+                    <div class="module-header">
+                        <h2>🔄 自动记忆固化与双向同步状态</h2>
+                        <p style="color:#8899bb;font-size:13px;">实时监控9120真值库 ↔ MR-019长期记忆库的自动同步状态</p>
+                    </div>
+                    
+                    <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
+                        <div class="stat-card" style="background:linear-gradient(135deg,#1e2540,#252d4a);border-radius:12px;padding:20px;border:1px solid #2a3355;">
+                            <div style="color:#8899bb;font-size:12px;margin-bottom:8px;">服务状态</div>
+                            <div style="font-size:24px;font-weight:bold;color:${statusColor};">${data.service_status === 'active' ? '✅ 运行中' : '❌ 已停止'}</div>
+                            <div style="color:#667799;font-size:11px;margin-top:4px;">auto-memory-consolidator</div>
+                        </div>
+                        
+                        <div class="stat-card" style="background:linear-gradient(135deg,#1e2540,#252d4a);border-radius:12px;padding:20px;border:1px solid #2a3355;">
+                            <div style="color:#8899bb;font-size:12px;margin-bottom:8px;">动态重要性阈值</div>
+                            <div style="font-size:24px;font-weight:bold;color:#60a5fa;">${(data.current_threshold * 100).toFixed(0)}%</div>
+                            <div style="color:#667799;font-size:11px;margin-top:4px;">基于增长速度自动调整</div>
+                        </div>
+                        
+                        <div class="stat-card" style="background:linear-gradient(135deg,#1e2540,#252d4a);border-radius:12px;padding:20px;border:1px solid #2a3355;">
+                            <div style="color:#8899bb;font-size:12px;margin-bottom:8px;">MR-019记忆总数</div>
+                            <div style="font-size:24px;font-weight:bold;color:#c084fc;">${data.mr019_total_memories}</div>
+                            <div style="color:#667799;font-size:11px;margin-top:4px;">长期记忆库</div>
+                        </div>
+                        
+                        <div class="stat-card" style="background:linear-gradient(135deg,#1e2540,#252d4a);border-radius:12px;padding:20px;border:1px solid #2a3355;">
+                            <div style="color:#8899bb;font-size:12px;margin-bottom:8px;">总运行次数</div>
+                            <div style="font-size:24px;font-weight:bold;color:#fbbf24;">${data.total_runs}</div>
+                            <div style="color:#667799;font-size:11px;margin-top:4px;">每60秒自动执行</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background:linear-gradient(135deg,#1e2540,#252d4a);border-radius:12px;padding:24px;border:1px solid #2a3355;margin-bottom:24px;">
+                        <h3 style="color:#e0e8ff;margin-bottom:16px;font-size:16px;">📊 累计同步统计</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">
+                            <div style="text-align:center;padding:16px;background:rgba(74,222,128,0.1);border-radius:8px;">
+                                <div style="font-size:28px;font-weight:bold;color:#4ade80;">${data.total_consolidated}</div>
+                                <div style="color:#8899bb;font-size:12px;margin-top:4px;">操作日志固化</div>
+                                <div style="color:#667799;font-size:10px;">9120 → MR-019</div>
+                            </div>
+                            <div style="text-align:center;padding:16px;background:rgba(96,165,250,0.1);border-radius:8px;">
+                                <div style="font-size:28px;font-weight:bold;color:#60a5fa;">${data.total_synced_g2m}</div>
+                                <div style="color:#8899bb;font-size:12px;margin-top:4px;">真值同步</div>
+                                <div style="color:#667799;font-size:10px;">9120 → MR-019</div>
+                            </div>
+                            <div style="text-align:center;padding:16px;background:rgba(192,132,252,0.1);border-radius:8px;">
+                                <div style="font-size:28px;font-weight:bold;color:#c084fc;">${data.total_synced_m2g}</div>
+                                <div style="color:#8899bb;font-size:12px;margin-top:4px;">记忆同步</div>
+                                <div style="color:#667799;font-size:10px;">MR-019 → 9120</div>
+                            </div>
+                            <div style="text-align:center;padding:16px;background:rgba(248,113,113,0.1);border-radius:8px;">
+                                <div style="font-size:28px;font-weight:bold;color:${data.total_failures > 0 ? '#f87171' : '#4ade80'};">${data.total_failures}</div>
+                                <div style="color:#8899bb;font-size:12px;margin-top:4px;">失败次数</div>
+                                <div style="color:#667799;font-size:10px;">连续失败: ${data.consecutive_failures}</div>
+                            </div>
+                            <div style="text-align:center;padding:16px;background:rgba(251,191,36,0.1);border-radius:8px;">
+                                <div style="font-size:28px;font-weight:bold;color:${data.total_alerts > 0 ? '#fbbf24' : '#4ade80'};">${data.total_alerts}</div>
+                                <div style="color:#8899bb;font-size:12px;margin-top:4px;">告警次数</div>
+                                <div style="color:#667799;font-size:10px;">连续失败≥3次触发</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background:linear-gradient(135deg,#1e2540,#252d4a);border-radius:12px;padding:24px;border:1px solid #2a3355;">
+                        <h3 style="color:#e0e8ff;margin-bottom:16px;font-size:16px;">🕐 最近运行信息</h3>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                            <div>
+                                <div style="color:#8899bb;font-size:12px;margin-bottom:4px;">最近运行时间</div>
+                                <div style="color:#e0e8ff;font-size:14px;">${data.last_run_time || '暂无记录'}</div>
+                            </div>
+                            <div>
+                                <div style="color:#8899bb;font-size:12px;margin-bottom:4px;">最近运行结果</div>
+                                <div style="font-size:14px;font-weight:bold;color:${resultColor};">${data.last_run_result === 'success' ? '✅ 成功' : '❌ 失败'}</div>
+                            </div>
+                        </div>
+                        <div style="margin-top:16px;padding-top:16px;border-top:1px solid #2a3355;">
+                            <button onclick="loadSyncStatus()" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px;">🔄 刷新状态</button>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                module.innerHTML = '<div style="text-align:center;padding:40px;color:#f87171;">加载失败: ' + e.message + '</div>';
+            }
+        }
+
+    </script>
+</body>
+</html>

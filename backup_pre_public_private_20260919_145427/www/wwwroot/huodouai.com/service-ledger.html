@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域服务台账 | 火斗云智AIOS</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#0a0a0f; color:#e0e0e0; line-height:1.6; }
+.container { max-width:1400px; margin:0 auto; padding:30px 20px; }
+.header { text-align:center; margin-bottom:40px; }
+.header h1 { font-size:2.2em; background:linear-gradient(135deg,#ffd700,#ff8c00); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px; }
+.header p { color:#888; }
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:15px; margin-bottom:40px; }
+.stat-card { background:linear-gradient(135deg,rgba(30,30,50,0.8),rgba(20,20,35,0.9)); border:1px solid rgba(255,215,0,0.15); border-radius:12px; padding:20px; text-align:center; }
+.stat-value { font-size:2em; font-weight:700; color:#ffd700; }
+.stat-label { color:#888; font-size:0.9em; margin-top:5px; }
+.section { margin-bottom:40px; }
+.section-title { font-size:1.4em; color:#ffd700; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid rgba(255,215,0,0.2); }
+.table-wrapper { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:0.9em; }
+th { background:rgba(255,215,0,0.1); color:#ffd700; padding:12px; text-align:left; position:sticky; top:0; }
+td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); }
+tr:hover { background:rgba(255,215,0,0.05); }
+.status-active { color:#4ade80; }
+.status-inactive { color:#f87171; }
+.port-public { color:#f87171; font-weight:600; }
+.port-local { color:#4ade80; }
+.priority-p0 { color:#ff6b6b; font-weight:600; }
+.priority-p1 { color:#ffb400; font-weight:600; }
+.priority-p2 { color:#64c8ff; }
+.priority-p3 { color:#888; }
+.category-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.8em; background:rgba(255,215,0,0.1); color:#ffd700; }
+.filter-bar { margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap; }
+.filter-btn { padding:8px 16px; border:1px solid rgba(255,215,0,0.3); background:transparent; color:#ffd700; border-radius:20px; cursor:pointer; transition:all 0.3s; }
+.filter-btn:hover, .filter-btn.active { background:rgba(255,215,0,0.2); }
+.footer { text-align:center; margin-top:50px; padding-top:30px; border-top:1px solid rgba(255,215,0,0.1); color:#666; font-size:0.85em; }
+@media (max-width:768px) { .stats { grid-template-columns:repeat(2,1fr); } table { font-size:0.8em; } th,td { padding:8px; } }
+</style>
+<style>
+/* 统一导航栏样式 */
+.nav-unified{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,10,15,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15)}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-brand{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;white-space:nowrap}
+.nav-menu{display:flex;align-items:center;gap:4px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 12px;color:#bbb;text-decoration:none;font-size:13.5px;transition:color .2s;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.06)}
+.nav-item.has-dropdown>a::after{content:"▾";font-size:10px;margin-left:4px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:160px;background:rgba(20,20,30,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;opacity:0;visibility:hidden;transform:translateY(8px);transition:all .2s;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.nav-item.has-dropdown:hover .dropdown{opacity:1;visibility:visible;transform:translateY(0)}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px;transition:all .15s}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px}
+@media(max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed;top:56px;left:0;right:0;bottom:0;background:rgba(10,10,15,0.98);flex-direction:column;align-items:stretch;gap:0;padding:10px 16px;overflow-y:auto;display:none;z-index:9998}
+  /* .nav-menu.active removed - using checkbox scheme */
+  .nav-item>a{padding:12px 14px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;background:transparent;padding:0 0 0 16px;display:none}
+  .nav-item.has-dropdown.open .dropdown{display:block}
+  .nav-item.has-dropdown>a::after{content:"+";font-size:16px;float:right}
+  .nav-item.has-dropdown.open>a::after{content:"−"}
+}
+
+
+/* ===== 移动端专项优化（480px以下） ===== */
+@media (max-width: 480px) {
+  body { padding-top: 48px !important; }
+  .container { padding: 0 14px !important; }
+  .nav-container { padding: 0 14px; height: 48px; }
+  .nav-brand { font-size: 14px; }
+  
+  /* Hero区域 */
+  .hero { padding: 40px 0 30px; }
+  .hero-symbol { font-size: 36px !important; margin-bottom: 12px; }
+  .hero h1 { font-size: 24px !important; line-height: 1.3; }
+  .hero-subtitle { font-size: 13px !important; }
+  .hero-desc { font-size: 14px !important; line-height: 1.6; }
+  .hero-stats { flex-direction: column; gap: 16px; }
+  .hero-stats .stat-num { font-size: 28px; }
+  .hero-stats .stat-label { font-size: 12px; }
+  
+  /* 按钮 */
+  .btn-gold { padding: 10px 20px; font-size: 13px; }
+  .btn-outline { padding: 10px 20px; font-size: 13px; }
+  
+  /* 标题 */
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 16px !important; }
+  .section-title { font-size: 20px; }
+  .section-subtitle { font-size: 13px; }
+  
+  /* 网格全部单列 */
+  .arch-grid { grid-template-columns: 1fr !important; gap: 12px; }
+  .concept-showcase { grid-template-columns: 1fr !important; }
+  .feature-grid { grid-template-columns: 1fr !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  
+  /* 卡片 */
+  .arch-card { padding: 16px; }
+  .arch-card h3 { font-size: 15px; }
+  .arch-card p { font-size: 13px; line-height: 1.6; }
+  
+  /* 表格横向滚动 */
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  th, td { padding: 8px 10px; font-size: 12px; white-space: nowrap; }
+  
+  /* 图片自适应 */
+  img { max-width: 100%; height: auto; }
+  
+  /* 代码块 */
+  pre, code { font-size: 12px; overflow-x: auto; }
+  
+  /* 页脚 */
+  footer { padding: 30px 0; font-size: 12px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+  
+  /* 段落间距 */
+  p { line-height: 1.7; }
+  section { padding: 40px 0; }
+}
+
+/* ===== 平板适配（768-900px） ===== */
+@media (max-width: 900px) and (min-width: 481px) {
+  .hero h1 { font-size: 36px; }
+  .hero-symbol { font-size: 50px; }
+  .arch-grid { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 0 20px; }
+}
+
+/* ===== 触摸优化 ===== */
+@media (hover: none) and (pointer: coarse) {
+  .nav-item.has-dropdown:hover .dropdown { opacity: 0; visibility: hidden; }
+  .nav-item.has-dropdown.open .dropdown { opacity: 1; visibility: visible; }
+  .arch-card:hover { transform: none; }
+  .arch-card:hover::before { transform: scaleX(0); }
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* ===== 纯CSS移动端导航（checkbox方案，不依赖JS） ===== */
+#navCheck:checked ~ .nav-unified .nav-menu {
+  transform: translateX(0) !important;
+  visibility: visible !important;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(2) {
+  opacity: 0;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+/* 移动端下拉菜单：用checkbox嵌套太复杂，改用target+hover兼容 */
+@media (max-width: 900px) {
+  .nav-item.has-dropdown > a::after { content: " +"; font-size: 16px; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus .dropdown { display: block; }
+  .dropdown { display: none; }
+  .nav-item.has-dropdown .dropdown { display: none; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus-within .dropdown { display: block; }
+}
+
+/* ===== 干净版导航（纯CSS，无JS依赖） ===== */
+#navCheck{display:none}
+.nav-unified{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:9999!important;background:rgba(10,10,15,0.95)!important;backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15);height:52px}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-brand{font-size:16px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-toggle{display:none;cursor:pointer;padding:8px;background:none;border:none;flex-direction:column;gap:5px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px;display:block}
+.nav-menu{display:flex;align-items:center;gap:2px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 10px;color:#bbb;text-decoration:none;font-size:13px;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-item.has-dropdown>a::after{content:" ▾";font-size:10px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:170px;background:rgba(15,15,25,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;display:none;z-index:10001;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.nav-item.has-dropdown:hover .dropdown{display:block}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+
+/* 移动端 */
+@media (max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed!important;top:52px!important;left:0!important;right:0!important;bottom:0!important;background:rgba(10,10,15,0.98)!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:10px 16px!important;overflow-y:auto!important;z-index:9998!important;display:none!important}
+  .nav-item>a{padding:14px 12px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .nav-item.has-dropdow
+</style>
+<meta name="description" content="服务账本 - 火斗云智AIOS服务注册与调用账本">
+<meta name="keywords" content="服务账本,服务注册,服务调用,火斗云智,AIOS">
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+<nav class="nav-unified" id="mainNav">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">火斗云智 AIOS</a>
+    <label class="nav-toggle" for="navCheck" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </label>
+    <div class="nav-menu" id="navMenu">
+      <div class="nav-item"><a href="/">首页</a></div>
+      <div class="nav-item"><a href="https://aios.huodouai.com" target="_blank" style="color:#d4af37;font-weight:600;">AIOS控制台 ↗</a></div>
+      <div class="nav-item has-dropdown">
+        <a href="/products.html">产品矩阵</a>
+        <div class="dropdown">
+          <a href="/products.html">产品总览</a>
+          <a href="/product-matrix.html">产品矩阵图</a>
+          <a href="/commercial.html">商业方案</a>
+          <a href="/cases.html">客户案例</a>
+          <a href="/pricing.html">定价方案</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/agent-network.html">智能体</a>
+        <div class="dropdown">
+          <a href="/agent-network.html">智能体网络</a>
+          <a href="/agent-embodiment.html">智能体实体化</a>
+          <a href="/high-capabilities.html">高阶能力中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/central-brain.html">中枢大脑</a>
+        <div class="dropdown">
+          <a href="/central-brain.html">中枢大脑</a>
+          <a href="/brain-strategy.html">战略全景</a>
+          <a href="/kernel-status.html">内核状态</a>
+          <a href="/bayesian-five-elements.html">贝叶斯五行引擎</a>
+          <a href="/unified-console.html">统一控制台</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/works-gallery-v2.html">作品中心</a>
+        <div class="dropdown">
+          <a href="/works-gallery-v2.html">作品库V2</a>
+          <a href="/drama/">短剧作品库</a>
+          <a href="/kunlun/">昆仑洞天</a>
+          <a href="/keyframe-gallery.html">关键帧资产库</a>
+          <a href="/digital-gallery-v3.html">数字画廊</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/architecture.html">技术架构</a>
+        <div class="dropdown">
+          <a href="/architecture.html">架构总览</a>
+          <a href="/microkernel-architecture.html">微内核架构</a>
+          <a href="/whitepaper.html">技术白皮书</a>
+          <a href="/developers.html">开发者中心</a>
+          <a href="/docs.html">文档中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/governance.html">治理战略</a>
+          <a href="/level-dual-axis.html">双轴层级</a>
+        <div class="dropdown">
+          <a href="/governance.html">治理体系</a>
+          <a href="/philosophy.html">思想体系</a>
+          <a href="/evolution-strategy.html">进化战略</a>
+          <a href="/lightweight-strategy.html">轻量化战略</a>
+          <a href="/axiom-system/">公理体系 ⭐</a>
+          <a href="/global-learning.html">全网学习</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/digital-assets.html">资产中心</a>
+        <div class="dropdown">
+          <a href="/digital-assets.html">数字资产</a>
+          <a href="/asset-center.html">资产中心</a>
+          <a href="/ledger.html">真值账本</a>
+          <a href="/experience-kb.html">经验库</a>
+          <a href="/aios/index.html">AIOS资产中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/aios/visual/cloud_brain_dashboard.html">实时监控</a>
+        <div class="dropdown">
+          <a href="/aios/visual/cloud_brain_dashboard.html">云脑仪表盘</a>
+          <a href="/aios/visual/kernel-dashboard.html">内核仪表盘</a>
+          <a href="/aios/visual/memory_gateway_monitor.html">记忆网关监控</a>
+          <a href="/aios/visual/scheduler_monitor_dashboard.html">调度器监控</a>
+          <a href="/system-dashboard.html">系统仪表盘</a>
+          <a href="/status-center.html">状态中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/auto-pipeline.html">更多</a>
+        <div class="dropdown">
+          <a href="/auto-pipeline.html">自动化流水线</a>
+          <a href="/model-compare-lab.html">模型对比实验室</a>
+          <a href="/education.html">普惠教育</a>
+          <a href="/search.html">全站搜索</a>
+          <a href="/performance.html">性能监控</a>
+          <a href="https://gov.huodouai.com" target="_blank">政务AI ↗</a>
+          <a href="https://status.huodouai.com" target="_blank">实时状态站 ↗</a>
+        </div>
+      </div>
+      <div class="nav-cta" style="display:flex;align-items:center;gap:12px;margin-left:20px;">
+        <a href="/book-demo.html" style="background:linear-gradient(135deg,#d4af37,#b8941f);color:#1a1a2e;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:13.5px;font-weight:600;transition:all .2s;white-space:nowrap;box-shadow:0 4px 15px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(212,175,55,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.3)'">预约演示</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <h1>全域服务台账</h1>
+    <p>ZONGYUAN-ROOT 元极恒一自治体系 · 70个服务全量登记</p>
+    <p style="margin-top:10px;">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 火斗云智AIOS</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-value">70</div><div class="stat-label">服务总数</div></div>
+    <div class="stat-card"><div class="stat-value">69</div><div class="stat-label">运行中</div></div>
+    <div class="stat-card"><div class="stat-value">71</div><div class="stat-label">端口总数</div></div>
+    <div class="stat-card"><div class="stat-value">34</div><div class="stat-label">公网暴露</div></div>
+    <div class="stat-card"><div class="stat-value">2490M</div><div class="stat-label">总内存占用</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">服务清单（按分类）</div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCategory('all')">全部</button>
+      <button class="filter-btn" onclick="filterCategory('DR自愈守护')">DR自愈守护(3)</button>
+      <button class="filter-btn" onclick="filterCategory('MR元法则引擎')">MR元法则引擎(9)</button>
+      <button class="filter-btn" onclick="filterCategory('其他业务')">其他业务(30)</button>
+      <button class="filter-btn" onclick="filterCategory('安全防御')">安全防御(3)</button>
+      <button class="filter-btn" onclick="filterCategory('政务AI中台')">政务AI中台(4)</button>
+      <button class="filter-btn" onclick="filterCategory('核心基础设施')">核心基础设施(5)</button>
+      <button class="filter-btn" onclick="filterCategory('短剧生产')">短剧生产(3)</button>
+      <button class="filter-btn" onclick="filterCategory('自治认知进化')">自治认知进化(8)</button>
+      <button class="filter-btn" onclick="filterCategory('飞书集成')">飞书集成(5)</button>
+    </div>
+    <div class="table-wrapper">
+      <table id="serviceTable">
+        <thead>
+          <tr><th>服务名</th><th>分类</th><th>状态</th><th>端口</th><th>内存</th><th>优先级</th><th>功能描述</th></tr>
+        </thead>
+        <tbody>
+          <tr data-category="DR自愈守护">
+            <td><code>dr-truth-absorber.service</code></td>
+            <td><span class="category-badge">DR自愈守护</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>44.0M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-009 Truth Auto-Absorber Daemon</td>
+          </tr>
+          <tr data-category="DR自愈守护">
+            <td><code>dr-self-healing-monitor.service</code></td>
+            <td><span class="category-badge">DR自愈守护</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>5.1M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-008 Full-Chain Self-Healing Monit</td>
+          </tr>
+          <tr data-category="DR自愈守护">
+            <td><code>dr-resource-monitor.service</code></td>
+            <td><span class="category-badge">DR自愈守护</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>5.0M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-007 Resource Steady-State Monitor</td>
+          </tr>
+          <tr data-category="MR元法则引擎">
+            <td><code>mr010-dual-compute-scheduler.service</code></td>
+            <td><span class="category-badge">MR元法则引擎</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>12.6M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-010 Dual-Compute Scheduler (Local</td>
+          </tr>
+          <tr data-category="MR元法则引擎">
+            <td><code>mr011-stability-evolution.service</code></td>
+            <td><span class="category-badge">MR元法则引擎</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>9.0M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-011 Stability Evolution Engine</td>
+          </tr>
+          <tr data-category="MR元法则引擎">
+            <td><code>mr018-multi-node.service</code></td>
+            <td><span class="category-badge">MR元法则引擎</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>6.0M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-018 Multi-Node Collaboration Engi</td>
+          </tr>
+          <tr data-category="MR元法则引擎">
+            <td><code>mr016-thinking-evolution.service</code></td>
+            <td><span class="category-badge">MR元法则引擎</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>5.9M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-016 Thinking Pattern Evolution</td>
+          </tr>
+          <tr data-category="MR元法则引擎">
+            <td><code>mr013-truth-unify.service</code></td>
+            <td><span class="category-badge">MR元法则引擎</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>5.4M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-013 Truth Unification Service</td>
+          </tr>
+          <tr data-category="MR元法则引擎">
+            <td><code>mr017-self-development.service</code></td>
+            <td><span class="category-badge">MR元法则引擎</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>4.3M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-017 Self Development Engine</td>
+          </tr>
+          <tr data-category="MR元法则引擎">
+            <td><code>mr012-kernel-bus.service</code></td>
+            <td><span class="category-badge">MR元法则引擎</span></td>
+            <td class="status-active">active</td>
+            <td>9121</td>
+            <td>4.2M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-012 Kernel Bus (元极内核总线)</td>
+          </tr>
+          <tr data-category="MR元法则引擎">
+            <td><code>mr019-long-term-memory.service</code></td>
+            <td><span class="category-badge">MR元法则引擎</span></td>
+            <td class="status-active">active</td>
+            <td>9124</td>
+            <td>4.2M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-019 Long Term Memory System</td>
+          </tr>
+          <tr data-category="MR元法则引擎">
+            <td><code>mr015-truth-generator.service</code></td>
+            <td><span class="category-badge">MR元法则引擎</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>2.2M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT MR-015 Active Truth Generator</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-geo-lattice-daemon.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>46.7M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT GEO-LATTICE Daemon (Auto Sync + Stab</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-geo-lattice.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>9151</td>
+            <td>18.0M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT GEO-LATTICE Multi-Model Truth Stabil</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-ai-proxy.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8021</td>
+            <td>16.9M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT AI-Proxy v8 (Port 8021)</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zr-observation.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>16.1M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 全域持续观测守护进程</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-media-auto-archive.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>15.2M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Media Auto Archive Daemon</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-root-cause.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>12.1M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 自动根因分析引擎</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-portal-updater.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>10.8M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 火斗云智AIOS官网动态迭代更新引擎</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zr-steady-ops.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8090</td>
+            <td>10.8M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Steady Ops Platform (8090)</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-global-propagation.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>10.7M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Global Methodology Propagation Daemo</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zr-ws-push.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>9140</td>
+            <td>7.5M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT WebSocket Push (9140)</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zr-op-scheduler.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8072</td>
+            <td>5.9M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Op Scheduler (8072)</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-service-ondemand.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>5.3M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 服务按需启停管理器</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-rag.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8085</td>
+            <td>4.9M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT RAG增强本地推理服务</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-task-persistence.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>9137</td>
+            <td>3.5M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Task Context Persistence Engine</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zr-mhp-handshake.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8099</td>
+            <td>3.4M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZR-MHP Homogeneous Protocol Handshake Receiver</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zr-meta-ops.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8098</td>
+            <td>3.3M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZR MetaOps Monitoring Service</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zr-task-scheduler.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>3.3M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Task Priority Scheduler</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-experience-center.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8046</td>
+            <td>3.2M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT AI Experience Center (Port 8046)</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-hrm.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8040</td>
+            <td>3.2M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT HRM Minimal System (Port 8040)</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-autonomy-api.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>9136</td>
+            <td>3.1M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Autonomy Dashboard API</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zr-identity-api.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8300</td>
+            <td>3.1M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Identity API (8300)</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>commercial-api.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>9099</td>
+            <td>2.8M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>HuodouAIOS Commercial API Gateway V1.0</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-gateway-evolution.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>9131</td>
+            <td>2.8M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Memory Gateway Evolution Engine</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-multi-agent-debate.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8185</td>
+            <td>2.2M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Multi-Agent Debate Engine</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-nexus.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>9443</td>
+            <td>1.5M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Nexus HTTPS Gateway</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-operator-panel.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8170</td>
+            <td>1.5M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Operator Management Panel</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-universal-agent-executor.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>8029</td>
+            <td>1.5M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Universal Agent Executor (Port 8029)</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-cos.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>9200</td>
+            <td>1.4M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Local COS</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-node-governance.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>9132</td>
+            <td>1.4M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Node Governance & Auto Absorber</td>
+          </tr>
+          <tr data-category="其他业务">
+            <td><code>zongyuan-unified-dispatcher.service</code></td>
+            <td><span class="category-badge">其他业务</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>1.4M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Unified Approval-to-Execution Dispat</td>
+          </tr>
+          <tr data-category="安全防御">
+            <td><code>zongyuan-global-guardian.service</code></td>
+            <td><span class="category-badge">安全防御</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>12.9M</td>
+            <td class="priority-p1">P1-重要</td>
+            <td>ZONGYUAN-ROOT 全域守护引擎 - 健康检查+自动自愈+资源保护+看门狗</td>
+          </tr>
+          <tr data-category="安全防御">
+            <td><code>zongyuan-honeypot.service</code></td>
+            <td><span class="category-badge">安全防御</span></td>
+            <td class="status-active">active</td>
+            <td>2222</td>
+            <td>8.2M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 蜜罐主动防御系统</td>
+          </tr>
+          <tr data-category="安全防御">
+            <td><code>zr-dynamic-ip-whitelist.service</code></td>
+            <td><span class="category-badge">安全防御</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>4.1M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Dynamic IP Whitelist Daemon</td>
+          </tr>
+          <tr data-category="政务AI中台">
+            <td><code>gov-gateway.service</code></td>
+            <td><span class="category-badge">政务AI中台</span></td>
+            <td class="status-active">active</td>
+            <td>8200</td>
+            <td>4.2M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 政务AI中台统一网关(鉴权/限流/路由)</td>
+          </tr>
+          <tr data-category="政务AI中台">
+            <td><code>gov-audit.service</code></td>
+            <td><span class="category-badge">政务AI中台</span></td>
+            <td class="status-active">active</td>
+            <td>8202</td>
+            <td>4.1M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 政务AI中台持久化审计(JSONL存储)</td>
+          </tr>
+          <tr data-category="政务AI中台">
+            <td><code>gov-dashboard.service</code></td>
+            <td><span class="category-badge">政务AI中台</span></td>
+            <td class="status-active">active</td>
+            <td>8203</td>
+            <td>4.1M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 政务AI中台大屏数据服务(实时聚合)</td>
+          </tr>
+          <tr data-category="政务AI中台">
+            <td><code>gov-operator-cluster.service</code></td>
+            <td><span class="category-badge">政务AI中台</span></td>
+            <td class="status-active">active</td>
+            <td>8201</td>
+            <td>4.1M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 政务AI中台算子集群服务</td>
+          </tr>
+          <tr data-category="核心基础设施">
+            <td><code>zongyuan-vector-server.service</code></td>
+            <td><span class="category-badge">核心基础设施</span></td>
+            <td class="status-active">active</td>
+            <td>8014</td>
+            <td>236.3M</td>
+            <td class="priority-p0">P0-核心</td>
+            <td>ZONGYUAN-ROOT ONNX Vector Server (bge-small-zh + C</td>
+          </tr>
+          <tr data-category="核心基础设施">
+            <td><code>zr-memory-gateway.service</code></td>
+            <td><span class="category-badge">核心基础设施</span></td>
+            <td class="status-active">active</td>
+            <td>9120</td>
+            <td>85.7M</td>
+            <td class="priority-p0">P0-核心</td>
+            <td>ZONGYUAN-ROOT Memory Gateway (9120)</td>
+          </tr>
+          <tr data-category="核心基础设施">
+            <td><code>nginx.service</code></td>
+            <td><span class="category-badge">核心基础设施</span></td>
+            <td class="status-active">active</td>
+            <td>443,80,8088</td>
+            <td>3.3M</td>
+            <td class="priority-p0">P0-核心</td>
+            <td>nginx - high performance web server (ZONGYUAN self</td>
+          </tr>
+          <tr data-category="核心基础设施">
+            <td><code>zongyuan-local-llm.service</code></td>
+            <td><span class="category-badge">核心基础设施</span></td>
+            <td class="status-active">active</td>
+            <td>8081</td>
+            <td>1701.7M</td>
+            <td class="priority-p1">P1-重要</td>
+            <td>ZONGYUAN-ROOT Local LLM Server (Qwen2.5-1.5B)</td>
+          </tr>
+          <tr data-category="核心基础设施">
+            <td><code>zr-comm-gateway.service</code></td>
+            <td><span class="category-badge">核心基础设施</span></td>
+            <td class="status-active">active</td>
+            <td>9122</td>
+            <td>5.2M</td>
+            <td class="priority-p1">P1-重要</td>
+            <td>ZONGYUAN-ROOT Comm Protocol Gateway (9122)</td>
+          </tr>
+          <tr data-category="短剧生产">
+            <td><code>zongyuan-kd-pipeline.service</code></td>
+            <td><span class="category-badge">短剧生产</span></td>
+            <td class="status-active">active</td>
+            <td>8626</td>
+            <td>5.9M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>KD-PIPELINE-V1.3 短剧产线自治引擎</td>
+          </tr>
+          <tr data-category="短剧生产">
+            <td><code>zongyuan-drama-orchestrator.service</code></td>
+            <td><span class="category-badge">短剧生产</span></td>
+            <td class="status-active">active</td>
+            <td>8102</td>
+            <td>3.5M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Drama Auto Orchestrator</td>
+          </tr>
+          <tr data-category="短剧生产">
+            <td><code>zongyuan-drama-semiauto.service</code></td>
+            <td><span class="category-badge">短剧生产</span></td>
+            <td class="status-active">active</td>
+            <td>8103</td>
+            <td>2.2M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Drama Semi-Auto Pipeline</td>
+          </tr>
+          <tr data-category="自治认知进化">
+            <td><code>zongyuan-compute-injection.service</code></td>
+            <td><span class="category-badge">自治认知进化</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>11.7M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT 本地算力注入引擎 - 为元内核提供持续动力源</td>
+          </tr>
+          <tr data-category="自治认知进化">
+            <td><code>zongyuan-cognitive-loop.service</code></td>
+            <td><span class="category-badge">自治认知进化</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>7.2M</td>
+            <td class="priority-p2">P2-常规</td>
+            <td>ZONGYUAN-ROOT 认知循环引擎（本地LLM动力源）</td>
+          </tr>
+          <tr data-category="自治认知进化">
+            <td><code>zongyuan-context-assembler.service</code></td>
+            <td><span class="category-badge">自治认知进化</span></td>
+            <td class="status-active">active</td>
+            <td>9123</td>
+            <td>11.4M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Context Assembler Engine (P1架构优化)</td>
+          </tr>
+          <tr data-category="自治认知进化">
+            <td><code>zongyuan-autonomous.service</code></td>
+            <td><span class="category-badge">自治认知进化</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>9.7M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Autonomous Compute Scheduler</td>
+          </tr>
+          <tr data-category="自治认知进化">
+            <td><code>zongyuan-learning-feedback.service</code></td>
+            <td><span class="category-badge">自治认知进化</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>5.6M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT P1 Learning Feedback Engine</td>
+          </tr>
+          <tr data-category="自治认知进化">
+            <td><code>zongyuan-meta-evolution.service</code></td>
+            <td><span class="category-badge">自治认知进化</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>5.6M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Meta Evolution Engine</td>
+          </tr>
+          <tr data-category="自治认知进化">
+            <td><code>zongyuan-proactive-evolution.service</code></td>
+            <td><span class="category-badge">自治认知进化</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>3.7M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT P2 Proactive Learning Evolution Engi</td>
+          </tr>
+          <tr data-category="自治认知进化">
+            <td><code>zongyuan-decision-formula.service</code></td>
+            <td><span class="category-badge">自治认知进化</span></td>
+            <td class="status-active">active</td>
+            <td>8180</td>
+            <td>1.5M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 超认知决策公式自演化引擎</td>
+          </tr>
+          <tr data-category="飞书集成">
+            <td><code>zongyuan-feishu-media-bot.service</code></td>
+            <td><span class="category-badge">飞书集成</span></td>
+            <td class="status-active">active</td>
+            <td>9134</td>
+            <td>8.6M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Feishu Media Archive Bot</td>
+          </tr>
+          <tr data-category="飞书集成">
+            <td><code>zongyuan-feishu-approval-callback.service</code></td>
+            <td><span class="category-badge">飞书集成</span></td>
+            <td class="status-active">active</td>
+            <td>8060</td>
+            <td>5.6M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Feishu Approval Callback Service</td>
+          </tr>
+          <tr data-category="飞书集成">
+            <td><code>zongyuan-approval-bridge.service</code></td>
+            <td><span class="category-badge">飞书集成</span></td>
+            <td class="status-active">active</td>
+            <td>8064</td>
+            <td>1.4M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Feishu Approval to Dispatcher Bridge</td>
+          </tr>
+          <tr data-category="飞书集成">
+            <td><code>zongyuan-intelligent-approval.service</code></td>
+            <td><span class="category-badge">飞书集成</span></td>
+            <td class="status-active">active</td>
+            <td>-</td>
+            <td>1.4M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT Intelligent Approval Daemon</td>
+          </tr>
+          <tr data-category="飞书集成">
+            <td><code>zongyuan-feishu-gateway.service</code></td>
+            <td><span class="category-badge">飞书集成</span></td>
+            <td class="status-inactive">activating</td>
+            <td>-</td>
+            <td>0.0M</td>
+            <td class="priority-p3">P3-辅助</td>
+            <td>ZONGYUAN-ROOT 飞书API统一网关（8050）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">端口台账</div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>端口</th><th>服务</th><th>绑定地址</th><th>公网暴露</th></tr></thead>
+        <tbody>
+          <tr><td><strong>80</strong></td><td>nginx.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>443</strong></td><td>nginx.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>2222</strong></td><td>zongyuan-honeypot.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>6379</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>7100</strong></td><td>unknown</td><td><code>*</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>7600</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8001</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8002</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8003</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8007</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8014</strong></td><td>zongyuan-vector-server.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8021</strong></td><td>zongyuan-ai-proxy.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8023</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8029</strong></td><td>zongyuan-universal-agent-executor.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8031</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8040</strong></td><td>zongyuan-hrm.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8046</strong></td><td>zongyuan-experience-center.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8050</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8060</strong></td><td>zongyuan-feishu-approval-callback.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8064</strong></td><td>zongyuan-approval-bridge.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8070</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8072</strong></td><td>zr-op-scheduler.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8081</strong></td><td>zongyuan-local-llm.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8085</strong></td><td>zongyuan-rag.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8088</strong></td><td>nginx.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8090</strong></td><td>zr-steady-ops.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8093</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8094</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8098</strong></td><td>zr-meta-ops.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8099</strong></td><td>zr-mhp-handshake.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8102</strong></td><td>zongyuan-drama-orchestrator.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8103</strong></td><td>zongyuan-drama-semiauto.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8161</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8170</strong></td><td>zongyuan-operator-panel.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8180</strong></td><td>zongyuan-decision-formula.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8185</strong></td><td>zongyuan-multi-agent-debate.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8200</strong></td><td>gov-gateway.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8201</strong></td><td>gov-operator-cluster.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8202</strong></td><td>gov-audit.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8203</strong></td><td>gov-dashboard.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8300</strong></td><td>zr-identity-api.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8301</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8626</strong></td><td>zongyuan-kd-pipeline.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>8628</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>8765</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9099</strong></td><td>commercial-api.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9120</strong></td><td>zr-memory-gateway.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9121</strong></td><td>mr012-kernel-bus.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9122</strong></td><td>zr-comm-gateway.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9123</strong></td><td>zongyuan-context-assembler.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9124</strong></td><td>mr019-long-term-memory.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9130</strong></td><td>unknown</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9131</strong></td><td>zongyuan-gateway-evolution.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9132</strong></td><td>zongyuan-node-governance.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9133</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9134</strong></td><td>zongyuan-feishu-media-bot.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9136</strong></td><td>zongyuan-autonomy-api.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9137</strong></td><td>zongyuan-task-persistence.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9140</strong></td><td>zr-ws-push.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9151</strong></td><td>zongyuan-geo-lattice.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9200</strong></td><td>zongyuan-cos.service</td><td><code>127.0.0.1</code></td><td class="port-local">🟢 本地</td></tr>
+          <tr><td><strong>9210</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9300</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9301</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9302</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9303</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9304</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9305</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9306</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9307</strong></td><td>unknown</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+          <tr><td><strong>9443</strong></td><td>zongyuan-nexus.service</td><td><code>0.0.0.0</code></td><td class="port-public">🔴 公网</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>ZONGYUAN-ROOT 全域服务台账 v1.0 | 自动生成 | 定期更新</p>
+    <p>Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 火斗云智AIOS</p>
+  </div>
+</div>
+
+<script>
+function filterCategory(cat) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('#serviceTable tbody tr').forEach(row => {
+    if (cat === 'all' || row.dataset.category === cat) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+</script>
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 元极恒一自治体系</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

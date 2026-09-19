@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>短剧流水线 · ZONGYUAN-ROOT</title>
+<style>
+:root,[data-theme="dark"]{--bg:#0a0e1a;--card:#111827;--border:#1f2937;--text:#e5e7eb;--dim:#6b7280;--gold:#d4af37;--cyan:#00d4ff;--green:#10b981;--red:#ef4444;--purple:#8b5cf6}
+[data-theme="light"]{--bg:#f5f5f0;--card:#fff;--border:#e0e0d8;--text:#1a1a2e;--dim:#888;--gold:#b8860b;--cyan:#0088aa;--green:#0a8a5a;--red:#cc3333;--purple:#6644cc}
+[data-theme="black-gold"]{--bg:#000;--card:#0d0d0d;--border:#2a2515;--text:#d4af37;--dim:#6b5d3a;--gold:#ffd700;--cyan:#c0a040;--green:#8a8a20;--red:#aa4444;--purple:#8a7a30}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:16px}
+.nav{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.nav a{padding:6px 12px;border-radius:6px;border:1px solid var(--border);color:var(--cyan);text-decoration:none;font-size:12px}
+.nav a.root{color:var(--gold);font-weight:700}
+.nav .badge{margin-left:auto;font-size:11px;color:var(--dim)}
+h1{font-size:20px;margin-bottom:4px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{font-size:15px;margin-bottom:14px;color:var(--gold)}
+label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;margin-top:10px}
+input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit}
+textarea{min-height:60px;resize:vertical}
+button{padding:10px 20px;border-radius:8px;border:none;background:var(--cyan);color:#000;font-weight:700;cursor:pointer;margin-top:12px;font-size:13px}
+button.sec{background:var(--border);color:var(--text)}
+.result{margin-top:12px;padding:12px;border-radius:8px;background:var(--bg);border:1px solid var(--border);font-size:12px;white-space:pre-wrap;max-height:250px;overflow-y:auto;display:none}
+.result.ok{border-color:var(--green);color:var(--green)}
+.result.err{border-color:var(--red);color:var(--red)}
+.list{margin-top:12px}
+.list-item{padding:10px;border-bottom:1px solid var(--border);font-size:13px;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="/" class="root">www.huodouai.com</a>
+<a href="/hub">中枢门户</a>
+<a href="/axiom">公理面板</a>
+<a href="/kunlun">昆仑洞天</a>
+<a href="/truth-engine">真值引擎</a>
+<a href="/cte">CTE</a>
+<a href="/rule-engine">规则引擎</a>
+<a href="/collection-card">藏品卡</a>
+<a href="/research-pipeline">研究流水线</a>
+<a href="/drama-pipeline">短剧流水线</a>
+<a href="/legal-shield">法律护盾</a>
+<span class="badge">DID-BR-000002</span>
+</div>
+<h1>短剧流水线</h1>
+<p class="sub">昆仑洞天短剧 / 剧本分镜 / 作品入库</p>
+
+<div class="card">
+<h2>新短剧项目</h2>
+<label>剧名</label><input id="dname" placeholder="昆仑洞天·创世篇">
+<label>集数</label><input id="dep" type="number" value="12">
+<button onclick="newDrama()">创建项目</button>
+<div class="result" id="dresult"></div>
+</div>
+<div class="card"><h2>项目列表</h2><div class="list" id="dlist">暂无</div></div>
+<script>
+const s=localStorage.getItem('sub-theme')||'dark';
+document.documentElement.setAttribute('data-theme',s);
+document.querySelector('.nav').insertAdjacentHTML('beforeend','<button class="sec" style="margin-left:8px" onclick="t()">主题</button>');
+function t(){const m={dark:'light',light:'black-gold','black-gold':'dark'};const c=document.documentElement.getAttribute('data-theme');const n=m[c];document.documentElement.setAttribute('data-theme',n);localStorage.setItem('sub-theme',n);}
+</script>
+
+<script>
+let items=[];
+try{items=JSON.parse(localStorage.getItem('drama-pipeline-items')||'[]');}catch(e){}
+function renderList(elId){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  el.innerHTML=items.length?items.map(function(i){return '<div class="list-item"><span>'+i.name+'</span><span style="color:var(--dim)">'+i.time+'</span></div>';}).join(''):'暂无';
+}
+function push(name,elId){
+  items.push({name:name,time:new Date().toLocaleString('zh-CN')});
+  localStorage.setItem('drama-pipeline-items',JSON.stringify(items));
+  renderList(elId);
+}
+</script>
+
+
+<script>
+function newDrama(){
+  const n=document.getElementById('dname').value;
+  if(!n){alert('请填写剧名');return;}
+  push(n+' ('+document.getElementById('dep').value+'集)','dlist');
+  const r=document.getElementById('dresult');
+  r.style.display='block';r.className='result ok';
+  r.textContent='短剧项目已创建: '+n+'\n集数: '+document.getElementById('dep').value+'\n状态: 剧本编排中...';
+}
+renderList('dlist');
+</script>\n</body>
+</html>

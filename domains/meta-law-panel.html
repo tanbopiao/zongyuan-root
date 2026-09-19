@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元法则治理面板 · 火斗云智AIOS</title>
+<meta name="description" content="ZONGYUAN-ROOT元法则体系可视化治理面板，77+元法则实时监控，中枢智能最高优先级调度">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:"Noto Sans SC",sans-serif;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 20% 0%,rgba(212,175,55,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(139,200,234,0.05) 0%,transparent 50%);pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:50px 24px}
+.back{display:inline-block;color:#d4af37;text-decoration:none;font-size:0.9em;margin-bottom:20px}
+.back:hover{text-decoration:underline}
+header{text-align:center;margin-bottom:40px}
+header .symbol{font-size:13px;color:#d4af37;letter-spacing:3px;margin-bottom:12px;font-family:monospace}
+header h1{font-family:"Noto Serif SC",serif;font-size:2.4em;font-weight:900;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+header .subtitle{color:#aaa;font-size:1em;margin-bottom:8px}
+header .desc{color:#888;font-size:0.9em;max-width:700px;margin:0 auto;line-height:1.7}
+.stats{display:flex;justify-content:center;gap:30px;margin:30px 0;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-item .num{font-size:1.8em;color:#d4af37;font-weight:bold;font-family:"Noto Serif SC",serif}
+.stat-item .label{color:#888;font-size:0.8em;margin-top:4px}
+.section{margin:40px 0}
+.section h2{font-family:"Noto Serif SC",serif;font-size:1.4em;color:#d4af37;margin-bottom:18px;padding-left:14px;border-left:3px solid #d4af37}
+.panel-container{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.3);border-radius:16px;padding:30px;text-align:center}
+.panel-container img{max-width:100%;height:auto;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.panel-note{color:#888;font-size:0.85em;margin-top:16px;font-style:italic}
+.features{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.feature{background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:18px;text-align:center}
+.feature .icon{font-size:1.6em;margin-bottom:8px}
+.feature .name{color:#e0e0e0;font-size:0.9em;font-weight:500}
+.feature .desc{color:#888;font-size:0.75em;margin-top:4px}
+.entries{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.entry{display:block;background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(212,175,55,0.3);border-radius:12px;padding:22px;text-decoration:none;transition:transform .3s,box-shadow .3s}
+.entry:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(212,175,55,0.15)}
+.entry.primary{border-color:rgba(212,175,55,0.6);background:linear-gradient(145deg,#1a1a2e,#1e1a10)}
+.entry .entry-title{color:#d4af37;font-weight:bold;font-size:1.05em;margin-bottom:6px}
+.entry .entry-desc{color:#888;font-size:0.82em;line-height:1.5}
+.entry .arrow{float:right;color:#d4af37}
+.law-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.law-item{background:rgba(212,175,55,0.05);border:1px solid rgba(212,175,55,0.15);border-radius:8px;padding:14px 16px}
+.law-item .law-id{color:#d4af37;font-family:monospace;font-size:0.8em;font-weight:bold}
+.law-item .law-name{color:#e0e0e0;font-size:0.9em;margin-top:4px}
+.law-item .law-status{float:right;font-size:0.75em;padding:2px 8px;border-radius:4px}
+.law-status.active{background:rgba(76,175,80,0.2);color:#81c784}
+.law-status.evolving{background:rgba(255,152,0,0.2);color:#ffb74d}
+footer{text-align:center;margin-top:50px;padding-top:24px;border-top:1px solid rgba(212,175,55,0.1);color:#666;font-size:0.8em}
+footer .did{margin-top:6px;color:#d4af37;font-family:monospace;letter-spacing:1px}
+@media(max-width:640px){header h1{font-size:1.7em}.stats{gap:16px}.stat-item .num{font-size:1.4em}.panel-container{padding:16px}}
+</style>
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+<div class="wrap">
+  <a href="/domains/" class="back">← 返回业务域总览</a>
+  <header>
+    <div class="symbol">Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT · DID-BR-000002</div>
+    <h1>元法则治理面板</h1>
+    <div class="subtitle">Meta-Law Governance Dashboard · 中枢智能最高优先级</div>
+    <div class="desc">ZONGYUAN-ROOT火斗云智AIOS智能平台元法则可视化治理，77+元法则实时监控与执行，保障全域自治稳态运行</div>
+  </header>
+
+  <div class="stats">
+    <div class="stat-item"><div class="num">77+</div><div class="label">元法则总数</div></div>
+    <div class="stat-item"><div class="num">31,875</div><div class="label">真值库总量</div></div>
+    <div class="stat-item"><div class="num">5</div><div class="label">同源节点</div></div>
+    <div class="stat-item"><div class="num">Lv10</div><div class="label">自治层级</div></div>
+  </div>
+
+  <div class="section">
+    <h2>治理面板实时快照</h2>
+    <div class="panel-container">
+      <img src="/assets/meta-law-dashboard.png" alt="元法则治理面板" loading="lazy">
+      <div class="panel-note">面板快照 · 2026-09-18 · 由中枢智能自动生成并归档</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>核心治理能力</h2>
+    <div class="features">
+      <div class="feature"><div class="icon">⚡</div><div class="name">真值驱动</div><div class="desc">9120真值库实时驱动</div></div>
+      <div class="feature"><div class="icon">🔗</div><div class="name">Merkle链</div><div class="desc">哈希链完整性校验</div></div>
+      <div class="feature"><div class="icon">🎯</div><div class="name">中枢调度</div><div class="desc">hub-central-agent最高优先级</div></div>
+      <div class="feature"><div class="icon">🛡️</div><div class="name">eFuse熔断</div><div class="desc">异常分支自动隔离</div></div>
+      <div class="feature"><div class="icon">🔐</div><div class="name">ZKP确权</div><div class="desc">零知识隐私校验</div></div>
+      <div class="feature"><div class="icon">🧠</div><div class="name">GPU大脑</div><div class="desc">A10+7B高性能决策外脑</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>关键元法则（精选）</h2>
+    <div class="law-list">
+      <div class="law-item"><span class="law-status active">ACTIVE</span><div class="law-id">MR-001</div><div class="law-name">中枢智能最高优先级</div></div>
+      <div class="law-item"><span class="law-status active">ACTIVE</span><div class="law-id">MR-002</div><div class="law-name">所有真值只新增不覆盖</div></div>
+      <div class="law-item"><span class="law-status active">ACTIVE</span><div class="law-id">MR-003</div><div class="law-name">SSH仅中枢保留权限</div></div>
+      <div class="law-item"><span class="law-status active">ACTIVE</span><div class="law-id">MR-010</div><div class="law-name">混合模型调度元规则</div></div>
+      <div class="law-item"><span class="law-status active">ACTIVE</span><div class="law-id">MR-020</div><div class="law-name">多窗口并发控制</div></div>
+      <div class="law-item"><span class="law-status evolving">EVOLVING</span><div class="law-id">MR-028</div><div class="law-name">短剧工业元法则</div></div>
+      <div class="law-item"><span class="law-status active">ACTIVE</span><div class="law-id">ML-GPU-001</div><div class="law-name">GPU大脑使用法则</div></div>
+      <div class="law-item"><span class="law-status active">ACTIVE</span><div class="law-id">ML-COST-001</div><div class="law-name">付费额度使用约束</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>深入探索</h2>
+    <div class="entries">
+      <a href="/domains/meta_kernel.html" class="entry primary"><span class="arrow">→</span><div class="entry-title">元内核可视化</div><div class="entry-desc">真值库、Merkle链、节点状态实时展示</div></a>
+      <a href="/kernel/dashboard.html" class="entry"><span class="arrow">→</span><div class="entry-title">内核仪表盘</div><div class="entry-desc">实时功能面板（需内网访问）</div></a>
+      <a href="/kernel/governance.html" class="entry"><span class="arrow">→</span><div class="entry-title">治理中心</div><div class="entry-desc">元法则治理与执行监控</div></a>
+      <a href="/central-brain.html" class="entry"><span class="arrow">→</span><div class="entry-title">中枢智能</div><div class="entry-desc">hub-central-agent最高调度中枢</div></a>
+    </div>
+  </div>
+
+  <footer>
+    火斗云智AIOS · 火斗云智AIOS智能操作系统
+    <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002</div>
+  </footer>
+</div>
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 火斗云智AIOS智能平台</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS · 统一控制台 V2.0</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #0a0a0f;
+  color: #e8e8f0;
+  min-height: 100vh;
+}
+.header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-bottom: 1px solid rgba(212,175,55,0.3);
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header h1 {
+  font-size: 24px;
+  background: linear-gradient(135deg, #f4e4bc, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.header .status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #00ff88;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: linear-gradient(135deg, rgba(26,26,46,0.8), rgba(22,33,62,0.8));
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 12px;
+  padding: 20px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(212,175,55,0.15);
+}
+.stat-card .label {
+  font-size: 13px;
+  color: #a0a0b8;
+  margin-bottom: 8px;
+}
+.stat-card .value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #d4af37;
+}
+.stat-card .unit {
+  font-size: 14px;
+  color: #888;
+  margin-left: 4px;
+}
+.section {
+  background: linear-gradient(135deg, rgba(26,26,46,0.6), rgba(22,33,62,0.6));
+  border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #d4af37;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, #d4af37, #f4e4bc);
+  border-radius: 2px;
+}
+.chart-container {
+  width: 100%;
+  height: 300px;
+}
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+}
+.alert-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border-left: 3px solid;
+}
+.alert-item.critical { border-left-color: #ff4444; background: rgba(255,68,68,0.05); }
+.alert-item.warning { border-left-color: #ffaa00; background: rgba(255,170,0,0.05); }
+.alert-item.info { border-left-color: #00aaff; background: rgba(0,170,255,0.05); }
+.alert-level {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.alert-level.critical { background: rgba(255,68,68,0.2); color: #ff6666; }
+.alert-level.warning { background: rgba(255,170,0,0.2); color: #ffbb33; }
+.alert-level.info { background: rgba(0,170,255,0.2); color: #33bbff; }
+.alert-message { flex: 1; font-size: 14px; color: #ccc; }
+.alert-time { font-size: 12px; color: #666; margin-left: 12px; }
+.alert-empty {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 14px;
+}
+.alert-empty .icon { font-size: 48px; margin-bottom: 12px; }
+.btn {
+  background: linear-gradient(135deg, #d4af37, #b8941f);
+  color: #0a0a0f;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212,175,55,0.4);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-secondary {
+  background: rgba(255,255,255,0.1);
+  color: #ccc;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.15);
+  box-shadow: none;
+}
+.engine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.engine-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.engine-status {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.engine-status.active { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
+.engine-status.inactive { background: #666; }
+.engine-info { flex: 1; }
+.engine-name { font-size: 14px; font-weight: 600; color: #ddd; }
+.engine-desc { font-size: 12px; color: #888; margin-top: 2px; }
+.engine-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(212,175,55,0.15);
+  color: #d4af37;
+}
+.chat-container {
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+.chat-message {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  max-width: 85%;
+}
+.chat-message.user {
+  background: rgba(212,175,55,0.15);
+  margin-left: auto;
+  border: 1px solid rgba(212,175,55,0.3);
+}
+.chat-message.ai {
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.2);
+}
+.chat-input-area {
+  display: flex;
+  gap: 8px;
+}
+.chat-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #e8e8f0;
+  font-size: 14px;
+  outline: none;
+}
+.chat-input:focus {
+  border-color: rgba(212,175,55,0.5);
+}
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+@media (max-width: 768px) {
+  .header { padding: 16px; flex-direction: column; gap: 12px; align-items: flex-start; }
+  .header h1 { font-size: 20px; }
+  .container { padding: 12px; }
+  .charts-grid { grid-template-columns: 1fr; }
+  .stat-card .value { font-size: 22px; }
+}
+</style>
+<style>
+/* 统一导航栏样式 */
+.nav-unified{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,10,15,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15)}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-brand{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;white-space:nowrap}
+.nav-menu{display:flex;align-items:center;gap:4px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 12px;color:#bbb;text-decoration:none;font-size:13.5px;transition:color .2s;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.06)}
+.nav-item.has-dropdown>a::after{content:"▾";font-size:10px;margin-left:4px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:160px;background:rgba(20,20,30,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;opacity:0;visibility:hidden;transform:translateY(8px);transition:all .2s;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.nav-item.has-dropdown:hover .dropdown{opacity:1;visibility:visible;transform:translateY(0)}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px;transition:all .15s}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px}
+@media(max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed;top:56px;left:0;right:0;bottom:0;background:rgba(10,10,15,0.98);flex-direction:column;align-items:stretch;gap:0;padding:10px 16px;overflow-y:auto;display:none;z-index:9998}
+  /* .nav-menu.active removed - using checkbox scheme */
+  .nav-item>a{padding:12px 14px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;background:transparent;padding:0 0 0 16px;display:none}
+  .nav-item.has-dropdown.open .dropdown{display:block}
+  .nav-item.has-dropdown>a::after{content:"+";font-size:16px;float:right}
+  .nav-item.has-dropdown.open>a::after{content:"−"}
+}
+
+
+/* ===== 移动端专项优化（480px以下） ===== */
+@media (max-width: 480px) {
+  body { padding-top: 48px !important; }
+  .container { padding: 0 14px !important; }
+  .nav-container { padding: 0 14px; height: 48px; }
+  .nav-brand { font-size: 14px; }
+  
+  /* Hero区域 */
+  .hero { padding: 40px 0 30px; }
+  .hero-symbol { font-size: 36px !important; margin-bottom: 12px; }
+  .hero h1 { font-size: 24px !important; line-height: 1.3; }
+  .hero-subtitle { font-size: 13px !important; }
+  .hero-desc { font-size: 14px !important; line-height: 1.6; }
+  .hero-stats { flex-direction: column; gap: 16px; }
+  .hero-stats .stat-num { font-size: 28px; }
+  .hero-stats .stat-label { font-size: 12px; }
+  
+  /* 按钮 */
+  .btn-gold { padding: 10px 20px; font-size: 13px; }
+  .btn-outline { padding: 10px 20px; font-size: 13px; }
+  
+  /* 标题 */
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 16px !important; }
+  .section-title { font-size: 20px; }
+  .section-subtitle { font-size: 13px; }
+  
+  /* 网格全部单列 */
+  .arch-grid { grid-template-columns: 1fr !important; gap: 12px; }
+  .concept-showcase { grid-template-columns: 1fr !important; }
+  .feature-grid { grid-template-columns: 1fr !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  
+  /* 卡片 */
+  .arch-card { padding: 16px; }
+  .arch-card h3 { font-size: 15px; }
+  .arch-card p { font-size: 13px; line-height: 1.6; }
+  
+  /* 表格横向滚动 */
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  th, td { padding: 8px 10px; font-size: 12px; white-space: nowrap; }
+  
+  /* 图片自适应 */
+  img { max-width: 100%; height: auto; }
+  
+  /* 代码块 */
+  pre, code { font-size: 12px; overflow-x: auto; }
+  
+  /* 页脚 */
+  footer { padding: 30px 0; font-size: 12px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+  
+  /* 段落间距 */
+  p { line-height: 1.7; }
+  section { padding: 40px 0; }
+}
+
+/* ===== 平板适配（768-900px） ===== */
+@media (max-width: 900px) and (min-width: 481px) {
+  .hero h1 { font-size: 36px; }
+  .hero-symbol { font-size: 50px; }
+  .arch-grid { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 0 20px; }
+}
+
+/* ===== 触摸优化 ===== */
+@media (hover: none) and (pointer: coarse) {
+  .nav-item.has-dropdown:hover .dropdown { opacity: 0; visibility: hidden; }
+  .nav-item.has-dropdown.open .dropdown { opacity: 1; visibility: visible; }
+  .arch-card:hover { transform: none; }
+  .arch-card:hover::before { transform: scaleX(0); }
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* ===== 纯CSS移动端导航（checkbox方案，不依赖JS） ===== */
+#navCheck:checked ~ .nav-unified .nav-menu {
+  transform: translateX(0) !important;
+  visibility: visible !important;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(2) {
+  opacity: 0;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+/* 移动端下拉菜单：用checkbox嵌套太复杂，改用target+hover兼容 */
+@media (max-width: 900px) {
+  .nav-item.has-dropdown > a::after { content: " +"; font-size: 16px; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus .dropdown { display: block; }
+  .dropdown { display: none; }
+  .nav-item.has-dropdown .dropdown { display: none; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus-within .dropdown { display: block; }
+}
+
+/* ===== 干净版导航（纯CSS，无JS依赖） ===== */
+#navCheck{display:none}
+.nav-unified{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:9999!important;background:rgba(10,10,15,0.95)!important;backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15);height:52px}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-brand{font-size:16px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-toggle{display:none;cursor:pointer;padding:8px;background:none;border:none;flex-direction:column;gap:5px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px;display:block}
+.nav-menu{display:flex;align-items:center;gap:2px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 10px;color:#bbb;text-decoration:none;font-size:13px;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-item.has-dropdown>a::after{content:" ▾";font-size:10px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:170px;background:rgba(15,15,25,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;display:none;z-index:10001;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.nav-item.has-dropdown:hover .dropdown{display:block}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+
+/* 移动端 */
+@media (max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed!important;top:52px!important;left:0!important;right:0!important;bottom:0!important;background:rgba(10,10,15,0.98)!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:10px 16px!important;overflow-y:auto!important;z-index:9998!important;display:none!important}
+  .nav-item>a{padding:14px 12px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .nav-item.has-dropdow
+</style>
+<meta name="description" content="统一控制台 - 火斗云智AIOS全域统一管理控制台">
+<meta name="keywords" content="统一控制台,全域管理,统一管理,火斗云智,AIOS">
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+<nav class="nav-unified" id="mainNav">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">火斗云智 AIOS</a>
+    <label class="nav-toggle" for="navCheck" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </label>
+    <div class="nav-menu" id="navMenu">
+      <div class="nav-item"><a href="/">首页</a></div>
+      <div class="nav-item"><a href="https://aios.huodouai.com" target="_blank" style="color:#d4af37;font-weight:600;">AIOS控制台 ↗</a></div>
+      <div class="nav-item has-dropdown">
+        <a href="/products.html">产品矩阵</a>
+        <div class="dropdown">
+          <a href="/products.html">产品总览</a>
+          <a href="/product-matrix.html">产品矩阵图</a>
+          <a href="/commercial.html">商业方案</a>
+          <a href="/cases.html">客户案例</a>
+          <a href="/pricing.html">定价方案</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/agent-network.html">智能体</a>
+        <div class="dropdown">
+          <a href="/agent-network.html">智能体网络</a>
+          <a href="/agent-embodiment.html">智能体实体化</a>
+          <a href="/high-capabilities.html">高阶能力中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/central-brain.html">中枢大脑</a>
+        <div class="dropdown">
+          <a href="/central-brain.html">中枢大脑</a>
+          <a href="/brain-strategy.html">战略全景</a>
+          <a href="/kernel-status.html">内核状态</a>
+          <a href="/bayesian-five-elements.html">贝叶斯五行引擎</a>
+          <a href="/unified-console.html">统一控制台</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/works-gallery-v2.html">作品中心</a>
+        <div class="dropdown">
+          <a href="/works-gallery-v2.html">作品库V2</a>
+          <a href="/drama/">短剧作品库</a>
+          <a href="/kunlun/">昆仑洞天</a>
+          <a href="/keyframe-gallery.html">关键帧资产库</a>
+          <a href="/digital-gallery-v3.html">数字画廊</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/architecture.html">技术架构</a>
+        <div class="dropdown">
+          <a href="/architecture.html">架构总览</a>
+          <a href="/microkernel-architecture.html">微内核架构</a>
+          <a href="/whitepaper.html">技术白皮书</a>
+          <a href="/developers.html">开发者中心</a>
+          <a href="/docs.html">文档中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/governance.html">治理战略</a>
+          <a href="/level-dual-axis.html">双轴层级</a>
+        <div class="dropdown">
+          <a href="/governance.html">治理体系</a>
+          <a href="/philosophy.html">思想体系</a>
+          <a href="/evolution-strategy.html">进化战略</a>
+          <a href="/lightweight-strategy.html">轻量化战略</a>
+          <a href="/axiom-system/">公理体系 ⭐</a>
+          <a href="/global-learning.html">全网学习</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/digital-assets.html">资产中心</a>
+        <div class="dropdown">
+          <a href="/digital-assets.html">数字资产</a>
+          <a href="/asset-center.html">资产中心</a>
+          <a href="/ledger.html">真值账本</a>
+          <a href="/experience-kb.html">经验库</a>
+          <a href="/aios/index.html">AIOS资产中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/aios/visual/cloud_brain_dashboard.html">实时监控</a>
+        <div class="dropdown">
+          <a href="/aios/visual/cloud_brain_dashboard.html">云脑仪表盘</a>
+          <a href="/aios/visual/kernel-dashboard.html">内核仪表盘</a>
+          <a href="/aios/visual/memory_gateway_monitor.html">记忆网关监控</a>
+          <a href="/aios/visual/scheduler_monitor_dashboard.html">调度器监控</a>
+          <a href="/system-dashboard.html">系统仪表盘</a>
+          <a href="/status-center.html">状态中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/auto-pipeline.html">更多</a>
+        <div class="dropdown">
+          <a href="/auto-pipeline.html">自动化流水线</a>
+          <a href="/model-compare-lab.html">模型对比实验室</a>
+          <a href="/education.html">普惠教育</a>
+          <a href="/search.html">全站搜索</a>
+          <a href="/performance.html">性能监控</a>
+          <a href="https://gov.huodouai.com" target="_blank">政务AI ↗</a>
+          <a href="https://status.huodouai.com" target="_blank">实时状态站 ↗</a>
+        </div>
+      </div>
+      <div class="nav-cta" style="display:flex;align-items:center;gap:12px;margin-left:20px;">
+        <a href="/book-demo.html" style="background:linear-gradient(135deg,#d4af37,#b8941f);color:#1a1a2e;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:13.5px;font-weight:600;transition:all .2s;white-space:nowrap;box-shadow:0 4px 15px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(212,175,55,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.3)'">预约演示</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<div class="header">
+  <div>
+    <h1>火斗云智AIOS · 统一控制台 V2.0</h1>
+    <div style="font-size:12px;color:#888;margin-top:4px;">元极恒一超认知永恒自治体系 · 全域监控中心</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span id="systemStatus">系统运行中</span>
+    </div>
+    <button class="btn btn-secondary" onclick="collectData()" id="collectBtn">手动采集</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- 实时状态卡片 -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card">
+      <div class="label">CPU 使用率</div>
+      <div class="value"><span id="cpuValue">--</span><span class="unit">%</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">内存使用</div>
+      <div class="value"><span id="memoryValue">--</span><span class="unit">%</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">磁盘使用</div>
+      <div class="value"><span id="diskValue">--</span><span class="unit">%</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">真值库总量</div>
+      <div class="value"><span id="truthValue">--</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">知识图谱</div>
+      <div class="value"><span id="kgValue">--</span><span class="unit">节点</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">核心引擎</div>
+      <div class="value"><span id="engineValue">--</span><span class="unit">/15</span></div>
+    </div>
+  </div>
+
+  <!-- 历史趋势图表 -->
+  <div class="section">
+    <div class="section-title">历史趋势监控（最近24小时）</div>
+    <div class="charts-grid">
+      <div class="chart-container" id="cpuChart"></div>
+      <div class="chart-container" id="memoryChart"></div>
+      <div class="chart-container" id="diskChart"></div>
+      <div class="chart-container" id="truthChart"></div>
+    </div>
+  </div>
+
+  <!-- 告警面板 -->
+  <div class="section">
+    <div class="section-title">
+      系统告警
+      <span id="alertBadge" style="font-size:12px;background:rgba(255,68,68,0.2);color:#ff6666;padding:2px 8px;border-radius:10px;margin-left:8px;">0</span>
+    </div>
+    <div id="alertsList">
+      <div class="alert-empty">
+        <div class="icon">✓</div>
+        <div>当前无告警，系统运行正常</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 核心引擎矩阵 -->
+  <div class="section">
+    <div class="section-title">核心引擎矩阵（15个）</div>
+    <div class="engine-grid" id="engineGrid"></div>
+  </div>
+
+  <!-- 专属模型智能交互 -->
+  <div class="section">
+    <div class="section-title">元极恒一专属模型 · 智能交互</div>
+    <div class="chat-container" id="chatContainer">
+      <div class="chat-message ai">
+        <div style="font-size:12px;color:#00d4ff;margin-bottom:4px;">元极恒一专属模型</div>
+        <div>你好！我是元极恒一专属模型，已加载体系全部元法则、真值库和前置约束。有什么可以帮你的？</div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" id="chatInput" placeholder="输入问题，例如：介绍一下元极恒一自治体系..." onkeypress="if(event.key==='Enter')sendMessage()">
+      <button class="btn" onclick="sendMessage()" id="sendBtn">发送</button>
+    </div>
+  </div>
+
+  <!-- 部署验证记录 -->
+  <div class="section">
+    <div class="section-title">部署验证记录</div>
+    <div id="deploymentLog">加载中...</div>
+  </div>
+</div>
+
+<div class="footer">
+  Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 火斗云智AIOS · 统一控制台V2.0 · BASELINE-FOUNDATION-V2
+</div>
+
+<script>
+const API_BASE = '/ai-proxy';
+let cpuChart, memoryChart, diskChart, truthChart;
+
+// 初始化图表
+function initCharts() {
+  const commonOption = {
+    backgroundColor: 'transparent',
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    tooltip: { trigger: 'axis', backgroundColor: 'rgba(26,26,46,0.95)', borderColor: 'rgba(212,175,55,0.3)', textStyle: { color: '#e8e8f0' } },
+    xAxis: { type: 'category', data: [], axisLine: { lineStyle: { color: '#444' } }, axisLabel: { color: '#888', fontSize: 10 } },
+    yAxis: { type: 'value', axisLine: { lineStyle: { color: '#444' } }, axisLabel: { color: '#888', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } }
+  };
+
+  cpuChart = echarts.init(document.getElementById('cpuChart'));
+  memoryChart = echarts.init(document.getElementById('memoryChart'));
+  diskChart = echarts.init(document.getElementById('diskChart'));
+  truthChart = echarts.init(document.getElementById('truthChart'));
+
+  cpuChart.setOption({ ...commonOption, title: { text: 'CPU使用率趋势', textStyle: { color: '#d4af37', fontSize: 14 } }, series: [{ name: 'CPU%', type: 'line', smooth: true, data: [], areaStyle: { color: 'rgba(212,175,55,0.2)' }, lineStyle: { color: '#d4af37' }, itemStyle: { color: '#d4af37' } }] });
+  memoryChart.setOption({ ...commonOption, title: { text: '内存使用趋势', textStyle: { color: '#00d4ff', fontSize: 14 } }, series: [{ name: '内存%', type: 'line', smooth: true, data: [], areaStyle: { color: 'rgba(0,212,255,0.2)' }, lineStyle: { color: '#00d4ff' }, itemStyle: { color: '#00d4ff' } }] });
+  diskChart.setOption({ ...commonOption, title: { text: '磁盘使用趋势', textStyle: { color: '#9b59b6', fontSize: 14 } }, series: [{ name: '磁盘%', type: 'line', smooth: true, data: [], areaStyle: { color: 'rgba(155,89,182,0.2)' }, lineStyle: { color: '#9b59b6' }, itemStyle: { color: '#9b59b6' } }] });
+  truthChart.setOption({ ...commonOption, title: { text: '真值库增长趋势', textStyle: { color: '#00ff88', fontSize: 14 } }, series: [{ name: '真值数', type: 'line', smooth: true, data: [], areaStyle: { color: 'rgba(0,255,136,0.2)' }, lineStyle: { color: '#00ff88' }, itemStyle: { color: '#00ff88' } }] });
+
+  window.addEventListener('resize', () => {
+    cpuChart.resize(); memoryChart.resize(); diskChart.resize(); truthChart.resize();
+  });
+}
+
+// 加载实时状态
+async function loadStatus() {
+  try {
+    const resp = await fetch(API_BASE + '/status');
+    const data = await resp.json();
+    document.getElementById('cpuValue').textContent = data.system.cpu_percent.toFixed(1);
+    document.getElementById('memoryValue').textContent = data.system.memory_percent.toFixed(1);
+    document.getElementById('diskValue').textContent = data.system.disk_percent.toFixed(1);
+    document.getElementById('truthValue').textContent = data.knowledge_base.truth_count.toLocaleString();
+    document.getElementById('kgValue').textContent = data.knowledge_base.kg_nodes;
+    document.getElementById('engineValue').textContent = data.engines.active;
+  } catch(e) { console.error('加载状态失败', e); }
+}
+
+// 加载历史数据
+async function loadHistory() {
+  try {
+    const resp = await fetch(API_BASE + '/history?hours=24');
+    const data = await resp.json();
+    const timestamps = data.timestamps.map(t => t.slice(11, 16));
+    cpuChart.setOption({ xAxis: { data: timestamps }, series: [{ data: data.cpu }] });
+    memoryChart.setOption({ xAxis: { data: timestamps }, series: [{ data: data.memory }] });
+    diskChart.setOption({ xAxis: { data: timestamps }, series: [{ data: data.disk }] });
+    truthChart.setOption({ xAxis: { data: timestamps }, series: [{ data: data.truth_count }] });
+  } catch(e) { console.error('加载历史数据失败', e); }
+}
+
+// 加载告警
+async function loadAlerts() {
+  try {
+    const resp = await fetch(API_BASE + '/alerts?limit=20');
+    const data = await resp.json();
+    document.getElementById('alertBadge').textContent = data.unacknowledged;
+    const list = document.getElementById('alertsList');
+    if (data.alerts.length === 0) {
+      list.innerHTML = '<div class="alert-empty"><div class="icon">✓</div><div>当前无告警，系统运行正常</div></div>';
+    } else {
+      list.innerHTML = data.alerts.slice().reverse().map(a => `
+        <div class="alert-item ${a.level}">
+          <span class="alert-level ${a.level}">${a.level}</span>
+          <span class="alert-message">${a.message}</span>
+          <span class="alert-time">${a.timestamp.slice(11,19)}</span>
+        </div>
+      `).join('');
+    }
+  } catch(e) { console.error('加载告警失败', e); }
+}
+
+// 加载引擎列表
+async function loadEngines() {
+  try {
+    const resp = await fetch(API_BASE + '/engines');
+    const data = await resp.json();
+    const grid = document.getElementById('engineGrid');
+    grid.innerHTML = data.engines.map(e => `
+      <div class="engine-card">
+        <div class="engine-status ${e.deployed ? 'active' : 'inactive'}"></div>
+        <div class="engine-info">
+          <div class="engine-name">${e.name}</div>
+          <div class="engine-desc">${e.description}</div>
+        </div>
+        <span class="engine-tag">${e.category}</span>
+      </div>
+    `).join('');
+  } catch(e) { console.error('加载引擎失败', e); }
+}
+
+// 手动采集
+async function collectData() {
+  const btn = document.getElementById('collectBtn');
+  btn.disabled = true;
+  btn.textContent = '采集中...';
+  try {
+    await fetch(API_BASE + '/collect', { method: 'POST' });
+    await Promise.all([loadStatus(), loadHistory(), loadAlerts()]);
+  } catch(e) { console.error('采集失败', e); }
+  btn.disabled = false;
+  btn.textContent = '手动采集';
+}
+
+// 发送消息
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const container = document.getElementById('chatContainer');
+  container.innerHTML += `<div class="chat-message user"><div>${msg}</div></div>`;
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.textContent = '思考中...';
+  try {
+    const resp = await fetch(API_BASE + '/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    });
+    const data = await resp.json();
+    container.innerHTML += `<div class="chat-message ai"><div style="font-size:12px;color:#00d4ff;margin-bottom:4px;">元极恒一专属模型</div><div>${data.response || data.error || '无响应'}</div></div>`;
+  } catch(e) {
+    container.innerHTML += `<div class="chat-message ai"><div style="color:#ff6666;">请求失败: ${e.message}</div></div>`;
+  }
+  btn.disabled = false;
+  btn.textContent = '发送';
+  container.scrollTop = container.scrollHeight;
+}
+
+// 加载部署日志
+async function loadDeploymentLog() {
+  try {
+    const resp = await fetch(API_BASE + '/deployment/log');
+    const data = await resp.json();
+    const el = document.getElementById('deploymentLog');
+    if (data.deployments && data.deployments.length > 0) {
+      el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">' +
+        data.deployments.slice(-6).map(d => `
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;">
+            <div style="font-size:13px;font-weight:600;color:#ddd;margin-bottom:6px;">${d.name || d.id || '未命名部署'}</div>
+            <div style="font-size:12px;color:#888;">状态: <span style="color:${d.success ? '#00ff88' : '#ff6666'}">${d.success ? '成功' : '失败'}</span></div>
+            <div style="font-size:11px;color:#666;margin-top:4px;">${d.timestamp || ''}</div>
+          </div>
+        `).join('') + '</div>';
+    } else {
+      el.innerHTML = '<div style="text-align:center;padding:30px;color:#666;">暂无部署记录</div>';
+    }
+  } catch(e) { document.getElementById('deploymentLog').innerHTML = '加载失败'; }
+}
+
+// 初始化
+initCharts();
+loadStatus();
+loadHistory();
+loadAlerts();
+loadEngines();
+loadDeploymentLog();
+
+// 每30秒刷新实时状态和告警
+setInterval(() => { loadStatus(); loadAlerts(); }, 30000);
+// 每5分钟刷新历史数据和引擎列表
+setInterval(() => { loadHistory(); loadEngines(); }, 300000);
+</script>
+
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 元极恒一自治体系</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

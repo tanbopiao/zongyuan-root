@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元内核自治状态仪表盘 | 火斗云智AIOS</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #0a0e1a;
+  color: #e0e6f0;
+  min-height: 100vh;
+  padding: 20px;
+}
+.header {
+  text-align: center;
+  padding: 30px 0;
+  border-bottom: 1px solid rgba(100, 150, 255, 0.2);
+  margin-bottom: 30px;
+}
+.header h1 {
+  font-size: 28px;
+  background: linear-gradient(135deg, #4fc3f7, #7c4dff, #e040fb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.header .subtitle { color: #7a8ba8; font-size: 14px; }
+.header .identity { color: #4fc3f7; font-size: 12px; margin-top: 8px; font-family: monospace; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.card {
+  background: linear-gradient(135deg, rgba(20, 30, 55, 0.9), rgba(15, 20, 40, 0.95));
+  border: 1px solid rgba(100, 150, 255, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+.card:hover {
+  border-color: rgba(100, 150, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(100, 150, 255, 0.1);
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4fc3f7;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title .icon { font-size: 20px; }
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 13px;
+}
+.status-item:last-child { border-bottom: none; }
+.status-label { color: #a0b0c8; }
+.status-value { font-weight: 600; font-family: monospace; }
+.status-active { color: #66bb6a; }
+.status-inactive { color: #ef5350; }
+.status-warning { color: #ffa726; }
+.status-info { color: #4fc3f7; }
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.metric {
+  background: rgba(100, 150, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #4fc3f7;
+  font-family: monospace;
+}
+.metric-label {
+  font-size: 11px;
+  color: #7a8ba8;
+  margin-top: 4px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.progress-green { background: linear-gradient(90deg, #66bb6a, #43a047); }
+.progress-blue { background: linear-gradient(90deg, #4fc3f7, #29b6f6); }
+.progress-orange { background: linear-gradient(90deg, #ffa726, #fb8c00); }
+
+.capability-list { list-style: none; }
+.capability-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.capability-item:last-child { border-bottom: none; }
+.capability-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-active { background: #66bb6a; box-shadow: 0 0 8px #66bb6a; }
+.dot-partial { background: #ffa726; box-shadow: 0 0 8px #ffa726; }
+.capability-name { flex: 1; font-size: 13px; color: #c0d0e8; }
+.capability-status { font-size: 11px; color: #7a8ba8; }
+
+.footer {
+  text-align: center;
+  padding: 30px 0;
+  color: #5a6a88;
+  font-size: 12px;
+  margin-top: 30px;
+  border-top: 1px solid rgba(100, 150, 255, 0.1);
+}
+.pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #66bb6a;
+  border-radius: 50%;
+  margin-right: 6px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+</style>
+<style>
+/* 统一导航栏样式 */
+.nav-unified{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,10,15,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15)}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-brand{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none;white-space:nowrap}
+.nav-menu{display:flex;align-items:center;gap:4px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 12px;color:#bbb;text-decoration:none;font-size:13.5px;transition:color .2s;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.06)}
+.nav-item.has-dropdown>a::after{content:"▾";font-size:10px;margin-left:4px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:160px;background:rgba(20,20,30,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;opacity:0;visibility:hidden;transform:translateY(8px);transition:all .2s;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.nav-item.has-dropdown:hover .dropdown{opacity:1;visibility:visible;transform:translateY(0)}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px;transition:all .15s}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px}
+@media(max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed;top:56px;left:0;right:0;bottom:0;background:rgba(10,10,15,0.98);flex-direction:column;align-items:stretch;gap:0;padding:10px 16px;overflow-y:auto;display:none;z-index:9998}
+  /* .nav-menu.active removed - using checkbox scheme */
+  .nav-item>a{padding:12px 14px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;border:none;background:transparent;padding:0 0 0 16px;display:none}
+  .nav-item.has-dropdown.open .dropdown{display:block}
+  .nav-item.has-dropdown>a::after{content:"+";font-size:16px;float:right}
+  .nav-item.has-dropdown.open>a::after{content:"−"}
+}
+
+
+/* ===== 移动端专项优化（480px以下） ===== */
+@media (max-width: 480px) {
+  body { padding-top: 48px !important; }
+  .container { padding: 0 14px !important; }
+  .nav-container { padding: 0 14px; height: 48px; }
+  .nav-brand { font-size: 14px; }
+  
+  /* Hero区域 */
+  .hero { padding: 40px 0 30px; }
+  .hero-symbol { font-size: 36px !important; margin-bottom: 12px; }
+  .hero h1 { font-size: 24px !important; line-height: 1.3; }
+  .hero-subtitle { font-size: 13px !important; }
+  .hero-desc { font-size: 14px !important; line-height: 1.6; }
+  .hero-stats { flex-direction: column; gap: 16px; }
+  .hero-stats .stat-num { font-size: 28px; }
+  .hero-stats .stat-label { font-size: 12px; }
+  
+  /* 按钮 */
+  .btn-gold { padding: 10px 20px; font-size: 13px; }
+  .btn-outline { padding: 10px 20px; font-size: 13px; }
+  
+  /* 标题 */
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 16px !important; }
+  .section-title { font-size: 20px; }
+  .section-subtitle { font-size: 13px; }
+  
+  /* 网格全部单列 */
+  .arch-grid { grid-template-columns: 1fr !important; gap: 12px; }
+  .concept-showcase { grid-template-columns: 1fr !important; }
+  .feature-grid { grid-template-columns: 1fr !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  
+  /* 卡片 */
+  .arch-card { padding: 16px; }
+  .arch-card h3 { font-size: 15px; }
+  .arch-card p { font-size: 13px; line-height: 1.6; }
+  
+  /* 表格横向滚动 */
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  th, td { padding: 8px 10px; font-size: 12px; white-space: nowrap; }
+  
+  /* 图片自适应 */
+  img { max-width: 100%; height: auto; }
+  
+  /* 代码块 */
+  pre, code { font-size: 12px; overflow-x: auto; }
+  
+  /* 页脚 */
+  footer { padding: 30px 0; font-size: 12px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+  
+  /* 段落间距 */
+  p { line-height: 1.7; }
+  section { padding: 40px 0; }
+}
+
+/* ===== 平板适配（768-900px） ===== */
+@media (max-width: 900px) and (min-width: 481px) {
+  .hero h1 { font-size: 36px; }
+  .hero-symbol { font-size: 50px; }
+  .arch-grid { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 0 20px; }
+}
+
+/* ===== 触摸优化 ===== */
+@media (hover: none) and (pointer: coarse) {
+  .nav-item.has-dropdown:hover .dropdown { opacity: 0; visibility: hidden; }
+  .nav-item.has-dropdown.open .dropdown { opacity: 1; visibility: visible; }
+  .arch-card:hover { transform: none; }
+  .arch-card:hover::before { transform: scaleX(0); }
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* ===== 纯CSS移动端导航（checkbox方案，不依赖JS） ===== */
+#navCheck:checked ~ .nav-unified .nav-menu {
+  transform: translateX(0) !important;
+  visibility: visible !important;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(2) {
+  opacity: 0;
+}
+#navCheck:checked ~ .nav-unified .nav-toggle span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+/* 移动端下拉菜单：用checkbox嵌套太复杂，改用target+hover兼容 */
+@media (max-width: 900px) {
+  .nav-item.has-dropdown > a::after { content: " +"; font-size: 16px; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus .dropdown { display: block; }
+  .dropdown { display: none; }
+  .nav-item.has-dropdown .dropdown { display: none; }
+  .nav-item.has-dropdown:active .dropdown,
+  .nav-item.has-dropdown:focus-within .dropdown { display: block; }
+}
+
+/* ===== 干净版导航（纯CSS，无JS依赖） ===== */
+#navCheck{display:none}
+.nav-unified{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:9999!important;background:rgba(10,10,15,0.95)!important;backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,175,55,0.15);height:52px}
+.nav-container{max-width:1200px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-brand{font-size:16px;font-weight:700;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-toggle{display:none;cursor:pointer;padding:8px;background:none;border:none;flex-direction:column;gap:5px}
+.nav-toggle span{width:22px;height:2px;background:#d4af37;transition:all .3s;border-radius:2px;display:block}
+.nav-menu{display:flex;align-items:center;gap:2px}
+.nav-item{position:relative}
+.nav-item>a{display:block;padding:8px 10px;color:#bbb;text-decoration:none;font-size:13px;border-radius:6px;white-space:nowrap}
+.nav-item>a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+.nav-item.has-dropdown>a::after{content:" ▾";font-size:10px;opacity:.6}
+.dropdown{position:absolute;top:100%;left:0;min-width:170px;background:rgba(15,15,25,0.98);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:6px;display:none;z-index:10001;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.nav-item.has-dropdown:hover .dropdown{display:block}
+.dropdown a{display:block;padding:8px 12px;color:#aaa;text-decoration:none;font-size:13px;border-radius:6px}
+.dropdown a:hover{color:#d4af37;background:rgba(212,175,55,0.08)}
+
+/* 移动端 */
+@media (max-width:900px){
+  .nav-toggle{display:flex}
+  .nav-menu{position:fixed!important;top:52px!important;left:0!important;right:0!important;bottom:0!important;background:rgba(10,10,15,0.98)!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:10px 16px!important;overflow-y:auto!important;z-index:9998!important;display:none!important}
+  .nav-item>a{padding:14px 12px;font-size:15px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .nav-item.has-dropdow
+</style>
+<meta name="description" content="自治仪表盘 - 火斗云智AIOS全域自治状态实时监控">
+<meta name="keywords" content="自治仪表盘,实时监控,全域自治,火斗云智,AIOS">
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="/" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="/products/" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="/solutions/" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="/docs/" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="/pricing/" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+<nav class="nav-unified" id="mainNav">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">火斗云智 AIOS</a>
+    <label class="nav-toggle" for="navCheck" aria-label="菜单">
+      <span></span><span></span><span></span>
+    </label>
+    <div class="nav-menu" id="navMenu">
+      <div class="nav-item"><a href="/">首页</a></div>
+      <div class="nav-item"><a href="https://aios.huodouai.com" target="_blank" style="color:#d4af37;font-weight:600;">AIOS控制台 ↗</a></div>
+      <div class="nav-item has-dropdown">
+        <a href="/products.html">产品矩阵</a>
+        <div class="dropdown">
+          <a href="/products.html">产品总览</a>
+          <a href="/product-matrix.html">产品矩阵图</a>
+          <a href="/commercial.html">商业方案</a>
+          <a href="/cases.html">客户案例</a>
+          <a href="/pricing.html">定价方案</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/agent-network.html">智能体</a>
+        <div class="dropdown">
+          <a href="/agent-network.html">智能体网络</a>
+          <a href="/agent-embodiment.html">智能体实体化</a>
+          <a href="/high-capabilities.html">高阶能力中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/central-brain.html">中枢大脑</a>
+        <div class="dropdown">
+          <a href="/central-brain.html">中枢大脑</a>
+          <a href="/brain-strategy.html">战略全景</a>
+          <a href="/kernel-status.html">内核状态</a>
+          <a href="/bayesian-five-elements.html">贝叶斯五行引擎</a>
+          <a href="/unified-console.html">统一控制台</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/works-gallery-v2.html">作品中心</a>
+        <div class="dropdown">
+          <a href="/works-gallery-v2.html">作品库V2</a>
+          <a href="/drama/">短剧作品库</a>
+          <a href="/kunlun/">昆仑洞天</a>
+          <a href="/keyframe-gallery.html">关键帧资产库</a>
+          <a href="/digital-gallery-v3.html">数字画廊</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/architecture.html">技术架构</a>
+        <div class="dropdown">
+          <a href="/architecture.html">架构总览</a>
+          <a href="/microkernel-architecture.html">微内核架构</a>
+          <a href="/whitepaper.html">技术白皮书</a>
+          <a href="/developers.html">开发者中心</a>
+          <a href="/docs.html">文档中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/governance.html">治理战略</a>
+          <a href="/level-dual-axis.html">双轴层级</a>
+        <div class="dropdown">
+          <a href="/governance.html">治理体系</a>
+          <a href="/philosophy.html">思想体系</a>
+          <a href="/evolution-strategy.html">进化战略</a>
+          <a href="/lightweight-strategy.html">轻量化战略</a>
+          <a href="/axiom-system/">公理体系 ⭐</a>
+          <a href="/global-learning.html">全网学习</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/digital-assets.html">资产中心</a>
+        <div class="dropdown">
+          <a href="/digital-assets.html">数字资产</a>
+          <a href="/asset-center.html">资产中心</a>
+          <a href="/ledger.html">真值账本</a>
+          <a href="/experience-kb.html">经验库</a>
+          <a href="/aios/index.html">AIOS资产中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/aios/visual/cloud_brain_dashboard.html">实时监控</a>
+        <div class="dropdown">
+          <a href="/aios/visual/cloud_brain_dashboard.html">云脑仪表盘</a>
+          <a href="/aios/visual/kernel-dashboard.html">内核仪表盘</a>
+          <a href="/aios/visual/memory_gateway_monitor.html">记忆网关监控</a>
+          <a href="/aios/visual/scheduler_monitor_dashboard.html">调度器监控</a>
+          <a href="/system-dashboard.html">系统仪表盘</a>
+          <a href="/status-center.html">状态中心</a>
+        </div>
+      </div>
+      <div class="nav-item has-dropdown">
+        <a href="/auto-pipeline.html">更多</a>
+        <div class="dropdown">
+          <a href="/auto-pipeline.html">自动化流水线</a>
+          <a href="/model-compare-lab.html">模型对比实验室</a>
+          <a href="/education.html">普惠教育</a>
+          <a href="/search.html">全站搜索</a>
+          <a href="/performance.html">性能监控</a>
+          <a href="https://gov.huodouai.com" target="_blank">政务AI ↗</a>
+          <a href="https://status.huodouai.com" target="_blank">实时状态站 ↗</a>
+        </div>
+      </div>
+      <div class="nav-cta" style="display:flex;align-items:center;gap:12px;margin-left:20px;">
+        <a href="/book-demo.html" style="background:linear-gradient(135deg,#d4af37,#b8941f);color:#1a1a2e;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:13.5px;font-weight:600;transition:all .2s;white-space:nowrap;box-shadow:0 4px 15px rgba(212,175,55,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(212,175,55,0.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(212,175,55,0.3)'">预约演示</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<div class="header">
+  <h1>⚡ 元内核自治状态仪表盘</h1>
+  <div class="subtitle">ZONGYUAN-ROOT 元极恒一自治体系 · 十大自治能力实时监控</div>
+  <div class="identity">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ 火斗云智AIOS</div>
+</div>
+
+<div class="grid">
+
+  <!-- 核心指标 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📊</span>核心指标</div>
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="metric-value" id="truth-count">7,440</div>
+        <div class="metric-label">真值总量</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="service-count">53</div>
+        <div class="metric-label">运行服务</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="uptime">6h53m</div>
+        <div class="metric-label">运行时长</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="autonomy-score">92%</div>
+        <div class="metric-label">自治评分</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 十大自治能力 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🔄</span>十大自治能力</div>
+    <ul class="capability-list">
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">自启动能力</span>
+        <span class="capability-status">50+服务开机自启</span>
+      </li>
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">自监控能力</span>
+        <span class="capability-status">资源+健康实时监控</span>
+      </li>
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">自修复能力</span>
+        <span class="capability-status">崩溃自动重启+自愈</span>
+      </li>
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">自进化能力</span>
+        <span class="capability-status">真值自动吸收+元进化</span>
+      </li>
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">自保护能力</span>
+        <span class="capability-status">六层防护+384文件锁定</span>
+      </li>
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">自备份能力</span>
+        <span class="capability-status">7个定时备份任务</span>
+      </li>
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">自调度能力</span>
+        <span class="capability-status">63个crontab+调度器</span>
+      </li>
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">自上报能力</span>
+        <span class="capability-status">飞书推送+全域传播</span>
+      </li>
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">算力自注入</span>
+        <span class="capability-status">本地1.5B模型持续运行</span>
+      </li>
+      <li class="capability-item">
+        <span class="capability-dot dot-active"></span>
+        <span class="capability-name">决策自裁决</span>
+        <span class="capability-status">三维稳态+多智能体辩论</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 系统资源 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">💻</span>系统资源</div>
+    <div class="status-item">
+      <span class="status-label">CPU负载</span>
+      <span class="status-value status-info">1.18 / 0.83 / 0.78</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">内存使用</span>
+      <span class="status-value status-warning">2.5G / 3.6G</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill progress-orange" style="width:69%"></div></div>
+    <div class="status-item" style="margin-top:10px">
+      <span class="status-label">Swap使用</span>
+      <span class="status-value status-info">849M / 8G</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill progress-blue" style="width:10%"></div></div>
+    <div class="status-item" style="margin-top:10px">
+      <span class="status-label">磁盘使用</span>
+      <span class="status-value status-active">20G / 60G</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill progress-green" style="width:33%"></div></div>
+    <div class="status-item" style="margin-top:10px">
+      <span class="status-label">zram压缩比</span>
+      <span class="status-value status-info">3.06:1</span>
+    </div>
+  </div>
+
+  <!-- 保护体系 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🛡️</span>六层防护体系</div>
+    <div class="status-item">
+      <span class="status-label">第一层：文件锁定</span>
+      <span class="status-value status-active">384+文件 chattr +i</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">第二层：白名单</span>
+      <span class="status-value status-active">121条保护路径</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">第三层：安全删除</span>
+      <span class="status-value status-active">6重校验机制</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">第四层：完整性监控</span>
+      <span class="status-value status-active">SHA256每日比对</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">第五层：数据库保护</span>
+      <span class="status-value status-active">权限600+WAL+快照</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">第六层：服务自愈</span>
+      <span class="status-value status-active">Restart=always</span>
+    </div>
+  </div>
+
+  <!-- 备份体系 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">💾</span>备份体系</div>
+    <div class="status-item">
+      <span class="status-label">每小时真值快照</span>
+      <span class="status-value status-active">保留48个(2天)</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">每日异地备份</span>
+      <span class="status-value status-active">保留30个(1月)</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">每日环境备份</span>
+      <span class="status-value status-active">03:00自动执行</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">每周备份清理</span>
+      <span class="status-value status-active">周一02:00执行</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">每月自动清理</span>
+      <span class="status-value status-active">1日03:00执行</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">备份总任务</span>
+      <span class="status-value status-info">7个定时任务</span>
+    </div>
+  </div>
+
+  <!-- 真值进化 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🧠</span>真值进化</div>
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="metric-value">7,440</div>
+        <div class="metric-label">当前真值</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">+333</div>
+        <div class="metric-label">今日增长</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">108</div>
+        <div class="metric-label">元法则</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">78</div>
+        <div class="metric-label">规则</div>
+      </div>
+    </div>
+    <div class="status-item" style="margin-top:15px">
+      <span class="status-label">真值吸收进程</span>
+      <span class="status-value status-active">7个运行中</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">元进化服务</span>
+      <span class="status-value status-active">meta-evolution + proactive</span>
+    </div>
+  </div>
+
+  <!-- 算力注入 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">⚡</span>算力注入</div>
+    <div class="status-item">
+      <span class="status-label">本地模型</span>
+      <span class="status-value status-active">Qwen2.5-1.5B-Instruct</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">模型大小</span>
+      <span class="status-value status-info">1.1GB (Q4_K_M)</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">推理端口</span>
+      <span class="status-value status-info">8081 (127.0.0.1)</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">内存限制</span>
+      <span class="status-value status-warning">MemoryMax=1.8G</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">算力注入服务</span>
+      <span class="status-value status-active">compute-injection 运行中</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">外部API</span>
+      <span class="status-value status-info">智谱GLM-4V-Flash(免费)</span>
+    </div>
+  </div>
+
+  <!-- 决策体系 -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🎯</span>决策自裁决</div>
+    <div class="status-item">
+      <span class="status-label">三维稳态公式</span>
+      <span class="status-value status-active">利益40%/风险35%/成本25%</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">七维评估体系</span>
+      <span class="status-value status-active">已写入元法则</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">多智能体辩论</span>
+      <span class="status-value status-active">乐观/保守/中立三方</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">认知循环</span>
+      <span class="status-value status-active">cognitive-loop 运行中</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">决策公式服务</span>
+      <span class="status-value status-active">decision-formula 运行中</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">人工审批阈值</span>
+      <span class="status-value status-info">高风险/高成本需审批</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p><span class="pulse"></span>元内核自治运行中 · 十大能力全部激活 · 系统稳态运行</p>
+  <p style="margin-top:8px">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ 火斗云智AIOS ｜ ZONGYUAN-ROOT</p>
+  <p style="margin-top:8px; color:#4a5a78">数据更新时间：2026-09-15 00:57 ｜ 服务器：腾讯云 4核3.6G ｜ 到期：2028-03-27</p>
+</div>
+
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 元极恒一自治体系</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

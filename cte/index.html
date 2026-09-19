@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CTE闭环引擎 · ZONGYUAN-ROOT V4.0</title>
+<style>
+:root,[data-theme="dark"]{--bg:#0a0e1a;--card:#111827;--border:#1f2937;--text:#e5e7eb;--dim:#6b7280;--gold:#d4af37;--cyan:#00d4ff;--green:#10b981;--red:#ef4444;--purple:#8b5cf6}
+[data-theme="light"]{--bg:#f5f5f0;--card:#fff;--border:#e0e0d8;--text:#1a1a2e;--dim:#888;--gold:#b8860b;--cyan:#0088aa;--green:#0a8a5a;--red:#cc3333;--purple:#6644cc}
+[data-theme="black-gold"]{--bg:#000;--card:#0d0d0d;--border:#2a2515;--text:#d4af37;--dim:#6b5d3a;--gold:#ffd700;--cyan:#c0a040;--green:#8a8a20;--red:#aa4444;--purple:#8a7a30}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:16px}
+.nav{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.nav a{padding:8px 16px;border-radius:8px;border:1px solid var(--border);color:var(--cyan);text-decoration:none;font-size:13px;transition:.2s}
+.nav a.root{color:var(--gold);font-weight:700}
+.nav .badge{margin-left:auto;font-size:11px;color:var(--dim)}
+h1{font-size:22px;margin-bottom:4px}
+.sub{color:var(--dim);font-size:13px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{font-size:15px;margin-bottom:14px;color:var(--gold)}
+.three-state{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:600px){.three-state{grid-template-columns:1fr}}
+.state-box{padding:16px;border-radius:8px;border:1px solid var(--border);background:var(--bg)}
+.state-box h3{font-size:13px;margin-bottom:8px}
+.state-box.c h3{color:var(--red)}
+.state-box.t h3{color:var(--green)}
+.state-box.e h3{color:var(--purple)}
+.state-box textarea{width:100%;min-height:80px;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px;font-family:inherit}
+canvas{width:100%;height:280px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+@media(max-width:600px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metric{text-align:center;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+.metric .v{font-size:20px;font-weight:700;color:var(--cyan)}
+.metric .l{font-size:11px;color:var(--dim);margin-top:2px}
+button{padding:12px 24px;border-radius:8px;border:none;background:var(--cyan);color:#000;font-weight:700;cursor:pointer;margin-top:12px;font-size:14px}
+button.secondary{background:var(--border);color:var(--text)}
+.log{margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);font-size:12px;max-height:200px;overflow-y:auto;white-space:pre-wrap;font-family:monospace}
+</style>
+</head>
+<body>
+<div class="nav">
+<a href="/" class="root">www.huodouai.com</a>
+<a href="/hub">中枢门户</a>
+<a href="/axiom">公理面板</a>
+<a href="/kunlun">昆仑洞天</a>
+<a href="/cte">CTE闭环</a>
+<span class="badge">DID-BR-000002</span>
+</div>
+
+<h1>CTE三位一体闭环引擎</h1>
+<p class="sub">C(因果)→T(真值)→E(进化)→C 闭环迭代 · 适应度Φ · 融合度D_TC · 能量函数V(X)</p>
+
+<div class="card">
+<h2>三态输入</h2>
+<div class="three-state">
+<div class="state-box c"><h3>C · 因果态</h3><textarea id="stateC" placeholder="因果链/奇点预警/干预结果...">信号衰减导致无线链路功耗上升</textarea></div>
+<div class="state-box t"><h3>T · 真值态</h3><textarea id="stateT" placeholder="真值条目/置信度/冲突标记...">频率校准校准可降低WiFi功耗46.4%</textarea></div>
+<div class="state-box e"><h3>E · 进化态</h3><textarea id="stateE" placeholder="策略调整/参数变更/版本升级...">启用968Hz硅基基准频同步时钟</textarea></div>
+</div>
+<button onclick="runCTE()">启动闭环迭代（5轮）</button>
+<button class="secondary" onclick="resetCTE()">重置</button>
+</div>
+
+<div class="card">
+<h2>闭环轨迹可视化</h2>
+<canvas id="cv" width="800" height="280"></canvas>
+<div class="metrics">
+<div class="metric"><div class="v" id="mPhi">--</div><div class="l">适应度 Φ</div></div>
+<div class="metric"><div class="v" id="mDtc">--</div><div class="l">融合度 D_TC</div></div>
+<div class="metric"><div class="v" id="mV">--</div><div class="l">能量 V(X)</div></div>
+<div class="metric"><div class="v" id="mConv">--</div><div class="l">收敛状态</div></div>
+</div>
+</div>
+
+<div class="card">
+<h2>迭代日志</h2>
+<div class="log" id="log">等待启动闭环...</div>
+</div>
+
+<script>
+const saved=localStorage.getItem('cte-theme')||'dark';
+document.documentElement.setAttribute('data-theme',saved);
+document.querySelector('.nav').insertAdjacentHTML('beforeend','<button class="secondary" onclick="toggleTheme()" style="margin-left:8px">主题</button>');
+function toggleTheme(){const c={'dark':'light','light':'black-gold','black-gold':'dark'};const cur=document.documentElement.getAttribute('data-theme');const n=c[cur];document.documentElement.setAttribute('data-theme',n);localStorage.setItem('cte-theme',n);}
+
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+let history=[];
+
+function drawChart(){
+  const w=cv.width,h=cv.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='#1f2937';ctx.lineWidth=1;
+  for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(40,h-30-i*40);ctx.lineTo(w-20,h-30-i*40);ctx.stroke();}
+  if(history.length<2)return;
+  // Φ曲线
+  ctx.strokeStyle='#00d4ff';ctx.lineWidth=2;ctx.beginPath();
+  history.forEach((p,i)=>{const x=40+i*(w-60)/(history.length-1);const y=h-30-p.phi*200;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+  // D_TC曲线
+  ctx.strokeStyle='#10b981';ctx.beginPath();
+  history.forEach((p,i)=>{const x=40+i*(w-60)/(history.length-1);const y=h-30-p.dtc*200;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+  // 点
+  history.forEach((p,i)=>{const x=40+i*(w-60)/(history.length-1);ctx.fillStyle='#00d4ff';ctx.beginPath();ctx.arc(x,h-30-p.phi*200,3,0,Math.PI*2);ctx.fill();});
+}
+
+function log(msg){const el=document.getElementById('log');el.textContent+=msg+'\n';el.scrollTop=el.scrollHeight;}
+
+async function runCTE(){
+  document.getElementById('log').textContent='';
+  history=[];
+  let phi=0.3,dtc=0.5,v=1.0;
+  for(let i=1;i<=5;i++){
+    // 模拟CTE迭代
+    phi=Math.min(0.99,phi+0.08+Math.random()*0.05);
+    dtc=Math.min(0.99,dtc+0.06+Math.random()*0.04);
+    v=Math.max(0.05,(0.99-phi)+(1-dtc));
+    history.push({phi,dtc,v});
+    document.getElementById('mPhi').textContent=phi.toFixed(3);
+    document.getElementById('mDtc').textContent=dtc.toFixed(3);
+    document.getElementById('mV').textContent=v.toFixed(3);
+    document.getElementById('mConv').textContent=i>=4?'✅ 收敛':'迭代中';
+    log(`[轮次${i}] Φ=${phi.toFixed(3)} D_TC=${dtc.toFixed(3)} V(X)=${v.toFixed(3)}`);
+    drawChart();
+    await new Promise(r=>setTimeout(r,400));
+  }
+  log('--- 闭环收敛完成 ---');
+  log(`最终适应度 Φ=${phi.toFixed(3)}，融合度 D_TC=${dtc.toFixed(3)}`);
+}
+
+function resetCTE(){history=[];ctx.clearRect(0,0,cv.width,cv.height);document.getElementById('log').textContent='已重置';['mPhi','mDtc','mV'].forEach(id=>document.getElementById(id).textContent='--');document.getElementById('mConv').textContent='--';}
+</script>
+</body>
+</html>
