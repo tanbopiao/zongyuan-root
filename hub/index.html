@@ -364,6 +364,32 @@ body::before{content:'';position:fixed;inset:0;background:
   </div>
 </div>
 
+<!-- === 节点实时看板 === -->
+<section style="max-width:1200px;margin:40px auto;padding:0 20px">
+  <h2 style="color:#e0e0e0;margin-bottom:20px;font-size:1.5rem">节点实时状态</h2>
+  <div id="node-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+    <div style="color:#888;text-align:center;padding:40px">加载中...</div>
+  </div>
+</section>
+<script>
+fetch('/api/report/nodes')
+  .then(r=>r.json())
+  .then(d=>{
+    const grid=document.getElementById('node-grid');
+    grid.innerHTML='';
+    const now=Date.now()/1000;
+    Object.values(d.nodes||{}).forEach(n=>{
+      const age=Math.floor(now-(n.last_heartbeat||0));
+      const online=age<300;
+      const color=online?'#4caf50':'#f44336';
+      const card=document.createElement('div');
+      card.style.cssText='background:#1a1a2e;border-radius:12px;padding:20px;border-left:3px solid '+color;
+      card.innerHTML=;
+      grid.appendChild(card);
+    });
+  })
+  .catch(()=>{document.getElementById('node-grid').innerHTML='<div style="color:#888">无法连接网关</div>'});
+</script>
 <footer class="footer">
   <div class="sig">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
   <p>ZONGYUAN-ROOT V4.0 火斗云智智能认知高度自治内核 | DID-BR-000002</p>
