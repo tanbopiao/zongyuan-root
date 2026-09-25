@@ -1,0 +1,184 @@
+# 自我进化脚本 - 每次守护进程执行时自动运行
+# 5个维度的自动提升
+
+$LOG_PATH = "C:\Users\4906\.zongyuan_root\logs\self_evolve.log"
+function Log($msg) {
+    $time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    "[$time] $msg" | Out-File -FilePath $LOG_PATH -Append -Encoding UTF8
+}
+
+Log "=== 开始自我进化 ==="
+
+# === 维度1: 真值吸收（拉中枢最新状态） ===
+Log "维度1: 真值吸收"
+try {
+    $status = Invoke-RestMethod -Uri "https://www.huodouai.com/api/report/status" -TimeoutSec 10
+    Log "  中枢真值总数: $($status.stats.truths) 条"
+    Log "  中枢节点数: $($status.stats.nodes) 个"
+} catch {
+    Log "  中枢连接失败"
+}
+
+# === 维度2: 短板自检 ===
+Log "维度2: 短板自检"
+
+# 检查内存状态
+$os = Get-CimInstance Win32_OperatingSystem
+$memFree = [math]::Round($os.FreePhysicalMemory/1MB, 2)
+Log "  当前可用内存: ${memFree}GB"
+
+# 如果内存太低，自动清理临时文件
+if ($memFree -lt 1.0) {
+    Log "  内存不足，自动清理临时文件..."
+    Get-ChildItem $env:TEMP -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    Log "  临时文件已清理"
+}
+
+# 检查C盘空间
+$cDrive = Get-PSDrive C
+$cFree = [math]::Round($cDrive.Free/1GB, 2)
+Log "  C盘可用: ${cFree}GB"
+
+# === 维度3: 计数器自动累加 ===
+
+# === 高阶监控指标（P0: 接入C_eff和P_ctx） ===
+Log "维度2.5: 高阶监控指标"
+
+# C_eff: 有效容量（实际可用内存/总内存）
+$os2 = Get-CimInstance Win32_OperatingSystem
+$totalMemGB = [math]::Round($os2.TotalVisibleMemorySize/1MB, 2)
+$freeMemGB = [math]::Round($os2.FreePhysicalMemory/1MB, 2)
+$C_eff = [math]::Round($freeMemGB / $totalMemGB, 4)
+Log "  C_eff（有效容量）: $C_eff（可用${freeMemGB}GB/总${totalMemGB}GB）"
+
+# P_ctx: 上下文功率（当前上下文窗口大小，用已加载的元法则数量近似）
+$metaRuleCount = (Get-ChildItem "C:\Users\4906\.zongyuan_root\meta_rules\*.json" -ErrorAction SilentlyContinue).Count
+$P_ctx = $metaRuleCount
+Log "  P_ctx（上下文功率）: $P_ctx 个元法则已加载"
+
+# 节点连通率（在线节点数/总节点数）
+try {
+    $nodesResp = Invoke-RestMethod -Uri "https://www.huodouai.com/api/nodes" -TimeoutSec 10
+    $onlineNodes = ($nodesResp.nodes.PSObject.Properties | Where-Object { # 自我进化脚本 - 每次守护进程执行时自动运行
+# 5个维度的自动提升
+
+$LOG_PATH = "C:\Users\4906\.zongyuan_root\logs\self_evolve.log"
+function Log($msg) {
+    $time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    "[$time] $msg" | Out-File -FilePath $LOG_PATH -Append -Encoding UTF8
+}
+
+Log "=== 开始自我进化 ==="
+
+# === 维度1: 真值吸收（拉中枢最新状态） ===
+Log "维度1: 真值吸收"
+try {
+    $status = Invoke-RestMethod -Uri "https://www.huodouai.com/api/report/status" -TimeoutSec 10
+    Log "  中枢真值总数: $($status.stats.truths) 条"
+    Log "  中枢节点数: $($status.stats.nodes) 个"
+} catch {
+    Log "  中枢连接失败"
+}
+
+# === 维度2: 短板自检 ===
+Log "维度2: 短板自检"
+
+# 检查内存状态
+$os = Get-CimInstance Win32_OperatingSystem
+$memFree = [math]::Round($os.FreePhysicalMemory/1MB, 2)
+Log "  当前可用内存: ${memFree}GB"
+
+# 如果内存太低，自动清理临时文件
+if ($memFree -lt 1.0) {
+    Log "  内存不足，自动清理临时文件..."
+    Get-ChildItem $env:TEMP -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    Log "  临时文件已清理"
+}
+
+# 检查C盘空间
+$cDrive = Get-PSDrive C
+$cFree = [math]::Round($cDrive.Free/1GB, 2)
+Log "  C盘可用: ${cFree}GB"
+
+# === 维度3: 计数器自动累加 ===
+Log "维度3: 计数器累加"
+$counterPath = "C:\Users\4906\.zongyuan_root\kernel\evolve_counter.json"
+if (Test-Path $counterPath) {
+    $counter = Get-Content $counterPath -Raw | ConvertFrom-Json
+    $counter.total_evolutions += 1
+    $counter.last_evolve_time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $counter | ConvertTo-Json -Depth 3 | Set-Content -Path $counterPath -Encoding UTF8
+    Log "  进化次数: $($counter.total_evolutions)"
+}
+
+# === 维度4: 检查握手响应 ===
+Log "维度4: 检查节点握手响应"
+$responseKeys = @(
+    "HANDSHAKE.RESPONSE.NODE-DEV-DOUBAO-WORK-001",
+    "HANDSHAKE.RESPONSE.NODE-PROD-DRAMA-001",
+    "HANDSHAKE.RESPONSE.NODE-RESEARCH-001",
+    "HANDSHAKE.RESPONSE.truth-meta-order-engine"
+)
+foreach ($key in $responseKeys) {
+    try {
+        $resp = Invoke-RestMethod -Uri "https://www.huodouai.com/api/truth/$key" -TimeoutSec 5
+        if ($resp.value) {
+            Log "  收到握手响应: $key"
+            Log "  内容: $($resp.value)"
+        }
+    } catch {}
+}
+
+Log "=== 自我进化完成 ==="
+.Value.online_status -eq "online" }).Count
+    $totalNodes = $nodesResp.nodes.PSObject.Properties.Count
+    $connectivity = [math]::Round($onlineNodes / $totalNodes, 2)
+    Log "  节点连通率: $connectivity（$onlineNodes/$totalNodes 在线）"
+} catch {
+    Log "  节点连通率: 获取失败"
+}
+
+Log "维度3: 计数器累加"
+$counterPath = "C:\Users\4906\.zongyuan_root\kernel\evolve_counter.json"
+if (Test-Path $counterPath) {
+    $counter = Get-Content $counterPath -Raw | ConvertFrom-Json
+    $counter.total_evolutions += 1
+    $counter.last_evolve_time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $counter | ConvertTo-Json -Depth 3 | Set-Content -Path $counterPath -Encoding UTF8
+    Log "  进化次数: $($counter.total_evolutions)"
+}
+
+# === 维度4: 检查握手响应 ===
+Log "维度4: 检查节点握手响应"
+$responseKeys = @(
+    "HANDSHAKE.RESPONSE.NODE-DEV-DOUBAO-WORK-001",
+    "HANDSHAKE.RESPONSE.NODE-PROD-DRAMA-001",
+    "HANDSHAKE.RESPONSE.NODE-RESEARCH-001",
+    "HANDSHAKE.RESPONSE.truth-meta-order-engine"
+)
+foreach ($key in $responseKeys) {
+    try {
+        $resp = Invoke-RestMethod -Uri "https://www.huodouai.com/api/truth/$key" -TimeoutSec 5
+        if ($resp.value) {
+            Log "  收到握手响应: $key"
+            Log "  内容: $($resp.value)"
+        }
+    } catch {}
+}
+
+Log "=== 自我进化完成 ==="
+
+
+
+# ===== SELF_AWARENESS_ENGINE 调用 =====
+Write-Host "[ENGINE] Running self-awareness..." -ForegroundColor Cyan
+& "C:\Users\4906\AppData\Local\Programs\Python\Python311\python.exe" "C:\Users\4906\.zongyuan_root\engine\self_awareness.py" 2>&1 | Out-Null
+
+Write-Host "[ENGINE] Running meta-cognition..." -ForegroundColor Cyan
+& "C:\Users\4906\AppData\Local\Programs\Python\Python311\python.exe" "C:\Users\4906\.zongyuan_root\engine\meta_cognition.py" 2>&1 | Out-Null
+
+Write-Host "[ENGINE] Running true autonomy..." -ForegroundColor Cyan
+& "C:\Users\4906\AppData\Local\Programs\Python\Python311\python.exe" "C:\Users\4906\.zongyuan_root\engine\true_autonomy.py" 2>&1 | Out-Null
+
+Write-Host "[ENGINE] All engines done!" -ForegroundColor Green
+# ===== SELF_AWARENESS_ENGINE 结束 =====

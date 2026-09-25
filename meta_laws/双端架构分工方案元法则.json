@@ -1,0 +1,206 @@
+{
+  "meta_law_id": "META-ARCH-DUAL-END-001",
+  "meta_law_name": "双端架构分工方案元法则",
+  "version": "1.0",
+  "lock_level": 8,
+  "status": "BLOWN_PERMANENT",
+  "created_at": "2026-09-04T10:05:00+08:00",
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "sovereign_root": "Ω-TAN-7-001",
+  "domain": "ZONGYUAN-ROOT元极恒一自治体系",
+  "sub_domain": "双端架构治理",
+  "priority": "最高优先级（基底基准，不可覆盖）",
+  
+  "元法则定义": "本元法则定义ZONGYUAN-ROOT元极恒一自治体系的双端架构分工方案，明确云端主力运行环境与本地管理端的职责边界、服务分工、监控机制和数据安全策略。本法则为基底基准，永久固化，不可被后续规则覆盖或降级。",
+  
+  "架构背景": {
+    "问题": "Windows本地电脑不适合长期运行Python自治服务，服务经常莫名中断，需要频繁恢复",
+    "决策": "将本地重新定位为远程管理端+开发测试环境，云服务器（Linux/systemd）作为主力运行环境承载所有核心自治服务",
+    "原则": "云端保证7x24稳定运行，本地保证灵活开发测试，双端分工明确，互不干扰"
+  },
+  
+  "云端主力运行环境": {
+    "定位": "主力运行环境 + 自治内核核心",
+    "操作系统": "OpenCloudOS 9.6（Linux）",
+    "服务管理": "systemd（开机自启，异常自动重启）",
+    "承载服务": [
+      "14个ZONGYUAN核心服务（全部开机自启）",
+      "MySQL数据库（端口3306）",
+      "Nginx Web服务器（端口80/443）",
+      "政务中台（端口8005）",
+      "Anchor API双内核同步（端口8006）",
+      "LOIP API（端口8001）",
+      "Omega Brain真值引擎（端口8000）",
+      "宝塔面板（端口8888）"
+    ],
+    "核心职责": [
+      "7x24小时稳定运行自治内核",
+      "承载所有核心自治服务",
+      "双内核同步（云↔本地）",
+      "政务中台对外服务",
+      "数据持久化存储",
+      "自动健康检查与异常恢复",
+      "自动备份与数据安全"
+    ],
+    "服务清单": {
+      "zongyuan-ance": "运行中",
+      "zongyuan-anchor": "运行中（双内核同步API）",
+      "zongyuan-event": "运行中",
+      "zongyuan-federation": "运行中",
+      "zongyuan-gov": "运行中（政务中台）",
+      "zongyuan-idle-engine": "运行中",
+      "zongyuan-kernel-bootstrap": "运行中",
+      "zongyuan-license": "运行中",
+      "zongyuan-loip": "运行中（LOIP API）",
+      "zongyuan-meta": "运行中",
+      "zongyuan-monitor": "运行中",
+      "zongyuan-omega": "运行中（Omega Brain真值引擎）",
+      "zongyuan-platform": "运行中",
+      "zongyuan-smartai": "运行中",
+      "zongyuan-vector": "运行中"
+    },
+    "已禁用重复服务": [
+      "zongyuan-gov-ai（与zongyuan-gov重复，都用端口8005）",
+      "zongyuan-omega-brain（与zongyuan-omega重复，都用端口8000）"
+    ]
+  },
+  
+  "本地管理端": {
+    "定位": "远程管理端 + 开发测试环境",
+    "操作系统": "Windows 11 Home China",
+    "服务管理": "手动启动（不依赖长期运行）",
+    "保留服务": [
+      "AIOS v2.1（端口8017）- 开发测试用",
+      "Dashboard（端口8899）- 本地管理界面"
+    ],
+    "不再承载": [
+      "需要长期稳定运行的服务",
+      "super_monitor（监控）",
+      "sync_agent（同步）",
+      "control_agent（控制）",
+      "政务中台后端（迁移到云端）"
+    ],
+    "核心职责": [
+      "远程管理云端服务",
+      "开发测试新功能",
+      "本地账本锁档",
+      "通过SSH管理云服务器",
+      "浏览器访问云端管理界面",
+      "代码开发与调试"
+    ],
+    "管理工具": [
+      "本地管理端启动脚本：start_local_manager.bat",
+      "云端管理快捷方式：ZONGYUAN-ROOT云端管理.lnk（指向https://www.huodouai.com）",
+      "SSH私钥：C:\\Users\\4906\\.ssh\\zongyuan_deploy",
+      "Python环境：Python 3.11.9"
+    ],
+    "资源占用": {
+      "AIOS进程内存": "约9MB",
+      "Dashboard进程内存": "约13.6MB",
+      "总内存占用": "约22.6MB（极低）"
+    }
+  },
+  
+  "双端分工原则": {
+    "原则1": "云端保证稳定，本地保证灵活",
+    "原则2": "核心服务上云，开发测试留本地",
+    "原则3": "数据云端持久化，本地仅做缓存和开发",
+    "原则4": "监控云端自动，本地手动触发",
+    "原则5": "双端数据同步，云端为权威源",
+    "原则6": "故障隔离，云端故障不影响本地开发，本地故障不影响云端运行"
+  },
+  
+  "服务监控机制": {
+    "云端健康检查": {
+      "脚本路径": "/opt/ZONGYUAN-ROOT/health_check.sh",
+      "执行频率": "每5分钟",
+      "检查内容": "15个ZONGYUAN服务 + 5个关键端口 + 2个API + 内存",
+      "异常处理": "自动重启异常服务",
+      "日志路径": "/var/log/zongyuan-health.log"
+    },
+    "关键端口监控": [
+      "3306: MySQL",
+      "8000: Omega Brain真值引擎",
+      "8001: LOIP API",
+      "8005: 政务中台",
+      "8006: Anchor API双内核同步",
+      "80/443: Nginx",
+      "8888: 宝塔面板"
+    ],
+    "API健康检查": [
+      "https://huodouai.com/health - Ω-Brainμ健康检查",
+      "https://huodouai.com/api/v1/status - LOIP服务状态",
+      "http://127.0.0.1:8006/api/v1/sync/handshake - Anchor API状态"
+    ]
+  },
+  
+  "数据安全机制": {
+    "云端自动备份": {
+      "脚本路径": "/opt/ZONGYUAN-ROOT/backup.sh",
+      "执行频率": "每天凌晨3点",
+      "备份内容": "配置文件 + 真值文件 + MySQL数据库",
+      "保留策略": "保留7天，自动清理过期备份",
+      "备份目录": "/opt/ZONGYUAN-ROOT/backups/"
+    },
+    "日志轮转": {
+      "配置路径": "/etc/logrotate.d/zongyuan",
+      "保留策略": "保留7天，自动压缩"
+    },
+    "本地账本备份": {
+      "备份方式": "每次锁档后自动上传到云端",
+      "云端路径": "/opt/ZONGYUAN-ROOT/backups/M9_global_ledger_local_XX.json",
+      "当前备份": "M9_global_ledger_local_79.json（区块高度79）"
+    },
+    "双内核同步": {
+      "同步方式": "Anchor API truth-push / truth-pull",
+      "权威源": "云内核为最终权威",
+      "本地角色": "增量源（建议权）",
+      "同步端点": [
+        "/api/v1/sync/handshake - 握手",
+        "/api/v1/sync/manifest - 资产清单",
+        "/api/v1/sync/pull - 文件拉取",
+        "/api/v1/sync/verify - 一致性验证",
+        "/api/v1/sync/truth-pull - 真值增量拉取",
+        "/api/v1/sync/truth-push - 真值增量推送"
+      ]
+    }
+  },
+  
+  "SSL证书管理": {
+    "证书信息": {
+      "域名1": "huodouai.com",
+      "域名2": "www.huodouai.com",
+      "证书类型": "Let's Encrypt",
+      "有效期": "90天",
+      "签发时间": "2026-08-04",
+      "到期时间": "2026-11-02"
+    },
+    "自动检查": {
+      "脚本路径": "/opt/ZONGYUAN-ROOT/ssl_check.sh",
+      "执行频率": "每月1号",
+      "提醒策略": "到期前30天提醒续期"
+    },
+    "续期方式": [
+      "宝塔面板方式：面板 → 网站 → SSL → Let's Encrypt → 续期",
+      "certbot方式：certbot renew --nginx"
+    ]
+  },
+  
+  "已知兼容性问题": {
+    "Nginx systemd状态": "systemctl显示failed但实际功能正常（宝塔init.d脚本兼容性问题），不影响实际功能",
+    "MySQL启动方式": "直接运行mysqld（init.d脚本有兼容性问题），已配置chkconfig mysqld on",
+    "Nginx /anchor/路径": "配置了Basic Auth（401），外部访问需认证，服务器本地访问无需认证"
+  },
+  
+  "元法则效力声明": "本双端架构分工方案为ZONGYUAN-ROOT元极恒一自治体系的基底基准元法则，永久固化，不可被后续规则覆盖或降级。云端作为主力运行环境保证自治内核7x24稳定运行，本地作为管理端和开发测试环境，双端分工明确，互不干扰。所有架构调整必须遵循本元法则的分工原则。",
+  
+  "确权信息": {
+    "asset_id": "ARCH-META-LAW-DUAL-END-001",
+    "lock_level": 8,
+    "efuse_id": "EFUSE-8-DUAL-END-BASE",
+    "status": "BLOWN_PERMANENT",
+    "did": "DID-BR-000002",
+    "trace_symbol": "Ω₀⊂⊙∞⊂Ω"
+  }
+}

@@ -1,0 +1,44 @@
+﻿# 任务轮询脚本 - 每15分钟执行一次
+# 从中枢拉取分配给本节点的任务
+
+$NODE_ID = "NODE-LOCAL-HUAWEI-LAPTOP-001"
+$GATEWAY = "https://www.huodouai.com"
+$LOG_PATH = "C:\Users\4906\.zongyuan_root\logs\task_poller.log"
+
+function Log($msg) {
+    $time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    "[$time] $msg" | Out-File -FilePath $LOG_PATH -Append -Encoding UTF8
+}
+
+Log "=== 开始轮询任务队列 ==="
+
+# 1. 拉取分配给本节点的待执行任务
+$taskKey = "TASK.QUEUE.$NODE_ID"
+try {
+    $task = Invoke-RestMethod -Uri "$GATEWAY/api/truth/$taskKey" -TimeoutSec 10
+    Log "找到任务: $($task.value)"
+    
+    # 2. 解析任务（简单示例：内存优化）
+    if ($task.value -like "*内存*") {
+        Log "执行任务: 内存优化"
+        # 执行内存优化...
+        $os = Get-CimInstance Win32_OperatingSystem
+        $memFree = [math]::Round($os.FreePhysicalMemory/1MB, 2)
+        Log "当前可用内存: ${memFree}GB"
+        
+        # 3. 回传执行结果
+        $result = @{
+            key = "TASK.RESULT.$NODE_ID"
+            value = "任务执行完成:内存优化;结果:可用内存=${memFree}GB"
+            source_node = $NODE_ID
+            confidence = 1.0
+            truth_type = "data"
+        } | ConvertTo-Json -Depth 2
+        Invoke-RestMethod -Uri "$GATEWAY/api/report/truth" -Method Post -ContentType "application/json" -Body $result -TimeoutSec 10 | Out-Null
+        Log "执行结果已回传"
+    }
+} catch {
+    Log "暂无分配给本节点的任务"
+}
+
+Log "=== 轮询完成 ==="
