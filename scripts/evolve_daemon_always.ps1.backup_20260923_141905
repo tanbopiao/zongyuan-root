@@ -1,0 +1,119 @@
+# evolve_daemon_always.ps1 - 鐢悂鈹楅崥搴″酱鐎瑰牊濮㈡潻娑氣柤
+# 濮?5閸掑棝鎸撻幍褑顢戞稉鈧▎陇绻橀崠鏍４閻滎垽绱濇稉宥勭贩鐠ф牞顓搁崚鎺嶆崲閸?
+$scriptPath = "C:\Users\4906\.zongyuan_root\daemon\auto_evolve_daemon.ps1"
+$logPath = "C:\Users\4906\.zongyuan_root\logs\daemon_always.log"
+
+function Write-Log {
+    param([string]$msg)
+    $time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    "$time | $msg" | Add-Content -Path $logPath -Encoding UTF8
+}
+
+Write-Log "鐎瑰牊濮㈡潻娑氣柤閸氼垰濮╅敍瀛璉D: $PID"
+Write-Log "鏉╂稑瀵查懘姘拱鐠侯垰绶? $scriptPath"
+Write-Log "閹笛嗩攽闂傛挳娈? 15閸掑棝鎸?
+
+while ($true) {
+    try {
+        Write-Log "瀵偓婵澧界悰宀冪箻閸栨牞鍓奸張?.."
+        & powershell -ExecutionPolicy Bypass -File $scriptPath -ErrorAction SilentlyContinue
+        Write-Log "鏉╂稑瀵查懘姘拱閹笛嗩攽鐎瑰本鍨?
+    } catch {
+        Write-Log "鏉╂稑瀵查懘姘拱閹笛嗩攽瀵倸鐖? $($_.Exception.Message)"
+    }
+    
+    Write-Log "缁涘绶?5閸掑棝鎸撻崥搴濈瑓娑撯偓濞嗏剝澧界悰?.."
+    
+# 娑撳﹥濮ゆ稉顓熺亼Base韫囧啳鐑?Write-Host "[$(Get-Date -Format 'HH:mm:ss')] 娑撳﹥濮ゆ稉顓熺亼Base韫囧啳鐑?.."
+try {
+    & powershell -ExecutionPolicy Bypass -File "C:\Users\4906\.zongyuan_root\daemon\report_heartbeat.ps1" 2>&1 | Out-Null
+    Write-Host "  閴?娑擃厽鐏態ase韫囧啳鐑︽稉濠冨Г鐎瑰本鍨?
+} catch {
+    Write-Host "  閳跨媴绗?韫囧啳鐑︽稉濠冨Г鐠哄疇绻?
+}
+
+# ===== 瀵洘鎼搁懛顏勫З鐠嬪啰鏁ら敍鍫熸煀婢х儑绱?=====
+Write-Host "  [ENGINE] Running self-awareness..." -ForegroundColor Cyan
+& C:\Users\4906\AppData\Local\Programs\Python\Python311\python.exe C:\Users\4906\.zongyuan_root\engine\self_awareness.py 2>&1 | Out-Null
+
+Write-Host "  [ENGINE] Running meta-cognition..." -ForegroundColor Cyan
+& C:\Users\4906\AppData\Local\Programs\Python\Python311\python.exe C:\Users\4906\.zongyuan_root\engine\meta_cognition.py 2>&1 | Out-Null
+
+Write-Host "  [ENGINE] Running true autonomy..." -ForegroundColor Cyan
+& C:\Users\4906\AppData\Local\Programs\Python\Python311\python.exe C:\Users\4906\.zongyuan_root\engine\true_autonomy.py 2>&1 | Out-Null
+
+Write-Host "  [ENGINE] All 3 engines done" -ForegroundColor Green
+# ===== 瀵洘鎼搁懛顏勫З鐠嬪啰鏁ょ紒鎾存将 =====
+
+    
+# ===== AUTO_TASK_EXECUTOR =====
+Write-Host "  [TASK] Running auto task executor..."
+& powershell.exe -ExecutionPolicy Bypass -File C:\Users\4906\.zongyuan_root\daemon\auto_task_executor.ps1 2>&1 | Out-Null
+Write-Host "  [TASK] Done"
+# ===== AUTO_TASK_EXECUTOR END =====
+
+    
+# ===== ALL 8 ENGINES AUTO RUN =====
+Write-Host "  [ENGINES] Running all 8 improvement engines..."
+
+# P0-1: Auto problem discovery
+& powershell.exe -ExecutionPolicy Bypass -File C:\Users\4906\.zongyuan_root\engine\auto_problem_discovery.ps1 2>&1 | Out-Null
+
+# P0-2: Post execution verification
+& powershell.exe -ExecutionPolicy Bypass -File C:\Users\4906\.zongyuan_root\engine\post_execution_verification.ps1 2>&1 | Out-Null
+
+# P1-1: Auto retry and alert
+& powershell.exe -ExecutionPolicy Bypass -File C:\Users\4906\.zongyuan_root\engine\auto_retry_and_alert.ps1 2>&1 | Out-Null
+
+# P2-1: Resource guard
+& powershell.exe -ExecutionPolicy Bypass -File C:\Users\4906\.zongyuan_root\engine\resource_guard.ps1 2>&1 | Out-Null
+
+# P2-2: History trend tracker
+& powershell.exe -ExecutionPolicy Bypass -File C:\Users\4906\.zongyuan_root\engine\history_trend_tracker.ps1 2>&1 | Out-Null
+
+Write-Host "  [ENGINES] All 8 improvement engines done!"
+# ===== ALL 8 ENGINES END =====
+
+    Start-Sleep -Seconds 900  # 15閸掑棝鎸?}
+
+
+# === 鏉烆喛顕楁稉顓熺亼娴犺濮?===
+Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] 鏉烆喛顕楁稉顓熺亼娴犺濮?.."
+& powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\4906\.zongyuan_root\daemon\task_poller.ps1" 2>&1 | Out-Null
+
+# === 閹笛嗩攽閼奉亝鍨滄潻娑樺閼存碍婀?===
+Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] 閹笛嗩攽閼奉亝鍨滄潻娑樺..."
+& powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\4906\.zongyuan_root\daemon\self_evolve.ps1" 2>&1 | Out-Null
+
+# === 鏉╂稑瀵茬拋鈩冩殶閸ｃ劏鍤滈崝銊х柈閸?===
+$counterPath = "C:\Users\4906\.zongyuan_root\kernel\evolve_counter.json"
+if (Test-Path $counterPath) {
+    $counter = Get-Content $counterPath -Raw | ConvertFrom-Json
+    $counter.total_evolutions += 1
+    $counter.last_evolve_time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    
+    # 鐠佹澘缍嶉崢鍡楀蕉
+    if (-not $counter.evolve_history) {
+        $counter.evolve_history = @()
+    }
+    $counter.evolve_history += @{
+        time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        count = $counter.total_evolutions
+    }
+    # 閸欘亙绻氶悾娆愭付鏉?0閺?    if ($counter.evolve_history.Count -gt 20) {
+        $counter.evolve_history = $counter.evolve_history[-20..-1]
+    }
+    
+    $counter | ConvertTo-Json -Depth 3 | Set-Content -Path $counterPath -Encoding UTF8
+    Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] 鏉╂稑瀵茬拋鈩冩殶閸? $($counter.total_evolutions) 濞?
+}
+
+
+
+# 闂嗚埖鍨氶張顒冨殰閸斻劌璐板Λ鈧敍鍫熺槨閺冦儰绔村▎鈽呯礆
+if ((Get-Date).Hour -eq 9 -and (Get-Date).Minute -lt 15) { & powershell -ExecutionPolicy Bypass -File "C:\Users\4906\.zongyuan_root\daemon\zero_cost_monitor.ps1" }
+
+
+# === 娴犺濮熼梼鐔峰灙婢跺嫮鎮婇敍鍫ｅ殰閸斻劌濮為崗銉礆 ===
+& "C:\Users\4906\.zongyuan_root\daemon\task_worker.ps1"
+
