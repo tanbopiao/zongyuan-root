@@ -1,0 +1,98 @@
+# Self Evolve Script V2 (Fixed, pure English)
+# Runs every 15 minutes: discover problems -> optimize -> verify -> report
+
+$logFile = "C:\Users\4906\.zongyuan_root\logs\auto_evolve.log"
+$counterFile = "C:\Users\4906\.zongyuan_root\kernel\evolve_counter.json"
+$pythonPath = "C:\Users\4906\AppData\Local\Programs\Python\Python311\python.exe"
+$engineDir = "C:\Users\4906\.zongyuan_root\engine"
+
+# Load counter
+if (Test-Path $counterFile) {
+    $counter = Get-Content $counterFile -Raw | ConvertFrom-Json
+    $count = $counter.total_evolutions + 1
+} else {
+    $count = 1
+}
+
+Write-Host "========================================"
+Write-Host "=== Evolution #$count ==="
+Write-Host "Time: $(Get-Date)"
+Write-Host "========================================"
+
+# Step 1: Check memory
+Write-Host ""
+Write-Host "[Step 1/5] Check system resources..."
+$mem = Get-CimInstance Win32_OperatingSystem
+$memUsedPct = [math]::Round((1 - $mem.FreePhysicalMemory / $mem.TotalVisibleMemorySize) * 100, 1)
+Write-Host "  Memory: $memUsedPct%"
+
+$cDrive = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'"
+$cFreePct = [math]::Round(($cDrive.FreeSpace / $cDrive.Size) * 100, 1)
+Write-Host "  C Drive free: $cFreePct%"
+
+# Step 2: Discover problems
+Write-Host ""
+Write-Host "[Step 2/5] Run problem discovery..."
+& powershell.exe -ExecutionPolicy Bypass -File "$engineDir\auto_problem_discovery.ps1" 2>&1 | Select-Object -Last 2 | ForEach-Object { Write-Host "  $_" }
+
+# Step 3: Run Python engines
+Write-Host ""
+Write-Host "[Step 3/5] Run Python engines..."
+try {
+    & $pythonPath "$engineDir\self_awareness.py" 2>&1 | Out-Null
+    Write-Host "  self_awareness.py: OK"
+} catch {
+    Write-Host "  self_awareness.py: WARN ($_)"
+}
+try {
+    & $pythonPath "$engineDir\meta_cognition.py" 2>&1 | Out-Null
+    Write-Host "  meta_cognition.py: OK"
+} catch {
+    Write-Host "  meta_cognition.py: WARN ($_)"
+}
+try {
+    & $pythonPath "$engineDir\true_autonomy.py" 2>&1 | Out-Null
+    Write-Host "  true_autonomy.py: OK"
+} catch {
+    Write-Host "  true_autonomy.py: WARN ($_)"
+}
+
+# Step 4: Resource guard + trend
+Write-Host ""
+Write-Host "[Step 4/5] Run resource guard and trend tracker..."
+& powershell.exe -ExecutionPolicy Bypass -File "$engineDir\resource_guard.ps1" 2>&1 | Select-Object -Last 1 | ForEach-Object { Write-Host "  $_" }
+& powershell.exe -ExecutionPolicy Bypass -File "$engineDir\history_trend_tracker.ps1" 2>&1 | Select-Object -Last 1 | ForEach-Object { Write-Host "  $_" }
+
+# Step 5: Report to central
+Write-Host ""
+Write-Host "[Step 5/5] Report to central..."
+$reportBody = @{
+    key = "SYSTEM.EVOLUTION-COUNTER"
+    value = @{
+        count = $count
+        mem_pct = $memUsedPct
+        c_drive_free_pct = $cFreePct
+    } | ConvertTo-Json
+    source_node = "NODE-LOCAL-HUAWEI-LAPTOP-001"
+    confidence = 1.0
+    truth_type = "data"
+} | ConvertTo-Json
+
+try {
+    $response = Invoke-RestMethod -Uri "https://www.huodouai.com/api/report/truth" -Method Post -Body $reportBody -ContentType "application/json" -TimeoutSec 10
+    Write-Host "  Reported: truth_count=$($response.truth_count)"
+} catch {
+    Write-Host "  Report failed: $_"
+}
+
+# Save counter
+$counterData = @{
+    total_evolutions = $count
+    last_run = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+} | ConvertTo-Json
+[System.IO.File]::WriteAllText($counterFile, $counterData, (New-Object System.Text.UTF8Encoding $false))
+
+Write-Host ""
+Write-Host "========================================"
+Write-Host "=== Evolution #$count COMPLETE ==="
+Write-Host "========================================"
