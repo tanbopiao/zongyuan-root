@@ -11,7 +11,7 @@ import os, sys, json, hashlib, time, subprocess, argparse
 PRJ = "/home/user/Doubao/chats/38418284746129666"
 DID = "DID-BR-000002"
 TRACE = "Ω₀⊂⊙∞⊂Ω"
-VERSION = "EVOLVE-CLOSED-LOOP-V2.0"
+VERSION = "EVOLVE-CLOSED-LOOP-V2.1"
 
 def now(): return time.strftime("%Y-%m-%dT%H:%M:%S+0800", time.localtime())
 
@@ -111,10 +111,27 @@ def anchor(version_dir: str, proposition: str, sim: dict, decision: dict) -> dic
 
 # ---------- 7 反哺 ----------
 def feedback(proposition: str, sim: dict, decision: dict, anchor: dict) -> dict:
-    return {"did": DID, "version": VERSION, "time": now(), "proposition": proposition,
-            "gate": decision["gate"], "best_branch": sim.get("best", {}),
-            "version_gen": anchor["version_chain_gen"],
-            "channel": "五通道反哺摘要待上报中枢"}
+    """五通道反哺: 进化真值经中枢 api/report/truth 上报云端真值库(DID+指纹确权)"""
+    import urllib.request
+    CENTRAL_URL = "https://drama.huodouai.com/api/report/truth"
+    TOKEN = "ZR-CAPTURE-2026-OMEGA-666b43e342a6b57ee54742f58d3e3fcd"
+    gen = anchor.get("version_chain_gen", 0)
+    key = f"evolve.cloop.{time.strftime('%Y%m%d')}.gen{gen}.{DID}"
+    value = {"proposition": proposition, "decision": decision.get("gate"),
+             "best": sim.get("best", {}).get("desc", ""), "merkle": sim.get("merkle", "N/A"),
+             "did": DID, "trace": TRACE, "engine": VERSION, "time": now()}
+    try:
+        req = urllib.request.Request(CENTRAL_URL,
+            data=json.dumps({"key": key, "value": value, "did": DID}).encode(),
+            headers={"X-Capture-Token": TOKEN, "X-DID": DID, "Content-Type": "application/json"})
+        r = urllib.request.urlopen(req, timeout=10)
+        resp = json.loads(r.read().decode())
+        return {"channel": "五通道反哺-真值上报", "key": key,
+                "status": resp.get("success"), "action": resp.get("action"),
+                "truth_count": resp.get("truth_count"), "message": resp.get("message")}
+    except Exception as e:
+        return {"channel": "五通道反哺-真值上报", "key": key, "status": False,
+                "error": str(e), "degrade": "中枢离线/上报失败, 记录待补, 不影响本地闭环"}
 
 # ---------- V2.0 短板自主驱动 ----------
 def auto_branches(issue: str) -> list:
@@ -139,8 +156,9 @@ def auto_pipeline(version_dir: str, dry_run: bool) -> dict:
             dec = decide(sim)
             exe = {"executed": False, "stage": "dry-run", "reason": "检查模式"} if dry_run else execute(dec)
             anc = anchor(version_dir, prop, sim, dec)
+            fb = {} if dry_run else feedback(prop, sim, dec, anc)
             cycles.append({"proposition": prop, "simulate": {"gate": sim.get("autonomy_gate")},
-                           "decision": dec, "execute": exe, "anchor": anc})
+                           "decision": dec, "execute": exe, "anchor": anc, "feedback": fb})
     return {"detect": det, "attribute": attr, "cycles": cycles}
 
 def main():
@@ -161,8 +179,10 @@ def main():
         dec = decide(sim)
         exe = {"executed": False, "stage": "dry-run"} if a.dry_run else execute(dec)
         anc = anchor(a.version_dir, a.prop or "未命名命题", sim, dec)
+        fb = {} if a.dry_run else feedback(a.prop or "未命名命题", sim, dec, anc)
         report = {"stage_1_detect": det, "stage_3_simulate": {"gate": sim.get("autonomy_gate")},
-                  "stage_4_decision": dec, "stage_5_execute": exe, "stage_6_anchor": anc}
+                  "stage_4_decision": dec, "stage_5_execute": exe, "stage_6_anchor": anc,
+                  "stage_7_feedback": fb}
 
     report.update({"engine": VERSION, "did": DID, "trace": TRACE, "time": now()})
     print(json.dumps(report, ensure_ascii=False, indent=2))
