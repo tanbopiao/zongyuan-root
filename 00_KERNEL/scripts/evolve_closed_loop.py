@@ -11,7 +11,7 @@ import os, sys, json, hashlib, time, subprocess, argparse
 PRJ = "/home/user/Doubao/chats/38418284746129666"
 DID = "DID-BR-000002"
 TRACE = "Ω₀⊂⊙∞⊂Ω"
-VERSION = "EVOLVE-CLOSED-LOOP-V2.1"
+VERSION = "EVOLVE-CLOSED-LOOP-V2.2"
 
 def now(): return time.strftime("%Y-%m-%dT%H:%M:%S+0800", time.localtime())
 
@@ -161,9 +161,23 @@ def auto_pipeline(version_dir: str, dry_run: bool) -> dict:
                            "decision": dec, "execute": exe, "anchor": anc, "feedback": fb})
     return {"detect": det, "attribute": attr, "cycles": cycles}
 
+# ---------- V2.2 进化+固化全自动串联 ----------
+def auto_persist_commit(version_dir: str, proposition: str, ledger_note: str, dry_run: bool) -> dict:
+    """进化完成后自动调用auto_persist固化(加固444+账本+启动记忆+推Gitee)"""
+    if dry_run: return {"skipped": "dry-run, 未固化"}
+    files = [version_dir + "/EVOLUTION-VERSIONS.json", PRJ + "/HASH-LEDGER.csv",
+             PRJ + "/memory_index.json", PRJ + "/00_KERNEL/scripts/evolve_closed_loop.py",
+             PRJ + "/00_KERNEL/scripts/auto_persist.py"]
+    cmd = [sys.executable, PRJ + "/00_KERNEL/scripts/auto_persist.py",
+           "--files", ",".join(files), "--ledger", ledger_note,
+           "--memory-desc", f"闭环进化成果自动固化: {proposition[:60]}"]
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    try: return json.loads(r.stdout)
+    except Exception: return {"error": (r.stdout or r.stderr)[:400], "raw": True}
+
 def main():
-    ap = argparse.ArgumentParser(description="自主进化闭环引擎V2.0")
-    ap.add_argument("--auto", action="store_true", help="短板自主驱动: 检测短板→自动生成命题/分支→推演决策")
+    ap = argparse.ArgumentParser(description="自主进化闭环引擎V2.2")
+    ap.add_argument("--auto", action="store_true", help="短板自主驱动: 检测短板→自动生成命题/分支→推演决策→自动固化反哺")
     ap.add_argument("--prop", help="显式命题(配合--branches)")
     ap.add_argument("--branches", help="JSON分支数组")
     ap.add_argument("--version-dir", default=PRJ+"/experience/evolution-versions")
@@ -172,6 +186,8 @@ def main():
 
     if a.auto:
         report = auto_pipeline(a.version_dir, a.dry_run)
+        report["stage_8_persist"] = auto_persist_commit(a.version_dir, "短板自主驱动进化闭环",
+                                                        "闭环引擎V2.2自动固化进化成果", a.dry_run)
     else:
         det = detect()
         branches = json.loads(a.branches) if a.branches else []
@@ -183,6 +199,8 @@ def main():
         report = {"stage_1_detect": det, "stage_3_simulate": {"gate": sim.get("autonomy_gate")},
                   "stage_4_decision": dec, "stage_5_execute": exe, "stage_6_anchor": anc,
                   "stage_7_feedback": fb}
+        report["stage_8_persist"] = auto_persist_commit(a.version_dir, a.prop or "未命名命题",
+                                                        "闭环引擎V2.2自动固化进化成果", a.dry_run)
 
     report.update({"engine": VERSION, "did": DID, "trace": TRACE, "time": now()})
     print(json.dumps(report, ensure_ascii=False, indent=2))
