@@ -13,7 +13,7 @@ class MemoryOptimizer:
     """内存优化器"""
     
     def __init__(self):
-        self.log_file = '/opt/ZONGYUAN-ROOT/memory_optimizer.log'
+        self.log_file = '/home/user/ZONGYUAN-ROOT/memory_optimizer.log'
         self.config = {
             'memory_threshold_warning': 80,
             'memory_threshold_critical': 90,

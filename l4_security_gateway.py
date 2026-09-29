@@ -19,7 +19,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 import httpx
 
 # ============ 配置 ============
-KERNEL_DIR = "/opt/ZONGYUAN-ROOT"
+KERNEL_DIR = "/home/user/ZONGYUAN-ROOT"
 ENV_FILE = os.path.join(KERNEL_DIR, ".env")
 SECURITY_CONFIG_DIR = os.path.join(KERNEL_DIR, "security_l4")
 AUDIT_LOG_FILE = os.path.join(KERNEL_DIR, "logs", "l4_security_audit.log")

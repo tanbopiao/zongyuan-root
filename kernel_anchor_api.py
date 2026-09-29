@@ -16,7 +16,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 # V7.0: 内核自治调度器（内置cron，不依赖外部crontab）
 try:
     import sys
-    sys.path.insert(0, "/opt/ZONGYUAN-ROOT")
+    sys.path.insert(0, "/home/user/ZONGYUAN-ROOT")
     from autonomous_scheduler import scheduler as auto_scheduler
     auto_scheduler.start()
     SCHEDULER_ENABLED = True
@@ -24,9 +24,9 @@ except Exception as e:
     SCHEDULER_ENABLED = False
     print(f"[WARN] 自治调度器启动失败: {e}")
 
-STATE_FILE = "/opt/ZONGYUAN-ROOT/kernel_state.json"
-REGISTRY_FILE = "/opt/ZONGYUAN-ROOT/task_registry.json"
-INSTALL_DIR = "/opt/ZONGYUAN-ROOT"
+STATE_FILE = "/home/user/ZONGYUAN-ROOT/kernel_state.json"
+REGISTRY_FILE = "/home/user/ZONGYUAN-ROOT/task_registry.json"
+INSTALL_DIR = "/home/user/ZONGYUAN-ROOT"
 ROOT = Path(INSTALL_DIR)
 
 def load_json(path):
@@ -62,7 +62,7 @@ def dashboard():
     """云内核可视化控制台聚合数据"""
     import os, json, hashlib, time
     from pathlib import Path
-    ROOT = Path("/opt/ZONGYUAN-ROOT")
+    ROOT = Path("/home/user/ZONGYUAN-ROOT")
     
     # 1. 服务状态
     services = {}
@@ -511,7 +511,7 @@ def omega_recall(req: RecallRequest):
     """Ω-Brainμ语义召回：TF-IDF + 五维路由"""
     try:
         import sys
-        sys.path.insert(0, "/opt/ZONGYUAN-ROOT")
+        sys.path.insert(0, "/home/user/ZONGYUAN-ROOT")
         from local_semantic_recall import LocalSemanticRecall
         engine = LocalSemanticRecall()
         return engine.recall(req.query, top_k=req.top_k)
@@ -524,7 +524,7 @@ def dashboard():
     """云内核可视化控制台聚合数据"""
     import os, json, time
     from pathlib import Path
-    ROOT = Path("/opt/ZONGYUAN-ROOT")
+    ROOT = Path("/home/user/ZONGYUAN-ROOT")
     services = {}
     for svc in ["omega-brain", "loip", "ance", "vector", "monitor", "gov-ai", "anchor"]:
         try:
@@ -598,7 +598,7 @@ def harness_capabilities():
     """豆包基座高阶能力清单"""
     try:
         import sys
-        sys.path.insert(0, "/opt/ZONGYUAN-ROOT")
+        sys.path.insert(0, "/home/user/ZONGYUAN-ROOT")
         from doubao_harness import DoubaoHarness
         return DoubaoHarness().capabilities()
     except Exception as e:
@@ -610,7 +610,7 @@ def harness_chat(req: dict):
     """豆包基座对话（通用/Agent模型）"""
     try:
         import sys
-        sys.path.insert(0, "/opt/ZONGYUAN-ROOT")
+        sys.path.insert(0, "/home/user/ZONGYUAN-ROOT")
         from doubao_harness import DoubaoHarness
         h = DoubaoHarness()
         messages = req.get("messages", [{"role": "user", "content": req.get("query", "ping")}])
@@ -625,7 +625,7 @@ def harness_embed(req: dict):
     """豆包多模态向量化（2048维）"""
     try:
         import sys
-        sys.path.insert(0, "/opt/ZONGYUAN-ROOT")
+        sys.path.insert(0, "/home/user/ZONGYUAN-ROOT")
         from doubao_harness import DoubaoHarness
         return DoubaoHarness().embed(req.get("text", ""), dimensions=req.get("dimensions", 2048))
     except Exception as e:

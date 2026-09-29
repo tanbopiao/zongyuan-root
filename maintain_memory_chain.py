@@ -4,7 +4,7 @@ OPS-02 记忆连续性公理工程化落地
 import json, hashlib, os
 from datetime import datetime
 
-MEMCHAIN_DIR = "/opt/ZONGYUAN-ROOT/memory_chain"
+MEMCHAIN_DIR = "/home/user/ZONGYUAN-ROOT/memory_chain"
 
 def get_seed_count():
     if not os.path.exists(MEMCHAIN_DIR):

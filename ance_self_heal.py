@@ -7,7 +7,7 @@ import json, os, time, subprocess, logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-ROOT = Path("/opt/ZONGYUAN-ROOT")
+ROOT = Path("/home/user/ZONGYUAN-ROOT")
 LOG_DIR = ROOT / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 CST = timezone(timedelta(hours=8))

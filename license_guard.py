@@ -10,7 +10,7 @@ import hashlib, json, os, platform, socket, time, uuid
 from datetime import datetime
 import urllib.request
 
-LICENSE_FILE = "/opt/ZONGYUAN-ROOT/.license"
+LICENSE_FILE = "/home/user/ZONGYUAN-ROOT/.license"
 LICENSE_SERVER = "http://127.0.0.1:8007"
 LICENSE_REMOTE = "https://www.huodouai.com/license"
 

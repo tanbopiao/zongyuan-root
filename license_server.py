@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import sqlite3
 
-DB_PATH = "/opt/ZONGYUAN-ROOT/licenses.db"
+DB_PATH = "/home/user/ZONGYUAN-ROOT/licenses.db"
 ADMIN_KEY = "8f95a041594914bdc89c103c9deb723290873220a07ec8d4"
 
 app = FastAPI(title="ZONGYUAN License Server", version="1.0")

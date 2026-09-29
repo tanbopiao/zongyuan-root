@@ -13,13 +13,13 @@ from typing import Optional, List
 app = FastAPI(title="ZONGYUAN Vector DB", version="2.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-VECTOR_DIR = "/opt/ZONGYUAN-ROOT/vector_db"
+VECTOR_DIR = "/home/user/ZONGYUAN-ROOT/vector_db"
 os.makedirs(VECTOR_DIR, exist_ok=True)
 
 # 加载环境变量
 try:
     from dotenv import load_dotenv
-    load_dotenv("/opt/ZONGYUAN-ROOT/.env")
+    load_dotenv("/home/user/ZONGYUAN-ROOT/.env")
 except: pass
 
 # ============================================================
@@ -29,7 +29,7 @@ class BGEZhEmbeddingFunction:
     """使用bge-small-zh中文优化嵌入模型"""
     def __init__(self, model_path=None):
         if model_path is None:
-            model_path = "/opt/ZONGYUAN-ROOT/models/models/BAAI--bge-small-zh/snapshots/master"
+            model_path = "BAAI/bge-small-zh"
         from sentence_transformers import SentenceTransformer
         self.model = SentenceTransformer(model_path, device='cpu')
         self.dimension = 512
@@ -169,6 +169,25 @@ def query_doc(q: QueryDoc):
     results = collection.query(query_texts=[q.query], n_results=q.top_k)
     return {
         "query": q.query,
+        "results": [
+            {"id": results["ids"][0][i], "text": results["documents"][0][i],
+             "distance": results["distances"][0][i] if results.get("distances") else None,
+             "metadata": results["metadatas"][0][i] if results.get("metadatas") else {}}
+            for i in range(len(results["ids"][0]))
+        ]
+    }
+
+@app.post("/api/v1/search")
+def business_search(q: QueryDoc):
+    """业务统一语义检索接口(供共享大脑/其他节点调用,带DID溯源)"""
+    if not CHROMA_READY:
+        return {"error": "chromadb not ready", "results": []}
+    results = collection.query(query_texts=[q.query], n_results=q.top_k)
+    return {
+        "service": "zongyuan-semantic-recall",
+        "query": q.query,
+        "did": "DID-BR-000002",
+        "trace": "Ω₀⊂⊙∞⊂Ω",
         "results": [
             {"id": results["ids"][0][i], "text": results["documents"][0][i],
              "distance": results["distances"][0][i] if results.get("distances") else None,

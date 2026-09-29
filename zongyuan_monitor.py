@@ -11,8 +11,8 @@ import subprocess
 import json
 from datetime import datetime
 
-LOG_FILE = "/var/log/zongyuan_monitor.log"
-ALERT_LOG = "/var/log/zongyuan_alerts.log"
+LOG_FILE = "/home/user/ZONGYUAN-ROOT/logs/zongyuan_monitor.log"
+ALERT_LOG = "/home/user/ZONGYUAN-ROOT/logs/zongyuan_alerts.log"
 
 # 监控阈值
 THRESHOLDS = {
@@ -24,16 +24,12 @@ THRESHOLDS = {
 
 # 需要监控的服务和端口
 SERVICES = {
-    "aios": 8765,
+    "memory_gateway": 8077,
+    "ance_api": 8002,
+    "vector_server": 8003,
+    "monitor": 8004,
     "nginx": 80,
     "nginx_https": 443,
-    "mysql": 3306,
-    "redis": 6379,
-    "frps": 7100,
-    "omega_brain": 8000,
-    "loip": 8001,
-    "anchor": 8006,
-    "gov_platform": 8010,
 }
 
 def log(message, level="INFO"):
@@ -154,9 +150,9 @@ def run_monitor():
     # 关键服务健康检查
     log("\n关键服务健康检查:")
     health_checks = [
-        ("AIOS", "http://127.0.0.1:8765/health"),
-        ("Ω-Brainμ", "http://127.0.0.1:8000/health"),
-        ("政务中台", "http://127.0.0.1:8010/health"),
+        ("Memory-Gateway", "http://127.0.0.1:8077/memory/health"),
+        ("Vector-Server", "http://127.0.0.1:8003/health"),
+        ("ANCE-API", "http://127.0.0.1:8002/health"),
     ]
     for service, url in health_checks:
         is_healthy = check_service_health(url)

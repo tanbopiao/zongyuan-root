@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime
 from collections import Counter
 
-ROOT = Path("/opt/ZONGYUAN-ROOT")
+ROOT = Path("/home/user/ZONGYUAN-ROOT")
 LOG_FILE = ROOT / "logs" / "idle_engine.log"
 STATE_FILE = ROOT / "idle_engine_state.json"
 
