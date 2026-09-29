@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-自主进化闭环引擎 evolve_closed_loop.py v1.0
+自主进化闭环引擎 evolve_closed_loop.py v2.0
 ZONGYUAN-ROOT 自治内核 · DID-BR-000002 · Ω₀⊂⊙∞⊂Ω
-闭环: 检测→定位(归因)→推演(≥80门)→决策→执行(自愈+锁档)→确权(版本链)→反哺
-落地元法则: 自主进化决策(80分门槛/违宪审批) + 冷存储进化确权铁律(版本链跨沙箱追溯)
+闭环: 检测→归因→推演(≥80门)→决策→执行(自愈+锁档)→确权(版本链)→反哺
+V2.0: 短板自主驱动 --auto 模式(检测短板→自动生成命题/候选分支→推演决策)
+落地元法则: 自主进化决策(80分门槛/违宪审批) + 冷存储进化确权铁律(版本链)
 """
 import os, sys, json, hashlib, time, subprocess, argparse
 
 PRJ = "/home/user/Doubao/chats/38418284746129666"
 DID = "DID-BR-000002"
 TRACE = "Ω₀⊂⊙∞⊂Ω"
-VERSION = "EVOLVE-CLOSED-LOOP-V1.0"
+VERSION = "EVOLVE-CLOSED-LOOP-V2.0"
 
 def now(): return time.strftime("%Y-%m-%dT%H:%M:%S+0800", time.localtime())
 
@@ -27,6 +28,7 @@ def detect() -> dict:
         "00-ROOT-POINTER.json": PRJ+"/00-ROOT-POINTER.json",
         "hypothesis_simulator.py": PRJ+"/00_KERNEL/scripts/hypothesis_simulator.py",
         "self_heal.py": PRJ+"/00_KERNEL/scripts/selfheal/ance_self_heal_local.py",
+        "evolve_closed_loop.py": PRJ+"/00_KERNEL/scripts/evolve_closed_loop.py",
     }
     issues = []
     health = {}
@@ -34,31 +36,25 @@ def detect() -> dict:
         ok = os.path.exists(path)
         health[name] = {"exists": ok, "sha": sha(path) if ok else None}
         if not ok: issues.append(f"缺失核心文件: {name}")
-    # 启动记忆merkle
     try:
         mi = json.load(open(PRJ+"/memory_index.json"))
         m = mi.get("index_meta", {})
-        health["memory_index"]["entries"] = m.get("total_assets")
-        health["memory_index"]["merkle"] = m.get("merkle_root")
+        health["memory_index.json"]["entries"] = m.get("total_assets")
+        health["memory_index.json"]["merkle"] = m.get("merkle_root")
     except Exception as e:
         issues.append(f"启动记忆读取异常: {e}")
     return {"health": health, "issues": issues, "issue_count": len(issues)}
 
-# ---------- 2 定位/归因 ----------
+# ---------- 2 归因 ----------
 def attribute(issues: list) -> list:
-    """因果归因: 短板→可能成因(轻量本地, 不依赖外部知识图谱)"""
     rules = {
         "缺失核心文件": ["未同步冷存储(版本母体)", "分类归档误移动", "沙箱重置未恢复"],
         "启动记忆读取异常": ["memory_index结构变更未同步", "只读444被破坏", "Merkle不一致"],
-        "守护未运行": ["supervisord未拉起", "run_zongyuan_daemon.sh未执行"],
     }
-    attributed = []
-    for issue in issues:
-        key = next((k for k in rules if k in issue), "通用")
-        attributed.append({"issue": issue, "possible_causes": rules.get(key, ["未知"])})
-    return attributed
+    return [{"issue": i, "possible_causes": rules.get(next((k for k in rules if k in i), "通用"),
+                                                       ["未知"])} for i in issues]
 
-# ---------- 3 推演(三最原则≥80门) ----------
+# ---------- 3 推演 ----------
 def simulate(proposition: str, branches: list) -> dict:
     cmd = [sys.executable, PRJ+"/00_KERNEL/scripts/hypothesis_simulator.py",
            "--prop", proposition, "--branches", json.dumps(branches, ensure_ascii=False)]
@@ -72,7 +68,6 @@ def decide(sim: dict) -> dict:
     best = sim.get("best", {})
     violates = best.get("violates_constitution", False)
     gate = sim.get("autonomy_gate", "BLOCKED")
-    # asdict不含property score, 用三最原则复算
     score = (float(best.get("value", 0)) * 0.30 + float(best.get("steady", 0)) * 0.25
              - float(best.get("cost", 0)) * 0.20 - float(best.get("risk", 0)) * 0.25)
     if violates: return {"gate": "CONSTITUTION-VIOLATION", "decision": "转人工审批", "reason": "违反元宪法/元公理", "score": score}
@@ -90,7 +85,7 @@ def execute(decision: dict) -> dict:
     except Exception as e:
         return {"executed": False, "stage": "self_heal", "reason": str(e)}
 
-# ---------- 6 确权(版本链+账本) ----------
+# ---------- 6 确权 ----------
 def anchor(version_dir: str, proposition: str, sim: dict, decision: dict) -> dict:
     os.makedirs(version_dir, exist_ok=True)
     vfile = version_dir + "/EVOLUTION-VERSIONS.json"
@@ -112,58 +107,64 @@ def anchor(version_dir: str, proposition: str, sim: dict, decision: dict) -> dic
     except Exception: pass
     json.dump(chain, open(vfile, "w"), ensure_ascii=False, indent=2)
     os.chmod(vfile, 0o444)
-    return {"version_chain_gen": gen, "record": record, "ledger_note": f"EVOLVE-GEN{gen}-{time.strftime('%Y%m%d')}"}
+    return {"version_chain_gen": gen, "record": record}
 
-# ---------- 7 反哺(摘要) ----------
+# ---------- 7 反哺 ----------
 def feedback(proposition: str, sim: dict, decision: dict, anchor: dict) -> dict:
-    summary = {
-        "did": DID, "trace": TRACE, "version": VERSION, "time": now(),
-        "proposition": proposition,
-        "gate": decision["gate"],
-        "best_branch": sim.get("best", {}),
-        "version_gen": anchor["version_chain_gen"],
-        "feedback_channel": "五通道反哺(真值/元法则/外部/断点/基底) 摘要待上报中枢",
-    }
-    return summary
+    return {"did": DID, "version": VERSION, "time": now(), "proposition": proposition,
+            "gate": decision["gate"], "best_branch": sim.get("best", {}),
+            "version_gen": anchor["version_chain_gen"],
+            "channel": "五通道反哺摘要待上报中枢"}
+
+# ---------- V2.0 短板自主驱动 ----------
+def auto_branches(issue: str) -> list:
+    """按短板自动生成候选修复方案(三最参数)"""
+    return [
+        {"desc": f"完整修复: {issue}", "value": 90, "steady": 85, "cost": 15, "risk": 10, "violates_constitution": False},
+        {"desc": f"最小修复: {issue}", "value": 72, "steady": 70, "cost": 5,  "risk": 20, "violates_constitution": False},
+        {"desc": f"观察记录: {issue}", "value": 52, "steady": 60, "cost": 0,  "risk": 30, "violates_constitution": False},
+    ]
+
+def auto_pipeline(version_dir: str, dry_run: bool) -> dict:
+    det = detect()
+    attr = attribute(det["issues"]) if det["issues"] else []
+    cycles = []
+    if not det["issues"]:
+        cycles.append({"proposition": "例行巡检: 无短板, 内核稳态", "decision": {"gate": "NO-ISSUE",
+                       "decision": "无短板, 例行确权", "reason": "内核资产完整", "score": None}})
+    else:
+        for issue in det["issues"]:
+            prop = f"修复短板: {issue}"
+            sim = simulate(prop, auto_branches(issue))
+            dec = decide(sim)
+            exe = {"executed": False, "stage": "dry-run", "reason": "检查模式"} if dry_run else execute(dec)
+            anc = anchor(version_dir, prop, sim, dec)
+            cycles.append({"proposition": prop, "simulate": {"gate": sim.get("autonomy_gate")},
+                           "decision": dec, "execute": exe, "anchor": anc})
+    return {"detect": det, "attribute": attr, "cycles": cycles}
 
 def main():
-    ap = argparse.ArgumentParser(description="自主进化闭环引擎")
-    ap.add_argument("--prop", required=True, help="进化命题")
-    ap.add_argument("--branches", required=True, help="JSON分支数组(desc/value/steady/cost/risk/violates_constitution)")
+    ap = argparse.ArgumentParser(description="自主进化闭环引擎V2.0")
+    ap.add_argument("--auto", action="store_true", help="短板自主驱动: 检测短板→自动生成命题/分支→推演决策")
+    ap.add_argument("--prop", help="显式命题(配合--branches)")
+    ap.add_argument("--branches", help="JSON分支数组")
     ap.add_argument("--version-dir", default=PRJ+"/experience/evolution-versions")
-    ap.add_argument("--dry-run", action="store_true", help="只推演不执行(检查模式)")
+    ap.add_argument("--dry-run", action="store_true", help="只推演不执行")
     a = ap.parse_args()
-    branches = json.loads(a.branches)
 
-    # 1 检测
-    det = detect()
-    # 2 归因
-    attr = attribute(det["issues"]) if det["issues"] else []
-    # 3 推演
-    sim = simulate(a.prop, branches)
-    # 4 决策
-    dec = decide(sim)
-    # 5 执行(非dry-run且自主达标)
-    if not a.dry_run:
-        exe = execute(dec)
+    if a.auto:
+        report = auto_pipeline(a.version_dir, a.dry_run)
     else:
-        exe = {"executed": False, "stage": "dry-run", "reason": "检查模式"}
-    # 6 确权
-    anc = anchor(a.version_dir, a.prop, sim, dec)
-    # 7 反哺
-    fb = feedback(a.prop, sim, dec, anc)
+        det = detect()
+        branches = json.loads(a.branches) if a.branches else []
+        sim = simulate(a.prop or "未命名命题", branches)
+        dec = decide(sim)
+        exe = {"executed": False, "stage": "dry-run"} if a.dry_run else execute(dec)
+        anc = anchor(a.version_dir, a.prop or "未命名命题", sim, dec)
+        report = {"stage_1_detect": det, "stage_3_simulate": {"gate": sim.get("autonomy_gate")},
+                  "stage_4_decision": dec, "stage_5_execute": exe, "stage_6_anchor": anc}
 
-    report = {
-        "engine": VERSION, "did": DID, "trace": TRACE, "time": now(),
-        "proposition": a.prop,
-        "stage_1_detect": {"issue_count": det["issue_count"], "issues": det["issues"]},
-        "stage_2_attribute": {"attributed": attr},
-        "stage_3_simulate": {"autonomy_gate": sim.get("autonomy_gate"), "best": sim.get("best")},
-        "stage_4_decision": dec,
-        "stage_5_execute": exe,
-        "stage_6_anchor": anc,
-        "stage_7_feedback": fb,
-    }
+    report.update({"engine": VERSION, "did": DID, "trace": TRACE, "time": now()})
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 if __name__ == "__main__":
