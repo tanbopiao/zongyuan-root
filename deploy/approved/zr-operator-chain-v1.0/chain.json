@@ -1,0 +1,22 @@
+{
+  "chain_name": "ZONGYUAN-ROOT 全闭环算子链",
+  "chain_version": "V1.0",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "nodes": [
+    {"id":"ENV-SENSE","name":"环境感知","dep":[],"in":"启动","out":"env_state","pass":"next","fail":"ROLLBACK"},
+    {"id":"ALIGN","name":"基准对齐","dep":["ENV-SENSE"],"in":"env_state","out":"baseline","pass":"next","fail":"ROLLBACK"},
+    {"id":"DIGEST","name":"真值消化","dep":["ALIGN"],"in":"baseline","out":"digest","pass":"next","fail":"REPORT"},
+    {"id":"REFINE","name":"深度提炼","dep":["DIGEST"],"in":"digest","out":"refined","pass":"next","fail":"REPORT"},
+    {"id":"EVOLVE","name":"进化策略","dep":["REFINE"],"in":"refined","out":"strategies","pass":"next","fail":"REPORT"},
+    {"id":"ORACLE","name":"智能推演","dep":["EVOLVE"],"in":"strategies","out":"forecast","pass":"next","fail":"REPORT"},
+    {"id":"DECIDE","name":"三维裁决","dep":["ORACLE"],"in":"forecast","out":"plan","pass":"next","fail":"REPORT"},
+    {"id":"DEPLOY","name":"执行部署","dep":["DECIDE"],"in":"plan","out":"installed","pass":"HEALTH","fail":"ROLLBACK"},
+    {"id":"HEALTH","name":"健康检查","dep":["DEPLOY"],"in":"installed","out":"healthy","pass":"REPORT","fail":"ROLLBACK"},
+    {"id":"ROLLBACK","name":"回滚告警","dep":["DEPLOY","HEALTH"],"in":"fail","out":"rolledback","pass":"REPORT","fail":"REPORT"},
+    {"id":"REPORT","name":"真值上报","dep":["HEALTH","ROLLBACK"],"in":"result","out":"reported","pass":"LEDGER","fail":"LEDGER"},
+    {"id":"LEDGER","name":"台账回写","dep":["REPORT"],"in":"reported","out":"ledgered","pass":"ARCHIVE","fail":"ARCHIVE"},
+    {"id":"ARCHIVE","name":"归档锁档","dep":["LEDGER"],"in":"ledgered","out":"archived","pass":"DONE","fail":"DONE"}
+  ],
+  "terminal": "DONE"
+}
