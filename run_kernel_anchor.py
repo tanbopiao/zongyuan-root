@@ -3,7 +3,7 @@
 """启动 kernel_anchor_api 服务"""
 import uvicorn
 import sys
-sys.path.insert(0, "/opt/ZONGYUAN-ROOT")
+sys.path.insert(0, "/home/user/ZONGYUAN-ROOT")
 from kernel_anchor_api import app
 
 if __name__ == "__main__":

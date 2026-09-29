@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 
 # 配置
-INDEX_PATH = "/opt/ZONGYUAN-ROOT/memory_index.json"
+INDEX_PATH = "/home/user/ZONGYUAN-ROOT/memory_index.json"
 GATEWAY_SECRET = os.getenv("MEMORY_GATEWAY_SECRET", "ZONGYUAN-ROOT-SECRET-DID-BR-000002")
 MAX_TOKEN_DEFAULT = 4000
 DID = "DID-BR-000002"

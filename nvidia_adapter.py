@@ -3,7 +3,7 @@
 import json, os, requests
 from pathlib import Path
 
-ENV_FILE = Path("/opt/ZONGYUAN-ROOT/.env")
+ENV_FILE = Path("/home/user/ZONGYUAN-ROOT/.env")
 
 def _load_env():
     env = {}

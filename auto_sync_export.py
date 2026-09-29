@@ -7,7 +7,7 @@ ZONGYUAN-ROOT 自动同步导出脚本
 """
 import json, os, glob, datetime, shutil, tarfile
 
-KERNEL_ROOT = "/opt/ZONGYUAN-ROOT"
+KERNEL_ROOT = "/home/user/ZONGYUAN-ROOT"
 EXPORT_DIR = os.path.join(KERNEL_ROOT, "auto_sync_export")
 LOG_FILE = os.path.join(KERNEL_ROOT, "logs", "auto_sync_export.log")
 

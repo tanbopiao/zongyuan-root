@@ -7,7 +7,7 @@ import json, os, requests, hashlib, time
 from pathlib import Path
 from typing import Optional
 
-ENV_FILE = Path("/opt/ZONGYUAN-ROOT/.env")
+ENV_FILE = Path("/home/user/ZONGYUAN-ROOT/.env")
 
 def _load_env():
     env = {}

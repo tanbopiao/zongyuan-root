@@ -1,0 +1,189 @@
+"""
+轻量向量数据库服务 - 基于ChromaDB嵌入式模式
+端口: 8003
+用途: RAG语义召回、真值向量存储、企业知识库
+V2.0升级: 使用bge-small-zh中文优化嵌入模型（512维），替换原minilm（384维）
+"""
+import os, sys, time, json
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional, List
+
+app = FastAPI(title="ZONGYUAN Vector DB", version="2.0.0")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+VECTOR_DIR = "/opt/ZONGYUAN-ROOT/vector_db"
+os.makedirs(VECTOR_DIR, exist_ok=True)
+
+# 加载环境变量
+try:
+    from dotenv import load_dotenv
+    load_dotenv("/opt/ZONGYUAN-ROOT/.env")
+except: pass
+
+# ============================================================
+# bge-small-zh 自定义嵌入函数
+# ============================================================
+class BGEZhEmbeddingFunction:
+    """使用bge-small-zh中文优化嵌入模型"""
+    def __init__(self, model_path=None):
+        if model_path is None:
+            model_path = "/opt/ZONGYUAN-ROOT/models/models/BAAI--bge-small-zh/snapshots/master"
+        from sentence_transformers import SentenceTransformer
+        self.model = SentenceTransformer(model_path, device='cpu')
+        self.dimension = 512
+        self._name = "bge-small-zh"
+
+    def __call__(self, input: List[str]) -> List[List[float]]:
+        embeddings = self.model.encode(input, normalize_embeddings=True)
+        return embeddings.tolist()
+
+    def embed_query(self, input: List[str]) -> List[List[float]]:
+        """ChromaDB要求的查询嵌入方法（接收字符串列表）"""
+        embeddings = self.model.encode(input, normalize_embeddings=True)
+        return embeddings.tolist()
+
+    def embed_documents(self, input: List[str]) -> List[List[float]]:
+        """ChromaDB要求的文档嵌入方法"""
+        embeddings = self.model.encode(input, normalize_embeddings=True)
+        return embeddings.tolist()
+
+    def name(self) -> str:
+        """ChromaDB要求的模型名称方法"""
+        return self._name
+
+try:
+    import chromadb
+    client = chromadb.PersistentClient(path=VECTOR_DIR)
+
+    # 使用bge-small-zh嵌入模型
+    ef = BGEZhEmbeddingFunction()
+    EMBEDDING_MODE = "bge_small_zh_512d"
+    EMBEDDING_DIMENSION = 512
+
+    # 尝试获取已有集合，如果嵌入函数不匹配则删除重建
+    existing_collections = [c.name for c in client.list_collections()]
+    collection = None
+    if "zongyuan_truth_bge" in existing_collections:
+        try:
+            collection = client.get_collection(name="zongyuan_truth_bge", embedding_function=ef)
+            print(f"使用已有集合 zongyuan_truth_bge，文档数: {collection.count()}")
+        except (ValueError, AttributeError) as e:
+            print(f"集合嵌入函数不匹配，删除重建: {e}")
+            client.delete_collection("zongyuan_truth_bge")
+            collection = None
+
+    if collection is None:
+        # 用bge-small-zh嵌入函数创建新集合
+        collection = client.create_collection(name="zongyuan_truth_bge", embedding_function=ef)
+        print("创建新集合 zongyuan_truth_bge（bge-small-zh嵌入）")
+
+        # 从旧的zongyuan_truth集合（minilm）迁移所有文档
+        if "zongyuan_truth" in existing_collections:
+            print("从zongyuan_truth集合迁移文档...")
+            old_collection = client.get_collection("zongyuan_truth")
+            old_count = old_collection.count()
+            print(f"旧集合文档数: {old_count}")
+
+            # 分批获取所有文档
+            batch_size = 100
+            all_docs = []
+            for offset in range(0, old_count, batch_size):
+                batch = old_collection.get(limit=batch_size, offset=offset)
+                for i in range(len(batch['ids'])):
+                    all_docs.append({
+                        'id': batch['ids'][i],
+                        'text': batch['documents'][i] if batch['documents'] else '',
+                        'metadata': batch['metadatas'][i] if batch['metadatas'] else {}
+                    })
+
+            print(f"获取到 {len(all_docs)} 篇文档，开始bge嵌入...")
+
+            # 用bge重新嵌入并添加到新集合
+            for i in range(0, len(all_docs), batch_size):
+                batch = all_docs[i:i+batch_size]
+                texts = [d['text'] for d in batch]
+                ids = [d['id'] for d in batch]
+                metadatas = [d['metadata'] for d in batch]
+                embeddings = ef.model.encode(texts, normalize_embeddings=True).tolist()
+                collection.add(ids=ids, embeddings=embeddings, documents=texts, metadatas=metadatas)
+                print(f"  迁移 {i+len(batch)}/{len(all_docs)}")
+
+            print(f"迁移完成！新集合文档数: {collection.count()}")
+
+    CHROMA_READY = True
+except Exception as e:
+    CHROMA_READY = False
+    EMBEDDING_MODE = "error"
+    EMBEDDING_DIMENSION = 0
+    print(f"ChromaDB初始化失败: {e}")
+    import traceback
+    traceback.print_exc()
+
+class AddDoc(BaseModel):
+    id: str
+    text: str
+    metadata: Optional[dict] = None
+
+class QueryDoc(BaseModel):
+    query: str
+    top_k: int = 5
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok" if CHROMA_READY else "degraded",
+        "service": "vector-db",
+        "chroma": CHROMA_READY,
+        "embedding": EMBEDDING_MODE if CHROMA_READY else "error",
+        "version": "2.0.0-bge"
+    }
+
+@app.get("/api/v1/stats")
+def stats():
+    if not CHROMA_READY:
+        return {"error": "chromadb not ready"}
+    count = collection.count()
+    return {
+        "collection": "zongyuan_truth_bge",
+        "doc_count": count,
+        "path": VECTOR_DIR,
+        "embedding": EMBEDDING_MODE,
+        "dimension": EMBEDDING_DIMENSION,
+        "model": "bge-small-zh",
+        "version": "2.0.0-bge"
+    }
+
+@app.post("/api/v1/add")
+def add_doc(doc: AddDoc):
+    if not CHROMA_READY:
+        return {"error": "chromadb not ready"}
+    collection.upsert(ids=[doc.id], documents=[doc.text], metadatas=[doc.metadata or {}])
+    return {"status": "added", "id": doc.id, "total": collection.count()}
+
+@app.post("/api/v1/query")
+def query_doc(q: QueryDoc):
+    if not CHROMA_READY:
+        return {"error": "chromadb not ready", "results": []}
+    results = collection.query(query_texts=[q.query], n_results=q.top_k)
+    return {
+        "query": q.query,
+        "results": [
+            {"id": results["ids"][0][i], "text": results["documents"][0][i],
+             "distance": results["distances"][0][i] if results.get("distances") else None,
+             "metadata": results["metadatas"][0][i] if results.get("metadatas") else {}}
+            for i in range(len(results["ids"][0]))
+        ]
+    }
+
+@app.delete("/api/v1/delete/{doc_id}")
+def delete_doc(doc_id: str):
+    if not CHROMA_READY:
+        return {"error": "chromadb not ready"}
+    collection.delete(ids=[doc_id])
+    return {"status": "deleted", "id": doc_id}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8003, workers=1)

@@ -7,7 +7,7 @@ import json, hashlib, os
 from pathlib import Path
 from datetime import datetime
 
-ROOT = Path("/opt/ZONGYUAN-ROOT")
+ROOT = Path("/home/user/ZONGYUAN-ROOT")
 META_CORE_PATH = ROOT / "truth_architecture" / "META-CORE-TRUTH-V1.0.json"
 
 class MetaCoreValidator:
