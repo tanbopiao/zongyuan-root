@@ -13,4 +13,5 @@ for lock in deploy kernel_write; do
 done
 echo ""
 echo "=== Git分支 ==="
-cd /opt/ZONGYUAN-ROOT && git branch -v 2>/dev/null | sed 's/^/  /'
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$REPO_DIR" && git branch -v 2>/dev/null | sed 's/^/  /'
