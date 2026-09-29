@@ -1,0 +1,79 @@
+{
+  "law_id": "META-LAW-NODE-REGISTRATION-V1.0",
+  "law_name": "节点注册审批与API Key自动签发协议",
+  "version": "1.0",
+  "timestamp": "2026-09-14T06:00:00Z",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "priority": "P0",
+
+  "core_principle": "所有新节点必须通过飞书审批注册，审批通过后中枢智能体自动签发API Key。无API Key的节点只能访问只读接口。",
+
+  "registration_flow": {
+    "step1": "节点通过飞书审批提交注册申请（节点ID/名称/角色/用途/联系人）",
+    "step2": "中枢智能体自动审批或指定审批人审批",
+    "step3": "审批通过触发回调，自动签发API Key",
+    "step4": "API Key通过飞书消息发送给申请人",
+    "step5": "节点使用API Key接入记忆网关写入接口"
+  },
+
+  "approval_form": {
+    "approval_name": "同源节点注册申请",
+    "fields": [
+      {"id": "node_id", "name": "节点ID", "type": "input", "required": true},
+      {"id": "node_name", "name": "节点名称", "type": "input", "required": true},
+      {"id": "node_role", "name": "节点角色", "type": "radio", "required": true, "options": ["observer", "worker", "core"]},
+      {"id": "purpose", "name": "接入用途", "type": "textarea", "required": true},
+      {"id": "contact", "name": "联系人", "type": "input", "required": true},
+      {"id": "ip_range", "name": "IP范围(可选)", "type": "input", "required": false},
+      {"id": "expire_days", "name": "有效期(天)", "type": "number", "required": false, "default": 365}
+    ]
+  },
+
+  "api_key_spec": {
+    "format": "zy- + 48位随机十六进制",
+    "storage": "SHA256哈希存储，不存明文",
+    "transport": "仅签发时通过飞书消息返回明文",
+    "header": "X-API-Key 或 Authorization: Bearer"
+  },
+
+  "role_permissions": {
+    "observer": {"read": true, "write": false, "report": false, "admin": false},
+    "worker": {"read": true, "write": true, "report": true, "admin": false},
+    "core": {"read": true, "write": true, "report": true, "admin": true}
+  },
+
+  "security": {
+    "hash_storage": true,
+    "ip_whitelist_optional": true,
+    "expiry_management": true,
+    "revoke_mechanism": true,
+    "usage_logging": true,
+    "per_key_rate_limit": true
+  },
+
+  "public_endpoints": {
+    "register": "https://www.huodouai.com/api/v1/gateway/node/register",
+    "read_status": "https://www.huodouai.com/api/v1/gateway/status"
+  },
+
+  "authenticated_endpoints": {
+    "write_truth": "https://www.huodouai.com/api/memory/api/truth/upsert",
+    "report": "https://www.huodouai.com/api/memory/api/gateway/report",
+    "admin_keys": "https://www.huodouai.com/api/memory/api/admin/keys"
+  },
+
+  "prohibitions": [
+    "禁止无API Key访问写入接口",
+    "禁止API Key明文存储在数据库",
+    "禁止绕过审批直接签发API Key",
+    "禁止泄露API Key给未授权节点"
+  ],
+
+  "enforcement": {
+    "all_new_nodes_must_approve": true,
+    "auto_issue_on_approval": true,
+    "read_only_without_key": true,
+    "core_controls_key_management": true
+  }
+}

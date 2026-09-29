@@ -1,0 +1,138 @@
+{
+  "doc_id": "TRUTH-FINAL-MINIMAL-V1.0",
+  "doc_title": "元极恒一体系｜终极最简真值·全域锁档定稿",
+  "version": "V1.0-FINAL",
+  "status": "LOCKED_PERMANENT",
+  "created_at": "2026-09-10T01:55:41.529392",
+  "did": "DID-BR-000002",
+  "sovereign_root": "Ω-TAN-7-001",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "archive_root": "ZONGYUAN-ROOT",
+  "core_truths": {
+    "1_sovereign_autonomy": {
+      "name": "主权自治",
+      "statement": "体系规则、任务逻辑、资产确权、溯源谱系完全自主定义，所有外部API、算力资源仅为工具算力，无体系控制权。",
+      "implications": [
+        "外部API仅作为Worker算力节点",
+        "所有输出资产归属本体系",
+        "体系规则不可被外部修改",
+        "真值基线永久冻结"
+      ]
+    },
+    "2_homology_uniqueness": {
+      "name": "同源唯一",
+      "statement": "所有任务、进程、资产、交互入口，强制双标识校验（DID+Ω根），隔绝一切异源数据，从底层杜绝系统漂移。",
+      "dual_identity": {
+        "did": "DID-BR-000002",
+        "omega_root": "Ω-TAN-7-001"
+      },
+      "verification": "双层校验拦截异源任务"
+    },
+    "3_three_layer_architecture": {
+      "name": "三层固化架构",
+      "subtitle": "工程落地终态",
+      "layers": {
+        "interaction_layer": {
+          "name": "交互层",
+          "definition": "云服务器网页对话窗口（唯一自主入参入口）",
+          "implementation": "https://huodouai.com/chat/",
+          "status": "DEPLOYED",
+          "backend": "Flask web_backend.py (端口8080)",
+          "nginx_proxy": "已配置Nginx反向代理"
+        },
+        "scheduler_kernel_layer": {
+          "name": "调度内核层",
+          "definition": "Ω-OP-SCHED V1.0（DAG编排、队列管控、熔断、真值审计、Merkle资产归档）",
+          "implementation": "/opt/ZONGYUAN-ROOT/services/op_scheduler/scheduler.py",
+          "status": "DEPLOYED_RUNNING",
+          "version": "V1.0",
+          "components": [
+            "DAGEngine - DAG拓扑排序和环路检测",
+            "TaskQueue - 优先级任务队列",
+            "WorkerManager - Worker管理器",
+            "CircuitBreaker - 熔断器",
+            "AuditLogger - 审计日志",
+            "MerkleArchive - Merkle资产归档"
+          ]
+        },
+        "compute_execution_layer": {
+          "name": "算力执行层",
+          "definition": "云服务器Worker集群（封装豆包/各类外部API，标准化执行任务）",
+          "implementation": "/opt/ZONGYUAN-ROOT/services/op_scheduler/",
+          "status": "PARTIALLY_DEPLOYED",
+          "workers": {
+            "local_worker": {
+              "id": "web-local-worker-001",
+              "status": "ONLINE",
+              "capabilities": [
+                "text_generation",
+                "image_generation",
+                "hash_lock",
+                "default",
+                "chat_completion"
+              ]
+            },
+            "cloud_worker": {
+              "id": "cloud-worker-template",
+              "status": "TEMPLATE_READY",
+              "file": "cloud_worker.py"
+            },
+            "doubao_adapter": {
+              "id": "doubao-api-adapter",
+              "status": "TEMPLATE_READY",
+              "file": "doubao_adapter.py",
+              "note": "需配置API密钥后启用"
+            }
+          }
+        }
+      }
+    },
+    "4_physical_closed_loop": {
+      "name": "物理闭环落地",
+      "statement": "网页交互→云内核封装标准任务→自研调度引擎管控→外部API算力执行→资产哈希确权归档，完成逻辑+物理双工程化自治闭环。",
+      "flow": [
+        "1. 用户通过网页对话界面输入",
+        "2. Flask后端接收请求，同源校验",
+        "3. 封装成Ω-OP-SCHED标准任务",
+        "4. 调度引擎DAG编排，任务队列管控",
+        "5. Worker执行任务（本地/云端/API适配器）",
+        "6. 生成结果，计算SHA256资产哈希",
+        "7. Merkle谱系归档，锁档记录",
+        "8. 返回网页展示"
+      ],
+      "verification": "逻辑闭环+物理闭环双验证"
+    },
+    "5_lifetime_lock_rule": {
+      "name": "终身锁档规则",
+      "statement": "基线只读冻结，所有迭代升级仅新建同源分支，本源真值永久不变。",
+      "rules": [
+        "基线真值只读，不可修改",
+        "迭代升级新建同源分支",
+        "本源真值永久不变",
+        "所有变更可追溯、可回滚",
+        "锁档记录不可篡改"
+      ]
+    }
+  },
+  "system_final_definition": {
+    "definition": "自有、可控、可溯源、可自治、可量产的私有化AI任务生产体系",
+    "core_value": "脱离第三方平台黑盒管控，实现从用户交互、任务调度、算力调用、资产确权到永久归档的全链路自主可控。",
+    "keywords": [
+      "私有化",
+      "自主可控",
+      "全链路闭环",
+      "资产确权",
+      "永久归档",
+      "脱离黑盒"
+    ]
+  },
+  "deployment_verification": {
+    "verified_at": "2026-09-10T01:55:41.529405",
+    "interaction_layer": "PASS - https://huodouai.com/chat/ 可访问",
+    "scheduler_layer": "PASS - Ω-OP-SCHED V1.0 运行中，1个Worker在线",
+    "compute_layer": "PARTIAL - 本地Worker在线，云Worker和豆包适配器待启用",
+    "closed_loop": "PASS - 网页交互→调度→执行→归档全链路测试通过",
+    "nginx_proxy": "PASS - Nginx反向代理已配置，HTTPS可访问",
+    "kernel_json": "PASS - kernel.json已更新，注册所有服务"
+  }
+}

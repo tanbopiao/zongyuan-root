@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政务工作台 · 火斗云智</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+/* 登录页 */
+.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+.login-card { background: rgba(255,255,255,0.95); padding: 40px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 400px; }
+.login-card h1 { text-align: center; color: #1a1a2e; margin-bottom: 8px; font-size: 24px; }
+.login-card .subtitle { text-align: center; color: #64748b; margin-bottom: 32px; font-size: 14px; }
+.login-card input { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+.login-card input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.login-card button { width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.login-card button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.4); }
+.login-error { color: #ef4444; text-align: center; margin-top: 12px; font-size: 13px; display: none; }
+
+/* 主界面 */
+.main-app { display: none; min-height: 100vh; }
+.sidebar { width: 220px; background: #1a1a2e; color: white; position: fixed; height: 100vh; left: 0; top: 0; padding: 20px 0; }
+.sidebar .logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
+.sidebar .logo h2 { font-size: 18px; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.sidebar .logo p { font-size: 11px; color: #64748b; margin-top: 4px; }
+.nav-item { padding: 12px 20px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; font-size: 14px; color: #94a3b8; }
+.nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+.nav-item.active { background: linear-gradient(90deg, rgba(59,130,246,0.2), transparent); color: #60a5fa; border-left: 3px solid #3b82f6; }
+.nav-item .icon { font-size: 18px; }
+.sidebar .user-info { position: absolute; bottom: 20px; left: 0; right: 0; padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+.sidebar .user-info .name { font-size: 14px; font-weight: 600; }
+.sidebar .user-info .role { font-size: 12px; color: #64748b; }
+.sidebar .logout { margin-top: 8px; font-size: 12px; color: #ef4444; cursor: pointer; }
+
+.content { margin-left: 220px; padding: 24px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-header h1 { font-size: 24px; color: #1a1a2e; }
+.page-header .date { color: #64748b; font-size: 14px; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* 统计卡片 */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.stat-card .label { font-size: 13px; color: #64748b; margin-bottom: 8px; }
+.stat-card .value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+.stat-card .trend { font-size: 12px; margin-top: 4px; }
+.stat-card .trend.up { color: #10b981; }
+.stat-card .trend.down { color: #ef4444; }
+
+/* 快捷入口 */
+.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.quick-card { background: white; padding: 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.quick-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.quick-card .icon { font-size: 32px; margin-bottom: 8px; }
+.quick-card .name { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+.quick-card .desc { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+/* 面板 */
+.panel { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.panel-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.panel-title .btn { font-size: 12px; padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; }
+
+/* 待办列表 */
+.todo-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #f1f5f9; gap: 12px; }
+.todo-item:last-child { border-bottom: none; }
+.todo-item .checkbox { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 4px; cursor: pointer; flex-shrink: 0; }
+.todo-item .checkbox.checked { background: #10b981; border-color: #10b981; }
+.todo-item .title { flex: 1; font-size: 14px; }
+.todo-item .title.completed { text-decoration: line-through; color: #94a3b8; }
+.todo-item .priority { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+.todo-item .priority.high { background: #fef2f2; color: #ef4444; }
+.todo-item .priority.medium { background: #fffbeb; color: #f59e0b; }
+.todo-item .priority.low { background: #f0fdf4; color: #10b981; }
+.todo-item .delete { color: #94a3b8; cursor: pointer; font-size: 16px; }
+
+/* 咨询辅助 */
+.chat-container { display: flex; height: calc(100vh - 200px); gap: 20px; }
+.chat-main { flex: 1; background: white; border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.chat-messages { flex: 1; padding: 20px; overflow-y: auto; }
+.chat-message { margin-bottom: 16px; max-width: 80%; }
+.chat-message.user { margin-left: auto; }
+.chat-message .bubble { padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+.chat-message.user .bubble { background: #3b82f6; color: white; border-bottom-right-radius: 4px; }
+.chat-message.ai .bubble { background: #f1f5f9; color: #1a1a2e; border-bottom-left-radius: 4px; }
+.chat-message .meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+.chat-input { padding: 16px; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; }
+.chat-input input { flex: 1; padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
+.chat-input button { padding: 10px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.chat-sidebar { width: 320px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-y: auto; }
+.sidebar-section { margin-bottom: 20px; }
+.sidebar-section h4 { font-size: 13px; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.recommend-item { padding: 10px; background: #f8fafc; border-radius: 8px; margin-bottom: 8px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.recommend-item:hover { background: #eff6ff; }
+.policy-ref { padding: 10px; background: #f0fdf4; border-radius: 8px; margin-bottom: 8px; font-size: 12px; border-left: 3px solid #10b981; }
+.policy-ref .title { font-weight: 600; color: #065f46; margin-bottom: 4px; }
+
+/* 公文中心 */
+.template-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.template-card { background: white; padding: 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.template-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+.template-card.selected { border-color: #3b82f6; background: #eff6ff; }
+.template-card .icon { font-size: 28px; margin-bottom: 8px; }
+.template-card .name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.template-card .category { font-size: 11px; color: #64748b; }
+.doc-editor { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.doc-editor input, .doc-editor textarea { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; font-size: 14px; font-family: inherit; }
+.doc-editor textarea { min-height: 200px; resize: vertical; }
+.doc-editor .actions { display: flex; gap: 12px; }
+.doc-editor .actions button { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.btn-primary { background: #3b82f6; color: white; }
+.btn-secondary { background: #f1f5f9; color: #1a1a2e; }
+
+/* 数据驾驶舱 */
+.chart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.chart-box h3 { font-size: 15px; margin-bottom: 16px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding-top: 20px; }
+.bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.bar { width: 100%; background: linear-gradient(180deg, #3b82f6, #8b5cf6); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 0.3s; }
+.bar-label { font-size: 11px; color: #64748b; }
+.bar-value { font-size: 12px; font-weight: 600; color: #1a1a2e; }
+
+/* 模态框 */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: white; padding: 24px; border-radius: 12px; width: 480px; max-width: 90%; }
+.modal h3 { margin-bottom: 16px; }
+.modal input, .modal select, .modal textarea { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+.modal .actions { display: flex; gap: 12px; justify-content: flex-end; }
+.modal .actions button { padding: 8px 20px; border: none; border-radius: 8px; cursor: pointer; }
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .sidebar { width: 60px; }
+  .sidebar .logo h2, .sidebar .nav-item span, .sidebar .user-info { display: none; }
+  .content { margin-left: 60px; }
+  .stats-grid, .quick-actions { grid-template-columns: repeat(2, 1fr); }
+  .template-grid { grid-template-columns: 1fr; }
+  .chat-container { flex-direction: column; }
+  .chat-sidebar { width: 100%; }
+}
+
+/* V1.1 新增样式 */
+.approval-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #f59e0b; }
+.approval-card.approved { border-left-color: #10b981; }
+.approval-card.rejected { border-left-color: #ef4444; }
+.approval-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.approval-title { font-weight: 600; font-size: 15px; color: #1a1a2e; }
+.approval-status { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 500; }
+.approval-status.pending { background: #fef3c7; color: #92400e; }
+.approval-status.approved { background: #d1fae5; color: #065f46; }
+.approval-status.rejected { background: #fee2e2; color: #991b1b; }
+.approval-meta { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+.approval-actions { display: flex; gap: 8px; margin-top: 12px; }
+.approval-actions button { padding: 6px 16px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.btn-approve { background: #10b981; color: white; }
+.btn-reject { background: #ef4444; color: white; }
+.performance-score { text-align: center; padding: 30px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 16px; color: white; margin-bottom: 20px; }
+.performance-score .score { font-size: 56px; font-weight: 700; }
+.performance-score .grade { font-size: 24px; margin-top: 4px; }
+.performance-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.metric-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.metric-card .metric-label { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+.metric-card .metric-value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+.doc-history-item { background: white; border-radius: 12px; padding: 16px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+.doc-history-item .doc-info { flex: 1; }
+.doc-history-item .doc-title { font-weight: 600; font-size: 14px; color: #1a1a2e; }
+.doc-history-item .doc-meta { font-size: 12px; color: #64748b; margin-top: 4px; }
+.v11-badge { display: inline-block; background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; font-size: 9px; padding: 2px 6px; border-radius: 8px; margin-left: 6px; vertical-align: middle; }
+
+/* ============ 移动端响应式优化 V1.0 ============ */
+@media (max-width: 768px) {
+  /* 全局调整 */
+  body { font-size: 14px; -webkit-tap-highlight-color: transparent; }
+  
+  /* 顶部导航优化 */
+  .top-nav { padding: 8px 12px; flex-wrap: wrap; }
+  .top-nav .nav-links { display: none; }
+  .top-nav .menu-toggle { display: block; }
+  
+  /* Hero区域 */
+  .hero { padding: 30px 16px; text-align: center; }
+  .hero h1 { font-size: 22px; line-height: 1.4; }
+  .hero p { font-size: 14px; }
+  .hero .search-box { width: 100%; margin: 16px 0; }
+  .hero .search-box input { font-size: 16px; padding: 12px 16px; }
+  .hero .search-box button { padding: 12px 20px; font-size: 14px; }
+  
+  /* 功能卡片网格 */
+  .feature-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 12px; }
+  .feature-card { padding: 16px 12px; min-height: 100px; }
+  .feature-card .icon { font-size: 28px; margin-bottom: 8px; }
+  .feature-card .title { font-size: 13px; }
+  .feature-card .desc { font-size: 11px; display: none; }
+  
+  /* 列表优化 */
+  .policy-list, .guide-list { padding: 0 12px; }
+  .policy-item, .guide-item { padding: 14px 12px; flex-direction: column; align-items: flex-start; }
+  .policy-item .title, .guide-item .title { font-size: 14px; margin-bottom: 6px; }
+  .policy-item .meta, .guide-item .meta { font-size: 11px; }
+  
+  /* 详情弹窗 */
+  .modal { padding: 12px; }
+  .modal-content { width: 95%; max-height: 85vh; margin: 5% auto; }
+  .modal-header { padding: 14px 16px; }
+  .modal-header h2 { font-size: 16px; }
+  .modal-body { padding: 16px; font-size: 14px; line-height: 1.7; }
+  
+  /* 聊天界面 */
+  .chat-container { flex-direction: column; height: calc(100vh - 120px); }
+  .chat-main { width: 100%; }
+  .chat-sidebar { width: 100%; max-height: 200px; overflow-y: auto; border-left: none; border-top: 1px solid #eee; }
+  .chat-messages { padding: 12px; }
+  .chat-message .bubble { max-width: 85%; font-size: 14px; padding: 10px 14px; }
+  .chat-input { padding: 10px 12px; }
+  .chat-input input { font-size: 16px; padding: 10px 14px; }
+  .chat-input button { padding: 10px 16px; font-size: 14px; }
+  
+  /* 表单优化 */
+  .form-group { margin-bottom: 14px; }
+  .form-group label { font-size: 13px; margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    font-size: 16px; padding: 12px 14px; width: 100%; box-sizing: border-box;
+  }
+  .btn { padding: 12px 20px; font-size: 14px; width: 100%; box-sizing: border-box; }
+  .btn-group { flex-direction: column; gap: 8px; }
+  .btn-group .btn { width: 100%; }
+  
+  /* 表格优化 */
+  .data-table { font-size: 12px; }
+  .data-table th, .data-table td { padding: 8px 6px; }
+  .data-table th:nth-child(n+4), .data-table td:nth-child(n+4) { display: none; }
+  
+  /* 统计卡片 */
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 12px; }
+  .stat-card { padding: 14px 10px; }
+  .stat-card .value { font-size: 22px; }
+  .stat-card .label { font-size: 11px; }
+  
+  /* 底部导航栏（移动端） */
+  .mobile-bottom-nav {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+    background: white; border-top: 1px solid #e5e7eb; padding: 6px 0;
+    z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  }
+  .mobile-bottom-nav .nav-item {
+    flex: 1; text-align: center; padding: 6px 4px; cursor: pointer;
+    font-size: 10px; color: #6b7280;
+  }
+  .mobile-bottom-nav .nav-item .icon { font-size: 20px; display: block; margin-bottom: 2px; }
+  .mobile-bottom-nav .nav-item.active { color: #3b82f6; }
+  body { padding-bottom: 60px; }
+  
+  /* 隐藏桌面端元素 */
+  .desktop-only { display: none !important; }
+  .mobile-only { display: block !important; }
+  
+  /* 图片优化 */
+  img { max-width: 100%; height: auto; }
+  
+  /* 分类标签 */
+  .category-tabs { overflow-x: auto; white-space: nowrap; padding: 0 12px; -webkit-overflow-scrolling: touch; }
+  .category-tab { display: inline-block; padding: 8px 16px; font-size: 13px; margin-right: 8px; flex-shrink: 0; }
+}
+
+/* 小屏手机 */
+@media (max-width: 375px) {
+  .feature-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .feature-card { padding: 12px 8px; min-height: 90px; }
+  .feature-card .icon { font-size: 24px; }
+  .hero h1 { font-size: 20px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 工作台专用移动端 */
+@media (max-width: 768px) {
+  .sidebar { width: 60px; padding: 10px 4px; }
+  .sidebar .nav-item span:not(.icon) { display: none; }
+  .sidebar .nav-item { justify-content: center; padding: 12px 4px; }
+  .sidebar .user-info { display: none; }
+  .main-content { margin-left: 60px; padding: 12px; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .page-header h1 { font-size: 18px; }
+  .approval-card, .stat-card { padding: 12px; }
+  .metric-card { padding: 10px; }
+  .metric-card .metric-value { font-size: 18px; }
+}
+
+</style>
+
+<style>
+.notif-card { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s; display: flex; gap: 12px; }
+.notif-card:hover { background: #f9fafb; }
+.notif-card.unread { background: #eff6ff; border-left: 3px solid #3b82f6; }
+.notif-icon { font-size: 24px; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; flex-shrink: 0; }
+.notif-content { flex: 1; }
+.notif-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #1f2937; }
+.notif-desc { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
+.notif-time { font-size: 11px; color: #9ca3af; }
+.notif-action { font-size: 12px; color: #3b82f6; cursor: pointer; }
+.notif-stat-card { background: white; padding: 16px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+.notif-stat-card .num { font-size: 28px; font-weight: bold; color: #1f2937; }
+.notif-stat-card .label { font-size: 12px; color: #6b7280; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div style="position:fixed;top:8px;right:8px;z-index:9999;"><a href="/rbac-admin/" target="_blank" style="background:#1a1a2e;color:white;padding:6px 12px;border-radius:4px;text-decoration:none;font-size:12px;">⚙️ 权限管理</a></div>
+
+<!-- 登录页 -->
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <h1>🏛️ 政务工作台</h1>
+    <p class="subtitle">火斗云智 · 政务人员智能办公平台</p>
+    <input type="text" id="loginUsername" placeholder="用户名" autocomplete="username">
+    <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password">
+    <button onclick="doLogin()">登 录</button>
+    <div class="login-error" id="loginError">用户名或密码错误</div>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:#94a3b8">
+      演示账号：admin / admin123
+    </div>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div class="main-app" id="mainApp">
+  <!-- 侧边栏 -->
+  <div class="sidebar">
+    <div class="logo">
+      <h2>政务工作台</h2>
+      <p>火斗云智 AIOS</p>
+    </div>
+    <div class="nav-item active" onclick="switchPage('dashboard')">
+      <span class="icon">🏠</span><span>工作台首页</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('consult')">
+      <span class="icon">💬</span><span>智能咨询辅助</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('document')">
+      <span class="icon">📝</span><span>公文处理中心</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('policy')">
+      <span class="icon">📋</span><span>政策知识库</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('todo')">
+      <span class="icon">✅</span><span>待办事项</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('stats')">
+      <span class="icon">📊</span><span>数据驾驶舱</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('approvals')">
+      <span class="icon">✅</span><span>办事审批</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('docHistory')">
+      <span class="icon">📁</span><span>公文历史</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('performance')">
+      <span class="icon">🏆</span><span>绩效考核</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('appointmentMgmt')">
+      <span class="icon">📅</span><span>预约管理</span>
+    </div>
+    <div class="nav-item" onclick="switchPage('notifications')">
+      <span class="icon">🔔</span><span>通知中心</span>
+    </div>
+    <div class="nav-item" onclick="window.open('/gov-dashboard/','_blank')">
+      <span class="icon">📊</span><span>数据看板</span>
+    </div>
+    <div class="user-info">
+      <div class="name" id="userName">管理员</div>
+      <div class="role" id="userRole">系统管理员</div>
+      <div class="logout" onclick="doLogout()">退出登录</div>
+    </div>
+  </div>
+
+  <!-- 内容区 -->
+  <div class="content">
+    <!-- 工作台首页 -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>工作台首页</h1>
+        <div class="date" id="currentDate"></div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">今日咨询</div>
+          <div class="value" id="statTodayConsult">0</div>
+          <div class="trend up">↑ 实时更新</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">待办事项</div>
+          <div class="value" id="statPendingTodo">0</div>
+          <div class="trend" id="statHighPriority">0个高优先级</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">进行中任务</div>
+          <div class="value" id="statInProgress">0</div>
+          <div class="trend">需关注进度</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">累计咨询</div>
+          <div class="value" id="statTotalConsult">0</div>
+          <div class="trend up">持续增长</div>
+        </div>
+      </div>
+
+      <div class="panel-title" style="margin-bottom:12px">快捷入口</div>
+      <div class="quick-actions" id="quickActions"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="panel">
+          <div class="panel-title">
+            待办事项
+            <button class="btn" onclick="showAddTodo()">+ 新增</button>
+          </div>
+          <div id="dashboardTodos"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">热点问题</div>
+          <div id="hotQuestions">
+            <div style="text-align:center;padding:40px;color:#94a3b8">暂无数据</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 智能咨询辅助 -->
+    <div class="page" id="page-consult">
+      <div class="page-header">
+        <h1>智能咨询辅助</h1>
+        <div class="date">坐席模式 · AI实时辅助</div>
+      </div>
+      <div class="chat-container">
+        <div class="chat-main">
+          <div class="chat-messages" id="chatMessages">
+            <div class="chat-message ai">
+              <div class="bubble">您好！我是政务AI助手。请输入群众的问题，我将为您推荐标准答案和相关政策依据。</div>
+              <div class="meta">AI助手 · 刚刚</div>
+            </div>
+          </div>
+          <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="输入群众问题..." onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()">发送</button>
+          </div>
+        </div>
+        <div class="chat-sidebar">
+          <div class="sidebar-section">
+            <h4>💡 推荐答案</h4>
+            <div id="recommendAnswers">
+              <div style="color:#94a3b8;font-size:13px;text-align:center;padding:20px">输入问题后自动推荐</div>
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <h4>📚 相关政策</h4>
+            <div id="relatedPolicies">
+              <div style="color:#94a3b8;font-size:13px;text-align:center;padding:20px">自动匹配政策依据</div>
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <h4>🗣️ 话术模板</h4>
+            <div id="scriptTemplates">
+              <div class="recommend-item" onclick="insertScript('您好，请问有什么可以帮您？')">开场问候</div>
+              <div class="recommend-item" onclick="insertScript('感谢您的咨询，祝您生活愉快！')">结束话术</div>
+              <div class="recommend-item" onclick="insertScript('这个问题我需要核实一下，请稍等。')">转接话术</div>
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <h4>📋 群众咨询队列 <span id="consultQueueBadge" style="background:#ef4444;color:white;font-size:10px;padding:2px 6px;border-radius:8px">0</span></h4>
+            <div id="consultQueue" style="max-height:200px;overflow-y:auto">
+              <div style="color:#94a3b8;font-size:13px;text-align:center;padding:10px">加载中...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 公文处理中心 -->
+    <div class="page" id="page-document">
+      <div class="page-header">
+        <h1>公文处理中心</h1>
+        <div class="date">24个场景模板 · AI智能生成</div>
+      </div>
+      <div class="panel-title" style="margin-bottom:12px">选择公文模板</div>
+      <div class="template-grid" id="templateGrid"></div>
+      
+      <div class="doc-editor">
+        <div class="panel-title">公文编辑</div>
+        <input type="text" id="docTitle" placeholder="公文标题">
+        <textarea id="docContent" placeholder="请输入公文主要内容，或点击下方按钮AI智能生成..."></textarea>
+        <div class="actions">
+          <button class="btn-primary" onclick="generateDoc()">🤖 AI智能生成</button>
+          <button class="btn-secondary" onclick="polishDoc()">✨ 润色优化</button>
+          <button class="btn-secondary" onclick="saveDoc()">💾 保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 政策知识库 -->
+    <div class="page" id="page-policy">
+      <div class="page-header">
+        <h1>政策知识库</h1>
+        <div class="date">190条政策 · 10大分类</div>
+      </div>
+      <div class="panel">
+        <div style="display:flex;gap:12px;margin-bottom:16px">
+          <input type="text" id="policySearchInput" placeholder="搜索政策标题、关键词..." style="flex:1;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px" oninput="searchPolicies()">
+          <select id="policyCategoryFilter" onchange="searchPolicies()" style="padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px">
+            <option value="">全部分类</option>
+          </select>
+        </div>
+        <div id="policyList"></div>
+      </div>
+    </div>
+
+    <!-- 待办事项 -->
+    <div class="page" id="page-todo">
+      <div class="page-header">
+        <h1>待办事项</h1>
+        <button class="btn" style="padding:8px 20px;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer" onclick="showAddTodo()">+ 新增待办</button>
+      </div>
+      <div class="panel">
+        <div id="todoList"></div>
+      </div>
+    </div>
+
+    <!-- 数据驾驶舱 -->
+    <div class="page" id="page-stats">
+      <div class="page-header">
+        <h1>数据驾驶舱</h1>
+        <div class="date">实时业务数据监控</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="label">总咨询量</div><div class="value" id="dcTotal">0</div></div>
+        <div class="stat-card"><div class="label">今日咨询</div><div class="value" id="dcToday">0</div></div>
+        <div class="stat-card"><div class="label">政策总数</div><div class="value">190</div></div>
+        <div class="stat-card"><div class="label">办事指南</div><div class="value">100</div></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-box">
+          <h3>📈 近7天咨询量趋势</h3>
+          <div class="bar-chart" id="trendChart"></div>
+        </div>
+        <div class="chart-box">
+          <h3>📊 政策分类分布</h3>
+          <div id="categoryChart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 新增待办模态框 -->
+<div class="modal-overlay" id="todoModal">
+  <div class="modal">
+    <h3>新增待办</h3>
+    <input type="text" id="newTodoTitle" placeholder="待办标题">
+    <textarea id="newTodoDesc" placeholder="详细描述（可选）" style="min-height:80px"></textarea>
+    <select id="newTodoPriority">
+      <option value="high">高优先级</option>
+      <option value="medium" selected>中优先级</option>
+      <option value="low">低优先级</option>
+    </select>
+    <div class="actions">
+      <button class="btn-secondary" onclick="closeTodoModal()">取消</button>
+      <button class="btn-primary" onclick="addTodo()">确认添加</button>
+    </div>
+  </div>
+
+  <!-- 办事审批 V1.1 -->
+  <div class="page" id="page-approvals">
+    <div class="page-header">
+      <h1>办事审批 <span class="v11-badge">V1.1</span></h1>
+      <span class="date" id="approvalsDate"></span>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="filterApprovals('all')">全部</button>
+      <button class="btn btn-secondary" onclick="filterApprovals('pending')">待审批</button>
+      <button class="btn btn-secondary" onclick="filterApprovals('approved')">已批准</button>
+      <button class="btn btn-secondary" onclick="filterApprovals('rejected')">已拒绝</button>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="showApprovalForm()">+ 新建审批</button>
+    </div>
+    <div id="approvalsList"><div style="text-align:center;padding:40px;color:#64748b">加载中...</div></div>
+  </div>
+
+  <!-- 公文历史 V1.1 -->
+  <div class="page" id="page-docHistory">
+    <div class="page-header">
+      <h1>公文历史 <span class="v11-badge">V1.1</span></h1>
+      <span class="date">云端存储</span>
+    </div>
+    <div id="docHistoryList"><div style="text-align:center;padding:40px;color:#64748b">加载中...</div></div>
+  </div>
+
+  <!-- 绩效考核 V1.1 -->
+  <div class="page" id="page-performance">
+    <div class="page-header">
+      <h1>绩效考核 <span class="v11-badge">V1.1</span></h1>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" onclick="loadPerformance('week')">本周</button>
+        <button class="btn btn-primary" onclick="loadPerformance('month')">本月</button>
+      </div>
+    </div>
+    <div id="performanceContent"><div style="text-align:center;padding:40px;color:#64748b">加载中...</div></div>
+  </div>
+
+  <!-- 预约管理 V1.1 -->
+  <div class="page" id="page-appointmentMgmt">
+    <div class="page-header">
+      <h1>预约管理 <span class="v11-badge">V1.1</span></h1>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" onclick="loadAppointments('all')">全部</button>
+        <button class="btn btn-secondary" onclick="loadAppointments('pending')">待确认</button>
+        <button class="btn btn-secondary" onclick="loadAppointments('confirmed')">已确认</button>
+        <button class="btn btn-secondary" onclick="loadAppointments('completed')">已完成</button>
+      </div>
+    </div>
+    <div id="appointmentMgmtStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px"></div>
+    <div id="appointmentMgmtList"><div style="text-align:center;padding:40px;color:#64748b">加载中...</div></div>
+  </div>
+
+</div>
+
+<script>
+const API_BASE = '/gov-api/api';
+let currentUser = null;
+let todos = [];
+let selectedTemplate = null;
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('currentDate').textContent = new Date().toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
+  
+  // 检查登录状态
+  const savedUser = localStorage.getItem('gov_workbench_user');
+  if (savedUser) {
+    currentUser = JSON.parse(savedUser);
+    showMainApp();
+  }
+  
+  loadQuickActions();
+  loadCategories();
+});
+
+// 登录
+function doLogin() {
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  // 简单认证（实际应调用API）
+  if ((username === 'admin' && password === 'admin123') || 
+      (username === 'staff' && password === 'staff123')) {
+    currentUser = {
+      username: username,
+      role: username === 'admin' ? '系统管理员' : '政务工作人员',
+      name: username === 'admin' ? '管理员' : '工作人员'
+    };
+    localStorage.setItem('gov_workbench_user', JSON.stringify(currentUser));
+    showMainApp();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('gov_workbench_user');
+  currentUser = null;
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+}
+
+function showMainApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  document.getElementById('userName').textContent = currentUser.name;
+  document.getElementById('userRole').textContent = currentUser.role;
+  loadDashboard();
+  loadPolicies();
+  loadTemplates();
+  loadTrendChart();
+}
+
+// 页面切换
+function switchPage(page) {
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'todo') loadTodos();
+  if (page === 'stats') loadStats();
+}
+
+// 快捷入口
+function loadQuickActions() {
+  const actions = [
+    {id:'consult', icon:'💬', name:'智能咨询', desc:'AI辅助回答', color:'#3b82f6'},
+    {id:'document', icon:'📝', name:'公文生成', desc:'智能起草材料', color:'#8b5cf6'},
+    {id:'policy', icon:'📋', name:'政策检索', desc:'查找政策文件', color:'#10b981'},
+    {id:'todo', icon:'✅', name:'待办事项', desc:'管理个人任务', color:'#06b6d4'},
+    {id:'stats', icon:'📊', name:'数据统计', desc:'业务数据报表', color:'#ef4444'},
+    {id:'guide', icon:'📖', name:'办事指南', desc:'查询办事流程', color:'#f59e0b'},
+    {id:'knowledge', icon:'📚', name:'知识库', desc:'部门经验库', color:'#ec4899'},
+    {id:'settings', icon:'⚙️', name:'系统设置', desc:'个人偏好', color:'#6b7280'},
+  ];
+  document.getElementById('quickActions').innerHTML = actions.map(a => 
+    `<div class="quick-card" onclick="quickNav('${a.id}')">
+      <div class="icon">${a.icon}</div>
+      <div class="name">${a.name}</div>
+      <div class="desc">${a.desc}</div>
+    </div>`
+  ).join('');
+}
+
+function quickNav(id) {
+  const navMap = {consult:'consult', document:'document', policy:'policy', todo:'todo', stats:'stats'};
+  if (navMap[id]) {
+    document.querySelectorAll('.nav-item').forEach((item, i) => {
+      if (item.textContent.includes({consult:'智能咨询',document:'公文',policy:'政策',todo:'待办',stats:'数据'}[id])) {
+        item.click();
+      }
+    });
+  }
+}
+
+// 工作台数据
+async function loadDashboard() {
+  try {
+    const res = await fetch(API_BASE + '/workbench/stats');
+    const data = await res.json();
+    if (data.ok) {
+      const s = data.stats;
+      document.getElementById('statTodayConsult').textContent = s.today_consultations;
+      document.getElementById('statPendingTodo').textContent = s.pending_todos;
+      document.getElementById('statInProgress').textContent = s.in_progress_todos;
+      document.getElementById('statTotalConsult').textContent = s.total_consultations;
+      document.getElementById('statHighPriority').textContent = s.high_priority_todos + '个高优先级';
+    }
+  } catch(e) { console.warn('加载统计失败', e); }
+  
+  loadDashboardTodos();
+}
+
+// 待办事项
+async function loadTodos() {
+  try {
+    const res = await fetch(API_BASE + '/workbench/todos');
+    const data = await res.json();
+    if (data.ok) {
+      todos = data.todos;
+      renderTodoList('todoList', todos);
+    }
+  } catch(e) { console.warn('加载待办失败', e); }
+}
+
+async function loadDashboardTodos() {
+  try {
+    const res = await fetch(API_BASE + '/workbench/todos?limit=5');
+    const data = await res.json();
+    if (data.ok) {
+      renderTodoList('dashboardTodos', data.todos.slice(0, 5), true);
+    }
+  } catch(e) {}
+}
+
+function renderTodoList(containerId, list, compact=false) {
+  const container = document.getElementById(containerId);
+  if (list.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8">暂无待办事项</div>';
+    return;
+  }
+  container.innerHTML = list.map(t => `
+    <div class="todo-item">
+      <div class="checkbox ${t.status==='completed'?'checked':''}" onclick="toggleTodo('${t.id}')"></div>
+      <div class="title ${t.status==='completed'?'completed':''}">${t.title}</div>
+      <span class="priority ${t.priority}">${t.priority==='high'?'高':t.priority==='medium'?'中':'低'}</span>
+      ${!compact ? `<span class="delete" onclick="deleteTodo('${t.id}')">×</span>` : ''}
+    </div>
+  `).join('');
+}
+
+async function toggleTodo(id) {
+  const todo = todos.find(t => t.id === id);
+  if (!todo) return;
+  const newStatus = todo.status === 'completed' ? 'pending' : 'completed';
+  await fetch(API_BASE + '/workbench/todos/' + id, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({status: newStatus})
+  });
+  loadTodos();
+  loadDashboard();
+}
+
+async function deleteTodo(id) {
+  if (!confirm('确定删除这个待办吗？')) return;
+  await fetch(API_BASE + '/workbench/todos/' + id, {method: 'DELETE'});
+  loadTodos();
+  loadDashboard();
+}
+
+function showAddTodo() {
+  document.getElementById('todoModal').classList.add('active');
+}
+
+function closeTodoModal() {
+  document.getElementById('todoModal').classList.remove('active');
+  document.getElementById('newTodoTitle').value = '';
+  document.getElementById('newTodoDesc').value = '';
+}
+
+async function addTodo() {
+  const title = document.getElementById('newTodoTitle').value;
+  if (!title) { alert('请输入标题'); return; }
+  const desc = document.getElementById('newTodoDesc').value;
+  const priority = document.getElementById('newTodoPriority').value;
+  
+  await fetch(API_BASE + '/workbench/todos', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({title, description: desc, priority})
+  });
+  closeTodoModal();
+  loadTodos();
+  loadDashboard();
+}
+
+// 智能咨询
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  
+  const messagesDiv = document.getElementById('chatMessages');
+  messagesDiv.innerHTML += `
+    <div class="chat-message user">
+      <div class="bubble">${msg}</div>
+      <div class="meta">我 · 刚刚</div>
+    </div>`;
+  input.value = '';
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  
+  // 调用API
+  try {
+    const res = await fetch(API_BASE + '/gov/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: msg, history: []})
+    });
+    const data = await res.json();
+    
+    messagesDiv.innerHTML += `
+      <div class="chat-message ai">
+        <div class="bubble">${data.reply || '暂无回答'}</div>
+        <div class="meta">AI助手 · 刚刚</div>
+      </div>`;
+    
+    // 显示推荐答案和相关政策
+    if (data.reply) {
+      document.getElementById('recommendAnswers').innerHTML = `
+        <div class="recommend-item" onclick="copyText(\`${data.reply.substring(0,100)}\`)">
+          ${data.reply.substring(0, 80)}...
+        </div>`;
+    }
+    if (data.related_policies && data.related_policies.length > 0) {
+      document.getElementById('relatedPolicies').innerHTML = data.related_policies.slice(0,3).map(p =>
+        `<div class="policy-ref"><div class="title">${p}</div></div>`
+      ).join('');
+    }
+  } catch(e) {
+    messagesDiv.innerHTML += `<div class="chat-message ai"><div class="bubble" style="color:#ef4444">请求失败，请稍后重试</div></div>`;
+  }
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function insertScript(text) {
+  document.getElementById('chatInput').value = text;
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text);
+  alert('已复制到剪贴板');
+}
+
+// 公文模板
+async function loadTemplates() {
+  try {
+    const res = await fetch(API_BASE + '/workbench/doc-templates');
+    const data = await res.json();
+    if (data.ok && data.templates) {
+      const templates = data.templates.slice(0, 12);
+      document.getElementById('templateGrid').innerHTML = templates.map((t, i) => `
+        <div class="template-card ${selectedTemplate===i?'selected':''}" onclick="selectTemplate(${i}, '${t.title}')">
+          <div class="icon">📄</div>
+          <div class="name">${t.title}</div>
+          <div class="category">${t.category || '政务服务'}</div>
+        </div>
+      `).join('');
+    }
+  } catch(e) {
+    // 本地降级
+    const localTemplates = [
+      {title:'公文智能拟稿', category:'公文处理'},
+      {title:'政策智能解读', category:'政策研究'},
+      {title:'会议纪要生成', category:'办公效率'},
+      {title:'通知公告起草', category:'公文处理'},
+      {title:'工作总结报告', category:'办公效率'},
+      {title:'调研报告撰写', category:'政策研究'},
+    ];
+    document.getElementById('templateGrid').innerHTML = localTemplates.map((t, i) => `
+      <div class="template-card" onclick="selectTemplate(${i}, '${t.title}')">
+        <div class="icon">📄</div>
+        <div class="name">${t.title}</div>
+        <div class="category">${t.category}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function selectTemplate(index, title) {
+  selectedTemplate = index;
+  document.querySelectorAll('.template-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === index);
+  });
+  document.getElementById('docTitle').value = title + ' - ';
+  document.getElementById('docContent').placeholder = '已选择【' + title + '】模板，输入要点后点击AI智能生成...';
+}
+
+async function generateDoc() {
+  const title = document.getElementById('docTitle').value;
+  const content = document.getElementById('docContent').value;
+  if (!title && !content) { alert('请输入标题或内容要点'); return; }
+  
+  document.getElementById('docContent').value = '正在AI生成中...';
+  
+  try {
+    const res = await fetch(API_BASE + '/gov/doc/generate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({type: '通知', title: title, content: content || title})
+    });
+    const data = await res.json();
+    document.getElementById('docContent').value = data.result || '生成失败，请重试';
+  } catch(e) {
+    document.getElementById('docContent').value = '生成失败：' + e.message;
+  }
+}
+
+async function polishDoc() {
+  const content = document.getElementById('docContent').value;
+  if (!content) { alert('请先输入内容'); return; }
+  
+  try {
+    const res = await fetch(API_BASE + '/gov/doc/polish', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({content: content})
+    });
+    const data = await res.json();
+    document.getElementById('docContent').value = data.result || content;
+  } catch(e) {
+    alert('润色失败');
+  }
+}
+
+function saveDoc() {
+  const title = document.getElementById('docTitle').value;
+  const content = document.getElementById('docContent').value;
+  localStorage.setItem('gov_doc_' + Date.now(), JSON.stringify({title, content, time: new Date().toLocaleString()}));
+  alert('公文已保存到本地');
+}
+
+// 政策库
+async function loadCategories() {
+  try {
+    const res = await fetch(API_BASE + '/gov/policy/categories');
+    const data = await res.json();
+    if (data.ok && data.categories) {
+      const select = document.getElementById('policyCategoryFilter');
+      data.categories.forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+      });
+    }
+  } catch(e) {}
+}
+
+async function loadPolicies() {
+  searchPolicies();
+}
+
+async function searchPolicies() {
+  const q = document.getElementById('policySearchInput').value;
+  const category = document.getElementById('policyCategoryFilter').value;
+  let url = API_BASE + '/gov/policy/search?';
+  if (q) url += 'q=' + encodeURIComponent(q) + '&';
+  if (category) url += 'category=' + encodeURIComponent(category);
+  
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.ok) {
+      const list = data.results || [];
+      document.getElementById('policyList').innerHTML = list.slice(0, 20).map(p => `
+        <div style="padding:16px;border-bottom:1px solid #f1f5f9">
+          <div style="font-weight:600;font-size:15px;margin-bottom:4px">${p.title}</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:8px">
+            ${p.category} · ${p.doc_no || ''} · ${p.org || ''}
+          </div>
+          <div style="font-size:13px;color:#475569">${p.summary || ''}</div>
+        </div>
+      `).join('') || '<div style="text-align:center;padding:40px;color:#94a3b8">未找到相关政策</div>';
+    }
+  } catch(e) {}
+}
+
+// 数据驾驶舱
+async function loadStats() {
+  try {
+    const res = await fetch(API_BASE + '/workbench/stats');
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('dcTotal').textContent = data.stats.total_consultations;
+      document.getElementById('dcToday').textContent = data.stats.today_consultations;
+    }
+  } catch(e) {}
+}
+
+function loadTrendChart() {
+  // 模拟7天数据
+  const days = [];
+  const values = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.getMonth()+1 + '/' + d.getDate());
+    values.push(Math.floor(Math.random() * 50) + 10);
+  }
+  const max = Math.max(...values);
+  document.getElementById('trendChart').innerHTML = days.map((day, i) => `
+    <div class="bar-item">
+      <div class="bar-value">${values[i]}</div>
+      <div class="bar" style="height:${(values[i]/max)*150}px"></div>
+      <div class="bar-label">${day}</div>
+    </div>
+  `).join('');
+  
+  // 分类分布
+  const cats = [
+    {name:'医保', value:30, color:'#3b82f6'},
+    {name:'社保', value:30, color:'#8b5cf6'},
+    {name:'住房', value:20, color:'#10b981'},
+    {name:'教育', value:20, color:'#f59e0b'},
+    {name:'就业', value:20, color:'#ef4444'},
+    {name:'其他', value:70, color:'#6b7280'},
+  ];
+  document.getElementById('categoryChart').innerHTML = cats.map(c => `
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+        <span>${c.name}</span><span>${c.value}条</span>
+      </div>
+      <div style="height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${c.value/1.9}%;background:${c.color};border-radius:4px"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============ V1.1 办事审批 ============
+let currentApprovalFilter = 'all';
+async function loadApprovals() {
+  try {
+    const url = '/gov-api/api/workbench/approvals' + (currentApprovalFilter !== 'all' ? '?status=' + currentApprovalFilter : '');
+    const res = await fetch(url);
+    const data = await res.json();
+    const list = data.approvals || [];
+    const container = document.getElementById('approvalsList');
+    if (list.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b">暂无审批记录</div>';
+      return;
+    }
+    container.innerHTML = list.map(a => `
+      <div class="approval-card ${a.status}">
+        <div class="approval-header">
+          <span class="approval-title">${a.title}</span>
+          <span class="approval-status ${a.status}">${a.status === 'pending' ? '待审批' : a.status === 'approved' ? '已批准' : '已拒绝'}</span>
+        </div>
+        <div class="approval-meta">申请人: ${a.applicant} | 类型: ${a.item_type} | ${a.created_at ? a.created_at.substring(0,10) : ''}</div>
+        <div style="font-size:13px;color:#475569">${a.description || '无描述'}</div>
+        ${a.status === 'pending' ? `
+        <div class="approval-actions">
+          <button class="btn-approve" onclick="handleApproval('${a.id}','approved')">批准</button>
+          <button class="btn-reject" onclick="handleApproval('${a.id}','rejected')">拒绝</button>
+        </div>` : ''}
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('approvalsList').innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">加载失败</div>';
+  }
+}
+function filterApprovals(status) {
+  currentApprovalFilter = status;
+  loadApprovals();
+}
+async function handleApproval(id, status) {
+  await fetch('/gov-api/api/workbench/approvals/update', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({id, status, approver: '当前用户'})
+  });
+  loadApprovals();
+}
+function showApprovalForm() {
+  const title = prompt('审批事项标题:');
+  if (!title) return;
+  const applicant = prompt('申请人:') || '当前用户';
+  const itemType = prompt('类型(请假/报销/采购/用印/其他):') || '其他';
+  const desc = prompt('描述:') || '';
+  fetch('/gov-api/api/workbench/approvals/create', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({title, applicant, item_type: itemType, description: desc})
+  }).then(() => loadApprovals());
+}
+
+// ============ V1.1 公文历史 ============
+async function loadDocHistory() {
+  try {
+    const res = await fetch('/gov-api/api/workbench/doc-history');
+    const data = await res.json();
+    const docs = data.docs || [];
+    const container = document.getElementById('docHistoryList');
+    if (docs.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b">暂无公文历史，生成的公文将自动保存到云端</div>';
+      return;
+    }
+    container.innerHTML = docs.map(d => `
+      <div class="doc-history-item">
+        <div class="doc-info">
+          <div class="doc-title">${d.title}</div>
+          <div class="doc-meta">${d.doc_type} | ${d.word_count}字 | ${d.creator} | ${d.created_at ? d.created_at.substring(0,10) : ''}</div>
+        </div>
+        <span style="font-size:11px;padding:3px 10px;background:#e0e7ff;color:#3730a3;border-radius:12px">${d.status}</span>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('docHistoryList').innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">加载失败</div>';
+  }
+}
+
+// ============ V1.1 绩效考核 ============
+async function loadPerformance(period = 'month') {
+  try {
+    const res = await fetch('/gov-api/api/workbench/performance?period=' + period);
+    const data = await res.json();
+    const m = data.metrics || {};
+    const gradeColors = {'A':'#10b981','B':'#3b82f6','C':'#f59e0b','D':'#ef4444','E':'#6b7280'};
+    document.getElementById('performanceContent').innerHTML = `
+      <div class="performance-score">
+        <div style="font-size:14px;opacity:0.9">${period === 'week' ? '本周' : '本月'}绩效考核</div>
+        <div class="score">${data.score}</div>
+        <div class="grade">等级 ${data.grade || 'E'}</div>
+      </div>
+      <div class="performance-metrics">
+        <div class="metric-card"><div class="metric-label">待办完成率</div><div class="metric-value">${m.todo_completion_rate || 0}%</div></div>
+        <div class="metric-card"><div class="metric-label">已完成待办</div><div class="metric-value">${m.todos_completed || 0}</div></div>
+        <div class="metric-card"><div class="metric-label">处理审批</div><div class="metric-value">${m.approvals_processed || 0}</div></div>
+        <div class="metric-card"><div class="metric-label">回答咨询</div><div class="metric-value">${m.consultations_answered || 0}</div></div>
+        <div class="metric-card"><div class="metric-label">创建公文</div><div class="metric-value">${m.docs_created || 0}</div></div>
+        <div class="metric-card"><div class="metric-label">总字数</div><div class="metric-value">${m.total_words || 0}</div></div>
+      </div>
+    `;
+  } catch(e) {
+    document.getElementById('performanceContent').innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">加载失败</div>';
+  }
+}
+
+// V1.1 页面切换扩展
+const _origSwitchPage = switchPage;
+switchPage = function(page) {
+  _origSwitchPage(page);
+  if (page === 'approvals') { document.getElementById('approvalsDate').textContent = new Date().toLocaleDateString('zh-CN'); loadApprovals(); }
+  if (page === 'docHistory') loadDocHistory();
+  if (page === 'performance') loadPerformance('month');
+  if (page === 'appointmentMgmt') loadAppointments('all');
+};
+
+// ============ V2.0 群众咨询队列 ============
+async function loadConsultQueue(){
+  try {
+    var res = await fetch('/gov-api/api/workbench/consultations?status=pending');
+    var data = await res.json();
+    var list = data.consultations || [];
+    document.getElementById('consultQueueBadge').textContent = list.length;
+    var container = document.getElementById('consultQueue');
+    if(list.length === 0){
+      container.innerHTML = '<div style="color:#94a3b8;font-size:13px;text-align:center;padding:10px">暂无待回答咨询</div>';
+    } else {
+      var html = '';
+      list.forEach(function(c){
+        html += '<div class="recommend-item" style="cursor:pointer" onclick="loadConsultation(\''+c.id+'\',\''+c.question.replace(/'/g,"\\'")+'\')">' +
+          '<div style="font-weight:600;font-size:13px;margin-bottom:2px">'+c.citizen_name+'</div>' +
+          '<div style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.question+'</div>' +
+          '</div>';
+      });
+      container.innerHTML = html;
+    }
+  } catch(e){
+    document.getElementById('consultQueue').innerHTML = '<div style="color:#ef4444;font-size:13px;text-align:center;padding:10px">加载失败</div>';
+  }
+}
+function loadConsultation(id, question){
+  document.getElementById('chatInput').value = question;
+  window._currentConsultId = id;
+  // 添加群众消息到聊天
+  addChatMsg('user', question);
+  // 自动发送获取AI辅助答案
+  sendMessage();
+}
+
+// ============ V1.1 预约管理 ============
+async function loadAppointments(status){
+  status = status || 'all';
+  try {
+    var url = '/gov-api/api/gov/appointments' + (status !== 'all' ? '?status=' + status : '');
+    var res = await fetch(url);
+    var data = await res.json();
+    var list = data.appointments || [];
+    var container = document.getElementById('appointmentMgmtList');
+    if(!container) return;
+    if(list.length === 0){
+      container.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b">暂无预约记录</div>';
+    } else {
+      var html = '';
+      list.forEach(function(a){
+        var statusText = a.status==='pending'?'待确认':a.status==='confirmed'?'已确认':a.status==='completed'?'已完成':'已取消';
+        var actions = '';
+        if(a.status === 'pending'){
+          actions = '<div class="approval-actions">' +
+            '<button class="btn-approve" onclick="updateAppointment(''+a.id+'','confirmed')">确认预约</button>' +
+            '<button class="btn-reject" onclick="updateAppointment(''+a.id+'','cancelled')">取消</button>' +
+            '<button class="btn-approve" style="background:#3b82f6" onclick="updateAppointment(''+a.id+'','completed')">完成</button>' +
+            '</div>';
+        }
+        html += '<div class="approval-card '+a.status+'">' +
+          '<div class="approval-header"><span class="approval-title">'+(a.guide_title||a.guideTitle)+'</span>' +
+          '<span class="approval-status '+a.status+'">'+statusText+'</span></div>' +
+          '<div class="approval-meta">预约人: '+a.name+' | '+a.phone+' | '+a.date+' '+(a.time_slot||a.time)+'</div>' +
+          '<div style="font-size:13px;color:#475569">'+(a.remark||'无备注')+'</div>' + actions + '</div>';
+      });
+      container.innerHTML = html;
+    }
+    loadAppointmentStats();
+  } catch(e) {
+    var c = document.getElementById('appointmentMgmtList');
+    if(c) c.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">加载失败</div>';
+  }
+}
+async function loadAppointmentStats(){
+  try {
+    var res = await fetch('/gov-api/api/gov/appointments/stats');
+    var data = await res.json();
+    var stats = [
+      {label:'总预约', value:data.total, color:'#3b82f6'},
+      {label:'待确认', value:data.pending, color:'#f59e0b'},
+      {label:'已确认', value:data.confirmed, color:'#10b981'},
+      {label:'已完成', value:data.completed, color:'#6366f1'},
+    ];
+    var container = document.getElementById('appointmentMgmtStats');
+    if(!container) return;
+    var html = '';
+    stats.forEach(function(s){
+      html += '<div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1)">' +
+        '<div style="font-size:28px;font-weight:700;color:'+s.color+'">'+s.value+'</div>' +
+        '<div style="font-size:12px;color:#64748b;margin-top:4px">'+s.label+'</div></div>';
+    });
+    container.innerHTML = html;
+  } catch(e){}
+}
+async function updateAppointment(id, status){
+  await fetch('/gov-api/api/gov/appointments/update', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({id:id, status:status})
+  });
+  loadAppointments();
+}
+async function markConsultationAnswered(){
+  if(window._currentConsultId){
+    await fetch('/gov-api/api/workbench/consultations/update', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id:window._currentConsultId, status:'answered', answer:'已回答'})
+    });
+    window._currentConsultId = null;
+    loadConsultQueue();
+  }
+}
+// 页面切换到consult时加载队列
+var _origSwitch = switchPage;
+switchPage = function(page){
+  _origSwitch(page);
+  if(page === 'consult'){ loadConsultQueue(); }
+};
+</script>
+
+    <div id="page-notifications" class="page">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2>🔔 通知中心</h2>
+        <div>
+          <button onclick="markAllNotificationsRead()" style="background:#3b82f6;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;margin-right:8px;">全部已读</button>
+          <select id="notifFilter" onchange="loadNotifications()" style="padding:8px;border-radius:6px;border:1px solid #ddd;">
+            <option value="all">全部通知</option>
+            <option value="unread">未读通知</option>
+            <option value="appointment">预约通知</option>
+            <option value="policy">政策更新</option>
+            <option value="todo">待办提醒</option>
+            <option value="system">系统公告</option>
+            <option value="approval">审批通知</option>
+            <option value="consultation">咨询回复</option>
+          </select>
+        </div>
+      </div>
+      <div id="notifStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;"></div>
+      <div id="notifList" style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);overflow:hidden;"></div>
+    </div>
+</body>
+</html>

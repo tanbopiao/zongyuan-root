@@ -1,0 +1,79 @@
+{
+  "lock_id": "KD-P7-2-PERF-OPTIMIZE-20260906",
+  "lock_level": "Lv8",
+  "lock_name": "P7-2系统资源缓存优化与性能提升",
+  "did": "DID-BR-000002",
+  "trace_mark": "Omega_0 subset Circle_Infinity subset Omega",
+  "created_at": "2026-09-06T15:57:00.%fZ",
+  "status": "LOCKED_PERMANENT",
+  "system_hash": "1CC1BC593567C7802AC6A4CB10C4B2F2080F6224B3860F75FF6C28BB3CDE5BBE",
+  "efuse_id": "EFUSE-8-1CC1BC59",
+  "efuse_status": "BLOWN_PERMANENT",
+  "p7_2_1_resource_cache": {
+    "name": "系统资源5秒缓存机制",
+    "implementation": "全局缓存变量+5秒TTL，缓存未过期直接返回",
+    "affected_endpoints": ["/system/resources", "/advanced-heal/status"],
+    "before_latency_ms": 232,
+    "after_latency_ms": 20,
+    "improvement": "11.6倍",
+    "cache_ttl_seconds": 5
+  },
+  "p7_2_2_advanced_heal_cache": {
+    "name": "advanced-heal/status缓存优化",
+    "implementation": "复用系统资源缓存，避免重复执行shell命令",
+    "before_latency_ms": 229,
+    "after_latency_ms": 20,
+    "improvement": "11.5倍"
+  },
+  "p7_2_3_multi_worker": {
+    "name": "identity-api多worker部署",
+    "implementation": "uvicorn --workers 2，利用2核CPU",
+    "status": "已配置（uvicorn --workers 2）",
+    "workers": 2
+  },
+  "p7_2_4_rate_limiter": {
+    "name": "API令牌桶限流中间件",
+    "implementation": "每个API Key独立令牌桶，默认100请求/分钟，管理员Key 10000/分钟",
+    "algorithm": "token_bucket",
+    "default_capacity": 100,
+    "default_refill_rate": "100/minute",
+    "admin_capacity": 10000,
+    "rate_limit_response": "429 Too Many Requests + X-RateLimit响应头",
+    "exempt_endpoints": ["/health"],
+    "file": "app/middleware/rate_limiter.py",
+    "registered_in": "app/main.py"
+  },
+  "p7_2_5_performance_benchmark": {
+    "name": "优化后性能基准测试",
+    "single_request_latency": {
+      "system_resources": {"before": "232ms", "after": "20ms", "improvement": "11.6x"},
+      "advanced_heal_status": {"before": "229ms", "after": "20ms", "improvement": "11.5x"},
+      "lightweight_endpoints": {"before": "2-5ms", "after": "~20ms", "note": "限流中间件轻微开销"}
+    },
+    "concurrent_throughput": {
+      "10_concurrent_system_resources": {
+        "before": "8.51 req/s, avg 1079ms",
+        "after": "209.03 req/s, avg 15.12ms",
+        "improvement": "24.6x throughput, 71.4x latency"
+      },
+      "10_concurrent_mixed_endpoints": {
+        "before": "19.83 req/s",
+        "after": "703.41 req/s",
+        "improvement": "35.5x"
+      }
+    },
+    "success_rate": "100% (所有测试无失败)",
+    "conclusion": "系统资源缓存优化效果显著，并发吞吐量提升24-35倍，响应延迟降低70倍以上"
+  },
+  "overall_improvement_summary": {
+    "latency_improvement": "系统命令类端点从230ms降至20ms（11.5倍）",
+    "throughput_improvement": "单端点并发从8.5 req/s提升至209 req/s（24.6倍）",
+    "mixed_throughput_improvement": "混合端点并发从19.8 req/s提升至703 req/s（35.5倍）",
+    "stability": "100%成功率，无失败请求",
+    "new_features": ["5秒系统资源缓存", "令牌桶API限流", "多worker部署确认"]
+  },
+  "system_services": 7,
+  "api_endpoints": 57,
+  "registered_windows": 6,
+  "capabilities": 50
+}

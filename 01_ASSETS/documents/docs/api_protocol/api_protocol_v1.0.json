@@ -1,0 +1,203 @@
+{
+  "protocol_name": "ZONGYUAN-ROOT 云内核 API 接口协议",
+  "protocol_version": "V1.0",
+  "protocol_id": "API-PROTOCOL-V1.0",
+  "published_at": "2026-09-06",
+  "kernel_id": "ZONGYUAN-ROOT-AUTONOMOUS-KERNEL",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "status": "ACTIVE",
+  "lock_status": "BLOWN_PERMANENT",
+
+  "base_info": {
+    "base_domain": "https://www.huodouai.com",
+    "public_ip": "123.207.202.158",
+    "api_version": "v1",
+    "data_format": "application/json; charset=utf-8",
+    "encoding": "UTF-8",
+    "time_format": "ISO 8601",
+    "timezone": "Asia/Shanghai (UTC+8)"
+  },
+
+  "service_ports": {
+    "nginx": {"http": 80, "https": 443, "description": "统一入口/SSL"},
+    "anchor_api": {"local_port": 8006, "public_path": "/anchor/", "description": "同步/控制/真值管理"},
+    "kernel_identity_api": {"local_port": 8030, "public_path": "/api/v1/kernel/", "description": "身份标识/节点管理"},
+    "protocol_registry": {"local_port": 8024, "public_path": "/api/v1/protocols", "description": "协议注册管理"},
+    "aiproxy": {"local_port": 8021, "public_path": null, "description": "多模型统一代理"},
+    "frps": {"bind_port": 7100, "admin_port": 7500, "description": "内网穿透服务端"}
+  },
+
+  "authentication": {
+    "x_api_key": {
+      "header": "X-API-Key",
+      "key": "36f55bdd86407a1fc12f27240ed9736ac0c5cfb33e7b89ee9c9f7d8594e0c242",
+      "applies_to": ["/anchor/api/v1/sync/*"]
+    },
+    "http_basic_auth": {
+      "username": "zongyuan",
+      "password": "123456",
+      "applies_to": ["/anchor/*", "/monitor/*", "/gov-api/*", "/system/state", "/api/v1/protocols/*"]
+    },
+    "no_auth": {
+      "endpoints": [
+        "GET /api/v1/kernel/identity",
+        "GET /api/v1/kernel/nodes/list",
+        "GET /api/v1/kernel/nodes/{node_id}",
+        "POST /api/v1/kernel/nodes/register",
+        "POST /api/v1/kernel/nodes/heartbeat"
+      ]
+    },
+    "frp_auth": {
+      "server": "123.207.202.158:7100",
+      "token": "ZONGYUAN-FRP-20260903-SECRET-KEY-7f3a9b2c"
+    }
+  },
+
+  "api_groups": {
+    "kernel_identity": {
+      "name": "内核身份标识API",
+      "base_path": "/api/v1/kernel",
+      "auth": "none",
+      "endpoints": {
+        "get_identity": {
+          "method": "GET",
+          "path": "/identity",
+          "description": "获取内核身份标识",
+          "response_fields": ["kernel_id", "did", "network", "core_services", "api_endpoints", "authentication", "kernel_status"]
+        }
+      }
+    },
+
+    "node_management": {
+      "name": "节点管理API",
+      "base_path": "/api/v1/kernel/nodes",
+      "auth": "none",
+      "endpoints": {
+        "register": {
+          "method": "POST",
+          "path": "/register",
+          "description": "节点注册",
+          "required_fields": ["node_id", "node_type", "node_name", "public_key", "capabilities"],
+          "node_types": ["local_kernel", "dev_workstation", "edge_device", "external_agent", "backup_node"]
+        },
+        "list": {
+          "method": "GET",
+          "path": "/list",
+          "description": "节点列表查询"
+        },
+        "heartbeat": {
+          "method": "POST",
+          "path": "/heartbeat",
+          "description": "节点心跳上报",
+          "interval_seconds": 300,
+          "timeout_seconds": 900
+        },
+        "detail": {
+          "method": "GET",
+          "path": "/{node_id}",
+          "description": "节点详情查询"
+        }
+      }
+    },
+
+    "sync": {
+      "name": "同步API",
+      "base_path": "/anchor/api/v1/sync",
+      "auth": "x_api_key",
+      "endpoints": {
+        "handshake": {"method": "GET", "path": "/handshake", "description": "握手获取内核状态"},
+        "manifest": {"method": "GET", "path": "/manifest", "description": "资产清单（SHA256+Merkle根）"},
+        "pull": {"method": "POST", "path": "/pull", "description": "文件拉取（BASE64）"},
+        "verify": {"method": "POST", "path": "/verify", "description": "一致性验证"},
+        "truth_pull": {"method": "POST", "path": "/truth-pull", "description": "真值增量拉取"},
+        "truth_push": {"method": "POST", "path": "/truth-push", "description": "真值增量推送（去重）"}
+      }
+    },
+
+    "control": {
+      "name": "控制API",
+      "base_path": "/anchor/api/v1/control",
+      "auth": "http_basic_auth",
+      "endpoints": {
+        "issue": {"method": "POST", "path": "/issue", "description": "下发控制指令"},
+        "commands": {"method": "GET", "path": "/commands", "description": "拉取待执行指令"},
+        "result": {"method": "POST", "path": "/result", "description": "上报执行结果"},
+        "heartbeat": {"method": "POST", "path": "/heartbeat", "description": "心跳上报（30秒间隔）"},
+        "status": {"method": "GET", "path": "/status", "description": "控制状态查询"}
+      },
+      "command_types": [
+        "config_update", "truth_push", "protocol_sync", "task_trigger",
+        "remote_diagnose", "self_update", "backup", "restart"
+      ]
+    },
+
+    "protocol_registry": {
+      "name": "协议注册中心API",
+      "base_path": "/api/v1/protocols",
+      "auth": "http_basic_auth",
+      "endpoints": {
+        "list": {"method": "GET", "path": "/", "description": "协议列表"},
+        "register": {"method": "POST", "path": "/register", "description": "协议注册"},
+        "get": {"method": "GET", "path": "/{id}", "description": "协议详情"},
+        "update": {"method": "PUT", "path": "/{id}", "description": "协议更新"},
+        "delete": {"method": "DELETE", "path": "/{id}", "description": "协议删除"}
+      }
+    },
+
+    "aiproxy": {
+      "name": "AI代理网关API",
+      "base_path": "http://127.0.0.1:8021",
+      "auth": "api_key",
+      "endpoints": {
+        "chat_completions": {
+          "method": "POST",
+          "path": "/v1/chat/completions",
+          "description": "聊天补全（OpenAI兼容）",
+          "models": {
+            "doubao-pro": {"priority": 1, "role": "primary"},
+            "hunyuan": {"priority": 2, "role": "fallback"},
+            "ollama-local": {"priority": 3, "role": "fallback", "model": "qwen2.5:1.5b"}
+          }
+        },
+        "health": {"method": "GET", "path": "/health", "description": "健康检查"}
+      }
+    }
+  },
+
+  "error_codes": {
+    "200": "SUCCESS",
+    "400": "BAD_REQUEST",
+    "401": "UNAUTHORIZED",
+    "403": "FORBIDDEN",
+    "404": "NOT_FOUND",
+    "409": "CONFLICT",
+    "429": "TOO_MANY_REQUESTS",
+    "500": "INTERNAL_ERROR",
+    "502": "BAD_GATEWAY",
+    "503": "SERVICE_UNAVAILABLE"
+  },
+
+  "data_models": {
+    "kernel_identity": ["kernel_id", "kernel_name", "did", "trace", "version", "status", "network", "core_services", "api_endpoints", "authentication", "web_portals", "kernel_status"],
+    "node": ["node_id", "node_type", "node_name", "public_key", "capabilities", "registered_at", "updated_at", "last_heartbeat", "online", "status"],
+    "truth": ["truth_id", "title", "content", "level", "type", "category", "confidence", "source", "sha256", "timestamp"],
+    "command": ["command_id", "target_node", "command_type", "command", "priority", "status", "issued_at", "expires_at", "executed_at", "result"]
+  },
+
+  "node_registration_policy": {
+    "allowed_node_types": ["local_kernel", "dev_workstation", "edge_device", "external_agent", "backup_node"],
+    "required_fields": ["node_id", "node_type", "node_name", "public_key", "capabilities"],
+    "heartbeat_interval_seconds": 300,
+    "heartbeat_timeout_seconds": 900,
+    "authority": "cloud_kernel",
+    "description": "云内核为唯一权威源，所有节点必须注册并定期心跳"
+  },
+
+  "version_history": [
+    {"version": "V1.0", "date": "2026-09-06", "description": "初始版本，6组API，27个端点"}
+  ],
+
+  "hash": "",
+  "merkle_root": ""
+}

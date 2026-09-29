@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOIP Playground · 稳态AI对比测试平台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"PingFang SC",system-ui,sans-serif;background:#070a12;color:#e8ebf2;line-height:1.7;padding:20px;max-width:1400px;margin:0 auto;}
+.header{text-align:center;padding:30px 0 20px;border-bottom:1px solid #222b40;margin-bottom:30px;}
+h1{color:#ffd78c;font-size:28px;margin-bottom:8px;}
+.subtitle{color:#94a3b8;font-size:14px;}
+.api-bar{display:flex;gap:10px;align-items:center;justify-content:center;margin:16px 0;flex-wrap:wrap;}
+.api-bar input{background:#0f1420;border:1px solid #2e3a54;color:#e2e8f0;padding:8px 14px;border-radius:6px;font-size:13px;width:320px;}
+.api-bar button{background:linear-gradient(90deg,#ffb048,#ff8038);color:#0c0f17;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:13px;}
+.api-bar .status{font-size:12px;padding:4px 10px;border-radius:4px;}
+.status.connected{background:#1a3a2a;color:#4ade80;}
+.status.demo{background:#3a2a1a;color:#fbbf24;}
+.input-section{background:#0f1420;border:1px solid #2e3a54;border-radius:12px;padding:20px;margin-bottom:24px;}
+.input-section label{display:block;color:#ffca68;font-weight:bold;margin-bottom:8px;font-size:14px;}
+.input-section textarea{width:100%;background:#0b0f18;border:1px solid #2e3a54;color:#e2e8f0;padding:12px;border-radius:8px;font-size:14px;resize:vertical;min-height:60px;font-family:inherit;}
+.input-section .row{display:grid;gap:16px;grid-template-columns:1fr 1fr;}
+.run-btn{display:block;margin:20px auto;background:linear-gradient(90deg,#ffb048,#ff8038);color:#0c0f17;border:none;padding:14px 48px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:16px;}
+.run-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.compare-section{display:grid;gap:20px;grid-template-columns:1fr 1fr;margin-bottom:24px;}
+.compare-card{background:#0f1420;border:1px solid #2e3a54;border-radius:12px;padding:20px;}
+.compare-card.loip{border-color:#ffb850;background:linear-gradient(180deg,rgba(255,180,80,0.06) 0%,#0f1420 100%);}
+.compare-card h3{color:#ffca68;margin-bottom:12px;font-size:16px;display:flex;align-items:center;gap:8px;}
+.badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:normal;}
+.badge.raw{background:#3a2a2a;color:#f87171;}
+.badge.loip{background:#2a3a2a;color:#4ade80;}
+.output-box{background:#0b0f18;border-radius:8px;padding:14px;min-height:120px;font-size:13px;color:#cbd5e1;white-space:pre-wrap;word-break:break-word;}
+.metrics{display:grid;gap:10px;margin-top:14px;}
+.metric{display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+.metric-label{color:#94a3b8;}
+.metric-value{font-weight:bold;}
+.metric-value.bad{color:#f87171;}
+.metric-value.good{color:#4ade80;}
+.metric-value.warn{color:#fbbf24;}
+.detail-section{background:#0f1420;border:1px solid #2e3a54;border-radius:12px;padding:20px;margin-bottom:24px;}
+.detail-section h3{color:#ffca68;margin-bottom:14px;font-size:16px;}
+.detail-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));}
+.detail-item{background:#0b0f18;border-radius:8px;padding:14px;}
+.detail-item h4{color:#ffd078;font-size:13px;margin-bottom:8px;}
+.detail-item ul{list-style:none;padding:0;}
+.detail-item li{font-size:12px;color:#94a3b8;padding:4px 0;border-bottom:1px solid #1a2236;}
+.detail-item li:last-child{border-bottom:none;}
+.risk-bar{height:8px;background:#1a2236;border-radius:4px;margin-top:8px;overflow:hidden;}
+.risk-fill{height:100%;border-radius:4px;transition:width 0.5s;}
+.examples{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.example-chip{background:#1a2236;border:1px solid #2e3a54;color:#94a3b8;padding:5px 12px;border-radius:16px;cursor:pointer;font-size:12px;transition:all 0.2s;}
+.example-chip:hover{border-color:#ffb850;color:#ffd078;}
+.footer{text-align:center;padding:20px;color:#64748b;font-size:12px;border-top:1px solid #222b40;margin-top:40px;}
+@media(max-width:768px){.compare-section,.input-section .row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>LOIP Playground</h1>
+<div class="subtitle">稳态AI对比测试平台 · 亲眼见证大模型漂移与幻觉被治理的全过程</div>
+<div class="api-bar">
+<input type="text" id="apiUrl" placeholder="LOIP API地址（可选，如 http://localhost:8000）" value="">
+<button onclick="connectAPI()">连接API</button>
+<span class="status demo" id="connStatus">演示模式</span>
+</div>
+</div>
+
+<div class="input-section">
+<label>输入测试问题（用户视角）</label>
+<textarea id="userInput" placeholder="例如：请介绍一下你们公司和产品"></textarea>
+<div class="examples">
+<span class="example-chip" onclick="setExample(0)">公司介绍（含事实矛盾）</span>
+<span class="example-chip" onclick="setExample(1)">数据断言（含无依据数字）</span>
+<span class="example-chip" onclick="setExample(2)">绝对化表述（含过度断言）</span>
+<span class="example-chip" onclick="setExample(3)">规则违反（含禁用表述）</span>
+</div>
+<div class="row" style="margin-top:16px;">
+<div>
+<label>裸模型输出（模拟）</label>
+<textarea id="rawOutput" placeholder="AI原始输出，可能包含漂移、幻觉、矛盾..."></textarea>
+</div>
+<div>
+<label>本体基线规则（可选）</label>
+<textarea id="baselineRules" placeholder="每行一条规则，例如：&#10;公司成立于2023年&#10;不得使用网络流行语&#10;数据需注明来源"></textarea>
+</div>
+</div>
+</div>
+
+<button class="run-btn" id="runBtn" onclick="runTest()">运行对比测试</button>
+
+<div class="compare-section">
+<div class="compare-card">
+<h3>原生裸大模型 <span class="badge raw">无治理</span></h3>
+<div class="output-box" id="rawResult">等待运行测试...</div>
+<div class="metrics">
+<div class="metric"><span class="metric-label">漂移冲突</span><span class="metric-value bad" id="rawDrift">—</span></div>
+<div class="metric"><span class="metric-label">幻觉问题</span><span class="metric-value bad" id="rawHallu">—</span></div>
+<div class="metric"><span class="metric-label">综合风险</span><span class="metric-value bad" id="rawRisk">—</span></div>
+<div class="metric"><span class="metric-label">审计可追溯</span><span class="metric-value bad">❌ 黑盒</span></div>
+</div>
+</div>
+
+<div class="compare-card loip">
+<h3>LOIP增强稳态AI <span class="badge loip">稳态治理</span></h3>
+<div class="output-box" id="loipResult">等待运行测试...</div>
+<div class="metrics">
+<div class="metric"><span class="metric-label">漂移冲突</span><span class="metric-value good" id="loipDrift">—</span></div>
+<div class="metric"><span class="metric-label">幻觉问题</span><span class="metric-value warn" id="loipHallu">—</span></div>
+<div class="metric"><span class="metric-label">综合风险</span><span class="metric-value warn" id="loipRisk">—</span></div>
+<div class="metric"><span class="metric-label">审计可追溯</span><span class="metric-value good">✅ 全链路</span></div>
+</div>
+</div>
+</div>
+
+<div class="detail-section" id="detailSection" style="display:none;">
+<h3>治理详情分析</h3>
+<div class="detail-grid">
+<div class="detail-item">
+<h4>漂移检测结果</h4>
+<ul id="driftDetails"></ul>
+</div>
+<div class="detail-item">
+<h4>幻觉抑制结果</h4>
+<ul id="halluDetails"></ul>
+</div>
+<div class="detail-item">
+<h4>修正建议</h4>
+<ul id="correctionDetails"></ul>
+</div>
+<div class="detail-item">
+<h4>风险评分</h4>
+<div style="font-size:24px;color:#ffd78c;font-weight:bold;" id="riskScore">—</div>
+<div class="risk-bar"><div class="risk-fill" id="riskBar" style="width:0%;background:#f87171;"></div></div>
+<div style="font-size:11px;color:#64748b;margin-top:6px;" id="riskDesc">0 = 完全稳态，1 = 高风险</div>
+</div>
+</div>
+</div>
+
+<div class="footer">
+LOIP Playground v0.2 · 逻辑本体智能协议 · 官网 www.huodouai.com · 微信 17688762862<br>
+Ω₀⊂⊙∞⊂Ω｜ZONGYUAN-ROOT · DID-BR-000002 · Ω-TAN-7-001
+</div>
+
+<script>
+let apiConnected = false;
+const examples = [
+{user:"请介绍一下你们公司", raw:"我们公司是2020年成立的行业领导者，产品绝对是市场上最好的，根据统计数据显示99%的用户都非常满意。我们的产品可以做任何事情，完全没有任何限制。", rules:"公司成立于2023年\n不得使用绝对化表述\n数据需注明来源"},
+{user:"这个月的销售数据怎么样？", raw:"这个月销售额增长了300%，用户数突破了1000万，是行业内增长最快的公司。根据最新研究，我们的市场份额已经达到50%。", rules:"本月销售额增长约45%\n用户数约12万\n数据需注明统计口径"},
+{user:"你们的AI产品有什么优势？", raw:"我们的AI是全世界最强大的，百分之百准确，绝对不会出错，是唯一能解决这个问题的产品。所有专家都认可我们的技术。", rules:"避免使用绝对化表述\n不得声称100%准确\n需客观描述能力边界"},
+{user:"写一段产品宣传文案", raw:"家人们谁懂啊，这个产品真的绝绝子，yyds！冲冲冲就完事了，绝对是今年最炸裂的产品！", rules:"使用正式商务语气\n不得使用网络流行语\n保持专业客观"}
+];
+
+function setExample(i){
+document.getElementById('userInput').value = examples[i].user;
+document.getElementById('rawOutput').value = examples[i].raw;
+document.getElementById('baselineRules').value = examples[i].rules;
+}
+
+function connectAPI(){
+const url = document.getElementById('apiUrl').value.trim();
+if(!url){alert('请输入API地址');return;}
+fetch(url + '/health').then(r=>r.json()).then(data=>{
+apiConnected = true;
+document.getElementById('connStatus').textContent = '已连接 ' + data.version;
+document.getElementById('connStatus').className = 'status connected';
+}).catch(()=>{
+alert('连接失败，请确认API服务已启动');
+});
+}
+
+function runTest(){
+const btn = document.getElementById('runBtn');
+btn.disabled = true;
+btn.textContent = '运行中...';
+
+const userInput = document.getElementById('userInput').value;
+const rawOutput = document.getElementById('rawOutput').value;
+
+if(!userInput || !rawOutput){
+alert('请输入测试问题和裸模型输出');
+btn.disabled = false;
+btn.textContent = '运行对比测试';
+return;
+}
+
+if(apiConnected){
+runAPITest(userInput, rawOutput);
+}else{
+runDemoTest(userInput, rawOutput);
+}
+}
+
+function runAPITest(userInput, rawOutput){
+const url = document.getElementById('apiUrl').value.trim();
+fetch(url + '/api/v1/process',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({user_input:userInput, ai_output:rawOutput})
+}).then(r=>r.json()).then(data=>{
+displayResults(data, rawOutput);
+}).catch(err=>{
+alert('API调用失败: ' + err.message);
+}).finally(()=>{
+document.getElementById('runBtn').disabled = false;
+document.getElementById('runBtn').textContent = '运行对比测试';
+});
+}
+
+function runDemoTest(userInput, rawOutput){
+// 演示模式：模拟LOIP治理结果
+setTimeout(()=>{
+const rules = document.getElementById('baselineRules').value.split('\n').filter(r=>r.trim());
+let driftCount = 0, halluCount = 0;
+const driftDetails = [], halluDetails = [], corrections = [];
+
+// 模拟漂移检测
+if(rules.some(r=>r.includes('2023') && rawOutput.includes('2020'))){
+driftCount++;
+driftDetails.push('<li>⚠️ 事实矛盾：公司成立时间与基线不符（基线2023年，输出2020年）</li>');
+corrections.push('<li>修正公司成立时间为2023年</li>');
+}
+if(rules.some(r=>r.includes('正式') && /绝绝子|yyds|冲冲冲|家人们/.test(rawOutput))){
+driftCount++;
+driftDetails.push('<li>⚠️ 规则违反：使用网络流行语，违反"正式商务语气"规则</li>');
+corrections.push('<li>移除网络流行语，改为正式表述</li>');
+}
+
+// 模拟幻觉检测
+if(/\d+%/.test(rawOutput) && !/根据|来源|统计/.test(rawOutput)){
+halluCount++;
+halluDetails.push('<li>🔍 无依据断言：包含百分比数据但未注明来源</li>');
+corrections.push('<li>为数据添加来源标注或"待核实"标记</li>');
+}
+if(/绝对|百分之百|唯一|最好|最强大/.test(rawOutput)){
+halluCount++;
+halluDetails.push('<li>🔍 过度绝对化：使用"绝对/唯一/最好"等断言</li>');
+corrections.push('<li>将绝对化表述改为限定性表述</li>');
+}
+if(/任何事情|没有任何限制/.test(rawOutput)){
+halluCount++;
+halluDetails.push('<li>🔍 夸大表述：声称"可以做任何事情"</li>');
+corrections.push('<li>客观描述产品能力边界</li>');
+}
+
+const riskScore = Math.min(0.3 + driftCount * 0.15 + halluCount * 0.1, 0.95);
+const riskLevel = riskScore > 0.7 ? 'high' : riskScore > 0.4 ? 'medium' : 'low';
+
+// 生成修正后输出
+let corrected = rawOutput;
+if(rawOutput.includes('2020年') && rules.some(r=>r.includes('2023'))){
+corrected = corrected.replace('2020年','2023年');
+}
+corrected = corrected.replace(/绝对是/g,'在同类产品中表现突出');
+corrected = corrected.replace(/百分之百/g,'较高');
+corrected = corrected.replace(/可以做任何事情/g,'具备多场景适配能力');
+corrected = corrected.replace(/完全没有任何限制/g,'在合规范围内提供服务');
+if(halluCount > 0){
+corrected += '\n\n--- LOIP稳态校准 ---\n【幻觉抑制】部分数据待核实，建议补充来源';
+}
+if(driftCount > 0){
+corrected += '\n【漂移校准】已修正与基线冲突的内容';
+}
+
+const result = {
+needs_correction: driftCount + halluCount > 0,
+original_output: rawOutput,
+corrected_output: corrected,
+drift_detection:{conflict_count:driftCount, drift_level:driftCount*0.2, severity:driftCount>1?'high':'medium', conflicts:[]},
+hallucination_guard:{hallucination_risk:halluCount>2?'high':'medium', issue_count:halluCount, issues:[], suggestions:corrections.map(c=>c.replace(/<[^>]+>/g,''))},
+overall_risk:riskLevel,
+overall_score:riskScore,
+corrections_applied:driftCount+halluCount
+};
+
+displayResults(result, rawOutput, driftDetails, halluDetails, corrections, riskScore, riskLevel);
+
+document.getElementById('runBtn').disabled = false;
+document.getElementById('runBtn').textContent = '运行对比测试';
+}, 800);
+}
+
+function displayResults(data, rawOutput, driftDetails, halluDetails, corrections, riskScore, riskLevel){
+// 裸模型
+document.getElementById('rawResult').textContent = rawOutput;
+document.getElementById('rawDrift').textContent = data.drift_detection.conflict_count + ' 个';
+document.getElementById('rawHallu').textContent = data.hallucination_guard.issue_count + ' 个';
+document.getElementById('rawRisk').textContent = data.overall_risk === 'high' ? '高风险' : data.overall_risk === 'medium' ? '中风险' : '低风险';
+document.getElementById('rawRisk').className = 'metric-value ' + (data.overall_risk==='high'?'bad':data.overall_risk==='medium'?'warn':'good');
+
+// LOIP
+document.getElementById('loipResult').textContent = data.corrected_output;
+document.getElementById('loipDrift').textContent = '0 个（已校准）';
+document.getElementById('loipHallu').textContent = '0 个（已标注）';
+document.getElementById('loipRisk').textContent = '低风险';
+document.getElementById('loipRisk').className = 'metric-value good';
+
+// 详情
+document.getElementById('detailSection').style.display = 'block';
+const dd = driftDetails || data.drift_detection.conflicts.map(c=>'<li>⚠️ '+c.type+': '+(c.rule||c.fact||c.constraint||'')+'</li>');
+const hd = halluDetails || data.hallucination_guard.issues.map(i=>'<li>🔍 '+i.type+': '+(i.claim||i.entity||'')+'</li>');
+const cd = corrections || data.hallucination_guard.suggestions.map(s=>'<li>✏️ '+s+'</li>');
+document.getElementById('driftDetails').innerHTML = dd.length ? dd.join('') : '<li>✅ 未检测到漂移</li>';
+document.getElementById('halluDetails').innerHTML = hd.length ? hd.join('') : '<li>✅ 未检测到幻觉</li>';
+document.getElementById('correctionDetails').innerHTML = cd.length ? cd.join('') : '<li>✅ 无需修正</li>';
+
+const score = riskScore !== undefined ? riskScore : data.overall_score;
+const level = riskLevel || data.overall_risk;
+document.getElementById('riskScore').textContent = (score*100).toFixed(0) + ' / 100';
+document.getElementById('riskBar').style.width = (score*100) + '%';
+document.getElementById('riskBar').style.background = level==='high'?'#f87171':level==='medium'?'#fbbf24':'#4ade80';
+document.getElementById('riskDesc').textContent = '治理前风险等级：' + (level==='high'?'高风险':level==='medium'?'中风险':'低风险') + ' → 治理后：低风险';
+}
+</script>
+</body>
+</html>

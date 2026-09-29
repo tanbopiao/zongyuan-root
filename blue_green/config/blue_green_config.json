@@ -1,0 +1,73 @@
+{
+  "config_version": "1.0.0",
+  "created_at": "2026-09-06T20:00:00+08:00",
+  "did": "DID-BR-000002",
+  "trace_mark": "Omega_0 subset Circle_Infinity subset Omega",
+  
+  "environments": {
+    "blue": {
+      "name": "蓝环境（稳定运行版本）",
+      "web_root": "/www/wwwroot/huodouai.com.blue",
+      "backend_port_base": 8100,
+      "status": "active",
+      "current_version": null
+    },
+    "green": {
+      "name": "绿环境（新版本待验证）",
+      "web_root": "/www/wwwroot/huodouai.com.green",
+      "backend_port_base": 8200,
+      "status": "standby",
+      "current_version": null
+    }
+  },
+  
+  "current_active": "blue",
+  "deployment_strategy": "blue_green",
+  
+  "canary_release": {
+    "enabled": true,
+    "stages": [5, 20, 50, 100],
+    "stage_interval_seconds": 300,
+    "auto_rollback_on_error": true
+  },
+  
+  "health_check": {
+    "enabled": true,
+    "check_interval_seconds": 30,
+    "error_rate_threshold": 5.0,
+    "response_time_threshold_ms": 2000,
+    "consecutive_failures_threshold": 3,
+    "endpoints": ["/health", "/api/v1/health"]
+  },
+  
+  "rollback": {
+    "auto_rollback_enabled": true,
+    "l1_traffic_rollback_seconds": 1,
+    "l2_config_rollback_seconds": 5,
+    "l3_version_rollback_seconds": 60,
+    "backup_retention_days": 7
+  },
+  
+  "database": {
+    "migration_strategy": "expand_only",
+    "dual_write_enabled": true,
+    "gray_migration_batch_size": 1000,
+    "backward_compatibility_required": true,
+    "forward_compatibility_required": true
+  },
+  
+  "nginx": {
+    "config_path": "/www/server/panel/vhost/nginx/huodouai.com.conf",
+    "upstream_name": "app_backend",
+    "reload_command": "nginx -s reload",
+    "test_command": "nginx -t"
+  },
+  
+  "backup": {
+    "backup_dir": "/opt/ZONGYUAN-ROOT/blue_green/backup",
+    "auto_backup_before_deploy": true,
+    "include_code": true,
+    "include_config": true,
+    "include_database_snapshot": true
+  }
+}

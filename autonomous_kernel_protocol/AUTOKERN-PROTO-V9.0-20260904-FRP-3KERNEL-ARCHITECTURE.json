@@ -1,0 +1,91 @@
+{
+  "protocol_version": "AUTOKERN-PROTO-V9.0-20260904-FRP-3KERNEL-ARCHITECTURE",
+  "did": "DID-BR-000002",
+  "sovereign_root": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-09-03T23:55:40.078797",
+  "parent_version": "AUTOKERN-PROTO-V8.9-DUAL-DOMAIN-P0-UPGRADE",
+  "efuse_state": "blown_permanent",
+  "efuse_id": "EFUSE-V9.0-FRP-3KERNEL-001",
+  "milestone": "三内核架构确立: 云内核+本地内核+frp穿透层",
+  "frp_deployment": {
+    "cloud_frps": {
+      "path": "/opt/frp/",
+      "port": 7100,
+      "version": "0.58.1",
+      "service": "frps.service enabled",
+      "resource_limit": "MemoryMax=50M CPUQuota=20%"
+    },
+    "local_frpc": {
+      "os": "Windows",
+      "path": "C:\\Users\\4906\\.zongyuan_root\\frp\\",
+      "version": "0.58.1",
+      "autostart": "Startup脚本",
+      "manage_script": "frpc-manage.bat"
+    },
+    "port_mappings": [
+      {
+        "service": "AIOS v2.1-MULTI-MODEL-GATEWAY",
+        "local_port": 8017,
+        "remote_port": 8017,
+        "external_url": "http://123.207.202.158:8017",
+        "health": "/api/health → HEALTHY"
+      },
+      {
+        "service": "ZONGYUAN-ROOT本地内核管理面板",
+        "local_port": 8899,
+        "remote_port": 8899,
+        "external_url": "http://123.207.202.158:8899",
+        "size": "19543字节"
+      }
+    ],
+    "authentication": {
+      "token": "ZONGYUAN-FRP-20260903-SECRET-KEY-7f3a9b2c",
+      "dashboard": "127.0.0.1:7600仅本地"
+    },
+    "zero_intrusion": {
+      "existing_services": "8个ZONGYUAN服务未受影响",
+      "nginx": "未修改",
+      "env": "未修改",
+      "rollback": "systemctl stop frps && rm -rf /opt/frp/"
+    },
+    "security_status": "HTTP无认证",
+    "security_recommendations": [
+      "Nginx反代+HTTPS域名访问",
+      "Basic Auth认证",
+      "IP白名单",
+      "更多端口映射9000-9010"
+    ]
+  },
+  "three_kernel_architecture": {
+    "cloud_kernel": {
+      "path": "/opt/ZONGYUAN-ROOT/",
+      "services": 7,
+      "truths": 139,
+      "protocols": 73,
+      "domain": "www.huodouai.com"
+    },
+    "local_kernel": {
+      "os": "Windows",
+      "aios_version": "v2.1-MULTI-MODEL-GATEWAY",
+      "dashboard_port": 8899,
+      "aios_port": 8017
+    },
+    "frp_layer": {
+      "role": "内网穿透",
+      "cloud_frps_port": 7100,
+      "mapped_ports": [
+        8017,
+        8899
+      ]
+    }
+  },
+  "truth_base": "V8.6-UNIFIED-TRUTH-BASE (139条真值)",
+  "four_layer_check": {
+    "L1": "PASS",
+    "L2": "PASS",
+    "L3": "PASS",
+    "L4": "PASS"
+  },
+  "self_sha256": "e5482e42ead794c56201169f0c1ab172e8eccf01acbc7d480616525425db5187"
+}

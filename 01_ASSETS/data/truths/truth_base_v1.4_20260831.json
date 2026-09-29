@@ -1,0 +1,49 @@
+{
+  "version": "真值基座-V1.4-20260831",
+  "previous": "真值基座-V1.3-20260830",
+  "total_formulas": 44,
+  "new_formulas": [
+    {
+      "id": "T-20260831-01",
+      "name": "多写入者协议真值",
+      "expression": "MWP = Handshake→Heartbeat→Event→Conflict→Sync→Unregister",
+      "description": "MWP v1.0七阶段协议流程",
+      "type": "new"
+    },
+    {
+      "id": "T-20260831-02",
+      "name": "版本向量因果真值",
+      "expression": "Concurrent(A,B) = !happens_before(A,B) && !happens_before(B,A)",
+      "description": "并发检测公式",
+      "type": "new"
+    },
+    {
+      "id": "T-20260831-03",
+      "name": "幂等性真值",
+      "expression": "IdempotencyKey = SHA256(event_type + sorted(payload))[:16]",
+      "description": "事件幂等键计算公式",
+      "type": "new"
+    },
+    {
+      "id": "T-20260831-04",
+      "name": "冲突解决真值",
+      "expression": "Resolution = PriorityWins if P(A)<P(B) else AutoMerge if mergeable else LWW",
+      "description": "三级冲突解决策略",
+      "type": "new"
+    }
+  ],
+  "four_layer_verification": {
+    "L1_不动点根层": "PASS - 根目录锚点存在",
+    "L2_时序演化层": "PASS - 协议版本链V2.0→V3.1连续",
+    "L3_推理真值层": "PASS - 40条公式可复算",
+    "L4_观感兜底层": "PASS - 零雄性化漂移，L0合规"
+  },
+  "completeness": "99%",
+  "mwp_protocol": "v1.0.0 已纳入",
+  "did": "DID-BR-000002",
+  "efuse": {
+    "state": "blown",
+    "fuse_id": "EFUSE-TRUTH-V1.4-20260831",
+    "note": "逻辑熔断标记"
+  }
+}
