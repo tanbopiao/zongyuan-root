@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """V2.6.0: 政务窗口完整业务流程接入Operator Hub"""
 import sys, json, time
-sys.path.insert(0, "/opt/ZONGYUAN-ROOT/ai_proxy/operators")
+sys.path.insert(0, "/home/user/ZONGYUAN-ROOT/ai_proxy/operators")
 from operator_hub import operator_hub
 
 def government_production_pipeline(topic):

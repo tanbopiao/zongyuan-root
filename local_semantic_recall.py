@@ -8,7 +8,7 @@ from pathlib import Path
 from collections import Counter
 from datetime import datetime
 
-ROOT = Path("/opt/ZONGYUAN-ROOT")
+ROOT = Path("/home/user/ZONGYUAN-ROOT")
 TRUTH_INDEX = ROOT / "Ω-Brainμ" / "truth_index.json"
 
 class LocalSemanticRecall:

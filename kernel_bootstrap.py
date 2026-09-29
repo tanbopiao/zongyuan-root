@@ -7,7 +7,7 @@ import json, os, sys, time, hashlib, requests
 from pathlib import Path
 from datetime import datetime
 
-ROOT = Path("/opt/ZONGYUAN-ROOT")
+ROOT = Path("/home/user/ZONGYUAN-ROOT")
 ACTIVATION_LOG = ROOT / "kernel_activation_log.json"
 
 def log(msg):

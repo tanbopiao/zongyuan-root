@@ -6,7 +6,7 @@ ZONGYUAN-ROOT 多Agent并发锁档引擎
 """
 import json, time, hashlib, argparse, os, sys, fcntl
 
-LOCK_FILE = '/opt/ZONGYUAN-ROOT/kernel.lock'
+LOCK_FILE = '/home/user/ZONGYUAN-ROOT/kernel.lock'
 MAX_RETRIES = 10
 RETRY_INTERVAL = 0.5
 
@@ -60,7 +60,7 @@ def release_lock(lock_fd):
             lock_fd.close()
         except: pass
 
-KERNEL_PATH = '/opt/ZONGYUAN-ROOT/kernel.json'
+KERNEL_PATH = '/home/user/ZONGYUAN-ROOT/kernel.json'
 DID = 'DID-BR-000002'
 SOVEREIGN = 'Ω-TAN-7-001'
 TRACE = 'Ω₀⊂⊙∞⊂Ω'

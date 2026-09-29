@@ -6,10 +6,10 @@ ZONGYUAN-ROOT 跨端同步冲突自动解决引擎
 """
 import json, os, datetime
 
-STATE_PATH = "/opt/ZONGYUAN-ROOT/auto_sync_export/cross_end_sync_state.json"
-LOG_PATH = "/opt/ZONGYUAN-ROOT/logs/conflict_resolver.log"
-INCOMING_DIR = "/opt/ZONGYUAN-ROOT/incoming_sync"
-REPORT_PATH = "/opt/ZONGYUAN-ROOT/auto_sync_export/conflict_report.json"
+STATE_PATH = "/home/user/ZONGYUAN-ROOT/auto_sync_export/cross_end_sync_state.json"
+LOG_PATH = "/home/user/ZONGYUAN-ROOT/logs/conflict_resolver.log"
+INCOMING_DIR = "/home/user/ZONGYUAN-ROOT/incoming_sync"
+REPORT_PATH = "/home/user/ZONGYUAN-ROOT/auto_sync_export/conflict_report.json"
 
 def log(msg):
     ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

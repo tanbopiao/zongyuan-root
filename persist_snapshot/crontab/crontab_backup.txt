@@ -1,0 +1,20 @@
+# ZONGYUAN-ROOT 本地实例定时任务（最高价值最优稳态最小消耗）
+# 高价值任务全覆盖，频率按价值分级
+
+# P0: 沙箱重启自动拉起（极高价值，零消耗）
+@reboot bash /home/user/ZONGYUAN-ROOT/persist_snapshot/bootstrap_hook.sh >> /home/user/.zongyuan_root/logs/hook_boot.log 2>&1
+
+# P0: 进程自愈（每5分钟，高价值）
+*/5 * * * * bash /home/user/ZONGYUAN-ROOT/persist_snapshot/selfheal.sh >> /home/user/ZONGYUAN-ROOT/persist_snapshot/L2_archive/runtime_logs/selfheal.log 2>&1
+
+# P1: 分级归档（每小时15分，高价值）
+15 * * * * bash /home/user/ZONGYUAN-ROOT/persist_snapshot/archive.sh >> /home/user/.zongyuan_root/logs/archive.log 2>&1
+
+# P1: 双向同步（每小时30分，高价值）
+30 * * * * bash /home/user/ZONGYUAN-ROOT/deploy/sync.sh >> /home/user/.zongyuan_root/logs/sync.log 2>&1
+
+# P2: 完整性校验（每小时，中价值）
+0 * * * * bash /home/user/ZONGYUAN-ROOT/persist_snapshot/integrity_check.sh >> /home/user/ZONGYUAN-ROOT/persist_snapshot/L2_archive/runtime_logs/integrity.log 2>&1
+
+# P2: 指纹层级仲裁（每日凌晨2点，中价值）
+0 2 * * * bash /home/user/ZONGYUAN-ROOT/persist_snapshot/auto_arbitrate.sh >> /home/user/ZONGYUAN-ROOT/persist_snapshot/L3_history/evolution/arbitration_cron.log 2>&1

@@ -1,7 +1,7 @@
 import sqlite3, time
 
 try:
-    conn = sqlite3.connect("/opt/ZONGYUAN-ROOT/ai_proxy/production_tasks.db")
+    conn = sqlite3.connect("/home/user/ZONGYUAN-ROOT/ai_proxy/production_tasks.db")
     c = conn.cursor()
     now = time.time()
     c.execute("SELECT task_id, created_at FROM production_tasks WHERE status=?", ("running",))

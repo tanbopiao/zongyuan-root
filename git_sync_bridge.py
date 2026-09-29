@@ -8,7 +8,7 @@ ZONGYUAN-ROOT Git桥接同步脚本
 import os, sys, json, hashlib, time, subprocess, shutil
 
 GIT_BRIDGE = "/opt/zongyuan-git-bridge"
-CLOUD_KERNEL = "/opt/ZONGYUAN-ROOT/kernel.json"
+CLOUD_KERNEL = "/home/user/ZONGYUAN-ROOT/kernel.json"
 GITEE_REMOTE = "https://huodou-cloud-intelligence-aios:9407c9b3bb5a9e371d70ee24fe6d08dc@gitee.com/huodou-cloud-intelligence-aios/zongyuan-root-kernel.git"
 GITHUB_REMOTE = "https://tanbopiao:github_pat_11BLAHBLAH@github.com/tanbopiao/zongyuan-root-kernel.git"
 

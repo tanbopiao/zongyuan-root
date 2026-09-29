@@ -7,7 +7,7 @@ import json, os, time, subprocess, logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-ROOT = Path("/opt/ZONGYUAN-ROOT")
+ROOT = Path("/home/user/ZONGYUAN-ROOT")
 LOG_DIR = ROOT / "logs"
 ALERT_FILE = LOG_DIR / "alerts.jsonl"
 CST = timezone(timedelta(hours=8))
@@ -81,7 +81,7 @@ def run_check():
         p0 = [a for a in all_alerts if a["level"]=="P0"]
         if p0:
             logger.info("检测到P0告警，触发ANCE自愈")
-            subprocess.run(["python3","/opt/ZONGYUAN-ROOT/ance_self_heal.py"], capture_output=True, timeout=30)
+            subprocess.run(["python3","/home/user/ZONGYUAN-ROOT/ance_self_heal.py"], capture_output=True, timeout=30)
     else:
         logger.info("全系统健康，无告警")
     return all_alerts
