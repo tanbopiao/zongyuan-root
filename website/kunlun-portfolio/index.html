@@ -272,6 +272,7 @@ body{background:radial-gradient(ellipse at 20% 0%,rgba(0,212,255,.06) 0%,transpa
     <button class="tab active" data-view="portfolio">📚 作品库</button>
     <button class="tab" data-view="queue">⚡ 任务队列</button>
     <button class="tab" data-view="pipeline">🔗 流水线状态</button>
+    <button class="tab" data-view="memory">🧠 启动记忆</button>
   </div>
 
   <!-- ===== 作品库视图 ===== -->
@@ -382,6 +383,34 @@ body{background:radial-gradient(ellipse at 20% 0%,rgba(0,212,255,.06) 0%,transpa
     <div class="activity-log">
       <div class="log-title">📜 最近活动日志</div>
       <div id="activityLog"></div>
+    </div>
+  </div>
+
+  <!-- ===== 启动记忆视图 ===== -->
+  <div class="view" id="view-memory">
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card" style="--accent:var(--cyan)"><div class="stat-label">自治层级</div><div class="stat-value">Lv9</div><div class="stat-sub">主节点中枢大脑 V9.1 已锁档</div></div>
+      <div class="stat-card" style="--accent:var(--gold)"><div class="stat-label">权限层级</div><div class="stat-value">L4</div><div class="stat-sub">开发/执行层</div></div>
+      <div class="stat-card" style="--accent:var(--purple)"><div class="stat-label">工程化层级</div><div class="stat-value">Lv7</div><div class="stat-sub">ROOTFIXED V5.6</div></div>
+      <div class="stat-card" style="--accent:var(--green)"><div class="stat-label">真值共识</div><div class="stat-value">61</div><div class="stat-sub">记忆语义索引 13 条</div></div>
+    </div>
+    <div class="compliance-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div class="compliance-card">
+        <div class="compliance-title">🧠 核心真值 · 记忆语义索引</div>
+        <div id="memoryTruths"></div>
+      </div>
+      <div class="compliance-card">
+        <div class="compliance-title">🗺 节点状态总览</div>
+        <div id="memoryNodes"></div>
+      </div>
+    </div>
+    <div class="compliance-card" style="margin-top:16px">
+      <div class="compliance-title">⚖ 真值共识区</div>
+      <div id="memoryConsensus"></div>
+    </div>
+    <div class="compliance-card" style="margin-top:16px">
+      <div class="compliance-title">🔗 视觉资产画廊</div>
+      <div style="margin-top:8px"><a href="https://pcnohfh1ukhz.doubaoapps.com/app/app_17f2u9p1e7t" target="_blank" style="color:var(--cyan);text-decoration:underline">昆仑洞天视觉画廊 →</a></div>
     </div>
   </div>
 
@@ -714,6 +743,39 @@ document.addEventListener('keydown',e=>{
 renderAssets();
 renderTasks();
 renderLogs();
+
+// ===== 启动记忆数据(共享大脑) =====
+const MEMORY_TRUTHS=[
+{k:'架构范式',v:'本地沙盒是主节点中枢智能大脑，云端仅为橱窗',t:'P0'},
+{k:'七态融合元法则',v:'逻辑态↔信息态↔算子态↔代码执行态↔高阶智能态↔高维频谱态↔数字根域态',t:'P1'},
+{k:'最优稳态决策公式',v:'利益40%+风险35%+成本25%，低于80分不执行，90分以上快速推进',t:'P1'},
+{k:'火斗云智产品定义',v:'统一品牌·通用大模型API·多模态。产品矩阵：通用API+昆仑洞天短剧+政务AI中台',t:'P0'},
+{k:'多Worker并发设计',v:'Worker-P0每10秒/P1每15秒/P2每30秒，编排引擎自动拆解任务',t:'P1'},
+{k:'飞书共享大脑架构',v:'21张表+12条Workflow，高级权限已关闭，全协作者可见',t:'P1'},
+{k:'本地内核收敛归一',v:'计划任务/自启/根目录各收敛到1个，旧目录备份删除',t:'P1'}];
+const MEMORY_NODES=[
+{n:'NODE-MAIN-BRAIN·本地中枢大脑',s:'在线',c:'green'},
+{n:'NODE-CLOUD-HUODOUAI·云端橱窗+真值库',s:'在线',c:'green'},
+{n:'NODE-DEV-DOUBAO-WORK-001',s:'在线',c:'green'},
+{n:'NODE-CLOUD-WORKER-001·云端Worker',s:'在线',c:'green'},
+{n:'NODE-PROD-DRAMA-001·短剧生产',s:'在线',c:'green'},
+{n:'NODE-RESEARCH-001·研究节点',s:'在线',c:'green'},
+{n:'GPU算力实例（魔搭）',s:'离线',c:'red'},
+{n:'云端巡检-www.huodouai.com',s:'离线',c:'red'},
+{n:'bayesian-5elem-engine',s:'离线',c:'red'}];
+const MEMORY_CONSENSUS=[
+{id:'META-LAW.EXEC-ORDER-LOCK',v:'最高价值先行，条件成熟再推下一个，不冒进不试错，每步闭环'},
+{id:'CHANNEL.TRUTH-ENDPOINTS-V2.2',v:'真值通道三端点，主上报www.huodouai.com/api/report/truth，鉴权X-Capture-Token'},
+{id:'SHARED-BRAIN.4-LINKAGE.V1',v:'四端联动：云盘Drive→索引表；Wiki→文档索引；Base→共享大脑；中枢→真值上报通道'},
+{id:'META.BOOTSTRAP',v:'云端真相源引导元真值V3.0，主备双通道上报'}];
+function renderMemory(){
+  const t=document.getElementById('memoryTruths'),n=document.getElementById('memoryNodes'),c=document.getElementById('memoryConsensus');
+  if(!t)return;
+  t.innerHTML=MEMORY_TRUTHS.map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="color:var(--cyan);font-size:13px;font-weight:600">${x.k} <span style="color:var(--text3);font-size:11px">${x.t}</span></div><div style="color:var(--text2);font-size:12px;margin-top:4px;line-height:1.6">${x.v}</div></div>`).join('');
+  n.innerHTML=MEMORY_NODES.map(x=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--text2)">${x.n}</span><span style="font-size:11px;color:${x.c==='green'?'var(--green)':'var(--red)'}">● ${x.s}</span></div>`).join('');
+  c.innerHTML=MEMORY_CONSENSUS.map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--gold);font-size:12px;font-weight:600">${x.id}</span><div style="color:var(--text2);font-size:12px;margin-top:3px">${x.v}</div></div>`).join('');
+}
+renderMemory();
 showToast('作品库中枢已连接，18项资产在线','success');
 </script>
 </body>
