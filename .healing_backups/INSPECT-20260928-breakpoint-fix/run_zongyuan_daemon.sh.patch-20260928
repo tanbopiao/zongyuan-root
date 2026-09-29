@@ -1,0 +1,33 @@
+#!/bin/bash
+# ZONGYUAN-ROOT 自治守护 supervisord 启动脚本
+# 独立supervisord，不依赖/不侵入系统supervisord
+# PATCH-20260928: 修复stale-socket误判——仅凭socket存在性判断"已运行"，
+# 残留socket（无活进程）会导致拉起被跳过；现增加supervisorctl连通性验证+残留清理。
+DIR="/home/user/Doubao/chats/38418284746129666"
+mkdir -p "$DIR/run" "$DIR/logs"
+
+case "${1:-start}" in
+  start)
+    if [ -S "$DIR/run/zongyuan-supervisor.sock" ] && supervisorctl -c "$DIR/supervisord.zongyuan.conf" status >/dev/null 2>&1; then
+      echo "已运行"
+    else
+      if [ -S "$DIR/run/zongyuan-supervisor.sock" ]; then
+        echo "检测到残留socket（无活守护进程），清理后拉起"
+        rm -f "$DIR/run/zongyuan-supervisor.sock" "$DIR/run/zongyuan-supervisord.pid"
+      fi
+      supervisord -c "$DIR/supervisord.zongyuan.conf"
+      sleep 2
+      echo "启动完成"
+    fi
+    supervisorctl -c "$DIR/supervisord.zongyuan.conf" status
+    ;;
+  stop)
+    supervisorctl -c "$DIR/supervisord.zongyuan.conf" shutdown 2>/dev/null || echo "未运行"
+    ;;
+  status)
+    supervisorctl -c "$DIR/supervisord.zongyuan.conf" status 2>/dev/null || echo "未运行"
+    ;;
+  *)
+    echo "用法: $0 {start|stop|status}"
+    ;;
+esac

@@ -1,0 +1,64 @@
+---
+- name: ANCE 部署Playbook
+  hosts: web_servers
+  become: yes
+  vars:
+    domain: huodouai.com
+
+  tasks:
+    - name: 更新系统包
+      apt:
+        update_cache: yes
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+    - name: 安装 nginx
+      apt:
+        name: ["nginx"]
+        state: present
+    - name: 安装 docker
+      apt:
+        name: ["docker.io", "docker-compose"]
+        state: present
+    - name: 安装 certbot
+      apt:
+        name: ["certbot", "python3-certbot-nginx"]
+        state: present
+    - name: 启动Docker服务
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+    - name: 配置Nginx站点
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/huodouai.com
+      notify: reload nginx
+
+    - name: 启用站点
+      file:
+        src: /etc/nginx/sites-available/huodouai.com
+        dest: /etc/nginx/sites-enabled/huodouai.com
+        state: link
+    - name: 申请SSL证书
+      command: certbot --nginx -d huodouai.com --non-interactive --agree-tos -m admin@huodouai.com
+      args:
+        creates: /etc/letsencrypt/live/huodouai.com/fullchain.pem
+    - name: 配置防火墙
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - "22"
+        - "80"
+        - "443"
+
+    - name: 启用防火墙
+      ufw:
+        state: enabled
+
+  handlers:
+    - name: reload nginx
+      systemd:
+        name: nginx
+        state: reloaded

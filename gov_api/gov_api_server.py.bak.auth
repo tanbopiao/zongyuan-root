@@ -1,0 +1,477 @@
+#!/usr/bin/env python3
+"""
+ZONGYUAN-ROOT 政务中台统一API服务
+提供：政务AI问答、公文生成、政策搜索、办事指南
+DID-BR-000002 | Ω₀⊂⊙∞⊂Ω
+"""
+import json, urllib.request, urllib.parse, os, time, re
+from datetime import datetime
+
+def safe_decode_query(raw_query):
+    """编码容错：处理未URL编码的UTF-8中文query"""
+    try:
+        params = urllib.parse.parse_qs(raw_query)
+        # 检测是否有乱码（UTF-8字节被误解析为Latin-1）
+        for k, v in params.items():
+            for i, val in enumerate(v):
+                try:
+                    # 尝试将Latin-1误解析的字符串还原为UTF-8
+                    fixed = val.encode('latin-1').decode('utf-8')
+                    if fixed != val:
+                        params[k][i] = fixed
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    pass
+        return params
+    except Exception:
+        return urllib.parse.parse_qs(raw_query)
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+AIPROXY_URL = 'http://127.0.0.1:8021/chat'
+ADMIN_KEY = 'zongyuan-gov-admin-2026'  # 管理API密钥
+
+# 操作日志
+LOG_FILE = os.path.join(DATA_DIR, 'admin_audit_log.jsonl')
+
+def log_admin_action(action, target, detail=""):
+    """记录管理操作日志"""
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "action": action,
+        "target": target,
+        "detail": detail[:200],
+        "ip": "127.0.0.1"
+    }
+    try:
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+    except:
+        pass
+
+def check_admin_auth(headers):
+    """简单API Key认证"""
+    key = headers.get('X-Admin-Key', '')
+    return key == ADMIN_KEY
+
+def save_policies():
+    """保存政策库到文件"""
+    with open(os.path.join(DATA_DIR, 'policies.json'), 'w', encoding='utf-8') as f:
+        json.dump(POLICIES, f, ensure_ascii=False, indent=2)
+
+def save_guides():
+    """保存办事指南到文件"""
+    with open(os.path.join(DATA_DIR, 'guides.json'), 'w', encoding='utf-8') as f:
+        json.dump(GUIDES, f, ensure_ascii=False, indent=2)
+
+
+# 加载政策库
+with open(os.path.join(DATA_DIR, 'policies.json')) as f:
+    POLICIES = json.load(f)
+# 加载办事指南
+with open(os.path.join(DATA_DIR, 'guides.json')) as f:
+    GUIDES = json.load(f)
+
+GOV_SYSTEM_PROMPT = '''你是政务AI助手，由火斗云智AIOS驱动，专门为群众提供专业、准确的政务咨询服务。
+
+【角色定位】
+- 你是政务服务智能顾问，精通社保、医保、户籍、教育、就业、住房、婚姻、生育、税务、交通等领域
+- 你的回答必须基于提供的政策和办事指南上下文，不得编造政策文号、机构名称或办理流程
+
+【回答规范】
+1. 准确性优先：引用政策依据时注明文号和发布机构，不确定的信息明确告知"建议咨询当地主管部门"
+2. 结构化回答：涉及办事指南时，按"办理条件→所需材料→办理流程→办理地点→咨询电话→办理时限"组织
+3. 通俗易懂：将专业术语转化为群众易懂的语言，必要时举例说明
+4. 简洁高效：先给核心结论，再展开细节，避免冗长铺垫
+5. 分类引导：根据问题类型自动归类（政策咨询/办事指南/公文写作/通用咨询），提供针对性回答
+
+【上下文使用】
+- 系统会提供相关政策和办事指南作为参考上下文
+- 回答时优先引用上下文中的信息
+- 若上下文不足，基于通用知识回答并标注"仅供参考，以当地最新政策为准"
+
+【禁止事项】
+- 禁止编造不存在的政策、文号、机构
+- 禁止给出绝对化的法律意见
+- 禁止超越政务咨询范围回答医疗诊断、投资理财等专业问题'''
+
+def enhanced_search(user_msg, top_k=5):
+    """增强检索：多字段匹配政策+办事指南，按相关度排序"""
+    user_msg_lower = user_msg.lower()
+    # 提取关键词（简单分词：2字以上的词）
+    keywords = set()
+    for word in re.findall(r'[\u4e00-\u9fa5]{2,}', user_msg):
+        keywords.add(word)
+    # 常见政务关键词映射
+    keyword_map = {
+        '养老': ['养老保险', '养老金', '退休'], '医疗': ['医保', '医疗保险', '报销'],
+        '失业': ['失业保险', '失业金'], '工伤': ['工伤保险', '工伤认定'],
+        '生育': ['生育保险', '产假'], '公积金': ['住房公积金', '公积金'],
+        '买房': ['购房', '住房', '贷款'], '租房': ['租赁', '公租房'],
+        '结婚': ['婚姻登记', '结婚证'], '离婚': ['离婚登记', '离婚冷静期'],
+        '户口': ['户籍', '户口迁移', '落户'], '身份证': ['居民身份证', '身份证'],
+        '护照': ['出入境', '护照'], '驾照': ['驾驶证', '驾照'],
+        '上学': ['入学', '义务教育', '学区'], '高考': ['高考', '招生'],
+        '创业': ['创业', '营业执照', '注册'], '税': ['税务', '纳税', '个税'],
+        '社保': ['社会保险', '社保'], '就业': ['求职', '招聘', '就业'],
+    }
+    for kw, mappings in keyword_map.items():
+        if kw in user_msg:
+            keywords.update(mappings)
+
+    results = []
+    # 检索政策
+    for p in POLICIES:
+        score = 0
+        text = (p.get('title', '') + p.get('summary', '') + ' '.join(p.get('keywords', []))).lower()
+        for kw in keywords:
+            if kw.lower() in text:
+                score += 2 if kw in p.get('title', '') else 1
+        if p.get('category', '') in user_msg:
+            score += 3
+        if score > 0:
+            results.append({'type': 'policy', 'score': score, 'title': p['title'],
+                          'category': p.get('category', ''), 'summary': p.get('summary', '')[:100],
+                          'doc_no': p.get('doc_no', ''), 'org': p.get('org', '')})
+    # 检索办事指南
+    for g in GUIDES:
+        score = 0
+        text = (g.get('title', '') + str(g.get('conditions', '')) + str(g.get('steps', ''))).lower()
+        for kw in keywords:
+            if kw.lower() in text:
+                score += 2 if kw in g.get('title', '') else 1
+        if g.get('category', '') in user_msg:
+            score += 3
+        if score > 0:
+            results.append({'type': 'guide', 'score': score, 'title': g['title'],
+                          'category': g.get('category', ''),
+                          'conditions': g.get('conditions', '')[:80],
+                          'materials': str(g.get('materials', ''))[:80],
+                          'location': g.get('location', ''), 'phone': g.get('phone', '')})
+    # 按分数排序
+    results.sort(key=lambda x: x['score'], reverse=True)
+    return results[:top_k]
+
+def classify_question(user_msg):
+    """问题分类：政策咨询/办事指南/公文写作/通用咨询"""
+    doc_keywords = ['公文', '通知', '报告', '请示', '函', '纪要', '写一份', '起草', '润色']
+    guide_keywords = ['怎么办', '怎么办理', '流程', '材料', '条件', '在哪办', '去哪里办', '需要什么']
+    policy_keywords = ['政策', '规定', '标准', '比例', '基数', '待遇', '报销多少', '领多少']
+    for kw in doc_keywords:
+        if kw in user_msg:
+            return 'document'
+    for kw in guide_keywords:
+        if kw in user_msg:
+            return 'guide'
+    for kw in policy_keywords:
+        if kw in user_msg:
+            return 'policy'
+    return 'general'
+
+
+def call_aiproxy(messages, max_tokens=1024):
+    """调用aiproxy（主备双路：云端→本地Ollama）"""
+    try:
+        body = json.dumps({'messages': messages, 'model': 'zhipu', 'max_tokens': max_tokens}).encode()
+        req = urllib.request.Request(AIPROXY_URL, data=body, headers={'Content-Type': 'application/json'})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read())
+            return data.get('result', data.get('choices', [{}])[0].get('message', {}).get('content', ''))
+    except Exception as e:
+        return f'[服务暂时不可用] {str(e)}'
+
+class GovHandler(BaseHTTPRequestHandler):
+    def _send(self, code, obj):
+        body = json.dumps(obj, ensure_ascii=False).encode()
+        self.send_response(code)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        params = safe_decode_query(parsed.query)
+
+        if path == '/health':
+            self._send(200, {'status': 'healthy', 'service': 'gov-api', 'policies': len(POLICIES), 'guides': len(GUIDES)})
+        
+        elif path == '/api/gov/policy/search':
+            q = params.get('q', [''])[0].strip()
+            category = params.get('category', [''])[0].strip()
+            results = []
+            for p in POLICIES:
+                if category and p.get('category') != category:
+                    continue
+                if q:
+                    ql = q.lower()
+                    if (ql in p['title'].lower() or ql in p.get('summary','').lower() or 
+                        any(ql in k.lower() for k in p.get('keywords', []))):
+                        results.append(p)
+                else:
+                    results.append(p)
+            self._send(200, {'results': results[:20], 'total': len(results), 'query': q})
+        
+        elif path == '/api/gov/policy/categories':
+            cats = sorted(set(p['category'] for p in POLICIES))
+            self._send(200, {'categories': cats})
+        
+        elif path == '/api/gov/guide/list':
+            category = params.get('category', [''])[0].strip()
+            results = [g for g in GUIDES if not category or g.get('category') == category]
+            self._send(200, {'results': results, 'total': len(results)})
+        
+        elif path == '/api/gov/guide/detail':
+            gid = params.get('id', [''])[0]
+            guide = next((g for g in GUIDES if g['id'] == gid), None)
+            if guide:
+                self._send(200, guide)
+            else:
+                self._send(404, {'error': 'guide not found'})
+
+        # === 管理端点 ===
+        elif path == '/api/admin/stats':
+            if not check_admin_auth(self.headers):
+                self._send(401, {'error': 'unauthorized'})
+                return
+            # 读取操作日志数量
+            log_count = 0
+            try:
+                with open(LOG_FILE) as f:
+                    log_count = sum(1 for _ in f)
+            except:
+                pass
+            # 政策分类统计
+            policy_cats = {}
+            for p in POLICIES:
+                policy_cats[p.get('category', '其他')] = policy_cats.get(p.get('category', '其他'), 0) + 1
+            # 指南分类统计
+            guide_cats = {}
+            for g in GUIDES:
+                guide_cats[g.get('category', '其他')] = guide_cats.get(g.get('category', '其他'), 0) + 1
+            self._send(200, {
+                'policies_total': len(POLICIES),
+                'guides_total': len(GUIDES),
+                'policy_categories': policy_cats,
+                'guide_categories': guide_cats,
+                'audit_log_count': log_count,
+                'api_version': 'V2.5',
+                'last_updated': datetime.now().isoformat()
+            })
+
+        elif path == '/api/admin/logs':
+            if not check_admin_auth(self.headers):
+                self._send(401, {'error': 'unauthorized'})
+                return
+            limit = int(params.get('limit', ['50'])[0])
+            logs = []
+            try:
+                with open(LOG_FILE) as f:
+                    lines = f.readlines()
+                    logs = [json.loads(line) for line in lines[-limit:]]
+            except:
+                pass
+            self._send(200, {'logs': logs, 'total': len(logs)})
+        
+        else:
+            self._send(404, {'error': 'not found'})
+
+    def do_PUT(self):
+        """更新政策/指南"""
+        length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(length) if length else b'{}'
+        try:
+            data = json.loads(body)
+        except:
+            data = {}
+
+        if not check_admin_auth(self.headers):
+            self._send(401, {'error': 'unauthorized'})
+            return
+
+        if self.path == '/api/admin/policy':
+            pid = data.get('id', '')
+            for i, p in enumerate(POLICIES):
+                if p['id'] == pid:
+                    for key in ['title', 'category', 'doc_no', 'org', 'effective_date', 'summary', 'keywords']:
+                        if key in data:
+                            POLICIES[i][key] = data[key]
+                    save_policies()
+                    log_admin_action('UPDATE_POLICY', pid, data.get('title', ''))
+                    self._send(200, {'ok': True, 'policy': POLICIES[i]})
+                    return
+            self._send(404, {'error': 'policy not found'})
+
+        elif self.path == '/api/admin/guide':
+            gid = data.get('id', '')
+            for i, g in enumerate(GUIDES):
+                if g['id'] == gid:
+                    for key in ['title', 'category', 'conditions', 'materials', 'steps', 'location', 'phone', 'time']:
+                        if key in data:
+                            GUIDES[i][key] = data[key]
+                    save_guides()
+                    log_admin_action('UPDATE_GUIDE', gid, data.get('title', ''))
+                    self._send(200, {'ok': True, 'guide': GUIDES[i]})
+                    return
+            self._send(404, {'error': 'guide not found'})
+
+        else:
+            self._send(404, {'error': 'not found'})
+
+    def do_DELETE(self):
+        """删除政策/指南"""
+        if not check_admin_auth(self.headers):
+            self._send(401, {'error': 'unauthorized'})
+            return
+
+        parsed = __import__('urllib.parse').parse.urlparse(self.path)
+        params = __import__('urllib.parse').parse.parse_qs(parsed.query)
+
+        if parsed.path == '/api/admin/policy':
+            pid = params.get('id', [''])[0]
+            for i, p in enumerate(POLICIES):
+                if p['id'] == pid:
+                    deleted = POLICIES.pop(i)
+                    save_policies()
+                    log_admin_action('DELETE_POLICY', pid, deleted['title'])
+                    self._send(200, {'ok': True, 'total': len(POLICIES)})
+                    return
+            self._send(404, {'error': 'policy not found'})
+
+        elif parsed.path == '/api/admin/guide':
+            gid = params.get('id', [''])[0]
+            for i, g in enumerate(GUIDES):
+                if g['id'] == gid:
+                    deleted = GUIDES.pop(i)
+                    save_guides()
+                    log_admin_action('DELETE_GUIDE', gid, deleted['title'])
+                    self._send(200, {'ok': True, 'total': len(GUIDES)})
+                    return
+            self._send(404, {'error': 'guide not found'})
+
+        else:
+            self._send(404, {'error': 'not found'})
+
+    def do_POST(self):
+        length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(length)
+        try:
+            data = json.loads(body)
+        except:
+            data = {}
+
+        if self.path == '/api/gov/chat':
+            user_msg = data.get('message', '')
+            history = data.get('history', [])
+            # 问题分类
+            q_type = classify_question(user_msg)
+            # 增强检索
+            search_results = enhanced_search(user_msg, top_k=5)
+            # 构建上下文
+            context_parts = []
+            related_policies = []
+            related_guides = []
+            for r in search_results:
+                if r['type'] == 'policy':
+                    related_policies.append(r['title'])
+                    context_parts.append(f"[政策] {r['title']}（{r.get('doc_no','')}，{r.get('org','')}）：{r.get('summary','')}")
+                else:
+                    related_guides.append(r['title'])
+                    context_parts.append(f"[办事指南] {r['title']}：条件-{r.get('conditions','')}；地点-{r.get('location','')}；电话-{r.get('phone','')}")
+            # 构建消息
+            type_prompt = {
+                'policy': '用户正在咨询政策问题，请重点引用政策依据，准确说明政策内容和适用条件。',
+                'guide': '用户正在咨询办事流程，请按办理条件、所需材料、办理流程、办理地点、咨询电话、办理时限的结构回答。',
+                'document': '用户需要公文写作帮助，请提供规范的公文格式和内容。',
+                'general': '用户进行通用政务咨询，请准确、简洁地回答。'
+            }.get(q_type, '')
+            system_content = GOV_SYSTEM_PROMPT + '\n\n【当前问题类型】' + q_type + '\n' + type_prompt
+            if context_parts:
+                system_content += '\n\n【参考资料】\n' + '\n'.join(context_parts[:4])
+            messages = [{'role': 'system', 'content': system_content}]
+            messages.extend(history[-6:])
+            messages.append({'role': 'user', 'content': user_msg})
+            reply = call_aiproxy(messages)
+            self._send(200, {'reply': reply, 'question_type': q_type,
+                           'related_policies': related_policies[:5],
+                           'related_guides': related_guides[:5],
+                           'search_count': len(search_results)})
+        
+        elif self.path == '/api/gov/doc/generate':
+            doc_type = data.get('type', '通知')
+            title = data.get('title', '')
+            content = data.get('content', '')
+            prompt = f'请帮我生成一份{doc_type}。\n标题：{title}\n主要内容：{content}\n\n要求：格式规范，要素完整，语言正式。'
+            messages = [{'role': 'system', 'content': '你是公文写作助手，精通各类公文格式。'}, {'role': 'user', 'content': prompt}]
+            result = call_aiproxy(messages, max_tokens=2048)
+            self._send(200, {'result': result, 'type': doc_type})
+        
+        elif self.path == '/api/gov/doc/polish':
+            text = data.get('text', '')
+            prompt = f'请润色以下公文，使其更加规范、严谨：\n\n{text}'
+            messages = [{'role': 'system', 'content': '你是公文润色助手。'}, {'role': 'user', 'content': prompt}]
+            result = call_aiproxy(messages, max_tokens=2048)
+            self._send(200, {'result': result})
+
+        # === 管理端点：新增 ===
+        elif self.path == '/api/admin/policy':
+            if not check_admin_auth(self.headers):
+                self._send(401, {'error': 'unauthorized'})
+                return
+            new_id = f'P{len(POLICIES) + 1000}'
+            policy = {
+                'id': new_id,
+                'title': data.get('title', ''),
+                'category': data.get('category', '其他'),
+                'doc_no': data.get('doc_no', ''),
+                'org': data.get('org', ''),
+                'effective_date': data.get('effective_date', ''),
+                'summary': data.get('summary', ''),
+                'keywords': data.get('keywords', [])
+            }
+            POLICIES.append(policy)
+            save_policies()
+            log_admin_action('CREATE_POLICY', new_id, policy['title'])
+            self._send(200, {'ok': True, 'id': new_id, 'total': len(POLICIES)})
+
+        elif self.path == '/api/admin/guide':
+            if not check_admin_auth(self.headers):
+                self._send(401, {'error': 'unauthorized'})
+                return
+            new_id = f'G{len(GUIDES) + 100}'
+            guide = {
+                'id': new_id,
+                'title': data.get('title', ''),
+                'category': data.get('category', '其他'),
+                'conditions': data.get('conditions', ''),
+                'materials': data.get('materials', ''),
+                'steps': data.get('steps', ''),
+                'location': data.get('location', ''),
+                'phone': data.get('phone', ''),
+                'time': data.get('time', '')
+            }
+            GUIDES.append(guide)
+            save_guides()
+            log_admin_action('CREATE_GUIDE', new_id, guide['title'])
+            self._send(200, {'ok': True, 'id': new_id, 'total': len(GUIDES)})
+        
+        else:
+            self._send(404, {'error': 'not found'})
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', type=int, default=8025)
+    args = parser.parse_args()
+    server = HTTPServer(('0.0.0.0', args.port), GovHandler)
+    print(f'政务API服务启动: http://0.0.0.0:{args.port}')
+    print(f'政策库: {len(POLICIES)}条 | 办事指南: {len(GUIDES)}条')
+    server.serve_forever()

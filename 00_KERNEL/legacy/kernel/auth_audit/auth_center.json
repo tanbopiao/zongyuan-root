@@ -1,0 +1,88 @@
+{
+  "center_id": "ZR-AUTH-AUDIT-V1.0",
+  "name": "ZONGYUAN-ROOT权限与审计中心",
+  "version": "1.0",
+  "updated_at": "2026-09-06T07:40:14.867522",
+  "role_model": "RBAC (Role-Based Access Control)",
+  "roles": [
+    {
+      "role": "admin",
+      "name": "系统管理员",
+      "permissions": [
+        "*"
+      ],
+      "description": "全部权限，包括系统配置、用户管理、部署、审计"
+    },
+    {
+      "role": "staff",
+      "name": "工作人员",
+      "permissions": [
+        "gov:read",
+        "gov:write",
+        "workbench:read",
+        "workbench:write"
+      ],
+      "description": "政务业务操作权限"
+    },
+    {
+      "role": "visitor",
+      "name": "访客",
+      "permissions": [
+        "gov:read",
+        "policy:read",
+        "guide:read"
+      ],
+      "description": "只读权限，可查询政策和指南"
+    },
+    {
+      "role": "auditor",
+      "name": "审计员",
+      "permissions": [
+        "audit:read",
+        "log:read",
+        "report:read"
+      ],
+      "description": "只读审计权限，可查看所有日志和报告"
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "role": "admin",
+      "status": "active",
+      "created_at": "2026-01-01"
+    },
+    {
+      "username": "staff_demo",
+      "role": "staff",
+      "status": "active",
+      "created_at": "2026-01-01"
+    }
+  ],
+  "audit_log": {
+    "enabled": true,
+    "log_format": "JSONL",
+    "log_path": "/kernel/audit/audit_log.jsonl",
+    "retention_days": 365,
+    "immutable": true,
+    "merkle_dag": true
+  },
+  "audit_events": [
+    "user_login",
+    "user_logout",
+    "config_change",
+    "deploy",
+    "rollback",
+    "permission_change",
+    "data_export",
+    "api_call",
+    "operator_invocation",
+    "evolution_trigger"
+  ],
+  "merkle_dag_audit": {
+    "enabled": true,
+    "hash_algorithm": "SHA256",
+    "block_time": 3600,
+    "verification": "全链路可追溯、不可篡改"
+  }
+}

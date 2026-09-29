@@ -1,0 +1,116 @@
+{
+  "center_id": "ZR-HEALTH-CENTER-V1.0",
+  "name": "ZONGYUAN-ROOT健康监控中心",
+  "version": "1.0",
+  "updated_at": "2026-09-06T07:40:14.867108",
+  "monitor_targets": [
+    {
+      "name": "zongyuan-gov-api",
+      "port": 8025,
+      "type": "service",
+      "expected": "active"
+    },
+    {
+      "name": "zongyuan-omega-brain",
+      "port": 8000,
+      "type": "service",
+      "expected": "active"
+    },
+    {
+      "name": "zongyuan-anchor-api",
+      "port": 8006,
+      "type": "service",
+      "expected": "active"
+    },
+    {
+      "name": "zongyuan-deploy-api",
+      "port": 8766,
+      "type": "service",
+      "expected": "active"
+    },
+    {
+      "name": "zongyuan-aiproxy",
+      "port": 8021,
+      "type": "service",
+      "expected": "active"
+    },
+    {
+      "name": "nginx",
+      "port": 443,
+      "type": "service",
+      "expected": "active"
+    },
+    {
+      "name": "zongyuan-scheduler",
+      "port": 8032,
+      "type": "service",
+      "expected": "active",
+      "api_health": "http://127.0.0.1:8032/kernel/health"
+    },
+    {
+      "name": "zongyuan-agent-executor",
+      "port": 8030,
+      "type": "service",
+      "expected": "active",
+      "api_health": "http://127.0.0.1:8030/agent/health"
+    }
+  ],
+  "check_interval": 30,
+  "health_grades": {
+    "A+": "所有指标正常，无告警",
+    "A": "轻微波动，可自愈",
+    "B": "功能降级，需关注",
+    "C": "部分故障，需干预",
+    "D": "严重故障，需熔断"
+  },
+  "alert_rules": [
+    {
+      "condition": "service_down",
+      "level": "critical",
+      "action": "auto_restart+notify"
+    },
+    {
+      "condition": "cpu>90%",
+      "level": "warning",
+      "action": "notify+analyze"
+    },
+    {
+      "condition": "memory>85%",
+      "level": "warning",
+      "action": "notify+analyze"
+    },
+    {
+      "condition": "disk>85%",
+      "level": "warning",
+      "action": "notify+cleanup"
+    },
+    {
+      "condition": "error_rate>5%",
+      "level": "critical",
+      "action": "auto_rollback+notify"
+    },
+    {
+      "condition": "latency>3s",
+      "level": "warning",
+      "action": "notify+optimize"
+    }
+  ],
+  "auto_healing": {
+    "enabled": true,
+    "max_retries": 3,
+    "retry_interval": 10,
+    "actions": [
+      "restart_service",
+      "clear_cache",
+      "rollback",
+      "scale_up"
+    ]
+  },
+  "current_status": {
+    "overall_grade": "A+",
+    "active_services": 6,
+    "total_services": 6,
+    "last_check": "2026-09-06T07:40:14.867123",
+    "active_alerts": 0
+  }
+}

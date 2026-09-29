@@ -1,0 +1,33 @@
+{
+  "window_id": "WIN-CLOUD-GOV-DEV-001",
+  "platform": "政务中台",
+  "version": "V2.0",
+  "locked_at": "2026-09-05",
+  "services": [
+    {"name": "zongyuan-gov-api", "port": 8025, "purpose": "政务统一API后端", "critical": true},
+    {"name": "zongyuan-aiproxy", "port": 8021, "purpose": "AI代理（主备双路）", "critical": true},
+    {"name": "nginx", "port": "80/443", "purpose": "反向代理+静态文件", "critical": true},
+    {"name": "mysqld", "port": 3306, "purpose": "数据库", "critical": true},
+    {"name": "redis", "port": 6379, "purpose": "缓存", "critical": false},
+    {"name": "frps", "port": 7100, "purpose": "frp隧道服务端", "critical": false}
+  ],
+  "ports": [8025, 8021, 80, 443, 3306, 6379, 7100],
+  "config_files": [
+    "/www/server/panel/vhost/nginx/huodouai.com.conf",
+    "/etc/systemd/system/zongyuan-gov-api.service",
+    "/opt/ZONGYUAN-ROOT/gov_api/gov_api_server.py"
+  ],
+  "data_dirs": [
+    "/opt/ZONGYUAN-ROOT/gov_api/data/",
+    "/www/wwwroot/huodouai.com/gov-ai/",
+    "/www/wwwroot/huodouai.com/gov-mobile/"
+  ],
+  "api_endpoints": [
+    "https://huodouai.com/gov-api/health",
+    "https://huodouai.com/gov-api/api/gov/chat",
+    "https://huodouai.com/gov-api/api/gov/policy/search",
+    "https://huodouai.com/gov-api/api/gov/guide/list"
+  ],
+  "modification_policy": "修改以上任何依赖项前，必须先执行snapshot.sh生成快照，再执行changelog.sh记录变更",
+  "notification": "依赖项变更后，所有窗口开头读取changelog.jsonl获取最新变更"
+}

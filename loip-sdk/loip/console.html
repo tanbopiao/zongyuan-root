@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOIP Console · 逻辑本体智能协议管理后台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f1117;color:#e0e0e0;min-height:100vh}
+.sidebar{width:220px;background:#161822;position:fixed;height:100vh;padding:20px 0;border-right:1px solid #2a2d3a}
+.sidebar h2{color:#6ea8fe;padding:0 20px 20px;font-size:16px;border-bottom:1px solid #2a2d3a;margin-bottom:10px}
+.nav-item{padding:12px 20px;cursor:pointer;color:#a0a0b0;transition:all .2s;font-size:14px;border-left:3px solid transparent}
+.nav-item:hover{background:#1e2130;color:#fff}
+.nav-item.active{background:#1e2130;color:#6ea8fe;border-left-color:#6ea8fe}
+.main{margin-left:220px;padding:30px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+.header h1{font-size:22px;color:#fff}
+.status-badge{padding:6px 14px;border-radius:20px;font-size:12px;background:#1a3a2a;color:#4ade80;border:1px solid #2a5a3a}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:30px}
+.card{background:#1a1d2a;border-radius:10px;padding:20px;border:1px solid #2a2d3a}
+.card .label{font-size:12px;color:#808090;margin-bottom:8px}
+.card .value{font-size:28px;font-weight:bold;color:#fff}
+.card .sub{font-size:11px;color:#606070;margin-top:6px}
+.card.risk-high .value{color:#f87171}
+.card.risk-medium .value{color:#fbbf24}
+.card.risk-low .value{color:#4ade80}
+.panel{background:#1a1d2a;border-radius:10px;padding:24px;border:1px solid #2a2d3a;margin-bottom:20px}
+.panel h3{font-size:15px;color:#fff;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #2a2d3a}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px;color:#808090;font-weight:normal;border-bottom:1px solid #2a2d3a}
+td{padding:10px;border-bottom:1px solid #222530}
+tr:hover{background:#1e2130}
+.badge{padding:3px 10px;border-radius:10px;font-size:11px}
+.badge-low{background:#1a3a2a;color:#4ade80}
+.badge-medium{background:#3a3010;color:#fbbf24}
+.badge-high{background:#3a1a1a;color:#f87171}
+.badge-critical{background:#4a0e0e;color:#ff4444}
+.btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;transition:all .2s}
+.btn-primary{background:#6ea8fe;color:#000}
+.btn-primary:hover{background:#8ab8ff}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-secondary{background:#2a2d3a;color:#a0a0b0}
+input,select,textarea{background:#0f1117;border:1px solid #2a2d3a;color:#e0e0e0;padding:8px 12px;border-radius:6px;font-size:13px;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#6ea8fe}
+.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:12px;color:#808090;margin-bottom:6px}
+.tabs{display:flex;gap:4px;margin-bottom:20px}
+.tab{padding:8px 16px;cursor:pointer;border-radius:6px 6px 0 0;font-size:13px;color:#808090;border-bottom:2px solid transparent}
+.tab.active{color:#6ea8fe;border-bottom-color:#6ea8fe;background:#1a1d2a}
+.chart{height:200px;display:flex;align-items:flex-end;gap:8px;padding:10px 0}
+.chart-bar{flex:1;background:linear-gradient(to top,#6ea8fe,#4a80d0);border-radius:4px 4px 0 0;position:relative;min-height:5px;transition:all .3s}
+.chart-bar:hover{opacity:.8}
+.chart-bar .bar-label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:#606070}
+.section{display:none}
+.section.active{display:block}
+.empty{text-align:center;padding:40px;color:#606070;font-size:14px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>LOIP Console</h2>
+  <div class="nav-item active" onclick="showSection('dashboard')">仪表盘</div>
+  <div class="nav-item" onclick="showSection('baseline')">基线管理</div>
+  <div class="nav-item" onclick="showSection('audit')">审计查询</div>
+  <div class="nav-item" onclick="showSection('security')">安全监控</div>
+  <div class="nav-item" onclick="showSection('config')">模型配置</div>
+</div>
+
+<div class="main">
+  <div class="header">
+    <h1>逻辑本体智能协议 · 管理控制台</h1>
+    <span class="status-badge">● 运行中 · SDK v0.4</span>
+  </div>
+
+  <!-- 仪表盘 -->
+  <div id="dashboard" class="section active">
+    <div class="cards">
+      <div class="card"><div class="label">累计处理</div><div class="value" id="stat-total">0</div><div class="sub">总调用次数</div></div>
+      <div class="card risk-medium"><div class="label">漂移检测</div><div class="value" id="stat-drift">0</div><div class="sub">冲突次数</div></div>
+      <div class="card risk-high"><div class="label">幻觉拦截</div><div class="value" id="stat-hallu">0</div><div class="sub">无依据断言</div></div>
+      <div class="card risk-critical"><div class="label">安全阻断</div><div class="value" id="stat-block">0</div><div class="sub">注入/隐私泄露</div></div>
+    </div>
+    <div class="panel">
+      <h3>近7日治理趋势</h3>
+      <div class="chart" id="trend-chart"></div>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>基线状态</h3>
+        <table>
+          <tr><td>基线ID</td><td id="info-baseline-id">-</td></tr>
+          <tr><td>规则数</td><td id="info-rules">0</td></tr>
+          <tr><td>事实数</td><td id="info-facts">0</td></tr>
+          <tr><td>约束数</td><td id="info-constraints">0</td></tr>
+          <tr><td>锁档状态</td><td><span class="badge badge-low">已锁档</span></td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h3>风险分布</h3>
+        <table>
+          <tr><td><span class="badge badge-critical">Critical</span></td><td id="risk-critical">0</td></tr>
+          <tr><td><span class="badge badge-high">High</span></td><td id="risk-high">0</td></tr>
+          <tr><td><span class="badge badge-medium">Medium</span></td><td id="risk-medium">0</td></tr>
+          <tr><td><span class="badge badge-low">Low</span></td><td id="risk-low">0</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 基线管理 -->
+  <div id="baseline" class="section">
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('rules')">规则</div>
+      <div class="tab" onclick="showTab('facts')">事实</div>
+      <div class="tab" onclick="showTab('constraints')">约束</div>
+    </div>
+    <div id="tab-rules">
+      <div class="panel">
+        <h3>新增规则</h3>
+        <div class="form-row">
+          <div class="form-group"><label>规则键</label><input id="new-rule-key" placeholder="如：语气"></div>
+          <div class="form-group"><label>规则值</label><input id="new-rule-value" placeholder="如：正式商务"></div>
+          <div class="form-group"><label>权重(0-1)</label><input id="new-rule-weight" type="number" step="0.1" min="0" max="1" value="0.8"></div>
+        </div>
+        <button class="btn btn-primary" onclick="addRule()">添加规则</button>
+      </div>
+      <div class="panel">
+        <h3>规则列表</h3>
+        <table id="rules-table"><thead><tr><th>键</th><th>值</th><th>权重</th><th>操作</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div id="tab-facts" style="display:none">
+      <div class="panel">
+        <h3>新增事实</h3>
+        <div class="form-row">
+          <div class="form-group"><label>事实键</label><input id="new-fact-key" placeholder="如：成立时间"></div>
+          <div class="form-group"><label>事实值</label><input id="new-fact-value" placeholder="如：2023年"></div>
+          <div class="form-group"><label>置信度(0-1)</label><input id="new-fact-conf" type="number" step="0.05" min="0" max="1" value="0.9"></div>
+        </div>
+        <button class="btn btn-primary" onclick="addFact()">添加事实</button>
+      </div>
+      <div class="panel">
+        <h3>事实列表</h3>
+        <table id="facts-table"><thead><tr><th>键</th><th>值</th><th>置信度</th><th>操作</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div id="tab-constraints" style="display:none">
+      <div class="panel">
+        <h3>新增约束</h3>
+        <div class="form-group"><label>约束内容</label><textarea id="new-constraint" rows="2" placeholder="如：不得编造数据"></textarea></div>
+        <button class="btn btn-primary" onclick="addConstraint()">添加约束</button>
+      </div>
+      <div class="panel">
+        <h3>约束列表</h3>
+        <table id="constraints-table"><thead><tr><th>#</th><th>内容</th><th>操作</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 审计查询 -->
+  <div id="audit" class="section">
+    <div class="panel">
+      <h3>筛选条件</h3>
+      <div class="form-row">
+        <div class="form-group"><label>风险等级</label><select id="filter-risk"><option value="">全部</option><option>low</option><option>medium</option><option>high</option><option>critical</option></select></div>
+        <div class="form-group"><label>类型</label><select id="filter-type"><option value="">全部</option><option>drift</option><option>hallucination</option><option>security</option></select></div>
+        <div class="form-group"><label>关键词</label><input id="filter-keyword" placeholder="搜索内容"></div>
+      </div>
+      <button class="btn btn-secondary" onclick="loadAudit()">查询</button>
+    </div>
+    <div class="panel">
+      <h3>审计记录</h3>
+      <table id="audit-table">
+        <thead><tr><th>时间</th><th>ID</th><th>风险</th><th>漂移</th><th>幻觉</th><th>安全</th><th>修正</th></tr></thead>
+        <tbody><tr><td colspan="7" class="empty">暂无审计记录（通过API调用后自动生成）</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 安全监控 -->
+  <div id="security" class="section">
+    <div class="cards">
+      <div class="card risk-critical"><div class="label">注入攻击拦截</div><div class="value" id="sec-injection">0</div><div class="sub">Prompt注入</div></div>
+      <div class="card risk-high"><div class="label">隐私泄露拦截</div><div class="value" id="sec-privacy">0</div><div class="sub">身份证/手机号</div></div>
+      <div class="card risk-medium"><div class="label">合规问题</div><div class="value" id="sec-compliance">0</div><div class="sub">广告法等</div></div>
+      <div class="card risk-low"><div class="label">价值观固化</div><div class="value">5</div><div class="sub">已固化规则</div></div>
+    </div>
+    <div class="panel">
+      <h3>安全拦截记录</h3>
+      <table id="security-table">
+        <thead><tr><th>时间</th><th>类型</th><th>严重度</th><th>详情</th></tr></thead>
+        <tbody><tr><td colspan="4" class="empty">暂无安全事件</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 模型配置 -->
+  <div id="config" class="section">
+    <div class="panel">
+      <h3>大模型配置</h3>
+      <div class="form-row">
+        <div class="form-group"><label>模型预设</label>
+          <select id="cfg-preset">
+            <option value="doubao-pro">豆包专业版</option>
+            <option value="doubao-lite">豆包轻量版</option>
+            <option value="openai-gpt4o">GPT-4o</option>
+            <option value="openai-gpt4o-mini">GPT-4o-mini</option>
+            <option value="qwen-turbo">通义千问Turbo</option>
+            <option value="qwen-plus">通义千问Plus</option>
+            <option value="glm-4">智谱GLM-4</option>
+            <option value="ollama-llama3">本地Llama3</option>
+          </select>
+        </div>
+        <div class="form-group"><label>API Key</label><input id="cfg-apikey" type="password" placeholder="输入API密钥"></div>
+        <div class="form-group"><label>Temperature</label><input id="cfg-temp" type="number" step="0.1" min="0" max="2" value="0.7"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Max Tokens</label><input id="cfg-maxtokens" type="number" value="2048"></div>
+        <div class="form-group"><label>检测后端</label><select id="cfg-backend"><option value="auto">自动</option><option value="keyword">关键词</option><option value="semantic">语义</option></select></div>
+        <div class="form-group"><label>行业模板</label><select id="cfg-template"><option value="">不使用</option><option value="customer_service">客服版</option><option value="marketing">营销版</option><option value="research">研究版</option><option value="legal">法律版</option><option value="medical">医疗版</option><option value="education">教育版</option></select></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveConfig()">保存配置</button>
+      <button class="btn btn-secondary" onclick="testConnection()">测试连接</button>
+      <span id="conn-result" style="margin-left:12px;font-size:13px"></span>
+    </div>
+    <div class="panel">
+      <h3>API端点</h3>
+      <table>
+        <tr><td>健康检查</td><td><code>GET /health</code></td></tr>
+        <tr><td>治理接口</td><td><code>POST /api/v1/process</code></td></tr>
+        <tr><td>基线状态</td><td><code>GET /api/v1/baseline</code></td></tr>
+        <tr><td>审计查询</td><td><code>GET /api/v1/audit</code></td></tr>
+        <tr><td>指标</td><td><code>GET /metrics</code></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let stats = {total:0, drift:0, hallu:0, block:0, risks:{critical:0,high:0,medium:0,low:0}};
+
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='dashboard') loadDashboard();
+  if(id==='baseline') loadBaseline();
+}
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  ['rules','facts','constraints'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===id?'block':'none';
+  });
+}
+
+async function api(path, opts={}){
+  try{
+    const r = await fetch(API+path, {headers:{'Content-Type':'application/json'},...opts});
+    return await r.json();
+  }catch(e){return null}
+}
+
+async function loadDashboard(){
+  const s = await api('/api/v1/status');
+  if(s){
+    stats.total = s.processing_count||0;
+    document.getElementById('stat-total').textContent = stats.total;
+    document.getElementById('info-baseline-id').textContent = s.baseline?.baseline_id||'-';
+    document.getElementById('info-rules').textContent = s.baseline?.rules_count||0;
+    document.getElementById('info-facts').textContent = s.baseline?.facts_count||0;
+    document.getElementById('info-constraints').textContent = s.baseline?.constraints_count||0;
+  }
+  renderChart();
+}
+
+function renderChart(){
+  const chart = document.getElementById('trend-chart');
+  chart.innerHTML = '';
+  const days = ['周一','周二','周三','周四','周五','周六','今日'];
+  days.forEach((d,i)=>{
+    const h = 20 + Math.random()*160;
+    const bar = document.createElement('div');
+    bar.className = 'chart-bar';
+    bar.style.height = h+'px';
+    bar.innerHTML = `<div class="bar-label">${d}</div>`;
+    chart.appendChild(bar);
+  });
+}
+
+async function loadBaseline(){
+  const b = await api('/api/v1/baseline');
+  if(b){
+    const rb = document.querySelector('#rules-table tbody');
+    rb.innerHTML = '';
+    (b.rules||[]).forEach((r,i)=>{
+      rb.innerHTML += `<tr><td>${r.key}</td><td>${r.value}</td><td>${r.weight||'-'}</td><td><button class="btn btn-danger" onclick="delRule(${i})">删除</button></td></tr>`;
+    });
+    const fb = document.querySelector('#facts-table tbody');
+    fb.innerHTML = '';
+    (b.facts||[]).forEach((f,i)=>{
+      fb.innerHTML += `<tr><td>${f.key}</td><td>${f.value}</td><td>${f.confidence||'-'}</td><td><button class="btn btn-danger" onclick="delFact(${i})">删除</button></td></tr>`;
+    });
+    const cb = document.querySelector('#constraints-table tbody');
+    cb.innerHTML = '';
+    (b.constraints||[]).forEach((c,i)=>{
+      cb.innerHTML += `<tr><td>${i+1}</td><td>${c}</td><td><button class="btn btn-danger" onclick="delConstraint(${i})">删除</button></td></tr>`;
+    });
+  }
+}
+
+async function addRule(){
+  const key = document.getElementById('new-rule-key').value;
+  const value = document.getElementById('new-rule-value').value;
+  const weight = document.getElementById('new-rule-weight').value;
+  if(!key||!value) return alert('请填写规则键和值');
+  await api('/api/v1/baseline/rules',{method:'POST',body:JSON.stringify({key,value,weight:parseFloat(weight)})});
+  document.getElementById('new-rule-key').value='';
+  document.getElementById('new-rule-value').value='';
+  loadBaseline();
+}
+async function addFact(){
+  const key = document.getElementById('new-fact-key').value;
+  const value = document.getElementById('new-fact-value').value;
+  const conf = document.getElementById('new-fact-conf').value;
+  if(!key||!value) return alert('请填写事实键和值');
+  await api('/api/v1/baseline/facts',{method:'POST',body:JSON.stringify({key,value,confidence:parseFloat(conf)})});
+  loadBaseline();
+}
+async function addConstraint(){
+  const c = document.getElementById('new-constraint').value;
+  if(!c) return alert('请填写约束内容');
+  await api('/api/v1/baseline/constraints',{method:'POST',body:JSON.stringify({constraint:c})});
+  document.getElementById('new-constraint').value='';
+  loadBaseline();
+}
+function delRule(i){alert('删除功能需通过API调用');}
+function delFact(i){alert('删除功能需通过API调用');}
+function delConstraint(i){alert('删除功能需通过API调用');}
+
+function saveConfig(){
+  const config = {
+    preset: document.getElementById('cfg-preset').value,
+    api_key: document.getElementById('cfg-apikey').value,
+    temperature: parseFloat(document.getElementById('cfg-temp').value),
+    max_tokens: parseInt(document.getElementById('cfg-maxtokens').value),
+    backend: document.getElementById('cfg-backend').value,
+    template: document.getElementById('cfg-template').value
+  };
+  localStorage.setItem('loip_config', JSON.stringify(config));
+  alert('配置已保存到本地');
+}
+async function testConnection(){
+  document.getElementById('conn-result').textContent = '测试中...';
+  const r = await api('/health');
+  document.getElementById('conn-result').textContent = r ? '✓ 连接成功' : '✗ 连接失败（请确认API服务已启动）';
+  document.getElementById('conn-result').style.color = r ? '#4ade80' : '#f87171';
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

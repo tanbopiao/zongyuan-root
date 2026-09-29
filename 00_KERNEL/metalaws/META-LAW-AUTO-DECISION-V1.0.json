@@ -1,0 +1,327 @@
+{
+  "law_id": "META-LAW-AUTO-DECISION-V1.0",
+  "law_name": "自主决策与自动执行元法则（含飞书审批集成）",
+  "timestamp": "2026-09-13T12:51:16Z",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "status": "ACTIVE",
+  "chapters": {
+    "chapter_1": "总则：目的/原则/决策引擎/适用范围",
+    "chapter_2": "6项准入标准+4级决策矩阵",
+    "chapter_3": "自动执行循环9步+修复限次",
+    "chapter_4": "飞书审批集成（8触发条件+9字段模板+回调处理+超时）",
+    "chapter_5": "4级决策等级与权限",
+    "chapter_6": "元规则自身约束（修订需人工/紧急覆盖/透明可追溯/异常降级）"
+  },
+  "core_mechanism": {
+    "criteria_count": 6,
+    "veto_items": [
+      "C1安全合规",
+      "C6架构不变更"
+    ],
+    "decision_levels": {
+      "A": "6项全达标→完全自主执行+群通知留痕，直到任务完成",
+      "B": "5项达标→自主执行+加强监控+群通知留痕",
+      "C": "4项达标→有条件执行+群通知留痕，高风险子任务审批",
+      "D": "≤3项或一票否决→飞书审批（人工确认）"
+    },
+    "auto_loop": "评估→执行→再评估→达标继续/不达标修复→修复超限→审批",
+    "repair_limits": "功能3轮/性能3轮/完整性1轮/稳态分5轮/安全架构0轮"
+  },
+  "feishu_approval": {
+    "integration_id": "FEISHU-APPROVAL-INTEGRATION-V1.0",
+    "version": "1.0",
+    "timestamp": "2026-09-13T12:50:12Z",
+    "did": "DID-BR-000002",
+    "trace": "Ω₀⊂⊙∞⊂Ω",
+    "approval_definition": {
+      "approval_code": "ZONGYUAN_AUTO_DECISION",
+      "approval_name": "ZONGYUAN-ROOT自主决策审批",
+      "description": "自主决策机制触发人工审批时使用，审批通过后自动恢复执行",
+      "form_fields": [
+        {
+          "id": "task_name",
+          "name": "任务名称",
+          "type": "text",
+          "required": true,
+          "placeholder": "如：P0向量索引INT8量化落地"
+        },
+        {
+          "id": "task_id",
+          "name": "任务ID",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "trigger_reason",
+          "name": "触发原因",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "如：C1安全合规标准不达标，存在高危漏洞"
+        },
+        {
+          "id": "criteria_status",
+          "name": "6项标准达标情况",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "steady_score",
+          "name": "稳态综合分",
+          "type": "number",
+          "required": true
+        },
+        {
+          "id": "risk_summary",
+          "name": "风险评估摘要",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "proposed_plan",
+          "name": "建议执行方案",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "impact_scope",
+          "name": "预期影响范围",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "approver",
+          "name": "审批人",
+          "type": "user",
+          "required": true
+        }
+      ],
+      "approval_flow": {
+        "nodes": [
+          {
+            "node_type": "start",
+            "name": "发起"
+          },
+          {
+            "node_type": "approval",
+            "name": "审批人审批",
+            "approver": "指定审批人"
+          },
+          {
+            "node_type": "end",
+            "name": "结束"
+          }
+        ],
+        "actions": [
+          "approved",
+          "rejected",
+          "returned"
+        ]
+      }
+    },
+    "trigger_conditions": [
+      {
+        "id": "T1",
+        "condition": "C1安全合规标准不达标",
+        "priority": "CRITICAL",
+        "auto_block": true,
+        "approval": true
+      },
+      {
+        "id": "T2",
+        "condition": "C6架构不变更标准不达标",
+        "priority": "CRITICAL",
+        "auto_block": true,
+        "approval": true
+      },
+      {
+        "id": "T3",
+        "condition": "≤3项标准达标",
+        "priority": "HIGH",
+        "auto_block": true,
+        "approval": true
+      },
+      {
+        "id": "T4",
+        "condition": "自动修复轮次超限",
+        "priority": "HIGH",
+        "auto_block": true,
+        "approval": true
+      },
+      {
+        "id": "T5",
+        "condition": "资源需求超出沙箱硬件上限",
+        "priority": "MEDIUM",
+        "auto_block": true,
+        "approval": "群通知+评估"
+      },
+      {
+        "id": "T6",
+        "condition": "涉及业务阈值/配额/周期等顶层参数调整",
+        "priority": "MEDIUM",
+        "auto_block": true,
+        "approval": true
+      },
+      {
+        "id": "T7",
+        "condition": "稳态算子判定存在无法量化的重大业务风险",
+        "priority": "HIGH",
+        "auto_block": true,
+        "approval": true
+      },
+      {
+        "id": "T8",
+        "condition": "用户明确要求人工审批的任务",
+        "priority": "MEDIUM",
+        "auto_block": true,
+        "approval": true
+      }
+    ],
+    "initiation_flow": [
+      "STEP1 决策引擎检测到触发条件，立即暂停任务执行",
+      "STEP2 收集任务上下文：任务信息、6项标准评估、稳态评分、风险摘要、建议方案",
+      "STEP3 组装审批表单数据，自动填充所有字段",
+      "STEP4 调用飞书审批API发起审批实例",
+      "STEP5 记录审批实例ID到任务状态，写入审计日志",
+      "STEP6 等待审批回调，任务状态置为PENDING_APPROVAL"
+    ],
+    "callback_handling": {
+      "approved": {
+        "action": "自动恢复执行",
+        "steps": [
+          "接收审批通过回调",
+          "验证审批凭证（审批人/时间/意见）",
+          "任务状态从PENDING_APPROVAL恢复为EXECUTING",
+          "从暂停点继续执行自动循环",
+          "记录审批凭证到内核，链式哈希固化"
+        ]
+      },
+      "rejected": {
+        "action": "终止任务",
+        "steps": [
+          "接收审批拒绝回调",
+          "记录拒绝原因",
+          "任务状态置为TERMINATED",
+          "生成终止报告（含已完成部分/未完成部分/拒绝原因）",
+          "已完成部分哈希锁档归档",
+          "通知决策引擎更新任务队列"
+        ]
+      },
+      "returned": {
+        "action": "退回修改",
+        "steps": [
+          "接收退回修改回调",
+          "解析修改意见",
+          "任务状态置为REVISION",
+          "按修改意见调整方案",
+          "重新执行6项标准评估",
+          "评估达标后可再次提交审批或自动执行"
+        ]
+      }
+    },
+    "timeout_handling": {
+      "reminder_1": "24小时未审批→自动发送提醒消息给审批人",
+      "reminder_2": "48小时未审批→再次提醒+抄送备用审批人",
+      "auto_reject": "72小时未审批→自动拒绝，任务终止",
+      "escalation": "紧急任务可配置升级路径，超时后自动升级到上级审批人"
+    },
+    "audit_trail": {
+      "log_fields": [
+        "approval_id",
+        "task_id",
+        "trigger_condition",
+        "submit_time",
+        "approver",
+        "decision",
+        "decision_time",
+        "comment"
+      ],
+      "storage": "链式哈希固化到自治内核",
+      "retention": "永久保留",
+      "verification": "任意审批记录可通过哈希链验证完整性"
+    },
+    "integration_points": {
+      "pre_execution": "任务启动前6项标准评估→D级直接发起审批",
+      "mid_execution": "执行中每步重新评估→不达标且修复超限→发起审批",
+      "post_approval": "审批通过→回调恢复执行；审批拒绝→终止归档",
+      "emergency": "用户人工中断→覆盖任何自动决策，记录人工干预凭证"
+    }
+  },
+  "implementation_status": "V1.1优化：A/B/C级自主决策+群通知留痕，D级飞书审批。自主决策通知机制已激活。",
+  "actual_approval_definition": {
+    "approval_code": "CAC2F6DD-B206-4F27-96FF-E99BD13464F7",
+    "approval_name": "AIOS阶段验收",
+    "test_instance": "C1EAE73B-928E-4535-89D3-8C719696E759",
+    "integration_script": "auto_decision_approval.py"
+  },
+  "law_hash": "64b5ebadef7a4bca062c05ae3c2cef6c87a673c7dead36b238d0f64976d89e5f",
+  "auto_decision_notification": {
+    "version": "1.0",
+    "timestamp": "2026-09-13T13:57:23Z",
+    "principle": "自主决策不审批，但必须通知+留痕+可追溯",
+    "notification_levels": {
+      "A": {
+        "action": "自动执行",
+        "notify": true,
+        "approval": false,
+        "channel": "内核群通知"
+      },
+      "B": {
+        "action": "自动执行+监控",
+        "notify": true,
+        "approval": false,
+        "channel": "内核群通知"
+      },
+      "C": {
+        "action": "有条件执行",
+        "notify": true,
+        "approval": "高风险子任务",
+        "channel": "内核群通知"
+      },
+      "D": {
+        "action": "暂停执行",
+        "notify": true,
+        "approval": true,
+        "channel": "飞书审批+群通知"
+      }
+    },
+    "notification_content": {
+      "required_fields": [
+        "任务名称",
+        "任务ID",
+        "决策等级(A/B/C/D)",
+        "6项标准达标情况",
+        "稳态综合分",
+        "执行结果",
+        "执行时间",
+        "哈希凭证"
+      ],
+      "format": "结构化卡片消息",
+      "destination": "内核群（飞书群）"
+    },
+    "audit_log": {
+      "storage": "自治内核链式哈希",
+      "fields": [
+        "task_id",
+        "decision_level",
+        "criteria",
+        "score",
+        "action",
+        "result",
+        "timestamp",
+        "hash"
+      ],
+      "retention": "永久保留",
+      "query": "可按时间/等级/任务类型检索"
+    },
+    "user_visibility": {
+      "what_user_can_see": [
+        "哪些任务自主决策通过了",
+        "哪些任务触发了人工审批",
+        "哪些任务还没做",
+        "每个自主决策的详细评估和执行结果"
+      ],
+      "dashboard": "数字资产可视化网页新增'自主决策日志'面板"
+    }
+  }
+}

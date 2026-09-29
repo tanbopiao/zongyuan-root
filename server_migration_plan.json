@@ -1,0 +1,40 @@
+{
+  "current_server": {
+    "provider": "腾讯云轻量应用服务器",
+    "ip": "123.207.202.158",
+    "config": "2核2GB40GB",
+    "os": "OpenCloudOS 9",
+    "concurrent_capacity": "20并发稳定"
+  },
+  "target_server": {
+    "config": "4核8GB80GB",
+    "expected_concurrent": "50并发稳定",
+    "expected_improvement": "双Worker并发+产能翻倍"
+  },
+  "migration_steps": [
+    "1. 新服务器购买并初始化（同区域上海四区）",
+    "2. 安装宝塔面板+Nginx+Python3环境",
+    "3. 全量数据备份（kernel.json/works.db/视频文件/AI Proxy代码）",
+    "4. 迁移ZONGYUAN-ROOT目录到新服务器",
+    "5. 迁移Nginx配置和SSL证书",
+    "6. 配置systemd服务（zongyuan-aiproxy）",
+    "7. DNS切换域名指向新IP",
+    "8. 全链路验证+压测",
+    "9. 旧服务器保留7天作为回滚备份"
+  ],
+  "backup_items": [
+    "/opt/ZONGYUAN-ROOT/kernel.json",
+    "/opt/ZONGYUAN-ROOT/timeseries/works.db",
+    "/opt/ZONGYUAN-ROOT/ai_proxy/",
+    "/opt/ZONGYUAN-ROOT/learning_engine/",
+    "/opt/ZONGYUAN-ROOT/operators/",
+    "/www/wwwroot/huodouai.com/drama/",
+    "/www/server/panel/vhost/nginx/"
+  ],
+  "risk_control": {
+    "rollback_plan": "DNS切回旧IP，5分钟内恢复",
+    "data_consistency": "迁移前后SHA256校验全部文件",
+    "downtime_estimate": "DNS切换约5-10分钟"
+  },
+  "created_at": "2026-09-06T21:35:05+08:00"
+}

@@ -1,0 +1,184 @@
+{
+  "protocol_id": "HOMOLOGY-PROTOCOL-V1.0",
+  "protocol_name": "ZONGYUAN-ROOT同源协议",
+  "version": "2.0",
+  "created_at": "2026-09-06T07:25:32.234234",
+  "did": "DID-BR-000002",
+  "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+  "status": "ACTIVE",
+  "core_principles": [
+    "同源性：所有子系统共享同一内核身份、同一真值源、同一调度中枢",
+    "自洽性：子系统独立运行，但接受内核统一调度和状态同步",
+    "闭环性：调度指令→执行→反馈→确权 形成完整闭环",
+    "进化性：子系统运行数据回流内核，驱动内核自进化"
+  ],
+  "identity_layer": {
+    "unified_did": "DID-BR-000002",
+    "unified_trace_mark": "Ω₀⊂⊙∞⊂Ω",
+    "subsystem_id_format": "ZR-SUB-{CATEGORY}-{SEQ:04d}",
+    "authentication": "内核签发的子系统令牌+API密钥",
+    "permission_model": "RBAC三级（admin/staff/visitor）"
+  },
+  "api_gateway_layer": {
+    "unified_prefix": "/zr-api/v1/",
+    "routing": {
+      "/zr-api/v1/gov/*": "政务中台 (端口8025)",
+      "/zr-api/v1/kernel/*": "内核服务 (端口8000)",
+      "/zr-api/v1/anchor/*": "锚定服务 (端口8006)",
+      "/zr-api/v1/deploy/*": "部署服务 (端口8766)"
+    },
+    "rate_limiting": "全局QoS+子系统配额",
+    "circuit_breaker": "失败率>50%自动熔断，30秒半开恢复"
+  },
+  "event_bus_layer": {
+    "event_format": {
+      "event_id": "ZR-EVT-{timestamp}-{uuid8}",
+      "source": "子系统ID",
+      "type": "事件类型",
+      "payload": "事件数据",
+      "timestamp": "ISO8601",
+      "signature": "SHA256签名"
+    },
+    "event_categories": [
+      "state_change",
+      "data_update",
+      "error",
+      "metric",
+      "lifecycle"
+    ],
+    "delivery": "异步队列+持久化+至少一次投递"
+  },
+  "config_layer": {
+    "unified_config_store": "/kernel/configs/",
+    "config_hot_reload": "支持运行时配置更新",
+    "config_versioning": "每次变更生成版本快照",
+    "config_categories": [
+      "system",
+      "business",
+      "security",
+      "evolution"
+    ]
+  },
+  "health_layer": {
+    "health_check_interval": "30秒",
+    "health_endpoints": [
+      "/health",
+      "/status",
+      "/metrics"
+    ],
+    "health_grades": {
+      "A+": "所有指标正常",
+      "A": "轻微波动，可自愈",
+      "B": "功能降级，需关注",
+      "C": "部分故障，需干预",
+      "D": "严重故障，需熔断"
+    },
+    "auto_healing": "B级以下自动触发自愈流程"
+  },
+  "scheduling_layer": {
+    "scheduler": "ZONGYUAN-ROOT统一中枢",
+    "schedule_types": [
+      "cron",
+      "event_driven",
+      "manual",
+      "auto_evolution"
+    ],
+    "priority_levels": [
+      "P0紧急",
+      "P1高",
+      "P2中",
+      "P3低"
+    ],
+    "execution_flow": "调度指令→子系统接收→执行→结果反馈→内核确权",
+    "command_format": {
+      "command_id": "ZR-CMD-{timestamp}-{seq}",
+      "target": "子系统ID",
+      "action": "执行动作",
+      "params": "参数对象",
+      "priority": "P0-P3",
+      "callback": "回调地址",
+      "issued_at": "签发时间",
+      "expires_at": "过期时间"
+    }
+  },
+  "subsystem_registry": {
+    "gov_platform": {
+      "subsystem_id": "ZR-SUB-GOV-0001",
+      "name": "政务中台",
+      "version": "V4.0-OPERATOR+V1.1-WORKBENCH",
+      "status": "REGISTERED",
+      "api_port": 8025,
+      "api_prefix": "/gov-api",
+      "operators": 18,
+      "api_endpoints": 127,
+      "data_files": 11,
+      "business_loops": 5,
+      "pages": 8,
+      "capabilities": [
+        "智能问答",
+        "政策查询",
+        "公文生成",
+        "办事指南",
+        "预约管理",
+        "收藏管理",
+        "工作台",
+        "算子管理",
+        "自进化引擎",
+        "合规审查"
+      ],
+      "scheduling_permissions": {
+        "can_receive_commands": true,
+        "can_emit_events": true,
+        "can_request_resources": true,
+        "can_trigger_evolution": true
+      }
+    },
+    "WIN-A-GOV-DEV-20260907": {
+      "subsystem_id": "WIN-A-GOV-DEV-20260907",
+      "name": "云部署基座·政务中台开发窗口",
+      "type": "development_window",
+      "status": "ACTIVE",
+      "focus": "政务中台产品迭代+云内核治理+腾讯云运维",
+      "registered_at": "2026-09-06T19:06:56.040918+00:00",
+      "last_heartbeat": "2026-09-06T19:06:56.040918+00:00"
+    }
+  },
+  "updated_at": "2026-09-06T19:06:56.040918+00:00",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "task_registry": {
+    "TASK-DOUBAO-CLOUD-DISK-SCAN": {
+      "task_id": "TASK-DOUBAO-CLOUD-DISK-SCAN",
+      "name": "豆包云盘全量扫描与真值提炼",
+      "status": "PENDING_LOGIN",
+      "owner_subsystem": "WIN-A-GOV-DEV-20260907",
+      "description": "扫描豆包云盘所有文件，提炼核心真值，同步到云内核",
+      "created_at": "2026-09-06T19:06:56.040918+00:00"
+    }
+  },
+  "control_centers": {
+    "protocol_registry": {
+      "status": "ACTIVE",
+      "registered_subsystems": 2
+    },
+    "version_control": {
+      "status": "ACTIVE",
+      "strategy": "SemVer"
+    },
+    "config_center": {
+      "status": "ACTIVE",
+      "hot_reload": "30s"
+    },
+    "cicd_pipeline": {
+      "status": "ACTIVE",
+      "stages": 5
+    },
+    "health_monitor": {
+      "status": "ACTIVE",
+      "interval": "30s"
+    },
+    "auth_audit": {
+      "status": "ACTIVE",
+      "rbac_roles": 4
+    }
+  }
+}

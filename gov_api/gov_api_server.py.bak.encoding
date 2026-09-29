@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""
+ZONGYUAN-ROOT 政务中台统一API服务
+提供：政务AI问答、公文生成、政策搜索、办事指南
+DID-BR-000002 | Ω₀⊂⊙∞⊂Ω
+"""
+import json, urllib.request, urllib.parse, os, time
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+AIPROXY_URL = 'http://127.0.0.1:8021/chat'
+
+# 加载政策库
+with open(os.path.join(DATA_DIR, 'policies.json')) as f:
+    POLICIES = json.load(f)
+# 加载办事指南
+with open(os.path.join(DATA_DIR, 'guides.json')) as f:
+    GUIDES = json.load(f)
+
+GOV_SYSTEM_PROMPT = '''你是政务AI助手，专门为群众提供政务咨询服务。
+回答要求：
+1. 准确、规范，引用政策依据
+2. 语言通俗易懂，避免专业术语
+3. 涉及具体办事时，说明办理条件、材料、流程、地点、电话
+4. 不确定的信息明确告知，不编造
+5. 回答简洁，重点突出'''
+
+def call_aiproxy(messages, max_tokens=1024):
+    """调用aiproxy（主备双路：云端→本地Ollama）"""
+    try:
+        body = json.dumps({'message': messages, 'model': 'doubao', 'max_tokens': max_tokens}).encode()
+        req = urllib.request.Request(AIPROXY_URL, data=body, headers={'Content-Type': 'application/json'})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read())
+            return data.get('result', data.get('choices', [{}])[0].get('message', {}).get('content', ''))
+    except Exception as e:
+        return f'[服务暂时不可用] {str(e)}'
+
+class GovHandler(BaseHTTPRequestHandler):
+    def _send(self, code, obj):
+        body = json.dumps(obj, ensure_ascii=False).encode()
+        self.send_response(code)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        params = urllib.parse.parse_qs(parsed.query)
+
+        if path == '/health':
+            self._send(200, {'status': 'healthy', 'service': 'gov-api', 'policies': len(POLICIES), 'guides': len(GUIDES)})
+        
+        elif path == '/api/gov/policy/search':
+            q = params.get('q', [''])[0].strip()
+            category = params.get('category', [''])[0].strip()
+            results = []
+            for p in POLICIES:
+                if category and p.get('category') != category:
+                    continue
+                if q:
+                    ql = q.lower()
+                    if (ql in p['title'].lower() or ql in p.get('summary','').lower() or 
+                        any(ql in k.lower() for k in p.get('keywords', []))):
+                        results.append(p)
+                else:
+                    results.append(p)
+            self._send(200, {'results': results[:20], 'total': len(results), 'query': q})
+        
+        elif path == '/api/gov/policy/categories':
+            cats = sorted(set(p['category'] for p in POLICIES))
+            self._send(200, {'categories': cats})
+        
+        elif path == '/api/gov/guide/list':
+            category = params.get('category', [''])[0].strip()
+            results = [g for g in GUIDES if not category or g.get('category') == category]
+            self._send(200, {'results': results, 'total': len(results)})
+        
+        elif path == '/api/gov/guide/detail':
+            gid = params.get('id', [''])[0]
+            guide = next((g for g in GUIDES if g['id'] == gid), None)
+            if guide:
+                self._send(200, guide)
+            else:
+                self._send(404, {'error': 'guide not found'})
+        
+        else:
+            self._send(404, {'error': 'not found'})
+
+    def do_POST(self):
+        length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(length)
+        try:
+            data = json.loads(body)
+        except:
+            data = {}
+
+        if self.path == '/api/gov/chat':
+            user_msg = data.get('message', '')
+            history = data.get('history', [])
+            # 构建消息
+            messages = [{'role': 'system', 'content': GOV_SYSTEM_PROMPT}]
+            messages.extend(history[-6:])
+            messages.append({'role': 'user', 'content': user_msg})
+            # 先检索相关政策
+            related = []
+            for p in POLICIES:
+                for kw in p.get('keywords', []):
+                    if kw in user_msg:
+                        related.append(p['title'])
+                        break
+            if related:
+                context = '\n相关政策：' + '、'.join(related[:3])
+                messages[-1]['content'] = user_msg + context
+            reply = call_aiproxy(messages)
+            self._send(200, {'reply': reply, 'related_policies': related[:5]})
+        
+        elif self.path == '/api/gov/doc/generate':
+            doc_type = data.get('type', '通知')
+            title = data.get('title', '')
+            content = data.get('content', '')
+            prompt = f'请帮我生成一份{doc_type}。\n标题：{title}\n主要内容：{content}\n\n要求：格式规范，要素完整，语言正式。'
+            messages = [{'role': 'system', 'content': '你是公文写作助手，精通各类公文格式。'}, {'role': 'user', 'content': prompt}]
+            result = call_aiproxy(messages, max_tokens=2048)
+            self._send(200, {'result': result, 'type': doc_type})
+        
+        elif self.path == '/api/gov/doc/polish':
+            text = data.get('text', '')
+            prompt = f'请润色以下公文，使其更加规范、严谨：\n\n{text}'
+            messages = [{'role': 'system', 'content': '你是公文润色助手。'}, {'role': 'user', 'content': prompt}]
+            result = call_aiproxy(messages, max_tokens=2048)
+            self._send(200, {'result': result})
+        
+        else:
+            self._send(404, {'error': 'not found'})
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', type=int, default=8025)
+    args = parser.parse_args()
+    server = HTTPServer(('0.0.0.0', args.port), GovHandler)
+    print(f'政务API服务启动: http://0.0.0.0:{args.port}')
+    print(f'政策库: {len(POLICIES)}条 | 办事指南: {len(GUIDES)}条')
+    server.serve_forever()

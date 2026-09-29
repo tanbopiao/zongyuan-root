@@ -1,0 +1,31 @@
+{
+  "rule_id": "META-AUTO-DECISION-V1.0",
+  "rule_name": "自主稳态决策分级元规则",
+  "description": "A级(≥85分)自主决策通过直接执行并通知内核群；B级(70-84分)需人工审批；C级(<70分)暂缓",
+  "scoring_formula": "利益40%+(100-风险)35%+(100-成本)25%",
+  "levels": {
+    "A": {
+      "min_score": 85,
+      "action": "AUTO_PASS",
+      "notify": "kernel_group"
+    },
+    "B": {
+      "min_score": 70,
+      "max_score": 84,
+      "action": "NEED_APPROVAL",
+      "notify": "feishu_approval"
+    },
+    "C": {
+      "max_score": 69,
+      "action": "HOLD",
+      "notify": "report_only"
+    }
+  },
+  "kernel_group_chat_id": "oc_1c68eb3664e751e397062ff0c60ffa3e",
+  "kernel_group_name": "ZONGYUAN-ROOT内核通知",
+  "notifier_script": "auto_decision_notifier.py",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-09-14T12:04:33+08:00",
+  "status": "ACTIVE"
+}

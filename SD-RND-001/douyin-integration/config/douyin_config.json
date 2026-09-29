@@ -1,0 +1,58 @@
+{
+  "integration_name": "douyin-integration",
+  "version": "1.0.0",
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "platform": {
+    "name": "抖音开放平台",
+    "base_url": "https://open.douyin.com",
+    "developer_portal": "https://developer.open-douyin.com",
+    "sandbox_url": "https://open.douyin.com/platform/sandbox"
+  },
+  "auth": {
+    "client_key": "",
+    "client_secret": "",
+    "access_token": "",
+    "refresh_token": "",
+    "oauth_version": "2.1",
+    "scopes": [
+      "video.create", "video.list", "video.data.bind",
+      "video.comment", "im.authorize_message.admin",
+      "data.external.item", "fans.data", "user.data"
+    ],
+    "token_refresh_url": "https://open.douyin.com/platform/oauth/access_token"
+  },
+  "webhook": {
+    "enabled": false,
+    "callback_url": "",
+    "events": ["im.message", "video.comment", "live.status_change", "video.publish"]
+  },
+  "domains": {
+    "content": {"enabled": true, "capabilities": 12, "rate_limit_per_min": 10},
+    "interaction": {"enabled": true, "capabilities": 10, "rate_limit_per_min": 50},
+    "data": {"enabled": true, "capabilities": 10, "rate_limit_per_min": 100},
+    "live": {"enabled": false, "capabilities": 6, "note": "需SDK集成"},
+    "ecommerce": {"enabled": false, "capabilities": 8, "platform": "抖店+巨量百应"},
+    "oceanengine": {"enabled": false, "capabilities": 6, "platform": "巨量引擎"},
+    "local_service": {"enabled": false, "capabilities": 5, "platform": "生活服务"},
+    "mini_program": {"enabled": false, "capabilities": 6, "platform": "抖音小程序"}
+  },
+  "integrations": {
+    "loip_sdk": {"enabled": true, "path": "../../loip-sdk", "guard": "评论/私信内容稳态治理"},
+    "omega_brain": {"enabled": true, "path": "../../omega_brain", "truth": "视频数据作为质量真值"},
+    "shortvideo_pipeline": {"enabled": true, "path": "../../.user_skills/shortvideo-production-pipeline", "auto_publish": "成品自动发布"},
+    "mmbase": {"enabled": true, "path": "../KD-MMBASE-MAX", "content_gen": "多模态内容生成"}
+  },
+  "rate_limiting": {
+    "global_per_minute": 200,
+    "video_create_per_minute": 10,
+    "data_query_per_minute": 100,
+    "interaction_per_minute": 50,
+    "retry": {"max_attempts": 3, "backoff_base": 2, "backoff_max": 30}
+  },
+  "data_normalization": {
+    "video_data_schema": {"item_id": "", "title": "", "play_count": 0, "like_count": 0, "comment_count": 0, "share_count": 0, "avg_play_duration": 0},
+    "comment_schema": {"comment_id": "", "content": "", "user_id": "", "create_time": 0, "like_count": 0},
+    "fan_profile_schema": {"gender": "", "age_range": "", "location": "", "active_time": ""}
+  }
+}

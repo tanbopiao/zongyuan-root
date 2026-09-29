@@ -1,0 +1,82 @@
+# ANCE 配置文件
+# AI-Native Cloud Ops Engine
+
+engine:
+  name: "ANCE"
+  version: "1.0.0"
+  mode: "hybrid"  # ai_direct / iac_ci_cd / hybrid
+
+llm:
+  provider: "doubao"
+  api_key: "${DOUBAO_API_KEY}"
+  model: "doubao-seed-2-0-lite-260215"
+  endpoint: "ep-m-20260325114252-xcd64"
+  base_url: "https://ark.cn-beijing.volces.com/api/v3"
+  max_tokens: 4096
+  temperature: 0.3
+
+cloud:
+  default_provider: "tencent"
+  tencent:
+    secret_id: "${TENCENT_SECRET_ID}"
+    secret_key: "${TENCENT_SECRET_KEY}"
+    region: "ap-guangzhou"
+    default_image: "img-22trbn9r"  # Ubuntu 22.04
+  aliyun:
+    access_key: "${ALIYUN_ACCESS_KEY}"
+    secret_key: "${ALIYUN_SECRET_KEY}"
+    region: "cn-guangzhou"
+
+ssh:
+  default_user: "root"
+  default_port: 22
+  key_file: "~/.ssh/ance_deploy"
+  timeout: 30
+  connect_timeout: 10
+
+execution:
+  max_retries: 3
+  retry_delay: 5
+  step_timeout: 300
+  parallel_steps: false
+  confirm_before_apply: true  # 生产环境建议true
+
+verification:
+  ports: [22, 80, 443]
+  check_http: true
+  check_https: true
+  check_ssl_expiry: true
+  ssl_min_days: 7
+  check_services: ["nginx"]
+
+healing:
+  enabled: true
+  auto_fix: true
+  max_fix_attempts: 3
+  llm_enhanced_diagnosis: false  # 需配置LLM API
+
+truth_engine:
+  enabled: true
+  cache_dir: "truth_cache"
+  auto_record: true
+  recall_threshold: 0.6
+  merkle_lock: true
+
+lock_archive:
+  enabled: true
+  algorithm: "sha256"
+  merkle_dag: true
+  efuse_simulation: true
+  output_dir: "lock_credentials"
+
+output:
+  base_dir: "output"
+  terraform_dir: "output/terraform"
+  ansible_dir: "output/ansible"
+  shell_dir: "output/shell"
+  log_dir: "logs"
+
+logging:
+  level: "INFO"  # DEBUG / INFO / WARNING / ERROR
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  file: "logs/ance.log"

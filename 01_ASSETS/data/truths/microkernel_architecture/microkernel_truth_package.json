@@ -1,0 +1,104 @@
+{
+  "batch_id": "LOCK-BATCH-20260905-MICROKERNEL-001",
+  "created_at": "2026-09-05T02:58:09.595177+00:00",
+  "source": "微内核/宏内核/混合内核对比技术文档",
+  "truth_purity": 96,
+  "drift_degree": "3%",
+  "axiom_check": "PASS",
+  "total_truths": 5,
+  "batch_root_hash": "9ADB752CB403FC83BED926AE3639A606EE44F152CAF4A0FA0A213B4D3B89836D",
+  "chain_hashes": [
+    {
+      "truth_id": "MK-TRUTH-001",
+      "asset_hash": "CE6EBE3F8221ED0DC59926D70678AD7295A24AAE86F851188592EFE3C885D5F5",
+      "parent_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "new_root_hash": "FF38A36EDAB74F13C72F66AB50DA86AFD507C416FC0A485AAA697E4266050787"
+    },
+    {
+      "truth_id": "MK-TRUTH-002",
+      "asset_hash": "66C519197E8796E1E4094AD7B4D6A38FFEE389107E90856C0546CC3120499394",
+      "parent_hash": "FF38A36EDAB74F13C72F66AB50DA86AFD507C416FC0A485AAA697E4266050787",
+      "new_root_hash": "EF226316B257A1A35661C03B0D94E424C57F4889294F580F17F327A27FF27647"
+    },
+    {
+      "truth_id": "MK-TRUTH-003",
+      "asset_hash": "97424D820F0A29D96833F7B0E7EA88ABF91BFF267F1FE73B211790548E97C27D",
+      "parent_hash": "EF226316B257A1A35661C03B0D94E424C57F4889294F580F17F327A27FF27647",
+      "new_root_hash": "5E1F729FC13F1065C150F31841803D36E7AE48F9C716C7AC3C14AC0631B679E7"
+    },
+    {
+      "truth_id": "MK-TRUTH-004",
+      "asset_hash": "C2854852BCCC30ECC3F5A42A9B83B700D80557754997B2ADA3073ECDAC825302",
+      "parent_hash": "5E1F729FC13F1065C150F31841803D36E7AE48F9C716C7AC3C14AC0631B679E7",
+      "new_root_hash": "7AAF623C8A5F19C4EA6A37172D09545BFC5D3D0CE815808BF7819D22D8E15089"
+    },
+    {
+      "truth_id": "MK-TRUTH-005",
+      "asset_hash": "024E706D4AD7A90E92559F3E25A88AA5542D675FB357E299A4BE02567DF68EC4",
+      "parent_hash": "7AAF623C8A5F19C4EA6A37172D09545BFC5D3D0CE815808BF7819D22D8E15089",
+      "new_root_hash": "9ADB752CB403FC83BED926AE3639A606EE44F152CAF4A0FA0A213B4D3B89836D"
+    }
+  ],
+  "truths": [
+    {
+      "truth_id": "MK-TRUTH-001",
+      "title": "内核架构三分法真值",
+      "content": "操作系统内核架构分为三类：宏内核（一切跑内核，性能好隔离弱，代表Linux/传统UNIX）、微内核（几乎全服务放用户态独立进程，隔离强IPC开销大，代表QNX/SeL4/Minix）、混合内核（微内核框架+性能热点模块入内核空间，折中方案，代表Windows NT）。",
+      "type": "技术定义公理",
+      "confidence": 98,
+      "dimension": "操作系统架构",
+      "axiom_ref": "高密度真值公理",
+      "lock_level": "Lv4",
+      "sha256": "CE6EBE3F8221ED0DC59926D70678AD7295A24AAE86F851188592EFE3C885D5F5"
+    },
+    {
+      "truth_id": "MK-TRUTH-002",
+      "title": "微内核最小机制不可下放真值",
+      "content": "微内核的核心原则是最小基础机制不可下放——进程调度、内存管理、IPC消息通信、基础权限必须保留在内核空间；文件系统、网络协议栈、设备驱动等全部运行在用户态独立进程，模块交互依靠IPC消息传递。",
+      "type": "架构设计公理",
+      "confidence": 97,
+      "dimension": "微内核架构",
+      "axiom_ref": "Ω-Brainμ架构公理",
+      "lock_level": "Lv5",
+      "omega_brain_mapping": "元法则校验/Merkle-DAG/漂移检测/熔断权限 = 微内核最小基础机制，绝不下放",
+      "sha256": "66C519197E8796E1E4094AD7B4D6A38FFEE389107E90856C0546CC3120499394"
+    },
+    {
+      "truth_id": "MK-TRUTH-003",
+      "title": "微内核性能优化正确路径真值",
+      "content": "微内核性能优化的正确路径是共享内存优化数据面IPC，而非把业务逻辑迁入内核空间——后者会破坏微内核的安全隔离底线，退化为混合内核。极少数高频热点路径采用共享内存机制优化IPC，业务逻辑始终保留在用户态进程。",
+      "type": "技术最佳实践",
+      "confidence": 95,
+      "dimension": "微内核性能优化",
+      "axiom_ref": "Ω-Brainμ架构公理",
+      "lock_level": "Lv4",
+      "omega_brain_mapping": "Ω-Brainμ高频热点路径用共享内存优化，业务逻辑始终用户态，不走向混合内核",
+      "sha256": "97424D820F0A29D96833F7B0E7EA88ABF91BFF267F1FE73B211790548E97C27D"
+    },
+    {
+      "truth_id": "MK-TRUTH-004",
+      "title": "故障隔离与攻击面量化真值",
+      "content": "微内核相比宏内核具有四个结构性优势：故障隔离（单用户态服务崩溃不影响内核，宏内核任意模块bug导致整个系统崩溃）、安全攻击面（内核代码极小，宏内核查漏风险面大）、组件热插拔（用户态进程可独立重启/替换，宏内核需重新编译）、形式化验证可行性（SeL4已完成形式化验证，宏内核代码量太大极难验证）。",
+      "type": "技术对比真值",
+      "confidence": 96,
+      "dimension": "内核架构对比",
+      "axiom_ref": "自愈公理",
+      "lock_level": "Lv3",
+      "sha256": "C2854852BCCC30ECC3F5A42A9B83B700D80557754997B2ADA3073ECDAC825302"
+    },
+    {
+      "truth_id": "MK-TRUTH-005",
+      "title": "Ω-Brainμ严格微内核选型自洽真值",
+      "content": "Ω-Brainμ采用严格微内核+共享内存优化IPC的架构选型，在操作系统经典理论层面完全自洽——底层真值基座（元法则校验、Merkle-DAG、漂移检测、熔断权限）严格微内核化绝不向外下放，普通业务插件全部用户态进程运行，极少数高频热点路径采用共享内存优化IPC，不把业务逻辑迁入内核空间，避免破坏微内核安全隔离底线，不走向混合内核路线。",
+      "type": "架构决策验证",
+      "confidence": 97,
+      "dimension": "Ω-Brainμ架构",
+      "axiom_ref": "Ω-Brainμ架构公理",
+      "lock_level": "Lv5",
+      "sha256": "024E706D4AD7A90E92559F3E25A88AA5542D675FB357E299A4BE02567DF68EC4"
+    }
+  ],
+  "did": "DID-BR-000002",
+  "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+  "lock_level": "Lv5"
+}

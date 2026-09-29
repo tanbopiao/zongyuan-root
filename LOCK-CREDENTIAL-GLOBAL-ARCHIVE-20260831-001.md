@@ -1,0 +1,371 @@
+# 全域锁档凭证｜GLOBAL-ARCHIVE-20260831-001
+
+## 锁档元数据
+
+| 字段 | 值 |
+|------|-----|
+| 快照ID | GLOBAL-ARCHIVE-20260831-001 |
+| DID标识 | DID-BR-000002 |
+| 溯源符号 | Ω₀⊂⊙∞⊂Ω |
+| 归档节点 | ZONGYUAN-ROOT |
+| 锁档时间 | 2026-08-31 10:04:02 +08 |
+| 资产总数 | 331个文件 |
+| Merkle根 | `e02f23368884decb797687e5a531adf3d57624581099d0c1016a3fb3859c1d5c` |
+| 归档包整体哈希 | `c4cb07af18ccc56628b2dbd44407fd3cfa3f9312a84560ae1787dd471a440862` |
+
+## 逐文件哈希
+
+| 文件 | 大小 | SHA-256 |
+|------|------|---------|
+| .github/workflows/ci.yml | 1281B | `36e239540ed1dc9007e51adfd31b6b44329558044e4c2d96829dc08ecb492ba9` |
+| architecture/evolution_20260827.json | 3899B | `887ef683c7645b5c464ae64ab133425851fece51c22626ede83df2447767bc66` |
+| architecture/evolution_20260828.json | 3681B | `4c370a82d9dbfe6507b9c54cf7844334e19a3a2c647719098e71ab412a15e1d6` |
+| architecture/evolution_20260829.json | 3589B | `98839e3cb5845e42a6c7701cc7aa09d38a1b956df102541ede71c9b54ceb2339` |
+| architecture/evolution_20260830.json | 1818B | `13d079cd5bebc9b84461a95386bc0d472d3505a91cde1c38dd07ecb863c20a40` |
+| architecture/evolution_20260831.json | 2123B | `7d88242abacff2c360590b9c5b75e63c70372a2ee776100302c99b0def9bded4` |
+| assets/production_lines/90ec8a1c9939_太阴月神·墟境校准/01_script.md | 449B | `e417e4567adc44bd0cb31e4d634de30aacd1a7a17a95ec44216cdb812c3dc209` |
+| assets/production_lines/90ec8a1c9939_太阴月神·墟境校准/02_storyboard.md | 308B | `21b06221c7069b1535df4ae8517c7d3f1ef86dc029b0354c7f5f9a4e8036aad2` |
+| assets/production_lines/90ec8a1c9939_太阴月神·墟境校准/03_voiceover.md | 151B | `350dc539d164d3062be42e102e3e1a10fb3f7222ea94c8d80b907f0ca66970d0` |
+| assets/production_lines/90ec8a1c9939_太阴月神·墟境校准/04_visual_description.md | 233B | `7af17efb9aad5978a45837161255a6b3ace3ef5d76ed2dba7f108f5a90f87fa2` |
+| assets/production_lines/90ec8a1c9939_太阴月神·墟境校准/14_whitepaper.md | 1360B | `407381decd3dcc7fa4261872b1de1e7d1d2d695c19e8fce7f25fcc7d33f0fe7f` |
+| assets/production_lines/90ec8a1c9939_太阴月神·墟境校准/manifest.json | 7845B | `0c377330fbbab9519e1f59eb9905f2a45d4f7cb5f863153de923e06df78aa0d1` |
+| assets/voice_library/voice_library.json | 3512B | `3717000559906ff3fa95aebc9fded807c401ef4688855bd911161d5d33ffcd15` |
+| audit_logs/action_execution.lock | 0B | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| audit_logs/audit_action_execution.jsonl | 21353B | `db9c38548466e7146fcb979359e94e97ddedd66713a2820fcd9178a748534e26` |
+| audit_logs/audit_backup.jsonl | 1402B | `7de5ca767e7a0bec02dd76dc2603980c13f1585ac0fa0d1a1d64389621e0d310` |
+| audit_logs/audit_default.jsonl | 12966B | `bd4c96c3160f9ee1c2fbd9aafe73507771bab818ebf9324110dbd6fcbe77edcc` |
+| audit_logs/audit_integration_test.jsonl | 851B | `8aa91abb4ed99b4fefea5bbd1ca5fc0a1bda1c633b08b0f5a9071a9fcbaa26e7` |
+| audit_logs/audit_seven_layer_test.jsonl | 924B | `0be43e6bc84ea3b3e0d945fc2a412e476de99a1caa68532640cb3b7a3cedefaa` |
+| audit_logs/default.lock | 0B | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| audit_logs/index_action_execution.json | 268B | `75c058249e3037bda4311ab34e41d45ca3f982dc07e5ce4eacd7c96b7ded6501` |
+| audit_logs/index_default.json | 259B | `e0b9b83adfba4876c4749d58fa070a2a98a15132d7a63b0d5cb56e72789c490a` |
+| audit_logs/index_integration_test.json | 266B | `191d2b8926634166feec7f9ec259e22e6dce6740c0af9f412e5df59237dbd4b8` |
+| audit_logs/index_seven_layer_test.json | 266B | `cb9a1152dd588111c31e8983827890f0534140d963ca885d51e64f722cccb83c` |
+| audit_logs/integration_test.lock | 0B | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| audit_logs/seven_layer_test.lock | 0B | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.0-20260827.json | 1542B | `69fe3ed118f6472407bfca1cfbb66216b52d09384f8f4fcad2b963da791cb990` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.1-20260828.json | 1538B | `de2ebeae1580003b3bb026cc3d83aaeb1432d17b93b9430c934e62b6fe1ddb71` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.2-20260828-GLOBAL-LOCK.json | 2590B | `89358d07836f698610caeeb8867338c5e222a2d88601a0334944f8f7a4afa8ea` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.3-20260829.json | 1636B | `f9a900cc746cd8d26f79cc467957dfe70e9452cf8a646ccf60792abbfce6e260` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.4-20260829-AUTO.json | 2528B | `9baf3ac8199b216335249880384839e374d2616ed37481e2a5878cc868fc6c5e` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.5-20260830-GLOBAL-OPTIMIZE.json | 3568B | `497351add5717c684abc4c2634772c37ca34ea6a9f7f63890b605468cbd6f10b` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.6-20260830-7ACTIONS.json | 3819B | `f2e4514b01f7b0e23f09280e183666971cd6c8bb5757c34930d0f29db249f666` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.7-20260830-PLAN-EXECUTE.json | 3812B | `fdda8dc1dbc5675bd59493fcb121b3ab86d41b81ee7363cfe1e4f1ca14956eaf` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.8-20260830-M3-COMPLETE.json | 3818B | `56560f598968d014e5f6b077df1cab0b4185b3c1e68e16454292e0ab72f20fb2` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V2.9-20260830-HORIZONTAL-EXPANSION.json | 3281B | `297b36cc80ac6d97c72f9b070ae4c04f7d0906f1ffe81ae47da0165f162da916` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V3.0-20260830-DAILY.json | 917B | `7fab810f607d438a958b5f232162a4ab7595cd4428150a0414c05ae7d89624ba` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V3.1-20260830-MWP.json | 1354B | `3dc5e98890ba9daeb23400ca36cd929350d310859f45841dc8a3d23a76f8db8c` |
+| autonomous_kernel_protocol/AUTOKERN-PROTO-V3.2-20260831-DAILY.json | 917B | `f63a6ab3063d0abc76e00c080fca9067b0fc578a69aa8f63a08f153b1f2f8a54` |
+| backups/whitepapers_20260831_013309/MWP多写入者协议规范_v1.0_20260830.md | 11290B | `a95b4217fbb9918eb00a4a7c301e46b2a8925a5951fdb214b7f9dd9367ff4960` |
+| backups/whitepapers_20260831_013309/P3认知偏差修正声明_20260830.md | 4009B | `2c38482f5c3ffcb30122408957b0a69cd4eaa9bac4489f4c803b488f3ac6f11a` |
+| backups/whitepapers_20260831_013309/ZONGYUAN-ROOT_全域终极进化白皮书_20260827.md | 12276B | `e1708dc4ded9607c4291aa4b80076716cfc8a06a0d44dcedefd7c477a8b884e2` |
+| backups/whitepapers_20260831_013309/ZONGYUAN-ROOT_全域终极进化白皮书_20260828.md | 10434B | `96c15147264d86780aaf320a056228692040d8119ecb19276a09b0b1d2f54c3d` |
+| backups/whitepapers_20260831_013309/ZONGYUAN-ROOT_全域终极进化白皮书_20260829.md | 7403B | `c1415871dde9ab88db05b326eab267b64a5936b1043427bcd64e2101fe31d268` |
+| backups/whitepapers_20260831_013309/ZONGYUAN-ROOT_全域终极进化白皮书_20260830.md | 4423B | `63d268a47317b31e13721678c56f6da4b108b011ec7ea88ff0ddc66d0166180c` |
+| backups/whitepapers_20260831_013309/ZONGYUAN-ROOT_全域终极进化白皮书_20260831.md | 4880B | `27cc25551570b3af2b50d024f4e3ff520cdfaa2c7c44bc6529c7bbb2f8015287` |
+| backups/whitepapers_20260831_013309/免费额度最大化利用方案_20260830.md | 12116B | `497f04ebb8cbcc804b3cd4ca46971ea5e1d99e00280514f341536cba750e41da` |
+| backups/whitepapers_20260831_013309/全域全维度通用大模型最大边界最大化利用方案_20260829.md | 13584B | `7f7923c6b50f6943f2eacc271dec060084f729a8c20c17effbb54e243ed85475` |
+| backups/whitepapers_20260831_013309/可信真值源架构白皮书_20260831.md | 20586B | `bec380b5a95112b8f3a4229f26d5649f1a3f1f08d246e0a17f592d3f41c4d385` |
+| backups/whitepapers_20260831_013309/基于最大边界推演的最大化利用方案_20260830.md | 13857B | `aa8c6c9cf33cf2fe5479f76204fcc7601977b7918cd66fa01228d83dc6b4c197` |
+| backups/whitepapers_20260831_013309/多写入者兼容进化架构白皮书_20260830.md | 13508B | `b925be7aebb3b9e5af83dd9aea71ebdc51a5fbbe685c760852ebb9a20d5b8c27` |
+| backups/whitepapers_20260831_013309/当前短板漏洞断点深度诊断_20260830.md | 11570B | `52a7f9f0535d1faa2656fbdc86f628091d60feeaae8c636a256a19347516e45e` |
+| backups/whitepapers_20260831_013309/根因修正_多写入者冲突分析_20260830.md | 10197B | `45c8b03f8dcf9b6b959a493b16b2b2db590e341c8254bc913ef2f93a9f6d5cf9` |
+| backups/whitepapers_20260831_013309/横向功能最大化扩展深度推演_20260830.md | 19123B | `90de6c4e955470f9f460700025f107500407d14c47088951a98e808aa6217361` |
+| backups/whitepapers_20260831_013309/每次修复根因深度推演_20260830.md | 12340B | `86a647a5003a9a5b6fd59e0c7a25014e54cc387721d6f26df539fc38d3900a70` |
+| backups/whitepapers_20260831_013309/规划架构真值_豆包基座+ΩBrainμ_20260828.md | 10268B | `29fa911eda3afc23bf6a3aa46230c66856c3dbdbb32d7039fb44362165732fa4` |
+| backups/whitepapers_20260831_013309/触达豆包基座的最大边界深度推演_20260830.md | 12858B | `151778580a37bcc8c7502efb61ab17a001c386fc5d2c431cfd3fba3add4fe60f` |
+| backups/whitepapers_20260831_013309/高价值任务深度规划白皮书_20260831.md | 15728B | `eb19215fed48f6e5ba185d7b8223f390a52c57220d1147644719c2b10a14d88d` |
+| backups/zongyuan_root_backup_20260830_070840.tar.gz | 135686B | `cff603f7221012de628386134d8bb2c45d0cf71281e98cc380513b043d2d0c42` |
+| backups/zongyuan_root_backup_20260830_070840_meta.json | 15269B | `82cc664bd003a1e09bb4ab7d1fe4b4240a2f417fbc4fd8cfedc5db5fc993ee54` |
+| blockchain_anchors/anchor_0x431fd458568b9ff0.json | 679B | `37292026352b4e9e06b25348bd340722f6d8d7a18e6605ba09ff6f4f58359e82` |
+| blockchain_anchors/anchor_0x9353ab8dba95b4a8.json | 679B | `462ca3ad101f5df1f8ed7312338e194b6568fa29109a6350368cf3fce927e888` |
+| blockchain_anchors/anchor_0xfe8b6cb9aa98051c.json | 693B | `737517dde3c2e7198ab396fc8fe58ec5dfcffae2e1f99ea032954b8b28e5e21e` |
+| blockchain_anchors/anchor_log.jsonl | 1934B | `44a666f33a667ca6dc8402ade3675881fa783b1c9e0b35e034800f4955221815` |
+| cache/vector_cache/rag_knowledge_base.json | 48812B | `af45226c9f7234a3be94652f8376369352020fae95b04aba3c40afc8b374d14e` |
+| cache/vector_cache/truth_base.json | 64179B | `3e7ac2e6e47e97077d8397c6262eaa55f250bb03d93e50de370f5b66b3c625d9` |
+| cas_store/index.json | 2112B | `056dd665243db1d3162645d98d591df66729435fabe0a1c4b1e66f9f5e390fd0` |
+| cas_store/objects/27/53363171e0fe0f3f406346ab7032d2c6b3bf46cc1339d65af33f9971040518 | 59B | `2753363171e0fe0f3f406346ab7032d2c6b3bf46cc1339d65af33f9971040518` |
+| cas_store/objects/2d/b172bbb0e76375fb9569f3054d17bebb5c4726814b72edde0a817197316a32 | 13B | `2db172bbb0e76375fb9569f3054d17bebb5c4726814b72edde0a817197316a32` |
+| cas_store/objects/53/7d612491136f2cad7f3e8f7135778e2228d3295056e0cc55a6cfda8a582d0d | 51B | `537d612491136f2cad7f3e8f7135778e2228d3295056e0cc55a6cfda8a582d0d` |
+| cas_store/objects/5f/33ed2ed04772d26ba620e9996bc16682a47204e9ed22ea29ffd30d961b31f2 | 46B | `5f33ed2ed04772d26ba620e9996bc16682a47204e9ed22ea29ffd30d961b31f2` |
+| cas_store/objects/b5/13870e107d85044315eff57b65d77e43babd28bd12621cacbf5f03a43ccf1e | 13B | `b513870e107d85044315eff57b65d77e43babd28bd12621cacbf5f03a43ccf1e` |
+| cas_store/objects/bd/e7df3389683b0a05ebbda7b90e1644075b268b1b6621115b3f4a21026f07a1 | 19B | `bde7df3389683b0a05ebbda7b90e1644075b268b1b6621115b3f4a21026f07a1` |
+| cas_store/objects/d5/5f486506e279d402fa43beabfb001c87cdef245b6515953443456c215cad5a | 89B | `d55f486506e279d402fa43beabfb001c87cdef245b6515953443456c215cad5a` |
+| cas_store/refs/HEAD/truth-v1.4 | 64B | `77b943554dcd03fa6ee8add12a848ccfb767a2377c90d304d9d925beccade5fa` |
+| cas_store/refs/evolution_EVOL-RUNTIME-20260831-001_kernel | 64B | `b008631357d2bf23ef62bdf411d1ebadcffd4fcf7af787da33537f690ffb66e6` |
+| cas_store/refs/pipeline_TEST-PIPELINE-001_L1 | 64B | `f089b1a31f28edf4825cb69a72beb1d91bdacea9b9738f1c38dd2b7297dca472` |
+| cas_store/refs/test_lifecycle | 64B | `a25407f50040a675204c09fcd331e71a6d8525db83d32c604f12742bbccf4bbb` |
+| cas_store/refs/tpc_test | 64B | `e4a338796a155f73b82eb294b67f202b05c0111fd0f434ac18fa7eb6d53abfa6` |
+| compute_audit/compute_log.jsonl | 3816B | `fda15b4f46afe59fcff963289daffe374e2774e548f089cef0283935caeaf75b` |
+| compute_audit/index.json | 414B | `9939619af24574a926dd552a165da7a2e991886910e1fa654cab4acbc67b18f6` |
+| config/.encrypted_keys | 370B | `58e343e72d554501a216bee4cd5915ab52b469f1d915e9eded7910df8a497db8` |
+| config/.master_key | 44B | `432742c98244821353a6164a9129e24bd8985e804e8c9e3df25774d723bcb310` |
+| config/blockchain_config.json | 2292B | `b0026f3d497489f23e72dfbba82500e951a4e40734ee6578edc9a19715cc5166` |
+| config/concurrent_writer.py | 4859B | `21ee9aa716e35f4de64ba316959f69cfdf29c6469480ba54148290549750ffb0` |
+| config/config_center.py | 3258B | `5b8397ac42ddd51f045595126df3d37d736b1e3c91ee322652ff5cbdbb299915` |
+| config/consensus_4node.json | 628B | `23ddf3cacdb1190e9abd8cae3323a2653678dfe8f46cca707a6a757499cdede4` |
+| config/im_config.json | 754B | `0e4da5f49cb866dbe0a5762daabc7551838e521ffda63f60d2f897de8b4adc3f` |
+| config/im_config.py | 2128B | `d9440864a7a25e023183b7e230487454501dab2f02ab0fdf6529d6ee0b6135f7` |
+| config/omega_brain_config_v1.1.json | 4704B | `c6cecd9d939a026ac67a872c1c0ff571f13418b7d7c9f5fa94a5589728bcb9d9` |
+| config/rag_config.json | 525B | `c74e5a830ccafa4787d51ebc61560f2d80807a450c9644b09fe88a8ffceaeacb` |
+| config/secure_config.py | 2763B | `bec2a59c97c71cb3571377426186af7a985c4166c2923415b676be679c12cfdf` |
+| config/unified_logger.py | 2324B | `f87088c0a19a536d9bfb60d26e07533f4e30597f6ad8538f83e6e9fa6eaf79e3` |
+| consensus/consensus_000000.json | 1078B | `db6c3461a4f3d32a45503eeab5032e8917784a47f7a61ace83030cb1b493496b` |
+| consensus/consensus_000001.json | 967B | `876860d3d1684907eb6730707c43efe135a4310b6c047375289ba1c1b47fb73f` |
+| consensus/consensus_000002.json | 967B | `95b3a2c7f9076dc4ff30d50c69c59c6a98cb8703a09a6d104d45d475b09d998d` |
+| consensus/consensus_000003.json | 967B | `84350b789bf2474d8f428615188459614df9fca09e6d4ee320f1a101608bfeb7` |
+| consensus/consensus_000004.json | 966B | `e26e1239c5978e3974501462cecdb449eacd15a3b0b56e2dda939d770a32610b` |
+| consensus/consensus_000005.json | 1139B | `53c85c778f578b075a760722989cbfcba32122198449d9d76be55e1f2d965ef7` |
+| consensus/consensus_000006.json | 1116B | `cca0b3a469350211b49f436709c68b9f4228ae42cd097576e735ff254cc1c811` |
+| consensus/consensus_000007.json | 1115B | `21003aa9262cd6f76619b297f02dd0a09b7415f2c6d8c70f9a32e32061f9ec03` |
+| consensus/consensus_000008.json | 1116B | `5e0711ea27d5448bc0bd9215f1145f28618dad6a880ff20d1fc537bd5badc0d2` |
+| consensus/consensus_000009.json | 1115B | `bcc036dea4b2be09c482ae3ffb3c91d5de2274c3454a3cede6d7d5fb56d31928` |
+| consensus/consensus_000010.json | 1116B | `4747d2bdd7dff52370be05462399d7d7ef7924fedd7bf52c6904fc7703f4a829` |
+| consensus/consensus_000011.json | 1117B | `05e00ffa0825ff414ad6bd484e88173e355241a6734f7631618a9e055db519d2` |
+| consensus/consensus_000012.json | 1116B | `1678dcd7dc74dd256926b4e3a419a02f9deec9d1ea1fad02ecf617f54e7099fa` |
+| contracts/TruthAnchor.sol | 6337B | `94693e377e11fac0cf616c9270e97db2a7d69f0e4156c88ea5d731118c5e5939` |
+| contracts/deploy_anchor.py | 10857B | `5df41ab12bf42cd660750e78798e2a02868780f3d7b67f95a0dce1ed6f6637b7` |
+| docs/API_REFERENCE.md | 12165B | `91cc17988a128214cfd8d8ad03b77d330f3719cb5e95b48431c1ad2830af0bb6` |
+| docs/ZONGYUAN-ROOT_技术白皮书_V1.0.0_20260831.html | 31788B | `c8a3bdf2f829d327382f23339bb2312cf2e61e125850df759563f52d9869467d` |
+| docs/ZONGYUAN-ROOT_技术白皮书_V1.0.0_20260831.md | 24342B | `cf86c947fa5f0810b6c848d644e6e0b9dca5a8a63b10d44fd70e9db28ba20e77` |
+| executor/evolution/evolution/pipeline_breaker.json | 192B | `1d675b10befdb5be0acdca4ca3acb5abf9f75eef355133f01f6e7de0b58c84a4` |
+| executor/evolution/evolution/pipeline_exec_chain.json | 4177B | `8c7c792b7d642dd1f5a2b1b301d03d38e72f1e085111c22f3b337adc53c698c2` |
+| executor/evolution/evolution/pipeline_idem.json | 4687B | `eae4acab4a8a3dcc1f4b6b38af844b0bdae13afa1cb5a567dff260d9f1143519` |
+| executor/evolution/evolution/pipeline_metrics.json | 1206B | `abf963afbd6e25843bede7a250d5b7c4f67e5363aaba3fa7a1de744ec51fb646` |
+| executor/evolution/evolution/pipeline_rbac_audit.jsonl | 1389B | `411b5735977df35daa636701188f6d13fcde732823bcdb76085c5e579cabb5d7` |
+| executor/evolution/evolution_report_EVOL-RUNTIME-20260831-001.json | 5894B | `e1dc2090f7230854c19dc02df1bedf665682a592deb845e5a8614b99a9be3062` |
+| executor/pipeline/pipeline_breaker.json | 208B | `2e8b8a4cc6e71e5806867d5ad017109af048cd75b5e2e407690e4735bff90c5e` |
+| executor/pipeline/pipeline_exec_chain.json | 4536B | `194565545e3bfe23207829eb3bd4de8529f3a40be2888d70444291f3bddf022d` |
+| executor/pipeline/pipeline_idem.json | 3296B | `9e3d4dcad54a0fb93bb5919babf8b6c0c7e7a1d3f28b4c4b22946aaaeaef527b` |
+| executor/pipeline/pipeline_metrics.json | 1869B | `b5246ff9ec7437e898c6be889225189ccc9bb07c34be53d333538f336357043b` |
+| executor/pipeline/pipeline_rbac_audit.jsonl | 1501B | `377dfa4f254cd41da6e66e550ea31690dcccdaa92bf8054fbda991522c7f08ab` |
+| executor/pipeline/pipeline_report_RUNTIME-TRUTH-20260831-001.json | 6887B | `a2fd8c6a0acc1c7172f26a040743b2d777d4d8754b177730c915a63e57c17e70` |
+| executor/vector_records/84f9df9954e8c72a.json | 11223B | `619044091b234d7e7a3c8beaf1675b81852ab288664b3438bdb4afb5f0d702d5` |
+| executor/vector_records/d53a2d035716bba0.json | 11246B | `183ea7e969c5c3d86a96f659530730914331063aa85b8c25a30e933722f7d1a3` |
+| expansion_plans/ecosystems_企业微信集成_plan.md | 499B | `4dff7300fe6f6ca30d72158357242f25df0c7a178ba51aab5d93c3e498c71dc0` |
+| expansion_plans/scenarios_个人助理场景_plan.md | 498B | `31cc68d5bb8ee80adbb801687984b9143b9f9f506f7e5912ea6f5c310255ede9` |
+| formal_proofs/TruthBase.v | 10554B | `080779788e753f5a0b87da0ccc5742b7ace270fed28d09c72447837bfcc22779` |
+| hash_chain/chain.jsonl | 832B | `307b0c3407e30a80d107f3fe57a00493757ee852315d9a0baef46d4912996683` |
+| ip_assets/ip_increment_20260830.json | 374B | `6fad41454ec21c6bd303cf17f25cbc492ec9c10c393234c50f6e4f33d4dfcb47` |
+| ip_assets/ip_increment_20260831.json | 421B | `cc96940dc80ded528ca5b365dc2411e03cc6958c4021b2a8446b763809c80191` |
+| lock_archive/BREAKPOINT-FIX-20260831015155.json | 1679B | `71032a724b7799c167272c4b5c04e8ff964372600aa93e269edd70cbb18ab662` |
+| lock_archive/BREAKPOINT-FIX-20260831015229.json | 1679B | `8332d6ab22e1681e5e14fcac4a62323680b236b97ba2da396beca953bcca4930` |
+| lock_archive/EVOL-RUNTIME-20260831-001_E4_LOCK.json | 54983B | `34fceef47c7e62b517238c0f38dee3b84af81653cce6dcc064b72d5d128ca6ee` |
+| lock_archive/LIMB-DRIVER-20260831011211.json | 1807B | `b5506d68c0d28b53e7f674fcf2d5bd1b7e29f72f11a1a2077aea6bcc6f8298cd` |
+| lock_archive/LIMB-HARDEN-20260831012109.json | 1958B | `338363df68168eff6baf1112e2cb4f3f33912eb9568b38e971952cda02dc1567` |
+| lock_archive/P0-FIX-TRUTH-20260831013726.json | 2050B | `798b75ee1897803a7b09dc0777866f9d3852cd1d5a9e93f6de303b6c471d26d1` |
+| lock_archive/RUNTIME-TRUTH-20260831-001_L2_merkle.json | 41855B | `ba16e4483f31c27bf1bc25b24ea115d2244cbcc4d03044407d861f6ce2d5a87e` |
+| lock_archive/snapshot_20260827.json | 3274B | `79882288ce650180eafe9038c418352cc93d6bba263006eca11e5cbf2768f965` |
+| lock_archive/snapshot_20260828.json | 3818B | `af66ec91f8a34b758cef9091802f76aa253a807055563e2a4da98db275275265` |
+| lock_archive/snapshot_20260829.json | 2773B | `06d35bec98473ebd874555b8dc280d85aefe0d350d5a3a6e12e2abce560bcd6a` |
+| lock_archive/snapshot_20260830.json | 13728B | `43b7bbe34e75902b8f7b79b3397bb546bbd998bdc137004207ff43856a596486` |
+| lock_archive/snapshot_20260831.json | 22913B | `e4e1af98a03a9cf58c20ccba987f84d50419fb0bb51c92ef88665a4daac38c8d` |
+| lock_archive/snapshot_7ACTIONS_20260830.json | 7491B | `ac71f685540ac1c10e86f0c7f3332859429f39a4442e5d16d4186d850aae3e27` |
+| lock_archive/snapshot_ALL_FIXES_20260830.json | 20074B | `966874d3f91126e4971b9dcb27dc5fac34709833bb4922b51abab10eeb68c40f` |
+| lock_archive/snapshot_GLOBAL_AUTO_LOCK_20260829.json | 5438B | `51d07980cc6d8bc84b764441e29ccbfa1cfb08904559e3cc7603d813e80216be` |
+| lock_archive/snapshot_GLOBAL_LOCK_20260828.json | 5386B | `ca53419c31c7452a82bca7671355469447972fcacd8e1a9186535ea4c0b890a1` |
+| lock_archive/snapshot_GLOBAL_OPTIMIZE_20260830.json | 6261B | `c1e3e9553e6d713b468a27e37aacb1912848cc505f9448499e0f9850b2427021` |
+| lock_archive/snapshot_HORIZONTAL_INTEGRATED_20260830.json | 13388B | `158c20e2f7e28e66f6d9211d10dfd981a628bc3420e439ce491dd037fec6b916` |
+| lock_archive/snapshot_M3_COMPLETE_20260830.json | 12114B | `df94aa23a45f37e5851dfd3cb25e541fd4b8c2d3aafb6acbf41461a616f28ef1` |
+| lock_archive/snapshot_PLAN_EXECUTE_20260830.json | 10395B | `6c6232fffc29aeed1d7c12254f048b639931843fd001bd9dd854b876237f65fa` |
+| logs/asset_aggregation_20260830.json | 1455B | `fef46b3086bd38569398789b7f0e66410ad66c1fcc3e0f25ce4f3d7316a3ad44` |
+| logs/boundary_scan_20260829.json | 11012B | `40726b794f386dbe859aadeaf4cb939b6fed91987f71aa1100e958a7cc7eac7a` |
+| logs/daemon.log | 414B | `834bb1a77b2ee0cf91be2341ab8bb6e1a879a2a1b8817b31279d5891489f0714` |
+| logs/evolution_events.jsonl | 5049B | `7afa0695e08d959bc8be8a28eaebaabc9f230837f47076190d52d41db5b1a34f` |
+| logs/evolution_loop_stdout.log | 68B | `c9c6ad1f5f421e3f8c508c3489a5ab6b74aaace484dfeec41bdf4beb6657e83d` |
+| logs/expansion_log.jsonl | 5388B | `0a58af1aa4cf2da1d2aa412bd70f567389bb63b240b8826e6f472e7e36e650e5` |
+| logs/load_balancer.log | 146B | `a0d1c0f1b566b1d670d7dc73186bdcfc0ae674d9c805ca7c414423728d9e9bf7` |
+| logs/monitoring_20260827.json | 3327B | `296b0437b944da9a58772fe285180cb9e2d3acc53b89aade7b4fa1ba3142410d` |
+| logs/monitoring_20260828.json | 2321B | `04497ba1597797356c5d470613969d19cd6c2199423f2f46a52800bc9b81c921` |
+| logs/monitoring_20260829.json | 1900B | `13a30bd4ce828523b5bf60f01f4b0c690833f899e364c282aebf4a7208c34280` |
+| logs/monitoring_20260830.json | 2160B | `b951fba05b4a3d0f2e9fe1302370eb4e90b131dbb5adbe15cc8db2adc3072745` |
+| logs/monitoring_20260831.json | 2477B | `3eed1fa11252793c37040eb1242e5abfd8b547fd3adc7df46c25d151fa815dbe` |
+| logs/quota_usage.json | 228B | `0e26ece40873255ce5574040dde1f540831969cfd7f7e4aba52a0837ac3081e4` |
+| logs/test_report_20260830_071101.json | 1219B | `3c44769a308dc57ce7c84cb52a7b02eb87b9b1e3650aff8e584a7401340b9095` |
+| logs/test_report_20260830_071119.json | 1012B | `8ecbef5bb61cba0447af8faaafcb6f4491e44451699e1af5060485dd042646b4` |
+| logs/weekly_inspection_20260831.json | 356B | `06722ea0e01f1a2195266c9d029e010351ee8af4930da01fb810d740776b80cf` |
+| logs/weekly_meetings_20260831.json | 149B | `b81a5390c83dc6d96505e36ef8d5eca62c54099eeda89c0375a27289bb7967cc` |
+| omega_brain/action_base.py | 9510B | `f91b092ada5e7c1daa125f1f6569d9ab01b8eb68800e349d7a36188f576be272` |
+| omega_brain/action_rbac.py | 11591B | `46368aa2d30a27927c29245b2d9c22d26df3c2deedfb757dd5f5bf86783ffb87` |
+| omega_brain/actions/__init__.py | 12623B | `dadaec26e1c7cbdfeac4bd9e3ad0c4368cd478227556a656635777f58d01f91d` |
+| omega_brain/advanced_trusted_retriever.py | 13994B | `1d51fecdceb24cfb0ca1d6ba8e77df21de81bd9fa4389d74305880c9e89cb9f0` |
+| omega_brain/agent_definition.json | 5270B | `00905b2106bb756bbfa9389994bbcc9213f9c0e19345083c555d47d911201d05` |
+| omega_brain/audit_log.py | 10975B | `c17c9e633290256cca875a7d6ea19751a6d2c30d0ba068d54d551526c4ab29db` |
+| omega_brain/blockchain_anchor.py | 13083B | `e9bfc21f9f47991b0908e7b013163794d29aeedc6e840d07e254909a9ede269b` |
+| omega_brain/cas_store.py | 9279B | `90c40f6062bda60c8d0010a5e0f804030260d76106a454160188d488e44121f5` |
+| omega_brain/circuit_breaker.py | 8626B | `4212280a097cbce23ef4042d69d9010cb145134eb2929081a3f2479d3dbd1a35` |
+| omega_brain/config_center.py | 11213B | `2b6ff47fadbd07ed4273d50fb0618b3a0f2c7cef4490752ec38846ae8e75c23f` |
+| omega_brain/consensus_engine.py | 10779B | `c16e221cead9fba5079f4d265daefa2081e01719a0fdb87a9641bb8abe3d94ad` |
+| omega_brain/daemon_manager.py | 5640B | `243094da358e03798e31143073aeff5631ca5e77b33b2e6ed4b5af1999097652` |
+| omega_brain/daemon_validator.py | 15395B | `fb5dc22112af262292e5e9bc03a572337f0ee6679a794758cc698a9f62756b31` |
+| omega_brain/evolution_events_v2.jsonl | 2630B | `ff38ea2d0491d06714601e616cda70f73f24252eb2f70a8cd9129068d18d2ad3` |
+| omega_brain/evolution_executor.py | 18399B | `dd09448a65de658afbf0e6babf07a89917bbe0c0a6715180cf844c239c3b149e` |
+| omega_brain/evolution_loop.py | 14807B | `b6f739559946a526de89739b9bf7a4fa29d284cbcc8e35b8234a1535876eb679` |
+| omega_brain/evolution_state.json | 217B | `49614351cdcf2d8757c8b4e9e628a045262fd09750ae3ed3ef8e4389456836e6` |
+| omega_brain/execution_hash_chain.py | 7098B | `fdf20ce784d084790b57ff7adca61f92bcf584d16f15cbe40cee65224bb57e0a` |
+| omega_brain/execution_metrics.py | 16899B | `ec669ee6e1c5b76c7babdfe5dfed51c0b348cc5f431d27ca863b7165f5a9b32c` |
+| omega_brain/executor.py | 17084B | `daaf269ca3fe5a51d3dda7f569205510709669844118a09e88c0b1238c6d6490` |
+| omega_brain/expansion_state.json | 705B | `727d023c43fdb21e0dfe76ac3f5c0270c9bdda52fb6ec3abcd1f4bfa2a5c88db` |
+| omega_brain/function_call_layer.py | 7407B | `e9920ab27c2202c6513b65b68c56e43bdaceb840bc3df92af4e718f306068c16` |
+| omega_brain/hash_chain.py | 10122B | `e448a907fdfad4a505a12c0cc1d374d1a5cc29265d59e9824c1817ce43053cf5` |
+| omega_brain/health_endpoint.py | 13533B | `698f28f8224df7709900544bfb9ba74f71f56ee6c10a646c4b0e18368bf26c0e` |
+| omega_brain/horizontal_expansion.py | 20200B | `9509b2d23e73582c995222595e43c6c67cf5b40d478a14e7bf87cd57bf5c622a` |
+| omega_brain/idempotency.py | 9905B | `93cd69a281498a9f2942ab437d8b24399c9610862c56474620534f28e24d663d` |
+| omega_brain/instances.json | 448B | `945f5d49d2affa3d409cb5333a40df4ce96f9af5943b5b4d91c90bd1bb63a1a1` |
+| omega_brain/key_manager.py | 6633B | `4fdfba9e9b560ddcf7e6ad2ae0d7b195876b4cb0e276db572e2237380ca7b745` |
+| omega_brain/limb_driver.py | 9112B | `61beae32f187b79050b57b8bfdf68153f95a0a33c23bb422451363493fdab5bc` |
+| omega_brain/load_balancer.py | 9299B | `9678968a512309eab9b9f8a782543303004d5501539242f7e146a541aaee158e` |
+| omega_brain/multi_writer_evolution.py | 17665B | `6b257a22e44929454d6506eb646a3048f09c55ce25ac76f97f5a63de2d7f4d95` |
+| omega_brain/multi_writer_executor.py | 14646B | `bce74a67a45d6b149564e4dd06b6544b788c5ad0b82823eebcdadd124cd81b7d` |
+| omega_brain/multi_writer_state.json | 542B | `e542b243f5c1aa380505233c7cf3421435ea124e08696b6a59ca29a10b659602` |
+| omega_brain/mwp/events.jsonl | 1376B | `9981467d1ea87a11a8d2b9f004f70822cdab2b32a08af83b43316ced9767e482` |
+| omega_brain/mwp/protocol_state.json | 562B | `e7c333891f48d0a2461435fdbb62c71f1622c32a68abe92b2d2c56e02e6f7850` |
+| omega_brain/mwp/writers.json | 1150B | `8768c327f68dbc54b167d19a4a4879f9e8e6059a2e657cfac180cb1da0ccfb94` |
+| omega_brain/mwp_protocol.py | 28144B | `ccae2572ddd33b429be5d70bcda5c96209bfeaa73eb5b74d33d5d663be7f2c22` |
+| omega_brain/omega_brain.pid | 4B | `40367c3cc999a9f9e951a1d33211545b84b2d5a63933b0020433000c3bb410fb` |
+| omega_brain/omega_brain_service.py | 5256B | `2e974991f6d8d07327ada71b13f889847ed65830f75a1250a77b2048813cfc41` |
+| omega_brain/pipeline_executor.py | 17811B | `c7579c419351c0da37066c5d54f65aebbb3cc197162fe0f8dbc9b799d22d6c91` |
+| omega_brain/rag_engine.py | 8088B | `698f433ab89160870911363ee064cd56754c8ef4500185dbf1ca7bca22659d5b` |
+| omega_brain/replay_verifier.py | 12044B | `e82bbcc3adbf1d5ca800e25b4764c970d1fa9e6852c13211900a1cb439ba8bd6` |
+| omega_brain/timestamp_client.py | 12672B | `f311551fb815dc7956b90931f8e890799d13a79dc05d2d04ad810248a8ca33ec` |
+| omega_brain/trust_pipeline.py | 14872B | `79d014ef3945d1aef4082a5d876c9c19e45ed1506799b804ce157c39499a09fb` |
+| omega_brain/truth_architecture.py | 16163B | `c7b97af356b2d27c19ecdbd41198d04e86b725a74a1ce45e84edbd564b266f7d` |
+| omega_brain/two_phase_action.py | 13950B | `3aaf9fd70dfef5463345f3596bdcadc493b7be8effe6980dead83f974bf6184f` |
+| omega_brain/unified_pipeline.py | 13262B | `cfe22e06959cc6cf730431ed4e1478ec90cd13ac207589aea3daa87ae9e2c65e` |
+| omega_brain/vector_truth_adapter_v2.py | 14534B | `13a3a52d4c0b49259c094e5973ac696b6f6b3428cd3ff985f16bc53d257189c9` |
+| omega_brain/writer_registry.json | 1606B | `b8106ce84e12a706f0855901bebf5bce6276e07533c889ebea9882f343f54d2c` |
+| scripts/activity_tracker.py | 4022B | `07fc26ca438832badff37354ba793d1c7b6db3403f892e703be8600765c5b1a3` |
+| scripts/asset_aggregation.py | 4336B | `bea34652e235a571d59f335ce5b48c9354f8b2dabf632859788d0cdf29e931a9` |
+| scripts/backup_manager.py | 4579B | `85e82ed44a4464f8fa9b11907197b6b7401eca3800926943e6cca4c047d443dd` |
+| scripts/batch_executor.py | 4795B | `443e258d4f3fffbf796b22be7de35515ca70a77167381fb890e22c8432a524d5` |
+| scripts/cold_tier_cleanup.py | 3592B | `e1d8331cbb1af9ed8aa83a13c250c48d5d416d1eb774b542a4abfff764845fa9` |
+| scripts/function_call_tools.py | 10120B | `24d36b92ee61dcbc318add7ba13592c9a90c473db75c82f2ffb35acfddf9fa74` |
+| scripts/generate_docs.py | 4136B | `5e34ee44c4256736881750ead2e4790a8eb0c45db13d0051a36626ae33ff3786` |
+| scripts/im_notifier.py | 3300B | `1481db75f362be466a2f94bccb071f26c300d464fd6d52d325695d6a15511a70` |
+| scripts/image_watermark.py | 3848B | `e4f53937fb27434fffff4e90928bf5242867608c61c2a4fa379c1479d384accf` |
+| scripts/local_tools.py | 6068B | `fca6bdf03752af213ff507682830a7a541ea0e535faff95fff57ec669068d956` |
+| scripts/merkle_tree.py | 3365B | `017a473387d3e6488ffebba541462761c3e13b6b3de57d67a2c0f682f058bfab` |
+| scripts/multimodal_pipeline.py | 10502B | `3eebd2c29568b968aca9d6baf2fdd6132b658f93aba315c5604658c75809635d` |
+| scripts/multimodal_pipeline_v2.py | 5081B | `4466761cc85a9fa15d38d8e986b05492ef486a435c2dbb807f8e6e7be1f08fdd` |
+| scripts/quota_monitor.py | 5816B | `84f89c15868275db1f556616b4c4d4c0160fbe075be2892f200097a7673606b6` |
+| scripts/quota_monitor_v2.py | 2947B | `b2ecd6efa7d4aae91d3baabdc1f3f3668d3cda82ec40c32bc008b558cfde5e50` |
+| scripts/update_truth_and_lock.py | 15886B | `69fbbe7420478af2b67d9eb52689c8097f6fb73835685c3b06ff85fa42ebca4e` |
+| scripts/vector_search.py | 5367B | `2eadcfc835fc943c87975b51ecad30ea460f2346ed3f28be1ffff1471dcbc3b5` |
+| scripts/web_crawler.py | 938B | `0dcdf59bac52a8a66a360937dfd126e431c7b101478314bde04bfc4e7fbac411` |
+| templates/prompt/template_library.json | 3980B | `d03ee1d184945a899bba83c4e4ecd56634c695ffc22dc1c8d848eef2341a90f0` |
+| tests/breakpoint_fix_report.json | 5932B | `a0f1cdabecf8fc76fe515e010f407747e6832c0eb46a37f97c47956119390491` |
+| tests/limb_driver_hardening_report.json | 5151B | `b3ff7cd9836273d965b821aa2a53384a465cfe09275c8c79f78fc77ab7ad15ee` |
+| tests/limb_driver_integration_report.json | 3810B | `3f486a6b14c6dee3e79a1aff27da69bae7f4533a5a461deb4d7a045c88af6445` |
+| tests/test_breakpoint_fix.py | 14349B | `07b91beed1d204c1190c3a43a1ef06dab2833be4dc5e4600d3e91f131855f489` |
+| tests/test_limb_driver.py | 15151B | `2dd4ce26d4b831f3784e4cc96b41100e70ec97ee2863561c18d5f1f112bc5a73` |
+| tests/test_limb_driver_hardening.py | 14564B | `1c9cc3daf6f61a63546ab259b2a88805843dc6ba6764dd9cbbe5414d0201786a` |
+| tests/test_suite.py | 5938B | `ddfb41d7d04e99215691b1fc964c23d4221f761e0a3faf47d7a999d5c640bf6d` |
+| timestamps/record_431fd458568b9ff0.json | 1079B | `9d3bd758130e59ed11f65925bc53b917fb447e4b5040c3120e0cf5e2a39c76d5` |
+| timestamps/record_9353ab8dba95b4a8.json | 1080B | `312523f5101a209e7944accb03c46cfca9c4278bce89dfafeda981af9b519e97` |
+| timestamps/record_f5e5b674d2efc685.json | 1068B | `0dd46fbd6d756698721c9a3a8603e2787140fe5e2e4f40c9119b027416d151d3` |
+| timestamps/ts_08c74e2b04d2f8ba_certum.tsr | 6164B | `cc6a5440a4f8529ae0c778b2834ea52b402127ff8a76e7ceb9e8d0734d7be4ac` |
+| timestamps/ts_08c74e2b04d2f8ba_digicert.tsr | 6006B | `7da0133e89087e9c03634bfb3dc3f32cfbf0519fbde8b32ebe05e18d9f6536f1` |
+| timestamps/ts_08c74e2b04d2f8ba_freetsa.tsr | 4643B | `52586bc14f465716f2ffabac2970bf8f29edfe75d98c7b7f8a22b7e47c7afee0` |
+| timestamps/ts_65cba1457e3746ff_certum.tsr | 6165B | `fd93a31c01793e1e61f17a5832f6962a693129c6c6ec094a86bee90f7077b088` |
+| timestamps/ts_65cba1457e3746ff_digicert.tsr | 6007B | `295664bcf4ca2bc1ba7a751948ec414eac35619da1004e8ec7226078acf7a598` |
+| timestamps/ts_65cba1457e3746ff_freetsa.tsr | 4643B | `122e4742d899b0c69b590165484724204f0a403b0fe8cf5b683cf348bc065dde` |
+| timestamps/ts_85eb0e26fe9f9ceb_certum.tsr | 6164B | `661a4710578ff33d5220035842d2f6fc2f24ca0bcb07889a9e3d838fdddad4c2` |
+| timestamps/ts_85eb0e26fe9f9ceb_digicert.tsr | 6008B | `60fa0a1c65d3090b1f0a1d22840f8e6d43b1c7bdd6a9f918a9c6ae11f1faa6d8` |
+| timestamps/ts_85eb0e26fe9f9ceb_freetsa.tsr | 4645B | `67aa20aea6c12eaafa9d92f4364c1d1a650b09df386b3dea6007d6a9cb5a3bfe` |
+| trust_pipeline/audit_logs/audit_trust_pipeline.jsonl | 2084B | `59453c6cbe5d90b541e0df30429399522f7742e13e24e4536545a42310ed4483` |
+| trust_pipeline/audit_logs/index_trust_pipeline.json | 264B | `38163ca1443d27947e61ea9f2176a8bc731b92714289daa1b626093937b3f7f1` |
+| trust_pipeline/audit_logs/trust_pipeline.lock | 0B | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| trust_pipeline/blockchain_anchors/anchor_0x0cdb67c29ac0c97a.json | 695B | `41dfabb6dc373f08e468c4b483f111c713904972539725d1f63586d64e0f65c6` |
+| trust_pipeline/blockchain_anchors/anchor_0x281da0f0ef2bb84c.json | 695B | `703bf2d788f359b98269cf5d689247655361bc7741f7e039010cb84a71b14f8a` |
+| trust_pipeline/blockchain_anchors/anchor_0xd7f0abfaa3fc8c4c.json | 695B | `405f85ac301701843c72da297f433b25afcd427a063aeb0cc0f92f26c4e26228` |
+| trust_pipeline/blockchain_anchors/anchor_log.jsonl | 1968B | `5db940d2537b7f18d96afd999afc99dc50fe9e702e3e4a3a1f7c4441045775a6` |
+| trust_pipeline/cas/index.json | 1089B | `eb8ead89c3a0690a14b80c440d9e7521ee14459ed88b8f58fbb8f15194de1fd5` |
+| trust_pipeline/cas/objects/6c/b7166967ec51907e126ebfdef440b1be1c63a079a45a6c444156124b3fbffa | 17B | `6cb7166967ec51907e126ebfdef440b1be1c63a079a45a6c444156124b3fbffa` |
+| trust_pipeline/cas/objects/73/7353648a272ed1613f6919e24a2716fd965ede0552633b47ccbd4248085bfe | 42B | `737353648a272ed1613f6919e24a2716fd965ede0552633b47ccbd4248085bfe` |
+| trust_pipeline/cas/objects/da/726f971f7b2999c1d03b6dc1fe5e8f3699c5f33b832f6054df4cb8bb68a1b8 | 46B | `da726f971f7b2999c1d03b6dc1fe5e8f3699c5f33b832f6054df4cb8bb68a1b8` |
+| trust_pipeline/cas/refs/HEAD/full_verification-0001 | 64B | `4247a37da369085a796cc345638366fb48656db96b535a84b21988fd8179317b` |
+| trust_pipeline/cas/refs/HEAD/test-0001 | 64B | `e49c693c8c6966c35b46a0c6ffda9a4595c6d68f4a2d465f816f02f72c8552e7` |
+| trust_pipeline/cas/refs/HEAD/truth_snapshot-0001 | 64B | `d974bc0a7e99aa9e4e93a1434959bb4bf5dcee488fa09d8170a9c1a7c31aa778` |
+| trust_pipeline/compute_audit/compute_log.jsonl | 0B | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| trust_pipeline/compute_audit/index.json | 48B | `d4042eed3ceca5dcf30791ad45c1aee7ba4915874aa05fda75ff3be3bed0cc51` |
+| trust_pipeline/consensus/consensus_000000.json | 1361B | `b9406faa745b1ffe36075198131c1c63f8910c70734349a1265412566e590c0e` |
+| trust_pipeline/consensus/consensus_000001.json | 1364B | `4f112787d57772a36482ef2a19d40aac4f01458a4dee9ccfbe426db307611e93` |
+| trust_pipeline/consensus/consensus_000002.json | 1351B | `56960f20e6eaaa1b69b30da91e2379d945078862578a8fc3fe5ca926b5890d59` |
+| trust_pipeline/credentials/RUN-20260830-213025-0001.json | 2319B | `53d3022123e38ec1541eeec45481e98dea0bc95eaaf34662070437b1c2cac90a` |
+| trust_pipeline/credentials/RUN-20260830-213342-0001.json | 2327B | `4af9b770e25c43063fab4f0a2884eca987eed2a01c598413c8a24b2f8a8dd043` |
+| trust_pipeline/credentials/RUN-20260830-213349-0001.json | 2299B | `7aa08def0db86727ad46da16fc7afe07b0910d0dc841c90173bb5ebe16ae8201` |
+| trust_pipeline/hash_chain/chain.jsonl | 1823B | `ac0f567ad053210e6c3d5b63c5cc8a45db863d8d1f73775ca859b35b1f564cdf` |
+| trust_pipeline/timestamps/record_0cdb67c29ac0c97a.json | 1155B | `33a987bcd5a9fe27c31e022508c6b92a8e17cf611812377eb9ac83aa749e7fab` |
+| trust_pipeline/timestamps/record_281da0f0ef2bb84c.json | 1149B | `67d9e0ab5c15321107d351b3a33f4017e41d780180974686548ff3d4511db7e4` |
+| trust_pipeline/timestamps/record_d7f0abfaa3fc8c4c.json | 1138B | `d834554b16260aad05c878319fe0dea125f982fe8904ff8f61b329068d99435c` |
+| trust_pipeline/timestamps/ts_9417f2cff28d9298_certum.tsr | 6164B | `056e86a260edc4ec4f667e33c33acfc81830a592c978d5405b2847c762cbde41` |
+| trust_pipeline/timestamps/ts_9417f2cff28d9298_digicert.tsr | 6007B | `431a870d91d02ed31b6b8fdf076d584cb658602a28ca4efc4b50d1ebe2c67a25` |
+| trust_pipeline/timestamps/ts_9417f2cff28d9298_freetsa.tsr | 4644B | `be527a659195a10142c86c07f104d963a50972b1cab4bc3049d67b64a9aaa771` |
+| trust_pipeline/timestamps/ts_ab8bd9dd2ccd5592_certum.tsr | 6165B | `874e235e8aa659daa814b0b412d049e10cfc764083ae1afefb5972ccc9ca0817` |
+| trust_pipeline/timestamps/ts_ab8bd9dd2ccd5592_digicert.tsr | 6008B | `e1c382cde93fb453fe5e0d99536575c6e67ae6d6b5aaa7349adf611aa416debf` |
+| trust_pipeline/timestamps/ts_ab8bd9dd2ccd5592_freetsa.tsr | 4643B | `e6616c56f2dc6b7d56a69e133b32a1a828111d560ea60b48ee0bd9d7460b5c38` |
+| trust_pipeline/timestamps/ts_f5761f9b95af8358_certum.tsr | 6164B | `d54eed2a38324404694a8490a0050990c1baa814c6312e7a001a0f5bb2f46853` |
+| trust_pipeline/timestamps/ts_f5761f9b95af8358_digicert.tsr | 6006B | `e05a1cc1bfb020d8f81517713f7cf4cd89225fc132f17a919ecb9483743f967b` |
+| trust_pipeline/timestamps/ts_f5761f9b95af8358_freetsa.tsr | 4644B | `f5815eb7a4c17d2c62c24f34171fa1d0e279107e2f7b62353d36617fcf5c864b` |
+| truth_architecture/snapshots/BREAKPOINT-FIX-20260831015155.json | 1645B | `015300b1be3a9a85fb0a5a0819180d23446378886fa8cd94526958372c70e1de` |
+| truth_architecture/snapshots/BREAKPOINT-FIX-20260831015229.json | 1643B | `d868e88f91ee59f14d699fa257f2570c635616a8dc7c7e7f16bfbe9d76f575f2` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831013447.json | 805B | `8a5fa230cdb57208e29ccc4d6370e3922ce2acd06948de3025a9851cedfbe9d0` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831013504.json | 805B | `11f041c9074a01d8a7c07dfb65aecf00fe0f4acd0c295cd326ac849154884b5b` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831013516.json | 805B | `9c8e4523954b78268feeca186bfccbd927dbb7d9e353102681baab86b92bd5e8` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831013535.json | 805B | `ff3714cabe1819bab5665d324ef93d61542e397d168f19d009c5d3af77d9d9be` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831013550.json | 805B | `d3c10125e33a2a2e01da56dbbfc658b30c31d4a313a2c06f4db4847e47b9175d` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831013627.json | 805B | `dd979ce65317668b7214a1ab9aa3aecefd07546f33afcbcc8cbb0c08deb8b066` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831013645.json | 805B | `1a2dd38827792ef3f34ea80042109b2a0afdb88df7765222c4ca1f9d0a43fefb` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831013707.json | 805B | `910f34d29ab6681696dcf837859c7416f13f4d3e1fba37d89ab8f5afc10bdede` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831015004.json | 805B | `acadb7789cb455dfa9920b7f5017c3c3dec2ecb66e93c5efff11f09917a3ae76` |
+| truth_architecture/snapshots/TRUTH-ARCH-20260831015032.json | 805B | `cc988fe86d98b464f57fc4e63c4efa7186b9968e94205d114ba46cd040781968` |
+| truth_architecture/truth_code.json | 14338B | `ed52480a45de037589a20d225aab8afbe8e2f0ed65108fb48603bb097742b2f5` |
+| truth_architecture/truth_design.json | 3934B | `086519cb8cd86db193dacb1b668969caa2fa7d85376207f4610e99d5e03e5694` |
+| truth_architecture/truth_planning.json | 4039B | `30d91d6eb7325bb75a3cfc4a4649c331a2e78cc402f9ace016fe308583cfb816` |
+| truth_architecture/truth_runtime.json | 7153B | `47dbac69ef40fe9b2dda45505583eba4743f64769b1b9f78d189a138f7b8fc8c` |
+| truth_base/planning_truth_v1.0_20260828.json | 7358B | `24609ae6bc369abf1817f82547cd3db7c717834e7b2bc0a0080e9754658012fb` |
+| truth_base/truth_base_v1.0_20260827.json | 5195B | `d364752f2c5b7aeaab2c1f30927dcc5b7abfd0e1a1b245b60d6eea01cc6e14fd` |
+| truth_base/truth_base_v1.1_20260828.json | 5185B | `2900793ee2c13c836ce5d4b25e67811202d4b8722d11b516d1c6bf00648bd127` |
+| truth_base/truth_base_v1.2_20260829.json | 6248B | `0ff94eaa75c0f80f48f8798978cc2f78edbe8b3989f88a85e1ee18b938a86e2c` |
+| truth_base/truth_base_v1.3_20260830.json | 1408B | `6506fe3782685e810d02281826401f462618442cbacd8d31f02d394a8d413345` |
+| truth_base/truth_base_v1.4_20260831.json | 1584B | `0b7b32173e7f8b34fc8fc7526273f958bab5847e8a6243f53a49af31a143d098` |
+| whitepapers/MWP多写入者协议规范_v1.0_20260830.md | 11290B | `a95b4217fbb9918eb00a4a7c301e46b2a8925a5951fdb214b7f9dd9367ff4960` |
+| whitepapers/P3认知偏差修正声明_20260830.md | 4009B | `2c38482f5c3ffcb30122408957b0a69cd4eaa9bac4489f4c803b488f3ac6f11a` |
+| whitepapers/ZONGYUAN-ROOT_全域终极进化白皮书_20260827.md | 12276B | `e1708dc4ded9607c4291aa4b80076716cfc8a06a0d44dcedefd7c477a8b884e2` |
+| whitepapers/ZONGYUAN-ROOT_全域终极进化白皮书_20260828.md | 10434B | `96c15147264d86780aaf320a056228692040d8119ecb19276a09b0b1d2f54c3d` |
+| whitepapers/ZONGYUAN-ROOT_全域终极进化白皮书_20260829.md | 7403B | `c1415871dde9ab88db05b326eab267b64a5936b1043427bcd64e2101fe31d268` |
+| whitepapers/ZONGYUAN-ROOT_全域终极进化白皮书_20260830.md | 4423B | `63d268a47317b31e13721678c56f6da4b108b011ec7ea88ff0ddc66d0166180c` |
+| whitepapers/ZONGYUAN-ROOT_全域终极进化白皮书_20260831.md | 4880B | `27cc25551570b3af2b50d024f4e3ff520cdfaa2c7c44bc6529c7bbb2f8015287` |
+| whitepapers/免费额度最大化利用方案_20260830.md | 12116B | `497f04ebb8cbcc804b3cd4ca46971ea5e1d99e00280514f341536cba750e41da` |
+| whitepapers/全域全维度通用大模型最大边界最大化利用方案_20260829.md | 13584B | `7f7923c6b50f6943f2eacc271dec060084f729a8c20c17effbb54e243ed85475` |
+| whitepapers/可信真值源架构白皮书_20260831.md | 20586B | `bec380b5a95112b8f3a4229f26d5649f1a3f1f08d246e0a17f592d3f41c4d385` |
+| whitepapers/基于最大边界推演的最大化利用方案_20260830.md | 13857B | `aa8c6c9cf33cf2fe5479f76204fcc7601977b7918cd66fa01228d83dc6b4c197` |
+| whitepapers/多写入者兼容进化架构白皮书_20260830.md | 13508B | `b925be7aebb3b9e5af83dd9aea71ebdc51a5fbbe685c760852ebb9a20d5b8c27` |
+| whitepapers/当前短板漏洞断点深度诊断_20260830.md | 11570B | `52a7f9f0535d1faa2656fbdc86f628091d60feeaae8c636a256a19347516e45e` |
+| whitepapers/根因修正_多写入者冲突分析_20260830.md | 10197B | `45c8b03f8dcf9b6b959a493b16b2b2db590e341c8254bc913ef2f93a9f6d5cf9` |
+| whitepapers/横向功能最大化扩展深度推演_20260830.md | 19123B | `90de6c4e955470f9f460700025f107500407d14c47088951a98e808aa6217361` |
+| whitepapers/每次修复根因深度推演_20260830.md | 12340B | `86a647a5003a9a5b6fd59e0c7a25014e54cc387721d6f26df539fc38d3900a70` |
+| whitepapers/规划架构真值_豆包基座+ΩBrainμ_20260828.md | 10268B | `29fa911eda3afc23bf6a3aa46230c66856c3dbdbb32d7039fb44362165732fa4` |
+| whitepapers/触达豆包基座的最大边界深度推演_20260830.md | 12858B | `151778580a37bcc8c7502efb61ab17a001c386fc5d2c431cfd3fba3add4fe60f` |
+| whitepapers/高价值任务深度规划白皮书_20260831.md | 15728B | `eb19215fed48f6e5ba185d7b8223f390a52c57220d1147644719c2b10a14d88d` |
+
+## 完整性校验命令
+
+```bash
+cd /sandboxdata/workspace/file/ZONGYUAN-ROOT
+python3 -c "
+import hashlib, os
+files = sorted([f for f in os.listdir('.') if os.path.isfile(f) and not f.startswith('LOCK-CREDENTIAL-') and not f.startswith('MANIFEST-')])
+concat = ''.join(hashlib.sha256(open(f,'rb').read()).hexdigest() for f in files)
+print('Merkle根:', hashlib.sha256(concat.encode()).hexdigest())
+print('预期:    e02f23368884decb797687e5a531adf3d57624581099d0c1016a3fb3859c1d5c')
+"
+```
+
+## 锁档声明
+
+1. 本快照纳入331个资产文件，绑定DID-BR-000002确权身份。
+2. Merkle根由全部文件SHA-256按文件名排序拼接后再取SHA-256生成，单文件篡改即失配。
+3. 后续迭代必须生成全新快照，禁止就地改写本锁档资产。
+
+Ω₀⊂⊙∞⊂Ω｜全域锁档完成｜ZONGYUAN-ROOT｜DID-BR-000002

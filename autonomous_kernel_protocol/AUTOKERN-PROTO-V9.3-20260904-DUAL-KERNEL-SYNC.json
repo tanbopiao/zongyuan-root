@@ -1,0 +1,49 @@
+{
+  "protocol_version": "AUTOKERN-PROTO-V9.3-20260904-DUAL-KERNEL-SYNC",
+  "did": "DID-BR-000002",
+  "sovereign_root": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-09-04T00:25:42.868613",
+  "parent_version": "AUTOKERN-PROTO-V9.2-GLOBAL-AUDIT-FIX",
+  "efuse_state": "blown_permanent",
+  "milestone": "本地内核↔云内核双向同步协议建立",
+  "cloud_sync_api": {
+    "endpoints": [
+      "handshake",
+      "manifest",
+      "pull",
+      "verify",
+      "truth-pull",
+      "truth-push"
+    ],
+    "base_url": "http://123.207.202.158:8006/api/v1/sync",
+    "nginx_proxy": "https://www.huodouai.com/anchor/api/v1/sync",
+    "auth": "X-API-Key or Basic Auth"
+  },
+  "local_sync_agent": {
+    "file": "sync_agent.py",
+    "platform": "Windows",
+    "interval": "300秒(5分钟)",
+    "direction": "双向(拉取+推送)",
+    "conflict_resolution": "云内核为权威源,本地为增量源"
+  },
+  "sync_flow": [
+    "1. handshake获取云内核状态(真值版本/数量/记忆链)",
+    "2. truth-pull全量拉取云端真值,本地比对差异",
+    "3. 拉取云端新真值写入本地truth_index.json",
+    "4. truth-push推送本地新真值到云端Ω-Brainμ",
+    "5. 更新sync_state.json记录同步状态"
+  ],
+  "truth_base": "V8.7-UNIFIED-TRUTH-BASE (145条)",
+  "memory_chain": {
+    "total_seeds": 18,
+    "latest": "#018"
+  },
+  "four_layer_check": {
+    "L1": "PASS",
+    "L2": "PASS",
+    "L3": "PASS",
+    "L4": "PASS"
+  },
+  "self_sha256": "27f2a58842cbe9fa79a3ffac60e676f11dcb59441cdd152bfaae3ae4eda3c3d1"
+}

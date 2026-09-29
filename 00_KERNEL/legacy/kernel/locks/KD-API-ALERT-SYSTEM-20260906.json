@@ -1,0 +1,75 @@
+{
+  "lock_id": "KD-API-ALERT-SYSTEM-20260906",
+  "lock_level": "Lv8",
+  "lock_name": "P4-3 API调用异常告警机制完成（后端检测引擎+7个API端点+告警中心Web界面+后台定时检测服务）",
+  "did": "DID-BR-000002",
+  "trace_mark": "Omega_0 subset Circle_Infinity subset Omega",
+  "created_at": "2026-09-06T14:45:02.%fZ",
+  "status": "LOCKED_PERMANENT",
+  "system_hash": "C28FF8C9CEB2E52392A133137C9C98F48C6D10F308B25B20D1B7FCF93DDE7198",
+  "efuse_id": "EFUSE-8-C28FF8C9",
+  "efuse_status": "BLOWN_PERMANENT",
+  "features": {
+    "backend": [
+      "异常检测服务 alert_service.py（7种检测规则）",
+      "告警规则配置 alert_rules.json（7条规则，可配置阈值）",
+      "告警数据存储 alerts.json（活跃告警+历史告警+统计）",
+      "7个API端点：告警列表/统计/规则/更新规则/确认/解决/手动检测"
+    ],
+    "alert_rules": [
+      "error_rate: 失败率>10% (warning)",
+      "high_latency: 响应时间>5000ms (warning)",
+      "consecutive_failures: 连续失败>3次 (critical)",
+      "http_4xx: 4xx客户端错误 (info)",
+      "http_5xx: 5xx服务器错误 (critical)",
+      "api_key_abuse: API Key滥用>100次/分钟 (warning)",
+      "endpoint_outage: 端点不可用100%失败 (critical)"
+    ],
+    "frontend": [
+      "告警中心Web界面（4个标签页：概览/活跃/历史/规则）",
+      "6项统计指标卡片（总告警/活跃/已解决/严重/警告/今日）",
+      "2个统计图表（按级别分布/告警最多端点Top5）",
+      "活跃告警列表（确认/解决/详情操作）",
+      "历史告警记录（按级别筛选）",
+      "告警规则配置（阈值编辑/启用禁用/批量保存）",
+      "手动运行异常检测按钮",
+      "每5分钟自动刷新",
+      "黑金暗纹高端学术风"
+    ],
+    "background_service": [
+      "zongyuan-alert-detector.service 后台定时检测服务",
+      "每5分钟自动运行异常检测",
+      "检测到的异常自动添加到告警中心（去重）",
+      "systemd管理，开机自启，异常自动重启",
+      "日志记录到 logs/alert_detector.log"
+    ],
+    "monitoring_coverage": [
+      "14个API端点全覆盖监控",
+      "50个节点能力调用监控",
+      "6个API Key使用监控",
+      "失败率/延迟/连续失败/错误码/滥用/不可用 6维度检测"
+    ]
+  },
+  "verification": {
+    "api_service_running": true,
+    "alert_detector_running": true,
+    "all_7_endpoints_http_200": true,
+    "alert_center_http_200": true,
+    "nginx_config_passed": true,
+    "test_detection_found_3_anomalies": true
+  },
+  "access_urls": [
+    "https://www.huodouai.com/alert-center/",
+    "https://huodouai.com/alert-center/"
+  ],
+  "api_endpoints": [
+    "GET /api/v1/identity/alerts - 获取告警列表",
+    "GET /api/v1/identity/alerts/stats - 获取告警统计",
+    "GET /api/v1/identity/alerts/rules - 获取告警规则",
+    "PUT /api/v1/identity/alerts/rules/{rule_id} - 更新告警规则",
+    "POST /api/v1/identity/alerts/{alert_id}/acknowledge - 确认告警",
+    "POST /api/v1/identity/alerts/{alert_id}/resolve - 解决告警",
+    "POST /api/v1/identity/alerts/detect - 手动运行异常检测"
+  ],
+  "summary": "P4-3最高价值工作完成：API调用异常告警机制全面上线，后端异常检测引擎支持7种检测规则，7个API端点提供完整告警管理能力，前端告警中心提供概览/活跃/历史/规则4个标签页和统计图表，后台定时服务每5分钟自动检测，实现对14个API端点和50个节点能力的主动监控和异常预警，大幅提升系统稳定性。"
+}

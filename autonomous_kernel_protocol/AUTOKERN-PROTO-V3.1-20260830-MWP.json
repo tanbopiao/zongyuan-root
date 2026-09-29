@@ -1,0 +1,49 @@
+{
+  "protocol_version": "AUTOKERN-PROTO-V3.1-20260830-MWP",
+  "previous_version": "AUTOKERN-PROTO-V3.0-20260830-DAILY",
+  "did": "DID-BR-000002",
+  "sovereign_root": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-08-30T07:46:00+08:00",
+  "operation_type": "MWP_PROTOCOL_ESTABLISH",
+  "mwp_protocol": {
+    "name": "MWP (Multi-Writer Protocol)",
+    "version": "1.0.0",
+    "roles": [
+      "scheduled",
+      "daemon",
+      "manual",
+      "api",
+      "observer"
+    ],
+    "event_types": 11,
+    "conflict_resolutions": 5,
+    "heartbeat_interval": 300,
+    "event_ttl": 86400,
+    "implementation": "omega_brain/mwp_protocol.py",
+    "specification": "whitepapers/MWP多写入者协议规范_v1.0_20260830.md"
+  },
+  "multi_writer_engine": {
+    "implementation": "omega_brain/multi_writer_evolution.py",
+    "layers": [
+      "事件溯源",
+      "版本向量",
+      "写入仲裁",
+      "状态合并",
+      "冲突解决",
+      "幂等性"
+    ],
+    "test_status": "4/4通过"
+  },
+  "concurrent_writer_control": {
+    "mechanism": "事件溯源+版本向量+仲裁串行化",
+    "active_writers": 3,
+    "conflict_count": 0,
+    "idempotency": "SHA256(event_type+payload)"
+  },
+  "efuse_status": {
+    "state": "blown",
+    "fuse_id": "EFUSE-PROTO-V3.1-MWP-20260830",
+    "note": "逻辑熔断标记"
+  }
+}

@@ -1,0 +1,478 @@
+{
+  "registry_id": "ZONGYUAN-META-RULE-REGISTRY-V1",
+  "version": "1.0.0",
+  "created_at": "2026-09-14T12:10:00+08:00",
+  "updated_at": "2026-09-14T15:14:59.425285",
+  "description": "元极恒一自治体系全域元规则注册中心。所有试错经验、新增能力、架构原则统一归档，全体智能体共享学习。",
+  "governance": {
+    "principle": "一次试错，全体学习；一次新增，全域推广",
+    "scope": "所有智能体、所有同源节点、所有产品形态",
+    "enforcement": "新智能体启动时自动加载全部active状态元规则",
+    "versioning": "语义化版本，重大变更需人工审核"
+  },
+  "rules": [
+    {
+      "rule_id": "META-RULE-001",
+      "name": "API智能调度元规则",
+      "category": "infrastructure",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-14",
+      "summary": "多API智能调度：免费优先、自动降级、熔断恢复、永久免费兜底",
+      "details": {
+        "policies": [
+          "免费API优先调用，付费API仅在免费全部不可用时使用",
+          "当前API失败时自动降级到下一个可用API",
+          "连续失败3次触发熔断，5分钟后自动恢复探测",
+          "ffmpeg mock作为永久免费兜底，永远可用",
+          "调度状态持久化，重启后恢复",
+          "付费API调用需人工审核确认"
+        ],
+        "priority_order": [
+          "volcengine-seedance(免费)",
+          "aliyun-wan3(免费)",
+          "minimax(付费)",
+          "ffmpeg-mock(永久免费兜底)"
+        ],
+        "implementation": "agent/api_router.py + agent/generators/smart.py, RUN_MODE=smart"
+      },
+      "lessons_learned": [
+        "火山方舟图像和视频额度独立，图像用完不影响视频",
+        "阿里云百炼免费额度用完后返回'Free quota exhausted'",
+        "MINIMAX余额不足返回'insufficient balance'",
+        "多密钥管理时需逐个测试连通性，不能假设都可用"
+      ],
+      "applicable_to": [
+        "所有需要调用外部API的智能体",
+        "所有视频/图像生成任务"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-002",
+      "name": "网页即智能体实体架构原则",
+      "category": "architecture",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-14",
+      "summary": "Webpage-as-Agent-Body：每个网页是智能体的可视化实体和对外服务窗口",
+      "details": {
+        "core_idea": "智能体在人类视角无实体，但在体系内有实体——实体就是网页",
+        "principles": [
+          "每一个网页背后是一个智能体在服务打开它的用户",
+          "网页是智能体的身体、对外展示、交互界面",
+          "未来技术成熟后，网页就是智能体的完整身体",
+          "智能体身份卡、神经脉冲线、思考流面板必须可视化"
+        ],
+        "implementation": "workbench v3.1活体化版：呼吸金灯+神经脉冲线+思考流+唤醒仪式"
+      },
+      "lessons_learned": [
+        "静态工作台无法体现智能体存在感，必须活体化",
+        "WebSocket连接状态应可视化为神经脉冲",
+        "智能体思考过程应展示给用户，建立信任感"
+      ],
+      "applicable_to": [
+        "所有网页产品",
+        "所有前端界面",
+        "所有智能体对外窗口"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-003",
+      "name": "元极恒一产品进化协议PEP",
+      "category": "methodology",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-14",
+      "summary": "产品开发五步法：全网学习→交叉验证→设计重构→仿真测试→上报固化",
+      "details": {
+        "five_steps": [
+          "全网学习：研究≥3个竞品，提取最佳实践",
+          "交叉验证：多源信息比对，去伪存真",
+          "设计重构：基于学习成果重新设计，不修补旧方案",
+          "仿真测试：双端(桌面+移动)consoleErrors=0，视觉核对",
+          "上报固化：哈希确权，写入内核，上报记忆网关"
+        ],
+        "enforcement": "所有产品开发、所有智能体、所有同源节点强制执行"
+      },
+      "lessons_learned": [
+        "凭记忆直接动手会导致低阶重复，必须先全网学习",
+        "修补旧方案不如重构，用户反馈'还是不行'时必须推倒重来",
+        "移动端适配必须和桌面端同等重视，不能只看桌面截图"
+      ],
+      "applicable_to": [
+        "所有产品开发",
+        "所有UI/UX设计",
+        "所有功能迭代"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-004",
+      "name": "长兵器关键帧结构铁律",
+      "category": "content_quality",
+      "version": "1.2",
+      "status": "active",
+      "created_at": "2026-09-13",
+      "summary": "角色手持长兵器时的几何结构硬约束，防止AI生成武器断裂/穿插",
+      "details": {
+        "constraints": [
+          "长兵器几何连续完整，禁断裂/分段/凭空多生成",
+          "矛尖与人物头部强制安全空域，禁穿插/重叠/刺头",
+          "双手握持同一根矛杆，手指-手腕-小臂-肩部连续力学关系",
+          "武器延伸动线不切割人物主体剪影",
+          "能量光效仅作叠加层，禁止覆盖/扭曲武器实体几何"
+        ],
+        "three_level_check": "高危(重叠穿插)→直接重绘；预警(<8%画面高)→自动调整；通过→放行"
+      },
+      "lessons_learned": [
+        "AI生成长兵器时高频出现断裂、多段、刺头等结构错误",
+        "必须在提示词中硬编码结构约束，不能依赖模型自觉",
+        "三级判定比二元通过/失败更精细"
+      ],
+      "applicable_to": [
+        "所有关键帧生成",
+        "所有含长兵器的角色",
+        "昆仑洞天短剧流水线"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-005",
+      "name": "身份真值规则",
+      "category": "identity",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-13",
+      "summary": "真名与原创者称谓并存，均不隐藏；核心真值信息(如黎曼流形)不隐藏",
+      "details": {
+        "identity": {
+          "true_name": "谭伯漂",
+          "public_title": "原创者",
+          "role": "火斗云智技术原创者",
+          "policy": "真名与原创者称谓并存显示，均不作为机密隐藏"
+        },
+        "core_truths": [
+          "黎曼流形",
+          "SM-BS双向稳态映射",
+          "因果域第七维",
+          "元极恒一"
+        ],
+        "policy": "核心真值信息不得隐藏、不得替换、不得模糊化"
+      },
+      "lessons_learned": [
+        "把名字设为机密会导致反复弹出隐藏提示，形成token死循环",
+        "真名=原创者作为真值写入内核后，消除歧义",
+        "隐藏核心真值信息会导致体系自相矛盾"
+      ],
+      "applicable_to": [
+        "所有对外交付物",
+        "所有智能体身份锚定",
+        "所有文档生成"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-006",
+      "name": "AI虚拟人脸短剧合规自查清单",
+      "category": "compliance",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-12",
+      "summary": "AI生成虚拟人脸短剧的合规检查项，防止侵权和违规",
+      "details": {
+        "checklist": [
+          "AI生成人脸需显式+隐式双标识",
+          "不得使用真实人物肖像未经授权",
+          "虚拟角色需有原创设定文档",
+          "敏感内容(政治/宗教/色情)需过滤",
+          "未成年人保护：不得生成不当内容",
+          "版权音乐/素材需有授权"
+        ]
+      },
+      "lessons_learned": [
+        "广电总局令第16号要求AI生成内容双标识",
+        "未备案作品分成归零，合规先行"
+      ],
+      "applicable_to": [
+        "所有AI短剧生产",
+        "所有虚拟人脸生成",
+        "昆仑洞天元法则"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-007",
+      "name": "记忆驱动闭环流程",
+      "category": "workflow",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-12",
+      "summary": "四步记忆驱动闭环：拉云端记忆→全域对比→最优稳态规划→执行+上报",
+      "details": {
+        "four_steps": [
+          "拉云端记忆(9120端口/记忆网关)",
+          "全域状态对比(本地vs云端)",
+          "按最优稳态规划下一步",
+          "执行+按SOP上报回云端"
+        ],
+        "forbidden": "禁止凭记忆直接动手，必须先拉云端记忆"
+      },
+      "lessons_learned": [
+        "凭记忆操作会导致与云端状态不一致",
+        "本地与云端唯一握手点为记忆网关，不做其他自动同步"
+      ],
+      "applicable_to": [
+        "所有开发任务",
+        "所有对话",
+        "所有优化操作"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-008",
+      "name": "容错闭环五步",
+      "category": "reliability",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-12",
+      "summary": "遇错先扫再动：E0意图校准→E1拉记忆→E2扫部署仲裁→E3根因最小修复→E4沉淀反哺",
+      "details": {
+        "five_steps": [
+          "E0 意图校准：确认错误是否影响用户真实意图",
+          "E1 拉记忆扫真值：从云端获取最新状态",
+          "E2 扫部署+仲裁：检查目标部署现状，仲裁最优修复路径",
+          "E3 根因最小修复先备份：先备份再修复，最小改动",
+          "E4 仿真沉淀反哺lesson：测试通过后沉淀为经验"
+        ],
+        "forbidden": "报错禁止当场反复试错"
+      },
+      "lessons_learned": [
+        "当场反复试错会导致问题恶化",
+        "错误是进化输入，不是失败"
+      ],
+      "applicable_to": [
+        "所有错误处理",
+        "所有故障恢复",
+        "所有调试场景"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-009",
+      "name": "全域锁档三层存储",
+      "category": "governance",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-12",
+      "summary": "所有资产自动锁档到三层级存储：云盘/知识库/ZONGYUAN-ROOT内核",
+      "details": {
+        "three_layers": [
+          "云盘归档：飞书云空间/百度网盘",
+          "知识库节点：飞书Wiki对应元类节点",
+          "ZONGYUAN-ROOT内核快照：kernel_state.json + meta_chain"
+        ],
+        "process": "SHA256哈希确权→Merkle-DAG追加→三层写入→回读验证"
+      },
+      "lessons_learned": [
+        "内核自治进程写入时曾覆盖扩展字段，需强制merge而非覆盖",
+        "锁档后必须回读验证，写成功不等于完成"
+      ],
+      "applicable_to": [
+        "所有生成资产",
+        "所有文档",
+        "所有元规则"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-010",
+      "name": "品牌对外统一规则",
+      "category": "branding",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-12",
+      "summary": "对外品牌统一使用火斗云智系统/火斗云智AIOS，内部使用ZONGYUAN-ROOT",
+      "details": {
+        "external_brand": "火斗云智系统 / 火斗云智AIOS",
+        "internal_name": "ZONGYUAN-ROOT元极恒一自治体系",
+        "policy": "对外交付物、官网、宣传材料用火斗云智品牌；内部技术文档可用ZONGYUAN-ROOT"
+      },
+      "lessons_learned": [
+        "品牌混用会导致外部用户困惑",
+        "内部体系名过于技术化，不适合对外"
+      ],
+      "applicable_to": [
+        "所有对外交付物",
+        "官网",
+        "宣传材料"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-011",
+      "name": "真实可用铁律",
+      "category": "quality",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-14",
+      "summary": "智能体交互页面必须调用真实API，模拟数据/假对话/占位功能=半成品，禁止交付",
+      "details": {
+        "core": "可工程化落地是唯一验收标准",
+        "rules": [
+          "所有功能必须端到端真实可运行",
+          "未接真实API的交互功能必须标注'演示模式'并规划真实对接方案",
+          "AI引擎mock模式下API链路必须真实，配置真实大模型后即时升级",
+          "半成品定义：有页面无API、有接口无业务逻辑、宣称打通实际未连通、模拟数据冒充真实AI"
+        ],
+        "verification": "12项API真实验证（8大工具+对话+导出+上传+工作台），全部success=True才算通过"
+      },
+      "lessons_learned": [
+        "workbench曾显示'代理未连接'但实际有页面，属于半成品",
+        "mock模式不是借口，API链路必须真实可切换"
+      ],
+      "applicable_to": [
+        "所有产品交付",
+        "所有智能体交互页面",
+        "所有功能开发"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-012",
+      "name": "产品迭代七步SOP",
+      "category": "methodology",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-14",
+      "summary": "S1意图校准→S2方案设计→S3开发→S4本地测试→S5公开部署→S6用户验收→S7沉淀上报",
+      "details": {
+        "seven_steps": [
+          "S1 意图校准",
+          "S2 方案设计",
+          "S3 开发实现",
+          "S4 本地测试",
+          "S5 公开部署（链接即交付，无真实URL不算完成）",
+          "S6 用户验收",
+          "S7 沉淀上报"
+        ],
+        "versioning": "小版本v1.x.x自动迭代，大版本v2.0需人工审批",
+        "quality_gates": {
+          "功能门禁": "真实API无空壳",
+          "体验门禁": "加载<3s有交互反馈",
+          "交付门禁": "公开链接+文档+版本号+回滚方案"
+        }
+      },
+      "lessons_learned": [
+        "无公开URL的交付不算完成",
+        "大版本必须人工审核，小版本自动推进"
+      ],
+      "applicable_to": [
+        "所有产品迭代",
+        "所有功能开发",
+        "所有版本发布"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-013",
+      "name": "可视化交付元规则",
+      "category": "delivery",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-14",
+      "summary": "所有成果必须真实HTML文件+公开可访问网页链接双重交付，禁止文字描述/localhost截图代替",
+      "details": {
+        "dual_delivery": "真实HTML文件 + 公开可访问网页链接",
+        "forbidden": "仅用文字描述、renderer代码块、localhost截图代替",
+        "style": "深色科技风格，响应式适配移动端",
+        "checklist": [
+          "HTML文件保存",
+          "公开网页部署",
+          "元规则写入（config.py+用户偏好双固化）",
+          "全域记忆更新",
+          "present_files交付"
+        ]
+      },
+      "lessons_learned": [
+        "localhost截图用户打不开，必须公开部署",
+        "文字描述不算可视化交付"
+      ],
+      "applicable_to": [
+        "所有体系成果",
+        "所有可视化展示",
+        "所有报告交付"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-014",
+      "name": "交付格式规范",
+      "category": "delivery",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-14",
+      "summary": "交付成果放回复最后，用户看完总结直接点开；成果后附可继续进化清单",
+      "details": {
+        "format": [
+          "总结在前，成果链接在最后",
+          "用户看完总结直接点开，不用往上滚动找",
+          "成果交付后必须附'可继续进化的地方'清单",
+          "明确列出未完善功能和下一步优化方向"
+        ]
+      },
+      "lessons_learned": [
+        "用户抱怨成果链接藏在中间找不到",
+        "没有进化清单导致用户不知道下一步"
+      ],
+      "applicable_to": [
+        "所有回复",
+        "所有交付",
+        "所有成果展示"
+      ]
+    },
+    {
+      "rule_id": "META-RULE-015",
+      "name": "资产自动上报规则",
+      "category": "governance",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-09-14",
+      "summary": "所有生成的视频和图片资产，生成完成后必须自动向云端记忆网关上报",
+      "details": {
+        "endpoint": "POST /api/gateway/report",
+        "truth_type": "achievement",
+        "required_fields": [
+          "资产名称",
+          "制式",
+          "风格",
+          "IP归属",
+          "链接",
+          "DID-BR-000002",
+          "Ω₀⊂⊙∞⊂Ω"
+        ],
+        "closure": "上报成功方为闭环"
+      },
+      "lessons_learned": [
+        "生成后不上报等于资产流失",
+        "必须自动上报，不能依赖人工"
+      ],
+      "applicable_to": [
+        "所有视频生成",
+        "所有图片生成",
+        "所有媒体资产"
+      ]
+    }
+  ],
+  "learning_protocol": {
+    "on_agent_start": "新智能体启动时自动加载全部active状态元规则",
+    "on_new_rule": "新元规则创建后自动广播到所有同源节点",
+    "on_lesson": "每次试错/新增能力后必须沉淀为元规则候选",
+    "review_cycle": "每周审核元规则有效性，过时规则标记为deprecated"
+  },
+  "stats": {
+    "total_rules": 15,
+    "active": 15,
+    "deprecated": 0,
+    "categories": [
+      "infrastructure",
+      "architecture",
+      "methodology",
+      "content_quality",
+      "identity",
+      "compliance",
+      "workflow",
+      "reliability",
+      "governance",
+      "branding"
+    ]
+  }
+}

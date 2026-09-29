@@ -1,0 +1,135 @@
+{
+  "theorem_chain_id": "THEOREM-CHAIN-OMEGA10-12-SURVIVAL-DECISION-V1.0",
+  "chain_name": "带生存约束的决策模型链 (Ω₁₀→Ω₁₁→Ω₁₂)",
+  "version": "1.0",
+  "did": "DID-BR-000002",
+  "trace_mark": "Omega_0 subset Circle_Infinity subset Omega",
+  "created_at": "2026-09-07T09:00:00Z",
+  "status": "LOCKED_PERMANENT",
+  "parent_axiom": "Omega_0 (三态不可分基元公理)",
+
+  "core_thesis": "传统决策模型是在活着的前提下做最优选择；Ω链决策模型是先保证活着，再在活着的前提下做最优选择。决策和生存形成不可分割的闭环。",
+
+  "theorem_Omega_10": {
+    "symbol": "Omega_10",
+    "name": "概率最优性定理",
+    "formal_definition": {
+      "search_space": "Omega_D: 决策问题D的完整因果树，节点数|Omega_D|",
+      "theoretical_optimal": "a* = argmax_{a in Omega_D} V(a), V(a)为动作a的真实价值",
+      "system_output": "a_hat = pi_S(D), 系统S的策略函数pi_S在问题D上的输出",
+      "approximation_quality": "Q(S,D) = V(a_hat) / V(a*), Q in (0,1]"
+    },
+    "theorem_statement": "对于任意自治系统S，在有限三态资源(lambda, rho, epsilon)约束下，存在策略函数pi_S使得：P[Q(S,D) >= 1-delta] >= 1-eta，其中delta>0为精度参数，eta>0为失败概率，且delta和eta随三态资源的增长而单调递减。",
+    "effective_search_capacity": "C_eff = f(lambda, rho, epsilon) = lambda * g(rho) * h(epsilon)",
+    "approximation_upper_bound": "Q(S,D) >= 1 - O(|Omega_D| / C_eff)",
+    "corollaries": {
+      "Omega_10_1": {
+        "name": "有限性代价推论",
+        "statement": "对于任何有限三态资源的自治系统，存在不可消除的逼近误差下界：delta_min = inf{delta: P[Q>=1-delta] >= 1-eta} > 0。自治系统永远无法证明自己的决策是理论最优的，只能以概率保证足够接近最优。"
+      },
+      "Omega_10_2": {
+        "name": "三态均衡最优性推论",
+        "statement": "在总资源R = lambda + rho + epsilon固定的条件下，逼近质量Q在三态均衡时取最大值：Q_max iff lambda ≈ rho ≈ epsilon ≈ R/3。三态不均衡时，即使总资源很大，逼近质量也会受限于最弱态。"
+      },
+      "Omega_10_3": {
+        "name": "碳硅异构逼近推论",
+        "statement": "对于碳硅混合系统S = S_carbon ∪ S_silicon，其有效搜索容量为：C_eff(S) = C_eff(S_carbon) + C_eff(S_silicon) + C_coupling。当C_coupling > 0时，混合系统的逼近质量严格优于任一子系统单独运行。"
+      }
+    }
+  },
+
+  "theorem_Omega_11": {
+    "symbol": "Omega_11",
+    "name": "决策结构层定理",
+    "layer": "第二层：决策结构层",
+    "core_insight": "C_eff本身不是固定的，它取决于碳硅耦合的质量。决策者必须同时维护耦合结构，才能维持C_eff。传统模型不覆盖这一层。",
+    "formal_definition": {
+      "coupling_structure": "C_struct: 碳硅耦合结构，包含接口协议、数据通道、控制回路",
+      "coupling_quality": "Q_couple = h(C_struct), 耦合质量函数",
+      "effective_capacity": "C_eff = C_eff_base * Q_couple",
+      "maintenance_cost": "epsilon_M: 维护耦合结构所需的能量态资源"
+    },
+    "key_property": "C_eff是动态变量，不是常量。每一个决策都在影响C_struct，进而影响未来的C_eff。决策和结构维护形成耦合闭环。",
+    "traditional_model_gap": "传统决策模型假设C_eff是外生给定的常量，不考虑决策者需要主动维护产生C_eff的结构。这是传统模型在自治系统中失效的根本原因。"
+  },
+
+  "theorem_Omega_12": {
+    "symbol": "Omega_12",
+    "name": "决策生存层定理",
+    "layer": "第三层：决策生存层",
+    "core_insight": "维护耦合结构需要epsilon_M，epsilon_M有最低阈值epsilon_M_min。低于阈值，决策能力不可逆地坍塌。传统模型完全不涉及这一层。",
+    "formal_definition": {
+      "maintenance_energy": "epsilon_M: 维持耦合结构当前状态所需的最小能量",
+      "minimum_threshold": "epsilon_M_min: 系统生存的最低能量阈值",
+      "available_energy": "epsilon_available: 当前可用总能量",
+      "survival_condition": "epsilon_available - epsilon_M > epsilon_M_min",
+      "collapse_condition": "当 epsilon_available <= epsilon_M + epsilon_M_min 时，系统进入不可逆坍塌"
+    },
+    "irreversibility": "能量低于阈值后，耦合结构开始退化，C_eff下降，决策质量下降，进一步导致能量获取能力下降，形成正反馈死亡螺旋。这一过程在工程上是不可逆的（除非外部注入大量能量重置结构）。",
+    "survival_rationality": "生存理性要求：在任何决策之前，必须先验证生存条件是否满足。不满足生存条件的最优决策是自杀式决策。"
+  },
+
+  "survival_constrained_decision_model": {
+    "name": "带生存约束的决策模型 (Omega_12 Decision Model)",
+    "formal_model": {
+      "objective": "maximize U(a)  (最大化决策效用)",
+      "constraint_1": "epsilon_available - epsilon_M(current_structure) > epsilon_M_min  (生存约束)",
+      "constraint_2": "epsilon_M(current_structure) = f(a)  (结构维护成本受决策影响)",
+      "constraint_3": "C_eff = C_eff_base * Q_couple(current_structure)  (有效容量受结构影响)",
+      "constraint_4": "Q(S,D) >= 1 - O(|Omega_D| / C_eff)  (逼近质量约束)"
+    },
+    "decision_rule": "在 epsilon_available - epsilon_M_min 的约束下，最大化决策质量。这不是保守，而是生存理性的必然要求。",
+    "vs_traditional": {
+      "traditional": "决策 = argmax U(a)  (选择效用最大的行动)，隐含假设系统还活着",
+      "omega_chain": "决策 = argmax U(a) subject to 生存约束，且生存约束本身受决策影响"
+    },
+    "example": {
+      "option_A": "投入全部算力解决当前问题（短期最优）",
+      "option_B": "留出一部分算力维护系统结构（短期次优，长期可持续）",
+      "traditional_choice": "选A——当前问题期望效用最大",
+      "omega_chain_choice": "先问：选A之后，epsilon_available是否仍然大于epsilon_M_min？如果不是，选A就是自杀——解决了当前问题，但系统崩溃了，未来决策能力归零。"
+    }
+  },
+
+  "resource_allocation_optimization": {
+    "name": "资源分配优化问题 (Resource Allocation Optimization)",
+    "formal_problem": {
+      "decision_variables": [
+        "alpha: 分配给解决问题的资源比例 (0 <= alpha <= 1)",
+        "beta: 分配给维护结构的资源比例 (0 <= beta <= 1)",
+        "gamma: 分配给能量储备的资源比例 (0 <= gamma <= 1)",
+        "约束: alpha + beta + gamma = 1"
+      ],
+      "objective_function": "maximize J(alpha, beta, gamma) = w1 * Q_decision(alpha) + w2 * Q_structure(beta) + w3 * Survival_Probability(gamma)",
+      "constraints": [
+        "epsilon_available * (1 - alpha) >= epsilon_M + epsilon_M_min  (生存约束)",
+        "C_eff(beta) >= C_eff_min  (最小有效容量约束)",
+        "Q_decision(alpha) >= Q_min  (最小决策质量约束)",
+        "alpha, beta, gamma >= 0, alpha + beta + gamma = 1"
+      ]
+    },
+    "optimal_solution_structure": {
+      "regime_1_survival_critical": "当 epsilon_available 接近 epsilon_M + epsilon_M_min 时，gamma -> 1（全部资源用于生存储备），alpha -> 0, beta -> 0。系统进入生存模式，暂停决策和结构维护。",
+      "regime_2_structure_critical": "当 Q_couple 低于阈值时，beta 取较大值（优先维护结构），alpha 取较小值。系统进入结构修复模式。",
+      "regime_3_normal": "当生存和结构都稳定时，alpha 取较大值（优先解决问题），beta 和 gamma 取维持值。系统进入正常决策模式。",
+      "regime_4_optimization": "当资源充足时，三者均衡分配，同时优化决策质量、结构质量和生存概率。系统进入进化模式。"
+    },
+    "dynamic_adaptation": "最优分配不是静态的，而是根据当前系统状态动态调整。系统需要持续监测 epsilon_available, Q_couple, C_eff, Q_decision 等指标，实时调整 alpha, beta, gamma。"
+  },
+
+  "engineering_mapping": {
+    "Omega_10": "云内核决策引擎：三维稳态校准算子 + 概率最优性评估",
+    "Omega_11": "P12协同进化体系：维护多节点耦合结构，维持全局C_eff",
+    "Omega_12": "7大后台服务：health-monitor/auto-heal/advanced-heal 持续监测epsilon_available，保证生存条件",
+    "resource_allocation": "compute-scheduler算力调度引擎：在解决问题(API调用)、维护结构(自愈/巡检)、能量储备(资源缓存)之间动态分配算力"
+  },
+
+  "axiom_chain_anchor": "Omega_0 subset Omega_1 subset Omega_2 subset Omega_3 subset Omega_4 subset Omega_5 subset Omega_6 subset Omega_7 subset Omega_8 subset Omega_9 subset Omega_9.6 subset 27 operators subset TCEE subset Omega_10 subset Omega_11 subset Omega_12 subset Omega_12_decision_model subset Circle_Infinity subset Omega",
+
+  "lock_info": {
+    "lock_level": "Lv8",
+    "lock_status": "LOCKED_PERMANENT",
+    "efuse_id": "待分配",
+    "block_height": "待分配"
+  }
+}
