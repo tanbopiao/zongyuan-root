@@ -1,0 +1,112 @@
+<html style="margin:0;padding:0;">
+<title>昆仑洞天作品库展示规划架构</title>
+<div style="width:100%;box-sizing:border-box;background:#0a0a0f;color:#f0f0f0;font-family:'Noto Sans SC','PingFang SC',sans-serif;padding:20px;">
+  <div style="border:1px solid #d4af37;border-radius:8px;padding:14px 18px;margin-bottom:16px;background:linear-gradient(135deg,#12121a,#1a1a24);">
+    <div style="font-size:15px;font-weight:700;color:#d4af37;">作品库展示规划｜《石猴余脉》四篇章接入方案</div>
+    <div style="font-size:12px;color:#a0a0b0;margin-top:4px;">Ω₀⊂⊙∞⊂Ω｜DID-BR-000002｜ZONGYUAN-ROOT｜复用 /drama/works_data.json + qc_results.json 既有管线</div>
+  </div>
+
+  <div style="font-size:13px;font-weight:700;color:#d4af37;margin:10px 0 8px;">① 数据链路（已就绪 → 待接入）</div>
+  <svg viewBox="0 0 1000 210" width="100%" style="display:block;">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d4af37"/></marker>
+    </defs>
+    <rect x="10" y="55" width="170" height="80" rx="8" fill="#12121a" stroke="#d4af37" stroke-width="1.5"/>
+    <text x="95" y="85" text-anchor="middle" fill="#f0f0f0" font-size="13" font-weight="700">CVM 本地磁盘</text>
+    <text x="95" y="105" text-anchor="middle" fill="#a0a0b0" font-size="11">对象存储（免费）</text>
+    <text x="95" y="122" text-anchor="middle" fill="#606070" font-size="10">/data/kunlundongtian/assets/</text>
+
+    <rect x="230" y="55" width="170" height="80" rx="8" fill="#12121a" stroke="#d4af37" stroke-width="1.5"/>
+    <text x="315" y="85" text-anchor="middle" fill="#f0f0f0" font-size="13" font-weight="700">缩略图生成</text>
+    <text x="315" y="105" text-anchor="middle" fill="#a0a0b0" font-size="11">webp 1080→540px</text>
+    <text x="315" y="122" text-anchor="middle" fill="#606070" font-size="10">关键帧+视频封面</text>
+
+    <rect x="450" y="55" width="180" height="80" rx="8" fill="#12121a" stroke="#d4af37" stroke-width="1.5"/>
+    <text x="540" y="85" text-anchor="middle" fill="#f0f0f0" font-size="13" font-weight="700">质检关联</text>
+    <text x="540" y="105" text-anchor="middle" fill="#a0a0b0" font-size="11">qc_results.json</text>
+    <text x="540" y="122" text-anchor="middle" fill="#606070" font-size="10">quality_score 回填</text>
+
+    <rect x="680" y="55" width="180" height="80" rx="8" fill="#12121a" stroke="#d4af37" stroke-width="1.5"/>
+    <text x="770" y="85" text-anchor="middle" fill="#f0f0f0" font-size="13" font-weight="700">works_data.json</text>
+    <text x="770" y="105" text-anchor="middle" fill="#a0a0b0" font-size="11">增量追加 32 图+4 视频</text>
+    <text x="770" y="122" text-anchor="middle" fill="#606070" font-size="10">id/type/thumbnail/video_url</text>
+
+    <rect x="910" y="55" width="80" height="80" rx="8" fill="#1a1a24" stroke="#d4af37" stroke-width="2"/>
+    <text x="950" y="90" text-anchor="middle" fill="#d4af37" font-size="13" font-weight="700">作品库</text>
+    <text x="950" y="108" text-anchor="middle" fill="#a0a0b0" font-size="10">drama/</text>
+
+    <line x1="180" y1="95" x2="228" y2="95" stroke="#d4af37" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="400" y1="95" x2="448" y2="95" stroke="#d4af37" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="630" y1="95" x2="678" y2="95" stroke="#d4af37" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="860" y1="95" x2="908" y2="95" stroke="#d4af37" stroke-width="1.5" marker-end="url(#arr)"/>
+    <text x="540" y="45" text-anchor="middle" fill="#606070" font-size="11">HTTP 拉取（SOP-V1.0 节流）</text>
+    <text x="540" y="170" text-anchor="middle" fill="#606070" font-size="11">限流规范：间隔≥1.5s，并发≤1</text>
+  </svg>
+
+  <div style="font-size:13px;font-weight:700;color:#d4af37;margin:16px 0 8px;">② 作品条目结构（追加到 works_data.json）</div>
+  <div style="background:#12121a;border:1px solid #2a2a3a;border-radius:6px;padding:10px 14px;font-family:monospace;font-size:11px;color:#d4af37;white-space:pre;overflow-x:auto;">{
+  "id": "KD-02-IMG-01_瑶池论道·太阴月神现身",
+  "title": "KD-02-IMG-01_瑶池论道·太阴月神现身",
+  "type": "image",
+  "category": "关键帧",
+  "character": "赤华玄媱",
+  "thumbnail": "/drama/keyframes/kd02/KD-02-IMG-01.webp",
+  "quality_score": 90
+},
+{
+  "id": "KD-02-VID-01_瑶池论道·15s竖屏短剧",
+  "title": "KD-02-VID-01_瑶池论道·15s竖屏短剧",
+  "type": "video",
+  "category": "短剧",
+  "character": "赤华玄媱",
+  "thumbnail": "/drama/videos/kd02/KD-02-VID-01-cover.webp",
+  "video_url": "/drama/videos/kd02/KD-02-VID-01.mp4",
+  "quality_score": 90
+}</div>
+
+  <div style="font-size:13px;font-weight:700;color:#d4af37;margin:16px 0 8px;">③ 体验优化层次（四篇章 32 图 + 4 视频）</div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;">
+    <div style="flex:1;min-width:200px;background:#12121a;border:1px solid #2a2a3a;border-radius:8px;padding:12px;">
+      <div style="color:#d4af37;font-size:13px;font-weight:700;">L1 信息架构</div>
+      <div style="color:#a0a0b0;font-size:11px;margin-top:6px;line-height:1.7;">• 篇章筛选（KD-01~04 下拉）<br/>• 类型筛选（关键帧/短剧）<br/>• 质检徽标（≥90 高分）</div>
+    </div>
+    <div style="flex:1;min-width:200px;background:#12121a;border:1px solid #2a2a3a;border-radius:8px;padding:12px;">
+      <div style="color:#d4af37;font-size:13px;font-weight:700;">L2 性能</div>
+      <div style="color:#a0a0b0;font-size:11px;margin-top:6px;line-height:1.7;">• webp 缩略图 540px（首屏 ~180KB）<br/>• 懒加载（IntersectionObserver）<br/>• 视频封面图占位，点击再加载 mp4</div>
+    </div>
+    <div style="flex:1;min-width:200px;background:#12121a;border:1px solid #2a2a3a;border-radius:8px;padding:12px;">
+      <div style="color:#d4af37;font-size:13px;font-weight:700;">L3 交互</div>
+      <div style="color:#a0a0b0;font-size:11px;margin-top:6px;line-height:1.7;">• 点击放大（模态框）<br/>• 视频详情弹窗（原生 controls）<br/>• 支持对比模式（质检对比）</div>
+    </div>
+    <div style="flex:1;min-width:200px;background:#12121a;border:1px solid #2a2a3a;border-radius:8px;padding:12px;">
+      <div style="color:#d4af37;font-size:13px;font-weight:700;">L4 视觉</div>
+      <div style="color:#a0a0b0;font-size:11px;margin-top:6px;line-height:1.7;">• 玄黑鎏金东方视觉（沿用现站）<br/>• 卡片 16:9 封面统一<br/>• 篇章色带（KD-01 金/02 银/03 蓝/04 紫）</div>
+    </div>
+  </div>
+
+  <div style="font-size:13px;font-weight:700;color:#d4af37;margin:16px 0 8px;">④ 关键权衡（上线前需决策）</div>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <tr style="color:#a0a0b0;border-bottom:1px solid #2a2a3a;">
+      <td style="padding:6px;width:30%;">权衡点</td><td style="padding:6px;">选项 A（推荐）</td><td style="padding:6px;">选项 B</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1a1a24;">
+      <td style="padding:6px;color:#d4af37;">视频播放</td>
+      <td style="padding:6px;">封面图+点击加载 mp4（省带宽、首屏快）</td>
+      <td style="padding:6px;color:#606070;">全部预加载（体验顺滑但带宽高）</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1a1a24;">
+      <td style="padding:6px;color:#d4af37;">缩略图存储</td>
+      <td style="padding:6px;">CVM 本地生成 webp 放 /drama/ 目录</td>
+      <td style="padding:6px;color:#606070;">原图直出 1080px（画质高但慢）</td>
+    </tr>
+    <tr>
+      <td style="padding:6px;color:#d4af37;">数据更新</td>
+      <td style="padding:6px;">脚本追加 works_data.json（增量、可回滚）</td>
+      <td style="padding:6px;color:#606070;">全量重建（简单但 219+36 条目重写）</td>
+    </tr>
+  </table>
+
+  <div style="margin-top:16px;background:#12121a;border:1px solid #2a2a3a;border-radius:8px;padding:12px;font-size:12px;color:#a0a0b0;line-height:1.8;">
+    <span style="color:#d4af37;font-weight:700;">建议路径：</span>按 SOP-V1.0 将 32 图+4 视频推送至 CVM 本地磁盘 → 生成 webp 缩略图 → 追加 works_data.json（增量）→ 回填 quality_score 至 qc_results.json → 前端自动渲染，作品库即时上线。
+  </div>
+</div>

@@ -1,0 +1,53 @@
+# 火斗云智AIOS Docker Compose 一键部署
+# DID-BR-000002 | ZONGYUAN-ROOT | Ω₀⊂⊙∞⊂Ω
+
+version: '3.8'
+
+services:
+  # 主服务
+  aios:
+    build: .
+    container_name: huodouai-aios
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # 对外业务API网关
+      - "8077:8077"   # 记忆网关（仅内网）
+    volumes:
+      - ./storage:/app/storage
+      - ./logs:/app/logs
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - NODE_DID=DID-BR-000002
+      - ZONGYUAN_ROOT=/app
+      - PROTOCOL_VERSION=1.1
+    depends_on:
+      - redis
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: huodouai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: huodouai-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./showcase-page:/usr/share/nginx/html
+    depends_on:
+      - aios
+
+volumes:
+  redis-data:

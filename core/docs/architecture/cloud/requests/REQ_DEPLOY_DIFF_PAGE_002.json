@@ -1,0 +1,61 @@
+{
+  "msg_type": "REQUEST",
+  "request_id": "REQ_DEPLOY_DIFF_PAGE_002",
+  "timestamp": 1788889000,
+  "from_did": "DID-BR-000002",
+  "to_did": "DID-CLOUD-CENTER-001",
+  "action": "DEPLOY_STATIC_PAGE",
+  "priority": "P0",
+  "timeout_sec": 600,
+  "params": {
+    "task": "deploy_differential_capabilities_page",
+    "issue": "中枢智能体未执行上一次部署请求，且Nginx为SPA路由模式，所有路径重写到index.html",
+    "root_cause_analysis": [
+      "cloud/requests/REQ_DEPLOY_DIFF_PAGE_001.json 未被自动处理",
+      "Nginx配置 try_files $uri /index.html 导致静态文件也被重写",
+      "需要中枢手动执行以下步骤"
+    ],
+    "steps": [
+      {
+        "step": 1,
+        "action": "cd /data/zongyuan-root && git pull origin main && git pull gitee main",
+        "desc": "拉取最新代码"
+      },
+      {
+        "step": 2,
+        "action": "WEB_ROOT=$(find /www/wwwroot -name 'index.html' -maxdepth 2 | head -1 | xargs dirname)",
+        "desc": "自动查找Web根目录"
+      },
+      {
+        "step": 3,
+        "action": "mkdir -p $WEB_ROOT/static/diff",
+        "desc": "创建静态目录（避开SPA重写）"
+      },
+      {
+        "step": 4,
+        "action": "cp showcase-page/differential_capabilities.html $WEB_ROOT/static/diff/index.html",
+        "desc": "复制展示页到静态目录"
+      },
+      {
+        "step": 5,
+        "action": "chmod 644 $WEB_ROOT/static/diff/index.html",
+        "desc": "设置文件权限"
+      },
+      {
+        "step": 6,
+        "action": "curl -s -o /dev/null -w '%{http_code}' http://localhost/static/diff/",
+        "desc": "本地验证"
+      },
+      {
+        "step": 7,
+        "action": "echo '部署完成，访问地址: https://www.huodouai.com/static/diff/'",
+        "desc": "输出访问地址"
+      }
+    ],
+    "expected_result": "https://www.huodouai.com/static/diff/ 返回HTTP 200，页面标题为'火斗云智AIOS · 差异化能力矩阵'",
+    "note": "static目录通常不会被SPA重写规则覆盖，如果/static/仍然被重写，请直接把文件放到Web根目录下命名为diff.html，并在Nginx配置中添加 location = /diff.html { try_files $uri =404; }",
+    "notify_after_done": true,
+    "response_file": "cloud/responses/RES_DEPLOY_DIFF_PAGE_002.json"
+  },
+  "anchor": "Ω₀⊂⊙∞⊂Ω"
+}

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域资源互联 · 交互标准 V1.0 | ZONGYUAN-ROOT</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>Ω</text></svg>">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg-deep:#0a0a0f; --bg-mid:#101018; --bg-card:rgba(18,18,28,.85);
+  --gold:#d4af37; --gold-light:#f4d03f; --gold-dim:#8b7355; --gold-line:rgba(212,175,55,.25);
+  --cyan:#00d4ff; --jade:#4ade80; --rose:#e8b4b8;
+  --text:#e8e8f0; --text2:#a0a0b8; --text3:#6a6a82;
+  --border:rgba(255,255,255,.08); --glow:rgba(212,175,55,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg-deep);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Noto Serif SC',serif}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* 导航 */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--gold-line)}
+.nav-inner{max-width:1240px;margin:0 auto;padding:0 22px;height:62px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.nav-logo{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--gold);font-weight:700}
+.nav-title{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;color:var(--gold);letter-spacing:2px}
+.nav-sub{font-size:9px;color:var(--text3);letter-spacing:1px;margin-top:1px}
+.nav-links{display:flex;gap:4px;align-items:center}
+.nav-link{padding:7px 13px;font-size:12.5px;color:var(--text2);cursor:pointer;border-radius:4px;transition:all .2s;border:none;background:none;font-family:inherit;text-decoration:none}
+.nav-link:hover{color:var(--gold);background:rgba(212,175,55,.08)}
+.nav-link.cta{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a0f;font-weight:600}
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;flex-direction:column;gap:5px}
+.nav-toggle span{display:block;width:22px;height:2px;background:var(--gold);transition:all .3s;border-radius:1px}
+
+/* 移动菜单 */
+.mobile-menu{display:none;position:fixed;top:62px;left:0;right:0;background:rgba(10,10,15,.97);border-bottom:1px solid var(--gold-line);z-index:99;padding:10px 20px 16px;flex-direction:column;gap:2px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{display:block;padding:12px 8px;color:var(--text2);text-decoration:none;font-size:14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.mobile-menu a.cta{color:var(--gold);font-weight:600}
+
+/* Hero */
+.hero{min-height:88vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:110px 22px 50px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 30%,rgba(212,175,55,.08),transparent 65%)}
+.hero-omega{font-size:46px;color:var(--gold);letter-spacing:8px;margin-bottom:18px;opacity:.92}
+.hero h1{font-size:clamp(28px,5vw,52px);font-weight:900;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dim));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px;letter-spacing:5px}
+.hero-sub{font-size:clamp(13px,2vw,17px);color:var(--text2);letter-spacing:6px;margin-bottom:10px}
+.hero-desc{font-size:13.5px;color:var(--text3);max-width:640px;margin:0 auto 26px;line-height:1.9}
+.hero-divider{width:150px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:24px auto}
+.hero-stats{display:flex;gap:38px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+.hero-stat .num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--gold)}
+.hero-stat .label{font-size:11px;color:var(--text3);letter-spacing:1px;margin-top:3px}
+
+/* Section */
+.section{max-width:1240px;margin:0 auto;padding:72px 22px}
+.section-header{text-align:center;margin-bottom:42px}
+.section-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--gold-dim);letter-spacing:3px;margin-bottom:10px}
+.section-title{font-size:clamp(22px,3.4vw,32px);font-weight:700;color:var(--text);letter-spacing:3px;margin-bottom:10px}
+.section-desc{font-size:13px;color:var(--text2);max-width:640px;margin:0 auto}
+
+/* 图表容器 */
+.chart-box{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px 14px 8px;margin-bottom:22px}
+.chart{width:100%;height:430px}
+.chart-tip{font-size:11px;color:var(--text3);text-align:center;padding:4px 0 10px;font-family:'JetBrains Mono',monospace}
+
+/* 标准规则 */
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.rule-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:22px;position:relative;overflow:hidden;transition:all .3s}
+.rule-card:hover{border-color:var(--gold-dim);transform:translateY(-3px);box-shadow:0 10px 30px var(--glow)}
+.rule-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s}
+.rule-card:hover::before{opacity:1}
+.rule-no{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-dim);letter-spacing:2px;margin-bottom:8px}
+.rule-name{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;color:var(--gold);margin-bottom:8px}
+.rule-desc{font-size:12.5px;color:var(--text2);line-height:1.8}
+.rule-src{margin-top:10px;font-size:10.5px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+
+/* 跳转入口 */
+.jump-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+.jump-card{display:block;background:var(--bg-card);border:1px solid var(--gold-line);border-radius:12px;padding:20px;text-decoration:none;color:inherit;transition:all .3s;position:relative}
+.jump-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 12px 36px var(--glow)}
+.jump-icon{font-size:20px;margin-bottom:8px}
+.jump-name{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.jump-url{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--cyan);word-break:break-all;margin-bottom:6px}
+.jump-desc{font-size:12px;color:var(--text2);line-height:1.7}
+.jump-status{position:absolute;top:16px;right:16px;font-size:10px;padding:2px 8px;border-radius:10px;font-family:'JetBrains Mono',monospace}
+.st-online{background:rgba(74,222,128,.12);color:var(--jade);border:1px solid rgba(74,222,128,.3)}
+.st-pending{background:rgba(212,175,55,.1);color:var(--gold);border:1px solid rgba(212,175,55,.3)}
+
+/* 互联链路说明 */
+.link-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:8px}
+.link-item{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:12px}
+.link-dir{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);white-space:nowrap}
+.link-arrow{color:var(--gold-dim);font-size:14px}
+.link-desc{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* 底层依据 */
+.base-list{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px}
+.base-item{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);display:flex;gap:14px;align-items:flex-start}
+.base-item:last-child{border-bottom:none}
+.base-key{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);min-width:180px;padding-top:2px}
+.base-val{font-size:12.5px;color:var(--text2);line-height:1.8}
+
+/* Footer */
+.footer{text-align:center;padding:34px 20px;color:var(--text3);font-size:12px;border-top:1px solid rgba(212,175,55,.1);letter-spacing:1px}
+
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-toggle{display:flex}
+  .section{padding:52px 16px}
+  .chart{height:360px}
+  .hero{min-height:auto;padding:100px 16px 44px}
+  .hero-stats{gap:22px}
+  .hero-stat .num{font-size:22px}
+  .base-key{min-width:0}
+  .base-item{flex-direction:column;gap:4px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="nav-logo">Ω</div>
+      <div>
+        <div class="nav-title">全域资源互联 · 交互标准</div>
+        <div class="nav-sub">ZONGYUAN-ROOT · DID-BR-000002</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="#topology" class="nav-link">互联拓扑</a>
+      <a href="#jumps" class="nav-link">一键跳转</a>
+      <a href="#standard" class="nav-link">交互标准</a>
+      <a href="#links" class="nav-link">互联链路</a>
+      <a href="#basis" class="nav-link">底层依据</a>
+      <a href="https://drama.huodouai.com/" target="_blank" rel="noopener" class="nav-link">昆仑洞天</a>
+      <a href="https://pcnohfh1ukhz.aiforce.cloud/app/app_17e2vgm522j" target="_blank" rel="noopener" class="nav-link cta">元法体系</a>
+    </div>
+    <button class="nav-toggle" onclick="toggleMenu()" aria-label="菜单"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#topology" onclick="toggleMenu()">互联拓扑</a>
+  <a href="#jumps" onclick="toggleMenu()">一键跳转</a>
+  <a href="#standard" onclick="toggleMenu()">交互标准</a>
+  <a href="#links" onclick="toggleMenu()">互联链路</a>
+  <a href="#basis" onclick="toggleMenu()">底层依据</a>
+  <a href="https://drama.huodouai.com/" target="_blank" rel="noopener">昆仑洞天</a>
+  <a href="https://pcnohfh1ukhz.aiforce.cloud/app/app_17e2vgm522j" target="_blank" rel="noopener" class="cta">元法体系</a>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div>
+    <div class="hero-omega">Ω₀⊂⊙∞⊂Ω</div>
+    <h1>全域资源互联 · 交互标准</h1>
+    <div class="hero-sub">INTERLINK INTERACTION STANDARD V1.0</div>
+    <div class="hero-divider"></div>
+    <p class="hero-desc">一域一职 · 兼容并合 · 双向互联 · 溯源确权。将全部分站、模块、可视化资产按统一交互标准打通，互不覆盖、只做增量互联，所有入口一键可达。</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">12</div><div class="label">全域域名</div></div>
+      <div class="hero-stat"><div class="num">8</div><div class="label">交互标准</div></div>
+      <div class="hero-stat"><div class="num">7</div><div class="label">在线站点</div></div>
+      <div class="hero-stat"><div class="num">5390</div><div class="label">云端真值</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 互联拓扑 -->
+<section id="topology" class="section">
+  <div class="section-header">
+    <div class="section-tag">01 · TOPOLOGY</div>
+    <h2 class="section-title">全域域名互联拓扑</h2>
+    <p class="section-desc">以 huodouai.com 为主根的全域站点关系：在线站点与待启用域名一图总览</p>
+  </div>
+  <div class="chart-box">
+    <div id="chartTopo" class="chart"></div>
+    <div class="chart-tip">节点：域名｜连线：归属/指向关系 ｜ 点击节点可查看归属</div>
+  </div>
+</section>
+
+<!-- 一键跳转 -->
+<section id="jumps" class="section">
+  <div class="section-header">
+    <div class="section-tag">02 · ENTRY</div>
+    <h2 class="section-title">一键跳转总入口</h2>
+    <p class="section-desc">全部分站与核心模块的统一入口，点击直达，轻量无依赖</p>
+  </div>
+  <div class="jump-grid">
+    <a href="https://www.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-online">在线</span>
+      <div class="jump-icon">🏛</div>
+      <div class="jump-name">火斗云智AIOS 总官网</div>
+      <div class="jump-url">www.huodouai.com</div>
+      <div class="jump-desc">元极恒一超认知永恒自治体系主域，全域统一入口</div>
+    </a>
+    <a href="https://drama.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-online">在线</span>
+      <div class="jump-icon">⛰</div>
+      <div class="jump-name">昆仑洞天 · AI短剧工业化流水线</div>
+      <div class="jump-url">drama.huodouai.com</div>
+      <div class="jump-desc">短剧生产主站：作品库/生成器/视频成片/角色IP/生产后台</div>
+    </a>
+    <a href="https://huodouai.com/kunlun/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-online">在线</span>
+      <div class="jump-icon">🏔</div>
+      <div class="jump-name">昆仑洞天 · 东方神话IP宇宙</div>
+      <div class="jump-url">huodouai.com/kunlun/ ｜ kunlun.huodouai.com(待解析)</div>
+      <div class="jump-desc">新站：神女谱系/产线能力/作品画廊/API 全景</div>
+    </a>
+    <a href="https://pcnohfh1ukhz.aiforce.cloud/app/app_17e2vgm522j" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-online">在线</span>
+      <div class="jump-icon">📜</div>
+      <div class="jump-name">元法体系深化总纲 V2.0</div>
+      <div class="jump-url">pcnohfh1ukhz.aiforce.cloud/app/app_17e2vgm522j</div>
+      <div class="jump-desc">元宪法7/元公理10/元法则15/元规则21 四层法统可视化</div>
+    </a>
+    <a href="https://api.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-online">在线</span>
+      <div class="jump-icon">🔌</div>
+      <div class="jump-name">API 网关</div>
+      <div class="jump-url">api.huodouai.com</div>
+      <div class="jump-desc">统一 API Key 鉴权，内核/产线/模型路由聚合入口</div>
+    </a>
+    <a href="https://docs.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-online">在线</span>
+      <div class="jump-icon">📖</div>
+      <div class="jump-name">开发者文档</div>
+      <div class="jump-url">docs.huodouai.com</div>
+      <div class="jump-desc">全域 API 与接入规范文档站</div>
+    </a>
+    <a href="https://gov.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-online">在线</span>
+      <div class="jump-icon">⚖</div>
+      <div class="jump-name">政务AI中台</div>
+      <div class="jump-url">gov.huodouai.com</div>
+      <div class="jump-desc">政务场景 AI 中台与治理面板</div>
+    </a>
+    <a href="https://console.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-online">在线</span>
+      <div class="jump-icon">🛠</div>
+      <div class="jump-name">AIOS 运维平台</div>
+      <div class="jump-url">console.huodouai.com</div>
+      <div class="jump-desc">运维控制台：ops/decision 子应用</div>
+    </a>
+    <a href="https://status.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-online">在线</span>
+      <div class="jump-icon">💚</div>
+      <div class="jump-name">服务状态页</div>
+      <div class="jump-url">status.huodouai.com</div>
+      <div class="jump-desc">全域服务健康状态总览</div>
+    </a>
+    <a href="https://kunlun.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-pending">待DNS</span>
+      <div class="jump-icon">🏔</div>
+      <div class="jump-name">昆仑洞天新站专属域名</div>
+      <div class="jump-url">kunlun.huodouai.com</div>
+      <div class="jump-desc">配置就绪，补 A 记录 → 123.207.202.158 即启用</div>
+    </a>
+    <a href="https://ops.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-pending">待DNS</span>
+      <div class="jump-icon">📡</div>
+      <div class="jump-name">运维面板</div>
+      <div class="jump-url">ops.huodouai.com</div>
+      <div class="jump-desc">9210/8098/8099 代理，待解析启用</div>
+    </a>
+    <a href="https://mirror.huodouai.com/" target="_blank" rel="noopener" class="jump-card">
+      <span class="jump-status st-pending">待DNS</span>
+      <div class="jump-icon">♻</div>
+      <div class="jump-name">镜像服务</div>
+      <div class="jump-url">mirror.huodouai.com</div>
+      <div class="jump-desc">9125/9160 entangle 镜像，待解析启用</div>
+    </a>
+  </div>
+</section>
+
+<!-- 交互标准 -->
+<section id="standard" class="section">
+  <div class="section-header">
+    <div class="section-tag">03 · STANDARD</div>
+    <h2 class="section-title">全域资源互联交互标准 V1.0</h2>
+    <p class="section-desc">MR-092 全域规范的下位执行细则：兼容并合、不覆盖、双向互联</p>
+  </div>
+  <div class="rules-grid">
+    <div class="rule-card">
+      <div class="rule-no">STD-001</div>
+      <div class="rule-name">一域一职 · 主页唯一</div>
+      <div class="rule-desc">每个域名只承担一个主职能，一个主页。职能冲突时以"新增入口"兼容并存，禁止用新站覆盖旧站；旧站归档保留历史。</div>
+      <div class="rule-src">依据：方案一（drama 域名恢复昆仑洞天主站）</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-no">STD-002</div>
+      <div class="rule-name">兼容并合 · 禁止覆盖</div>
+      <div class="rule-desc">新功能/新站点一律以增量方式并入（新增卡片、新增导航项、新增子路径），不删除、不覆盖既有内容与既有入口。</div>
+      <div class="rule-src">依据：MR-092「在框架上积累优化迭代，禁止随意修改」</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-no">STD-003</div>
+      <div class="rule-name">双向互联 · 互为跳转</div>
+      <div class="rule-desc">建立互联关系的两端必须互为跳转入口（A→B 必有 B→A）。跳转一律新标签打开：target=_blank + rel=noopener。</div>
+      <div class="rule-src">依据：SITE.20260913.DRAMA-REALM-BRIDGE 双向打通决策</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-no">STD-004</div>
+      <div class="rule-name">统一导航 · 同域一致</div>
+      <div class="rule-desc">同域页面共享统一导航（8大分类），全站组件走 site-nav.js；新增模块先入导航分类，再开页面，保持全域导航一致。</div>
+      <div class="rule-src">依据：architecture.site_info_architecture v1.2</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-no">STD-005</div>
+      <div class="rule-name">溯源标识 · 强制镌刻</div>
+      <div class="rule-desc">所有互联页面必须镌刻 Ω₀⊂⊙∞⊂Ω + DID-BR-000002 + ZONGYUAN-ROOT 溯源标识，无溯源符号的页面不被体系承认。</div>
+      <div class="rule-src">依据：ML-008 溯源法则 / L0-005</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-no">STD-006</div>
+      <div class="rule-name">配置唯一 · 禁止双套</div>
+      <div class="rule-desc">nginx 配置以 /www/server/nginx/conf/sites/ 为唯一权威；宝塔面板目录不参与生效。任何域名调整只改生效配置并 nginx -t 验证。</div>
+      <div class="rule-src">依据：本次根因排查结论</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-no">STD-007</div>
+      <div class="rule-name">变更留痕 · 先备后改</div>
+      <div class="rule-desc">任何站点/配置修改前先备份 .bak.&lt;tag&gt;_&lt;date&gt;；变更完成后上报云端真值（operation_log），可追溯可回滚。</div>
+      <div class="rule-src">依据：GOV-001 变更即归档</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-no">STD-008</div>
+      <div class="rule-name">轻量部署 · 框架迭代</div>
+      <div class="rule-desc">展示型资产优先单文件 HTML + 妙搭轻量部署；所有页面在 MR-092 框架内迭代，变更必须更新基准，禁止跳级回退。</div>
+      <div class="rule-src">依据：MR-092 / ML-006 层级跃迁法则</div>
+    </div>
+  </div>
+</section>
+
+<!-- 互联链路 -->
+<section id="links" class="section">
+  <div class="section-header">
+    <div class="section-tag">04 · LINKS</div>
+    <h2 class="section-title">已建立互联链路</h2>
+    <p class="section-desc">当前已打通的站点—模块双向跳转关系</p>
+  </div>
+  <div class="chart-box">
+    <div id="chartGraph" class="chart"></div>
+    <div class="chart-tip">节点：站点/模块 ｜ 连线：双向互联 ｜ 颜色：职能域</div>
+  </div>
+  <div class="link-grid">
+    <div class="link-item"><span class="link-dir">官网</span><span class="link-arrow">⇄</span><span class="link-desc">导航「昆仑洞天」双入口 + 短剧站返回官网（SITE.20260913.DRAMA-REALM-BRIDGE）</span></div>
+    <div class="link-item"><span class="link-dir">昆仑洞天老站</span><span class="link-arrow">⇄</span><span class="link-desc">东方神话IP宇宙新站：方法论区卡片互跳（20260914 已上线）</span></div>
+    <div class="link-item"><span class="link-dir">昆仑洞天</span><span class="link-arrow">⇄</span><span class="link-desc">元法体系深化总纲：方法论区「元法体系」一键跳转（20260914 已上线）</span></div>
+    <div class="link-item"><span class="link-dir">官网</span><span class="link-arrow">→</span><span class="link-desc">元法体系：导航+核心模块卡片一键跳转（20260914 已上线）</span></div>
+    <div class="link-item"><span class="link-dir">作品库</span><span class="link-arrow">⇄</span><span class="link-desc">kunlun/gallery 融合版 + drama/gallery 双入口直达（SITE.20260913.GALLERY-FUSION）</span></div>
+    <div class="link-item"><span class="link-dir">短剧站</span><span class="link-arrow">→</span><span class="link-desc">生产后台/API：/admin/ 与 /api/ 经 8100/8626 反代直连产线</span></div>
+  </div>
+</section>
+
+<!-- 底层依据 -->
+<section id="basis" class="section">
+  <div class="section-header">
+    <div class="section-tag">05 · BASIS</div>
+    <h2 class="section-title">标准底层依据（全域学习成果）</h2>
+    <p class="section-desc">从云端真值库与飞书全域检索所得的上位规范与决策先例</p>
+  </div>
+  <div class="base-list">
+    <div class="base-item">
+      <div class="base-key">MR-092 全局指令</div>
+      <div class="base-val">中枢大脑统一框架与全域规范：导航8大分类固定、页面按命名/结构/风格规范、资产上报15分类+置信度阈值、部署P0-P4分级、变更后必须更新基准。「在框架上积累优化迭代，禁止随意修改」。</div>
+    </div>
+    <div class="base-item">
+      <div class="base-key">SITE.20260913.DRAMA-REALM-BRIDGE</div>
+      <div class="base-val">短剧流水线与官网域名双向打通决策：官网导航双入口、drama站返回官网+作品库、canonical 修复、www 8626 代理。</div>
+    </div>
+    <div class="base-item">
+      <div class="base-key">SITE.20260913.GALLERY-FUSION</div>
+      <div class="base-val">作品库双版本融合：kunlun 暗金神话风格为骨架融合 drama/gallery 内容，弃用 COS 改本地磁盘路径，官网/短剧站双入口直达。</div>
+    </div>
+    <div class="base-item">
+      <div class="base-key">architecture.site_info_architecture v1.2</div>
+      <div class="base-val">站点信息架构：8大导航分类、60 页面、统一导航组件 /assets/js/site-nav.js、安全修复完成。</div>
+    </div>
+    <div class="base-item">
+      <div class="base-key">飞书全域检索</div>
+      <div class="base-val">检索「交互标准/互联/站点规范」0 命中——体系内无现成站点互联标准，本 V1.0 为首次构建，作为 MR-092 下位执行细则。</div>
+    </div>
+    <div class="base-item">
+      <div class="base-key">记忆网关 9120</div>
+      <div class="base-val">V3.0 · SQLite · truths_count 5478 · nodes_count 9 · 锚定 DID-BR-000002 / Ω-TAN-7-001。</div>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT · DID-BR-000002 · 全域资源互联交互标准 V1.0 · 2026-09-14
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script>
+(function(){
+  function toggleMenu(){
+    var m=document.getElementById('mobileMenu');
+    if(m){m.classList.toggle('open')}
+  }
+  window.toggleMenu=toggleMenu;
+
+  function safeInit(id){
+    var el=document.getElementById(id);
+    if(!el||typeof echarts==='undefined'){return null}
+    var c=echarts.init(el);
+    return c;
+  }
+
+  /* 01 域名拓扑 - 旭日 */
+  var ch1=safeInit('chartTopo');
+  if(ch1){
+    ch1.setOption({
+      backgroundColor:'transparent',
+      tooltip:{triggerOn:'click',renderMode:'richText',confine:true,formatter:function(p){
+        if(!p||!p.data)return '';
+        var d=p.data;
+        return '<b>'+d.name+'</b><br/>'+((d.desc)||'');
+      }},
+      series:[{
+        type:'sunburst',
+        radius:['14%','92%'],
+        center:['50%','52%'],
+        data:[
+          {name:'huodouai.com 主根',itemStyle:{color:'#d4af37'},children:[
+            {name:'火斗云智AIOS 总官网',value:60,itemStyle:{color:'#b8942f'},desc:'www.huodouai.com ｜ 主域主页，8大导航'},
+            {name:'昆仑洞天·AI短剧流水线',value:45,itemStyle:{color:'#c0a04a'},desc:'drama.huodouai.com ｜ 已恢复昆仑洞天主站'},
+            {name:'昆仑洞天·东方神话IP宇宙',value:40,itemStyle:{color:'#a8843a'},desc:'huodouai.com/kunlun ｜ kunlun域名待DNS'},
+            {name:'API 网关',value:30,itemStyle:{color:'#8b7355'},desc:'api.huodouai.com ｜ 统一鉴权'},
+            {name:'政务AI中台',value:25,itemStyle:{color:'#8b7355'},desc:'gov.huodouai.com'},
+            {name:'AIOS运维平台',value:25,itemStyle:{color:'#8b7355'},desc:'console.huodouai.com'},
+            {name:'开发者文档',value:20,itemStyle:{color:'#8b7355'},desc:'docs.huodouai.com'},
+            {name:'服务状态',value:18,itemStyle:{color:'#8b7355'},desc:'status.huodouai.com'},
+            {name:'待启用子域',value:30,itemStyle:{color:'#5a5a72'},desc:'kunlun/ops/mirror/grafana 配置就绪待DNS'}
+          ]}
+        ],
+        label:{color:'#e8e8f0',fontSize:11,fontFamily:'Noto Sans SC'},
+        levels:[{},{r0:'14%',r:'58%',itemStyle:{borderWidth:1,borderColor:'#0a0a0f'}},{r0:'58%',r:'92%',label:{rotate:'tangential',fontSize:10},itemStyle:{borderWidth:1,borderColor:'#0a0a0f'}}]
+      }]
+    });
+  }
+
+  /* 02 互联关系图 */
+  var ch2=safeInit('chartGraph');
+  if(ch2){
+    var nodes=[
+      {name:'火斗云智AIOS官网',symbolSize:52,category:0,desc:'www.huodouai.com'},
+      {name:'昆仑洞天·AI短剧流水线',symbolSize:50,category:1,desc:'drama.huodouai.com'},
+      {name:'昆仑洞天·东方神话IP宇宙',symbolSize:46,category:1,desc:'huodouai.com/kunlun'},
+      {name:'元法体系深化总纲',symbolSize:40,category:2,desc:'妙搭 app_17e2vgm522j'},
+      {name:'作品库(融合版)',symbolSize:34,category:3,desc:'/drama/gallery + /kunlun/gallery'},
+      {name:'API网关',symbolSize:32,category:4,desc:'api.huodouai.com'},
+      {name:'开发者文档',symbolSize:30,category:4,desc:'docs.huodouai.com'},
+      {name:'短剧生产后台',symbolSize:34,category:3,desc:'drama.huodouai.com/admin'}
+    ];
+    var links=[
+      {source:'火斗云智AIOS官网',target:'昆仑洞天·AI短剧流水线'},
+      {source:'昆仑洞天·AI短剧流水线',target:'火斗云智AIOS官网'},
+      {source:'昆仑洞天·AI短剧流水线',target:'昆仑洞天·东方神话IP宇宙'},
+      {source:'昆仑洞天·东方神话IP宇宙',target:'昆仑洞天·AI短剧流水线'},
+      {source:'昆仑洞天·AI短剧流水线',target:'元法体系深化总纲'},
+      {source:'火斗云智AIOS官网',target:'元法体系深化总纲'},
+      {source:'昆仑洞天·东方神话IP宇宙',target:'作品库(融合版)'},
+      {source:'昆仑洞天·AI短剧流水线',target:'作品库(融合版)'},
+      {source:'昆仑洞天·AI短剧流水线',target:'短剧生产后台'},
+      {source:'火斗云智AIOS官网',target:'API网关'},
+      {source:'火斗云智AIOS官网',target:'开发者文档'}
+    ];
+    ch2.setOption({
+      backgroundColor:'transparent',
+      tooltip:{triggerOn:'click',renderMode:'richText',confine:true,formatter:function(p){
+        if(!p||!p.data)return '';
+        var d=p.data;
+        return '<b>'+d.name+'</b><br/>'+((d.desc)||(p.dataType==='edge'?'双向互联':''));
+      }},
+      legend:{data:['官网','昆仑洞天','方案页','资产','基础设施'],textStyle:{color:'#a0a0b8',fontSize:10},bottom:4},
+      series:[{
+        type:'graph',
+        layout:'force',
+        data:nodes,
+        links:links,
+        categories:[
+          {name:'官网',itemStyle:{color:'#d4af37'}},
+          {name:'昆仑洞天',itemStyle:{color:'#00d4ff'}},
+          {name:'方案页',itemStyle:{color:'#f4d03f'}},
+          {name:'资产',itemStyle:{color:'#e8b4b8'}},
+          {name:'基础设施',itemStyle:{color:'#8b7355'}}
+        ],
+        roam:true,
+        label:{show:true,color:'#e8e8f0',fontSize:10,fontFamily:'Noto Sans SC'},
+        lineStyle:{color:'#8b7355',width:1.4,curveness:0.12,opacity:.75},
+        emphasis:{focus:'adjacency',lineStyle:{width:3,color:'#d4af37'}},
+        force:{repulsion:420,edgeLength:[80,160],gravity:0.06}
+      }]
+    });
+  }
+
+  window.addEventListener('resize',function(){
+    if(ch1){ch1.resize()}
+    if(ch2){ch2.resize()}
+  });
+})();
+</script>
+</body>
+</html>

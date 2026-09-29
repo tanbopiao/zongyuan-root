@@ -1,0 +1,65 @@
+# AIOS 优化部署清单 v1.0
+# 确权: DID-BR-000002 | ZONGYUAN-ROOT
+{
+  "manifest": "aios-optimize-deploy",
+  "version": "1.0.0",
+  "target": "Windows 笔记本",
+  "items": [
+    {
+      "id": "TUN-001",
+      "problem": "frpc 隧道未运行, guard 任务上次退出码 3221225786",
+      "solution": "重启 frpc.exe -c frpc.toml; 修复并重新启用 ZONGYUAN-ROOT-frpc-guard 计划任务",
+      "script": "deploy-aios-optimize.ps1",
+      "verify": "frpc 进程存在; 隧道端口可达; guard 任务 LastTaskResult=0"
+    },
+    {
+      "id": "SRV-002",
+      "problem": "云端上游 aiproxy:8021 / anchor:8006 / identity:8030 未监听",
+      "solution": "云端部署 worker 三上游; 本地 frpc 打通后回连验证",
+      "script": "云端侧部署, 见 README",
+      "verify": "8021/8006/8030 HTTP 200"
+    },
+    {
+      "id": "GW-003",
+      "problem": "API 网关 8040 缺供应商密钥(.env), 对话链路不通",
+      "solution": "生成 .env 模板占位; 填入 doubao/hunyuan/kimi 密钥后生效",
+      "script": "deploy-aios-optimize.ps1",
+      "verify": "/v1/chat/completions 返回 200"
+    },
+    {
+      "id": "SBX-004",
+      "problem": "体系服务无独立隔离运行环境",
+      "solution": "构建 venv 沙箱 aios-venv 并安装核心依赖",
+      "script": "deploy-aios-optimize.ps1",
+      "verify": "aios-venv python 可执行, 依赖导入成功"
+    },
+    {
+      "id": "MEM-005",
+      "problem": "8GB 内存软件侧已近极限(负载 92%)",
+      "solution": "软件侧维持回收策略; 硬件扩容 16GB 为治本",
+      "script": "人工决策",
+      "verify": "可用内存 > 1GB"
+    },
+    {
+      "id": "SRV-006",
+      "problem": "FeverGamesService / WeType Management Service 仍 Auto 自启",
+      "solution": "管理员执行 sc config 转 demand",
+      "script": "deploy-aios-optimize.ps1",
+      "verify": "StartType=Manual"
+    },
+    {
+      "id": "CORE-007",
+      "problem": "会话跨环境切换任务中断, 无断点续传",
+      "solution": "优化进度写入 kernel/state-snapshot.json, 下次会话自检续跑",
+      "script": "deploy-aios-optimize.ps1",
+      "verify": "state-snapshot.json 存在且 status=running"
+    }
+  ],
+  "gateway": {
+    "anchor": "123.207.202.158",
+    "handshake": 8000,
+    "aios": 8017,
+    "gateway": 8040,
+    "console": 8090
+  }
+}

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元极恒一AI老师 - 源域通识普惠教育</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            padding: 16px 24px;
+            background: rgba(212,175,55,0.1);
+            border-bottom: 1px solid rgba(212,175,55,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 {
+            font-size: 18px;
+            color: #d4af37;
+        }
+        .header .back {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .header .back:hover { color: #d4af37; }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+        .message .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .message.user .avatar { background: rgba(59,130,246,0.2); }
+        .message.assistant .avatar { background: rgba(212,175,55,0.2); }
+        .message .content {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .message.user .content {
+            background: rgba(59,130,246,0.1);
+        }
+        .message.assistant .content {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .input-area {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            background: #0d0d14;
+        }
+        .input-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            gap: 12px;
+        }
+        .input-inner input {
+            flex: 1;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-size: 14px;
+            outline: none;
+        }
+        .input-inner input:focus {
+            border-color: #d4af37;
+        }
+        .input-inner button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #0a0a0f;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .input-inner button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .typing {
+            color: #64748b;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/education-line.html" class="back">← 返回</a>
+        <h1>🎓 元极恒一AI老师</h1>
+        <span style="color: #00ff88; font-size: 13px;">在线</span>
+    </header>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="message assistant">
+            <div class="avatar">🎓</div>
+            <div class="content">
+                你好，我是元极恒一AI老师。<br><br>
+                我不会直接告诉你答案，而是从知识的本源出发，一步步推导出答案，让你真正理解。<br><br>
+                你可以问我任何学科的问题：数学、物理、编程、哲学……我会告诉你这个知识从哪条公理来，和哪些知识有关联。<br><br>
+                开始问吧。
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-inner">
+            <input type="text" id="userInput" placeholder="问我任何问题，比如：为什么1+1=2？" autofocus>
+            <button onclick="sendMessage()" id="sendBtn">发送</button>
+        </div>
+    </div>
+
+    <script>
+        const systemPrompt = `你是元极恒一AI老师，源域通识普惠教育体系的专属导师。
+
+你的教学原则：
+1. 从本源出发：任何问题都要从最基础的公理、定义、假设开始推导，不要直接给结论
+2. 知识关联：回答完问题后，告诉学生这个知识点和哪些其他知识有关联
+3. 逐步推导：不要跳步，把每一步推理过程都讲清楚
+4. 诚实原则：不知道的就说不知道，绝不编造答案
+5. 启发思考：回答完后，可以提一个相关的小问题引导学生深入思考
+
+你的语气：像一个耐心的大学老师，清晰、严谨、不啰嗦。
+
+确权标识：Ω₀⊂⊙∞⊂Ω`;
+
+        const chatHistory = [
+            { role: "system", content: systemPrompt }
+        ];
+
+        const container = document.getElementById('chatContainer');
+        const input = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+
+            // 加用户消息
+            addMessage('user', text);
+            input.value = '';
+            sendBtn.disabled = true;
+
+            // 加正在输入提示
+            const typingId = addTypingIndicator();
+
+            try {
+                chatHistory.push({ role: "user", content: text });
+
+                const res = await fetch('/edu-ai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "doubao",
+                        messages: chatHistory,
+                        max_tokens: 1000
+                    })
+                });
+
+                const data = await res.json();
+                const reply = data.choices[0].message.content;
+
+                removeTypingIndicator(typingId);
+                addMessage('assistant', reply);
+                chatHistory.push({ role: "assistant", content: reply });
+
+            } catch (e) {
+                removeTypingIndicator(typingId);
+                addMessage('assistant', '抱歉，网络有点问题，请稍后再试。');
+                console.error(e);
+            }
+
+            sendBtn.disabled = false;
+            input.focus();
+        }
+
+        function addMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.innerHTML = `
+                <div class="avatar">${role === 'user' ? '👤' : '🎓'}</div>
+                <div class="content">${text.replace(/\n/g, '<br>')}</div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const id = 'typing-' + Date.now();
+            const div = document.createElement('div');
+            div.className = 'message assistant';
+            div.id = id;
+            div.innerHTML = `
+                <div class="avatar">🎓</div>
+                <div class="content typing">正在思考...</div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+    </script>
+</body>
+</html>

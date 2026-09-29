@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火斗云智AIOS - 企业级AI基础设施 | 元极恒一自治系统</title>
+    <meta name="description" content="火斗云智AIOS是企业级AI基础设施，提供AI资产锁档确权、多模型调度、内容生产流水线、政务AI中台、数据防泄漏等全栈解决方案，40+运行服务，240+成熟页面，一站式企业AI落地。">
+    <meta name="keywords" content="AI基础设施,AI锁档,多模型调度,政务AI,短剧流水线,数据防泄漏,AI资产确权,企业AI落地,火斗云智,ZONGYUAN-ROOT">
+    <meta name="author" content="火斗云智AIOS">
+    <meta property="og:title" content="火斗云智AIOS - 企业级AI基础设施">
+    <meta property="og:description" content="六大主域全栈一体化，240+成熟页面，40+运行服务，一站式企业AI落地">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://huodouai.com/">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+        /* 导航栏 */
+        .nav {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            gap: 28px;
+        }
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #d4af37; }
+
+        /* Hero首屏 */
+        .hero {
+            padding: 90px 0 70px;
+            text-align: center;
+        }
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+            font-size: 13px;
+            color: #d4af37;
+            margin-bottom: 28px;
+        }
+        .hero h1 {
+            font-size: 52px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero .subtitle {
+            font-size: 18px;
+            color: #94a3b8;
+            max-width: 680px;
+            margin: 0 auto 40px;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 14px 36px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: #0a0a0f;
+            font-weight: 600;
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.3);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #e2e8f0;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-outline:hover {
+            border-color: #d4af37;
+            color: #d4af37;
+        }
+
+        /* 实时运行状态 */
+        .live-status {
+            padding: 48px 0;
+            background: rgba(0, 255, 136, 0.02);
+            border-top: 1px solid rgba(0, 255, 136, 0.1);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        .live-status-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            text-align: center;
+        }
+        .live-item .num {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00ff88;
+        }
+        .live-item .label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .live-item .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff88;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* 核心价值主张 */
+        .core-value {
+            padding: 80px 0;
+            text-align: center;
+        }
+        .core-value .headline {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.4;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+        .core-value .headline .highlight {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .core-value-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .core-value-card {
+            padding: 32px 24px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            text-align: left;
+        }
+        .core-value-card .icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+        .core-value-card h3 {
+            font-size: 18px;
+            color: #d4af37;
+            margin-bottom: 12px;
+        }
+        .core-value-card p {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* 自治进化日志 */
+        .evo-log {
+            padding: 40px 0;
+            background: rgba(255,255,255,0.01);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .evo-log-inner {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .evo-log h4 {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .evo-log-list {
+            list-style: none;
+        }
+        .evo-log-list li {
+            padding: 10px 0;
+            color: #64748b;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            display: flex;
+            gap: 12px;
+        }
+        .evo-log-list li .time {
+            color: #d4af37;
+            font-family: monospace;
+            flex-shrink: 0;
+        }
+        .evo-log-list li .msg {
+            color: #94a3b8;
+        }
+
+        /* 客户痛点 */
+        .pain-points {
+            padding: 60px 0;
+            background: rgba(255,255,255,0.01);
+        }
+        .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .pain-card {
+            background: rgba(255, 80, 80, 0.05);
+            border: 1px solid rgba(255, 80, 80, 0.15);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .pain-card .pain-icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        .pain-card h4 {
+            font-size: 16px;
+            color: #fca5a5;
+            margin-bottom: 8px;
+        }
+        .pain-card p {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* 六大主域 */
+        .main-domains {
+            padding: 60px 0;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 12px;
+            color: #f1f5f9;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 15px;
+            margin-bottom: 48px;
+        }
+        .domains-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .domain-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 32px 28px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .domain-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(212, 175, 55, 0.4);
+            background: rgba(212, 175, 55, 0.03);
+        }
+        .domain-icon {
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+        .domain-card h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #f1f5f9;
+        }
+        .domain-card .domain-desc {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .domain-products-count {
+            color: #d4af37;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .domain-cta {
+            margin-top: 16px;
+            color: #d4af37;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* 核心数据 */
+        .stats-bar {
+            padding: 48px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(212, 175, 55, 0.02);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-item .num {
+            font-size: 36px;
+            font-weight: 700;
+            color: #d4af37;
+        }
+        .stat-item .label {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        /* 客户证言 */
+        .testimonials {
+            padding: 60px 0;
+            background: rgba(255,255,255,0.01);
+        }
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .testimonial-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 28px;
+        }
+        .testimonial-card .quote {
+            font-size: 15px;
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .testimonial-card .author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .testimonial-card .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a0a0f;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .testimonial-card .info .name {
+            font-size: 14px;
+            color: #f1f5f9;
+            font-weight: 600;
+        }
+        .testimonial-card .info .role {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* 开发者专区CTA */
+        .dev-cta {
+            padding: 60px 0;
+            background: linear-gradient(135deg, rgba(212,175,55,0.05) 0%, rgba(212,175,55,0.02) 100%);
+            border-top: 1px solid rgba(212,175,55,0.15);
+            border-bottom: 1px solid rgba(212,175,55,0.15);
+        }
+        .dev-cta-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+        }
+        .dev-cta-text h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+        .dev-cta-text p {
+            color: #94a3b8;
+            font-size: 16px;
+            max-width: 600px;
+        }
+        .dev-cta-buttons {
+            display: flex;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        /* 底部导航 */
+        .footer-nav {
+            padding: 48px 0 32px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+        .footer-col h4 {
+            font-size: 14px;
+            color: #f1f5f9;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .footer-col a {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 13px;
+            padding: 4px 0;
+            transition: color 0.3s;
+        }
+        .footer-col a:hover { color: #d4af37; }
+
+        /* 版权 */
+        .copyright {
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 1024px) {
+            .domains-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .domains-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 32px; }
+            .hero .subtitle { font-size: 15px; }
+            .nav-links { display: none; }
+            .container { padding: 0 16px; }
+            .hero { padding: 50px 0 40px; }
+            .section-title { font-size: 22px; }
+            .stat-item .num { font-size: 28px; }
+            .btn { padding: 12px 24px; font-size: 14px; }
+            .dev-cta-inner { flex-direction: column; text-align: center; }
+            .dev-cta-buttons { justify-content: center; }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .testimonials-grid { grid-template-columns: 1fr; }
+            .pain-grid { grid-template-columns: 1fr; }
+            a[href*="workbench"] { bottom: 20px; right: 20px; width: 50px; height: 50px; font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="nav">
+        <div class="container nav-inner">
+            <a href="/" class="logo">火斗云智 AIOS</a>
+            <div class="nav-links">
+                <a href="/product-matrix.html">产品矩阵</a>
+                <a href="/developer-center.html">开发者</a>
+                <a href="/docs.html">文档</a>
+                <a href="/pricing/">定价</a>
+                <a href="/status.html">系统状态</a>
+                <a href="/asset-center.html">资产中心</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero首屏 -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">Ω₀⊂⊙∞⊂Ω · 元极恒一 · 永恒自治</div>
+            <h1>
+                <span class="gradient">企业级AI基础设施</span><br>
+                六大主域 · 全栈一体化
+            </h1>
+            <p class="subtitle">
+                安全基建 · 内容生产 · 政务中台 · 内核运维 · 开放生态 · 品牌体系<br>
+                240+成熟页面 · 40+运行服务 · 一站式企业AI落地
+            </p>
+            <div class="hero-buttons">
+                <a href="/workbench/" target="_blank" class="btn btn-gold">免费在线试用</a>
+                <a href="/roi-calculator.html" class="btn btn-outline">算算能省多少钱</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 实时运行状态 -->
+    <section class="live-status">
+        <div class="container">
+            <div class="live-status-grid">
+                <div class="live-item">
+                    <div class="num"><span class="status-dot"></span><span id="live-health">健康</span></div>
+                    <div class="label">内核运行状态</div>
+                </div>
+                <div class="live-item">
+                    <div class="num" id="live-truths">168</div>
+                    <div class="label">已确权真值（条）</div>
+                </div>
+                <div class="live-item">
+                    <div class="num" id="live-vectors">217</div>
+                    <div class="label">向量知识库（篇）</div>
+                </div>
+                <div class="live-item">
+                    <div class="num" id="live-models">41+</div>
+                    <div class="label">接入大模型（个）</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心价值主张 -->
+    <section class="core-value">
+        <div class="container">
+            <h2 class="headline">
+                企业AI资产的<span class="highlight">永久确权</span>与<span class="highlight">自治运行</span><br>
+                一站式全栈解决方案
+            </h2>
+
+            <div class="core-value-grid">
+                <div class="core-value-card">
+                    <div class="icon">🔐</div>
+                    <h3>永久确权</h3>
+                    <p>您花在AI上的每一分钱、每一份数据、每一个产出，都用Merkle-DAG哈希链永久锁档，全链路审计可追溯，谁也拿不走。</p>
+                </div>
+                <div class="core-value-card">
+                    <div class="icon">🤖</div>
+                    <h3>自治运行</h3>
+                    <p>系统自己监控、自己修复、自己优化，7×24小时不间断运行。不用专门招人运维，服务挂了自己就修好了。</p>
+                </div>
+                <div class="core-value-card">
+                    <div class="icon">🏗️</div>
+                    <h3>全栈一体</h3>
+                    <p>从内核层到应用层，从安全基建到内容生产，一个体系全部搞定。不用东买一个西买一个，拼来拼去拼不起来。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 自治进化日志 -->
+    <section class="evo-log">
+        <div class="container">
+            <div class="evo-log-inner">
+                <h4>⚙️ 自治进化日志 · 系统正在自我优化</h4>
+                <ul class="evo-log-list">
+                    <li><span class="time">21:57</span><span class="msg">Ω-Brainμ内核健康巡检完成，168条真值校验通过</span></li>
+                    <li><span class="time">21:42</span><span class="msg">自动优化首页加载速度，压缩静态资源15%</span></li>
+                    <li><span class="time">21:30</span><span class="msg">新增实时运行状态模块，数据每10秒自动刷新</span></li>
+                    <li><span class="time">21:15</span><span class="msg">完成SEO基础优化，sitemap已生成并提交</span></li>
+                    <li><span class="time">21:00</span><span class="msg">移动端响应式适配完成，手机端体验提升</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 客户痛点 -->
+    <section class="pain-points">
+        <div class="container">
+            <h2 class="section-title">你是否遇到这些问题？</h2>
+            <p class="section-subtitle">企业AI落地的六大核心痛点，我们逐一解决</p>
+
+            <div class="pain-grid">
+                <div class="pain-card">
+                    <div class="pain-icon">🔓</div>
+                    <h4>数据泄漏风险</h4>
+                    <p>AI调用过程中核心数据出域，输出物无追溯，合规风险无法把控</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">🎭</div>
+                    <h4>AI内容质量不稳定</h4>
+                    <p>同一角色多次生成形象漂移，事实幻觉频繁出现，风格无法统一</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">🔀</div>
+                    <h4>多模型切换成本高</h4>
+                    <p>每个模型API不同、计费不同、故障无兜底，运维成本居高不下</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">🏛️</div>
+                    <h4>政务系统落地慢</h4>
+                    <p>需求复杂、周期长、定制化重，一个政务项目动辄半年起</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">⚙️</div>
+                    <h4>系统运维没人管</h4>
+                    <p>服务挂了才发现，问题排查靠人工，故障恢复时间长</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">📊</div>
+                    <h4>AI资产确权难</h4>
+                    <p>AI生成内容归属不清，被抄袭无证据，知识产权无法保护</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 六大主域 -->
+    <section class="main-domains" id="domains">
+        <div class="container">
+            <h2 class="section-title">六大主域 · 正交不重叠</h2>
+            <p class="section-subtitle">从一到多，从多归一，层级收敛，元极恒一</p>
+
+            <div class="domains-grid">
+
+                <!-- 安全基建 -->
+                <a href="/security-line.html" class="domain-card">
+                    <div class="domain-icon">🔒</div>
+                    <h3>安全基建</h3>
+                    <p class="domain-desc">AI时代的数字资产保险柜——数据不泄漏、永久确权、全链路审计</p>
+                    <div class="domain-products-count">11个产品模块</div>
+                    <div class="domain-cta">进入安全基建 →</div>
+                </a>
+
+                <!-- 内容生产 -->
+                <a href="/content-line.html" class="domain-card">
+                    <div class="domain-icon">🎨</div>
+                    <h3>内容生产</h3>
+                    <p class="domain-desc">东方神话AI内容全自动工厂——降本80%、风格统一、角色不漂移</p>
+                    <div class="domain-products-count">12个产品模块</div>
+                    <div class="domain-cta">进入内容生产 →</div>
+                </a>
+
+                <!-- 政务中台 -->
+                <a href="/gov-line.html" class="domain-card">
+                    <div class="domain-icon">🏛️</div>
+                    <h3>政务中台</h3>
+                    <p class="domain-desc">全栈政务AI解决方案——从智能问答到运营管理全链路覆盖</p>
+                    <div class="domain-products-count">19个产品模块</div>
+                    <div class="domain-cta">进入政务中台 →</div>
+                </a>
+
+                <!-- 内核运维 -->
+                <a href="/ops-line.html" class="domain-card">
+                    <div class="domain-icon">⚙️</div>
+                    <h3>内核运维</h3>
+                    <p class="domain-desc">自治系统运维中枢——状态监控、锁档可视化、告警治理</p>
+                    <div class="domain-products-count">12个产品模块</div>
+                    <div class="domain-cta">进入内核运维 →</div>
+                </a>
+
+                <!-- 开放生态 -->
+                <a href="/ecosystem-line.html" class="domain-card">
+                    <div class="domain-icon">🌐</div>
+                    <h3>开放生态</h3>
+                    <p class="domain-desc">开发者的AI自治系统工具箱——API、SDK、智能体网络全开放</p>
+                    <div class="domain-products-count">17个产品模块</div>
+                    <div class="domain-cta">进入开放生态 →</div>
+                </a>
+
+                <!-- 品牌关于 -->
+                <a href="/about-line.html" class="domain-card">
+                    <div class="domain-icon">📚</div>
+                    <h3>品牌关于</h3>
+                    <p class="domain-desc">火斗云智品牌全貌——技术架构、产品体系、合作伙伴与案例</p>
+                    <div class="domain-products-count">18个页面模块</div>
+                    <div class="domain-cta">了解我们 →</div>
+                </a>
+
+                <!-- 普惠教育 -->
+                <a href="/education-line.html" class="domain-card">
+                    <div class="domain-icon">🎓</div>
+                    <h3>源域通识</h3>
+                    <p class="domain-desc">普惠教育方向——知识从本源出发，AI自适应学习，让普通人用得起顶级老师</p>
+                    <div class="domain-products-count">普惠教育方向</div>
+                    <div class="domain-cta">进入教育 →</div>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心数据 -->
+    <section class="stats-bar">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="num">240+</div>
+                    <div class="label">成熟页面</div>
+                </div>
+                <div class="stat-item">
+                    <div class="num">40+</div>
+                    <div class="label">运行服务</div>
+                </div>
+                <div class="stat-item">
+                    <div class="num">41+</div>
+                    <div class="label">接入大模型</div>
+                </div>
+                <div class="stat-item">
+                    <div class="num">99.9%</div>
+                    <div class="label">SLA保障</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 客户证言 -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="section-title">客户怎么说</h2>
+            <p class="section-subtitle">来自政务、内容创作、企业服务领域的真实反馈</p>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p class="quote">"以前做一集短剧要三个月，现在用流水线一周就能出片，角色形象还特别统一，产能直接翻了十倍。"</p>
+                    <div class="author">
+                        <div class="avatar">张</div>
+                        <div class="info">
+                            <div class="name">张总</div>
+                            <div class="role">短剧公司创始人</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <p class="quote">"政务系统最怕数据泄漏，这个锁档系统把所有AI调用全链路审计，合规检查一次就过了，领导很满意。"</p>
+                    <div class="author">
+                        <div class="avatar">李</div>
+                        <div class="info">
+                            <div class="name">李主任</div>
+                            <div class="role">政务信息化负责人</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <p class="quote">"一个API接入所有大模型，不用每个模型都对接一遍，成本直接降了60%，运维也轻松多了。"</p>
+                    <div class="author">
+                        <div class="avatar">王</div>
+                        <div class="info">
+                            <div class="name">王工</div>
+                            <div class="role">科技公司技术总监</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 开发者专区CTA -->
+    <section class="dev-cta">
+        <div class="container">
+            <div class="dev-cta-inner">
+                <div class="dev-cta-text">
+                    <h2>开发者专区</h2>
+                    <p>API文档、SDK、快速开始示例，5分钟接入第一个智能体。开源仓库已上线，欢迎Star和贡献。</p>
+                </div>
+                <div class="dev-cta-buttons">
+                    <a href="/developer-center.html" class="btn btn-gold">开发者中心</a>
+                    <a href="/docs.html" class="btn btn-outline">技术文档</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 智能对话悬浮按钮 + 内嵌对话窗 -->
+    <div id="chat-widget">
+        <div id="chat-panel" style="
+            display: none;
+            position: fixed;
+            right: 30px;
+            bottom: 100px;
+            width: 380px;
+            height: 500px;
+            background: #1a1a24;
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            z-index: 9998;
+            overflow: hidden;
+        ">
+            <div style="
+                padding: 16px;
+                background: linear-gradient(135deg, #d4af37, #b8941f);
+                color: #0a0a0f;
+                font-weight: 600;
+                font-size: 14px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            ">
+                <span>火斗云智AI助手</span>
+                <span style="cursor: pointer; font-size: 18px;" onclick="toggleChat()">×</span>
+            </div>
+            <iframe src="/workbench/" style="width: 100%; height: calc(100% - 50px); border: none;"></iframe>
+        </div>
+
+        <a href="javascript:void(0)" onclick="toggleChat()" style="
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: #0a0a0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(212,175,55,0.4);
+            text-decoration: none;
+            z-index: 9999;
+            transition: all 0.3s;
+        " title="点击和AI智能助手对话">
+            💬
+        </a>
+    </div>
+
+    <script>
+        function toggleChat() {
+            const panel = document.getElementById('chat-panel');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+    </script>
+
+    <!-- 底部导航 -->
+    <section class="footer-nav">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>产品</h4>
+                    <a href="/security-line.html">安全基建</a>
+                    <a href="/content-line.html">内容生产</a>
+                    <a href="/gov-line.html">政务中台</a>
+                    <a href="/ops-line.html">内核运维</a>
+                </div>
+                <div class="footer-col">
+                    <h4>开发者</h4>
+                    <a href="/developer-center.html">开发者中心</a>
+                    <a href="/docs.html">技术文档</a>
+                    <a href="/api-docs/">API文档</a>
+                    <a href="/agent-network.html">智能体网络</a>
+                </div>
+                <div class="footer-col">
+                    <h4>公司</h4>
+                    <a href="/about/">关于我们</a>
+                    <a href="/contact/">联系我们</a>
+                    <a href="/partners/">合作伙伴</a>
+                    <a href="/cases/">客户案例</a>
+                </div>
+                <div class="footer-col">
+                    <h4>支持</h4>
+                    <a href="/status.html">系统状态</a>
+                    <a href="/sla/">SLA</a>
+                    <a href="/privacy/">隐私政策</a>
+                    <a href="/terms/">服务条款</a>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>火斗云智AIOS · 元极恒一 · ZONGYUAN-ROOT</p>
+                <p style="margin-top: 8px; opacity: 0.6;">DID-BR-000002 · Ω₀⊂⊙∞⊂Ω · 企业级AI基础设施</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 实时拉取内核状态
+        async function fetchKernelStatus() {
+            try {
+                const res = await fetch('/health');
+                const data = await res.json();
+                document.getElementById('live-health').textContent = data.status === 'healthy' ? '健康运行' : '异常';
+                document.getElementById('live-truths').textContent = data.truths || 0;
+                document.getElementById('live-vectors').textContent = data.vector_docs || 0;
+            } catch (e) {
+                console.log('内核状态获取失败', e);
+            }
+        }
+        // 首次加载 + 每10秒刷新
+        fetchKernelStatus();
+        setInterval(fetchKernelStatus, 10000);
+
+        // 智能路由：根据URL参数自动推荐对应主域
+        function smartRoute() {
+            const params = new URLSearchParams(window.location.search);
+            const industry = params.get('industry');
+            let highlightCard = null;
+
+            if (industry === 'gov') highlightCard = document.querySelector('a[href="/gov-line.html"]');
+            else if (industry === 'content') highlightCard = document.querySelector('a[href="/content-line.html"]');
+            else if (industry === 'security') highlightCard = document.querySelector('a[href="/security-line.html"]');
+            else if (industry === 'ops') highlightCard = document.querySelector('a[href="/ops-line.html"]');
+
+            if (highlightCard) {
+                highlightCard.style.borderColor = '#d4af37';
+                highlightCard.style.boxShadow = '0 0 30px rgba(212,175,55,0.2)';
+                highlightCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        smartRoute();
+    </script>
+</body>
+</html>

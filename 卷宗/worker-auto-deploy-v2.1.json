@@ -1,0 +1,35 @@
+{
+  "archive_id": "ARCH-WORKER-SCRIPT-001",
+  "name": "Worker自动部署定时任务脚本 增强V2.1（本地适配）",
+  "script_file": "/home/user/ZONGYUAN-ROOT/scripts/worker_auto_deploy_timer.sh",
+  "version": "v2.1",
+  "event_id": "TASK-WORKER-AUTO-DEPLOY-002",
+  "meta_rule_ref": ["META-RULE-012", "META-RULE-014", "ML-012"],
+  "adaptation_notes": [
+    "lark-cli命令修正：+record-update→+record-upsert，+record-add→+record-batch-create",
+    "字段名修正为飞书Base实际中文字段",
+    "心跳record_id硬编码为NODE-DEV记录(recvw5OkCUCJvm)",
+    "docker未安装时优雅降级为调度框架模式，不崩溃",
+    "任务筛选：状态=待开始 且名称含worker/部署/deploy"
+  ],
+  "capability": [
+    "本机全局互斥锁，防止单节点并发冲突",
+    "飞书Base原子任务认领（状态改进行中），多节点防重复",
+    "本机Worker最大并发配额限制（docker可用时）",
+    "容器健康探针校验（docker可用时）",
+    "lark-cli返回码捕获，失败中断",
+    "阶梯重试+死信标记",
+    "双通道记忆网关真值上报（主备）",
+    "跨节点消息同步、错误阻塞台账、节点心跳"
+  ],
+  "config": {
+    "MAX_WORKER_COUNT": 4,
+    "HEALTH_CHECK_RETRY": 3,
+    "HEALTH_CHECK_INTERVAL": 5,
+    "RETRY_MAX": 2,
+    "cron_spec": "*/10 * * * *",
+    "log_path": "/home/user/ZONGYUAN-ROOT/logs/worker_auto_deploy.log"
+  },
+  "dependencies": ["lark-cli", "docker(可选)", "飞书Base四表", "记忆网关主备"],
+  "create_ts": "2026-09-29"
+}

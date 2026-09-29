@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI资产确权存证API - 火斗云智AIOS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .hero { padding: 80px 0 60px; text-align: center; }
+        .hero-badge {
+            display: inline-block; padding: 6px 16px;
+            background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px; font-size: 14px; color: #a5b4fc; margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: 48px; font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 20px;
+        }
+        .hero .subtitle { font-size: 20px; color: #94a3b8; max-width: 800px; margin: 0 auto 40px; }
+        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 500;
+            text-decoration: none; transition: all 0.3s; display: inline-block;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.05); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+        .section { padding: 60px 0; }
+        .section-title { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 16px; color: #f1f5f9; }
+        .section-desc { text-align: center; color: #94a3b8; max-width: 700px; margin: 0 auto 48px; font-size: 16px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+        .grid-8 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+        .card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px; padding: 28px; transition: all 0.3s;
+        }
+        .card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-4px); }
+        .card .icon { font-size: 32px; margin-bottom: 16px; }
+        .card h3 { font-size: 18px; margin-bottom: 12px; color: #f1f5f9; }
+        .card p { color: #94a3b8; font-size: 14px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px; padding: 36px 28px; position: relative; transition: all 0.3s;
+        }
+        .pricing-card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-4px); }
+        .pricing-card.popular { border-color: rgba(99, 102, 241, 0.5); background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); }
+        .popular-badge {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
+        }
+        .pricing-name { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #f1f5f9; }
+        .pricing-price { font-size: 36px; font-weight: 700; margin-bottom: 4px; color: #fff; }
+        .pricing-price span { font-size: 14px; font-weight: 400; color: #94a3b8; }
+        .pricing-desc { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+        .pricing-features { list-style: none; margin-bottom: 28px; }
+        .pricing-features li { padding: 8px 0; color: #cbd5e1; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .pricing-features li::before { content: "✓"; color: #10b981; font-weight: bold; }
+        .customers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+        .customer-card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px; padding: 20px; text-align: center;
+        }
+        .customer-card .icon { font-size: 28px; margin-bottom: 8px; }
+        .customer-card .name { font-size: 15px; font-weight: 500; color: #f1f5f9; margin-bottom: 4px; }
+        .customer-card .desc { font-size: 13px; color: #a5b4fc; }
+        .cta-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 20px; padding: 60px 40px; text-align: center; margin: 60px 0;
+        }
+        .cta-section h2 { font-size: 32px; margin-bottom: 16px; color: #f1f5f9; }
+        .cta-section p { color: #94a3b8; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .footer { padding: 40px 0; text-align: center; color: #64748b; font-size: 14px; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 60px; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .hero .subtitle { font-size: 16px; }
+            .section-title { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">📜 区块链存证</div>
+            <h1>AI资产确权存证API</h1>
+            <p class="subtitle">开放API，为平台和机构提供密码学级资产确权存证服务，司法可采信</p>
+            <div class="hero-buttons">
+                <a href="/trial.html" class="btn btn-primary">立即试用</a>
+                <a href="#features" class="btn btn-secondary">了解更多</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">你是否面临这些痛点？</h2>
+            <p class="section-desc">解决企业在AI应用中的核心难题</p>
+            <div class="grid-4">
+                
+                <div class="card">
+                    <div class="icon">⚖️</div>
+                    <h3 style="color: #fca5a5;">取证难</h3>
+                    <p>发生知识产权纠纷时，拿不出有效的电子证据</p>
+                </div>
+                <div class="card">
+                    <div class="icon">⏱️</div>
+                    <h3 style="color: #fca5a5;">时间戳不权威</h3>
+                    <p>自己写的时间戳没有法律效力，不被法院采信</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔗</div>
+                    <h3 style="color: #fca5a5;">对接成本高</h3>
+                    <p>自己做区块链存证，要对接联盟链，开发成本几十万</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📊</div>
+                    <h3 style="color: #fca5a5;">存证量太小</h3>
+                    <p>偶尔存几个证，自建系统不划算</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <div class="container">
+            <h2 class="section-title">核心功能</h2>
+            <p class="section-desc">技术驱动的产品设计，解决真实业务问题</p>
+            <div class="grid-8">
+                
+                <div class="card">
+                    <div class="icon">🔗</div>
+                    <h3>Merkle-DAG哈希链</h3>
+                    <p>密码学级哈希链存证，不可篡改、不可删除</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📜</div>
+                    <h3>司法级时间戳</h3>
+                    <p>国家授时中心时间戳，符合司法存证标准</p>
+                </div>
+                <div class="card">
+                    <div class="icon">✍️</div>
+                    <h3>数字签名认证</h3>
+                    <p>DID身份签名，存证主体可验证、可追溯</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔌</div>
+                    <h3>API即插即用</h3>
+                    <p>RESTful API，10分钟接入，不用懂区块链</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📄</div>
+                    <h3>确权证书生成</h3>
+                    <p>一键生成带哈希+时间戳+签名的确权证书PDF</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔍</div>
+                    <h3>在线验证查询</h3>
+                    <p>输入文件或哈希即可验证是否已存证、何时存证</p>
+                </div>
+                <div class="card">
+                    <div class="icon">📊</div>
+                    <h3>批量存证</h3>
+                    <p>支持批量上传存证，适合平台型客户</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🏛️</div>
+                    <h3>司法对接</h3>
+                    <p>已对接多家互联网法院，存证凭证可直接作为诉讼证据</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="pricing">
+        <div class="container">
+            <h2 class="section-title">定价方案</h2>
+            <p class="section-desc">从免费体验到企业级私有化部署，满足不同规模需求</p>
+            <div class="pricing-grid">
+                
+                <div class="pricing-card">
+                    
+                    <div class="pricing-name">按量付费</div>
+                    <div class="pricing-price">¥0.1 <span>/次存证</span></div>
+                    <div class="pricing-desc">偶尔使用</div>
+                    <ul class="pricing-features">
+                        <li>按次计费</li><li>基础存证</li><li>在线验证</li><li>社区支持</li>
+                    </ul>
+                    <a href="/trial.html" class="btn btn-primary" style="width:100%; text-align:center; display:block;">按量付费</a>
+                </div>
+                <div class="pricing-card popular">
+                    <div class="popular-badge">最受欢迎</div>
+                    <div class="pricing-name">专业版</div>
+                    <div class="pricing-price">¥999 <span>/月</span></div>
+                    <div class="pricing-desc">中小平台日常使用</div>
+                    <ul class="pricing-features">
+                        <li>1万次/月</li><li>确权证书生成</li><li>API调用</li><li>统计报表</li>
+                    </ul>
+                    <a href="/trial.html" class="btn btn-primary" style="width:100%; text-align:center; display:block;">立即开通</a>
+                </div>
+                <div class="pricing-card">
+                    
+                    <div class="pricing-name">企业版</div>
+                    <div class="pricing-price">¥50,000 <span>/年</span></div>
+                    <div class="pricing-desc">大型平台/律所</div>
+                    <ul class="pricing-features">
+                        <li>无限存证</li><li>批量接口</li><li>定制对接</li><li>SLA保障</li>
+                    </ul>
+                    <a href="/trial.html" class="btn btn-primary" style="width:100%; text-align:center; display:block;">联系销售</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">谁在用？</h2>
+            <p class="section-desc">为不同行业的企业提供专业解决方案</p>
+            <div class="customers-grid">
+                
+                <div class="customer-card">
+                    <div class="icon">⚖️</div>
+                    <div class="name">律师事务所</div>
+                    <div class="desc">电子证据存证</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">📱</div>
+                    <div class="name">内容平台</div>
+                    <div class="desc">创作者版权存证</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">🎨</div>
+                    <div class="name">设计平台</div>
+                    <div class="desc">作品原创认证</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">💻</div>
+                    <div class="name">代码平台</div>
+                    <div class="desc">软件著作权存证</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">📰</div>
+                    <div class="name">媒体平台</div>
+                    <div class="desc">新闻稿件首发存证</div>
+                </div>
+                <div class="customer-card">
+                    <div class="icon">🏛️</div>
+                    <div class="name">司法机构</div>
+                    <div class="desc">电子证据服务</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="cta-section">
+                <h2>开始使用AI资产确权存证API</h2>
+                <p>5分钟快速接入，立即提升你的业务效率</p>
+                <div class="hero-buttons">
+                    <a href="/trial.html" class="btn btn-primary">免费试用30天</a>
+                    <a href="/demo.html" class="btn btn-secondary">查看Demo</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>火斗云智AIOS · AI资产确权存证API | Ω₀⊂⊙∞⊂Ω</p>
+            <p style="margin-top: 8px; opacity: 0.6;">DID-BR-000002 · ZONGYUAN-ROOT · 企业级AI解决方案</p>
+        </div>
+    </footer>
+</body>
+</html>
