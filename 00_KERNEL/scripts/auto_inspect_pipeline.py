@@ -56,7 +56,7 @@ def verify_asset(path, need_json=False, expected_entries=None):
         try:
             d = json.load(open(path))
             v["json_ok"] = True
-            if expected_entries is not None and isinstance(d, dict):
+            if isinstance(d, dict):
                 n = len(d.get("asset_entries", []))
                 t = d.get("index_meta", {}).get("total_assets")
                 v["entries"] = n; v["meta_total"] = t
@@ -69,7 +69,13 @@ def verify_asset(path, need_json=False, expected_entries=None):
 
 # ---------- 阶段1 守护 ----------
 def stage_daemon():
-    r = run_bounded(["bash", PRJ + "/run_zongyuan_daemon.sh", "start"], timeout=90, retries=1, desc="daemon")
+    """本地独立配置守护 api-server/meta-daemon(权威配置指向新根未就绪, 不覆盖)"""
+    cfg = PRJ + "/config/supervisord.zongyuan.local.conf"
+    r = run_bounded(["supervisorctl", "-c", cfg, "status"], timeout=30, retries=0, desc="daemon-status")
+    if r["rc"] != 0 or "RUNNING" not in r["output"]:
+        run_bounded(["supervisord", "-c", cfg], timeout=30, desc="daemon-start")
+        time.sleep(6)
+        r = run_bounded(["supervisorctl", "-c", cfg, "status"], timeout=30, retries=0, desc="daemon-status")
     r["health"] = run_bounded(["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
                                "--connect-timeout", "3", "http://127.0.0.1:8765/health"],
                               timeout=10, desc="api-health")["output"]
@@ -77,8 +83,10 @@ def stage_daemon():
 
 # ---------- 阶段2 健康巡检(四维门) ----------
 def stage_health():
+    kernel = {"path": PRJ + "/00_KERNEL", "exists": os.path.exists(PRJ + "/00_KERNEL"),
+              "count": sum(len(fs) for _,_,fs in os.walk(PRJ + "/00_KERNEL"))}
     checks = {
-        "00_KERNEL": {"path": PRJ + "/00_KERNEL", "count": sum(len(fs) for _,_,fs in os.walk(PRJ + "/00_KERNEL"))},
+        "00_KERNEL": kernel,
         "memory_index": verify_asset(PRJ + "/memory_index.json", need_json=True),
         "HASH-LEDGER": verify_asset(PRJ + "/HASH-LEDGER.csv"),
         "ROOT-POINTER": verify_asset(PRJ + "/00-ROOT-POINTER.json"),
