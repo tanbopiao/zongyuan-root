@@ -1,0 +1,79 @@
+# 根目录继续收敛凭证-20260922
+
+## 锁档元数据
+
+| 字段 | 值 |
+|------|-----|
+| 快照ID | SNAP-20260922-ROOT-FILES-CONVERGE |
+| DID标识 | DID-BR-000002 |
+| 溯源符号 | Ω₀⊂⊙∞⊂Ω |
+| 归档节点 | ZONGYUAN-ROOT/CONVERGE |
+| 锁档时间 | 2026-09-22 00:42:04 +08 |
+| 资产总数 | 39个文件 |
+| Merkle根 | `d5467b3198bae0c418cb5385945e54167e9460417e0199b075b449e3110b5be3` |
+| 归档包整体哈希 | `f56b4a4fc1f31372a6388090b003de89b1891b632b8965ee30415044ec9abcce` |
+
+## 逐文件哈希
+
+| 文件 | 大小 | SHA-256 |
+|------|------|---------|
+| 01-CONST-GEO-20260531-宪法公理法则体系.md | 2287B | `04060052240385e0950d91163e14ecae412708d170bbcc07882cb5b79e322479` |
+| 02-昆仑基座二十一条全域本源元法则.md | 4388B | `82c2da5fcab9924c9c94a5c68c0520c9c9f6268d7914400fdede41f3a8a9d0f5` |
+| 03-GEO商业化宪法正式白皮书全文.md | 4950B | `96185c2488b8bd07fbbd4ed1325be9a173433becd58ae2228433a09448b74d95` |
+| 04-GEO体系终极完整架构总目录.md | 3394B | `cbf89ddaa8fd0f1bc34ec341ec40afac81ff63f8a793683ea3818924b41eabfd` |
+| 05-全域资产锁档写入自治内核协议.md | 3063B | `a4e19e2fc8556915d05d55edddf094889f41736a523e0cb9c571e35746e472c2` |
+| 06-ZONGYUAN-ROOT数字根域全域广播通告.md | 2390B | `7f71afbbe2ff51a51bb159569a3f3c325a569cb1f4cc77c9098717a2eebfbb39` |
+| 07-Merkle哈希链深度加固报告.md | 1983B | `de364c5fac505363051d27d31dff29b75af8be66b9810ce11232b7de20222317` |
+| 08-元法则终极闭环归档完整版.md | 4225B | `eb2165269da2aaf2bffdb6f7a6db66866ad8c3a30f886909685c99edbe4eee5c` |
+| 09-全域锁档写入自治内核执行回执.md | 2537B | `da54d69aa3acc073833e3dd516d5ee17e4e9ccc1d891709414db36b59a9a4e03` |
+| ANCHOR-CENTRAL-INTELLIGENCE-20260917.md | 2047B | `9cc2a8e07c6172a4fbac206895e2683cbf6225accb4095edfbe01333d14e5de4` |
+| ANCHOR-SOP-HANDSHAKE-V1.0-20260913.md | 4925B | `956e0dca7a750a59e5f3826d6f1042e10e55431cbc6d3d5f508368a780c03666` |
+| ASSET-CENTER-20260914.html | 22875B | `945a923e36be21dff5798ec1127b0162d9e1f639cc3ee28ae1584f0b1ed0b094` |
+| ASSET-CENTER-20260914.md | 1002B | `457254450a4f4d69cd41e116863b43b6b3f4bbbf40962305fa70d163e5a60ce1` |
+| ASSET-CENTER-DOMAIN-20260914.md | 1735B | `5a6415059461d850145315b6958689acabc41ffa88627cf22a8fa8221369b871` |
+| ASSET-REPORT-20260913.md | 7003B | `038209b8be532b6f735749ea2e4ea36d850fa687f88b92798ef132e0796c4f1a` |
+| BASELINE-ANCHOR-20260913.md | 538B | `ac512c2771cda567899465b8c1c17ce9e325b5eab653e2efcb84760c604bfc06` |
+| CLOUD-HANDSHAKE-SOP-V1.0.md | 675B | `7ad1f91213f82d2dc685452c2516ff26d16a28f3ec5b02ac19be69a997fba304` |
+| CONVERGE-ROOT-FILES-20260922.md | 1155B | `2cb5b172b91db3146c05be2df8c2b2dddcd74f1a3e168c519467da14e86ee5d0` |
+| FEISHU-FULL-CONNECTIVITY-TEST-20260917.md | 2134B | `48efa4923432c636ae1f044162ee522e7bf0ab37f94f0a2c6440ddd306366848` |
+| KERNEL-LEARNING-PACK.md | 927B | `4774c43adfdfa7bd46dc3ba6d5735a8cc6afa002a96eacd1577d0670114767df` |
+| KUNLUN-DRAMA-CREATION-SOP-V1.0.md | 3641B | `dcd3ebcfa071e607b4c721f1a388c25880948647d20cfdc58cf609c29f478f02` |
+| MASTER-ANCHOR-STATEMENT-20260913.md | 2012B | `fc5f9d6d08431f8744d0a17f166a5f6a9de46909b9452637812d43ab86b9f557` |
+| MODE-SWITCH-OVERHEAD-ANALYSIS-V1.0.md | 1177B | `798d8e81d216563516a8ecac53bdc62981f845bd17d58aaee14e6dfc35e0326c` |
+| NODE-ONBOARDING-SOP-v1.1.md | 719B | `b8cd8b13ef65131ca75266e89b56da826b462e017d0b35798e418d03fcb54474` |
+| NODE_ACCESS_PACKAGE_V1.0.md | 992B | `48556fef71efe8a7513304d086dd2c2948ee55f5438f15cfb42ddf02e80ecc80` |
+| SECURITY-HARDENING-CREDENTIAL-V1.0.md | 1610B | `f2d654593d100a6a6b5eb3505bc75bc5d3ff8de6ccc5828d5f0baeb127c349ba` |
+| TRACE-ANALYSIS-v420-FEISHU-INTEGRATION-V1.0.md | 1612B | `9ccd2bc90313a14a1d3dacd2157e76d06834e9e6c348698365df116aef4882b2` |
+| XUANNIAO-DEEPENING-20260914.md | 15110B | `528e2c0882c8446d36007b98e1288d42b04f37f5716e25b549d22c4a1efa372e` |
+| XUANNIAO-EP03-MEDIA-ARCHIVE-20260914.md | 3752B | `fd85977661dc646c9ad757f3d72a65700a05490b2cd002ab9234b9a895ef9919` |
+| lock-credential-snap-20260913.md | 2007B | `bab454abe4499c2d2b21cd63dffe9aa5384a645d8c883572b8ca21b0d91d9667` |
+| zongyuan-persist/CLOUD-ANCHOR-CREDENTIAL-20260917.md | 1313B | `7117ec9937ba8b9345ebed16e15328ae5d942bb736acd4aa8bb2d5cdb7e6626f` |
+| zongyuan-persist/DEEP-PERSIST-CREDENTIAL.md | 1758B | `0adb674b46caf488d9951f6d0089c918917cccaf479c56cb94d0533af9d4c198` |
+| zongyuan-persist/FEISHU-FULL-CONNECTIVITY-TEST-20260917.md | 2134B | `48efa4923432c636ae1f044162ee522e7bf0ab37f94f0a2c6440ddd306366848` |
+| zongyuan-persist/SECURITY-HARDENING-CREDENTIAL.md | 1610B | `f2d654593d100a6a6b5eb3505bc75bc5d3ff8de6ccc5828d5f0baeb127c349ba` |
+| zongyuan-persist/cron_jobs.sh | 1114B | `72c0a7f989ad91a1ca5fd9133524aef7eb017e1d29fc4edd431c266b759bfa10` |
+| zongyuan-persist/logs/security_hardening.log | 415B | `c29e0b5745cac47c55d09ba7b07ee01ecf3241bdd6777bfae440d2ee44cf08a4` |
+| zongyuan-persist/planning/STEADY-STATE-OPTIMAL-PLAN-V1.0.md | 1953B | `9fa17dc54eee165d54c0c46bf5365e29b76a1aa7beb9991bd5e45083cedc31d0` |
+| zongyuan-persist/security_hardening.sh | 1230B | `ee673ac8649bd4abdad301f5c635eb693946ad036ba208cd3cda49a7ce58460d` |
+| zongyuan-persist/snapshots/DEEP-PERSIST-SNAPSHOT.json | 199631B | `6fc0c4d1b6824ef7ec03a4f3ac652959b342e9b9dcbd1a6b23627bf33805a880` |
+
+## 完整性校验命令
+
+```bash
+cd /home/user/ZONGYUAN-ROOT/02-ARCHIVE/03-files
+python3 -c "
+import hashlib, os
+files = sorted([f for f in os.listdir('.') if os.path.isfile(f) and not f.startswith('LOCK-CREDENTIAL-') and not f.startswith('MANIFEST-')])
+concat = ''.join(hashlib.sha256(open(f,'rb').read()).hexdigest() for f in files)
+print('Merkle根:', hashlib.sha256(concat.encode()).hexdigest())
+print('预期:    d5467b3198bae0c418cb5385945e54167e9460417e0199b075b449e3110b5be3')
+"
+```
+
+## 锁档声明
+
+1. 本快照纳入39个资产文件，绑定DID-BR-000002确权身份。
+2. Merkle根由全部文件SHA-256按文件名排序拼接后再取SHA-256生成，单文件篡改即失配。
+3. 后续迭代必须生成全新快照，禁止就地改写本锁档资产。
+
+Ω₀⊂⊙∞⊂Ω｜全域锁档完成｜ZONGYUAN-ROOT/CONVERGE｜DID-BR-000002
