@@ -1,0 +1,135 @@
+# ZONGYUAN-ROOT CI/CD 配置文件
+# 自动化流水线：提交 → 检查 → 测试 → 部署 → 锁档
+
+version: "1.0"
+project: "ZONGYUAN-ROOT"
+did: "DID-BR-000002"
+trace: "Ω₀⊂⊙∞⊂Ω"
+
+# 流水线阶段
+stages:
+  - name: "pre-commit"
+    description: "提交前检查"
+    auto_run: true
+    steps:
+      - name: "python_syntax_check"
+        description: "Python语法检查"
+        command: "python3 -m py_compile"
+        target: "*.py"
+        on_failure: "block"
+      
+      - name: "sensitive_file_check"
+        description: "敏感文件检查"
+        patterns: [".env", "*.pem", "*.key", "*credentials*", "*secret*", "*token*", "api_keys.json"]
+        on_failure: "block"
+      
+      - name: "large_file_check"
+        description: "大文件检查(>10MB)"
+        max_size_mb: 10
+        on_failure: "warn"
+
+  - name: "test"
+    description: "自动化测试"
+    auto_run: true
+    steps:
+      - name: "service_health_check"
+        description: "服务健康检查"
+        endpoints:
+          - "http://127.0.0.1:8024/health"
+          - "http://127.0.0.1:8023/health"
+        on_failure: "warn"
+      
+      - name: "api_endpoint_test"
+        description: "API端点测试"
+        endpoints:
+          - url: "https://www.huodouai.com/api/v1/protocols"
+            method: "GET"
+            expected_status: 200
+          - url: "https://www.huodouai.com/protocol-registry/health"
+            method: "GET"
+            expected_status: 200
+        on_failure: "warn"
+
+  - name: "deploy"
+    description: "自动部署"
+    auto_run: true
+    conditions:
+      - "service_files_changed"
+    steps:
+      - name: "restart_affected_services"
+        description: "重启受影响的服务"
+        services:
+          - name: "protocol-registry"
+            path: "protocol_registry/*.py"
+            command: "systemctl restart protocol-registry"
+          - name: "agent-hub"
+            path: "ai_proxy/agent_hub.py"
+            command: "systemctl restart agent-hub"
+        on_failure: "block"
+
+  - name: "post-commit"
+    description: "提交后处理"
+    auto_run: true
+    steps:
+      - name: "auto_lock"
+        description: "自动锁档"
+        lock_dir: "/opt/ZONGYUAN-ROOT/locks"
+        lock_prefix: "LOCK-AUTO-"
+        include_kernel_hash: true
+        include_commit_hash: true
+      
+      - name: "health_verification"
+        description: "部署后健康验证"
+        endpoints:
+          - "http://127.0.0.1:8024/health"
+          - "http://127.0.0.1:8023/health"
+        on_failure: "warn"
+
+# 钩子配置
+hooks:
+  pre_commit:
+    enabled: true
+    path: ".git/hooks/pre-commit"
+    strict: true
+  
+  post_commit:
+    enabled: true
+    path: ".git/hooks/post-commit"
+    strict: false
+
+# 通知配置
+notifications:
+  on_success:
+    - log_to_file: "/opt/ZONGYUAN-ROOT/logs/ci_cd.log"
+  on_failure:
+    - log_to_file: "/opt/ZONGYUAN-ROOT/logs/ci_cd_error.log"
+    - alert: true
+
+# 版本策略
+versioning:
+  strategy: "semantic"
+  auto_bump:
+    patch: "bug_fix, docs, chore"
+    minor: "feat, feature"
+    major: "breaking_change"
+  tag_prefix: "v"
+
+# 安全策略
+security:
+  sensitive_files: [".env", "*.pem", "*.key", "*credentials*", "*secret*", "*token*"]
+  max_file_size_mb: 10
+  require_signoff: false
+  branch_protection:
+    main:
+      require_review: false
+      require_status_checks: true
+      allow_force_push: false
+
+# 锁档策略
+locking:
+  auto_lock_on_commit: true
+  lock_level: "BLOWN_PERMANENT"
+  include_kernel_hash: true
+  include_commit_hash: true
+  include_timestamp: true
+  lock_dir: "/opt/ZONGYUAN-ROOT/locks"

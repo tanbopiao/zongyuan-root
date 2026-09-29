@@ -1,0 +1,248 @@
+{
+  "sandbox_config": {
+    "version": "2.0.0",
+    "name": "ZONGYUAN-ROOT 自进化沙箱",
+    "溯源标识": "Ω₀⊂⊙∞⊂Ω",
+    "确权编码": "DID-BR-000002",
+    "体系基线": "ZONGYUAN-ROOT V1.7",
+    
+    "container_config": {
+      "image": "zongyuan/evolution-sandbox:2.0.0",
+      "default_cpu": "1.0",
+      "default_memory": "512m",
+      "default_disk": "1g",
+      "network_mode": "bridge",
+      "restart_policy": "unless-stopped",
+      "timeout_seconds": 3600,
+      "auto_cleanup": true,
+      "cleanup_after_hours": 24
+    },
+    
+    "resource_limits": {
+      "cpu_shares": 1024,
+      "memory_limit": "512m",
+      "memory_swap": "1g",
+      "pids_limit": 256,
+      "ulimits": {
+        "nofile": {
+          "soft": 65536,
+          "hard": 65536
+        }
+      }
+    },
+    
+    "security_config": {
+      "run_as_non_root": true,
+      "user_id": 1000,
+      "group_id": 1000,
+      "read_only_rootfs": false,
+      "cap_drop": ["ALL"],
+      "cap_add": ["NET_BIND_SERVICE"],
+      "security_opt": ["no-new-privileges:true"],
+      "disable_network": false,
+      "network_whitelist": [
+        "pypi.org",
+        "files.pythonhosted.org",
+        "huodouai.com",
+        "www.huodouai.com"
+      ]
+    },
+    
+    "verification_config": {
+      "functional_tests": {
+        "enabled": true,
+        "test_framework": "pytest",
+        "coverage_enabled": true,
+        "min_coverage_percent": 80,
+        "max_test_time_seconds": 300
+      },
+      "linting": {
+        "enabled": true,
+        "tools": ["flake8", "black", "mypy"],
+        "max_line_length": 120,
+        "fail_on_error": true
+      },
+      "performance_benchmark": {
+        "enabled": true,
+        "benchmarks": ["cpu", "memory", "io_read", "io_write"],
+        "max_regression_percent": 20
+      },
+      "security_scan": {
+        "enabled": true,
+        "checks": ["root_check", "sensitive_files", "network_access", "docker_socket"],
+        "fail_on_vulnerability": true
+      }
+    },
+    
+    "gray_release_config": {
+      "enabled": true,
+      "initial_percentage": 10,
+      "increment_percentage": 10,
+      "increment_interval_seconds": 300,
+      "health_check_interval_seconds": 30,
+      "auto_rollback": true,
+      "rollback_thresholds": {
+        "error_rate_percent": 5.0,
+        "response_time_ms": 2000,
+        "health_check_failures": 3,
+        "cpu_usage_percent": 90,
+        "memory_usage_percent": 90
+      }
+    },
+    
+    "lock_archive_config": {
+      "enabled": true,
+      "hash_algorithm": "sha256",
+      "lock_status": "BLOWN_PERMANENT",
+      "archive_locations": [
+        "local_filesystem",
+        "cloud_storage",
+        "knowledge_base"
+      ],
+      "retention_days": 365
+    },
+    
+    "logging_config": {
+      "level": "INFO",
+      "format": "[%(asctime)s] [%(levelname)s] %(message)s",
+      "log_dir": "/var/log/sandbox",
+      "max_file_size_mb": 10,
+      "max_files": 5,
+      "console_output": true
+    },
+    
+    "monitoring_config": {
+      "enabled": true,
+      "metrics_interval_seconds": 15,
+      "metrics": ["cpu_usage", "memory_usage", "disk_usage", "network_io", "process_count"],
+      "alert_thresholds": {
+        "cpu_usage_percent": 85,
+        "memory_usage_percent": 85,
+        "disk_usage_percent": 85
+      }
+    }
+  },
+  
+  "evolution_rules": {
+    "performance_optimization": [
+      {
+        "rule_id": "PERF-001",
+        "title": "内存使用率超过85%时触发优化",
+        "condition": "memory_percent > 85",
+        "action": "optimize_memory",
+        "risk_level": "medium",
+        "estimated_time": "1-2小时"
+      },
+      {
+        "rule_id": "PERF-002",
+        "title": "磁盘使用率超过85%时清理空间",
+        "condition": "disk_percent > 85",
+        "action": "cleanup_disk",
+        "risk_level": "low",
+        "estimated_time": "30分钟"
+      },
+      {
+        "rule_id": "PERF-003",
+        "title": "API响应时间超过2秒时优化",
+        "condition": "response_time_ms > 2000",
+        "action": "optimize_api_performance",
+        "risk_level": "medium",
+        "estimated_time": "1小时"
+      },
+      {
+        "rule_id": "PERF-004",
+        "title": "缓存命中率低于50%时优化缓存策略",
+        "condition": "cache_hit_rate < 50",
+        "action": "optimize_cache_strategy",
+        "risk_level": "low",
+        "estimated_time": "30分钟"
+      }
+    ],
+    "security_hardening": [
+      {
+        "rule_id": "SEC-001",
+        "title": "SSL证书剩余30天时提醒续期",
+        "condition": "ssl_days_remaining < 30",
+        "action": "renew_ssl_certificate",
+        "risk_level": "high",
+        "estimated_time": "30分钟"
+      },
+      {
+        "rule_id": "SEC-002",
+        "title": "发现服务异常时自动恢复",
+        "condition": "service_status == unhealthy",
+        "action": "auto_recover_service",
+        "risk_level": "high",
+        "estimated_time": "15-30分钟"
+      },
+      {
+        "rule_id": "SEC-003",
+        "title": "检测到异常登录时告警",
+        "condition": "abnormal_login_detected",
+        "action": "security_alert",
+        "risk_level": "high",
+        "estimated_time": "即时"
+      },
+      {
+        "rule_id": "SEC-004",
+        "title": "API密钥即将过期时提醒轮换",
+        "condition": "api_key_days_remaining < 7",
+        "action": "rotate_api_key",
+        "risk_level": "medium",
+        "estimated_time": "1小时"
+      }
+    ],
+    "feature_completion": [
+      {
+        "rule_id": "FEAT-001",
+        "title": "补全缺失的API端点文档",
+        "condition": "missing_api_docs > 0",
+        "action": "generate_api_docs",
+        "risk_level": "low",
+        "estimated_time": "2小时"
+      },
+      {
+        "rule_id": "FEAT-002",
+        "title": "完善单元测试覆盖率",
+        "condition": "test_coverage < 80",
+        "action": "improve_test_coverage",
+        "risk_level": "low",
+        "estimated_time": "4小时"
+      },
+      {
+        "rule_id": "FEAT-003",
+        "title": "优化用户界面交互体验",
+        "condition": "ui_feedback_score < 70",
+        "action": "improve_ui_ux",
+        "risk_level": "medium",
+        "estimated_time": "4小时"
+      },
+      {
+        "rule_id": "FEAT-004",
+        "title": "增加数据备份和恢复机制",
+        "condition": "backup_system == missing",
+        "action": "implement_backup_system",
+        "risk_level": "medium",
+        "estimated_time": "4小时"
+      }
+    ]
+  },
+  
+  "approval_matrix": {
+    "low_risk": {
+      "performance_optimization": "auto_approve",
+      "security_hardening": "auto_approve",
+      "feature_completion": "auto_approve"
+    },
+    "medium_risk": {
+      "performance_optimization": "admin_approval",
+      "security_hardening": "admin_approval",
+      "feature_completion": "admin_approval"
+    },
+    "high_risk": {
+      "performance_optimization": "highest_authority_approval",
+      "security_hardening": "highest_authority_approval",
+      "feature_completion": "highest_authority_approval"
+    }
+  }
+}

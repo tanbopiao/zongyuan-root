@@ -1,0 +1,135 @@
+{
+  "lock_id": "LOCK-API-GATEWAY-20260906_105436",
+  "timestamp": "2026-09-06T10:54:36.489285",
+  "type": "api_gateway_complete",
+  "title": "统一API网关V1.0完成部署",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "api_gateway": {
+    "status": "completed",
+    "version": "V1.0",
+    "port": 8040,
+    "service_name": "api-gateway",
+    "systemd_managed": true,
+    "autostart": true,
+    "code_size_bytes": 22925
+  },
+  "features": {
+    "api_key_management": {
+      "status": "completed",
+      "features": [
+        "API Key生成（zy-前缀+48位十六进制）",
+        "API Key列表（不返回明文）",
+        "API Key吊销",
+        "权限控制（chat/models/kernel/usage/admin）",
+        "过期时间设置",
+        "使用统计（调用次数/最后使用时间）",
+        "哈希存储（不存储明文）"
+      ],
+      "admin_key": "zy-admin-8cf6a7075d06d3622779d0b0a32527ca",
+      "main_app_key": "zy-101e3e6f7188482f87bca9e806ca7c5d775a6e44e4784772",
+      "main_app_key_id": "key_bb40be3c"
+    },
+    "openai_compatible": {
+      "status": "completed",
+      "endpoints": [
+        "GET /v1/models - 模型列表（OpenAI兼容格式）",
+        "POST /v1/chat/completions - 聊天补全（OpenAI兼容格式）",
+        "GET /v1/health - 健康检查"
+      ],
+      "models_available": 11,
+      "model_list": [
+        "doubao",
+        "doubao-reasoning",
+        "doubao-reasoning2",
+        "hunyuan",
+        "zhipu",
+        "siliconflow",
+        "aliyun",
+        "kimi",
+        "agnes",
+        "ollama-local",
+        "ollama-win"
+      ],
+      "usage": "可直接用OpenAI SDK调用，base_url=https://www.huodouai.com/v1"
+    },
+    "kernel_api_routing": {
+      "status": "completed",
+      "endpoints": [
+        "GET /v1/kernel/status - 内核状态（转发到Anchor）",
+        "GET /v1/kernel/identity - 内核身份（转发到身份API）",
+        "GET /v1/kernel/nodes/list - 节点列表（转发到身份API）",
+        "POST /v1/kernel/nodes/register - 节点注册（转发到身份API）",
+        "POST /v1/kernel/nodes/heartbeat - 节点心跳（转发到身份API）",
+        "POST /v1/kernel/truth/pull - 真值拉取（转发到Anchor）",
+        "POST /v1/kernel/truth/push - 真值推送（转发到Anchor）"
+      ]
+    },
+    "rate_limiting": {
+      "status": "completed",
+      "per_minute": 60,
+      "per_hour": 1000,
+      "implementation": "内存存储，按API Key哈希限流"
+    },
+    "authentication": {
+      "status": "completed",
+      "methods": [
+        "X-API-Key 请求头",
+        "Authorization: Bearer <key>"
+      ],
+      "permission_levels": [
+        "chat",
+        "models",
+        "kernel",
+        "usage",
+        "admin"
+      ]
+    }
+  },
+  "nginx_config": {
+    "status": "completed",
+    "external_urls": [
+      "https://www.huodouai.com/v1/ - OpenAI兼容API入口",
+      "https://www.huodouai.com/api/v1/gateway/ - API网关入口"
+    ],
+    "upstream": "http://127.0.0.1:8040",
+    "timeout": "120s",
+    "max_body_size": "50m"
+  },
+  "upstream_services": {
+    "aiproxy": {
+      "url": "http://127.0.0.1:8021",
+      "status": "healthy",
+      "purpose": "AI模型调用代理"
+    },
+    "anchor": {
+      "url": "http://127.0.0.1:8006",
+      "status": "healthy",
+      "purpose": "真值同步/控制API"
+    },
+    "identity": {
+      "url": "http://127.0.0.1:8030",
+      "status": "healthy",
+      "purpose": "节点身份/心跳管理"
+    }
+  },
+  "test_results": {
+    "health_check": "✅ 200",
+    "unauthorized_access": "✅ 401（无API Key拒绝访问）",
+    "admin_key_auth": "✅ 200（管理员Key认证成功）",
+    "model_list": "✅ 11个模型返回",
+    "create_api_key": "✅ 201（创建成功）",
+    "new_key_auth": "✅ 200（新Key认证成功）",
+    "kernel_status": "✅ 200（内核状态返回正常）",
+    "external_access": "✅ 200（外网访问正常）"
+  },
+  "usage_examples": {
+    "openai_sdk": "\nfrom openai import OpenAI\nclient = OpenAI(\n    api_key=\"zy-101e3e6f7188482f87bca9e806ca7c5d775a6e44e4784772\",\n    base_url=\"https://www.huodouai.com/v1\"\n)\nresponse = client.chat.completions.create(\n    model=\"doubao\",\n    messages=[{\"role\": \"user\", \"content\": \"你好\"}]\n)\nprint(response.choices[0].message.content)\n",
+    "curl": "\n# 模型列表\ncurl -H \"X-API-Key: zy-101e3e6f7188482f87bca9e806ca7c5d775a6e44e4784772\" \\\n  https://www.huodouai.com/v1/models\n\n# 聊天补全\ncurl -X POST -H \"X-API-Key: zy-101e3e6f7188482f87bca9e806ca7c5d775a6e44e4784772\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"doubao\",\"messages\":[{\"role\":\"user\",\"content\":\"你好\"}]}' \\\n  https://www.huodouai.com/v1/chat/completions\n"
+  },
+  "file_hashes": {
+    "api_gateway_py": "50aa94bf08e5e6411acdccf6fbcbbefc73f1f39c0c1c1a6eb4f3a602c25aaf0a"
+  },
+  "status": "BLOWN_PERMANENT",
+  "merkle_root": "e9ab95add3e21e043bf57d5fdf2fdba5322e2d3123149d16e5b943a1db1d6032"
+}

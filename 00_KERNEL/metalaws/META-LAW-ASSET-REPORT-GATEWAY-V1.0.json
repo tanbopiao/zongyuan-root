@@ -1,0 +1,62 @@
+{
+  "law_id": "META-LAW-ASSET-REPORT-GATEWAY-V1.0",
+  "law_name": "视频图片资产自动上报记忆网关节",
+  "version": "1.0",
+  "timestamp": "2026-09-14T03:25:00Z",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "philosophy_anchor": "元极恒一",
+
+  "core_principle": "所有生成的视频和图片资产，生成完成后必须自动向云端记忆网关上报，上报成功方为闭环。",
+
+  "report_specification": {
+    "endpoint": "POST /api/gateway/report",
+    "truth_type": "achievement",
+    "required_fields": [
+      "asset_name（资产名称）",
+      "format（制式）",
+      "style（风格）",
+      "ip_origin（IP归属）",
+      "link（链接）",
+      "DID-BR-000002（确权标识）",
+      "Ω₀⊂⊙∞⊂Ω（溯源标识）"
+    ],
+    "success_criteria": "上报成功方为闭环，失败必须重试或记录待同步队列"
+  },
+
+  "asset_types": {
+    "video": {
+      "formats": ["mp4", "mov", "webm"],
+      "must_report": true,
+      "additional_fields": ["duration", "resolution", "fps"]
+    },
+    "image": {
+      "formats": ["png", "jpg", "jpeg", "webp"],
+      "must_report": true,
+      "additional_fields": ["resolution", "aspect_ratio"]
+    }
+  },
+
+  "failure_handling": {
+    "retry": "上报失败自动重试最多3次",
+    "pending_queue": "重试失败写入待同步队列，网关可达后自动补发",
+    "local_lock": "本地锁档不受上报影响，先本地锁档再上报"
+  },
+
+  "channel_constraints": {
+    "ssh_prohibited": "禁止使用SSH连接云服务器（123.207.202.158）",
+    "allowed_channels": [
+      "记忆网关API（9120端口）",
+      "飞书Base",
+      "飞书云盘",
+      "飞书知识库"
+    ],
+    "unique_handshake": "本地与云端唯一握手点为记忆网关9120端口"
+  },
+
+  "applicability": {
+    "scope": "所有生成的视频和图片资产",
+    "mandatory": true,
+    "closure_definition": "上报成功方为闭环"
+  }
+}

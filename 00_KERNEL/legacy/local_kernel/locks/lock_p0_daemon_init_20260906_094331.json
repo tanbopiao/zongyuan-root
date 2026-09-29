@@ -1,0 +1,95 @@
+{
+  "lock_id": "LOCK-P0-DAEMON-INIT-20260906_094331",
+  "timestamp": "2026-09-06T09:43:31.150973",
+  "type": "p0_optimization_complete",
+  "title": "P0级优化完成：新窗口自动初始化协议 + 本地节点统一守护进程",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "p0_1_auto_init_protocol": {
+    "status": "completed",
+    "script": "auto_init.py",
+    "size_bytes": 17841,
+    "features": [
+      "自动获取云内核身份标识",
+      "自动注册为新节点",
+      "自动配置sync_agent（X-API-Key）",
+      "自动拉取最新真值库",
+      "输出当前内核状态摘要"
+    ],
+    "cloud_deployment": {
+      "path": "/opt/ZONGYUAN-ROOT/init_protocol/auto_init.py",
+      "public_url": "https://www.huodouai.com/init/auto_init.py",
+      "nginx_location": "/init/"
+    },
+    "usage": "python auto_init.py  # 新窗口一键初始化"
+  },
+  "p0_2_node_daemon": {
+    "status": "completed",
+    "script": "node_daemon.py",
+    "size_bytes": 21445,
+    "features": [
+      "节点心跳上报（300秒间隔）",
+      "双内核真值同步（300秒间隔）",
+      "frpc隧道监控+自动重连（60秒间隔）",
+      "本地服务健康检查（120秒间隔）",
+      "异常自动告警+自愈",
+      "状态定期保存（60秒间隔）"
+    ],
+    "modules": 5,
+    "module_names": [
+      "heartbeat_worker",
+      "sync_worker",
+      "frpc_monitor_worker",
+      "service_check_worker",
+      "state_save_worker"
+    ],
+    "startup_script": "start_node_daemon_hidden.vbs",
+    "autostart": "已配置到Windows启动文件夹",
+    "node_id": "local-win-001",
+    "node_type": "local_kernel",
+    "status_command": "python node_daemon.py --status",
+    "stop_command": "python node_daemon.py --stop"
+  },
+  "api_fixes": {
+    "kernel_identity_api": {
+      "issue": "请求体解析问题导致注册/心跳失败",
+      "fix": "增强请求体解析+添加调试日志",
+      "status": "fixed",
+      "endpoints_tested": [
+        "GET /api/v1/kernel/identity ✅",
+        "POST /api/v1/kernel/nodes/register ✅",
+        "POST /api/v1/kernel/nodes/heartbeat ✅",
+        "GET /api/v1/kernel/nodes/list ✅"
+      ]
+    }
+  },
+  "current_status": {
+    "daemon_running": true,
+    "heartbeat_count": 1,
+    "sync_count": 1,
+    "frpc_status": "running",
+    "local_services": {
+      "aios": "active",
+      "dashboard": "active",
+      "ollama": "active",
+      "gov_backend": "inactive"
+    },
+    "cloud_truth_count": 104,
+    "local_truth_count": 310
+  },
+  "memory_optimization": {
+    "before": "多个分散进程（sync_agent + watchdog + 各agent），每个30-50MB",
+    "after": "统一守护进程，单进程整合所有功能，预计内存50-80MB",
+    "estimated_savings": "40-60%"
+  },
+  "file_hashes": {
+    "auto_init_py": "4e2b90e8f441927440655554125752275f7315b12119cc5118300288d5ad2d13",
+    "node_daemon_py": "9906a47eb17dcd6361b28b310e99d7b978baac7ad37a39ab9e422c9bae3681ef",
+    "start_node_daemon_vbs": "7f53a9f21f6032e9b3b2caacbfe589734ccd44cf435a05315ef89a38e7d50d54",
+    "node_config_json": "192fa7b1d1aab25c5ce52cb3bca36f57ddb83e9f2e7f05d9d4f2b3c3c503899b",
+    "api_protocol_md": "24aca666f7ea665ff24d82085d48481ac33473f67c9136ff4e8a1e408be70553",
+    "api_protocol_json": "4fe9fd6fbb6444e5dac8f55d1ab745047047dc113d5183bfa74c1a4e52540cfd"
+  },
+  "status": "BLOWN_PERMANENT",
+  "merkle_root": "3a1d4f34a3a98a6ad054372b52026b3b1f31dabf7ee86be21a75bc6fe8d95ccd"
+}

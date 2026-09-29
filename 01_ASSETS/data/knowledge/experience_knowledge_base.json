@@ -1,0 +1,231 @@
+{
+  "knowledge_base_id": "KB-ZONGYUAN-ROOT-001",
+  "name": "ZONGYUAN-ROOT 全域经验知识库",
+  "version": "1.0.0",
+  "created_at": "2026-09-06",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "categories": {
+    "nginx_config": {
+      "name": "Nginx配置经验",
+      "count": 5,
+      "lessons": [
+        {
+          "id": "NGINX-001",
+          "title": "主配置文件识别",
+          "problem": "修改了错误的Nginx配置文件（www.huodouai.com.conf），导致配置不生效",
+          "root_cause": "宝塔面板存在多个配置文件，主配置是huodouai.com.conf（13832字节），www.huodouai.com.conf（2697字节）是次要配置会产生conflicting server name警告",
+          "solution": "始终修改 /www/server/panel/vhost/nginx/huodouai.com.conf，修改前先确认文件大小和内容",
+          "verification": "nginx -t 测试通过，且实际访问生效",
+          "severity": "high",
+          "tags": ["nginx", "配置", "宝塔", "踩坑"]
+        },
+        {
+          "id": "NGINX-002",
+          "title": "PowerShell双引号$变量解析问题",
+          "problem": "通过SSH传递包含$host/$remote_addr的Nginx配置时，PowerShell将$解析为变量导致配置错误",
+          "root_cause": "PowerShell双引号字符串中$开头的内容会被解析为PowerShell变量",
+          "solution": "使用Python脚本文件方式传递配置（cat > /tmp/file.py && python3 /tmp/file.py），或使用PowerShell单引号",
+          "verification": "nginx -t 通过，配置文件中$变量完整保留",
+          "severity": "high",
+          "tags": ["nginx", "powershell", "ssh", "变量", "踩坑"]
+        },
+        {
+          "id": "NGINX-003",
+          "title": "proxy_pass尾部斜杠路径替换问题",
+          "problem": "proxy_pass带尾部斜杠（http://127.0.0.1:8023/api/v1/agents/）导致Nginx路径替换，/api/v1/agents请求返回404",
+          "root_cause": "Nginx proxy_pass带URI时会替换匹配的location部分",
+          "solution": "proxy_pass不带尾部斜杠（http://127.0.0.1:8023），使用location ^~ /api/v1/agents 优先前缀匹配",
+          "verification": "curl http://127.0.0.1/api/v1/agents 返回200",
+          "severity": "high",
+          "tags": ["nginx", "proxy_pass", "路径", "404", "踩坑"]
+        },
+        {
+          "id": "NGINX-004",
+          "title": "location带尾部斜杠不匹配无斜杠请求",
+          "problem": "location /api/v1/agents/ 不匹配 /api/v1/agents（无斜杠）请求，返回404",
+          "root_cause": "Nginx location匹配是精确前缀匹配，带斜杠和不带斜杠是不同的",
+          "solution": "使用 location ^~ /api/v1/agents （不带尾部斜杠）优先前缀匹配",
+          "verification": "带斜杠和不带斜杠的请求都能正确匹配",
+          "severity": "medium",
+          "tags": ["nginx", "location", "匹配", "404", "踩坑"]
+        },
+        {
+          "id": "NGINX-005",
+          "title": "pid文件为空导致reload失败",
+          "problem": "nginx -s reload 报错 invalid PID number，因为pid文件为空",
+          "root_cause": "Nginx异常退出后pid文件残留但内容为空",
+          "solution": "rm -f /www/server/nginx/logs/nginx.pid && /www/server/nginx/sbin/nginx -c /www/server/nginx/conf/nginx.conf",
+          "verification": "ps aux | grep nginx 显示进程正常，curl访问返回200",
+          "severity": "medium",
+          "tags": ["nginx", "pid", "reload", "重启", "踩坑"]
+        }
+      ]
+    },
+    "service_deployment": {
+      "name": "服务部署经验",
+      "count": 4,
+      "lessons": [
+        {
+          "id": "DEPLOY-001",
+          "title": "nohup/setsid在SSH非交互shell不可靠",
+          "problem": "通过SSH使用nohup启动Python后台进程，进程立即消失，日志不创建",
+          "root_cause": "SSH非交互shell退出时会杀死所有子进程，nohup和setsid在某些环境下不可靠",
+          "solution": "使用systemd服务管理（Type=simple, Restart=always），systemctl enable + start",
+          "verification": "systemctl status 显示active running，SSH断开后进程仍存活",
+          "severity": "high",
+          "tags": ["部署", "systemd", "nohup", "ssh", "后台进程", "踩坑"]
+        },
+        {
+          "id": "DEPLOY-002",
+          "title": "UTF-8 BOM导致Python json.load失败",
+          "problem": "Python json.load 报错 Unexpected UTF-8 BOM，JSON文件解析失败",
+          "root_cause": "Windows PowerShell写入文件时默认添加UTF-8 BOM头",
+          "solution": "使用无BOM UTF-8写入（Python open(encoding='utf-8')，或PowerShell -Encoding utf8NoBOM）",
+          "verification": "file命令显示 UTF-8 Unicode text（无BOM），json.load成功",
+          "severity": "medium",
+          "tags": ["部署", "utf-8", "bom", "json", "编码", "踩坑"]
+        },
+        {
+          "id": "DEPLOY-003",
+          "title": "Windows服务闪退问题",
+          "problem": "批处理文件右键以管理员身份运行后闪退，无法看到结果",
+          "root_cause": "批处理执行完成后窗口自动关闭，且可能存在编码/路径问题",
+          "solution": "使用VBS静默启动器（Set WshShell = CreateObject(\"WScript.Shell\"): WshShell.Run \"cmd /c python script.py\", 0, False），放入启动文件夹实现开机自启",
+          "verification": "任务管理器显示python进程，日志文件正常写入",
+          "severity": "medium",
+          "tags": ["部署", "windows", "闪退", "vbs", "静默启动", "踩坑"]
+        },
+        {
+          "id": "DEPLOY-004",
+          "title": "内存不足导致MySQL启动失败",
+          "problem": "MySQL启动失败，日志显示正常关闭，但实际无法启动",
+          "root_cause": "云服务器内存仅1.9Gi，空闲内存不足218Mi，MySQL无法分配足够内存",
+          "solution": "释放内存（停止不必要的服务），降低MySQL innodb_buffer_pool_size配置，或升级服务器内存",
+          "verification": "free -h 显示足够空闲内存，systemctl start mysql成功",
+          "severity": "high",
+          "tags": ["部署", "mysql", "内存", "oom", "启动失败", "踩坑"]
+        }
+      ]
+    },
+    "architecture_decisions": {
+      "name": "架构决策记录",
+      "count": 5,
+      "lessons": [
+        {
+          "id": "ARCH-001",
+          "title": "中枢主窗口+专业窗口星型架构",
+          "decision": "采用1个中枢主窗口 + N个专业窗口的星型协同架构，而非单窗口或多窗口平级",
+          "rationale": "单窗口上下文容量有限且业务混乱；多窗口平级会导致重复建设和冲突；星型架构实现道器分离（中枢管道，专业窗口器）",
+          "benefits": ["统一管控", "专业分工", "防重复建设", "冲突有最终裁决", "记忆全网共享"],
+          "tradeoffs": ["需要维护窗口间通信协议", "中枢窗口成为单点（但可通过云内核高可用解决）"],
+          "status": "adopted",
+          "adopted_at": "2026-09-06",
+          "tags": ["架构", "决策", "星型", "窗口管理", "ADR"]
+        },
+        {
+          "id": "ARCH-002",
+          "title": "云内核为主力，本地内核为管理端",
+          "decision": "云服务器作为主力运行环境（7x24稳定运行），本地Windows作为管理端和开发测试环境",
+          "rationale": "Windows系统对服务常驻不友好（服务经常中断/闪退），云服务器Linux+systemd更稳定；本地用于开发测试和远程管理",
+          "benefits": ["云端稳定运行", "本地灵活开发", "双端分工互不干扰", "本地故障不影响云端服务"],
+          "tradeoffs": ["需要维护双端同步机制", "本地开发完成后需要部署到云端"],
+          "status": "adopted",
+          "adopted_at": "2026-09-06",
+          "tags": ["架构", "决策", "云端", "本地", "分工", "ADR"]
+        },
+        {
+          "id": "ARCH-003",
+          "title": "协议注册中心作为单一真相源",
+          "decision": "建立协议注册中心（Protocol Registry），所有功能/服务/算子统一注册，作为全域单一真相源",
+          "rationale": "多窗口各自开发导致功能分散、重复建设、无法统一管控；协议中心实现开发前查询防重复、开发后注册可复用、版本可追溯",
+          "benefits": ["防重复建设", "统一管控", "版本可追溯", "全网可查可复用", "依赖关系可分析"],
+          "tradeoffs": ["需要维护注册中心服务", "所有新功能必须走注册流程"],
+          "status": "adopted",
+          "adopted_at": "2026-09-06",
+          "tags": ["架构", "决策", "协议中心", "单一真相源", "ADR"]
+        },
+        {
+          "id": "ARCH-004",
+          "title": "免费优先，付费需人工审核",
+          "decision": "所有大模型API使用遵循免费优先策略，产生付费的调用一律不用，付费需要人工审核确认",
+          "rationale": "控制成本，避免意外扣费；免费额度足够内部使用；付费模型需要明确的ROI评估",
+          "benefits": ["成本可控", "避免意外扣费", "免费模型足够内部使用"],
+          "tradeoffs": ["免费模型可能有速率限制", "部分高级功能不可用"],
+          "status": "adopted",
+          "adopted_at": "2026-09-06",
+          "tags": ["架构", "决策", "成本", "免费优先", "API", "ADR"]
+        },
+        {
+          "id": "ARCH-005",
+          "title": "政务AI保留双版本",
+          "decision": "政务AI保留两个版本：v3.0旧版（/gov/，使用简单）+ 新工作台（/gov-ai/，操作复杂但功能强）",
+          "rationale": "不同用户场景需求不同，旧版适合快速演示和基础流程，新版适合复杂编排；两套都保留，后续根据使用反馈优化",
+          "benefits": ["满足不同场景需求", "新旧平滑过渡", "用户可选择适合的版本"],
+          "tradeoffs": ["维护两套代码", "需要明确版本定位和导航"],
+          "status": "adopted",
+          "adopted_at": "2026-09-06",
+          "tags": ["架构", "决策", "政务AI", "双版本", "ADR"]
+        }
+      ]
+    },
+    "best_practices": {
+      "name": "最佳实践",
+      "count": 4,
+      "lessons": [
+        {
+          "id": "BEST-001",
+          "title": "新功能开发标准流程",
+          "practice": "查询协议中心防重复 → 沙箱仿真验证 → 本地开发测试 → 上报中枢窗口 → 注册协议中心 → 云端部署 → 自动锁档 → 记忆同步",
+          "why": "避免重复建设，确保质量，统一管控，全网可复用",
+          "verification": "协议中心可查询，服务健康检查通过，锁档记录存在",
+          "tags": ["最佳实践", "流程", "开发", "标准"]
+        },
+        {
+          "id": "BEST-002",
+          "title": "云服务器操作标准方式",
+          "practice": "使用SSH密钥认证（ssh -i key），复杂操作通过Python脚本文件方式执行（避免PowerShell变量解析问题），修改配置前先备份",
+          "why": "安全可靠，避免编码/变量/权限问题，可追溯可回滚",
+          "verification": "操作成功，备份文件存在，可回滚",
+          "tags": ["最佳实践", "云服务器", "ssh", "操作规范"]
+        },
+        {
+          "id": "BEST-003",
+          "title": "服务部署标准方式",
+          "practice": "所有云服务器服务使用systemd管理（Type=simple, Restart=always, RestartSec=5），开机自启（systemctl enable），日志统一输出到/opt/ZONGYUAN-ROOT/logs/",
+          "why": "稳定可靠，异常自动重启，开机自启，日志统一管理",
+          "verification": "systemctl is-active 返回active，重启服务器后服务自动启动",
+          "tags": ["最佳实践", "部署", "systemd", "服务管理"]
+        },
+        {
+          "id": "BEST-004",
+          "title": "敏感信息管理标准",
+          "practice": "API密钥/凭证/Token统一存储在.env文件（600权限），绝不提交到Git，.gitignore必须包含敏感文件模式，CI/CD预提交钩子自动拦截敏感文件",
+          "why": "防止密钥泄露，避免安全风险，合规要求",
+          "verification": "git ls-files | grep -E '(\\.env|\\.pem|\\.key)' 无输出，文件权限600",
+          "tags": ["最佳实践", "安全", "密钥", "敏感信息", "git"]
+        }
+      ]
+    }
+  },
+  "stats": {
+    "total_lessons": 18,
+    "by_category": {
+      "nginx_config": 5,
+      "service_deployment": 4,
+      "architecture_decisions": 5,
+      "best_practices": 4
+    },
+    "by_severity": {
+      "high": 5,
+      "medium": 4,
+      "info": 9
+    }
+  },
+  "maintenance": {
+    "auto_update": true,
+    "update_trigger": "post-commit-hook",
+    "review_cycle": "weekly",
+    "owner": "中枢主窗口"
+  }
+}

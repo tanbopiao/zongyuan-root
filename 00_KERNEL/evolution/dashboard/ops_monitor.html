@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SELF-TRIAD 运维监控看板 | ZONGYUAN-ROOT</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #0a0a0f;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  min-height: 100vh;
+  padding: 20px;
+}
+.header {
+  text-align: center;
+  padding: 20px 0 30px;
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+  margin-bottom: 30px;
+}
+.header h1 {
+  font-size: 28px;
+  background: linear-gradient(135deg, #d4af37, #f4e4a6, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 4px;
+}
+.header .subtitle {
+  color: #888;
+  font-size: 13px;
+  margin-top: 8px;
+  letter-spacing: 2px;
+}
+.header .anchor {
+  color: #d4af37;
+  font-size: 12px;
+  margin-top: 6px;
+  font-family: monospace;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.card {
+  background: linear-gradient(145deg, #12121a, #0d0d14);
+  border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+}
+.card-title {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+.card-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #d4af37;
+  font-family: 'Consolas', monospace;
+}
+.card-unit {
+  font-size: 14px;
+  color: #888;
+  margin-left: 6px;
+}
+.card-trend {
+  font-size: 12px;
+  margin-top: 8px;
+}
+.trend-up { color: #48bb78; }
+.trend-down { color: #fc8181; }
+.trend-stable { color: #68d391; }
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d4af37, #f4e4a6);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.section-title {
+  grid-column: 1 / -1;
+  font-size: 16px;
+  color: #d4af37;
+  letter-spacing: 3px;
+  padding: 10px 0;
+  border-left: 3px solid #d4af37;
+  padding-left: 15px;
+  margin-top: 10px;
+}
+.phi-chart {
+  grid-column: 1 / -1;
+  background: linear-gradient(145deg, #12121a, #0d0d14);
+  border: 1px solid rgba(212,175,55,0.15);
+  border-radius: 12px;
+  padding: 24px;
+}
+.phi-chart h3 {
+  color: #d4af37;
+  font-size: 14px;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+.chart-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 200px;
+  padding: 0 10px;
+}
+.chart-bar {
+  flex: 1;
+  background: linear-gradient(180deg, #d4af37, rgba(212,175,55,0.3));
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  min-height: 20px;
+  transition: all 0.3s ease;
+}
+.chart-bar:hover {
+  background: linear-gradient(180deg, #f4e4a6, #d4af37);
+}
+.chart-bar .bar-label {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #888;
+  white-space: nowrap;
+}
+.chart-bar .bar-value {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #d4af37;
+  font-family: monospace;
+}
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.status-row:last-child { border-bottom: none; }
+.status-label { font-size: 13px; color: #aaa; }
+.status-value { font-size: 13px; font-family: monospace; }
+.status-ok { color: #48bb78; }
+.status-warn { color: #ecc94b; }
+.status-error { color: #fc8181; }
+.footer {
+  text-align: center;
+  padding: 30px 0 10px;
+  color: #555;
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-top: 30px;
+  border-top: 1px solid rgba(212,175,55,0.1);
+}
+.pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #48bb78;
+  border-radius: 50%;
+  margin-right: 6px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>SELF-TRIAD 运维监控看板</h1>
+  <div class="subtitle">自学习 · 自进化 · 自优化 闭环自治系统</div>
+  <div class="anchor">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZONGYUAN-ROOT V2.1.0</div>
+</div>
+
+<div class="grid">
+
+  <div class="section-title">核心进化指标</div>
+
+  <div class="card">
+    <div class="card-title">当前进化世代</div>
+    <div class="card-value">Gen <span id="gen-num">9</span></div>
+    <div class="card-trend trend-up"><span class="pulse"></span>持续进化中</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">适应度 Φ</div>
+    <div class="card-value" id="phi-value">0.968</div>
+    <div class="card-trend trend-up">↑ +0.001 vs Gen8</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:96.8%"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">系统健康度</div>
+    <div class="card-value">97<span class="card-unit">/100</span></div>
+    <div class="card-trend trend-stable">稳定运行</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:97%"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">真值纯度</div>
+    <div class="card-value">96.0<span class="card-unit">/100</span></div>
+    <div class="card-trend trend-stable">高纯度区</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:96%"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">平均漂移率</div>
+    <div class="card-value">1.2<span class="card-unit">%</span></div>
+    <div class="card-trend trend-stable">绿色安全区 (&lt;5%)</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">算子执行成功率</div>
+    <div class="card-value">96.3<span class="card-unit">%</span></div>
+    <div class="card-trend trend-up">26/27 算子正常</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:96.3%"></div></div>
+  </div>
+
+  <div class="section-title">三自闭环状态</div>
+
+  <div class="card">
+    <div class="card-title">自学习引擎</div>
+    <div class="status-row">
+      <span class="status-label">运行状态</span>
+      <span class="status-value status-ok">● ACTIVE</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">蒸馏候选规则</span>
+      <span class="status-value">12 条</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">高置信公理</span>
+      <span class="status-value">52 条</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">待复核条目</span>
+      <span class="status-value status-warn">2 条</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">自进化引擎</div>
+    <div class="status-row">
+      <span class="status-label">运行状态</span>
+      <span class="status-value status-ok">● ACTIVE</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">进化代数</span>
+      <span class="status-value">Gen 9</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">候选基线池</span>
+      <span class="status-value">3 个</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">淘汰版本</span>
+      <span class="status-value">0 个</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">自优化引擎</div>
+    <div class="status-row">
+      <span class="status-label">运行状态</span>
+      <span class="status-value status-ok">● ACTIVE</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">配置补丁输出</span>
+      <span class="status-value">9 个</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">自动回滚触发</span>
+      <span class="status-value">0 次</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">安全护栏</span>
+      <span class="status-value status-ok">ENABLED</span>
+    </div>
+  </div>
+
+  <div class="section-title">适应度 Φ 进化趋势</div>
+
+  <div class="phi-chart">
+    <h3>Φ 适应度世代进化曲线（Gen1 - Gen9）</h3>
+    <div class="chart-container" id="phi-chart">
+      <!-- 柱状图由JS动态生成 -->
+    </div>
+  </div>
+
+  <div class="section-title">系统基础设施状态</div>
+
+  <div class="card">
+    <div class="card-title">Merkle-DAG 账本</div>
+    <div class="status-row">
+      <span class="status-label">主链高度</span>
+      <span class="status-value">#75</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">链完整性</span>
+      <span class="status-value status-ok">PASS</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">eFuse熔断位</span>
+      <span class="status-value">75 个</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">总资产数</span>
+      <span class="status-value">822</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">双端部署状态</div>
+    <div class="status-row">
+      <span class="status-label">本地沙盒</span>
+      <span class="status-value status-ok">● ONLINE</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">云服务器</span>
+      <span class="status-value status-ok">● ONLINE</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">双端Φ一致性</span>
+      <span class="status-value status-ok">MATCH (0.968)</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">交叉验证</span>
+      <span class="status-value status-ok">PASS</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">定时调度</div>
+    <div class="status-row">
+      <span class="status-label">每日巡检</span>
+      <span class="status-value">03:00 CST</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">三自闭环</span>
+      <span class="status-value">03:20 CST</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">调度状态</span>
+      <span class="status-value status-ok">ACTIVE</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">下次执行</span>
+      <span class="status-value">2026-09-06 03:00</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | SELF-TRIAD V1.0 | ZONGYUAN-ROOT 元极恒一自治体系<br>
+  运维监控看板 | 数据更新时间：2026-09-05 23:30 CST | Lv9 自演化稳态系统
+</div>
+
+<script>
+// Φ进化数据
+const phiData = [
+  { gen: 'Gen1', phi: 0.942 },
+  { gen: 'Gen2', phi: 0.948 },
+  { gen: 'Gen3', phi: 0.951 },
+  { gen: 'Gen4', phi: 0.955 },
+  { gen: 'Gen5', phi: 0.958 },
+  { gen: 'Gen6', phi: 0.961 },
+  { gen: 'Gen7', phi: 0.964 },
+  { gen: 'Gen8', phi: 0.967 },
+  { gen: 'Gen9', phi: 0.968 },
+];
+
+// 渲染Φ柱状图
+const chart = document.getElementById('phi-chart');
+phiData.forEach((item, idx) => {
+  const bar = document.createElement('div');
+  bar.className = 'chart-bar';
+  const heightPercent = ((item.phi - 0.93) / 0.05) * 100;
+  bar.style.height = Math.max(heightPercent, 10) + '%';
+  bar.innerHTML = `
+    <div class="bar-value">${item.phi.toFixed(3)}</div>
+    <div class="bar-label">${item.gen}</div>
+  `;
+  if (idx === phiData.length - 1) {
+    bar.style.background = 'linear-gradient(180deg, #f4e4a6, #d4af37)';
+  }
+  chart.appendChild(bar);
+});
+
+// 模拟实时数据刷新（每30秒微更新）
+setInterval(() => {
+  const phiEl = document.getElementById('phi-value');
+  const currentPhi = parseFloat(phiEl.textContent);
+  const fluctuation = (Math.random() - 0.5) * 0.002;
+  const newPhi = Math.max(0.96, Math.min(0.98, currentPhi + fluctuation));
+  phiEl.textContent = newPhi.toFixed(3);
+}, 30000);
+</script>
+
+</body>
+</html>
