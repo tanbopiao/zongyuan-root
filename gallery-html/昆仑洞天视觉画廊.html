@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>昆仑洞天 · 视觉资产画廊</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0A0A'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='%23C1A442'%3E昆%3C/text%3E%3C/svg%3E">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Serif SC',Georgia,'Songti SC',serif;background:#0a0a0a;color:#e8dcc0;overflow-x:hidden}
+.hero{position:relative;min-height:60vh;display:flex;align-items:center;justify-content:center;text-align:center;
+  background:radial-gradient(ellipse at 50% 30%,#1a1a1a 0%,#0a0a0a 70%);padding:80px 20px;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(circle at 20% 20%,rgba(193,164,66,.08) 0,transparent 40%),
+  radial-gradient(circle at 80% 80%,rgba(193,164,66,.06) 0,transparent 40%)}
+.hero h1{font-size:clamp(2.2rem,6vw,4rem);letter-spacing:.2em;font-weight:900;
+  background:linear-gradient(180deg,#f0e3c0,#c1a442 60%,#8a7230);-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 40px rgba(193,164,66,.2)}
+.hero .sub{margin-top:18px;font-size:clamp(.9rem,2vw,1.15rem);color:#8a8466;letter-spacing:.35em}
+.hero .count{margin-top:24px;font-size:.85rem;color:#5a5542;letter-spacing:.2em}
+.hr{height:1px;background:linear-gradient(90deg,transparent,#c1a442 50%,transparent);max-width:900px;margin:0 auto}
+.wrap{max-width:1300px;margin:0 auto;padding:60px 20px}
+.series-title{margin:50px 0 24px;font-size:1.5rem;letter-spacing:.15em;color:#c1a442;border-left:3px solid #c1a442;padding-left:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.card{position:relative;border-radius:8px;overflow:hidden;border:1px solid #2a2a2a;cursor:pointer;
+  transition:transform .4s,box-shadow .4s,border-color .4s;background:#111}
+.card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(193,164,66,.15);border-color:#c1a442}
+.card img{width:100%;height:300px;object-fit:cover;display:block;transition:transform .6s}
+.card:hover img{transform:scale(1.05)}
+.card .label{position:absolute;bottom:0;left:0;right:0;padding:30px 14px 12px;
+  background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);font-size:.85rem;letter-spacing:.1em;color:#e8dcc0}
+.card .tag{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);border:1px solid #c1a442;color:#c1a442;
+  padding:3px 10px;font-size:.7rem;letter-spacing:.1em;border-radius:3px}
+.card .meta{font-size:.7rem;color:#8a8466;margin-top:4px;letter-spacing:.05em}
+footer{text-align:center;padding:40px;color:#5a5542;font-size:.75rem;letter-spacing:.2em;border-top:1px solid #1a1a1a}
+footer .did{margin-top:10px;color:#c1a442}
+/* 灯箱 */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;z-index:100}
+.lightbox.open{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;border:1px solid #c1a442;box-shadow:0 0 60px rgba(193,164,66,.3)}
+.lightbox .close{position:absolute;top:20px;right:30px;font-size:2rem;color:#c1a442;cursor:pointer}
+.lightbox .cap{position:absolute;bottom:30px;color:#e8dcc0;letter-spacing:.15em}
+@media(max-width:600px){.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}.card img{height:200px}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div>
+    <h1>昆仑洞天</h1>
+    <div class="sub">视觉资产 · 神话CG画廊</div>
+    <div class="count">东方纯粹 · 玄黑鎏金 · DID-BR-000002 确权</div>
+  </div>
+</div>
+<div class="hr"></div>
+<div class="wrap" id="gallery"></div>
+<footer>
+  ZONGYUAN-ROOT 自治内核视觉资产 · 本地持久层统一归档 · 魔搭数据湖同步
+  <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002</div>
+</footer>
+<div class="lightbox" id="lb">
+  <span class="close" onclick="closelb()">×</span>
+  <img id="lbimg" src="">
+  <div class="cap" id="lbcap"></div>
+</div>
+<script>
+const IMGS=[
+{name:"赛博国风·新中式战甲",series:"新中式战甲",tag:"赛博国风",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/V77Kbndp8o4ZDXxAVRRcbIVqn2c"},
+{name:"新中式·3:4人物",series:"人物肖像",tag:"新中式",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/LD2cbpMl2oeouExG7D2c9AvNnLg"},
+{name:"终章·新苍穹裂纹",series:"终章",tag:"关键帧",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/CvJ2bLAR1o2Uk3xmHHBcyTy1ncd"},
+{name:"昆仑资产",series:"昆仑",tag:"资产",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/RROMbWa4qov7loxb8ZMcUHGqnce"},
+{name:"月神系列",series:"太阴月神",tag:"月神",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/L3KvbqI4QoZ0NKxvnjHcWlIXnEb"},
+{name:"汉服系列",series:"汉服",tag:"国风",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/DxsNb144Goeb6KxqGwzceFBknyd"},
+{name:"帝王金系列",series:"帝王",tag:"鎏金",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/Yfm4b1E8ToxjPDxVW0bcEJiynhe"},
+{name:"九天玄女系列",series:"九天玄女",tag:"神女",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/MuuNb8Bjcorr7ixuD9FcCd5qnVl"},
+{name:"赛博国风",series:"赛博国风",tag:"CG",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/Z2sebt9YSohfwBxJbnicftwAnQc"},
+{name:"终章·灵脉再断",series:"终章",tag:"关键帧",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/QI66bnEEZowZRVxIRSFcmt1LnVh"},
+{name:"太素神女",series:"太素",tag:"神女",src:"https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/N8ebbEoNAowqRyxeSERc2rFMnKc"}];
+const g=document.getElementById('gallery');
+function render(){g.innerHTML='';
+ IMGS.forEach(img=>{const c=document.createElement('div');c.className='card';
+  c.innerHTML=`<span class="tag">${img.tag}</span><img src="${img.src}" alt="${img.name}" loading="lazy">
+  <div class="label">${img.name}<div class="meta">${img.series} · ${img.tag}</div></div>`;
+  c.onclick=()=>{document.getElementById('lbimg').src=img.src;document.getElementById('lbcap').textContent=img.name;
+   document.getElementById('lb').classList.add('open')};
+  g.appendChild(c)});}
+function closelb(){document.getElementById('lb').classList.remove('open')}
+document.getElementById('lb').onclick=e=>{if(e.target.id==='lb')closelb()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closelb()});
+render();
+</script>
+</body>
+</html>
