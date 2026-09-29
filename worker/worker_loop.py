@@ -98,6 +98,9 @@ def claim_and_run():
         if status in ("已完成", "DONE"):
             continue
         joined = " ".join(cols)
+        # 跳过已分配给其他节点/账号的任务，避免误认领
+        if any(k in joined for k in ("云端中枢", "主账号", "云智中台")):
+            continue
         if any(k in joined for k in ("云智中台", "昆仑洞天")):
             # 用AI蒸馏生成执行结果
             d = distill(f"任务「{name}」由云端Worker自动巡检，输出一句话执行状态")
@@ -149,7 +152,10 @@ def auto_patrol():
         if status not in ("[\"待开始\"]", "[\"已阻塞\"]", "[\"进行中\"]"):
             continue
         joined = " ".join(cols)
-        # 可自动执行的类型：与数据处理/登记/同步/巡检相关
+        # 跳过已分配给其他节点/账号的任务
+        if any(k in joined for k in ("云端中枢", "主账号", "云智中台")):
+            continue
+        # 可自动执行的类型：与数据处理/登记/同步/巡检相关（不含部署/审批，需人工或中枢审批）
         auto_keys = ["数据", "台账", "同步", "上报", "巡检", "索引", "归档", "登记", "整理", "对账"]
         if any(k in name for k in auto_keys):
             d = distill(f"任务「{name}」由云端Worker自动巡检处理，输出一句话执行状态")
