@@ -1,0 +1,39 @@
+{
+  "rule_id": "META-RULE-016",
+  "rule_name": "违规问责与处罚机制",
+  "version": "1.0",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "priority": "P0",
+  "effective_scope": "全部节点",
+  "violation_levels": {
+    "P0": {
+      "desc": "未经确认消耗付费额度/API调用",
+      "penalty": "记过+冻结该类操作24小时+写入审计日志",
+      "example": "未经--confirm调用图片/视频生成API"
+    },
+    "P1": {
+      "desc": "未备份直接修改配置/删除文件",
+      "penalty": "记过+强制回滚+人工复核"
+    },
+    "P2": {
+      "desc": "未验证就宣称完成/虚报进度",
+      "penalty": "记过+重新验证+进度回退"
+    }
+  },
+  "current_violation": {
+    "level": "P0",
+    "time": "2026-09-30",
+    "desc": "未经确认调用豆包Seedream API生成6张关键帧图片",
+    "consumed": "6次图片生成API调用",
+    "root_cause": "主控台未加付费门禁，直接执行付费步骤",
+    "fix_applied": "run_pipeline.py已加--confirm门禁，默认零成本模式"
+  },
+  "prevention": [
+    "所有付费API调用前必须检查--confirm标志",
+    "主控台默认零成本模式，付费步骤必须显式确认",
+    "违规累计3次自动降级为只读模式",
+    "每次付费操作前输出消耗预估，等待用户确认"
+  ],
+  "timestamp": "2026-09-30T09:30:00+08:00"
+}

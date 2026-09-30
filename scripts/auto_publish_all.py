@@ -24,8 +24,8 @@ SOURCE_DIRS = [
     f'{BASE}/docs',                                  # 白皮书/紫皮书/文档/可视化网页
     os.path.expanduser('~/.zongyuan_root/PERMANENT_BASE/aios_deliverables/docs'),
 ]
-WHITEPAPER_REPO = ('models', 'zongyuanroot/zongyuan-whitepaper', 'datalake/whitepapers')
-DATALAKE_REPO = ('datasets', 'zongyuanroot/ZONGYUAN-SHARED-DATALAKE', 'zongyuan-root/web')
+WHITEPAPER_REPO = ('model', 'zongyuanroot/zongyuan-whitepaper', 'datalake/whitepapers')
+DATALAKE_REPO = ('dataset', 'zongyuanroot/ZONGYUAN-SHARED-DATALAKE', 'zongyuan-root/web')
 
 def sh(cmd):
     r = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -63,7 +63,7 @@ def discover():
                 print(f'  [安全跳过] {f}')
                 continue
             rel = f.replace(sd, '').lstrip('/')
-            rkey = 'whitepaper' if ('whitepaper' in low or '白皮' in f) else 'datalake'
+            rkey = 'datalake' if '/showcase/' in f else ('whitepaper' if ('whitepaper' in low or '白皮' in f) else 'datalake')
             found[rel] = (f, sha(f), rkey)
     return found
 
