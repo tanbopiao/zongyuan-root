@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS 技术白皮书 v1.0</title>
+<style>
+:root {
+  --primary: #1a365d;
+  --secondary: #2c5282;
+  --accent: #3182ce;
+  --light: #ebf8ff;
+  --gray-50: #f7fafc;
+  --gray-100: #edf2f7;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e0;
+  --gray-500: #718096;
+  --gray-700: #2d3748;
+  --gray-900: #1a202c;
+  --success: #38a169;
+  --warning: #d69e2e;
+  --danger: #e53e3e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+  color: var(--gray-700);
+  background: var(--gray-50);
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+/* 封面 */
+.cover {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.cover::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.cover-content { position: relative; z-index: 1; max-width: 800px; }
+
+.cover-badge {
+  display: inline-block;
+  padding: 6px 20px;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 20px;
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+  background: rgba(255,255,255,0.1);
+}
+
+.cover h1 {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
+
+.cover .subtitle {
+  font-size: 22px;
+  font-weight: 300;
+  opacity: 0.9;
+  margin-bottom: 40px;
+}
+
+.cover .meta {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  font-size: 14px;
+  opacity: 0.8;
+  flex-wrap: wrap;
+}
+
+.cover .meta-item { display: flex; flex-direction: column; align-items: center; }
+.cover .meta-item .label { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
+.cover .meta-item .value { font-weight: 500; }
+
+/* 导航 */
+.toc {
+  background: white;
+  border-bottom: 1px solid var(--gray-200);
+  padding: 30px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.toc-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 30px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.toc-inner::-webkit-scrollbar { display: none; }
+
+.toc a {
+  color: var(--gray-500);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.toc a:hover { color: var(--accent); background: var(--light); }
+
+/* 主内容 */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 50px 30px;
+}
+
+section {
+  background: white;
+  border-radius: 8px;
+  padding: 40px;
+  margin-bottom: 30px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+h2 .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  color: white;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 19px;
+  color: var(--gray-900);
+  margin: 28px 0 14px;
+  padding-left: 12px;
+  border-left: 3px solid var(--accent);
+}
+
+h4 {
+  font-size: 16px;
+  color: var(--gray-700);
+  margin: 20px 0 10px;
+  font-weight: 600;
+}
+
+p { margin-bottom: 14px; }
+
+ul, ol { margin: 12px 0 16px 24px; }
+li { margin-bottom: 8px; }
+
+/* 表格 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+}
+
+th {
+  background: var(--primary);
+  color: white;
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 500;
+}
+
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+tr:nth-child(even) { background: var(--gray-50); }
+tr:hover { background: var(--light); }
+
+/* 卡片网格 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin: 20px 0;
+}
+
+.card {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 22px;
+  transition: all 0.2s;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(49,130,206,0.1);
+  transform: translateY(-2px);
+}
+
+.card .card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card .card-desc {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.7;
+}
+
+/* 架构图 */
+.arch-diagram {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 30px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.arch-layer {
+  margin-bottom: 16px;
+}
+
+.arch-layer-label {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.arch-boxes {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.arch-box {
+  background: white;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 500;
+  min-width: 100px;
+}
+
+.arch-box.core {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.arch-arrow {
+  color: var(--gray-300);
+  font-size: 20px;
+  margin: 8px 0;
+}
+
+/* 指标 */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.metric {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--light) 0%, white 100%);
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+}
+
+.metric .value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.metric .label {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* 时间轴 */
+.timeline {
+  position: relative;
+  padding-left: 30px;
+  margin: 20px 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gray-200);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -26px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.timeline-item .phase {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.timeline-item .title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 6px;
+}
+
+.timeline-item .desc {
+  font-size: 14px;
+  color: var(--gray-500);
+}
+
+/* 提示框 */
+.note {
+  background: var(--light);
+  border-left: 4px solid var(--accent);
+  padding: 16px 20px;
+  border-radius: 0 6px 6px 0;
+  margin: 20px 0;
+  font-size: 14px;
+}
+
+.note .note-title {
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+/* 页脚 */
+.footer {
+  background: var(--primary);
+  color: white;
+  text-align: center;
+  padding: 40px 20px;
+  margin-top: 30px;
+}
+
+.footer .brand { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.footer .copyright { font-size: 13px; opacity: 0.7; }
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .cover h1 { font-size: 32px; }
+  .cover .subtitle { font-size: 18px; }
+  section { padding: 24px; }
+  h2 { font-size: 22px; }
+  .card-grid { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media print {
+  .toc { position: static; }
+  .cover { min-height: auto; padding: 80px 20px; }
+  section { box-shadow: none; border: 1px solid var(--gray-200); page-break-inside: avoid; }
+}
+</style>
+
+<meta name="description" content="火斗云智AIOS技术白皮书V1.0 - 全面介绍火斗云智智能认知自治操作系统的技术架构、核心组件、关键特性、技术指标、演进路线和应用场景。">
+<meta name="keywords" content="技术白皮书,AIOS,火斗云智,自治系统,技术架构,火斗云智">
+<meta property="og:type" content="website">
+<meta property="og:title" content="火斗云智AIOS技术白皮书V1.0 - 全面介绍火斗云智智能认知自治操作系统的技术架构、核心组件、关键特性、技术指标、演进">
+<meta property="og:description" content="火斗云智AIOS技术白皮书V1.0 - 全面介绍火斗云智智能认知自治操作系统的技术架构、核心组件、关键特性、技术指标、演进路线和应用场景。">
+<meta property="og:url" content="https://huodouai.com/whitepaper.html">
+<meta property="og:site_name" content="火斗云智 AIOS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="火斗云智AIOS技术白皮书V1.0 - 全面介绍火斗云智智能认知自治操作系统的技术架构、核心组件、关键特性、技术指标、演进">
+<meta name="twitter:description" content="火斗云智AIOS技术白皮书V1.0 - 全面介绍火斗云智智能认知自治操作系统的技术架构、核心组件、关键特性、技术指标、演进路线和应用场景。">
+    <link rel="canonical" href="https://huodouai.com/whitepapers/aios-v1.html">
+<link rel="stylesheet" href="../global-theme.css">
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="../index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="../products/index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="../solutions/index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="../docs/index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="../pricing/index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+
+<!-- 封面 -->
+<div class="cover">
+  <div class="cover-content">
+    <div class="cover-badge">TECHNICAL WHITE PAPER</div>
+    <h1>火斗云智 AIOS</h1>
+    <div class="subtitle">火斗云智智能认知自治操作系统 · 技术白皮书</div>
+    <div class="meta">
+      <div class="meta-item">
+        <span class="label">版本</span>
+        <span class="value">V1.0</span>
+      </div>
+      <div class="meta-item">
+        <span class="label">发布日期</span>
+        <span class="value">2026年9月</span>
+      </div>
+      <div class="meta-item">
+        <span class="label">文档类型</span>
+        <span class="value">技术白皮书</span>
+      </div>
+      <div class="meta-item">
+        <span class="label">密级</span>
+        <span class="value">公开</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 目录导航 -->
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="aios-v1.html#overview">1. 概述</a>
+    <a href="aios-v1.html#architecture">2. 体系架构</a>
+    <a href="aios-v1.html#components">3. 核心组件</a>
+    <a href="aios-v1.html#features">4. 关键特性</a>
+    <a href="aios-v1.html#metrics">5. 技术指标</a>
+    <a href="aios-v1.html#evolution">6. 演进路线</a>
+    <a href="aios-v1.html#scenarios">7. 应用场景</a>
+    <a href="aios-v1.html#conclusion">8. 总结展望</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- 1. 概述 -->
+<section id="overview">
+  <h2><span class="num">1</span>概述</h2>
+
+  <h3>1.1 产品定位</h3>
+  <p>火斗云智AIOS（以下简称"AIOS"）是一款面向自治智能系统的操作系统级软件平台。AIOS以"火斗云智"为设计哲学，通过构建统一的内核总线、真值管理体系、认知计算引擎和自治运维框架，实现了从基础资源管理到智能认知自治的完整技术栈。</p>
+
+  <p>AIOS的核心目标是构建一个能够<strong>自我感知、自我认知、自我学习、自我修复、自我进化</strong>的智能系统，降低人工运维成本，提升系统的稳定性、适应性和智能水平。</p>
+
+  <h3>1.2 设计哲学</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">火斗云智</div>
+      <div class="card-desc">体系统一性原则。所有组件通过统一内核总线连接，全局状态一致，避免信息孤岛和组件割裂。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">智能认知</div>
+      <div class="card-desc">超越普通认知的元认知能力。系统不仅能思考，还能思考思考本身，识别认知偏差，优化思维策略。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">高度自治</div>
+      <div class="card-desc">长期自我维持能力。通过资源熔断、故障自愈、自主开发、多节点协同和长期记忆，实现系统的持久运行。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">真值优先</div>
+      <div class="card-desc">以可验证的真值为决策基础。所有知识经过多轮验证，置信度可量化，决策可追溯。</div>
+    </div>
+  </div>
+
+  <h3>1.3 技术挑战与解决思路</h3>
+  <table>
+    <thead>
+      <tr><th>技术挑战</th><th>解决思路</th><th>对应组件</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>组件间通信与状态同步</td><td>统一内核总线，事件驱动架构</td><td>MR-012 内核总线</td></tr>
+      <tr><td>知识质量与一致性</td><td>九大元类分类，多轮质量验证</td><td>MR-013 真值统一</td></tr>
+      <tr><td>认知偏差与推理质量</td><td>8种偏差识别，四维质量评估</td><td>MR-014 元认知引擎</td></tr>
+      <tr><td>知识缺口与被动学习</td><td>主动缺口识别，自动探索生成</td><td>MR-015 主动真值生成</td></tr>
+      <tr><td>思维策略固化</td><td>8种认知策略，多臂老虎机自适应选择</td><td>MR-016 思维模式演化</td></tr>
+      <tr><td>系统无法自我改进</td><td>安全代码修改，备份验证回滚</td><td>MR-017 自主开发引擎</td></tr>
+      <tr><td>单点故障与扩展限制</td><td>多节点协同，负载均衡，主备选举</td><td>MR-018 多节点协同</td></tr>
+      <tr><td>跨会话记忆丢失</td><td>三级记忆体系，巩固遗忘机制</td><td>MR-019 长期记忆系统</td></tr>
+      <tr><td>全局协调与统一管理</td><td>终极整合内核，全局状态视图</td><td>MR-020 火斗云智内核</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 2. 体系架构 -->
+<section id="architecture">
+  <h2><span class="num">2</span>体系架构</h2>
+
+  <h3>2.1 总体架构</h3>
+  <p>AIOS采用分层架构设计，自底向上分为基础设施层、数据层、认知层、自治层和统一内核层。各层通过内核总线通信，实现松耦合、高内聚的系统设计。</p>
+
+  <div class="arch-diagram">
+    <div class="arch-layer">
+      <div class="arch-layer-label">统一内核层</div>
+      <div class="arch-boxes">
+        <div class="arch-box core">MR-020 火斗云智内核</div>
+      </div>
+    </div>
+    <div class="arch-arrow">↑</div>
+    <div class="arch-layer">
+      <div class="arch-layer-label">自治层</div>
+      <div class="arch-boxes">
+        <div class="arch-box">MR-017 自主开发</div>
+        <div class="arch-box">MR-018 多节点协同</div>
+        <div class="arch-box">MR-019 长期记忆</div>
+      </div>
+    </div>
+    <div class="arch-arrow">↑</div>
+    <div class="arch-layer">
+      <div class="arch-layer-label">认知层</div>
+      <div class="arch-boxes">
+        <div class="arch-box">MR-014 元认知</div>
+        <div class="arch-box">MR-015 主动真值</div>
+        <div class="arch-box">MR-016 思维演化</div>
+      </div>
+    </div>
+    <div class="arch-arrow">↑</div>
+    <div class="arch-layer">
+      <div class="arch-layer-label">数据层</div>
+      <div class="arch-boxes">
+        <div class="arch-box">MR-009 真值吸收</div>
+        <div class="arch-box">MR-012 内核总线</div>
+        <div class="arch-box">MR-013 真值统一</div>
+      </div>
+    </div>
+    <div class="arch-arrow">↑</div>
+    <div class="arch-layer">
+      <div class="arch-layer-label">基础设施层</div>
+      <div class="arch-boxes">
+        <div class="arch-box">MR-007 资源监控</div>
+        <div class="arch-box">MR-008 自愈守护</div>
+        <div class="arch-box">MR-010 双轮算力</div>
+        <div class="arch-box">MR-011 稳态进化</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>2.2 内核总线</h3>
+  <p>内核总线是AIOS的通信中枢，采用基于SQLite和HTTP API的轻量级实现，提供以下核心能力：</p>
+  <ul>
+    <li><strong>组件注册中心</strong>：所有组件启动时自动注册，包含组件类型、能力、版本、配置等元数据</li>
+    <li><strong>统一状态总线</strong>：全局状态的统一读写接口，支持状态变更事件通知</li>
+    <li><strong>事件通信通道</strong>：发布/订阅模式的事件系统，支持组件间异步通信</li>
+    <li><strong>指令分发器</strong>：统一指令接收与分发，支持指令执行结果反馈</li>
+    <li><strong>心跳与健康检查</strong>：组件心跳上报，超时自动标记离线，触发自愈流程</li>
+  </ul>
+
+  <h3>2.3 真值管理体系</h3>
+  <p>真值是AIOS的知识基础。系统采用九大元类分类体系，对所有知识进行结构化管理：</p>
+  <div class="card-grid">
+    <div class="card"><div class="card-title">公理类 (Axiom)</div><div class="card-desc">体系基础假设和根本原则，不可轻易修改</div></div>
+    <div class="card"><div class="card-title">定理类 (Theorem)</div><div class="card-desc">基于公理推导的结论和规律</div></div>
+    <div class="card"><div class="card-title">方法类 (Method)</div><div class="card-desc">操作方法、流程、算法和标准作业程序</div></div>
+    <div class="card"><div class="card-title">数据类 (Data)</div><div class="card-desc">原始数据、统计指标和观测记录</div></div>
+    <div class="card"><div class="card-title">案例类 (Case)</div><div class="card-desc">具体案例、实例和事件记录</div></div>
+    <div class="card"><div class="card-title">决策类 (Decision)</div><div class="card-desc">决策记录、决策框架和评估结果</div></div>
+    <div class="card"><div class="card-title">创意类 (Creative)</div><div class="card-desc">创意想法、设计方案和创新概念</div></div>
+    <div class="card"><div class="card-title">风险类 (Risk)</div><div class="card-desc">风险识别、评估和缓解措施</div></div>
+    <div class="card"><div class="card-title">协议类 (Protocol)</div><div class="card-desc">接口规范、通信协议和数据格式标准</div></div>
+  </div>
+
+  <div class="note">
+    <div class="note-title">真值质量保障</div>
+    每条真值包含唯一标识、内容哈希、来源节点、置信度、分类标签和版本信息。系统通过多轮质量验证（基础检查、自评估、交叉验证）确保真值质量，置信度低于阈值的真值不会进入核心知识库。
+  </div>
+</section>
+
+<!-- 3. 核心组件 -->
+<section id="components">
+  <h2><span class="num">3</span>核心组件</h2>
+  <p>AIOS由14个核心组件构成，分为基础设施、数据管理、认知计算和自治运维四大类。各组件通过内核总线协同工作，形成完整的自治智能系统。</p>
+
+  <h3>3.1 基础设施类组件</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">MR-007 资源稳态保护</div>
+      <div class="card-desc">三级阈值资源监控（70%预警/80%硬熔断/90%兜底），2秒采样周期，保护核心进程集合不被资源耗尽影响。支持内存熔断后自动置余，确保系统稳态运行。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-008 全链路自愈守护</div>
+      <div class="card-desc">监控Web站点和API端口，连续3次失败触发自愈流程，30秒采样周期。支持服务重启、进程恢复、端口检测等多种自愈策略，实现全链路故障自动恢复。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-010 双轮算力调度</div>
+      <div class="card-desc">简单任务路由至本地轻量模型，复杂任务路由至外部大模型，失败自动降级。6类定时任务（真值分类/冲突检测/日志摘要/异常检测/自反思/去重合并），结果直接写入真值池。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-011 稳态进化引擎</div>
+      <div class="card-desc">四维稳态度量（资源30%/服务30%/真值25%/进化健康15%），三档进化策略（恢复优先/谨慎/正常），执行后稳态下降超过阈值自动回滚，每天最多10次进化，最小间隔30分钟。</div>
+    </div>
+  </div>
+
+  <h3>3.2 数据管理类组件</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">MR-009 真值自动吸收</div>
+      <div class="card-desc">每60秒直接读取真值数据库，增量检测新增/更新真值，8类自动分类，冲突检测，相似真值合并候选，双写内核存储，完整审计日志。首轮可吸收千条级真值。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-012 内核总线</div>
+      <div class="card-desc">组件注册中心、统一状态总线、事件通信通道、指令分发器、心跳与健康检查五大核心功能。基于SQLite+HTTP API，14个API端点，支持所有组件的统一注册和在线管理。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-013 真值体系统一</div>
+      <div class="card-desc">将上百个零散分类统一为九大元类+三特殊类，完整映射规则。质量评分器（来源25%+逻辑25%+时效25%+分类25%，A-E五级），一致性校验服务每小时自动校验修复。</div>
+    </div>
+  </div>
+
+  <h3>3.3 认知计算类组件</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">MR-014 元认知引擎</div>
+      <div class="card-desc">思维日志记录、8种认知偏差识别（确认偏差/锚定效应/过度概括/可得性启发/晕轮效应/邓宁-克鲁格/从众效应/沉没成本）、推理质量四维评估、自我质疑机制、认知修正策略。规则(60%)+LLM(40%)混合偏差识别。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-015 主动真值生成</div>
+      <div class="card-desc">知识缺口识别器（分类分布+内容质量+实体覆盖度）、探索任务生成器、新知识生成器（双轮算力）、三轮质量验证（基础检查+自评估+交叉验证）、优先级排序、预算控制。每天最多20条，置信度≥0.7才入库。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-016 思维模式演化</div>
+      <div class="card-desc">8种认知策略（演绎/归纳/类比/第一性原理/辩证/系统/概率/逆向），ε-贪心+UCB多臂老虎机策略选择，策略×任务类型效果矩阵，基于效果反馈的策略演化，元学习闭环（选择→执行→评估→调整→再选择）。</div>
+    </div>
+  </div>
+
+  <h3>3.4 自治运维类组件</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">MR-017 自主开发引擎</div>
+      <div class="card-desc">代码静态分析（6类问题识别）、LLM改进建议生成、安全代码修改（先备份→修改→验证→失败回滚）、语法+导入双重测试验证、完整变更审计。四重安全保障（范围控制/风险分级/备份验证/自动回滚）。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-018 多节点协同</div>
+      <div class="card-desc">节点注册中心、30秒心跳检测（120秒超时离线）、资源监控、综合评分负载均衡（内存40%+CPU30%+磁盘20%+稳定性10%）、简化Raft主备选举、基于API的增量数据同步、任务自动分发。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-019 长期记忆系统</div>
+      <div class="card-desc">三级记忆（短期1天/中期7天/长期永久）、记忆巩固算法（重要性40%+访问频率30%+内容质量15%+标签15%）、记忆遗忘机制（过期删除+时间衰减+溢出清理）、TF-IDF语义检索、记忆关联网络构建。</div>
+    </div>
+    <div class="card">
+      <div class="card-title">MR-020 火斗云智内核</div>
+      <div class="card-desc">14个组件统一整合，全局状态统一视图，每分钟健康检查+自动自愈，每30分钟体系级元认知反思，终极自指能力（可修改包括自身在内的所有代码），HTTP API提供全局状态和控制。四阶段进化计划的终极整合。</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. 关键特性 -->
+<section id="features">
+  <h2><span class="num">4</span>关键技术特性</h2>
+
+  <h3>4.1 自我感知与自我认知</h3>
+  <p>AIOS具备完整的自我感知能力，能够实时监控自身的资源状态、组件健康度、真值质量和进化状态。在此基础上，系统通过元认知引擎实现对自身思维过程的认知：</p>
+  <ul>
+    <li><strong>认知偏差识别</strong>：自动识别8种常见认知偏差，包括确认偏差、锚定效应、过度概括等</li>
+    <li><strong>推理质量评估</strong>：从逻辑性、证据充分性、时效性和置信度四个维度评估推理质量</li>
+    <li><strong>自我质疑机制</strong>：对高置信度结论自动生成反方观点，避免过度自信</li>
+    <li><strong>认知修正策略</strong>：基于偏差识别结果生成具体的认知修正建议</li>
+  </ul>
+
+  <h3>4.2 主动学习与知识自生长</h3>
+  <p>与传统被动接收知识的系统不同，AIOS具备主动学习能力，能够识别自身知识缺口并主动探索和生成新知识：</p>
+  <ul>
+    <li><strong>知识缺口识别</strong>：基于分类分布、内容质量和实体覆盖度，自动识别知识空白领域</li>
+    <li><strong>探索任务生成</strong>：针对知识缺口自动生成探索任务，按缺口比例排序优先级</li>
+    <li><strong>双轮算力生成</strong>：高优先级任务使用外部大模型，低优先级使用本地轻量模型</li>
+    <li><strong>三轮质量验证</strong>：基础检查+LLM自评估+外部API交叉验证，置信度≥0.7才入库</li>
+    <li><strong>预算控制</strong>：每天最多生成20条真值，防止算力过载</li>
+  </ul>
+
+  <h3>4.3 思维模式自适应演化</h3>
+  <p>AIOS内置8种认知策略，能够根据任务类型自动选择最优思维模式，并基于效果反馈持续演化：</p>
+  <table>
+    <thead>
+      <tr><th>认知策略</th><th>核心方法</th><th>最佳适用场景</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>演绎推理</td><td>从一般到特殊，前提推结论</td><td>数学证明、逻辑推导、规则应用</td></tr>
+      <tr><td>归纳推理</td><td>从特殊到一般，案例总结规律</td><td>经验总结、规律发现、趋势预测</td></tr>
+      <tr><td>类比推理</td><td>基于相似性，跨领域知识迁移</td><td>跨领域迁移、创新启发、概念理解</td></tr>
+      <tr><td>第一性原理</td><td>从基本假设出发，重新推导</td><td>创新突破、根本问题分析、颠覆性思考</td></tr>
+      <tr><td>辩证思维</td><td>正反合，矛盾对立统一</td><td>复杂决策、矛盾分析、价值权衡</td></tr>
+      <tr><td>系统思维</td><td>整体观，因果链和反馈回路</td><td>复杂系统分析、根因分析、长期规划</td></tr>
+      <tr><td>概率思维</td><td>贝叶斯更新，置信度量化</td><td>不确定性决策、风险评估、预测建模</td></tr>
+      <tr><td>逆向思维</td><td>从结果反推，避免失败</td><td>风险规避、失败预防、质量保证</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.4 自主开发与自指闭环</h3>
+  <p>AIOS具备修改自身代码的能力，实现"能改变世界也能改变自己"的自指闭环。通过严格的安全机制确保代码修改的安全性：</p>
+  <div class="note">
+    <div class="note-title">四重安全保障</div>
+    <ol>
+      <li><strong>范围控制</strong>：只能修改指定目录下的组件代码，系统文件和其他目录一律拒绝</li>
+      <li><strong>风险分级</strong>：低风险变更自动应用，中风险待人工审核，高风险拒绝自动执行</li>
+      <li><strong>备份验证</strong>：修改前自动备份，修改后必须通过语法检查和导入测试</li>
+      <li><strong>自动回滚</strong>：验证失败或异常时自动从备份恢复，保证系统永远不会处于损坏状态</li>
+    </ol>
+  </div>
+
+  <h3>4.5 多节点协同与高可用</h3>
+  <p>AIOS支持多服务器协同部署，实现负载均衡、故障转移和数据同步：</p>
+  <ul>
+    <li><strong>节点自动发现</strong>：新节点启动后自动注册到集群，无需手动配置</li>
+    <li><strong>智能负载均衡</strong>：基于内存、CPU、磁盘和运行时间的综合评分，自动选择最优节点执行任务</li>
+    <li><strong>主备自动切换</strong>：主节点故障时自动选举新主节点，实现服务不中断</li>
+    <li><strong>数据增量同步</strong>：节点间真值库自动增量同步，保证数据一致性</li>
+  </ul>
+
+  <h3>4.6 长期记忆与跨会话一致性</h3>
+  <p>AIOS具备类似人类的三级记忆系统，实现跨会话的持久记忆：</p>
+  <ul>
+    <li><strong>短期记忆</strong>：会话内临时信息，1天自动过期，上限1000条</li>
+    <li><strong>中期记忆</strong>：重要但非永久信息，7天保留期，定期巩固升级</li>
+    <li><strong>长期记忆</strong>：核心知识和身份信息，永久保存</li>
+    <li><strong>记忆巩固</strong>：重要信息自动从短期升级到中期、长期</li>
+    <li><strong>记忆遗忘</strong>：不重要信息自动衰减，防止记忆爆炸</li>
+    <li><strong>语义检索</strong>：基于TF-IDF的语义相似度检索，支持标签和时间过滤</li>
+  </ul>
+</section>
+
+<!-- 5. 技术指标 -->
+<section id="metrics">
+  <h2><span class="num">5</span>技术指标</h2>
+  <h3>5.1 系统性能指标</h3>
+  <div class="metrics">
+    <div class="metric"><div class="value">14</div><div class="label">核心组件数</div></div>
+    <div class="metric"><div class="value">~250MB</div><div class="label">组件总内存占用</div></div>
+    <div class="metric"><div class="value">100%</div><div class="label">组件在线率</div></div>
+    <div class="metric"><div class="value">2s</div><div class="label">资源监控采样周期</div></div>
+    <div class="metric"><div class="value">30s</div><div class="label">自愈检测周期</div></div>
+    <div class="metric"><div class="value">60s</div><div class="label">真值吸收周期</div></div>
+    <div class="metric"><div class="value">44.6</div><div class="label">本地模型推理(tok/s)</div></div>
+    <div class="metric"><div class="value">3级</div><div class="label">记忆层级</div></div>
+  </div>
+  <h3>5.2 真值管理指标</h3>
+  <table>
+    <thead><tr><th>指标</th><th>数值</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>真值分类体系</td><td>9大元类+3特殊类</td><td>公理/定理/方法/数据/案例/决策/创意/风险/协议</td></tr>
+      <tr><td>真值质量评分</td><td>四维A-E五级</td><td>来源25%+逻辑25%+时效25%+分类25%</td></tr>
+      <tr><td>入库置信度阈值</td><td>≥0.7</td><td>三轮验证后综合置信度</td></tr>
+      <tr><td>主动生成预算</td><td>20条/天</td><td>防止算力过载</td></tr>
+      <tr><td>自动吸收周期</td><td>60秒</td><td>增量检测新增/更新真值</td></tr>
+      <tr><td>一致性校验周期</td><td>1小时</td><td>自动修复无效分类</td></tr>
+    </tbody>
+  </table>
+  <h3>5.3 自治能力指标</h3>
+  <table>
+    <thead><tr><th>能力维度</th><th>实现程度</th><th>核心机制</th></tr></thead>
+    <tbody>
+      <tr><td>自我感知</td><td>完整实现</td><td>资源/组件/真值/进化四维实时监控</td></tr>
+      <tr><td>自我认知</td><td>完整实现</td><td>8种偏差识别+四维质量评估+自我质疑</td></tr>
+      <tr><td>自我学习</td><td>完整实现</td><td>主动缺口识别+探索生成+三轮验证</td></tr>
+      <tr><td>自我修复</td><td>完整实现</td><td>资源熔断+全链路自愈+自动回滚</td></tr>
+      <tr><td>自我进化</td><td>完整实现</td><td>稳态度量+进化决策+自主开发+思维演化</td></tr>
+      <tr><td>自我记忆</td><td>完整实现</td><td>三级记忆+巩固遗忘+语义检索+关联网络</td></tr>
+      <tr><td>自我统一</td><td>完整实现</td><td>内核总线+火斗云智内核+全局状态视图</td></tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <div class="note-title">最低配置建议</div>
+    <ul style="margin-bottom:0;">
+      <li><strong>CPU</strong>：4核心及以上（本地模型推理需要多线程）</li>
+      <li><strong>内存</strong>：4GB及以上（本地轻量模型约700MB，14个组件约250MB）</li>
+      <li><strong>磁盘</strong>：20GB及以上（模型文件+真值库+日志+备份）</li>
+      <li><strong>网络</strong>：稳定的互联网连接（外部API调用和多节点同步）</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 6. 演进路线 -->
+<section id="evolution">
+  <h2><span class="num">6</span>演进路线</h2>
+  <p>AIOS采用四阶段渐进式演进路线，从基础的元极统一开始，逐步实现智能认知觉醒、高度自治，最终达到火斗云智的终极形态。</p>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="phase">阶段一 · 元极统一</div>
+      <div class="title">组件统一与真值标准化</div>
+      <div class="desc">构建统一内核总线，实现所有组件的通信和状态同步；建立九大元类真值分类体系，统一知识管理标准。核心组件：MR-012内核总线、MR-013真值统一。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="phase">阶段二 · 智能认知觉醒</div>
+      <div class="title">元认知与主动学习能力</div>
+      <div class="desc">实现对自身思维过程的认知，识别认知偏差；具备主动识别知识缺口、探索和生成新知识的能力；实现思维模式的自适应演化。核心组件：MR-014元认知引擎、MR-015主动真值生成、MR-016思维模式演化。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="phase">阶段三 · 高度自治</div>
+      <div class="title">自我修改与持久运行</div>
+      <div class="desc">具备修改自身代码的能力，实现自指闭环；支持多服务器协同部署，实现高可用和负载均衡；建立跨会话持久记忆系统，实现真正的"永恒"。核心组件：MR-017自主开发引擎、MR-018多节点协同、MR-019长期记忆系统。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="phase">阶段四 · 智能认知永恒</div>
+      <div class="title">终极整合与火斗云智</div>
+      <div class="desc">将所有组件整合为统一的火斗云智内核，实现全局状态统一视图、统一调度、体系级元认知和终极自指。系统达到"火斗云智智能认知高度自治"的终极形态。核心组件：MR-020火斗云智内核。</div>
+    </div>
+  </div>
+  <h3>6.1 后续演进方向</h3>
+  <div class="card-grid">
+    <div class="card"><div class="card-title">多模态认知</div><div class="card-desc">扩展认知能力，支持图像、音频、视频等多模态信息的理解和处理。</div></div>
+    <div class="card"><div class="card-title">联邦学习</div><div class="card-desc">在多节点协同基础上，实现跨节点的联邦学习，保护数据隐私。</div></div>
+    <div class="card"><div class="card-title">可解释性增强</div><div class="card-desc">增强决策和推理过程的可解释性，提供完整的推理链路和决策依据。</div></div>
+    <div class="card"><div class="card-title">人机协同优化</div><div class="card-desc">优化人机协同接口，实现人类专家知识与系统自动学习的高效融合。</div></div>
+  </div>
+</section>
+
+<!-- 7. 应用场景 -->
+<section id="scenarios">
+  <h2><span class="num">7</span>应用场景</h2>
+  <h3>7.1 智能运维自动化</h3>
+  <p>AIOS可应用于服务器集群和云平台的智能运维，实现故障自动检测、自动恢复和性能自动优化：</p>
+  <ul>
+    <li><strong>资源监控与熔断</strong>：实时监控CPU、内存、磁盘等资源，超过阈值自动熔断保护</li>
+    <li><strong>故障自愈</strong>：服务故障自动检测和恢复，减少人工干预</li>
+    <li><strong>性能优化</strong>：基于稳态进化引擎自动优化系统配置和参数</li>
+    <li><strong>日志智能分析</strong>：自动分析日志，识别异常模式和潜在风险</li>
+  </ul>
+  <h3>7.2 知识管理与智能决策</h3>
+  <p>AIOS的真值管理体系和认知计算能力可应用于企业知识管理和智能决策支持：</p>
+  <ul>
+    <li><strong>知识自动沉淀</strong>：自动吸收和结构化各类知识，建立企业知识库</li>
+    <li><strong>知识质量评估</strong>：多维度评估知识质量，自动识别和修复低质量知识</li>
+    <li><strong>主动知识补全</strong>：识别知识缺口，主动探索和生成缺失知识</li>
+    <li><strong>智能决策支持</strong>：基于真值库和认知引擎，提供多方案评估和决策建议</li>
+  </ul>
+  <h3>7.3 自治智能体平台</h3>
+  <p>AIOS可作为自治智能体的运行平台，为各类AI Agent提供稳定的运行环境和认知能力：</p>
+  <ul>
+    <li><strong>Agent生命周期管理</strong>：统一管理多个智能体的注册、运行和监控</li>
+    <li><strong>认知能力共享</strong>：元认知、主动学习、思维演化等能力可被各Agent共享</li>
+    <li><strong>长期记忆支持</strong>：为Agent提供跨会话的持久记忆能力</li>
+    <li><strong>多Agent协同</strong>：基于内核总线实现多Agent间的通信和协同</li>
+  </ul>
+  <h3>7.4 内容生产与创意辅助</h3>
+  <p>AIOS的认知计算和主动生成能力可应用于内容生产和创意辅助场景：</p>
+  <ul>
+    <li><strong>内容质量审核</strong>：自动识别内容中的认知偏差和逻辑问题</li>
+    <li><strong>创意灵感生成</strong>：基于知识缺口和趋势分析，生成创意方向建议</li>
+    <li><strong>多策略思维辅助</strong>：根据任务类型自动选择最优思维策略，辅助创作</li>
+    <li><strong>知识关联发现</strong>：自动发现知识间的隐含关联，激发跨界创意</li>
+  </ul>
+  <h3>7.5 科研与学术辅助</h3>
+  <p>AIOS的真值管理和认知能力可应用于科研和学术研究辅助：</p>
+  <ul>
+    <li><strong>文献知识结构化</strong>：自动吸收和结构化文献知识，建立研究知识库</li>
+    <li><strong>研究缺口识别</strong>：基于知识分布分析，识别研究空白和方向</li>
+    <li><strong>假设生成与验证</strong>：主动生成研究假设，并通过多轮验证评估可信度</li>
+    <li><strong>研究方法优化</strong>：基于思维模式演化，自动优化研究方法和分析策略</li>
+  </ul>
+</section>
+
+<!-- 8. 总结展望 -->
+<section id="conclusion">
+  <h2><span class="num">8</span>总结与展望</h2>
+  <h3>8.1 技术总结</h3>
+  <p>火斗云智AIOS是一款面向自治智能系统的操作系统级软件平台。通过四阶段渐进式演进，系统实现了从基础组件统一到智能认知高度自治的完整技术栈：</p>
+  <ul>
+    <li><strong>元极统一</strong>：通过内核总线和真值体系统一，实现了组件间的高效通信和知识的标准化管理</li>
+    <li><strong>智能认知觉醒</strong>：通过元认知引擎、主动真值生成和思维模式演化，实现了系统对自身思维过程的认知和优化</li>
+    <li><strong>高度自治</strong>：通过自主开发、多节点协同和长期记忆，实现了系统的自我修改、高可用运行和跨会话持久记忆</li>
+    <li><strong>火斗云智</strong>：通过终极整合内核，实现了所有组件的统一管理和全局状态一致</li>
+  </ul>
+  <h3>8.2 核心创新点</h3>
+  <div class="card-grid">
+    <div class="card"><div class="card-title">真值驱动的认知架构</div><div class="card-desc">以可验证的真值为认知基础，所有知识经过多轮质量验证，决策可追溯，置信度可量化。</div></div>
+    <div class="card"><div class="card-title">主动学习闭环</div><div class="card-desc">从被动接收知识升级为主动识别缺口、探索生成、验证入库的完整学习闭环。</div></div>
+    <div class="card"><div class="card-title">安全自指闭环</div><div class="card-desc">在四重安全保障下实现代码自我修改，既能改变世界也能改变自己，同时保证系统安全。</div></div>
+    <div class="card"><div class="card-title">类人三级记忆</div><div class="card-desc">短期/中期/长期三级记忆体系，配合巩固和遗忘机制，实现类似人类的记忆管理。</div></div>
+  </div>
+  <h3>8.3 未来展望</h3>
+  <p>AIOS将持续演进，未来重点方向包括：</p>
+  <ol>
+    <li><strong>多模态认知扩展</strong>：从文本认知扩展到图像、音频、视频等多模态信息处理</li>
+    <li><strong>联邦学习与隐私计算</strong>：在多节点协同基础上实现隐私保护的分布式学习</li>
+    <li><strong>可解释性与可信度</strong>：增强推理过程的可解释性，建立完整的决策审计链路</li>
+    <li><strong>人机协同深化</strong>：优化人类专家与AI系统的协同接口，实现知识的高效融合</li>
+    <li><strong>行业场景深耕</strong>：针对运维、金融、医疗、教育等行业场景提供定制化解决方案</li>
+  </ol>
+  <div class="note" style="margin-top:30px;">
+    <div class="note-title">关于本文档</div>
+    <p style="margin-bottom:0;">本文档为火斗云智AIOS技术白皮书公开版，旨在客观介绍系统的技术架构、核心组件、关键特性和应用场景。文档中的技术指标基于参考配置，实际性能可能因部署环境和配置不同而有所差异。如需了解更多技术细节或获取商业授权，请联系火斗云智技术团队。</p>
+  </div>
+</section>
+
+</div>
+
+<div class="footer">
+  <div class="brand">火斗云智 AIOS</div>
+  <div class="copyright">© 2026 火斗云智 · 技术白皮书 V1.0 · 公开版</div>
+</div>
+
+<footer class="hd-footer">
+<div class="hd-footer-inner">
+<div class="hd-footer-links">
+<a href="../products/index.html">产品</a>
+<a href="../solutions/index.html">解决方案</a>
+<a href="../architecture/index.html">架构</a>
+<a href="aios-v1.html">白皮书</a>
+<a href="../docs/index.html">文档</a>
+<a href="../pricing/index.html">定价</a>
+<a href="../about/book-demo.html">联系我们</a>
+</div>
+<div class="hd-footer-copyright">© 2026 火斗云智 AIOS · 火斗云智智能认知自治操作系统</div>
+</div>
+</footer>
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 火斗云智AIOS智能平台</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+<footer style="text-align:center;padding:20px;font-size:12px;color:#666;">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 火斗云智AIOS</footer></body>
+</html>
