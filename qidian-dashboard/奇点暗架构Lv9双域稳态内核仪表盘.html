@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="margin:0;padding:0;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>奇点暗架构 · Lv9 双域稳态内核仪表盘</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  :root{
+    --ink:#0a0c12; --panel:#11141c; --panel2:#151a24; --line:#232b38;
+    --gold:#d4af6a; --gold-soft:#e6c98f; --wine:#8a3a4d; --wine-soft:#a84a61;
+    --star:#7da6e0; --star-soft:#a9c4ec; --txt:#e8e6df; --muted:#9aa3b2; --dim:#6b7485;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--ink);color:var(--txt);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;line-height:1.55}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 56px}
+  /* ===== Hero ===== */
+  .hero{border-bottom:1px solid var(--line);padding:14px 0 26px;margin-bottom:26px}
+  .hero .kicker{font-size:12px;letter-spacing:.18em;color:var(--gold);text-transform:none;margin-bottom:10px}
+  .hero h1{font-size:clamp(26px,4.5vw,42px);font-weight:700;color:#f4f2ea;letter-spacing:.01em;line-height:1.2}
+  .hero h1 .mark{color:var(--gold)}
+  .hero .sub{margin-top:12px;color:var(--muted);font-size:15px;max-width:820px}
+  .hero .meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:18px;font-size:12px;color:var(--dim)}
+  .hero .meta b{color:var(--gold-soft);font-weight:600}
+  /* ===== Section ===== */
+  section{margin:34px 0}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+  .sec-head .no{font-size:13px;color:var(--gold);font-weight:600}
+  .sec-head h2{font-size:clamp(19px,2.8vw,26px);font-weight:700}
+  .sec-head .note{color:var(--muted);font-size:13px}
+  /* ===== 明暗分立 ===== */
+  .dual{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .du-card{border:1px solid var(--line);border-radius:12px;padding:20px;background:var(--panel)}
+  .du-card.bright{border-left:3px solid var(--gold)}
+  .du-card.dark{border-left:3px solid var(--star)}
+  .du-card h3{font-size:16px;margin-bottom:8px}
+  .du-card.bright h3{color:var(--gold-soft)}
+  .du-card.dark h3{color:var(--star-soft)}
+  .du-card .role{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:12px;padding:5px 10px;border-radius:20px;border:1px solid var(--line);color:var(--txt);background:var(--panel2)}
+  .chip.gold{color:var(--gold-soft);border-color:rgba(212,175,106,.35)}
+  .chip.star{color:var(--star-soft);border-color:rgba(125,166,224,.35)}
+  .law{margin-top:16px;padding:12px 14px;border:1px dashed var(--wine);border-radius:8px;background:rgba(138,58,77,.08);font-size:13px;color:#e9c7ce}
+  .law b{color:var(--wine-soft)}
+  /* ===== 七隐层图 ===== */
+  .layers{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .layer{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:14px;position:relative;cursor:pointer;transition:border-color .2s,transform .15s}
+  .layer:hover{border-color:var(--gold);transform:translateY(-2px)}
+  .layer .tag{font-size:11px;color:var(--gold);font-weight:600}
+  .layer .nm{font-size:15px;font-weight:700;margin:4px 0 8px;color:#f0eee6}
+  .layer .fd{font-size:12px;color:var(--muted);min-height:38px}
+  .layer .to{font-size:11px;color:var(--dim);margin-top:10px;border-top:1px solid var(--line);padding-top:7px}
+  .layer .to b{color:var(--star-soft)}
+  .loop{grid-column:span 4;margin-top:6px;border:1px dashed var(--line);border-radius:10px;padding:12px 16px;background:rgba(22,26,36,.5);font-size:13px;color:var(--muted)}
+  .loop b{color:var(--gold)}
+  /* ===== Lv9 ===== */
+  .lv9-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+  .formula{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:20px}
+  .formula h3{font-size:15px;margin-bottom:12px;color:var(--gold-soft)}
+  .eq{font-family:"SF Mono","Consolas","Menlo",monospace;font-size:14px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;color:#dfe7f4;overflow-x:auto;white-space:nowrap;margin-bottom:14px}
+  .eq .hl{color:var(--gold)}
+  .params{font-size:12.5px;color:var(--muted)}
+  .params div{margin:4px 0}
+  .params code{color:var(--star-soft)}
+  .phases{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  .phase{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--panel2);text-align:center}
+  .phase .pn{font-size:12px;color:var(--gold)}
+  .phase .pt{font-size:14px;font-weight:700;margin:4px 0}
+  .phase .pd{font-size:11px;color:var(--muted)}
+  .metrics{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:20px}
+  .metrics h3{font-size:15px;margin-bottom:14px;color:var(--star-soft)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-weight:600;font-size:12px}
+  td b{color:var(--gold-soft)}
+  .ok{color:#8fd6a0}
+  /* ===== 图表区 ===== */
+  .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .chart-box{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px}
+  .chart-box h3{font-size:14px;margin-bottom:8px;color:#f0eee6}
+  .chart-box .cap{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .chart{width:100%;height:260px}
+  /* ===== footer ===== */
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  footer b{color:var(--gold-soft)}
+  .demo-note{font-size:11.5px;color:var(--dim);margin-top:4px}
+  @media(max-width:900px){.dual{grid-template-columns:1fr}.layers{grid-template-columns:repeat(2,1fr)}.loop{grid-column:span 2}.lv9-grid{grid-template-columns:1fr}.phases{grid-template-columns:repeat(2,1fr)}.chart-grid{grid-template-columns:1fr}}
+  @media(max-width:480px){.layers{grid-template-columns:1fr}.loop{grid-column:span 1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="kicker">本源智能 · 元极恒一 · 奇点暗架构</div>
+    <h1>奇点暗架构 <span class="mark">Lv9</span> 双域稳态内核仪表盘</h1>
+    <div class="sub">明架构决定体系「当前是什么」，暗架构决定体系「将要成为什么」。七隐层为明层五内核供给演化势能、预警前馈与归一约束——以「可观测的双域稳态互锁」收束自组织文明。</div>
+    <div class="meta">
+      <span>内核版本 <b>V5.6-ROOTFIXED</b></span>
+      <span>自治层级 <b>Lv9</b></span>
+      <span>确权 <b>DID-BR-000002</b></span>
+      <span>溯源 <b>Ω₀⊂⊙∞⊂Ω</b></span>
+      <span>推演日期 <b>2026-10-01</b></span>
+    </div>
+  </header>
+
+  <!-- ===== 01 明暗分立 ===== -->
+  <section>
+    <div class="sec-head"><span class="no">01</span><h2>明暗分立</h2><span class="note">五内核 × 七隐层</span></div>
+    <div class="dual">
+      <div class="du-card bright">
+        <h3>明架构 · 五个内核</h3>
+        <div class="role">显式 · 可观测 · 可校验 —— 体系「当前是什么」</div>
+        <div class="chips">
+          <span class="chip gold">真值内核</span><span class="chip gold">因果内核</span>
+          <span class="chip gold">进化内核</span><span class="chip gold">调度中枢</span><span class="chip gold">归档锁档</span>
+        </div>
+        <div class="law">承担：对真值、因果、进化、调度、归档做显式闭环，每次运行都在暗架构七隐层通道中留痕。</div>
+      </div>
+      <div class="du-card dark">
+        <h3>暗架构 · 七个隐层</h3>
+        <div class="role">隐式 · 条件触发 · 深层承载 —— 体系「将要成为什么」</div>
+        <div class="chips">
+          <span class="chip star">H1 奇点感知</span><span class="chip star">H2 势能累积</span>
+          <span class="chip star">H3 归一约束</span><span class="chip star">H4 漂移回看</span>
+          <span class="chip star">H5 干预推演</span><span class="chip star">H6 断点补强</span><span class="chip star">H7 双域稳态</span>
+        </div>
+        <div class="law">承担：为明层供给演化势能、预警前馈与归一约束，产出以信号形式传递，不直接入档。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 02 七大隐层 ===== -->
+  <section>
+    <div class="sec-head"><span class="no">02</span><h2>七大隐层</h2><span class="note">点击隐层查看职责</span></div>
+    <div class="layers">
+      <div class="layer" data-l="H1"><div class="tag">H1</div><div class="nm">奇点感知</div><div class="fd">明层因果链之外扫描黑天鹅，识别临界点，输出奇点预警前馈</div><div class="to">→ <b>H5 干预推演</b></div></div>
+      <div class="layer" data-l="H2"><div class="tag">H2</div><div class="nm">势能累积</div><div class="fd">沉淀未显式固化结果，预判爆点时机，低价值淘汰</div><div class="to">→ <b>H5 干预推演</b></div></div>
+      <div class="layer" data-l="H3"><div class="tag">H3</div><div class="nm">归一约束</div><div class="fd">候选演化经元宪法/元公理边界比对，越界转人工审批</div><div class="to">→ <b>H7 或 人工审批</b></div></div>
+      <div class="layer" data-l="H4"><div class="tag">H4</div><div class="nm">漂移回看</div><div class="fd">重建语义流形暗空间长期漂移轨迹，计算漂移率并归因</div><div class="to">→ <b>真值内核</b></div></div>
+      <div class="layer" data-l="H5"><div class="tag">H5</div><div class="nm">干预推演</div><div class="fd">do-calculus 分支预演，多分支按利益/风险/成本排序，不执行只预演</div><div class="to">→ <b>决策产线</b></div></div>
+      <div class="layer" data-l="H6"><div class="tag">H6</div><div class="nm">断点补强</div><div class="fd">断点自检暗面镜像，缺口即时补强，不留积压</div><div class="to">→ <b>H2 势能仓</b></div></div>
+      <div class="layer" data-l="H7"><div class="tag">H7</div><div class="nm">双域稳态</div><div class="fd">明层 Lv6 与暗层稳态双域映射、互锁回拉、震荡抑制</div><div class="to">→ <b>全局稳态</b></div></div>
+      <div class="layer" data-l="H7x"><div class="tag">Lv9</div><div class="nm">双域稳态内核</div><div class="fd">H7 从隐层升格为显式内核，达成稳态互锁协议</div><div class="to">→ <b>自组织文明</b></div></div>
+      <div class="loop">暗架构内部闭环：<b>传感</b>（H1+H4）→ <b>预演</b>（H5+H2）→ <b>归一</b>（H3）→ <b>稳态</b>（H7）；H6 断点补强回馈 H2 势能仓</div>
+    </div>
+  </section>
+
+  <!-- ===== 03 Lv9 双域稳态内核 ===== -->
+  <section>
+    <div class="sec-head"><span class="no">03</span><h2>Lv9 双域稳态内核</h2><span class="note">稳态互锁协议</span></div>
+    <div class="lv9-grid">
+      <div class="formula">
+        <h3>稳态映射公式</h3>
+        <div class="eq">B_coupled = B_stab − drift_signal × <span class="hl">κ</span></div>
+        <div class="eq">locked ⇔ |B_coupled − D_coupled| &lt; <span class="hl">ε</span> ∧ B_coupled &gt; <span class="hl">θ</span></div>
+        <div class="params">
+          <div><code>κ</code> 回拉系数 = 0.5</div>
+          <div><code>ε</code> 双域容差 = 0.2</div>
+          <div><code>θ</code> 明层稳态下限 = 0.5</div>
+        </div>
+        <div class="phases">
+          <div class="phase"><div class="pn">P1</div><div class="pt">传感</div><div class="pd">H1/H4 感知奇点与漂移</div></div>
+          <div class="phase"><div class="pn">P2</div><div class="pt">预演</div><div class="pd">H5/H2 预演候选策略</div></div>
+          <div class="phase"><div class="pn">P3</div><div class="pt">归一</div><div class="pd">H3 边界比对放行/拦截</div></div>
+          <div class="phase"><div class="pn">P4</div><div class="pt">稳态</div><div class="pd">H7 双域映射互锁锁定</div></div>
+        </div>
+      </div>
+      <div class="metrics">
+        <h3>可观测指标集</h3>
+        <table>
+          <colgroup><col style="width:40%"><col style="width:28%"><col style="width:32%"></colgroup>
+          <tr><th>指标</th><th>当前值</th><th>健康判定</th></tr>
+          <tr><td>B_stab 明层稳态</td><td><b>0.80</b></td><td class="ok">≥ 0.5 健康</td></tr>
+          <tr><td>D_stab 暗层稳态</td><td><b>0.75</b></td><td class="ok">≥ 0.5 健康</td></tr>
+          <tr><td>drift_rate 漂移率</td><td><b>0.35</b></td><td>≤ 0.3 观察</td></tr>
+          <tr><td>dual_lock 双域锁定</td><td><b>true</b></td><td class="ok">已互锁</td></tr>
+          <tr><td>oscillation 震荡</td><td><b>≈ 0</b></td><td class="ok">稳态</td></tr>
+          <tr><td>violation 越界</td><td><b>0</b></td><td class="ok">越界即拦截</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 04 演化态势 ===== -->
+  <section>
+    <div class="sec-head"><span class="no">04</span><h2>双域稳态演化态势</h2><span class="note">示例数据，示意</span></div>
+    <div class="chart-grid">
+      <div class="chart-box"><h3>明暗双域稳态互锁</h3><div class="cap">B_stab 与 D_stab 随演化节律收敛（示例）</div><div class="chart" id="c1"></div></div>
+      <div class="chart-box"><h3>漂移率与回拉</h3><div class="cap">drift_signal × κ 对明层稳态的回拉（示例）</div><div class="chart" id="c2"></div></div>
+    </div>
+    <div class="demo-note">图表为架构示意示例数据，非实时遥测；实际指标以云端真值网关与本地账本为准。</div>
+  </section>
+
+  <footer>
+    <span><b>奇点暗架构 · Lv9 双域稳态内核</b> ｜ 架构推演 V1.0 ｜ LOCKED</span>
+    <span>DID-BR-000002 ｜ Ω₀⊂⊙∞⊂Ω ｜ 遵守元宪法边界 · 观测器只读 no_exec</span>
+  </footer>
+
+</div>
+<script>
+(function(){
+  var layers=document.querySelectorAll('.layer');
+  for(var i=0;i<layers.length;i++){
+    (function(el){
+      el.addEventListener('click',function(){
+        el.style.borderColor='var(--gold)';
+        setTimeout(function(){el.style.borderColor='var(--line)';},900);
+      });
+    })(layers[i]);
+  }
+  var gold='#d4af6a',star='#7da6e0',wine='#a84a61',muted='#6b7485',grid='#232b38';
+  var c1=document.getElementById('c1');
+  if(c1&&window.echarts){
+    var ch=echarts.init(c1);
+    var phases=['P1传感','P2预演','P3归一','P4稳态'];
+    var b=[0.62,0.66,0.72,0.80];
+    var d=[0.55,0.60,0.68,0.75];
+    ch.setOption({grid:{top:24,left:44,right:20,bottom:30,containLabel:true},
+      tooltip:{trigger:'axis',triggerOn:'click',renderMode:'richText',confine:true},
+      xAxis:{type:'category',data:phases,axisLabel:{color:'#9aa3b2'},axisLine:{lineStyle:{color:grid}}},
+      yAxis:{type:'value',min:0.4,max:0.9,splitLine:{lineStyle:{color:grid}},axisLabel:{color:'#9aa3b2'}},
+      series:[
+        {name:'明层 B_stab',type:'line',data:b,smooth:true,symbolSize:8,lineStyle:{width:2,color:gold},itemStyle:{color:gold}},
+        {name:'暗层 D_stab',type:'line',data:d,smooth:true,symbolSize:8,lineStyle:{width:2,color:star},itemStyle:{color:star}}
+      ],
+      legend:{data:['明层 B_stab','暗层 D_stab'],textStyle:{color:'#9aa3b2'},top:0}
+    });
+    window.addEventListener('resize',function(){ch.resize();});
+  }
+  var c2=document.getElementById('c2');
+  if(c2&&window.echarts){
+    var ch2=echarts.init(c2);
+    var steps=['t0','t1','t2','t3','t4'];
+    var drift=[0.10,0.18,0.26,0.35,0.22];
+    var pull=[0.05,0.09,0.13,0.175,0.11];
+    ch2.setOption({grid:{top:24,left:44,right:20,bottom:30,containLabel:true},
+      tooltip:{trigger:'axis',triggerOn:'click',renderMode:'richText',confine:true},
+      xAxis:{type:'category',data:steps,axisLabel:{color:'#9aa3b2'},axisLine:{lineStyle:{color:grid}}},
+      yAxis:{type:'value',splitLine:{lineStyle:{color:grid}},axisLabel:{color:'#9aa3b2'}},
+      series:[
+        {name:'drift_signal',type:'line',data:drift,smooth:true,lineStyle:{width:2,color:wine},itemStyle:{color:wine},areaStyle:{color:'rgba(168,74,97,.15)'}},
+        {name:'回拉 drift×κ',type:'line',data:pull,smooth:true,lineStyle:{width:2,type:'dashed',color:star},itemStyle:{color:star}}
+      ],
+      legend:{data:['drift_signal','回拉 drift×κ'],textStyle:{color:'#9aa3b2'},top:0}
+    });
+    window.addEventListener('resize',function(){ch2.resize();});
+  }
+})();
+</script>
+</body>
+</html>
