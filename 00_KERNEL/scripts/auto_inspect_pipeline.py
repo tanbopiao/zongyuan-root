@@ -61,7 +61,8 @@ def verify_asset(path, need_json=False, expected_entries=None):
                 t = d.get("index_meta", {}).get("total_assets")
                 v["entries"] = n; v["meta_total"] = t
                 v["merkle"] = d.get("index_meta", {}).get("merkle_root")
-                v["merkle_consistent"] = (n == t)
+                # merkle为写入前状态指纹(auto_persist设计语义), 验证entries==total数量一致+merkle非空
+                v["merkle_consistent"] = (n == t) and bool(v["merkle"])
                 v["pass"] = v["pass"] and v["merkle_consistent"]
         except Exception as e:
             v["json_ok"] = False; v["reason"] = f"json:{e}"; v["pass"] = False
