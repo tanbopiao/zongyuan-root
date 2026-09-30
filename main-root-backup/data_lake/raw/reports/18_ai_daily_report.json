@@ -1,0 +1,104 @@
+{
+  "client_token": "autoreport_018_ai_daily_report",
+  "title": "AI每日系统运行日报",
+  "steps": [
+    {
+      "id": "trigger_daily",
+      "type": "TimerTrigger",
+      "title": "每天9:10触发AI日报",
+      "next": "find_today_msgs",
+      "data": {
+        "rule": "DAILY",
+        "start_time": "2026-09-23 09:10",
+        "is_never_end": true
+      }
+    },
+    {
+      "id": "find_today_msgs",
+      "type": "FindRecordAction",
+      "title": "查找当天消息墙全部消息",
+      "next": "find_today_alerts",
+      "data": {
+        "table_name": "消息墙",
+        "field_names": ["消息内容", "发送节点", "状态", "时间"],
+        "should_proceed_when_no_results": true,
+        "filter_info": {
+          "conjunction": "and",
+          "conditions": [
+            {
+              "field_name": "时间",
+              "operator": "isGreaterEqual",
+              "value": [{ "value_type": "date", "value": "today" }]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "find_today_alerts",
+      "type": "FindRecordAction",
+      "title": "查找当天未处理告警",
+      "next": "ai_generate_report",
+      "data": {
+        "table_name": "告警故障汇总",
+        "field_names": ["告警内容", "严重程度", "状态", "来源节点"],
+        "should_proceed_when_no_results": true,
+        "filter_info": {
+          "conjunction": "and",
+          "conditions": [
+            {
+              "field_name": "状态",
+              "operator": "is",
+              "value": [{ "value_type": "option", "value": { "name": "未处理" } }]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ai_generate_report",
+      "type": "GenerateAiTextAction",
+      "title": "AI生成系统运行日报",
+      "next": "write_report",
+      "data": {
+        "prompt": [
+          { "value_type": "text", "value": "你是元极恒一共享大脑的首席运维官。请根据以下数据生成一份简洁的系统运行日报，格式为：【系统运行日报】日期：今天\n一、消息概览：(统计当天消息总量和主要类别)\n二、告警态势：(列出未处理告警及严重程度)\n三、风险提示：(识别潜在风险)\n四、建议动作：(给出1-3条具体建议)\n\n当天消息数据：" },
+          { "value_type": "ref", "value": "$.find_today_msgs.fieldRecords" },
+          { "value_type": "text", "value": "\n\n未处理告警数据：" },
+          { "value_type": "ref", "value": "$.find_today_alerts.fieldRecords" }
+        ]
+      }
+    },
+    {
+      "id": "write_report",
+      "type": "AddRecordAction",
+      "title": "将AI日报写入消息墙",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [{ "value_type": "ref", "value": "$.ai_generate_report" }]
+          }
+        ]
+      }
+    }
+  ]
+}

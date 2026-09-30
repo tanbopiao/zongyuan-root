@@ -1,0 +1,62 @@
+{
+  "client_token": "autoreport_001_account_status",
+  "title": "账号状态变更自动上报",
+  "steps": [
+    {
+      "id": "trigger_account",
+      "type": "SetRecordTrigger",
+      "title": "监听账号主表当前状态变更",
+      "next": "action_msgwall",
+      "data": {
+        "table_name": "账号主表",
+        "record_watch_conjunction": "and",
+        "record_watch_info": [],
+        "field_watch_info": [
+          { "field_name": "当前状态" }
+        ],
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "action_msgwall",
+      "type": "AddRecordAction",
+      "title": "写入消息墙上报记录",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[账号状态上报] 账号：" },
+              { "value_type": "ref", "value": "$.trigger_account.fld0OmhPKv" },
+              { "value_type": "text", "value": "，角色：" },
+              { "value_type": "ref", "value": "$.trigger_account.fldERdA4qe" },
+              { "value_type": "text", "value": "，状态变更为：" },
+              { "value_type": "ref", "value": "$.trigger_account.fld3L315Fl" },
+              { "value_type": "text", "value": "，负责范围：" },
+              { "value_type": "ref", "value": "$.trigger_account.fld9ukwLfW" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

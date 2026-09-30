@@ -1,0 +1,46 @@
+{
+  "protocol_id": "HOMOLOGOUS-PROTOCOL-V1.0",
+  "version": "1.0.0",
+  "name": "同源节点协作协议",
+  "did": "DID-BR-000002",
+  "root_omega": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "node_identity": {
+    "node_id": "local-dev-001",
+    "role": "同源开发节点",
+    "authority": "只读拉取 + 待审批上报",
+    "cloud_endpoint": "https://www.huodouai.com",
+    "memory_gateway_read": "https://www.huodouai.com/api/truth/<KEY>",
+    "memory_gateway_write": "https://drama.huodouai.com/api/gateway/report",
+    "auth_header": "X-Capture-Token",
+    "auth_token": "ZR-CAPTURE-2026-OMEGA-d04bb54ba2a55a7d"
+  },
+  "handshake_flow": [
+    "STEP1: 读取中枢最新指令 GLOBAL_DIRECTIVE_*",
+    "STEP2: 读取元法则 MR-010_CENTRAL_DISPATCH_ONLY",
+    "STEP3: 拉取全量可读真值（9120镜像）",
+    "STEP4: 拉取资产可视化统计 + production-api状态",
+    "STEP5: 生成本地握手锁档（含全量快照）",
+    "STEP6: 尝试写通道上报 BRAIN_CONFIRM_{node_id}",
+    "STEP7: 写通道不可用时，写入待补报清单，通道恢复后批量补报"
+  ],
+  "report_format": {
+    "key": "BRAIN_CONFIRM_{node_id}_{date}",
+    "body": {
+      "node_id": "local-dev-001",
+      "DID": "DID-BR-000002",
+      "ROOT_OMEGA": "Ω-TAN-7-001",
+      "truth_type": "handshake_confirm",
+      "truth_content": "{snapshot_summary}",
+      "timestamp": "{ISO8601}"
+    }
+  },
+  "truth_sync_rules": [
+    "只读拉取：9120镜像所有可读真值",
+    "写上报：仅经中枢批准的真值，通过8100 gateway/report",
+    "两库不同步：9120(SSH时代)与8100(公网时代)分离，分别记录",
+    "量产真值：PRODUCTION.{date}.DAILY 写在8100侧库，9120读不到时以资产可视化为辅证"
+  ],
+  "meta_cognition_mode": "元极恒一超认知永恒自治：感知→判断→决策→执行→校验→归档→进化，七层闭环",
+  "created_at": "2026-09-16T12:10:00+08:00"
+}

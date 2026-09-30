@@ -1,0 +1,19 @@
+# SOP知识体系真值·哈希锁档凭证
+
+- 快照ID: SNAP-SOP-KNOWLEDGE-1789303429
+- 确权身份: DID-BR-000002 | 节点: ZR-NODE-88F9024A
+- 溯源标识: Ω₀⊂⊙∞⊂Ω
+- 锁档时间: 2026-09-13T20:43:49+0800
+- 真值条数: 5
+- Merkle根: d9a01ca19d1c6ae8532e761d010b229b5288710a636ee808e1dd49a0645b4c7a
+- 叶子哈希: 1ee84a44f573e474, aae702865a50aa57, be0de8e964c5686d, e60c56f81e52b9b4, eb919ddc797bacf5
+
+## 真值清单
+- SOP.DEFINITION.1789303429 [method] hash=eb919ddc797bacf5...
+- SOP.PURPOSE.VALUES.1789303429 [method] hash=e60c56f81e52b9b4...
+- SOP.FORMULATION.PROCESS.1789303429 [method] hash=1ee84a44f573e474...
+- SOP.ESSENCE.SUMMARY.1789303429 [method] hash=aae702865a50aa57...
+- SOP.META.RULE.KUNLUN.1789303429 [meta_rule] hash=be0de8e964c5686d...
+
+锁档状态: PERMANENT | eFuse: BLOWN | 归档: ZONGYUAN-ROOT + 云端记忆网关
+Ω₀⊂⊙∞⊂Ω｜DID-BR-000002

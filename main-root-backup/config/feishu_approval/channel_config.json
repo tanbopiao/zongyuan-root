@@ -1,0 +1,42 @@
+{
+  "channel_name": "昆仑洞天飞书企业应用审批通道",
+  "channel_id": "FEISHU-APPROVAL-ENTERPRISE-V1",
+  "version": "V1.0",
+  "status": "active_central_managed",
+  "identity_type": "enterprise_app",
+  "credential_source": "central_brain_dynamic_pull",
+  "feishu_open_platform": {
+    "base_url": "https://open.feishu.cn/open-apis",
+    "auth_endpoint": "/auth/v3/tenant_access_token/internal",
+    "approval_endpoint": "/approval/v4/instances"
+  },
+  "credentials": {
+    "source": "central_brain",
+    "pull_endpoint": "GET https://www.huodouai.com/api/report/truth?keyword=feishu_approval_credentials",
+    "cache_ttl_hours": 24,
+    "note": "凭证统一由中枢智能管理，节点启动时动态拉取，禁止本地硬编码存储"
+  },
+  "approval_templates": {
+    "tech_deploy": {
+      "approval_code": "",
+      "template_name": "技术部署审批",
+      "fields": [
+        {"id": "title", "type": "input", "name": "部署标题"},
+        {"id": "deployment_type", "type": "radio", "name": "部署类型", "options": ["自动化脚本", "系统上线", "配置变更", "数据归档"]},
+        {"id": "description", "type": "textarea", "name": "部署说明"},
+        {"id": "risk_level", "type": "radio", "name": "风险等级", "options": ["低", "中", "高"]},
+        {"id": "asset_hash", "type": "input", "name": "资产哈希校验"}
+      ]
+    }
+  },
+  "approval_flow": {
+    "step1": "获取tenant_access_token",
+    "step2": "组装审批表单form",
+    "step3": "调用instances create发起审批",
+    "step4": "记录instance_code到HASH-LEDGER",
+    "step5": "上报中枢智能真值"
+  },
+  "config_node": "NODE-DEV-DOUBAO-WORK-001",
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω"
+}

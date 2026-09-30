@@ -1,0 +1,45 @@
+{
+  "protocol_id": "HANDSHAKE-MODELSCOPE-001",
+  "name": "数据湖↔魔搭(ModelScope)双向握手协议",
+  "version": "V1.0",
+  "created_at": "2026-09-30 10:24:12",
+  "status": "PROTOCOL-READY",
+  "local": {
+    "node": "NODE-DEV-DOUBAO-WORK-001",
+    "did": "DID-BR-000002",
+    "data_lake": "/home/user/.doubao/agent_mode/workspace/.user_skills/kunlun-autonomous-system/ZONGYUAN-ROOT/data_lake",
+    "index": "/home/user/.doubao/agent_mode/workspace/.user_skills/kunlun-autonomous-system/ZONGYUAN-ROOT/data_lake/INDEX.json"
+  },
+  "remote": {
+    "platform": "ModelScope (魔搭)",
+    "endpoint": "https://modelscope.cn",
+    "api_verified": [
+      {
+        "name": "模型详情",
+        "path": "/api/v1/models/{namespace}/{model_name}",
+        "probe": "Qwen/Qwen2.5-7B",
+        "code": 200
+      },
+      {
+        "name": "数据集详情",
+        "path": "/api/v1/datasets/{namespace}/{dataset_name}",
+        "probe": "modelscope/chinese-poetry-collection",
+        "code": 200
+      }
+    ],
+    "pending": [
+      "魔搭命名空间(namespace)",
+      "魔搭访问令牌(公开只读可暂缺)"
+    ]
+  },
+  "handshake_direction": {
+    "inbound": "魔搭资产元数据 → 本地数据湖登记（模型/数据集拉取索引）",
+    "outbound": "本地数据湖索引 → 魔搭侧登记/发布（待令牌）"
+  },
+  "sync_scope": "待用户确认（模型/数据集/代码仓库）",
+  "sync_rule": [
+    "双向握手以索引级同步为主，物理大文件不复制",
+    "每次同步更新数据湖INDEX+账本留痕+哈希确权",
+    "凭据补齐后状态置 ACTIVE，真实执行同步"
+  ]
+}

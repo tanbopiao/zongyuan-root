@@ -1,0 +1,40 @@
+{
+  "schema_version": "V1",
+  "schema_name": "昆仑洞天视频资产元数据规范",
+  "fields": {
+    "series": {"type": "string", "required": true, "desc": "系列名称"},
+    "episode": {"type": "string", "required": true, "desc": "剧集编号 EP01-EPxx"},
+    "title": {"type": "string", "required": true, "desc": "剧集标题"},
+    "duration": {"type": "number", "required": true, "desc": "时长（秒）"},
+    "aspect_ratio": {"type": "string", "required": true, "desc": "画幅比例"},
+    "model": {"type": "string", "required": true, "desc": "生成模型"},
+    "task_id": {"type": "string", "required": false, "desc": "视频生成任务ID，溯源主键"},
+    "video_url": {"type": "string", "required": false, "desc": "CDN预览地址"},
+    "download_url": {"type": "string", "required": false, "desc": "CDN下载直链"},
+    "expire_at": {"type": "string", "required": false, "desc": "CDN过期时间 ISO8601"},
+    "status": {"type": "string", "required": true, "enum": ["pending", "generated", "local_archived", "cdn_expired", "regen_required"]},
+    "local_archive": {"type": "boolean", "required": true, "desc": "是否已下载本地"},
+    "local_file_path": {"type": "string", "required": false, "desc": "本地MP4路径"},
+    "sha256": {"type": "string", "required": false, "desc": "文件SHA256哈希"},
+    "file_size": {"type": "string", "required": false, "desc": "文件大小"},
+    "archived_at": {"type": "string", "required": false, "desc": "本地归档时间"},
+    "keyframe_refs": {"type": "array", "required": false, "desc": "关联关键帧文件列表"},
+    "storyboard_ref": {"type": "string", "required": false, "desc": "关联分镜脚本标识"},
+    "source_node": {"type": "string", "required": true, "desc": "来源节点ID"},
+    "did": {"type": "string", "required": true, "desc": "身份标识 DID-BR-000002"},
+    "cdn_expired": {"type": "boolean", "required": false, "desc": "CDN是否已过期"},
+    "note": {"type": "string", "required": false, "desc": "备注"}
+  },
+  "auto_archive_rule": {
+    "trigger": "视频生成API返回成功瞬间",
+    "required_actions": [
+      "提取task_id/video_url/download_url/expire_at",
+      "写入raw/EPxx_meta.json",
+      "追加HASH-LEDGER",
+      "调用video_archive_auto.sh下载MP4",
+      "校验SHA256并更新元数据"
+    ],
+    "scan_interval": "6小时",
+    "alert_threshold_hours": 4
+  }
+}

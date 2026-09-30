@@ -1,0 +1,58 @@
+{
+  "client_token": "autoreport_008_knowledge_sync",
+  "title": "知识库入库自动同步",
+  "steps": [
+    {
+      "id": "trigger_knowledge",
+      "type": "AddRecordTrigger",
+      "title": "监听知识库索引新增",
+      "next": "action_sync",
+      "data": {
+        "table_name": "知识库索引",
+        "watched_field_name": "知识条目",
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "action_sync",
+      "type": "AddRecordAction",
+      "title": "写入跨节点消息同步",
+      "next": null,
+      "data": {
+        "table_name": "跨节点消息同步",
+        "field_values": [
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "ref", "value": "$.trigger_knowledge.fld8OL9vke" }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "云端中枢" } }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "待发送" } }]
+          },
+          {
+            "field_name": "发送时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[知识入库] 来源账号：" },
+              { "value_type": "ref", "value": "$.trigger_knowledge.fld8OL9vke" },
+              { "value_type": "text", "value": "，知识条目：" },
+              { "value_type": "ref", "value": "$.trigger_knowledge.fldrSiN0B2" },
+              { "value_type": "text", "value": "，类型：" },
+              { "value_type": "ref", "value": "$.trigger_knowledge.fldnEVG8aW" },
+              { "value_type": "text", "value": "，版本：" },
+              { "value_type": "ref", "value": "$.trigger_knowledge.fldmqSXZyb" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

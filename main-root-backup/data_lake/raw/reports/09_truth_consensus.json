@@ -1,0 +1,62 @@
+{
+  "client_token": "autoreport_009_truth_consensus",
+  "title": "真值共识状态自动上报",
+  "steps": [
+    {
+      "id": "trigger_truth",
+      "type": "SetRecordTrigger",
+      "title": "监听真值共识区最终状态变更",
+      "next": "action_msgwall",
+      "data": {
+        "table_name": "真值共识区",
+        "record_watch_conjunction": "and",
+        "record_watch_info": [],
+        "field_watch_info": [
+          { "field_name": "最终状态" }
+        ],
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "action_msgwall",
+      "type": "AddRecordAction",
+      "title": "写入消息墙真值共识上报",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[真值共识] 真值key：" },
+              { "value_type": "ref", "value": "$.trigger_truth.fldcsccKPH" },
+              { "value_type": "text", "value": "，最终状态：" },
+              { "value_type": "ref", "value": "$.trigger_truth.fldOhmyZab" },
+              { "value_type": "text", "value": "，确认节点：" },
+              { "value_type": "ref", "value": "$.trigger_truth.fldmI2CxSA" },
+              { "value_type": "text", "value": "，异议节点：" },
+              { "value_type": "ref", "value": "$.trigger_truth.fldFrdhHXu" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
