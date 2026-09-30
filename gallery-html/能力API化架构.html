@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>昆仑洞天 · 能力API化架构</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23060a14'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='%2300d4ff'%3EAPI%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC','PingFang SC',system-ui,sans-serif;background:#060a14;color:#e8eefc;overflow-x:hidden}
+body{background:radial-gradient(ellipse at 20% 0%,rgba(0,212,255,.06),transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(255,184,0,.05),transparent 50%),#060a14}
+.wrap{max-width:1200px;margin:0 auto;padding:40px 24px}
+h1{text-align:center;font-size:2rem;letter-spacing:.1em;font-weight:800;background:linear-gradient(90deg,#00d4ff,#b388ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px}
+.sub{text-align:center;color:#8fa3c8;font-size:.9rem;letter-spacing:.2em;margin-bottom:10px}
+.tagline{text-align:center;color:#5a6d8f;font-size:.8rem;margin-bottom:36px}
+.card{background:#0d1424;border:1px solid #1e2a45;border-radius:14px;padding:20px;margin-bottom:20px}
+.card h2{font-size:1.1rem;color:#00d4ff;letter-spacing:.05em;margin-bottom:14px;font-weight:700}
+.card h2 .n{display:inline-block;background:#00d4ff;color:#001;border-radius:4px;padding:1px 8px;font-size:.85rem;margin-right:8px}
+#archChart{height:420px;width:100%}
+.ep-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.ep{background:#111a2e;border:1px solid #1e2a45;border-radius:10px;padding:14px}
+.ep .path{font-family:monospace;color:#00d4ff;font-size:.85rem;font-weight:700}
+.ep .desc{color:#8fa3c8;font-size:.78rem;margin-top:6px;line-height:1.6}
+.ep .st{font-size:.7rem;margin-top:8px;padding:2px 8px;border-radius:3px;display:inline-block}
+.ready{background:rgba(0,230,118,.1);color:#00e676;border:1px solid rgba(0,230,118,.3)}
+.pending{background:rgba(255,145,0,.1);color:#ff9100;border:1px solid rgba(255,145,0,.3)}
+.flow{display:flex;gap:0;align-items:stretch;flex-wrap:wrap;margin-top:10px}
+.flow-step{flex:1;min-width:140px;background:#111a2e;border:1px solid #1e2a45;border-radius:10px;padding:16px;text-align:center;position:relative}
+.flow-step+.flow-step::before{content:'→';position:absolute;left:-12px;top:50%;transform:translateY(-50%);color:#00d4ff;font-size:1.2rem}
+.flow-step .ic{font-size:1.6rem;margin-bottom:8px}
+.flow-step .nm{font-size:.85rem;font-weight:700;color:#00d4ff}
+.flow-step .ds{font-size:.72rem;color:#8fa3c8;margin-top:4px;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid #1e2a45}
+th{color:#8fa3c8;font-weight:600}
+td{color:#e8eefc}
+.mono{font-family:monospace;color:#b388ff}
+footer{text-align:center;padding:30px;color:#5a6d8f;font-size:.72rem;letter-spacing:.15em;border-top:1px solid #1e2a45}
+footer .did{margin-top:8px;color:#00d4ff}
+@media(max-width:600px){.flow-step{min-width:100%}.flow-step+.flow-step::before{content:'↓';top:auto;left:50%;bottom:-16px;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>能力API化架构</h1>
+  <div class="sub">META-AUTO-003 · 把SSH命令变成AI可直接调的API</div>
+  <div class="tagline">问题本质不是AI笨，是工具链没封装 · 所有能力API端点化，AI纯API驱动</div>
+
+  <div class="card"><h2><span class="n">1</span>架构四层</h2><div id="archChart"></div></div>
+
+  <div class="card"><h2><span class="n">2</span>API端点清单</h2>
+    <div class="ep-grid">
+      <div class="ep"><div class="path">/api/truth/report</div><div class="desc">真值上报</div><span class="st ready">✅ 已有</span></div>
+      <div class="ep"><div class="path">/api/truth/{key}</div><div class="desc">真值召回</div><span class="st ready">✅ 已有</span></div>
+      <div class="ep"><div class="path">/api/node/register</div><div class="desc">新节点注册</div><span class="st pending">⬜ 待封装</span></div>
+      <div class="ep"><div class="path">/api/key/scan</div><div class="desc">密钥扫描</div><span class="st pending">⬜ 待封装</span></div>
+      <div class="ep"><div class="path">/api/service/restart</div><div class="desc">服务重启</div><span class="st pending">⬜ 待封装</span></div>
+      <div class="ep"><div class="path">/api/deploy/portfolio</div><div class="desc">官网部署</div><span class="st pending">⬜ 待封装</span></div>
+    </div>
+  </div>
+
+  <div class="card"><h2><span class="n">3</span>调用闭环 · AI纯API驱动</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="ic">🧠</div><div class="nm">AI决策</div><div class="ds">新会话AI读元法则，确定要调哪个能力</div></div>
+      <div class="flow-step"><div class="ic">🔐</div><div class="nm">鉴权</div><div class="ds">X-Capture-Token + X-DID + L0语义校验</div></div>
+      <div class="flow-step"><div class="ic">⚙️</div><div class="nm">API执行</div><div class="ds">服务器自动执行底层命令，AI不需懂SSH</div></div>
+      <div class="flow-step"><div class="ic">📋</div><div class="nm">返回结果</div><div class="ds">结构化JSON回执，AI直接消费</div></div>
+    </div>
+  </div>
+
+  <div class="card"><h2><span class="n">4</span>能力层 → API层 映射</h2>
+    <table>
+      <tr><th>能力层(底层)</th><th>API层(HTTP端点)</th><th>触发词</th><th>状态</th></tr>
+      <tr><td>真值上报 / 召回</td><td class="mono">/api/truth/report · /api/truth/{key}</td><td>上报真值</td><td style="color:#00e676">✅</td></tr>
+      <tr><td>节点注册</td><td class="mono">/api/node/register</td><td>注册节点</td><td style="color:#ff9100">待封装</td></tr>
+      <tr><td>密钥扫描/申请</td><td class="mono">/api/key/scan</td><td>申请密钥</td><td style="color:#ff9100">待封装</td></tr>
+      <tr><td>服务重启</td><td class="mono">/api/service/restart</td><td>重启服务</td><td style="color:#ff9100">待封装</td></tr>
+      <tr><td>官网部署</td><td class="mono">/api/deploy/portfolio</td><td>部署官网</td><td style="color:#ff9100">待封装</td></tr>
+    </table>
+  </div>
+</div>
+<footer>
+  META-AUTO-003 能力API封装元法则 · 完善架构
+  <div class="did">Ω₀⊂⊙∞⊂Ω · DID-BR-000002</div>
+</footer>
+<script>
+const chart=echarts.init(document.getElementById('archChart'));
+chart.setOption({
+  tooltip:{trigger:'item',backgroundColor:'#0d1424',borderColor:'#1e2a45',textStyle:{color:'#e8eefc'}},
+  series:[{type:'sankey',
+    data:[
+      {name:'AI调用层',itemStyle:{color:'#b388ff'}},
+      {name:'鉴权层',itemStyle:{color:'#00d4ff'}},
+      {name:'API封装层',itemStyle:{color:'#00e676'}},
+      {name:'能力层',itemStyle:{color:'#ff9100'}},
+      {name:'SSH/SCP',itemStyle:{color:'#ff5252'}},
+      {name:'节点注册',itemStyle:{color:'#ff5252'}},
+      {name:'密钥管理',itemStyle:{color:'#ff5252'}},
+      {name:'服务管理',itemStyle:{color:'#ff5252'}},
+      {name:'真值网关',itemStyle:{color:'#ff5252'}}
+    ],
+    links:[
+      {source:'AI调用层',target:'鉴权层',value:10},
+      {source:'鉴权层',target:'API封装层',value:10},
+      {source:'API封装层',target:'SSH/SCP',value:3},
+      {source:'API封装层',target:'节点注册',value:2},
+      {source:'API封装层',target:'密钥管理',value:2},
+      {source:'API封装层',target:'服务管理',value:1},
+      {source:'API封装层',target:'真值网关',value:2}
+    ],
+    nodeAlign:'left',
+    lineStyle:{color:'gradient',curveness:.5},
+    emphasis:{focus:'adjacency'}
+  }]
+});
+window.addEventListener('resize',()=>chart.resize());
+</script>
+</body>
+</html>
