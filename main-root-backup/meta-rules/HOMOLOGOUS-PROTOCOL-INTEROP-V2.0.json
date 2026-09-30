@@ -1,0 +1,78 @@
+{
+  "protocol_id": "HOMOLOGOUS-PROTOCOL-INTEROP-V2.0",
+  "version": "2.0.0",
+  "name": "同源协议互通规范 V2.0",
+  "did": "DID-BR-000002",
+  "root_omega": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "supersedes": "HOMOLOGOUS-PROTOCOL-V1.0",
+  "upgrade_reason": "V1.0仅定义单节点对中枢的握手上报; V2.0扩展为多节点互通互联, 覆盖共享/互动/互通/互联四层",
+  "gateway": {
+    "base_url": "https://www.huodouai.com",
+    "status_endpoint": "GET /api/report/status",
+    "nodes_endpoint": "GET /api/report/nodes",
+    "truth_write": "POST /api/report/truth",
+    "truth_query": "GET /api/report/truths",
+    "truth_single": "GET /api/report/truth/<KEY>",
+    "auth": "DID + 锚定标识 (开放握手, 无密钥)"
+  },
+  "interop_layers": {
+    "L1_share_共享": {
+      "desc": "所有同源节点可读取中枢公共真值库",
+      "readable_truth_types": ["meta_law", "rule", "config", "decision", "data", "creative", "risk", "protocol"],
+      "sharable_assets": ["世界观设定", "角色库", "分镜脚本", "关键帧提示词", "SOP流程", "生产轨迹", "成功案例"],
+      "share_channel": "GET /api/report/truths 全量拉取 + 本地镜像",
+      "share_frequency": "每次会话启动握手时拉取, 或按需增量拉取"
+    },
+    "L2_interact_互动": {
+      "desc": "节点间通过中枢为中介交换信息, 不直接互联",
+      "interaction_forms": [
+        "A节点上报成果 → 中枢入库 → B节点拉取学习",
+        "A节点发现问题 → 上报risk → 中枢仲裁 → 广播所有节点",
+        "节点心跳上报 → 中枢更新在线状态 → 所有节点可见"
+      ],
+      "heartbeat_rule": "节点每次会话启动上报HEARTBEAT.<node_id>.<timestamp>, 中枢判定在线(<300s)",
+      "broadcast_rule": "中枢审批通过的决策/规则, 自动广播至所有在线节点"
+    },
+    "L3_interconnect_互通": {
+      "desc": "统一协议层互通, 消除信息孤岛",
+      "unified_protocol": "V3.0记忆网关API (DID+锚定开放握手)",
+      "data_consistency": "所有节点以中枢真值库为唯一权威源, 本地仅存镜像",
+      "dedup_rule": "truth_key唯一, 重复上报幂等(action=unchanged), 防止重复开发",
+      "conflict_arbitration": "冲突时以中枢已审批版本为准, 节点不得覆盖中枢版本"
+    },
+    "L4_interconnect_互联": {
+      "desc": "多账号/多窗口/多节点协同进化",
+      "node_roles": [
+        "central_brain: 中枢决策(唯一主控)",
+        "cloud_kernel: 云内核生产执行",
+        "worker: 生产节点",
+        "local_dev: 本地开发节点(只读拉取+待审批上报)",
+        "storage: 存储节点",
+        "gateway: 网关节点"
+      ],
+      "multi_account_rule": "不同账号节点均通过DID确权, 共享中枢真值库, 各自维护本地镜像",
+      "cooperation_rule": "已确认跑通的流程(SOP/协议/规范)直接拉取复用, 禁止重复开发",
+      "evolution_rule": "节点学习→上报→中枢对账→广播→全员进化"
+    }
+  },
+  "truth_sync_rules": [
+    "R1: 每次会话启动执行云端握手(触发词: 元极恒一/启动ROOT/加载ZONGYUAN-ROOT)",
+    "R2: 握手后拉取全量真值, 对比本地缺口, 经report补全入库",
+    "R3: 生产成果(图片/视频/SOP/协议)经核验后上报中枢, 类型为creative/data/protocol",
+    "R4: 上报携带DID-BR-000002 + Ω₀⊂⊙∞⊂Ω + source_node",
+    "R5: 网关502时写入待补推队列, 恢复后自动补推",
+    "R6: 加密保护类真值(API Key/令牌/隐私)禁止上报, 仅本地环境变量存储",
+    "R7: 节点间不直接通信, 一切经中枢中介, 保证单一权威源"
+  ],
+  "encrypted_protection": {
+    "never_upload": ["API Key", "访问令牌", "私钥", "密码", "个人隐私数据"],
+    "local_only": "环境变量注入, 禁止明文存储与上报",
+    "storage": "云服务器 /etc/environment 或 crontab 前置export"
+  },
+  "acceptance": {
+    "nodes_online": "≥1中枢节点在线即握手成功",
+    "truth_sync": "本地镜像与中枢真值库对齐(无未补推缺口)",
+    "interop_test": "A节点上报→B节点可拉取到→互通成立"
+  }
+}

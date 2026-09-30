@@ -1,0 +1,96 @@
+{
+  "client_token": "autoreport_013_ai_alert_analysis",
+  "title": "AI告警智能分析",
+  "steps": [
+    {
+      "id": "trigger_alert",
+      "type": "AddRecordTrigger",
+      "title": "监听告警故障汇总新增",
+      "next": "branch_severity",
+      "data": {
+        "table_name": "告警故障汇总",
+        "watched_field_name": "告警内容",
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "branch_severity",
+      "type": "IfElseBranch",
+      "title": "判断是否为高/严重告警",
+      "children": {
+        "links": [
+          { "kind": "if_true", "to": "ai_analyze", "label": "high", "desc": "高或严重" },
+          { "kind": "if_false", "to": "skip_end", "label": "normal", "desc": "低/中" }
+        ]
+      },
+      "next": null,
+      "data": {
+        "condition": {
+          "conjunction": "or",
+          "conditions": [
+            {
+              "conjunction": "and",
+              "conditions": [
+                {
+                  "left_value": { "value_type": "ref", "value": "$.trigger_alert.fldgA6lq0P" },
+                  "operator": "is",
+                  "right_value": [{ "value_type": "option", "value": { "name": "高" } }]
+                }
+              ]
+            },
+            {
+              "conjunction": "and",
+              "conditions": [
+                {
+                  "left_value": { "value_type": "ref", "value": "$.trigger_alert.fldgA6lq0P" },
+                  "operator": "is",
+                  "right_value": [{ "value_type": "option", "value": { "name": "严重" } }]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ai_analyze",
+      "type": "GenerateAiTextAction",
+      "title": "AI生成根因分析与处置建议",
+      "next": "write_solution",
+      "data": {
+        "prompt": [
+          { "value_type": "text", "value": "你是元极恒一共享大脑的智能运维分析引擎。请针对以下告警生成简洁的根因分析与处置建议，格式为：【根因推断】...【处置建议】...【预计恢复时间】...。告警信息：来源节点=" },
+          { "value_type": "ref", "value": "$.trigger_alert.fldWkWuEsd" },
+          { "value_type": "text", "value": "，严重程度=" },
+          { "value_type": "ref", "value": "$.trigger_alert.fldgA6lq0P" },
+          { "value_type": "text", "value": "，告警内容=" },
+          { "value_type": "ref", "value": "$.trigger_alert.fld3ELjXmh" }
+        ]
+      }
+    },
+    {
+      "id": "write_solution",
+      "type": "SetRecordAction",
+      "title": "将AI分析结果回写解决方案字段",
+      "next": null,
+      "data": {
+        "table_name": "告警故障汇总",
+        "ref_info": { "step_id": "trigger_alert" },
+        "field_values": [
+          {
+            "field_name": "解决方案",
+            "value": [{ "value_type": "ref", "value": "$.ai_analyze" }]
+          }
+        ]
+      }
+    },
+    {
+      "id": "skip_end",
+      "type": "Delay",
+      "title": "低中危告警跳过AI分析",
+      "next": null,
+      "data": { "duration": 1 }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "hook_version": "V1.0",
+  "hook_name": "三态合一自动归档钩子",
+  "trigger_rule": "图片/视频生成API返回成功后自动调用",
+  "states": {
+    "logic_state": "逻辑态：用户意图、分镜设计、参数确认",
+    "operator_state": "算子态：调用生成API、产出CDN链接与task_id",
+    "execution_state": "执行态：自动下载、哈希校验、元数据写入、HASH-LEDGER确权"
+  },
+  "storage_paths": {
+    "video": "ZONGYUAN-ROOT/assets/media/jiutian_xuannu_video/{EP}/{EP}.mp4",
+    "image": "ZONGYUAN-ROOT/assets/images/jiutian_xuannu/{EP}/{seq}_{title}.png",
+    "meta": "ZONGYUAN-ROOT/assets/media/jiutian_xuannu_video_meta/raw/{EP}.json",
+    "hash_ledger": "项目目录/HASH-LEDGER.csv"
+  },
+  "auto_trigger_modes": [
+    "快速对话模式（用户说生成图片/视频）",
+    "工作任务模式（任务编排调用生成API）"
+  ],
+  "required_fields": {
+    "video": ["type", "ep", "url", "expire", "title", "duration"],
+    "image": ["type", "ep", "url", "seq", "desc"]
+  },
+  "output_feedback": "归档完成后向逻辑态返回：本地路径、文件大小、SHA256哈希"
+}

@@ -1,0 +1,98 @@
+{
+  "client_token": "autoreport_005_blocker_report",
+  "title": "问题阻塞自动上报",
+  "steps": [
+    {
+      "id": "trigger_blocker",
+      "type": "AddRecordTrigger",
+      "title": "监听问题阻塞记录新增",
+      "next": "action_alert",
+      "data": {
+        "table_name": "问题阻塞记录",
+        "watched_field_name": "问题描述",
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "action_alert",
+      "type": "AddRecordAction",
+      "title": "写入告警故障汇总",
+      "next": "action_msgwall",
+      "data": {
+        "table_name": "告警故障汇总",
+        "field_values": [
+          {
+            "field_name": "严重程度",
+            "value": [{ "value_type": "option", "value": { "name": "严重" } }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未处理" } }]
+          },
+          {
+            "field_name": "上报时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "来源节点",
+            "value": [{ "value_type": "ref", "value": "$.trigger_blocker.fld2CPolPO" }]
+          },
+          {
+            "field_name": "告警内容",
+            "value": [
+              { "value_type": "text", "value": "[问题阻塞告警] 提出账号：" },
+              { "value_type": "ref", "value": "$.trigger_blocker.fld2CPolPO" },
+              { "value_type": "text", "value": "，问题描述：" },
+              { "value_type": "ref", "value": "$.trigger_blocker.fldXkCAaJf" },
+              { "value_type": "text", "value": "，负责解决：" },
+              { "value_type": "ref", "value": "$.trigger_blocker.fldi6BXq3B" },
+              { "value_type": "text", "value": "，当前状态：" },
+              { "value_type": "ref", "value": "$.trigger_blocker.fld1GC4qer" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "action_msgwall",
+      "type": "AddRecordAction",
+      "title": "写入消息墙上报记录",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[问题阻塞上报] 提出账号：" },
+              { "value_type": "ref", "value": "$.trigger_blocker.fld2CPolPO" },
+              { "value_type": "text", "value": "，问题描述：" },
+              { "value_type": "ref", "value": "$.trigger_blocker.fldXkCAaJf" },
+              { "value_type": "text", "value": "，负责解决：" },
+              { "value_type": "ref", "value": "$.trigger_blocker.fldi6BXq3B" },
+              { "value_type": "text", "value": "，当前状态：" },
+              { "value_type": "ref", "value": "$.trigger_blocker.fld1GC4qer" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

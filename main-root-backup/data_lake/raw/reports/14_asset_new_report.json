@@ -1,0 +1,60 @@
+{
+  "client_token": "autoreport_014_asset_new_report",
+  "title": "资产新增自动上报",
+  "steps": [
+    {
+      "id": "trigger_asset",
+      "type": "AddRecordTrigger",
+      "title": "监听资产台账新增",
+      "next": "action_msgwall",
+      "data": {
+        "table_name": "资产台账",
+        "watched_field_name": "资产名称",
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "action_msgwall",
+      "type": "AddRecordAction",
+      "title": "写入消息墙资产新增上报",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[资产新增] 资产名称：" },
+              { "value_type": "ref", "value": "$.trigger_asset.fld4O1qOo7" },
+              { "value_type": "text", "value": "，类型：" },
+              { "value_type": "ref", "value": "$.trigger_asset.fld4Xg0pjh" },
+              { "value_type": "text", "value": "，元类分类：" },
+              { "value_type": "ref", "value": "$.trigger_asset.fldcNAB7VP" },
+              { "value_type": "text", "value": "，所属账号：" },
+              { "value_type": "ref", "value": "$.trigger_asset.fldGVO6lJI" },
+              { "value_type": "text", "value": "，存储位置：" },
+              { "value_type": "ref", "value": "$.trigger_asset.fldg3X4HMr" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

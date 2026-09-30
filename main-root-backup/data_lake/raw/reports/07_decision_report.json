@@ -1,0 +1,58 @@
+{
+  "client_token": "autoreport_007_decision_report",
+  "title": "决策日志自动上报",
+  "steps": [
+    {
+      "id": "trigger_decision",
+      "type": "AddRecordTrigger",
+      "title": "监听决策日志新增",
+      "next": "action_msgwall",
+      "data": {
+        "table_name": "决策日志",
+        "watched_field_name": "决策内容",
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "action_msgwall",
+      "type": "AddRecordAction",
+      "title": "写入消息墙决策上报",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[决策上报] 提出账号：" },
+              { "value_type": "ref", "value": "$.trigger_decision.fldvy9eoX5" },
+              { "value_type": "text", "value": "，决策内容：" },
+              { "value_type": "ref", "value": "$.trigger_decision.fldUMgUbO3" },
+              { "value_type": "text", "value": "，决策结果：" },
+              { "value_type": "ref", "value": "$.trigger_decision.fldS6WXHUV" },
+              { "value_type": "text", "value": "，参与账号：" },
+              { "value_type": "ref", "value": "$.trigger_decision.fldTDSG12W" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

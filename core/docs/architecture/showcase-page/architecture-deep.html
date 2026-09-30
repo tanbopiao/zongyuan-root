@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术架构 - 火斗云智AIOS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+        .nav { padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); z-index: 100; }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: 700; color: #d4af37; text-decoration: none; }
+        .nav a { color: #94a3b8; text-decoration: none; font-size: 14px; margin-left: 24px; }
+        .nav a:hover { color: #d4af37; }
+        .breadcrumb { padding: 20px 0; color: #64748b; font-size: 14px; }
+        .breadcrumb a { color: #94a3b8; text-decoration: none; }
+        .breadcrumb a:hover { color: #d4af37; }
+
+        .hero { padding: 50px 0; text-align: center; }
+        .hero h1 { font-size: 40px; margin-bottom: 12px; }
+        .hero p { color: #94a3b8; font-size: 17px; max-width: 700px; margin: 0 auto; }
+
+        .section { padding: 60px 0; border-top: 1px solid rgba(255,255,255,0.05); }
+        .section h2 { font-size: 28px; margin-bottom: 16px; text-align: center; }
+        .section .section-desc { text-align: center; color: #94a3b8; margin-bottom: 40px; max-width: 700px; margin-left: auto; margin-right: auto; }
+
+        /* 架构图 */
+        .arch-diagram {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+        .arch-layer {
+            background: rgba(212,175,55,0.1);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .arch-layer .layer-name {
+            color: #d4af37;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        .arch-layer .layer-items {
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+        .arch-arrow {
+            text-align: center;
+            color: #64748b;
+            font-size: 20px;
+            margin: 8px 0;
+        }
+
+        /* 特性卡片 */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 28px;
+        }
+        .feature-card h3 {
+            font-size: 18px;
+            color: #d4af37;
+            margin-bottom: 12px;
+        }
+        .feature-card p {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* 架构对比 */
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .compare-col {
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            padding: 28px;
+        }
+        .compare-col.old {
+            border: 1px solid rgba(255,80,80,0.2);
+        }
+        .compare-col.new {
+            border: 1px solid rgba(212,175,55,0.3);
+        }
+        .compare-col h4 {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        .compare-col.old h4 { color: #fca5a5; }
+        .compare-col.new h4 { color: #d4af37; }
+        .compare-col ul {
+            list-style: none;
+        }
+        .compare-col li {
+            padding: 6px 0;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        .compare-col.new li { color: #cbd5e1; }
+
+        .footer { padding: 40px 0; text-align: center; color: #64748b; font-size: 13px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px; }
+        @media (max-width: 768px) { .feature-grid, .compare-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="container nav-inner">
+            <a href="/" class="logo">火斗云智 AIOS</a>
+            <div>
+                <a href="/">首页</a>
+                <a href="/developer-center.html">开发者</a>
+                <a href="/docs.html">文档</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="breadcrumb">
+        <div class="container">
+            <a href="/">首页</a> / 技术架构
+        </div>
+    </div>
+
+    <section class="hero">
+        <div class="container">
+            <h1>元极恒一技术架构</h1>
+            <p>从底层内核到上层应用，全栈自治设计<br>不是套壳，是真正的AI操作系统</p>
+        </div>
+    </section>
+
+    <!-- 三层架构 -->
+    <section class="section">
+        <div class="container">
+            <h2>三层核心架构</h2>
+            <p class="section-desc">从元内核到应用层，层级清晰，职责分明，正交不重叠</p>
+
+            <div class="arch-diagram">
+                <div class="arch-layer">
+                    <div class="layer-name">应用层 · 六大主域</div>
+                    <div class="layer-items">安全基建 | 内容生产 | 政务中台 | 内核运维 | 开放生态 | 品牌体系</div>
+                </div>
+                <div class="arch-arrow">↑</div>
+                <div class="arch-layer">
+                    <div class="layer-name">调度层 · 智能编排引擎</div>
+                    <div class="layer-items">多模型调度 | 任务编排 | 智能体协作 | 故障自动切换 | 成本优化</div>
+                </div>
+                <div class="arch-arrow">↑</div>
+                <div class="arch-layer">
+                    <div class="layer-name">内核层 · 元极恒一内核</div>
+                    <div class="layer-items">Merkle-DAG锁档 | 三账本审计 | 界域状态机 | 真值校验 | 自治自愈</div>
+                </div>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Merkle-DAG 哈希链</h3>
+                    <p>所有资产和操作都生成密码学哈希，串成不可篡改的有向无环图。改任何一个字节，整条链都能检测出来。永久确权，司法可采信。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>三账本审计体系</h3>
+                    <p>网络访问账本、操作审计账本、算力调用账本，三本账独立记录，交叉验证。谁、什么时候、做了什么、花了多少，全部可追溯。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>S8 真值校验层</h3>
+                    <p>大模型输出必须经过四重校验：元法则冲突校验、本体一致性校验、状态边界校验、格式确权校验。不通过的内容拒绝落库，从源头防止幻觉。</p>
+                </div>
+                <div class="feature-card">
+                    <h3>自治自愈机制</h3>
+                    <p>系统7×24小时自检，发现问题自动修复，不需要人工干预。三级稳态决策算子：收益最大化、风险最小化、成本最小化。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 和普通产品的区别 -->
+    <section class="section">
+        <div class="container">
+            <h2>和普通AI产品的区别</h2>
+            <p class="section-desc">不是简单套壳大模型API，是从底层重新设计的AI操作系统</p>
+
+            <div class="compare-grid">
+                <div class="compare-col old">
+                    <h4>❌ 普通AI产品</h4>
+                    <ul>
+                        <li>套壳单一大模型API</li>
+                        <li>数据全部上传第三方</li>
+                        <li>没有审计和追溯</li>
+                        <li>服务挂了就全挂</li>
+                        <li>没有知识产权保护</li>
+                        <li>不能私有化部署</li>
+                        <li>黑盒，不知道AI为什么这么说</li>
+                        <li>出错了只能人工改</li>
+                    </ul>
+                </div>
+                <div class="compare-col new">
+                    <h4>✅ 火斗云智AIOS</h4>
+                    <ul>
+                        <li>接入41+大模型，自动调度最优</li>
+                        <li>数据不出域，全链路加密</li>
+                        <li>三账本审计，每一步可追溯</li>
+                        <li>多模型故障自动切换，99.9% SLA</li>
+                        <li>Merkle-DAG永久确权</li>
+                        <li>支持纯私有化部署</li>
+                        <li>S8四重校验，输出可解释</li>
+                        <li>自治自愈，自动修复问题</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技术栈 -->
+    <section class="section">
+        <div class="container">
+            <h2>技术栈</h2>
+            <p class="section-desc">成熟稳定的技术选型，经过生产环境验证</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>后端</h3>
+                    <p>Python 3.10+ · FastAPI · Redis · SQLite/PostgreSQL<br>微服务架构，30+个服务独立部署，故障隔离</p>
+                </div>
+                <div class="feature-card">
+                    <h3>前端</h3>
+                    <p>原生HTML/CSS/JS · 响应式设计<br>无框架依赖，加载快，兼容性好，可定制</p>
+                </div>
+                <div class="feature-card">
+                    <h3>算力接入</h3>
+                    <p>41+大模型统一API接口<br>OpenAI兼容格式，故障自动切换，成本自动优化</p>
+                </div>
+                <div class="feature-card">
+                    <h3>部署</h3>
+                    <p>腾讯云轻量服务器 · Nginx反向代理<br>支持Docker部署，一键安装脚本</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>火斗云智AIOS · 技术架构 | Ω₀⊂⊙∞⊂Ω</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,252 @@
+{
+  "client_token": "autoreport_006_daily_inspection",
+  "title": "每日定时巡检上报",
+  "steps": [
+    {
+      "id": "trigger_daily",
+      "type": "TimerTrigger",
+      "title": "每天早上9点触发巡检",
+      "next": "find_offline_accounts",
+      "data": {
+        "rule": "DAILY",
+        "start_time": "2026-09-22 09:00",
+        "is_never_end": true
+      }
+    },
+    {
+      "id": "find_offline_accounts",
+      "type": "FindRecordAction",
+      "title": "查找所有离线账号",
+      "next": "loop_offline_accounts",
+      "data": {
+        "table_name": "账号主表",
+        "field_names": ["账号名称", "角色定位", "当前状态", "负责范围", "最后同步时间"],
+        "should_proceed_when_no_results": true,
+        "filter_info": {
+          "conjunction": "and",
+          "conditions": [
+            {
+              "field_name": "当前状态",
+              "operator": "is",
+              "value": [{ "value_type": "option", "value": { "name": "离线" } }]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "loop_offline_accounts",
+      "type": "Loop",
+      "title": "遍历离线账号并上报",
+      "children": {
+        "links": [
+          { "kind": "loop_start", "to": "report_offline_account" }
+        ]
+      },
+      "next": "find_offline_nodes",
+      "data": {
+        "loop_mode": "continue",
+        "max_loop_times": 5,
+        "data": [{ "value_type": "ref", "value": "$.find_offline_accounts.fieldRecords" }]
+      }
+    },
+    {
+      "id": "report_offline_account",
+      "type": "AddRecordAction",
+      "title": "写入消息墙-离线账号上报",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[每日巡检-离线账号] 账号：" },
+              { "value_type": "ref", "value": "$.loop_offline_accounts.item.fld0OmhPKv" },
+              { "value_type": "text", "value": "，角色：" },
+              { "value_type": "ref", "value": "$.loop_offline_accounts.item.fldERdA4qe" },
+              { "value_type": "text", "value": "，状态：离线，最后同步时间：" },
+              { "value_type": "ref", "value": "$.loop_offline_accounts.item.fld6gZqW1Q" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "find_offline_nodes",
+      "type": "FindRecordAction",
+      "title": "查找所有离线节点",
+      "next": "loop_offline_nodes",
+      "data": {
+        "table_name": "节点状态总览",
+        "field_names": ["节点名称", "节点类型", "当前状态", "负责人", "最后心跳时间"],
+        "should_proceed_when_no_results": true,
+        "filter_info": {
+          "conjunction": "and",
+          "conditions": [
+            {
+              "field_name": "当前状态",
+              "operator": "is",
+              "value": [{ "value_type": "option", "value": { "name": "离线" } }]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "loop_offline_nodes",
+      "type": "Loop",
+      "title": "遍历离线节点并告警",
+      "children": {
+        "links": [
+          { "kind": "loop_start", "to": "alert_offline_node" }
+        ]
+      },
+      "next": "find_overdue_tasks",
+      "data": {
+        "loop_mode": "continue",
+        "max_loop_times": 5,
+        "data": [{ "value_type": "ref", "value": "$.find_offline_nodes.fieldRecords" }]
+      }
+    },
+    {
+      "id": "alert_offline_node",
+      "type": "AddRecordAction",
+      "title": "写入告警故障汇总-离线节点告警",
+      "next": null,
+      "data": {
+        "table_name": "告警故障汇总",
+        "field_values": [
+          {
+            "field_name": "严重程度",
+            "value": [{ "value_type": "option", "value": { "name": "高" } }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未处理" } }]
+          },
+          {
+            "field_name": "上报时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "来源节点",
+            "value": [{ "value_type": "ref", "value": "$.loop_offline_nodes.item.fld24q3IvM" }]
+          },
+          {
+            "field_name": "告警内容",
+            "value": [
+              { "value_type": "text", "value": "[每日巡检-离线节点] 节点：" },
+              { "value_type": "ref", "value": "$.loop_offline_nodes.item.fldypYwgqf" },
+              { "value_type": "text", "value": "，类型：" },
+              { "value_type": "ref", "value": "$.loop_offline_nodes.item.fldMng8UUw" },
+              { "value_type": "text", "value": "，状态：离线，负责人：" },
+              { "value_type": "ref", "value": "$.loop_offline_nodes.item.fld24q3IvM" },
+              { "value_type": "text", "value": "，最后心跳：" },
+              { "value_type": "ref", "value": "$.loop_offline_nodes.item.fldorUt4AD" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "find_overdue_tasks",
+      "type": "FindRecordAction",
+      "title": "查找所有逾期未完成任务",
+      "next": "loop_overdue_tasks",
+      "data": {
+        "table_name": "任务台账",
+        "field_names": ["任务名称", "负责账号", "截止时间", "进度", "备注"],
+        "should_proceed_when_no_results": true,
+        "filter_info": {
+          "conjunction": "and",
+          "conditions": [
+            {
+              "field_name": "截止时间",
+              "operator": "isLess",
+              "value": [{ "value_type": "date", "value": "today" }]
+            },
+            {
+              "field_name": "进度",
+              "operator": "isLess",
+              "value": [{ "value_type": "number", "value": 100 }]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "loop_overdue_tasks",
+      "type": "Loop",
+      "title": "遍历逾期任务并上报",
+      "children": {
+        "links": [
+          { "kind": "loop_start", "to": "report_overdue_task" }
+        ]
+      },
+      "next": null,
+      "data": {
+        "loop_mode": "continue",
+        "max_loop_times": 5,
+        "data": [{ "value_type": "ref", "value": "$.find_overdue_tasks.fieldRecords" }]
+      }
+    },
+    {
+      "id": "report_overdue_task",
+      "type": "AddRecordAction",
+      "title": "写入消息墙-逾期任务上报",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[每日巡检-逾期任务] 任务：" },
+              { "value_type": "ref", "value": "$.loop_overdue_tasks.item.fld04Z60Qp" },
+              { "value_type": "text", "value": "，负责账号：" },
+              { "value_type": "ref", "value": "$.loop_overdue_tasks.item.fldtkZX8gm" },
+              { "value_type": "text", "value": "，截止时间：" },
+              { "value_type": "ref", "value": "$.loop_overdue_tasks.item.fld8thqEXw" },
+              { "value_type": "text", "value": "，当前进度：" },
+              { "value_type": "ref", "value": "$.loop_overdue_tasks.item.fldi6aKwSX" },
+              { "value_type": "text", "value": "%" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "client_token": "autoreport_011_alert_recovery",
+  "title": "告警恢复自动通知",
+  "steps": [
+    {
+      "id": "trigger_recovery",
+      "type": "SetRecordTrigger",
+      "title": "监听告警状态变为已恢复",
+      "next": "action_msgwall",
+      "data": {
+        "table_name": "告警故障汇总",
+        "record_watch_conjunction": "and",
+        "record_watch_info": [],
+        "field_watch_info": [
+          {
+            "field_name": "状态",
+            "operator": "is",
+            "value": [{ "value_type": "option", "value": { "name": "已恢复" } }]
+          }
+        ],
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "action_msgwall",
+      "type": "AddRecordAction",
+      "title": "写入消息墙告警恢复通知",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[告警恢复] 告警内容：" },
+              { "value_type": "ref", "value": "$.trigger_recovery.fld3ELjXmh" },
+              { "value_type": "text", "value": "，来源节点：" },
+              { "value_type": "ref", "value": "$.trigger_recovery.fldWkWuEsd" },
+              { "value_type": "text", "value": "，解决方案：" },
+              { "value_type": "ref", "value": "$.trigger_recovery.fldvg9gu63" },
+              { "value_type": "text", "value": "，状态：已恢复" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

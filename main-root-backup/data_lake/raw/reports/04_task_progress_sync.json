@@ -1,0 +1,62 @@
+{
+  "client_token": "autoreport_004_task_progress_sync",
+  "title": "任务进度变更自动同步",
+  "steps": [
+    {
+      "id": "trigger_task",
+      "type": "SetRecordTrigger",
+      "title": "监听任务台账进度变更",
+      "next": "action_sync",
+      "data": {
+        "table_name": "任务台账",
+        "record_watch_conjunction": "and",
+        "record_watch_info": [],
+        "field_watch_info": [
+          { "field_name": "进度" }
+        ],
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "action_sync",
+      "type": "AddRecordAction",
+      "title": "写入跨节点消息同步",
+      "next": null,
+      "data": {
+        "table_name": "跨节点消息同步",
+        "field_values": [
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "ref", "value": "$.trigger_task.fldtkZX8gm" }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "云端中枢" } }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "待发送" } }]
+          },
+          {
+            "field_name": "发送时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[任务进度同步] 任务：" },
+              { "value_type": "ref", "value": "$.trigger_task.fld04Z60Qp" },
+              { "value_type": "text", "value": "，负责账号：" },
+              { "value_type": "ref", "value": "$.trigger_task.fldtkZX8gm" },
+              { "value_type": "text", "value": "，进度更新为：" },
+              { "value_type": "ref", "value": "$.trigger_task.fldi6aKwSX" },
+              { "value_type": "text", "value": "%，截止时间：" },
+              { "value_type": "ref", "value": "$.trigger_task.fld8thqEXw" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

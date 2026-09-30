@@ -1,0 +1,62 @@
+{
+  "client_token": "autoreport_012_crossnode_sync",
+  "title": "跨节点消息状态同步上报",
+  "steps": [
+    {
+      "id": "trigger_crossnode",
+      "type": "SetRecordTrigger",
+      "title": "监听跨节点消息同步状态变更",
+      "next": "action_msgwall",
+      "data": {
+        "table_name": "跨节点消息同步",
+        "record_watch_conjunction": "and",
+        "record_watch_info": [],
+        "field_watch_info": [
+          { "field_name": "状态" }
+        ],
+        "trigger_control_list": [],
+        "condition_list": null
+      }
+    },
+    {
+      "id": "action_msgwall",
+      "type": "AddRecordAction",
+      "title": "写入消息墙跨节点同步通知",
+      "next": null,
+      "data": {
+        "table_name": "消息墙",
+        "field_values": [
+          {
+            "field_name": "时间",
+            "value": [{ "value_type": "date", "value": "now" }]
+          },
+          {
+            "field_name": "状态",
+            "value": [{ "value_type": "option", "value": { "name": "未读" } }]
+          },
+          {
+            "field_name": "发送节点",
+            "value": [{ "value_type": "option", "value": { "name": "中枢智能" } }]
+          },
+          {
+            "field_name": "接收节点",
+            "value": [{ "value_type": "option", "value": { "name": "全部" } }]
+          },
+          {
+            "field_name": "消息内容",
+            "value": [
+              { "value_type": "text", "value": "[跨节点同步] 发送节点：" },
+              { "value_type": "ref", "value": "$.trigger_crossnode.fld4OTu3Gm" },
+              { "value_type": "text", "value": "，接收节点：" },
+              { "value_type": "ref", "value": "$.trigger_crossnode.fldvU7ahlF" },
+              { "value_type": "text", "value": "，同步状态：" },
+              { "value_type": "ref", "value": "$.trigger_crossnode.fldLCem3SA" },
+              { "value_type": "text", "value": "，消息内容：" },
+              { "value_type": "ref", "value": "$.trigger_crossnode.fld7CXMBAx" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

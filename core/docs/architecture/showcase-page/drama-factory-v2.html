@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>短剧生产流水线 - 火斗云智AIOS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+        .nav { padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: 700; color: #d4af37; text-decoration: none; }
+        .nav a { color: #94a3b8; text-decoration: none; font-size: 14px; margin-left: 24px; }
+        .nav a:hover { color: #d4af37; }
+        .breadcrumb { padding: 20px 0; color: #64748b; font-size: 14px; }
+        .breadcrumb a { color: #94a3b8; text-decoration: none; }
+        .breadcrumb a:hover { color: #d4af37; }
+
+        .hero { padding: 50px 0; text-align: center; }
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(212,175,55,0.1);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 20px;
+            font-size: 13px;
+            color: #d4af37;
+            margin-bottom: 20px;
+        }
+        .hero h1 { font-size: 42px; margin-bottom: 16px; }
+        .hero .subtitle { font-size: 18px; color: #94a3b8; max-width: 700px; margin: 0 auto 32px; }
+        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.3s; display: inline-block; }
+        .btn-gold { background: linear-gradient(135deg, #d4af37, #b8941f); color: #0a0a0f; font-weight: 600; }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(212,175,55,0.3); }
+        .btn-outline { background: transparent; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-outline:hover { border-color: #d4af37; color: #d4af37; }
+
+        .section { padding: 50px 0; border-top: 1px solid rgba(255,255,255,0.05); }
+        .section h2 { font-size: 28px; margin-bottom: 24px; color: #f1f5f9; }
+        .pain-list { display: grid; gap: 16px; }
+        .pain-item {
+            background: rgba(255, 80, 80, 0.05);
+            border: 1px solid rgba(255, 80, 80, 0.15);
+            border-radius: 12px;
+            padding: 20px 24px;
+        }
+        .pain-item h4 { color: #fca5a5; margin-bottom: 6px; font-size: 16px; }
+        .pain-item p { color: #94a3b8; font-size: 14px; }
+
+        .solution-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .solution-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .solution-item h4 { color: #d4af37; margin-bottom: 8px; font-size: 16px; }
+        .solution-item p { color: #94a3b8; font-size: 14px; }
+
+        .value-list { display: grid; gap: 12px; }
+        .value-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; }
+        .value-item .check { color: #d4af37; font-size: 18px; }
+        .value-item p { color: #cbd5e1; font-size: 15px; }
+
+        .pipeline { display: flex; justify-content: space-between; align-items: center; margin: 30px 0; flex-wrap: wrap; gap: 10px; }
+        .pipeline-step {
+            background: rgba(212,175,55,0.1);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 8px;
+            padding: 12px 20px;
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+        }
+        .pipeline-step .step-num { color: #d4af37; font-size: 12px; }
+        .pipeline-step .step-name { color: #f1f5f9; font-size: 14px; font-weight: 500; margin-top: 4px; }
+        .pipeline-arrow { color: #64748b; font-size: 20px; }
+
+        .footer { padding: 40px 0; text-align: center; color: #64748b; font-size: 13px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px; }
+        @media (max-width: 768px) { .solution-grid { grid-template-columns: 1fr; } .hero h1 { font-size: 30px; } .pipeline { flex-direction: column; } .pipeline-arrow { transform: rotate(90deg); } }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="container nav-inner">
+            <a href="/" class="logo">火斗云智 AIOS</a>
+            <div>
+                <a href="/product-matrix.html">产品矩阵</a>
+                <a href="/content-line.html">内容生产</a>
+                <a href="/status.html">状态</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="breadcrumb">
+        <div class="container">
+            <a href="/">首页</a> / <a href="/content-line.html">内容生产</a> / 短剧生产流水线
+        </div>
+    </div>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">🎨 内容生产 · 核心产品</div>
+            <h1>短剧生产流水线</h1>
+            <p class="subtitle">东方神话AI内容全自动工厂<br>从剧本到成片，全链路自动化，成本直降80%</p>
+            <div class="hero-buttons">
+                <a href="/kunlun/" class="btn btn-gold">进入昆仑洞天工作台</a>
+                <a href="/agent-studio.html" class="btn btn-outline">Agent工作室</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2>传统短剧生产有多难？</h2>
+            <div class="pain-list">
+                <div class="pain-item">
+                    <h4>成本高，周期长</h4>
+                    <p>一集短剧几万到几十万，拍摄周期几周甚至几个月，小团队根本玩不起</p>
+                </div>
+                <div class="pain-item">
+                    <h4>角色形象不统一</h4>
+                    <p>AI生成的角色每次长得都不一样，一会胖一会瘦，观众出戏</p>
+                </div>
+                <div class="pain-item">
+                    <h4>质量不稳定</h4>
+                    <p>AI生成内容时好时坏，事实错误、逻辑断裂经常出现，还要人工大量返工</p>
+                </div>
+                <div class="pain-item">
+                    <h4>产能跟不上</h4>
+                    <p>平台要求日更甚至多更，人工团队根本做不过来，流量吃不住</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2>全自动生产流水线</h2>
+            <div class="pipeline">
+                <div class="pipeline-step">
+                    <div class="step-num">STEP 1</div>
+                    <div class="step-name">剧本生成</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="step-num">STEP 2</div>
+                    <div class="step-name">关键帧生成</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="step-num">STEP 3</div>
+                    <div class="step-name">角色一致性</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="step-num">STEP 4</div>
+                    <div class="step-name">视频合成</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="step-num">STEP 5</div>
+                    <div class="step-name">质量检测</div>
+                </div>
+            </div>
+
+            <div class="solution-grid" style="margin-top: 30px;">
+                <div class="solution-item">
+                    <h4>AI剧本引擎</h4>
+                    <p>输入主题和风格，自动生成完整剧本，人物、剧情、台词一应俱全</p>
+                </div>
+                <div class="solution-item">
+                    <h4>角色一致性锁定</h4>
+                    <p>同一角色多轮生成形象、色调、风格完全统一，不会跑偏</p>
+                </div>
+                <div class="solution-item">
+                    <h4>东方视觉规范</h4>
+                    <p>纯东方神女审美，黑色头发，无外国人，自动过滤不符合的元素</p>
+                </div>
+                <div class="solution-item">
+                    <h4>漂移自动检测</h4>
+                    <p>每一步自动检测内容漂移，发现问题自动返工，不用人工盯着</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <h2>你能得到什么？</h2>
+            <div class="value-list">
+                <div class="value-item">
+                    <div class="check">✓</div>
+                    <p><strong>成本降80%</strong> — 从几万/集降到几千/集，小团队也能做短剧</p>
+                </div>
+                <div class="value-item">
+                    <div class="check">✓</div>
+                    <p><strong>产能翻10倍</strong> — 从几周/集降到几天/集，日更不是问题</p>
+                </div>
+                <div class="value-item">
+                    <div class="check">✓</div>
+                    <p><strong>风格统一</strong> — 整个短剧系列视觉一致，品牌感强</p>
+                </div>
+                <div class="value-item">
+                    <div class="check">✓</div>
+                    <p><strong>质量稳定</strong> — 自动检测+自动返工，不用人工反复改</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>火斗云智AIOS · 短剧生产流水线 | Ω₀⊂⊙∞⊂Ω</p>
+        </div>
+    </footer>
+</body>
+</html>
