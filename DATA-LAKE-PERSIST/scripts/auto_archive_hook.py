@@ -19,6 +19,10 @@ DID = "DID-BR-000002"
 TRACE = "Ω₀⊂⊙∞⊂Ω"
 MEDIA_EXTS = {'.png','.jpg','.jpeg','.gif','.webp','.bmp','.tiff','.tif','.heic','.svg',
               '.mp4','.mov','.avi','.mkv','.webm','.flv','.wmv','.m4v','.3gp'}
+# 文本内核资产类型（文档/代码/配置/数据/协议）
+TEXT_EXTS = {'.md','.txt','.json','.py','.sh','.js','.ts','.html','.css','.yml','.yaml',
+             '.csv','.xml','.ps1','.bat','.cfg','.ini','.toml','.pdf','.docx','.xlsx',
+             '.ipynb','.svg'}
 
 def sha256_file(path):
     h = hashlib.sha256()
@@ -112,14 +116,87 @@ def refresh(reg, roots, dry_run=False):
                     pass
     return added
 
+def add_text_file(man, path, dry_run=False):
+    """登记文本内核资产到 MANIFEST text_assets"""
+    ext = os.path.splitext(path)[1].lower()
+    size = os.path.getsize(path)
+    dom = classify(path)
+    if dom == 'misc':
+        dom = 'kernel-docs'
+    entry = {
+        "rel_path": path.replace("/home/user/", "home/"),
+        "file": os.path.basename(path),
+        "ext": ext,
+        "size": size, "size_mb": round(size/1048576, 3),
+        "sha256": None if size > 50*1048576 else sha256_file(path),
+        "domain": dom,
+        "added_at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    }
+    man.setdefault("text_assets", [])
+    # 去重：已存在同路径则跳过
+    existing = {t.get('rel_path') for t in man['text_assets']}
+    if entry['rel_path'] in existing:
+        return None
+    man['text_assets'].append(entry)
+    return entry
+
+def refresh_text(man, roots, dry_run=False):
+    """全量扫描文本内核差异（限体系关键目录，避免扫描全部chats）"""
+    existing = {t.get('rel_path') for t in man.get('text_assets', [])}
+    added = 0
+    for root in roots:
+        if not os.path.isdir(root): continue
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames if d not in {'.git','node_modules','site-packages','.cache','__pycache__','.sessions','media_archive'}]
+            for fn in filenames:
+                ext = os.path.splitext(fn)[1].lower()
+                if ext not in TEXT_EXTS: continue
+                if ext in MEDIA_EXTS and ext == '.svg': continue  # svg归媒体
+                p = os.path.join(dirpath, fn)
+                if p in existing: continue
+                try:
+                    e = add_text_file(man, p, dry_run)
+                    if e and not dry_run:
+                        print(f"  + [text:{e['domain']}] {os.path.basename(p)}")
+                        added += 1
+                    elif e:
+                        added += 1
+                except OSError:
+                    pass
+    return added
+
 def main():
     ap = argparse.ArgumentParser(description='数据湖自动归档钩子')
-    ap.add_argument('--add', help='登记单个新资产文件')
-    ap.add_argument('--refresh', action='store_true', help='全量重扫新增差异')
+    ap.add_argument('--add', help='登记单个新媒体资产文件')
+    ap.add_argument('--refresh', action='store_true', help='全量重扫媒体新增差异')
+    ap.add_argument('--text-add', help='登记单个文本内核资产')
+    ap.add_argument('--text-refresh', action='store_true', help='全量扫描文本内核新增差异')
     ap.add_argument('--dry-run', action='store_true', help='预览不写入')
     ap.add_argument('--roots', nargs='*', default=['/home/user/Doubao/chats', '/home/user/ZONGYUAN-ROOT'],
                     help='refresh扫描根')
     args = ap.parse_args()
+
+    if args.text_add or args.text_refresh:
+        man = json.load(open(MAN_PATH))
+        if args.text_add:
+            if not os.path.exists(args.text_add):
+                print(f"❌ 文件不存在: {args.text_add}"); sys.exit(1)
+            e = add_text_file(man, args.text_add, args.dry_run)
+            if e:
+                print(f"{'[DRY] ' if args.dry_run else '✅ '}文本登记 [{e['domain']}] {e['file']} ({e['size_mb']}MB)")
+            else:
+                print("⏭️ 已存在，跳过")
+        elif args.text_refresh:
+            print("扫描文本内核差异...")
+            n = refresh_text(man, args.roots, args.dry_run)
+            print(f"{'[DRY] ' if args.dry_run else '✅ '}新增文本登记 {n} 个")
+        if not args.dry_run:
+            man['updated'] = time.strftime("%Y-%m-%dT%H:%M:%S+08:00")
+            man['text_asset_count'] = len(man.get('text_assets', []))
+            with open(MAN_PATH, 'w', encoding='utf-8') as f:
+                json.dump(man, f, ensure_ascii=False, indent=2)
+            print(f"MANIFEST text_assets: {man['text_asset_count']} 个")
+        return
 
     reg = load_reg()
     if args.add:
