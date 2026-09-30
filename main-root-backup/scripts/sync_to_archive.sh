@@ -27,5 +27,6 @@ echo "[3/3] 推送冷存储..."
 BRANCH=$(git branch --show-current 2>/dev/null)
 git push gitee "$BRANCH" 2>&1 | tail -1 || echo "  Gitee: 跳过"
 git push github "$BRANCH" 2>&1 | tail -1 || echo "  Github: 跳过"
+git push modelscope "$BRANCH" 2>&1 | tail -1 || echo "  ModelScope: 跳过"
 
-echo "=== 变更同步完成 ==="
+echo "=== 变更同步完成（四层冷存储：归档母体+Gitee+Github+ModelScope数据湖）==="
