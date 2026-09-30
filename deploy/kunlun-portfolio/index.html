@@ -273,6 +273,7 @@ body{background:radial-gradient(ellipse at 20% 0%,rgba(0,212,255,.06) 0%,transpa
     <button class="tab" data-view="queue">⚡ 任务队列</button>
     <button class="tab" data-view="pipeline">🔗 流水线状态</button>
     <button class="tab" data-view="memory">🧠 启动记忆</button>
+    <button class="tab" data-view="arch">🏗 能力API架构</button>
   </div>
 
   <!-- ===== 作品库视图 ===== -->
@@ -411,6 +412,40 @@ body{background:radial-gradient(ellipse at 20% 0%,rgba(0,212,255,.06) 0%,transpa
     <div class="compliance-card" style="margin-top:16px">
       <div class="compliance-title">🔗 视觉资产画廊</div>
       <div style="margin-top:8px"><a href="https://pcnohfh1ukhz.doubaoapps.com/app/app_17f2u9p1e7t" target="_blank" style="color:var(--cyan);text-decoration:underline">昆仑洞天视觉画廊 →</a></div>
+    </div>
+  </div>
+
+  <!-- ===== 能力API架构视图 ===== -->
+  <div class="view" id="view-arch">
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card" style="--accent:var(--cyan)"><div class="stat-label">API端点</div><div class="stat-value" id="arch-ep">6</div><div class="stat-sub">truth×2 / node / key / service / deploy</div></div>
+      <div class="stat-card" style="--accent:var(--gold)"><div class="stat-label">已有端点</div><div class="stat-value" id="arch-ready">2</div><div class="stat-sub">truth/report · truth/{key}</div></div>
+      <div class="stat-card" style="--accent:var(--orange)"><div class="stat-label">待封装</div><div class="stat-value" id="arch-pending">4</div><div class="stat-sub">node/key/service/deploy</div></div>
+      <div class="stat-card" style="--accent:var(--purple)"><div class="stat-label">元法则</div><div class="stat-value">003</div><div class="stat-sub">META-AUTO-003 · P0</div></div>
+    </div>
+    <div class="compliance-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div class="compliance-card">
+        <div class="compliance-title">🎯 核心方案</div>
+        <div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.8">
+          问题本质不是AI笨，是工具链没封装。<br>
+          <b style="color:var(--cyan)">所有能力封装为HTTP API</b>，AI只需调API，不需懂底层SSH命令。<br>
+          四层架构：<b style="color:var(--purple)">AI调用层 → 鉴权层 → API封装层 → 能力层</b>。
+        </div>
+      </div>
+      <div class="compliance-card">
+        <div class="compliance-title">🔄 调用闭环</div>
+        <div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.9">
+          🧠 AI决策 → 🔐 鉴权(X-Capture-Token+X-DID+L0) → ⚙️ API执行(服务器自动跑底层) → 📋 返回JSON回执
+        </div>
+      </div>
+    </div>
+    <div class="compliance-card" style="margin-top:16px">
+      <div class="compliance-title">🏗 能力层 → API层 映射</div>
+      <div id="archMap" style="margin-top:8px"></div>
+    </div>
+    <div class="compliance-card" style="margin-top:16px">
+      <div class="compliance-title">🔗 完整架构页</div>
+      <div style="margin-top:8px"><a href="https://pcnohfh1ukhz.doubaoapps.com/app/app_17f31cdjaat" target="_blank" style="color:var(--cyan);text-decoration:underline">能力API化架构 · 交互可视化 →</a></div>
     </div>
   </div>
 
@@ -776,6 +811,17 @@ function renderMemory(){
   c.innerHTML=MEMORY_CONSENSUS.map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--gold);font-size:12px;font-weight:600">${x.id}</span><div style="color:var(--text2);font-size:12px;margin-top:3px">${x.v}</div></div>`).join('');
 }
 renderMemory();
+const ARCH_MAP=[
+{c:'真值上报/召回',a:'/api/truth/report · /api/truth/{key}',tr:'上报真值',st:'✅',col:'var(--green)'},
+{c:'节点注册',a:'/api/node/register',tr:'注册节点',st:'待封装',col:'var(--orange)'},
+{c:'密钥扫描/申请',a:'/api/key/scan',tr:'申请密钥',st:'待封装',col:'var(--orange)'},
+{c:'服务重启',a:'/api/service/restart',tr:'重启服务',st:'待封装',col:'var(--orange)'},
+{c:'官网部署',a:'/api/deploy/portfolio',tr:'部署官网',st:'待封装',col:'var(--orange)'}];
+function renderArch(){
+  const m=document.getElementById('archMap');if(!m)return;
+  m.innerHTML='<table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">能力层</th><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">API端点</th><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">触发词</th><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">状态</th></tr>'+ARCH_MAP.map(x=>`<tr><td style="padding:8px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">${x.c}</td><td style="padding:8px;font-size:12px;font-family:monospace;color:var(--purple);border-bottom:1px solid var(--border)">${x.a}</td><td style="padding:8px;font-size:12px;color:var(--text3);border-bottom:1px solid var(--border)">${x.tr}</td><td style="padding:8px;font-size:12px;color:${x.col};border-bottom:1px solid var(--border)">${x.st}</td></tr>`).join('')+'</table>';
+}
+renderArch();
 showToast('作品库中枢已连接，18项资产在线','success');
 </script>
 </body>
