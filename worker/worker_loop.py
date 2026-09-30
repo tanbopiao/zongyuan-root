@@ -119,23 +119,6 @@ def broadcast(content):
         json.dump({"消息内容": content, "发送节点": NODE_ID}, f, ensure_ascii=False)
     lark(f"+record-upsert --table-id {MSG_TABLE} --json @{tmp}")
 
-if __name__ == "__main__":
-    log(f"云端Worker V2.1 启动 (动态频率: 高峰9-21点5分钟/低峰15分钟)")
-    cycle = 0
-    while True:
-        cycle += 1
-        log(f"=== 第{cycle}轮 ===")
-        try:
-            heartbeat()
-            n = claim_and_run()
-            if n == 0:
-                auto_patrol()
-        except Exception as e:
-            log(f"异常: {e}")
-        interval = dynamic_interval()
-        log(f"休眠{interval}s (动态调度)")
-        time.sleep(interval)
-
 # ===== 自动巡检模块 V1.0（追加） =====
 def auto_patrol():
     """扫描任务台账，识别待开始/已阻塞但可自动执行的任务"""
@@ -167,3 +150,20 @@ def auto_patrol():
             log(f"巡检补齐[{name}]: {r[:80]}")
             broadcast(f"Worker巡检补齐任务「{name}」")
             return  # 每轮最多补齐1个
+
+if __name__ == "__main__":
+    log(f"云端Worker V2.1 启动 (动态频率: 高峰9-21点5分钟/低峰15分钟)")
+    cycle = 0
+    while True:
+        cycle += 1
+        log(f"=== 第{cycle}轮 ===")
+        try:
+            heartbeat()
+            n = claim_and_run()
+            if n == 0:
+                auto_patrol()
+        except Exception as e:
+            log(f"异常: {e}")
+        interval = dynamic_interval()
+        log(f"休眠{interval}s (动态调度)")
+        time.sleep(interval)
