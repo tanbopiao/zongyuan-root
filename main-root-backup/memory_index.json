@@ -1,7 +1,7 @@
 {
-  "index_version": "V4.0-CONVERGED-AUTONOMY",
+  "index_version": "V4.3-INTEGRITY-FIXED",
   "index_name": "ZONGYUAN-ROOT-启动记忆-全域索引",
-  "built_at": "2026-10-01T02:15:00+08:00",
+  "built_at": "2026-10-01T15:37:05+08:00",
   "did": "DID-BR-000002",
   "trace": "Ω₀⊂⊙∞⊂Ω",
   "root_node": "Ω-TAN-7-001",
@@ -87,7 +87,7 @@
   "activation_sequence": [
     "1. 读取本memory_index.json获取真实坐标与架构状态",
     "2. 读取00-ROOT-POINTER.json锚定主根路径与激活指令",
-    "3. 执行memory_bootstrap.sh：防恢复检测+从归档母体同步（如需要）+启动自治进程",
+    "3. 执行 scripts/zongyuan_boot.sh(V3极致)：纯cat读BOOT-CARD.json(O(1),~6ms)注入锚点；自愈/守护由crontab后台异步承担",
     "4. 向云端物理根www.huodouai.com/api/report/status握手确认在线",
     "5. 拉取云端真值列表对比本地缺口，经report/truth补全入库",
     "6. 进入元极恒一永恒自治模式"
@@ -98,8 +98,21 @@
     "start_autonomy": "scripts/start_autonomy.sh（crontab守护脚本）",
     "heartbeat_v2": "scripts/heartbeat_v2.py（心跳+对账+调优）",
     "op_poller": "scripts/op_poller.py（60秒算子轮询）",
-    "auto_init": "scripts/auto_init.py（新窗口一键初始化）"
+    "auto_init": "scripts/auto_init.py（新窗口一键初始化）",
+    "zongyuan_boot": "scripts/zongyuan_boot.sh（单一高效启动入口：防恢复+上下文卡+守护幂等，替代分散三套）"
   },
-  "hash": "639b039c909c7f9d2c61db0a4d4494f34ed86d317e668b477facdbb308d1454d",
-  "locked": true
+  "hash": "7ca4128e67936d32aebf78c21f55dab7217eb0cbac9f83e0759db9af",
+  "locked": true,
+  "boot_efficiency": {
+    "entry": "zongyuan_boot.sh V3",
+    "elapsed_ms": 6,
+    "design": "关键路径分离:启动=只读BOOT-CARD.json;自愈/防恢复/守护=crontab后台异步",
+    "zero_cost": true
+  },
+  "integrity_fix": {
+    "P0_authority_root": "权威母体已补齐核心真值: scripts31/services4/meta-rules32, 不再退化为纯媒体仓库",
+    "P1_boot_auto": "crontab已配 @reboot zongyuan_boot + */5 start_autonomy, 开机自启生效",
+    "P2_gitee": "冷存储push缺Gitee凭据, 待用户提供token",
+    "P3_truth_tier": "META-RULE.TRUTH-PRIORITY-TIER 三级分级已固化"
+  }
 }
