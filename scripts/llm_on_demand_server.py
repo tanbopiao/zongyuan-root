@@ -108,9 +108,13 @@ class ModelProcess:
 
     def _start_ollama(self):
         bin_path = self.cfg["ollama_bin"]
-        # 若 ollama serve 已在运行则复用, 否则拉起
+        # 若 ollama serve 已在运行则复用, 否则拉起(注入 KEEP_ALIVE 实现空闲自动卸载)
         if not self._probe("http://127.0.0.1:11434/api/tags"):
+            env = dict(os.environ)
+            env["OLLAMA_MODELS"] = env.get("OLLAMA_MODELS", os.path.expanduser("~/ollama/models"))
+            env["OLLAMA_KEEP_ALIVE"] = str(self.cfg["idle_timeout_sec"])
             subprocess.Popen([bin_path, "serve"],
+                             env=env,
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self.ready_port = 11434
         # 检查模型是否已本地存在(避免对已导入/已拉取的模型重复 pull)
