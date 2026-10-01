@@ -41,6 +41,7 @@ CONFIG_DEFAULT = {
     "idle_timeout_sec": 300,             # 空闲多少秒后自动释放模型进程
     "start_timeout_sec": 120,            # 拉起模型进程的最大等待秒数
     "max_context": 8192,                 # 上下文长度
+    "ollama_bin": "ollama",              # ollama 可执行文件路径(默认PATH, 可填绝对路径)
     "llama_server_bin": "llama-server",  # llama.cpp server 可执行文件路径
     "openai_compat_url": "http://127.0.0.1:8080/v1/chat/completions",
     "openai_compat_key": "none",
@@ -106,12 +107,24 @@ class ModelProcess:
             return ok
 
     def _start_ollama(self):
-        # 确保 ollama serve 常驻(若已运行则复用); 推理用 `ollama run` 一次性子进程
-        subprocess.Popen(["ollama", "serve"],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        bin_path = self.cfg["ollama_bin"]
+        # 若 ollama serve 已在运行则复用, 否则拉起
+        if not self._probe("http://127.0.0.1:11434/api/tags"):
+            subprocess.Popen([bin_path, "serve"],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self.ready_port = 11434
-        # 预热: 拉取模型
-        subprocess.run(["ollama", "pull", self.cfg["model"]],
+        # 检查模型是否已本地存在(避免对已导入/已拉取的模型重复 pull)
+        try:
+            with urllib.request.urlopen("http://127.0.0.1:11434/api/tags", timeout=5) as r:
+                tags = json.loads(r.read().decode())
+                local = {m["name"] for m in tags.get("models", [])}
+            if self.cfg["model"] in local:
+                log.info(f"模型已本地存在, 跳过 pull: {self.cfg['model']}")
+                return
+        except Exception:
+            pass
+        # 预热: 拉取模型(不存在时才拉)
+        subprocess.run([bin_path, "pull", self.cfg["model"]],
                        timeout=self.cfg["start_timeout_sec"],
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -266,7 +279,7 @@ class Handler(BaseHTTPRequestHandler):
                     if not ok:
                         self._send(503, {"error": "model start failed"})
                         return
-                result = model.infer(messages, **payload)
+                result = model.infer(messages, **{k: v for k, v in payload.items() if k != "messages"})
                 log.info(f"推理完成 messages={len(messages)} tokens_ok=True")
                 self._send(200, result)
             except Exception as e:
