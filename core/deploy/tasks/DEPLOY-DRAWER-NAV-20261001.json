@@ -1,0 +1,39 @@
+{
+  "task_id": "DEPLOY-DRAWER-NAV-20261001",
+  "task_type": "待部署",
+  "title": "官网右上角导航条抽屉式改造部署",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "created": "2026-10-01T13:37:51",
+  "status": "待执行",
+  "deploy_target": "www.huodouai.com（官网品牌门户·物理根节点）",
+  "source": "NODE-DEV-DOUBAO-WORK-001 本地已验证产物",
+  "file": {
+    "path": "core/deploy/official-homepage.html",
+    "sha256": "a9fa2abd28bd6a25777094562e074ab9d3c186bbb15239ea9ab3d196443fb0c3",
+    "size_bytes": 63062,
+    "local_backup": "core/deploy/official-homepage.html.bak-drawer-20261001"
+  },
+  "verification": {
+    "method": "playwright无头浏览器实测",
+    "result": {
+      "desktop_hamburger_visible": true,
+      "drawer_open": true,
+      "submenu_accordion": true,
+      "overlay_close": true,
+      "mobile_drawer": true
+    }
+  },
+  "deploy_sop": [
+    "1. 校验待部署文件SHA256与指令包一致",
+    "2. 备份服务器现有official-homepage.html（cp为.bak-YYYYMMDD）",
+    "3. 上传新文件到官网部署目录（scp/rsync，走主窗口授权通道）",
+    "4. 校验服务器端SHA256一致",
+    "5. nginx reload使生效（若需）",
+    "6. 访问www.huodouai.com验证右上角汉堡可点击展开抽屉",
+    "7. 回写部署结果+回滚方案到飞书台账"
+  ],
+  "rollback": "使用备份文件official-homepage.html.bak-drawer-20261001还原并reload",
+  "risk_level": "低",
+  "constraint": "部署走主窗口/云中枢授权通道，遵循SSH全域铁律（ML-SSH-FORBIDDEN-GLOBAL-001），不直接本地SSH"
+}
