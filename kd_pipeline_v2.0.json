@@ -1,0 +1,323 @@
+{
+  "pipeline_id": "KD-PIPELINE-V1.0",
+  "pipeline_name": "昆仑洞天短剧全自动生产流水线(可控版)",
+  "version": "V2.0",
+  "architecture": "META-LAW-007 星型协同",
+  "did": "DID-BR-000002",
+  "root_id": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "hub_id": "window-zongyuan-autokernel",
+  "cloud_anchor_ip": "123.207.202.158",
+  "created_at": "2026-09-06T13:00:00+08:00",
+  "status": "ACTIVE",
+  "stages": [
+    {
+      "stage_id": "S1",
+      "stage_name": "剧本生成",
+      "window": "window-drama-machine",
+      "domain": "drama",
+      "operator": "generate_script",
+      "operator_group": "text",
+      "input": {
+        "topic": "string",
+        "character": "string",
+        "duration": "int"
+      },
+      "output": {
+        "script_id": "string",
+        "script_content": "string"
+      },
+      "constraints": [
+        "纯东方神女神话视觉",
+        "L0天元法则合规",
+        "无西方元素",
+        "无雄性化"
+      ],
+      "next_stage": "S2"
+    },
+    {
+      "stage_id": "S2",
+      "stage_name": "分镜生成(StoryPack)",
+      "window": "window-drama-machine",
+      "domain": "drama",
+      "operator": "generate_storyboard",
+      "operator_group": "text",
+      "input": {
+        "script_id": "string",
+        "shots": "int",
+        "aspect_ratio": "9:16"
+      },
+      "output": {
+        "storyboard_id": "string",
+        "story_pack": {
+          "hook": "故事钩子",
+          "character_cards": "角色卡(外形/性格/台词风格)",
+          "beats": "分幕节拍(铺垫→发展→爆点→转折→收尾)",
+          "dialogue_cues": "台词提示",
+          "shot_order": "镜头顺序"
+        },
+        "shots": "array"
+      },
+      "constraints": [
+        "每镜头含画面/光影/旁白/音效",
+        "情绪逻辑：铺垫→发展→爆点→转折→收尾",
+        "StoryPack一次性产出: 钩子/角色卡/分幕节拍/台词提示/镜头顺序"
+      ],
+      "next_stage": "S2.5"
+    },
+    {
+      "stage_id": "S2.5",
+      "stage_name": "分镜审核门控",
+      "window": "window-drama-machine",
+      "domain": "drama",
+      "operator": "storyboard_gate",
+      "operator_group": "quality",
+      "input": {
+        "story_pack": "object",
+        "shots": "array"
+      },
+      "output": {
+        "gate_status": "APPROVED|REJECTED",
+        "review_note": "string"
+      },
+      "constraints": [
+        "人工审核关卡: 分镜未过不进入生成",
+        "审核通过→S3",
+        "审核驳回→回S2修订",
+        "打破黑箱: 阶段可编辑可审核"
+      ],
+      "next_stage": "S3"
+    },
+    {
+      "stage_id": "S3",
+      "stage_name": "关键帧生成",
+      "window": "window-drama-machine",
+      "domain": "drama",
+      "operator": "generate_keyframe",
+      "operator_group": "image",
+      "input": {
+        "story_pack": "object",
+        "gate_status": "APPROVED",
+        "aspect_ratio": "9:16"
+      },
+      "output": {
+        "keyframes": "array",
+        "image_urls": "array"
+      },
+      "constraints": [
+        "纯乌黑长发（永久基准）",
+        "九头身体态",
+        "青黑长裙+玄鸟图腾",
+        "天书+剑法器",
+        "强烈轮廓光+霞光",
+        "UE5.7光追",
+        "Kodak Portra400胶片",
+        "9:16竖屏",
+        "严禁白发/西方铠甲/雄性化/畸形肢体/性别混杂",
+        "右下角溯源符号Ω₀⊂⊙∞⊂Ω"
+      ],
+      "next_stage": "S4"
+    },
+    {
+      "stage_id": "S4",
+      "stage_name": "视频生成",
+      "window": "window-drama-machine",
+      "domain": "drama",
+      "operator": "image_to_video",
+      "operator_group": "video",
+      "input": {
+        "keyframe_urls": "array",
+        "duration_per_clip": "10s",
+        "model": "seedance_2.0_mini"
+      },
+      "output": {
+        "video_clips": "array",
+        "video_urls": "array"
+      },
+      "constraints": [
+        "Seedance 2.0 Mini",
+        "每段10秒独立短视频",
+        "关键帧+旁白金句组合"
+      ],
+      "next_stage": "S5",
+      "fallback_operator": "text_to_video"
+    },
+    {
+      "stage_id": "S5",
+      "stage_name": "视频合成",
+      "window": "window-drama-machine",
+      "domain": "drama",
+      "operator": "concat",
+      "operator_group": "video",
+      "input": {
+        "video_clips": "array",
+        "transitions": "array"
+      },
+      "output": {
+        "final_video_url": "string"
+      },
+      "sub_operators": [
+        "merge_audio",
+        "transcode"
+      ],
+      "next_stage": "S6"
+    },
+    {
+      "stage_id": "S6",
+      "stage_name": "校验中心(连续性门)",
+      "window": "window-verify-hub",
+      "domain": "verify",
+      "operators": [
+        "check_file_integrity",
+        "check_video_playable",
+        "drift_detection"
+      ],
+      "operator_group": "verify",
+      "input": {
+        "final_video_url": "string",
+        "expected_hash": "string"
+      },
+      "output": {
+        "integrity_pass": "bool",
+        "playable_pass": "bool",
+        "drift_pass": "bool"
+      },
+      "rules": [
+        "文件完整性校验通过",
+        "视频可播性校验通过",
+        "漂移检测无异常",
+        "视觉合规：纯东方神女/无白发/无西方元素/无雄性化",
+        "L0天元法则合规"
+      ],
+      "on_fail": "回退到S3重新生成",
+      "next_stage": "S7",
+      "operator": "quality_center",
+      "constraints": [
+        "连续性检查算子: 跨场景一致性校验(角色/服饰/场景/风格)",
+        "关键帧sha256指纹比对: 防角色漂移",
+        "一致性未过→回S3重渲对应镜头, 不重渲全片"
+      ]
+    },
+    {
+      "stage_id": "S7",
+      "stage_name": "锁档归档",
+      "window": "window-zongyuan-autokernel",
+      "domain": "core",
+      "operator": "global_lock_processor",
+      "input": {
+        "all_assets": "array",
+        "episode_id": "string"
+      },
+      "output": {
+        "snapshot_id": "string",
+        "universal_root": "string",
+        "merkle_root": "string"
+      },
+      "sub_steps": [
+        "Merkle DAG谱系构建",
+        "BASE85密文封存",
+        "增量快照",
+        "L0基线校验",
+        "eFuse硬件熔断标记",
+        "飞书云盘上传",
+        "飞书Base进化谱系注册",
+        "云端内核锁(S3_lock)"
+      ],
+      "archive_targets": {
+        "feishu_drive_folder": "XT6EfNqrTludZyd9U43c0HDonKc",
+        "feishu_base": {
+          "base_token": "IKIdb7KLDapblXsvVDIcs8FLnLa",
+          "table_id": "tbl6bt6EuQrgkj6b"
+        },
+        "cloud_kernel_lock": true
+      }
+    }
+  ],
+  "dispatch_workflow": [
+    "中枢接收短剧生产需求",
+    "S1剧本生成 → 短剧母机",
+    "S2分镜生成 → 短剧母机",
+    "S3关键帧生成 → 短剧母机",
+    "S4视频生成 → 短剧母机",
+    "S5视频合成 → 短剧母机",
+    "S6校验中心校验 → 校验中心",
+    "S7锁档归档 → 中枢",
+    "全流程完成，输出网页入口"
+  ],
+  "windows": {
+    "hub": {
+      "id": "window-zongyuan-autokernel",
+      "role": "kernel_hub",
+      "domain": "local_kernel"
+    },
+    "drama": {
+      "id": "window-drama-machine",
+      "role": "producer",
+      "domain": "drama",
+      "capabilities": 7
+    },
+    "verify": {
+      "id": "window-verify-hub",
+      "role": "verifier",
+      "domain": "verify",
+      "capabilities": 3
+    }
+  },
+  "quality_gates": {
+    "visual_compliance": [
+      "纯乌黑长发",
+      "九头身",
+      "青黑长裙",
+      "玄鸟图腾",
+      "天书+剑",
+      "强烈轮廓光",
+      "无白发",
+      "无西方元素",
+      "无雄性化"
+    ],
+    "technical": [
+      "9:16竖屏",
+      "UE5.7光追",
+      "Portra400胶片",
+      "溯源符号"
+    ],
+    "narrative": [
+      "铺垫→发展→爆点情绪逻辑",
+      "关键帧+旁白金句",
+      "10秒独立短视频"
+    ],
+    "continuity": [
+      "角色一致性(外形/服饰跨镜头不漂移)",
+      "关键帧sha256指纹比对",
+      "场景/风格一致性",
+      "StoryPack节拍与成片对齐"
+    ],
+    "storyboard_gate": [
+      "钩子明确",
+      "角色卡完整",
+      "分幕节拍符合情绪逻辑",
+      "镜头顺序可执行"
+    ]
+  },
+  "cloud_sync": {
+    "persist_task": {
+      "task_type": "pipeline_config",
+      "task_id": "pipeline-kd-v1.0"
+    },
+    "lock_kernel": {
+      "snapshot_id": "SNAP-PIPELINE-V1.0",
+      "desc": "昆仑洞天短剧生产流水线V1.0配置锁档"
+    },
+    "operators_base_url": "https://www.huodouai.com/ai-proxy/operators/call"
+  },
+  "tech_integration": {
+    "batch": "INTEGRATE-20261001-AIFILM-TECH",
+    "integrated": [
+      "分镜审核门控(storyboard_gate)",
+      "StoryPack一次性产出",
+      "连续性检查算子(continuity_gate)"
+    ],
+    "source": "魔搭AI+∞大赛最佳Agent范式",
+    "principle": "强集成优先, 零成本零额度"
+  }
+}
