@@ -72,57 +72,6 @@ def decision_gate(action: str, risk: str = "low"):
     return {"allow": False, "gate": "pending-approval"}
 
 
-
-
-def decision_engine_once():
-    """决策引擎(L2→L1质变): 读本地状态→M1公式(P=0.3U-0.4R-0.3C)分级→低风险自主执行/高风险挂起→决策日志JSONL+网关留痕"""
-    ts = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-    try:
-        m = json.load(open("/www/wwwroot/huodouai.com/_zongyuan-assets/zhongshu-metrics.json"))
-        last = m.get("last", {})
-    except Exception:
-        last = {}
-    gw_ok = last.get("gateway_ok"); tc = last.get("truth_count"); dsk = last.get("disk_pct"); mem = last.get("mem_pct")
-    decisions = []
-    # M1 分级: P=0.3U-0.4R-0.3C
-    if gw_ok == 0:
-        decisions.append({"action": "restart-gateway", "U": 9, "R": 2, "C": 1, "P": 2.7-0.8-0.3, "gate": "auto"})
-    if dsk is not None and str(dsk).isdigit() and int(dsk) > 85:
-        decisions.append({"action": "disk-alert", "U": 7, "R": 1, "C": 1, "P": 2.1-0.4-0.3, "gate": "alert"})
-    if mem is not None and str(mem).isdigit() and int(mem) > 90:
-        decisions.append({"action": "mem-alert", "U": 7, "R": 1, "C": 1, "P": 2.1-0.4-0.3, "gate": "alert"})
-    # 高风险域(写docroot/删除/结构变更): fail-closed 挂起, 仅记录
-    decisions.append({"action": "high-risk-domain", "gate": "pending-approval",
-                      "rule": "写docroot/删除/结构变更一律挂起人工审批", "P": -9.9})
-    entry = {"ts": ts, "cycle": "decision", "gateway_ok": gw_ok, "truth_count": tc,
-             "disk_pct": dsk, "mem_pct": mem, "decisions": decisions, "did": DID}
-    ddir = "/www/wwwroot/huodouai.com/zhongshu/data/decisions"
-    try:
-        os.makedirs(ddir, exist_ok=True)
-        with open(f"{ddir}/decisions-{time.strftime('%Y%m%d')}.jsonl", "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    except Exception as e:
-        entry["log_error"] = str(e)[:80]
-    # 低风险动作执行
-    for d in decisions:
-        if d["gate"] == "auto" and d["action"] == "restart-gateway":
-            try:
-                subprocess.run(["systemctl", "restart", "zhongshu-gateway"], capture_output=True, timeout=30)
-                entry["executed"] = "restart-gateway"
-            except Exception as e:
-                entry["exec_error"] = str(e)[:80]
-        elif d["gate"] == "alert":
-            try:
-                subprocess.run(["curl", "-s", "-m", "8", "-X", "POST",
-                                "https://zrntfy.huodouai.com/zongyuan-did-br-000002-7f3a9c2e-alert",
-                                "-H", "X-DID: DID-BR-000002",
-                                "-d", json.dumps({"event": "decision_alert", "detail": d["action"]})],
-                               capture_output=True, timeout=15)
-            except Exception:
-                pass
-    return entry
-
-
 def lark_guarded(args):
     """写操作守卫：所有 lark 写类命令先过决策门，未审批不执行"""
     write_kw = ("record-batch-update", "record-delete", "record-upsert", "field-create",
@@ -146,11 +95,6 @@ def run_loop():
             print(json.dumps(hb, ensure_ascii=False), flush=True)
         except Exception as e:
             print("heartbeat_error:", str(e)[:160], flush=True)
-        try:
-            de = decision_engine_once()
-            print(json.dumps(de, ensure_ascii=False), flush=True)
-        except Exception as e:
-            print("decision_error:", str(e)[:160], flush=True)
         time.sleep(INTERVAL)
 
 
