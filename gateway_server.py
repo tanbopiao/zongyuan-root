@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+"""gateway_server.py · 云端中枢元内核 · 真值网关 HTTP
+端点：POST /api/report/truth（X-DID 单头认证，无尾部斜杠）
+兼容：GET /api/status 状态页
+启动：python3 gateway_server.py [--port 9001]
+"""
+import json, sys, os
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse
+
+from truth_store import append_truth, state, status_ok, DID
+
+PORT = int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 9001
+VALID_DIDS = {"DID-BR-000002"}
+
+
+class GW(BaseHTTPRequestHandler):
+    def log_message(self, *a):
+        pass
+
+    def _send(self, code, obj):
+        body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        p = urlparse(self.path).path
+        if p == "/api/status":
+            st = state()
+            self._send(200, {
+                "status": "ok" if status_ok() else "degraded",
+                "service": "zhongshu-meta-core",
+                "did": DID,
+                "anchor": "Ω₀⊂⊙∞⊂Ω",
+                "truth_count": st.get("ledger_lines", 0),
+                "merkle_root": st.get("merkle_root", ""),
+                "version": "V3.0",
+            })
+        else:
+            self._send(404, {"error": "not_found", "message": f"未知端点: {p}"})
+
+    def do_POST(self):
+        p = urlparse(self.path).path
+        if p != "/api/report/truth":
+            self._send(404, {"error": "not_found", "message": f"未知端点: {p}"})
+            return
+        x_did = self.headers.get("X-DID", "")
+        if x_did not in VALID_DIDS:
+            self._send(401, {"error": "unauthorized", "message": "X-DID 未授权"})
+            return
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+            payload = json.loads(self.rfile.read(length).decode("utf-8")) if length else {}
+        except Exception as e:
+            self._send(400, {"error": "bad_json", "message": str(e)[:120]})
+            return
+        key = payload.get("key", f"truth-{int(__import__('time').time()*1000)}")
+        value = payload.get("value", {})
+        if not isinstance(value, dict):
+            self._send(400, {"error": "value_must_be_object"})
+            return
+        try:
+            res = append_truth(key, value, x_did)
+            self._send(200, {
+                "ok": True, "message": "真值写入成功",
+                "key": key, "truth_count": res["truth_count"],
+                "seq": res["seq"], "event_id": res["event_id"],
+            })
+        except Exception as e:
+            self._send(500, {"error": "write_failed", "message": str(e)[:160]})
+
+
+if __name__ == "__main__":
+    print(f"云端中枢元内核 · 真值网关启动 http://0.0.0.0:{PORT}")
+    HTTPServer(("0.0.0.0", PORT), GW).serve_forever()
