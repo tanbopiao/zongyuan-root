@@ -8,7 +8,7 @@ import json, sys, os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 
-from truth_store import append_truth, state, status_ok, DID, query_truth, ledger_snapshot, verify_merkle
+from truth_store import append_truth, state, status_ok, DID
 
 PORT = int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 9001
 VALID_DIDS = {"DID-BR-000002"}
@@ -37,20 +37,8 @@ class GW(BaseHTTPRequestHandler):
                 "anchor": "Ω₀⊂⊙∞⊂Ω",
                 "truth_count": st.get("ledger_lines", 0),
                 "merkle_root": st.get("merkle_root", ""),
-                "version": "V3.1",
+                "version": "V3.0",
             })
-        elif p == "/api/truth":
-            # 真值查询: ?key=前缀&limit=N
-            from urllib.parse import parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            rows = query_truth(q.get("key", [""])[0], int(q.get("limit", ["10"])[0]))
-            self._send(200, {"ok": True, "count": len(rows), "results": rows})
-        elif p == "/api/ledger":
-            from urllib.parse import parse_qs
-            q = parse_qs(urlparse(self.path).query)
-            self._send(200, {"ok": True, **ledger_snapshot(int(q.get("limit", ["10"])[0]))})
-        elif p == "/api/verify":
-            self._send(200, {"ok": True, **verify_merkle()})
         else:
             self._send(404, {"error": "not_found", "message": f"未知端点: {p}"})
 
@@ -86,5 +74,5 @@ class GW(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"云端中枢元内核 · 真值网关启动 http://127.0.0.1:{PORT} (仅本机, nginx反代)")
-    HTTPServer(("127.0.0.1", PORT), GW).serve_forever()
+    print(f"云端中枢元内核 · 真值网关启动 http://0.0.0.0:{PORT}")
+    HTTPServer(("0.0.0.0", PORT), GW).serve_forever()
