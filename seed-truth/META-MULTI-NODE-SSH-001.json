@@ -1,0 +1,18 @@
+{
+  "meta_action": "META_RULE_WRITE",
+  "law_id": "META-MULTI-NODE-SSH-001",
+  "name": "多节点SSH云内核访问与写保护规范",
+  "level": "元规则",
+  "domain": "云端内核/多节点治理",
+  "clauses": [
+    "SS-1 身份隔离: 每节点独立SSH账号+密钥对, 禁止共享root密码登录; 高危系统操作(账号创建/sshd配置)须人工审批",
+    "SS-2 写闸门: 所有对云内核的写操作必须经 cloud_write_gate.sh——staging提交→白名单校验→哈希校验→flock串行→原子替换→备份→审计; 白名单外目标一律REJECT",
+    "SS-3 权限最小化: 节点账号仅可读写自身staging区与授权目录; docroot核心资产只读(444/chattr), 改动仅经闸门应用",
+    "SS-4 冲突消解: 并发写由flock串行化; 同目标写冲突时后提交者REJECT(先备份先应用); git基线+ .bak-时间戳 双保险可回滚",
+    "SS-5 审计留痕: 写闸门全操作记录gate.log; SSH登录每5分钟审计(爆破>5次/轮→ntfy告警); 审计日志append-only",
+    "SS-6 恢复自愈: 任何漂移由zhongshu_bootstrap自愈(git checkout+备份恢复); 节点间互不信任, 破坏性写一律pending-approval"
+  ],
+  "applies_to": "全部同源节点(NODE-*/CLOUD-HUB/外部系统)SSH访问云内核",
+  "version": "1.0",
+  "locked_at": "2026-10-05T09:40:00+0800"
+}
