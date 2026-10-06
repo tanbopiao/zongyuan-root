@@ -2,7 +2,7 @@
   "rule_id": "META-RULE-SUBDOMAIN-DEPLOY-ISOLATION-20261006",
   "rule_type": "meta_rule",
   "title": "云端部署子域隔离元规则：新子域部署、主站只读",
-  "version": "V1.0",
+  "version": "V1.1",
   "did": "DID-BR-000002",
   "anchor": "Ω₀⊂⊙∞⊂Ω",
   "created": "2026-10-06T11:20:00+0800",
@@ -42,6 +42,16 @@
       "no": 6,
       "content": "SSH接入通道统一走腾讯云API关联密钥对(当前: zongyuan_core↔zongyuan_core_access)，子域部署均通过该通道，禁止在服务器上创建互相冲突的凭据",
       "trigger": "SSH部署"
+    },
+    {
+      "no": 7,
+      "content": "部署前必查域名清单(domain_registry): 目标域名必须属于允许部署域(kunlun/cloud子域); 属于主站www.huodouai.com的直接拒绝并改走子域",
+      "trigger": "所有部署动作"
+    },
+    {
+      "no": 8,
+      "content": "新子域申请流程: 域名清单不含的新子域, 需先在服务器nginx添加server_name+创建站点目录+申请证书, 并登记回本清单(补齐规范)后方可部署",
+      "trigger": "需要新子域时"
     }
   ],
   "enforcement": {
@@ -52,5 +62,73 @@
   "references": [
     "KUNLUN-PLATFORM-CLOUD-20261006(首次子域部署实例)",
     "LOCK-CREDENTIAL-HUODOUAI-CLOUD-HANDSHAKE-20260919"
-  ]
+  ],
+  "updated": "2026-10-06T11:40:00+0800",
+  "update_note": "V1.1: 补齐域名清单与各域用途/部署策略, 规范化后续所有云端部署",
+  "domain_registry": {
+    "main_site": {
+      "domains": [
+        "www.huodouai.com",
+        "huodouai.com"
+      ],
+      "root": "/www/wwwroot/huodouai.com/",
+      "role": "主站·共享中枢入口",
+      "policy": "永久只读, 禁止任何节点部署/修改(需人工审批)",
+      "existing_modules": [
+        "api/",
+        "about/",
+        "archive/",
+        "assets/",
+        "zhongshu/",
+        "en/",
+        "kunlun.html",
+        "pipeline.html",
+        "zongyuan-whitepaper.html",
+        "tech-architecture.html",
+        "truth-dashboard.html",
+        "perception-dashboard.html",
+        "monitor.html",
+        "dashboard.html",
+        "chat.html",
+        "investor.html",
+        "research.html",
+        "pricing.html",
+        "sitemap.xml",
+        "robots.txt"
+      ]
+    },
+    "kunlun_subdomain": {
+      "domains": [
+        "kunlun.huodouai.com",
+        "shennv.huodouai.com",
+        "dongtian.huodouai.com"
+      ],
+      "root": "/www/wwwroot/kunlun.huodouai.com/",
+      "role": "昆仑洞天IP专属子域(角色/作品/短剧/创作平台)",
+      "policy": "允许部署, 新增模块建独立子目录; 修改index.html必须先备份(bak-日期)",
+      "existing_modules": [
+        "kunlun-platform/(AI创作平台)",
+        "gallery/rose/(玫瑰作品库)",
+        "index.html(首页)",
+        "shennv.html(神女页)"
+      ]
+    },
+    "cloud_subdomain": {
+      "domains": [
+        "cloud.huodouai.com",
+        "ops.huodouai.com"
+      ],
+      "root": "/www/wwwroot/cloud.huodouai.com/",
+      "role": "云中枢/运维控制台",
+      "policy": "运维类部署专用, 业务模块不部署于此",
+      "existing_modules": [
+        "index.html"
+      ]
+    },
+    "known_related_domains": {
+      "aios.huodouai.com": "AIOS主站/注册入口(引用)",
+      "drama.huodouai.com": "记忆网关(report/truth)",
+      "www.modelscope.cn/models/zongyuanroot/*": "魔搭云端数据湖/白皮书仓(外部发布通道)"
+    }
+  }
 }
