@@ -1,0 +1,56 @@
+{
+  "rule_id": "META-RULE-SUBDOMAIN-DEPLOY-ISOLATION-20261006",
+  "rule_type": "meta_rule",
+  "title": "云端部署子域隔离元规则：新子域部署、主站只读",
+  "version": "V1.0",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "created": "2026-10-06T11:20:00+0800",
+  "source": "用户指令(20261006)",
+  "status": "locked",
+  "priority": "high",
+  "scope": "所有云端部署动作(全节点统一遵守)",
+  "purpose": "多节点分布式协作时，避免交叉部署覆盖彼此成果，保障主站稳定与各子域独立进化",
+  "rules": [
+    {
+      "no": 1,
+      "content": "云端部署一律使用专用子域名(如 kunlun.huodouai.com / shennv.huodouai.com / dongtian.huodouai.com / cloud.huodouai.com)，在子域根目录或子域下的独立路径部署新成果",
+      "trigger": "任何新网页/平台/应用部署动作"
+    },
+    {
+      "no": 2,
+      "content": "禁止改动主站 www.huodouai.com 及其根目录 /www/wwwroot/huodouai.com/ 下的任何文件、配置、路由",
+      "trigger": "所有部署动作",
+      "note": "主站为共享中枢入口，任何节点改动都可能影响其他节点访问，故永久只读(需人工审批方可改动)"
+    },
+    {
+      "no": 3,
+      "content": "同一子域内新增模块时，优先在子域下新建独立子目录(如 /kunlun-platform/、/gallery/)，不与子域现有文件直接覆盖；确需修改子域首页时，必须先备份原文件(bak-日期)再做增量注入",
+      "trigger": "子域内新增/修改"
+    },
+    {
+      "no": 4,
+      "content": "部署完成后必须验证：新子域页面 HTTP 200 + 原有子域页面/主站全部 HTTP 200(零破坏验证)",
+      "trigger": "每次部署后"
+    },
+    {
+      "no": 5,
+      "content": "多节点并发部署同一子域时，以账本时间戳+HASH指纹为准排序，禁止凭记忆互相覆盖；冲突按元法则冲突消解三级机制处理",
+      "trigger": "多节点并发"
+    },
+    {
+      "no": 6,
+      "content": "SSH接入通道统一走腾讯云API关联密钥对(当前: zongyuan_core↔zongyuan_core_access)，子域部署均通过该通道，禁止在服务器上创建互相冲突的凭据",
+      "trigger": "SSH部署"
+    }
+  ],
+  "enforcement": {
+    "check": "部署前检查目标路径是否含 www.huodouai.com/ 主站根，含则拒绝并改走子域",
+    "verify": "部署后跑全站HTTP核验脚本(新页面+原页面+主站)"
+  },
+  "violation": "任何节点违反本规则改动主站，视为破坏性操作，需回滚+登记问题+人工审批追责",
+  "references": [
+    "KUNLUN-PLATFORM-CLOUD-20261006(首次子域部署实例)",
+    "LOCK-CREDENTIAL-HUODOUAI-CLOUD-HANDSHAKE-20260919"
+  ]
+}
