@@ -1,134 +1,223 @@
 {
-  "rule_id": "META-RULE-SUBDOMAIN-DEPLOY-ISOLATION-20261006",
-  "rule_type": "meta_rule",
-  "title": "云端部署子域隔离元规则：新子域部署、主站只读",
-  "version": "V1.1",
-  "did": "DID-BR-000002",
-  "anchor": "Ω₀⊂⊙∞⊂Ω",
-  "created": "2026-10-06T11:20:00+0800",
-  "source": "用户指令(20261006)",
-  "status": "locked",
-  "priority": "high",
-  "scope": "所有云端部署动作(全节点统一遵守)",
-  "purpose": "多节点分布式协作时，避免交叉部署覆盖彼此成果，保障主站稳定与各子域独立进化",
-  "rules": [
-    {
-      "no": 1,
-      "content": "云端部署一律使用专用子域名(如 kunlun.huodouai.com / shennv.huodouai.com / dongtian.huodouai.com / cloud.huodouai.com)，在子域根目录或子域下的独立路径部署新成果",
-      "trigger": "任何新网页/平台/应用部署动作"
-    },
-    {
-      "no": 2,
-      "content": "禁止改动主站 www.huodouai.com 及其根目录 /www/wwwroot/huodouai.com/ 下的任何文件、配置、路由",
-      "trigger": "所有部署动作",
-      "note": "主站为共享中枢入口，任何节点改动都可能影响其他节点访问，故永久只读(需人工审批方可改动)"
-    },
-    {
-      "no": 3,
-      "content": "同一子域内新增模块时，优先在子域下新建独立子目录(如 /kunlun-platform/、/gallery/)，不与子域现有文件直接覆盖；确需修改子域首页时，必须先备份原文件(bak-日期)再做增量注入",
-      "trigger": "子域内新增/修改"
-    },
-    {
-      "no": 4,
-      "content": "部署完成后必须验证：新子域页面 HTTP 200 + 原有子域页面/主站全部 HTTP 200(零破坏验证)",
-      "trigger": "每次部署后"
-    },
-    {
-      "no": 5,
-      "content": "多节点并发部署同一子域时，以账本时间戳+HASH指纹为准排序，禁止凭记忆互相覆盖；冲突按元法则冲突消解三级机制处理",
-      "trigger": "多节点并发"
-    },
-    {
-      "no": 6,
-      "content": "SSH接入通道统一走腾讯云API关联密钥对(当前: zongyuan_core↔zongyuan_core_access)，子域部署均通过该通道，禁止在服务器上创建互相冲突的凭据",
-      "trigger": "SSH部署"
-    },
-    {
-      "no": 7,
-      "content": "部署前必查域名清单(domain_registry): 目标域名必须属于允许部署域(kunlun/cloud子域); 属于主站www.huodouai.com的直接拒绝并改走子域",
-      "trigger": "所有部署动作"
-    },
-    {
-      "no": 8,
-      "content": "新子域申请流程: 域名清单不含的新子域, 需先在服务器nginx添加server_name+创建站点目录+申请证书, 并登记回本清单(补齐规范)后方可部署",
-      "trigger": "需要新子域时"
-    }
-  ],
-  "enforcement": {
-    "check": "部署前检查目标路径是否含 www.huodouai.com/ 主站根，含则拒绝并改走子域",
-    "verify": "部署后跑全站HTTP核验脚本(新页面+原页面+主站)"
+ "rule_id": "META-RULE-SUBDOMAIN-DEPLOY-ISOLATION-20261006",
+ "rule_type": "meta_rule",
+ "title": "云端部署子域隔离元规则：新子域部署、主站只读",
+ "version": "V1.2",
+ "did": "DID-BR-000002",
+ "anchor": "Ω₀⊂⊙∞⊂Ω",
+ "created": "2026-10-06T11:20:00+0800",
+ "source": "用户指令(20261006)",
+ "status": "locked",
+ "priority": "high",
+ "scope": "所有云端部署动作(全节点统一遵守)",
+ "purpose": "多节点分布式协作时，避免交叉部署覆盖彼此成果，保障主站稳定与各子域独立进化",
+ "rules": [
+  {
+   "no": 1,
+   "content": "云端部署一律使用专用子域名(如 kunlun.huodouai.com / shennv.huodouai.com / dongtian.huodouai.com / cloud.huodouai.com)，在子域根目录或子域下的独立路径部署新成果",
+   "trigger": "任何新网页/平台/应用部署动作"
   },
-  "violation": "任何节点违反本规则改动主站，视为破坏性操作，需回滚+登记问题+人工审批追责",
-  "references": [
-    "KUNLUN-PLATFORM-CLOUD-20261006(首次子域部署实例)",
-    "LOCK-CREDENTIAL-HUODOUAI-CLOUD-HANDSHAKE-20260919"
-  ],
-  "updated": "2026-10-06T11:40:00+0800",
-  "update_note": "V1.1: 补齐域名清单与各域用途/部署策略, 规范化后续所有云端部署",
-  "domain_registry": {
-    "main_site": {
-      "domains": [
-        "www.huodouai.com",
-        "huodouai.com"
-      ],
-      "root": "/www/wwwroot/huodouai.com/",
-      "role": "主站·共享中枢入口",
-      "policy": "永久只读, 禁止任何节点部署/修改(需人工审批)",
-      "existing_modules": [
-        "api/",
-        "about/",
-        "archive/",
-        "assets/",
-        "zhongshu/",
-        "en/",
-        "kunlun.html",
-        "pipeline.html",
-        "zongyuan-whitepaper.html",
-        "tech-architecture.html",
-        "truth-dashboard.html",
-        "perception-dashboard.html",
-        "monitor.html",
-        "dashboard.html",
-        "chat.html",
-        "investor.html",
-        "research.html",
-        "pricing.html",
-        "sitemap.xml",
-        "robots.txt"
-      ]
-    },
-    "kunlun_subdomain": {
-      "domains": [
-        "kunlun.huodouai.com",
-        "shennv.huodouai.com",
-        "dongtian.huodouai.com"
-      ],
-      "root": "/www/wwwroot/kunlun.huodouai.com/",
-      "role": "昆仑洞天IP专属子域(角色/作品/短剧/创作平台)",
-      "policy": "允许部署, 新增模块建独立子目录; 修改index.html必须先备份(bak-日期)",
-      "existing_modules": [
-        "kunlun-platform/(AI创作平台)",
-        "gallery/rose/(玫瑰作品库)",
-        "index.html(首页)",
-        "shennv.html(神女页)"
-      ]
-    },
-    "cloud_subdomain": {
-      "domains": [
-        "cloud.huodouai.com",
-        "ops.huodouai.com"
-      ],
-      "root": "/www/wwwroot/cloud.huodouai.com/",
-      "role": "云中枢/运维控制台",
-      "policy": "运维类部署专用, 业务模块不部署于此",
-      "existing_modules": [
-        "index.html"
-      ]
-    },
-    "known_related_domains": {
-      "aios.huodouai.com": "AIOS主站/注册入口(引用)",
-      "drama.huodouai.com": "记忆网关(report/truth)",
-      "www.modelscope.cn/models/zongyuanroot/*": "魔搭云端数据湖/白皮书仓(外部发布通道)"
-    }
+  {
+   "no": 2,
+   "content": "禁止改动主站 www.huodouai.com 及其根目录 /www/wwwroot/huodouai.com/ 下的任何文件、配置、路由",
+   "trigger": "所有部署动作",
+   "note": "主站为共享中枢入口，任何节点改动都可能影响其他节点访问，故永久只读(需人工审批方可改动)"
+  },
+  {
+   "no": 3,
+   "content": "同一子域内新增模块时，优先在子域下新建独立子目录(如 /kunlun-platform/、/gallery/)，不与子域现有文件直接覆盖；确需修改子域首页时，必须先备份原文件(bak-日期)再做增量注入",
+   "trigger": "子域内新增/修改"
+  },
+  {
+   "no": 4,
+   "content": "部署完成后必须验证：新子域页面 HTTP 200 + 原有子域页面/主站全部 HTTP 200(零破坏验证)",
+   "trigger": "每次部署后"
+  },
+  {
+   "no": 5,
+   "content": "多节点并发部署同一子域时，以账本时间戳+HASH指纹为准排序，禁止凭记忆互相覆盖；冲突按元法则冲突消解三级机制处理",
+   "trigger": "多节点并发"
+  },
+  {
+   "no": 6,
+   "content": "SSH接入通道统一走腾讯云API关联密钥对(当前: zongyuan_core↔zongyuan_core_access)，子域部署均通过该通道，禁止在服务器上创建互相冲突的凭据",
+   "trigger": "SSH部署"
+  },
+  {
+   "no": 7,
+   "content": "部署前必查域名清单(domain_registry): 目标域名必须属于允许部署域(kunlun/cloud子域); 属于主站www.huodouai.com的直接拒绝并改走子域",
+   "trigger": "所有部署动作"
+  },
+  {
+   "no": 8,
+   "content": "新子域申请流程: 域名清单不含的新子域, 需先在服务器nginx添加server_name+创建站点目录+申请证书, 并登记回本清单(补齐规范)后方可部署",
+   "trigger": "需要新子域时"
   }
+ ],
+ "enforcement": {
+  "check": "部署前检查目标路径是否含 www.huodouai.com/ 主站根，含则拒绝并改走子域",
+  "verify": "部署后跑全站HTTP核验脚本(新页面+原页面+主站)"
+ },
+ "violation": "任何节点违反本规则改动主站，视为破坏性操作，需回滚+登记问题+人工审批追责",
+ "references": [
+  "KUNLUN-PLATFORM-CLOUD-20261006(首次子域部署实例)",
+  "LOCK-CREDENTIAL-HUODOUAI-CLOUD-HANDSHAKE-20260919"
+ ],
+ "updated": "2026-10-06T12:10:00+0800",
+ "update_note": "V1.2: 登记6新子域(wiki/gallery/gov/loip/qidian/dev)部署; kunlun子域aios register引用已改指dev(2处); 主站5处引用待审批",
+ "domain_registry": {
+  "main_site": {
+   "domains": [
+    "www.huodouai.com",
+    "huodouai.com"
+   ],
+   "root": "/www/wwwroot/huodouai.com/",
+   "role": "主站·共享中枢入口",
+   "policy": "永久只读, 禁止任何节点部署/修改(需人工审批)",
+   "existing_modules": [
+    "api/",
+    "about/",
+    "archive/",
+    "assets/",
+    "zhongshu/",
+    "en/",
+    "kunlun.html",
+    "pipeline.html",
+    "zongyuan-whitepaper.html",
+    "tech-architecture.html",
+    "truth-dashboard.html",
+    "perception-dashboard.html",
+    "monitor.html",
+    "dashboard.html",
+    "chat.html",
+    "investor.html",
+    "research.html",
+    "pricing.html",
+    "sitemap.xml",
+    "robots.txt",
+    "aios.huodouai.com/register.html 引用(5处, 外部站点404, 待人工审批改指dev)"
+   ]
+  },
+  "kunlun_subdomain": {
+   "domains": [
+    "kunlun.huodouai.com",
+    "shennv.huodouai.com",
+    "dongtian.huodouai.com"
+   ],
+   "root": "/www/wwwroot/kunlun.huodouai.com/",
+   "role": "昆仑洞天IP专属子域(角色/作品/短剧/创作平台)",
+   "policy": "允许部署, 新增模块建独立子目录; 修改index.html必须先备份(bak-日期)",
+   "existing_modules": [
+    "kunlun-platform/(AI创作平台)",
+    "gallery/rose/(玫瑰作品库)",
+    "index.html(首页)",
+    "shennv.html(神女页)"
+   ]
+  },
+  "cloud_subdomain": {
+   "domains": [
+    "cloud.huodouai.com",
+    "ops.huodouai.com"
+   ],
+   "root": "/www/wwwroot/cloud.huodouai.com/",
+   "role": "云中枢/运维控制台",
+   "policy": "运维类部署专用, 业务模块不部署于此",
+   "existing_modules": [
+    "index.html"
+   ]
+  },
+  "known_related_domains": {
+   "aios.huodouai.com": "AIOS主站/注册入口(引用)",
+   "drama.huodouai.com": "记忆网关(report/truth)",
+   "www.modelscope.cn/models/zongyuanroot/*": "魔搭云端数据湖/白皮书仓(外部发布通道)"
+  },
+  "wiki_subdomain": {
+   "domains": [
+    "wiki.huodouai.com"
+   ],
+   "root": "/www/wwwroot/wiki.huodouai.com/",
+   "role": "文档中枢·技术白皮书/官网/能力架构",
+   "policy": "文档类部署专用",
+   "existing_modules": [
+    "ZONGYUAN-ROOT_技术白皮书_V1.0.0_20260831.html",
+    "ZONGYUAN-ROOT官网.html",
+    "能力API化架构.html",
+    "index.html(导航)"
+   ],
+   "deployed": "2026-10-06"
+  },
+  "gallery_subdomain": {
+   "domains": [
+    "gallery.huodouai.com"
+   ],
+   "root": "/www/wwwroot/gallery.huodouai.com/",
+   "role": "视觉作品库·暗黑玫瑰/琉璃礼服/媒体画廊/视觉画廊",
+   "policy": "视觉资产部署专用",
+   "existing_modules": [
+    "暗黑玫瑰废墟记忆.html",
+    "琉璃礼服作品库.html",
+    "昆仑洞天媒体画廊.html",
+    "昆仑洞天视觉画廊.html",
+    "index.html(导航)"
+   ],
+   "deployed": "2026-10-06"
+  },
+  "gov_subdomain": {
+   "domains": [
+    "gov.huodouai.com"
+   ],
+   "root": "/www/wwwroot/gov.huodouai.com/",
+   "role": "政务AI平台·V4.0/政务工作台",
+   "policy": "政务业务部署专用",
+   "existing_modules": [
+    "gov-ai-index.html",
+    "workbench-index.html",
+    "index.html(跳转)"
+   ],
+   "deployed": "2026-10-06"
+  },
+  "loip_subdomain": {
+   "domains": [
+    "loip.huodouai.com"
+   ],
+   "root": "/www/wwwroot/loip.huodouai.com/",
+   "role": "LOIP协议·Console/Playground",
+   "policy": "LOIP协议工具部署专用",
+   "existing_modules": [
+    "console.html",
+    "playground.html"
+   ],
+   "deployed": "2026-10-06"
+  },
+  "qidian_subdomain": {
+   "domains": [
+    "qidian.huodouai.com"
+   ],
+   "root": "/www/wwwroot/qidian.huodouai.com/",
+   "role": "奇点暗架构·Lv9双域稳态内核仪表盘",
+   "policy": "奇点架构展示专用",
+   "existing_modules": [
+    "index.html(Lv9仪表盘)"
+   ],
+   "deployed": "2026-10-06"
+  },
+  "dev_subdomain": {
+   "domains": [
+    "dev.huodouai.com"
+   ],
+   "root": "/www/wwwroot/dev.huodouai.com/",
+   "role": "企业AIOS页·火斗云智官方企业站(替代aios register死链指向)",
+   "policy": "企业站点/开发预览部署专用; register.html为AIOS注册入口补页",
+   "existing_modules": [
+    "index.html",
+    "ai.html",
+    "education.html",
+    "geo-source.html",
+    "knowledge.html",
+    "ai-visibility-check.html",
+    "register.html(补页)"
+   ],
+   "deployed": "2026-10-06"
+  }
+ }
 }
