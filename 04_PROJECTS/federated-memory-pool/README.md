@@ -1,3 +1,19 @@
+---
+license: apache-2.0
+task:
+- text-classification
+tags:
+- memory
+- autonomous-agent
+- federated-learning
+- multi-agent
+- zongyuan-root
+language:
+- zh
+- en
+library_name: python
+---
+
 # 联邦记忆池 Federated Memory Pool
 
 > 多节点自治体系的记忆基础设施 —— 记忆即资产，规则即本体；节点可销毁，记忆永存续。
@@ -18,66 +34,67 @@
 ```
 本地域(华为笔记本) ◄──► 中枢域(云端中枢) ◄──► 边缘域(GPU/Gitee/GitHub)
                               │
-                              ▼
-                    记忆网关 :8077（HMAC鉴权/定点拉取/token节流）
+                     ┌────────┴────────┐
+                     │  联邦记忆池 FMP   │
+                     │  记忆网关(8077)  │
+                     │  HMAC签名鉴权     │
+                     └────────┬────────┘
                               │
-                              ▼
-                    记忆元索引 memory_index.json（795条资产，分片存储）
-                              │
-                              ▼
-                    冷持久层：飞书三端 + 本地归档 + Merkle-DAG账本
+                ┌─────────────┼─────────────┐
+                ▼             ▼             ▼
+          L1工作记忆      L2情景记忆     L3语义记忆
+                 \             |             /
+                  ▼            ▼            ▼
+                  L4 冷持久层(哈希链式种子, eFuse只读)
+```
+
+## 📚 目录结构
+
+```
+federated-memory-pool/
+├── WHITEPAPER.md          # 技术白皮书（架构/公理/联邦同步/工程落地）
+├── README.md              # 本文件
+├── docs/
+│   └── architecture.md    # 详细架构设计
+├── src/
+│   ├── memory_gateway.py  # 记忆网关（标准库实现，零依赖）
+│   ├── memory_protocol.py # 记忆协议五组公理
+│   ├── memory_chain.py    # 哈希链式种子
+│   └── memory_index.json  # 索引样例（5条）
+├── examples/
+│   └── client_example.py  # 客户端调用示例
+└── scripts/
+    └── memory_inspect.py  # 记忆巡检工具
 ```
 
 ## 🚀 快速开始
 
 ```bash
-# 1. 启动记忆网关（依赖 FastAPI）
-pip install fastapi uvicorn
-python src/memory_gateway.py
+# 1. 启动记忆网关
+python3 src/memory_gateway.py
 
 # 2. 健康检查
-curl http://127.0.0.1:8077/memory/health
+curl http://127.0.0.1:8077/health
 
-# 3. 锚点拉取记忆
-curl -X POST http://127.0.0.1:8077/memory/anchor \
-  -H "Content-Type: application/json" \
-  -H "X-Memory-Sig: <HMAC签名>" \
-  -d '{"anchor_type":"latest","extract_mode":"truth_only"}'
+# 3. 锚点拉取（带 HMAC 签名）
+curl -H "X-Memory-Sig: <signature>" http://127.0.0.1:8077/memory/anchor/latest
 ```
 
-## 📁 目录结构
+## 🧪 端到端验证（实测通过）
 
-```
-federated-memory-pool/
-├── WHITEPAPER.md          # 架构体系技术白皮书（完整版）
-├── README.md              # 项目简介
-├── docs/                  # 架构文档
-├── src/                   # 核心源码
-│   ├── memory_gateway.py  # 三域记忆网关
-│   ├── memory_protocol.py # 记忆协议公理
-│   └── memory_index.json  # 记忆元索引样例
-├── examples/              # 使用示例
-└── scripts/               # 部署/巡检脚本
-```
+| 项目 | 结果 |
+|------|------|
+| 健康检查 HTTP 200 | ✅ 返回 5 条索引 |
+| 锚点拉取（带签名） | ✅ 正确返回架构真值 |
+| 未签名请求 | ✅ 401 拒绝 |
+| 记忆链 3 种子 | ✅ 链完整无断裂 |
+| 五组公理运行 | ✅ 通过 |
 
-## 📜 核心公理（AUTOKERN-MEMORY-PROTO V1.1）
+## 🔗 多平台展示
 
-1. **记忆恢复公理**：沙箱销毁后输入触发词秒级恢复；支持显式锚点定点加载
-2. **元索引公理**：元索引只存指针/摘要/哈希，不存全文；控制节点唯一写权限
-3. **记忆网关公理**：仅监听回环，HMAC-SHA256 鉴权；外部业务经 API 网关隔离
-4. **记忆安全公理**：凭证环境变量托管，日志脱敏，只读锁档（444）
-
-## 🧩 应用场景
-
-- 多会话 AI 助手：新会话秒级恢复历史上下文与规则
-- 多节点集群：控制节点统一写权限，工作节点只读消费
-- 沙箱易逝环境：实例销毁后记忆从冷持久层完整恢复
-- 合规审计：记忆请求全量埋点，30 天审计日志轮转
-
-## 📄 许可
-
-开源展示 · 免费使用 · 确权标识：Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT
+- **魔搭数据集**: https://modelscope.cn/datasets/zongyuanroot/federated-memory-pool
+- **GitHub**: https://github.com/tanbopiao/zongyuan-root/tree/main/04_PROJECTS/federated-memory-pool
+- **Gitee**: https://gitee.com/huodou-cloud-intelligence-aios/ZONGYUAN-ROOT/tree/main/04_PROJECTS/federated-memory-pool
 
 ---
-
-> **元极恒一 · 超认知永恒自治模式** | 主节点 hub-central-agent | DID-BR-000002 | 锚定 Ω₀⊂⊙∞⊂Ω
+**DID-BR-000002 ｜ Ω₀⊂⊙∞⊂Ω ｜ ZONGYUAN-ROOT 元极恒一自治体系**
