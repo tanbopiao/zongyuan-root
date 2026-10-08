@@ -9,7 +9,7 @@ DID-BR-000002 | Ω₀⊂⊙∞⊂Ω | 全自动流水线核心
 """
 import os, json, subprocess, time, urllib.request
 
-BASE = '/home/user/ZONGYUAN-ROOT'
+BASE = r'D:/ZONGYUAN_MOVE/_gitee_probe'
 OUT = f'{BASE}/docs/showcase'
 NOW = time.strftime('%Y-%m-%d %H:%M')
 DID, ANCHOR = 'DID-BR-000002', 'Ω₀⊂⊙∞⊂Ω'
@@ -39,11 +39,12 @@ a{{color:{GOLD};text-decoration:none}}
 
 def api_status():
     try:
-        req = urllib.request.Request('https://www.huodouai.com/api/report/status', headers={'X-Capture-Token': TOKEN})
+        req = urllib.request.Request('https://www.huodouai.com/api/status', headers={'X-Capture-Token': TOKEN})
         d = json.loads(urllib.request.urlopen(req, timeout=10).read())
-        return d['stats']
+        return {'truths': d.get('truth_count', 0), 'nodes': 5, 'audit_logs': 'N/A',
+                'version': d.get('version', ''), 'merkle_root': d.get('merkle_root', '')}
     except Exception:
-        return {'truths': 152032, 'nodes': 5, 'audit_logs': 187615}
+        return {'truths': 0, 'nodes': 5, 'audit_logs': 'N/A', 'version': '', 'merkle_root': ''}
 
 def modelscope_ds():
     try:
@@ -64,8 +65,11 @@ def modelscope_ds():
                 ('ZONGYUAN-SHARED-DATALAKE', 91), ('zongyuan-root-full-archive', 1080)]
 
 def git_count():
-    r = subprocess.run('git -C /home/user/ZONGYUAN-ROOT log --oneline', shell=True, capture_output=True, text=True)
-    return len(r.stdout.splitlines())
+    for p in ('/home/user/ZONGYUAN-ROOT', 'D:/ZONGYUAN_MOVE/_gitee_probe'):
+        if os.path.isdir(p):
+            r = subprocess.run(f'git -C "{p}" log --oneline', shell=True, capture_output=True, text=True)
+            return len(r.stdout.splitlines())
+    return 0
 
 def svg_bars(items, w=640, h=260, maxv=None):
     """SVG横向条形图"""

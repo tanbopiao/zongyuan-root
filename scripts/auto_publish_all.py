@@ -12,9 +12,9 @@ import os, sys, json, hashlib, subprocess, time, glob
 DRY = '--dry-run' in sys.argv
 FORCE = '--force' in sys.argv
 NOW = time.strftime('%Y%m%d-%H%M%S')
-BASE = '/home/user/ZONGYUAN-ROOT'
+BASE = r'D:/ZONGYUAN_MOVE/_gitee_probe'
 MANIFEST = f'{BASE}/data/publish_manifest.json'
-TMP = '/tmp/auto_publish'
+TMP = r'D:/ZONGYUAN_MOVE/_pipeline_tmp'
 GIT_TOKEN = open(os.path.expanduser('~/.modelscope/credentials/git_token')).read().strip()
 GIT_NAME, GIT_EMAIL = 'zongyuanroot', '195162494@qq.com'
 DID, ANCHOR = 'DID-BR-000002', 'Ω₀⊂⊙∞⊂Ω'
@@ -22,7 +22,7 @@ DID, ANCHOR = 'DID-BR-000002', 'Ω₀⊂⊙∞⊂Ω'
 # 源头资产目录（任何新资产落入以下目录即自动发现，无需人工登记）
 SOURCE_DIRS = [
     f'{BASE}/docs',                                  # 白皮书/紫皮书/文档/可视化网页
-    os.path.expanduser('~/.zongyuan_root/PERMANENT_BASE/aios_deliverables/docs'),
+    r'C:/Users/4906/.zongyuan_root/PERMANENT_BASE/aios_deliverables/docs',
 ]
 WHITEPAPER_REPO = ('model', 'zongyuanroot/zongyuan-whitepaper', 'datalake/whitepapers')
 DATALAKE_REPO = ('dataset', 'zongyuanroot/ZONGYUAN-SHARED-DATALAKE', 'zongyuan-root/web')
@@ -68,12 +68,17 @@ def discover():
     return found
 
 def clone(kind, repo):
+    import shutil as _sh
     url = f'https://oauth2:{GIT_TOKEN}@www.modelscope.cn/{kind}s/{repo}.git'
     d = f'{TMP}/{repo.split("/")[1]}'
     for attempt in range(3):
         if os.path.exists(f'{d}/.git'):
             return d
-        sh(f'rm -rf {d} && git clone -q {url} {d}')
+        if os.path.exists(d):
+            _sh.rmtree(d, ignore_errors=True)
+        r = subprocess.run(['git', 'clone', '-q', url, d], capture_output=True, text=True)
+        if r.returncode != 0:
+            print(f'  [clone失败 {attempt+1}/3] {repo}: {r.stderr.strip()[:200]}')
     raise RuntimeError(f'clone失败(3次): {repo}')
 
 def publish(rel, local, h, rkey):
@@ -91,7 +96,7 @@ def publish(rel, local, h, rkey):
               'did': DID, 'anchored': ANCHOR, 'source': 'auto-publish-engine-v2'}
     aname = f'ATTESTATION-{os.path.basename(rel)}-{NOW[:8]}.json'
     open(f'{dst_dir}/{aname}', 'w').write(json.dumps(attest, ensure_ascii=False, indent=2))
-    out, err, rc = sh(f'cd {d} && git add -A && git -c user.name="{GIT_NAME}" -c user.email="{GIT_EMAIL}" commit -q -m "publish(auto): {rel}" && git push -q origin master')
+    out, err, rc = sh(f'git -C "{d}" add -A && git -C "{d}" -c user.name="{GIT_NAME}" -c user.email="{GIT_EMAIL}" commit -q -m "publish(auto): {rel}" && git -C "{d}" pull --rebase origin master && git -C "{d}" push -q origin master')
     return (rel, repo, rc)
 
 def update_index(entries):
@@ -111,7 +116,7 @@ td,th{{padding:8px;border-bottom:1px solid #333;text-align:left}}</style></head>
     html += '</table></body></html>'
     os.makedirs(base, exist_ok=True)
     open(f'{base}/INDEX.html', 'w').write(html)
-    sh(f'cd {d} && git add -A && git -c user.name="{GIT_NAME}" -c user.email="{GIT_EMAIL}" commit -q -m "index: 导航自动更新({len(entries)}项)" && git push -q origin master')
+    sh(f'git -C "{d}" add -A && git -C "{d}" -c user.name="{GIT_NAME}" -c user.email="{GIT_EMAIL}" commit -q -m "index: 导航自动更新({len(entries)}项)" && git -C "{d}" pull --rebase origin master && git -C "{d}" push -q origin master')
 
 def main():
     print(f'[引擎V2.0] {NOW} 模式={"DRY-RUN" if DRY else "REAL"}')
