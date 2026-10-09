@@ -1,0 +1,59 @@
+{
+  "service_name": "zongyuan-identity-api",
+  "service_type": "api_service",
+  "version": "1.0.0",
+  "blue_environment": {
+    "port": 8300,
+    "status": "active",
+    "version": "1.0.0",
+    "deploy_path": "/opt/ZONGYUAN-ROOT/identity_api/"
+  },
+  "green_environment": {
+    "port": 8301,
+    "status": "standby",
+    "version": null,
+    "deploy_path": "/opt/ZONGYUAN-ROOT/identity_api_green/"
+  },
+  "canary_release": {
+    "enabled": true,
+    "stages": [
+      5,
+      20,
+      50,
+      100
+    ],
+    "current_stage": 100,
+    "auto_rollback": true,
+    "error_threshold": 5,
+    "response_time_threshold": 2000
+  },
+  "health_check": {
+    "endpoint": "/api/v1/identity/health",
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3
+  },
+  "rollback": {
+    "l1_traffic_rollback": "<1s",
+    "l2_config_rollback": "<5s",
+    "l3_version_rollback": "<60s"
+  },
+  "nginx": {
+    "upstream_blue": "identity_api_blue",
+    "upstream_green": "identity_api_green",
+    "server_name": "identity.huodouai.com",
+    "location": "/"
+  },
+  "database": {
+    "type": "json_files",
+    "path": "/opt/ZONGYUAN-ROOT/identity_api/data/",
+    "dual_write": false,
+    "migration_strategy": "copy_on_deploy"
+  },
+  "backup": {
+    "enabled": true,
+    "path": "/opt/ZONGYUAN-ROOT/backup/identity_api/",
+    "retention_days": 30,
+    "pre_deploy_backup": true
+  }
+}

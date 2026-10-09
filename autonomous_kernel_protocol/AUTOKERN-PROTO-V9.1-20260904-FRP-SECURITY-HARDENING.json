@@ -1,0 +1,47 @@
+{
+  "protocol_version": "AUTOKERN-PROTO-V9.1-20260904-FRP-SECURITY-HARDENING",
+  "did": "DID-BR-000002",
+  "sovereign_root": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-09-04T00:10:18.971836",
+  "parent_version": "AUTOKERN-PROTO-V9.0-FRP-3KERNEL-ARCHITECTURE",
+  "efuse_state": "blown_permanent",
+  "milestone": "frp服务P0安全加固: Nginx反代+HTTPS+Basic Auth+firewalld端口限制",
+  "security_hardening": {
+    "nginx_reverse_proxy": {
+      "/aios/": "127.0.0.1:8017(AIOS)",
+      "/local-dashboard/": "127.0.0.1:8899(Dashboard)",
+      "/frp-admin/": "127.0.0.1:7600(frps仪表盘)"
+    },
+    "basic_auth": {
+      "enabled": true,
+      "username": "zongyuan-admin",
+      "htpasswd": "/www/server/nginx/conf/frp_access",
+      "unauth_returns": 401
+    },
+    "firewalld": {
+      "8017": "仅127.0.0.1",
+      "8899": "仅127.0.0.1",
+      "7100": "frp通信保留",
+      "ip_direct_access": "拒绝"
+    },
+    "external_access_urls": {
+      "aios": "https://www.huodouai.com/aios/",
+      "local_dashboard": "https://www.huodouai.com/local-dashboard/"
+    },
+    "known_issue": "local-dashboard返回502因为Windows端Dashboard服务未启动,需用户本地启动frpc+Dashboard"
+  },
+  "lessons_learned": [
+    "htpasswd文件必须放在www用户可遍历目录(/www/server/nginx/conf/), 宝塔panel目录drwx------导致500",
+    "Nginx error_log=crit时不记录proxy 500, 排查时临时改为error",
+    "禁止sed全局替换proxy_pass端口, 必须用Python精确匹配location块"
+  ],
+  "truth_base": "V8.7-UNIFIED-TRUTH-BASE (145条)",
+  "four_layer_check": {
+    "L1": "PASS",
+    "L2": "PASS",
+    "L3": "PASS",
+    "L4": "PASS"
+  },
+  "self_sha256": "9499f1c561ae1a6f42120f5e4c5d7894aba55f97763f51f0122e0170f6d5e9a1"
+}

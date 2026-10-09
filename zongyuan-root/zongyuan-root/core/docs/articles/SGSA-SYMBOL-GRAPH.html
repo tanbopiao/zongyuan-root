@@ -1,0 +1,77 @@
+<html style="margin:0;padding:0;">
+<title>SGSA符号图谱稳态锚定技术</title>
+<div style="background:#0a0a0a;color:#d4af37;font-family:'Noto Serif SC',serif;max-width:860px;margin:0 auto;padding:40px;line-height:1.9;">
+
+<h1 style="color:#d4af37;border-bottom:2px solid #d4af37;padding-bottom:16px;font-size:28px;">SGSA 符号图谱稳态锚定</h1>
+<p style="color:#888;font-size:14px;">不依赖图库/向量库/微调的轻量化知识图谱工程实践 ｜ DID-BR-000002 ｜ 2026-09-24</p>
+
+<h2 style="color:#d4af37;margin-top:36px;">摘要</h2>
+<p>SGSA（Symbol Graph Steady Anchoring）：仅用飞书多维表格构建AI认知稳态锚点。生产环境已运行——<b>103个实体节点、37条S-P-O三元组、8个符号映射</b>，支撑6个同源节点跨模型认知对齐。</p>
+
+<h2 style="color:#d4af37;margin-top:36px;">一、行业痛点</h2>
+<div style="background:#1a1a1a;padding:16px;border-left:3px solid #d4af37;margin:12px 0;">
+<p style="margin:6px 0;"><b>1. 重型图库贵</b>：Neo4j需独立服务器+DBA，小团队用不起</p>
+<p style="margin:6px 0;"><b>2. 向量库漂移</b>：模糊匹配无固定本体，跨模型对齐误差累积</p>
+<p style="margin:6px 0;"><b>3. Prompt无不变量</b>：换窗口就忘，无认知锁档、无共识机制</p>
+</div>
+
+<h2 style="color:#d4af37;margin-top:36px;">二、三表架构</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0;">
+<tr style="background:#1a1a1a;">
+<th style="border:1px solid #d4af37;padding:10px;text-align:left;">表</th>
+<th style="border:1px solid #d4af37;padding:10px;text-align:left;">角色</th>
+<th style="border:1px solid #d4af37;padding:10px;text-align:left;">核心字段</th>
+</tr>
+<tr><td style="border:1px solid #444;padding:10px;">tbl_entity</td><td style="border:1px solid #444;padding:10px;">认知本体</td><td style="border:1px solid #444;padding:10px;">entity_id / symbol / baseline_hash</td></tr>
+<tr><td style="border:1px solid #444;padding:10px;">tbl_relation</td><td style="border:1px solid #444;padding:10px;">图谱边</td><td style="border:1px solid #444;padding:10px;">subject / predicate / object / rel_hash</td></tr>
+<tr><td style="border:1px solid #444;padding:10px;">tbl_symbol_map</td><td style="border:1px solid #444;padding:10px;">语义归一</td><td style="border:1px solid #444;padding:10px;">symbol / canonical_semantic</td></tr>
+</table>
+<p style="color:#888;font-size:13px;">每个实体和关系都有SHA256哈希，写入云端做Merkle-DAG存证。</p>
+
+<h2 style="color:#d4af37;margin-top:36px;">三、双区隔离</h2>
+<div style="display:flex;gap:16px;margin:16px 0;">
+<div style="flex:1;background:#1a1a1a;padding:16px;border-top:3px solid #d4af37;">
+<p style="color:#d4af37;font-weight:bold;">Lv8 只读本体</p>
+<p style="font-size:14px;color:#ccc;">公理、基础符号、基础设施基线<br>AI节点只读不写</p>
+</div>
+<div style="flex:1;background:#1a1a1a;padding:16px;border-top:3px solid #888;">
+<p style="color:#888;font-weight:bold;">动态运行区</p>
+<p style="font-size:14px;color:#ccc;">任务记录、心跳、审计事件<br>AI节点可追加不可改</p>
+</div>
+</div>
+
+<h2 style="color:#d4af37;margin-top:36px;">四、三层正交锚定</h2>
+<div style="background:#1a1a1a;padding:20px;border-left:3px solid #d4af37;font-family:monospace;font-size:14px;">
+认知层：ROM-DNA最小公理集<br>
+本体层：飞书Base符号化知识图谱<br>
+审计层：云端记忆网关真值链
+</div>
+
+<h2 style="color:#d4af37;margin-top:36px;">五、落地数据</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0;">
+<tr style="background:#1a1a1a;"><th style="border:1px solid #d4af37;padding:10px;text-align:left;">实体类型</th><th style="border:1px solid #d4af37;padding:10px;text-align:right;">数量</th></tr>
+<tr><td style="border:1px solid #444;padding:8px;">配置基线</td><td style="border:1px solid #444;padding:8px;text-align:right;">33</td></tr>
+<tr><td style="border:1px solid #444;padding:8px;">守护进程</td><td style="border:1px solid #444;padding:8px;text-align:right;">17</td></tr>
+<tr><td style="border:1px solid #444;padding:8px;">网络端点</td><td style="border:1px solid #444;padding:8px;text-align:right;">9</td></tr>
+<tr><td style="border:1px solid #444;padding:8px;">其他</td><td style="border:1px solid #444;padding:8px;text-align:right;">44</td></tr>
+<tr style="background:#1a1a1a;font-weight:bold;"><td style="border:1px solid #d4af37;padding:8px;">合计</td><td style="border:1px solid #d4af37;padding:8px;text-align:right;">103</td></tr>
+</table>
+
+<h2 style="color:#d4af37;margin-top:36px;">六、方案对比</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0;">
+<tr style="background:#1a1a1a;">
+<th style="border:1px solid #d4af37;padding:10px;">维度</th>
+<th style="border:1px solid #d4af37;padding:10px;">Neo4j</th>
+<th style="border:1px solid #d4af37;padding:10px;">向量库</th>
+<th style="border:1px solid #d4af37;padding:10px;color:#d4af37;">SGSA</th>
+</tr>
+<tr><td style="border:1px solid #444;padding:8px;">成本</td><td style="border:1px solid #444;padding:8px;">高</td><td style="border:1px solid #444;padding:8px;">中</td><td style="border:1px solid #444;padding:8px;color:#d4af37;">零</td></tr>
+<tr><td style="border:1px solid #444;padding:8px;">本体固定</td><td style="border:1px solid #444;padding:8px;">需建模</td><td style="border:1px solid #444;padding:8px;">无</td><td style="border:1px solid #444;padding:8px;color:#d4af37;">Lv8锁档</td></tr>
+<tr><td style="border:1px solid #444;padding:8px;">篡改检测</td><td style="border:1px solid #444;padding:8px;">无</td><td style="border:1px solid #444;padding:8px;">无</td><td style="border:1px solid #444;padding:8px;color:#d4af37;">SHA256+Merkle</td></tr>
+</table>
+
+<h2 style="color:#d4af37;margin-top:36px;">七、技术边界</h2>
+<p style="color:#888;font-size:14px;">超10万实体需迁图库 · 不支持Cypher多跳查询 · 未实现BFT共识 · 不自动逻辑推理</p>
+
+<p style="color:#666;margin-top:40px;font-size:12px;text-align:center;">Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT</p>
+</div>

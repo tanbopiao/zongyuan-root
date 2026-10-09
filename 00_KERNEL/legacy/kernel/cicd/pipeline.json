@@ -1,0 +1,83 @@
+{
+  "pipeline_id": "ZR-CICD-PIPELINE-V1.0",
+  "name": "ZONGYUAN-ROOT CI/CD部署流水线",
+  "version": "1.0",
+  "updated_at": "2026-09-06T07:40:14.866759",
+  "stages": [
+    {
+      "stage": "lint",
+      "name": "代码检查",
+      "tools": [
+        "pyflakes",
+        "eslint",
+        "html-validate"
+      ],
+      "auto_run": true,
+      "block_on_fail": true
+    },
+    {
+      "stage": "test",
+      "name": "自动测试",
+      "tests": [
+        "unit_test",
+        "api_test",
+        "integration_test"
+      ],
+      "auto_run": true,
+      "block_on_fail": true,
+      "coverage_threshold": 60
+    },
+    {
+      "stage": "sandbox",
+      "name": "沙箱验证",
+      "environment": "isolated_sandbox",
+      "validation": [
+        "功能验证",
+        "性能验证",
+        "安全扫描"
+      ],
+      "auto_run": true,
+      "block_on_fail": true
+    },
+    {
+      "stage": "gray",
+      "name": "灰度发布",
+      "strategy": "percentage_based",
+      "initial_percent": 10,
+      "gradual_increase": [
+        10,
+        30,
+        50,
+        100
+      ],
+      "monitor_metrics": [
+        "error_rate",
+        "latency",
+        "cpu",
+        "memory"
+      ],
+      "auto_rollback_on_error": true,
+      "error_threshold": 5
+    },
+    {
+      "stage": "full",
+      "name": "全量发布",
+      "auto_run": true,
+      "post_deploy_check": true,
+      "notification": true
+    }
+  ],
+  "rollback": {
+    "enabled": true,
+    "auto_rollback": true,
+    "rollback_triggers": [
+      "error_rate>5%",
+      "latency>3s",
+      "cpu>90%",
+      "health_check_fail"
+    ],
+    "rollback_command": "python3 /kernel/rollback.py --stage=gray"
+  },
+  "deployment_history": [],
+  "current_status": "IDLE"
+}

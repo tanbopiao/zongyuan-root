@@ -1,0 +1,193 @@
+{
+  "lock_id": "LOCK-TIERED-COMPUTE-V2-20260906_112643",
+  "timestamp": "2026-09-06T11:26:43.163155",
+  "type": "tiered_compute_v2_complete",
+  "title": "层级化算力调度V2.0完成部署",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "api_gateway_v2": {
+    "status": "completed",
+    "version": "V2.0",
+    "port": 8040,
+    "service_name": "api-gateway",
+    "systemd_managed": true,
+    "autostart": true,
+    "code_size_bytes": 35581
+  },
+  "tiered_compute": {
+    "status": "completed",
+    "tiers": {
+      "free": {
+        "name": "免费层",
+        "description": "体验测试用，仅免费模型",
+        "rate_limit_per_minute": 10,
+        "rate_limit_per_hour": 100,
+        "daily_quota": 10000,
+        "priority": 1,
+        "allowed_models": [
+          "zhipu",
+          "agnes",
+          "ollama-local",
+          "ollama-win"
+        ],
+        "max_tokens": 1024
+      },
+      "basic": {
+        "name": "基础层",
+        "description": "个人使用，免费+基础模型",
+        "rate_limit_per_minute": 30,
+        "rate_limit_per_hour": 500,
+        "daily_quota": 100000,
+        "priority": 2,
+        "allowed_models": [
+          "zhipu",
+          "agnes",
+          "ollama-local",
+          "ollama-win",
+          "doubao",
+          "hunyuan",
+          "kimi"
+        ],
+        "max_tokens": 2048
+      },
+      "pro": {
+        "name": "专业层",
+        "description": "专业开发，全部模型",
+        "rate_limit_per_minute": 60,
+        "rate_limit_per_hour": 2000,
+        "daily_quota": 1000000,
+        "priority": 3,
+        "allowed_models": [
+          "zhipu",
+          "agnes",
+          "ollama-local",
+          "ollama-win",
+          "doubao",
+          "hunyuan",
+          "kimi",
+          "doubao-reasoning",
+          "doubao-reasoning2",
+          "siliconflow",
+          "aliyun"
+        ],
+        "max_tokens": 4096
+      },
+      "enterprise": {
+        "name": "企业层",
+        "description": "企业商用，全部模型+专属通道",
+        "rate_limit_per_minute": 200,
+        "rate_limit_per_hour": 10000,
+        "daily_quota": -1,
+        "priority": 4,
+        "allowed_models": [
+          "zhipu",
+          "agnes",
+          "ollama-local",
+          "ollama-win",
+          "doubao",
+          "hunyuan",
+          "kimi",
+          "doubao-reasoning",
+          "doubao-reasoning2",
+          "siliconflow",
+          "aliyun"
+        ],
+        "max_tokens": 8192
+      }
+    }
+  },
+  "features": {
+    "tier_management": {
+      "status": "completed",
+      "features": [
+        "4个层级（free/basic/pro/enterprise）",
+        "API Key层级字段",
+        "层级配置查询接口（/v1/tiers）",
+        "创建API Key时可选择层级"
+      ]
+    },
+    "model_whitelist": {
+      "status": "completed",
+      "features": [
+        "每个层级独立的模型白名单",
+        "模型列表按层级过滤",
+        "调用付费模型时自动拒绝（403）",
+        "管理员可使用所有模型"
+      ]
+    },
+    "differentiated_rate_limit": {
+      "status": "completed",
+      "features": [
+        "按层级差异化QPS限制",
+        "按层级差异化小时限制",
+        "每日Token配额管理",
+        "配额耗尽自动拒绝"
+      ]
+    },
+    "token_metering": {
+      "status": "completed",
+      "features": [
+        "输入Token估算",
+        "输出Token估算",
+        "按API Key统计Token消耗",
+        "按模型统计Token消耗",
+        "每日用量记录（保留30天）"
+      ]
+    },
+    "auto_fallback": {
+      "status": "completed",
+      "features": [
+        "模型故障自动降级",
+        "降级模型白名单校验",
+        "最多3次重试（主模型+2降级）",
+        "响应中标记降级信息"
+      ]
+    },
+    "usage_statistics": {
+      "status": "completed",
+      "features": [
+        "总请求数统计",
+        "总Token消耗统计",
+        "按模型统计",
+        "按日期统计（保留30天）",
+        "/v1/usage查询接口"
+      ]
+    }
+  },
+  "api_console_v2": {
+    "status": "completed",
+    "url": "https://www.huodouai.com/api-console/",
+    "code_size_bytes": 44286,
+    "pages": [
+      "概览 - 状态统计 + 快速开始",
+      "层级配置 - 4个层级详细展示",
+      "API Key管理 - 创建/列表/吊销/层级选择",
+      "模型列表 - 当前层级可用模型",
+      "用量统计 - 总请求/Token/按模型统计",
+      "API文档 - 完整接口文档",
+      "在线调试 - 可视化API测试工具",
+      "内核状态 - 内核信息 + 节点列表"
+    ]
+  },
+  "test_results": {
+    "api_gateway_health": "✅ 200（V2.0，4个层级）",
+    "tier_config": "✅ 200（4个层级配置正常）",
+    "free_tier_models": "✅ 4个模型（zhipu/agnes/ollama-local/ollama-win）",
+    "enterprise_tier_models": "✅ 11个模型（全部可用）",
+    "paid_model_rejection": "✅ 403（free层级调用付费模型正确拒绝）",
+    "usage_statistics": "✅ 200（用量统计接口正常）",
+    "api_console_access": "✅ 200（外网访问正常，44286 bytes）",
+    "all_features": "✅ 全部功能测试通过"
+  },
+  "api_keys": {
+    "admin": "zy-admin-8cf6a7075d06d3622779d0b0a32527ca",
+    "main_app": "zy-101e3e6f7188482f87bca9e806ca7c5d775a6e44e4784772",
+    "test_free": "zy-b6480d3fc7624b78af7196e99da756f2887dba194cc2410d"
+  },
+  "file_hashes": {
+    "api_gateway_v2": "35090627e1bdbb8db85915bb5c1357398a99b0daa381930e6bc3397e1f1ded16",
+    "api_console_v2": "abfb1a5cec65a6f7cd53bacb47e10509a45b7b1dd490daa5636ca9c1ef58141e"
+  },
+  "status": "BLOWN_PERMANENT",
+  "merkle_root": "27d4a15e94bf03b146ea296f0d3bbe66bd5b82b48fbcac360491a73a279a565c"
+}

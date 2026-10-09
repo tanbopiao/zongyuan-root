@@ -1,0 +1,33 @@
+{
+  "lock_id": "TRACE-DEEP-SANDBOX-20260928",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "ts": "2026-09-28T23:40:00+0800",
+  "type": "SANDBOX-API-DEEP-TRACE-LOCK",
+  "api_sources": {
+    "runtime": {"proc": "runtime-agent", "pid": 2, "entry": "dumb-init → /opt/bytefaas/run.sh", "role": "FAAS入口"},
+    "aio_web": {"port": 8080, "desc": "AIO Sandbox Web, /health=healthy"},
+    "mcp_vm": {"port": 10000, "proc": "mcp_vm_server", "role": "VM会话调度"},
+    "vm_hook": {"port": 10080, "proc": "vm_runtime_hook", "role": "运行时注入/生命周期钩子"},
+    "gost": {"port": 18080, "role": "出网代理"},
+    "sandbox_mcp": {"port": 8091, "name": "Sandbox MCP Tools v2.14.7(FastMCP)", "endpoint": "/mcp", "tools": ["browser_*", "sandbox_execute_code"]},
+    "browser": {"port": 9222, "role": "沙箱内Chrome"},
+    "autonomous": {"port": 8765, "role": "zongyuan自治守护api-server"}
+  },
+  "faas_injection": {
+    "create_params": "_FAAS_CREATE_SANDBOX_PARAMS=ENCv1(加密)",
+    "sandboxd_inject": false,
+    "run_command": "./entrypoint.sh",
+    "instance": "vefaas-5cxweu04-g4iyahdbh8-dat86ug1b323edlj8gsg-sandbox",
+    "func": "super_25_general-agent-efs_14",
+    "max_concurrency": 1000,
+    "func_timeout": 315
+  },
+  "lifecycle": {
+    "control": "FAAS平台调度器(runtime-agent侧管理)",
+    "destroy_trigger": "函数超时315s/会话结束/关闭钩子30s",
+    "local_self_destroy_api": "无(vm_runtime_hook:10080仅钩子,非自毁接口)",
+    "data_dir": "/sandboxdata(销毁清空)"
+  },
+  "conclusion": "API源头=FAAS平台注入;生命周期由平台调度;生产服务器无FAAS层持久常驻"
+}

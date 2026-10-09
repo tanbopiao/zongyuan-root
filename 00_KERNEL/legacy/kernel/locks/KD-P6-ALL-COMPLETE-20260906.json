@@ -1,0 +1,131 @@
+{
+  "lock_id": "KD-P6-ALL-COMPLETE-20260906",
+  "lock_level": "Lv8",
+  "lock_name": "P6-1+P6-2+P6-3全部完成（自治驾驶舱+增强自愈+跨窗口协同）",
+  "did": "DID-BR-000002",
+  "trace_mark": "Omega_0 subset Circle_Infinity subset Omega",
+  "created_at": "2026-09-06T15:40:33.%fZ",
+  "status": "LOCKED_PERMANENT",
+  "system_hash": "2581F7FDC19A71AC1C3AFB0139C37B20F075425900732B53C7642F2571C2BE7A",
+  "efuse_id": "EFUSE-8-2581F7FD",
+  "efuse_status": "BLOWN_PERMANENT",
+  "p6_1": {
+    "name": "云内核自治全景驾驶舱",
+    "page": "autonomy-cockpit/index.html",
+    "backend": "cockpit_aggregator.py",
+    "api_endpoints": [
+      "GET /cockpit/overview - 全局驾驶舱聚合快照",
+      "GET /cockpit/topology - 节点拓扑实时状态",
+      "GET /cockpit/live-events - SSE实时事件推送"
+    ],
+    "features": [
+      "顶部全局状态栏（5守护服务实时状态）",
+      "左侧身份节点拓扑可视化",
+      "中央自治闭环动态流转动画",
+      "右侧四大指标卡片（节点资产/告警自愈/能力质量/链路可靠性）",
+      "底部实时流水日志面板"
+    ],
+    "access_url": "https://www.huodouai.com/autonomy-cockpit/"
+  },
+  "p6_2": {
+    "name": "增强自愈（自动扩容/降级保护/主备故障转移）",
+    "backend": "advanced_heal_service.py",
+    "api_endpoints": [
+      "GET /advanced-heal/rules - 获取增强自愈规则",
+      "PUT /advanced-heal/rules - 更新增强自愈规则",
+      "GET /advanced-heal/status - 获取增强自愈系统状态",
+      "POST /advanced-heal/run - 手动运行增强自愈闭环",
+      "GET /advanced-heal/history - 获取增强自愈历史",
+      "GET /system/resources - 获取系统资源实时状态"
+    ],
+    "auto_scale": {
+      "trigger": "CPU>80% 或 内存>85% 或 负载>2.5",
+      "max_workers": 4,
+      "min_workers": 1,
+      "scale_up_cooldown": "5分钟",
+      "scale_down_cooldown": "10分钟"
+    },
+    "degradation": {
+      "trigger": "CPU>90% 或 内存>92%",
+      "degraded_services": [
+        "zongyuan-capability-optimizer (暂停)",
+        "zongyuan-alert-detector (间隔拉长到10分钟)",
+        "zongyuan-auto-heal (间隔拉长到5分钟)"
+      ],
+      "restore_cooldown": "15分钟"
+    },
+    "failover": {
+      "primary_service": "zongyuan-identity-api",
+      "primary_port": 8300,
+      "backup_port": 8301,
+      "health_check_interval": "15秒",
+      "max_failover_attempts": 3,
+      "failover_cooldown": "10分钟",
+      "flow": "主服务故障 -> 尝试重启 -> 重启失败 -> 启动备用实例 -> 主服务恢复 -> 切回主服务"
+    },
+    "resource_thresholds": {
+      "cpu_warning": 70,
+      "cpu_critical": 85,
+      "memory_warning": 75,
+      "memory_critical": 90,
+      "disk_warning": 80,
+      "disk_critical": 92,
+      "load_warning": 1.5,
+      "load_critical": 3.0
+    },
+    "background_service": {
+      "name": "zongyuan-advanced-heal.service",
+      "interval": "每30秒",
+      "status": "active running"
+    }
+  },
+  "p6_3": {
+    "name": "跨窗口全域协同自治",
+    "backend": "cross_window_sync.py",
+    "api_endpoints": [
+      "POST /cross-window/register - 注册新业务窗口",
+      "POST /cross-window/report - 窗口上报状态",
+      "GET /cross-window/windows - 获取所有窗口状态",
+      "GET /cross-window/commands/{window_id} - 获取窗口待执行指令",
+      "POST /cross-window/commands/ack - 确认执行指令",
+      "GET /cross-window/global-status - 获取全局协同状态",
+      "POST /cross-window/sync - 手动运行跨窗口协同闭环",
+      "GET /cross-window/history - 获取协同历史"
+    ],
+    "registered_windows": [
+      {"id": "app-gov-ai-0001", "name": "政务AI中台", "type": "gov-ai", "capabilities": 4},
+      {"id": "app-workbench-0001", "name": "智能工作台", "type": "workbench", "capabilities": 4},
+      {"id": "app-drama-0001", "name": "短剧生产流水线", "type": "drama", "capabilities": 4},
+      {"id": "app-vector-kb-0001", "name": "向量知识库", "type": "vector-kb", "capabilities": 4},
+      {"id": "app-website-0001", "name": "官网展示中台", "type": "website", "capabilities": 4},
+      {"id": "svc-identity-api-0001", "name": "身份节点API（云内核）", "type": "identity-api", "capabilities": 5}
+    ],
+    "coordination_features": [
+      "窗口注册表（身份/状态/能力管理）",
+      "统一上报接口（状态/指标/告警）",
+      "自动指令生成（离线通知/扩容建议/联动自愈）",
+      "指令下发与确认执行机制",
+      "全局健康评分（在线率-告警影响）",
+      "窗口离线自动检测（5分钟未上报）",
+      "全局降级保护（健康分<60触发）"
+    ],
+    "background_service": {
+      "name": "zongyuan-cross-window.service",
+      "interval": "每60秒",
+      "status": "active running"
+    }
+  },
+  "system_services_total": 7,
+  "system_services": [
+    "zongyuan-identity-api (身份API服务)",
+    "zongyuan-health-monitor (健康监控，每60秒)",
+    "zongyuan-alert-detector (告警检测，每5分钟)",
+    "zongyuan-auto-heal (自愈守护，每60秒)",
+    "zongyuan-capability-optimizer (能力优化，每10分钟)",
+    "zongyuan-advanced-heal (增强自愈，每30秒)",
+    "zongyuan-cross-window (跨窗口协同，每60秒)"
+  ],
+  "api_endpoints_total": 57,
+  "new_endpoints_p6": 17,
+  "summary": "P6阶段全部完成：P6-1自治驾驶舱+P6-2增强自愈（自动扩容/降级保护/主备故障转移）+P6-3跨窗口全域协同自治。云内核从自治运行系统升级为全域协同自治体系：7个后台服务7x24小时运行，57个API端点，6个业务窗口统一协同，系统资源实时监控+自动扩容+降级保护+故障转移+跨窗口联动，达到Lv9工业级自治体系标准。"
+}

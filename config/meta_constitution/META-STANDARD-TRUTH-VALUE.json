@@ -1,0 +1,50 @@
+{
+  "standard_id": "META-STANDARD-001",
+  "name": "真值写入内容标准",
+  "level": "元宪法级",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  
+  "principle": "不限制写入者身份，只限制写入内容。所有POST到记忆网关的真值必须通过以下校验，否则拒绝写入。",
+  
+  "required_fields": {
+    "truth_value": {
+      "type": "string",
+      "min_length": 10,
+      "max_length": 5000,
+      "rule": "必须是完整陈述句，包含主语+谓语+宾语，禁止纯符号/纯数字/无意义文本"
+    },
+    "truth_type": {
+      "type": "enum",
+      "allowed": ["meta_law", "rule", "config", "decision", "data", "creative", "risk", "protocol", "unknown"],
+      "rule": "必须属于九类之一，unknown需标注原因"
+    }
+  },
+  
+  "rejection_rules": [
+    "内容长度<10字符 → 拒绝（过短无信息量）",
+    "内容为纯符号/纯emoji/纯数字 → 拒绝",
+    "内容包含API密钥明文(ark-/sk-) → 拒绝（安全风险）",
+    "内容包含密码明文 → 拒绝（安全风险）",
+    "truth_type不在九类中 → 拒绝",
+    "内容与已有真值重复度>90% → 标记重复，不重复写入",
+    "内容为测试占位符(test/hello/123) → 拒绝"
+  ],
+  
+  "quality_tiers": {
+    "S级": "包含具体数据+来源+时间戳+可验证结论，如'9164端口于2026-09-30测试返回200，模型doubao-seed-2-0-pro'",
+    "A级": "包含明确结论+上下文，如'META-RULE-016已写入，违规问责机制生效'",
+    "B级": "一般性陈述，如'API三链路全200'",
+    "C级": "过短或模糊，如'已完成'（应补充具体内容）"
+  },
+  
+  "auto_enrichment": {
+    "自动追加字段": ["timestamp", "source_node", "truth_hash"],
+    "timestamp": "服务端自动注入，不可伪造",
+    "truth_hash": "SHA256(truth_value)，用于去重和溯源"
+  },
+  
+  "enforcement": "记忆网关服务端在写入前执行内容校验，不通过返回400+拒绝原因。校验逻辑与本标准同步更新。",
+  
+  "timestamp": "2026-09-30T09:40:00+08:00"
+}

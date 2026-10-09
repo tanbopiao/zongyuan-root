@@ -1,0 +1,56 @@
+{
+  "lock_id": "KD-BLUE-GREEN-DEPLOY-20260906",
+  "lock_level": "Lv7",
+  "lock_name": "零影响更新架构（蓝绿部署+金丝雀发布+三层回滚+自动熔断）",
+  "did": "DID-BR-000002",
+  "trace_mark": "Omega_0 subset Circle_Infinity subset Omega",
+  "created_at": "2026-09-06T20:00:00+08:00",
+  "block_height": 21216,
+  "status": "LOCKED",
+  
+  "assets": {
+    "scripts": {
+      "blue_green_deploy.py": "蓝绿部署核心工具（自动备份+部署+验证+切换），288行",
+      "rollback.py": "秒级回滚工具（L1流量<1秒/L2配置<5秒/L3版本<1分钟），266行",
+      "health_monitor.py": "健康检查与自动熔断工具，213行",
+      "canary_release.py": "金丝雀发布工具（5%->20%->50%->100%逐步放量），193行"
+    },
+    "config": {
+      "blue_green_config.json": "蓝绿部署配置中心（环境/金丝雀/健康检查/回滚/数据库/Nginx/备份）"
+    },
+    "templates": {
+      "nginx_upstream_blue.conf": "Nginx蓝环境流量模板",
+      "nginx_upstream_green.conf": "Nginx绿环境流量模板",
+      "nginx_upstream_canary.conf": "Nginx金丝雀发布流量权重模板"
+    },
+    "docs": {
+      "DEPLOYMENT_SOP.md": "零影响更新标准操作流程（231行，含检查清单/部署流程/回滚预案/数据库规范）"
+    },
+    "directories": {
+      "blue_web_root": "/www/wwwroot/huodouai.com.blue",
+      "green_web_root": "/www/wwwroot/huodouai.com.green",
+      "backup_dir": "/opt/ZONGYUAN-ROOT/blue_green/backup/{code,config,database}",
+      "logs_dir": "/opt/ZONGYUAN-ROOT/blue_green/logs"
+    },
+    "systemd": {
+      "zongyuan-blue-green-health.service": "健康监控守护进程（已配置，待启用）"
+    }
+  },
+  
+  "total_code_lines": 960,
+  "total_files": 12,
+  "system_hash": "57C66C017468F792C37CA912FB650269A93A993D2D7E66E0147C3EA95A9239F4",
+  
+  "core_features": [
+    "蓝绿部署：不停机更新，旧版本持续运行，用户无感知",
+    "秒级回滚：L1流量回滚<1秒，L2配置回滚<5秒，L3版本回滚<1分钟",
+    "金丝雀发布：5%->20%->50%->100%逐步放量，风险可控",
+    "自动熔断：健康检查异常自动触发回滚，无需人工干预",
+    "数据库双兼容：扩展式变更+双写过渡+灰度迁移，零风险",
+    "配置隔离：蓝绿环境配置独立，互不影响",
+    "健康监控：持续监控错误率/响应时间，异常自动告警"
+  ],
+  
+  "efuse_id": "EFUSE-7-57C66C01",
+  "verification": "所有Python脚本语法检查通过，所有工具状态查询正常运行"
+}

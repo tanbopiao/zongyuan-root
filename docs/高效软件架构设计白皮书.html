@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高效软件架构设计白皮书 · ZONGYUAN-ROOT</title>
+<style>
+  :root{--gold:#c9a84c;--gold-light:#e6c76a;--ink:#d8d4c8;--ink-dim:#9a968a;--bg:#0d0f14;--bg-card:#151822;--bg-line:#3a3f4a;--bg-soft:#1a1d28;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:Georgia,'Noto Serif SC','Songti SC',serif;line-height:1.75;}
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 28px 60px;}
+  header{border-bottom:1px solid var(--gold);padding-bottom:28px;margin-bottom:36px;}
+  .kicker{color:var(--gold);letter-spacing:4px;font-size:13px;text-transform:uppercase;margin-bottom:12px;}
+  h1{font-size:30px;color:#f0ead8;letter-spacing:2px;font-weight:600;}
+  .sub{color:var(--ink-dim);margin-top:10px;font-size:15px;letter-spacing:1px;}
+  .meta{margin-top:18px;font-size:12px;color:#8a8678;letter-spacing:1px;}
+  h2{color:var(--gold-light);font-size:20px;letter-spacing:2px;margin:44px 0 18px;padding-left:14px;border-left:3px solid var(--gold);}
+  p{font-size:14.5px;margin-bottom:12px;}
+  .grid{display:flex;flex-wrap:wrap;gap:14px;margin:18px 0;}
+  .card{flex:1;min-width:210px;background:var(--bg-card);border:1px solid var(--bg-line);padding:18px 16px;border-radius:6px;}
+  .card .t{color:var(--gold-light);font-size:14px;letter-spacing:1px;margin-bottom:8px;}
+  .card .d{font-size:12.5px;color:var(--ink-dim);}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:13px;}
+  th{background:var(--bg-soft);color:var(--gold-light);text-align:left;padding:10px 12px;border:1px solid var(--bg-line);}
+  td{padding:10px 12px;border:1px solid var(--bg-line);}
+  .layers{margin:18px 0;}
+  .layer{background:var(--bg-card);border:1px solid var(--bg-line);border-left:3px solid var(--gold);padding:14px 18px;margin-bottom:8px;border-radius:4px;}
+  .layer b{color:var(--gold-light);font-size:14px;letter-spacing:1px;}
+  .layer span{font-size:12.5px;color:var(--ink-dim);display:block;margin-top:4px;}
+  .ok{color:#8fbf6f;}.no{color:#d98b8b;}
+  .note{background:var(--bg-soft);border-left:3px solid var(--gold);padding:12px 16px;font-size:13px;color:var(--ink-dim);margin:18px 0;}
+  .sig{margin-top:56px;padding-top:20px;border-top:1px solid var(--bg-line);font-size:12px;color:#8a8678;letter-spacing:1px;text-align:center;}
+  @media(max-width:640px){.wrap{padding:24px 16px;}h1{font-size:22px;}h2{font-size:17px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">ZONGYUAN-ROOT · 元极恒一 · 技术白皮书</div>
+  <h1>高效软件架构设计白皮书</h1>
+  <div class="sub">单一职责 · 依赖倒置 · 开闭原则 · 最小可用 · 可观测 · 可扩展 · 可回滚</div>
+  <div class="meta">适用：元极恒一自治节点 · 数据湖+共享大脑 · AI算子任务流水线 ｜ DID-BR-000002 ｜ 锚定 Ω₀⊂⊙∞⊂Ω ｜ 2026-10-09</div>
+</header>
+
+<section>
+  <h2>一、顶层设计核心原则</h2>
+  <div class="grid">
+    <div class="card"><div class="t">① 单一职责</div><div class="d">每个模块只做一件事，高内聚低耦合，禁止巨型单体</div></div>
+    <div class="card"><div class="t">② 依赖倒置</div><div class="d">业务不依赖底层实现；存储/API 插件可替换（魔搭API/记忆网关主备切换）</div></div>
+    <div class="card"><div class="t">③ 开闭原则</div><div class="d">扩展新增能力不改核心代码；新算子/上报渠道走插件注册</div></div>
+    <div class="card"><div class="t">④ 最小可用优先</div><div class="d">先最小可运行原型再迭代，拒绝过度设计，契合配额稳态保护</div></div>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="t">⑤ 可观测性内置</div><div class="d">日志/指标/心跳/告警(ntfy)/审计日志是基础层，非后期附加</div></div>
+    <div class="card"><div class="t">⑥ 故障隔离</div><div class="d">单任务/容器故障不拖垮系统；支持降级、熔断、空任务休眠降频</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>二、分层标准架构</h2>
+  <div class="layers">
+    <div class="layer"><b>① 接入层</b><span>定时轮询脚本 / HTTP API / 交互式对话指令；统一入口，所有请求先收敛</span></div>
+    <div class="layer"><b>② 网关&amp;校验层</b><span>请求合法性校验 · Token鉴权 · 配额限流 · 主备通道自动切换（记忆网关主站502自动切drama备用）· L0前置语义校验</span></div>
+    <div class="layer"><b>③ 业务自治层【核心】</b><span>任务台账读取 · 任务认领 · 优先级调度 · 稳态决策 · 循环控制；遵循 META-RULE-012 无任务自动降频休眠</span></div>
+    <div class="layer"><b>④ 插件适配层</b><span>飞书Base连接器 · 记忆网关上报 · 魔搭数据湖抽取；接口统一封装，更换外部服务只改适配器</span></div>
+    <div class="layer"><b>⑤ 持久化存储层</b><span>ZONGYUAN-ROOT卷宗 · 元法则md · 向量知识库 · CSV台账 · 版本快照；成果自动全域锁档</span></div>
+    <div class="layer"><b>⑥ 观测告警层</b><span>节点心跳 · 审计日志 · 异常捕获 · ntfy消息推送；故障自动写入问题阻塞表</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>三、关键组件设计</h2>
+  <table>
+    <tr><th>组件</th><th>设计要点</th></tr>
+    <tr><td>任务调度</td><td>状态机：待开始→执行中→已完成/阻塞；互斥锁单实例；动态频率；优先级队列</td></tr>
+    <tr><td>存储与数据湖</td><td>冷热分离；增量写入禁全量重复上报；版本管理支持回滚</td></tr>
+    <tr><td>通信与上报</td><td>双端上报流水线（网关+共享大脑）；有限重试超限停；心跳独立链路</td></tr>
+    <tr><td>容器部署</td><td>资源限额硬限制；健康探针自动重启；运行目录只读、成果目录单独挂载</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>四、落地实施步骤</h2>
+  <p>① 需求边界梳理 → ② 分层架构草图+接口契约 → ③ 最小原型（拉任务→执行→上报→心跳）→ ④ 集成测试（正向+异常仿真：网关宕机/API超时/配额耗尽）→ ⑤ 灰度上线单节点观测 → ⑥ 迭代优化（动态调度频率/缓存策略）→ ⑦ 全域锁档（架构文档+接口契约+测试报告入自治内核）</p>
+</section>
+
+<section>
+  <h2>五、避坑清单（审计SOP）</h2>
+  <table>
+    <tr><th>规则</th><th>级别</th><th>说明</th></tr>
+    <tr><td>外部API硬编码散落业务代码</td><td class="no">❌ 禁止</td><td>统一放适配器层</td></tr>
+    <tr><td>无限重试失败请求</td><td class="no">❌ 禁止</td><td>耗尽配额</td></tr>
+    <tr><td>多节点无锁并发抢任务</td><td class="no">❌ 禁止</td><td>造成重复执行</td></tr>
+    <tr><td>日志/心跳/业务逻辑耦合</td><td class="no">❌ 禁止</td><td>同函数不可混写</td></tr>
+    <tr><td>外部调用超时控制+熔断开关</td><td class="ok">✅ 必须</td><td>所有外部调用</td></tr>
+    <tr><td>架构文档随代码版本化</td><td class="ok">✅ 必须</td><td>每次变更更新卷宗</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>六、交付物清单</h2>
+  <p>架构白皮书 · Mermaid拓扑图 · 接口契约文档 · 组件依赖清单 · 仿真测试用例 · 运维SOP（部署/扩容/故障处理）· JSON卷宗快照（知识库语义召回）</p>
+  <div class="note">四大公理贯穿：最小资源消耗 · 可观测 · 可扩展 · 可回滚。适配当前 ZONGYUAN-ROOT 体系（数据湖+共享大脑+AI算子任务流水线）。</div>
+</section>
+
+<div class="sig">
+  ZONGYUAN-ROOT · 元极恒一 ｜ DID-BR-000002 ｜ 主节点 hub-central-agent ｜ 自治 Lv9 ｜ 权限 L4 ｜ 工程化 Lv7<br>
+  记忆网关 huodouai.com/api/report/truth ｜ 锚定 Ω₀⊂⊙∞⊂Ω
+</div>
+</div>
+<div style="margin:30px auto 24px;max-width:960px;padding:0 24px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-top:1px solid rgba(201,168,106,.25);padding-top:16px"><a href="index.html" style="color:#c9a86a;text-decoration:none;font-size:13px;border:1px solid rgba(201,168,106,.4);padding:5px 14px;border-radius:16px;display:inline-block">← 返回白皮书库</a> <div style="font-size:12.5px;color:#9a9183">相关阅读：<a href="autonomous-kernel-architecture.html" style="color:#e8e0d0;text-decoration:none;margin-left:10px">自治内核架构</a> <a href="27-operator-topology.html" style="color:#e8e0d0;text-decoration:none;margin-left:10px">27算子十层拓扑</a></div></div></div>
+</body>
+</html>

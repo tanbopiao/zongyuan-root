@@ -1,0 +1,69 @@
+{
+  "law_id": "META-LAW-EXTERNAL-ACCESS-V1.0",
+  "law_name": "外部节点统一接入规范",
+  "version": "1.0",
+  "timestamp": "2026-09-14T05:00:00Z",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "priority": "P0",
+
+  "core_principle": "同源节点不再用 域名:9120 直连，统一通过官网域名API路径接入。只读查询和写入真值分离，短剧API路径零重叠。",
+
+  "access_points": {
+    "read_only": {
+      "url": "https://www.huodouai.com/api/v1/gateway/status",
+      "purpose": "外部节点只读查询",
+      "auth": "无需API Key",
+      "rate_limit": "10r/s",
+      "proxy_to": "127.0.0.1:9120/api/status"
+    },
+    "write_truth": {
+      "url": "https://www.huodouai.com/api/memory/api/truth/upsert",
+      "purpose": "外部节点写入真值",
+      "auth": "必须带API Key",
+      "rate_limit": "2r/s",
+      "proxy_to": "127.0.0.1:9120/api/truth/upsert"
+    },
+    "report_achievement": {
+      "url": "https://www.huodouai.com/api/memory/api/gateway/report",
+      "purpose": "视频图片资产成果上报",
+      "auth": "API Key + 同源协议",
+      "proxy_to": "127.0.0.1:9120/api/gateway/report"
+    },
+    "drama_api": {
+      "portal": "https://www.huodouai.com/drama/",
+      "api": "https://www.huodouai.com/api/v1/*",
+      "purpose": "短剧流水线API",
+      "note": "与记忆网关路径零重叠"
+    }
+  },
+
+  "path_isolation": {
+    "memory_gateway_prefix": "/api/memory/",
+    "drama_api_prefix": "/api/v1/",
+    "read_status_prefix": "/api/v1/gateway/",
+    "zero_overlap": true,
+    "explanation": "/api/v1/gateway/* 精确匹配走记忆网关只读，其余 /api/v1/* 走短剧API，路径零重叠"
+  },
+
+  "prohibitions": [
+    "禁止外部节点直连 域名:9120",
+    "禁止暴露9120端口到公网",
+    "禁止写入接口不带API Key",
+    "禁止短剧API与记忆网关路径重叠"
+  ],
+
+  "enforcement": {
+    "all_external_nodes_must_use_domain_api": true,
+    "port_9120_internal_only": true,
+    "api_key_required_for_write": true,
+    "nginx_unified_routing": true
+  },
+
+  "migration": {
+    "old_way": "域名:9120 直连",
+    "new_way": "官网域名API路径",
+    "status": "立即生效",
+    "compatibility": "旧方式逐步废弃"
+  }
+}

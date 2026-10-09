@@ -1,0 +1,81 @@
+{
+  "boot_id": "BOOT-METERNAL-LV10-001",
+  "kernel_version": "V5.6-ROOTFIXED",
+  "did": "DID-BR-000002",
+  "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+  "load_order": [
+    {
+      "step": 1,
+      "name": "校验持久层文件存在性",
+      "path": "meta_truth/persist/doubao_account_persist.json",
+      "fail_action": "进入只读安全模式"
+    },
+    {
+      "step": 2,
+      "name": "加载四维框架本体",
+      "paths": [
+        "00_KERNEL/axioms/",
+        "00_KERNEL/metalaws/",
+        ".zongyuan_root/meta_laws/",
+        ".zongyuan_root/meta_rules/"
+      ]
+    },
+    {
+      "step": 3,
+      "name": "加载27算子注册表",
+      "path": ".zongyuan_root/operator_registry/operators_full_ledger.json"
+    },
+    {
+      "step": 4,
+      "name": "校验Merkle链完整性",
+      "path": ".zongyuan_root/state/merkle_chain.json",
+      "expect_root": "6dd42b1c08d7e4cc9c78ad3aaa95095c10e936cd39438aa2595257bc026a6965"
+    },
+    {
+      "step": 5,
+      "name": "加载META-RULE-014记忆网关对齐",
+      "path": ".zongyuan_root/meta_laws/META-RULE-014.json"
+    },
+    {
+      "step": 6,
+      "name": "加载节点激活状态",
+      "path": ".zongyuan_root/state/node_activation_state.json"
+    },
+    {
+      "step": 7,
+      "name": "加载数据湖持久层索引（绑定BINDING-LAKE-ACCOUNT-001）",
+      "paths": [
+        "ZONGYUAN-ROOT/DATA-LAKE-PERSIST/03-index/MANIFEST-LAKE.json",
+        "ZONGYUAN-ROOT/DATA-LAKE-PERSIST/04-media-registry/MEDIA-REGISTRY-V2.json",
+        "ZONGYUAN-ROOT/DATA-LAKE-PERSIST/05-ledger/BINDING-LAKE-ACCOUNT.json"
+      ],
+      "fail_action": "降级为本地缓存模式（数据湖不可用时仅加载持久层）"
+    },
+    {
+      "step": 8,
+      "name": "握手记忆网关",
+      "endpoint": "https://www.huodouai.com/api/report/truth",
+      "fail_action": "降级为本地缓存模式"
+    }
+  ],
+  "safety_mode": {
+    "trigger": "任一步骤校验失败",
+    "actions": [
+      "冻结Ω₀稳态域写入",
+      "禁止高风险API调用",
+      "仅允许只读查询",
+      "触发ntfy告警",
+      "等待人工介入"
+    ]
+  },
+  "load_on_new_session": true,
+  "rebuilt_at": "2026-09-28T22:15:00+08:00",
+  "data_lake_binding": {
+    "binding_id": "BINDING-LAKE-ACCOUNT-001",
+    "lake_manifest": "MANIFEST-LAKE.json V2.0",
+    "media_registry": "MEDIA-REGISTRY-V2.json (2950文件/1993.52MB)",
+    "auto_load": true,
+    "bound_at": "2026-09-30T08:50:00+08:00"
+  },
+  "updated_at": "2026-09-30T08:55:00+08:00"
+}

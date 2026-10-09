@@ -1,0 +1,71 @@
+{
+  "truth_id": "TRUTH-BT-GOV-001",
+  "truth_name": "宝塔面板全维度治理真值体系",
+  "version": "V1.0",
+  "created_at": "2026-09-06T10:32:34.%f+00:00",
+  "did": "DID-BR-000002",
+  "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+  "core_truths": {
+    "nginx_governance": {
+      "rule_1": "每个域名仅允许一个HTTP(80)+一个HTTPS(443) server块，禁止重复server_name",
+      "rule_2": "Nginx备份文件保留最近3个，超过自动清理",
+      "rule_3": "所有location配置必须在主HTTPS块中定义，禁止分散到多个server块",
+      "rule_4": "auth_basic认证移除后必须验证0残留",
+      "rule_5": "配置修改后必须执行nginx -t验证，0警告0错误才允许重载"
+    },
+    "service_governance": {
+      "rule_1": "同一功能仅允许一个systemd服务运行，禁止重复服务",
+      "rule_2": "protocol-gateway统一使用zongyuan-protocol-gateway（8900端口）",
+      "rule_3": "新服务部署前必须检查端口冲突和功能重复",
+      "rule_4": "僵尸进程（内存0.0%且运行超过24小时）必须定期清理",
+      "rule_5": "服务禁用必须同时执行stop+disable，禁止仅stop"
+    },
+    "site_governance": {
+      "rule_1": "站点目录必须与Nginx配置一一对应，禁止存在未引用的冗余目录",
+      "rule_2": "空目录必须立即删除",
+      "rule_3": "双域名分工：huodouai.com=品牌主站，www.huodouai.com=应用控制台",
+      "rule_4": "静态资源目录必须在Nginx中有对应alias或root配置",
+      "rule_5": "归档目录统一放在archive/下，按日期命名"
+    },
+    "resource_governance": {
+      "rule_1": "磁盘使用率告警阈值：75%黄色，85%橙色，90%红色",
+      "rule_2": "日志文件超过50M必须截断，超过7天必须清理",
+      "rule_3": "备份文件保留策略：日常备份7天，周备份30天，月备份永久",
+      "rule_4": "Python进程总数控制在40以内，超过需评估合并",
+      "rule_5": "内存使用率超过80%必须触发服务优化或扩容"
+    },
+    "security_governance": {
+      "rule_1": "SSL证书到期前30天必须触发续期提醒",
+      "rule_2": "所有API接口必须有健康检查端点",
+      "rule_3": "敏感文件（.env/.git/.sql/.key）必须禁止外网访问",
+      "rule_4": "计划任务注释必须与实际cron表达式一致",
+      "rule_5": "所有配置修改必须保留备份，可回滚"
+    }
+  },
+  "scan_results": {
+    "scan_time": "2026-09-06T10:32:34.%f+00:00",
+    "dimensions_scanned": 10,
+    "issues_found": 9,
+    "issues_fixed": 9,
+    "severity_breakdown": {
+      "critical": 1,
+      "medium": 3,
+      "low": 5
+    },
+    "post_fix_status": {
+      "nginx_warnings": 0,
+      "nginx_errors": 0,
+      "duplicate_services": 0,
+      "zombie_processes": 0,
+      "redundant_directories": 0,
+      "nginx_backups": 3,
+      "python_processes": 35,
+      "system_services": 26,
+      "disk_usage": "75%",
+      "dual_domain_status": "both_200"
+    }
+  },
+  "truth_purity": 98.5,
+  "confidence": "HIGH",
+  "status": "LOCKED"
+}
