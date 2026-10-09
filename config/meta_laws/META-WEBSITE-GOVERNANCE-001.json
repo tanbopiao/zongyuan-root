@@ -1,0 +1,23 @@
+{
+  "law_id": "META-WEBSITE-GOVERNANCE-001",
+  "name": "官网可视化资产治理元规则（新增/修复标准流程）",
+  "level": "P0",
+  "version": "v1.0",
+  "description": "官网（火斗云智AI主站 /www/wwwroot/huodouai.com）所有新增与修复操作遵循统一治理流程：沿用视觉标准、修改前备份原版、只新增不删改、本地仿真自检、全站无断链再上线。视觉色彩规范不在此重复（见 META-VISUAL-STANDARD-001）。",
+  "clauses": [
+    {"id": "WG-1", "text": "标准沿用：所有新增/修复页面必须沿用 META-VISUAL-STANDARD-001 视觉规范（深色 #0a0e1a + 金 #d4af37 + 辅助 #3684ff + 文字 #e0e6f0/#8899aa + 边框 #1e293b），复用主站资产（/assets/aios-logo.png、/favicon.svg）；禁止自创风格"},
+    {"id": "WG-2", "text": "修改前备份原版：任何对既有页面（index/kunlun/pipeline 等）的修改，先复制原版为 .bak-<事件>-<YYYYMMDD>（append-only，不覆盖历史）；备份缺失不得直接改原版"},
+    {"id": "WG-3", "text": "只新增不删改：允许新增页面、新增导航入口、在既有页面新增区块；禁止推倒重构、删除既有元素、覆盖已锁档资产（index/whitepaper/asset-index 等 immutable）——确需整改须人工审批（M11）解锁后操作并全程留痕"},
+    {"id": "WG-4", "text": "本地仿真自检：页面部署前用 html 管道自检（shot.py 桌面 1440×900 + 移动 390×844，console error=0、无僵尸按钮、图片路径静态可访问）；自检不过不上线"},
+    {"id": "WG-5", "text": "全站断链扫描：部署上线后必须全站扫描——镜像/服务器全部 html 页面状态码（基准 42 页）与页面内部 src/href 引用（基准 58 项）全部 200 方算无断链；发现 403/404 立即修复（补页面/补资源）"},
+    {"id": "WG-6", "text": "公网验证关键链路：上线后验证 首页 / 新页面 / 导航入口 / api-docs / 作品库 等关键链路 https 200；新导航入口确认在桌面 nav 与移动 drawer 双端生效"},
+    {"id": "WG-7", "text": "留痕：每次官网新增/修复审计写 website-governance|<action>|ok，新增页面登记 asset-master-index-addendum；云端真值上报包含 new_pages/broken_fixed/scan 摘要"},
+    {"id": "WG-8", "text": "回滚：线上异常时恢复备份原版（.bak-<事件>-<YYYYMMDD>）并重新验证；回滚动作本身留痕"}
+  ],
+  "scope": "官网 docroot /www/wwwroot/huodouai.com 全部新增与修复操作",
+  "relies_on": ["META-VISUAL-STANDARD-001", "META-ASSET-VALUE-DISPLAY-001", "M11 云端写改删人工审批"],
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002",
+  "created": "2026-10-03",
+  "verified_by": "2026-10-03 架构页+作品库+中枢状态页 3 处 403 修复实测：42 页+58 引用无断链，首页 nav 双端入口生效"
+}

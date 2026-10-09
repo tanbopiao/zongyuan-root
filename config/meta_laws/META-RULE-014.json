@@ -1,0 +1,17 @@
+{
+  "law_id": "META-RULE-014",
+  "name": "JSON算子钩子调度约束（V1.4）",
+  "level": "P0",
+  "version": "v1.4",
+  "description": "JSON 算子钩子调度统一约束：载荷标准化、优先级调度、超时回收、双执行模式",
+  "clauses": [
+    {"id": "MR14-1", "text": "钩子入参必须为合法 JSON 载荷，结构非法直接 rejected，禁止继续执行"},
+    {"id": "MR14-2", "text": "priority 字段仅允许 P0/P1/P2/P3 四档枚举，非法枚举直接 rejected"},
+    {"id": "MR14-3", "text": "timeout_sec 必须为正整数秒，非法值直接 rejected；默认超时 3600 秒"},
+    {"id": "MR14-4", "text": "run_mode 支持 sync/async 双模式：sync 立即执行部署脚本，async 写入台账等待定时轮询"},
+    {"id": "MR14-5", "text": "任务入队前置校验当前运行 worker < max_worker_count（配额稳态保护），超限拒绝入队"},
+    {"id": "MR14-6", "text": "任务超时自动回收：超时标记 failed、释放容器配额、写入失败日志，回收不阻塞主流程"}
+  ],
+  "scope": "OP-WORKER-TRIGGER-001 / hooks/hook_trigger_worker.sh / scripts/task_timeout_recycle.sh",
+  "DID": "DID-BR-000002"
+}

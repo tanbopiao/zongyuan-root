@@ -1,0 +1,16 @@
+{
+  "law_id": "MR-FUSE-JITTER-001",
+  "name": "熔断抖动过滤元法则",
+  "level": "meta",
+  "version": "v1.0",
+  "description": "熔断状态切换防抖动：常规异常需连续 N 个采样周期仍异常才真正熔断；瞬时尖峰不触发；哈希锁篡改等致命异常即时熔断不受此限",
+  "clauses": [
+    "熔断状态切换必须连续 N=3 个采样周期保持异常，才允许从 CLOSED 切换至 OPEN",
+    "单次瞬时尖峰不触发熔断，触发计数器自动清零",
+    "致命异常（哈希锁篡改/基线失效）即时熔断，跳过抖动过滤（critical=true）",
+    "熔断后恢复需显式 reset 或连续 N 周期正常，才允许 CLOSED",
+    "参数 n_consecutive 可在内核配置覆盖，默认 3"
+  ],
+  "params": {"n_consecutive": 3},
+  "allowed_actions": ["audit", "fuse", "reset", "patrol", "reflect", "accumulate", "heartbeat", "selfcheck"]
+}
