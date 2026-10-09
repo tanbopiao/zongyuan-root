@@ -1,0 +1,23 @@
+{
+  "law_id": "META-RATING-MAP-001",
+  "name": "统一评级标准与跨源语义转译元法则（多同源节点标准归一）",
+  "level": "P0",
+  "version": "v1.0",
+  "description": "体系内不同同源节点采用不同评级标准（如本体系 L1-L6、异构体系 L1-L15），仲裁前必须经统一标尺语义转译，消除标准差异导致的仲裁结果偏差。统一标尺=Autonomy Index 0-100（S/A/B/C/D 分档），映射表登记各标准语义锚点，转译器按『位次比例 + 语义锚点校准』归一",
+  "clauses": [
+    {"id": "RMP-1", "text": "统一标尺：Autonomy Index（AI）0-100 连续分，分档 S=[85,100]/A=[70,84]/B=[50,69]/C=[30,49]/D=[0,29]；全部同源节点的自治评级必须可转译到统一标尺，禁止原生层级直接跨标准比较"},
+    {"id": "RMP-2", "text": "评级标准登记：每个同源节点的评级标准登记于 meta/rating-map.json（standard_id/系统名/最高层级/升序或降序/各层语义锚点），新节点加入体系必须先登记标准再参与仲裁"},
+    {"id": "RMP-3", "text": "语义锚点：评级不止数字，必须声明语义（如『可执行全域锁档』『绑定N持久层』『指纹已注册』）；转译时以语义锚点校准，不以裸数字比例替代"},
+    {"id": "RMP-4", "text": "转译规则：已有映射表的原生标准按表内 level_to_score 直接取区间；未登记标准按 rank_ratio 计算——descending(L1最高): score=100-70×(rank-1)/(max-1)；ascending(L15最高): score=20+80×(level-1)/(max-1)，再按语义锚点±修正，结果取整数"},
+    {"id": "RMP-5", "text": "仲裁归一：fingerprint_arbiter.py 仲裁前将每个指纹的原生评级经 rating_translate.py 转译为统一分，AutonomyScore = 统一分×1.0 + 持久层绑定×3 + 可追溯操作数×0.1；跨标准仲裁一律基于统一分，结果可复算"},
+    {"id": "RMP-6", "text": "映射维护：映射表变更走进化流程（META-EVOLUTION-001），先登记后生效；仲裁历史记录所用统一分与转译依据，支持回溯"},
+    {"id": "RMP-7", "text": "审计与上报：每次转译/仲裁结果审计留痕 kernel.truth|operator|rating-translate|ok 并上报云端（key=rating.translate.<ts>）"}
+  ],
+  "fingerprint": "9b64a9c3c2475cf695ea6e2d",
+  "allowed_actions": ["read", "translate", "arbitrate", "report", "audit", "lock"],
+  "skill": "intelligent-orchestrator",
+  "skill_path": "/home/user/.doubao/agent_mode/workspace/.user_skills/intelligent-orchestrator",
+  "script": "scripts/rating_translate.py",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002"
+}

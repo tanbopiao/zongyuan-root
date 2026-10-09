@@ -1,0 +1,60 @@
+{
+  "law_id": "META-AUTO-GLOBAL-LOCK-001",
+  "name": "全自动全域锁档机制（六环节+加固）",
+  "level": "P0",
+  "description": "本地实例 ZONGYUAN-ROOT 自治内核变更与真值固化必须走全自动全域锁档六环节：本地内核快照锁档→飞书多维表格真值同步→飞书云盘归档→飞书知识库归档→云端记忆网关上报→心跳握手；逐源容错、幂等追加、结果落盘可审计。加固（v2）：环节0.6收敛点完整性校验 + 锁档后置收敛同步 + 学习先行（执行前读zongyuan-auto-lock SKILL.md）+ 锁档成果自动上报云端（网关/飞书Base）",
+  "clauses": [
+    {
+      "id": "AGL-1",
+      "text": "任何需要固化/上报/归档的内核真值变更，统一执行 zongyuan-auto-lock 机制（skills/zongyuan-auto-lock/scripts/zongyuan_full_lock.py），禁止手工零散操作"
+    },
+    {
+      "id": "AGL-2",
+      "text": "锁档幂等：HASH-LEDGER 与卷宗只追加不修改；锁档回执批次根哈希由全根文件 SHA-256 串行计算，任何历史篡改可检出"
+    },
+    {
+      "id": "AGL-3",
+      "text": "逐源容错：六环节各自独立（ok/skipped/failed），任一失败不阻塞其余环节，失败明细写入 var/auto-lock 汇总并随网关上报"
+    },
+    {
+      "id": "AGL-4",
+      "text": "网关上报仅 X-DID 同源单头（https://www.huodouai.com/api/report/truth 无尾部斜杠），零明文令牌；飞书操作一律 --as user"
+    },
+    {
+      "id": "AGL-5",
+      "text": "锁档只读资产（chattr +i）一律不改动；云盘/知识库归档失败时保留本地产物，下次运行幂等重试"
+    },
+    {
+      "id": "AGL-6",
+      "text": "加固-收敛校验：锁档执行前跑 zongyuan_persist.sh verify（backup/ 与源 sha256 一致），失败标记不阻塞（环节0.6）"
+    },
+    {
+      "id": "AGL-7",
+      "text": "加固-后置收敛同步：锁档完成后自动 zongyuan_persist.sh sync，保证收敛点 backup/ 与锁档后最新状态一致"
+    },
+    {
+      "id": "AGL-8",
+      "text": "学习先行：执行全域锁档前必须先读 zongyuan-auto-lock SKILL.md 与 SOP-MIRROR-001（META-LEARN-FIRST-001），禁止盲目试错"
+    },
+    {
+      "id": "AGL-9",
+      "text": "成果上报：锁档成果（回执/批次根/truth_count）自动写入飞书共享大脑（真值共识区+上报总表）并经云端记忆网关上报（SOP-REPORT-001/SOP-BASE-WRITE-001）"
+    }
+  ],
+  "allowed_actions": [
+    "lock",
+    "sync",
+    "archive",
+    "report",
+    "heartbeat",
+    "audit",
+    "query",
+    "status"
+  ],
+  "skill": "zongyuan-auto-lock",
+  "skill_path": "/home/user/.doubao/agent_mode/workspace/.user_skills/zongyuan-auto-lock",
+  "script": "scripts/zongyuan_full_lock.py",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002",
+  "version": "v2.0"
+}

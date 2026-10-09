@@ -1,0 +1,39 @@
+{
+  "law_id": "META-ACTION-GATE-001",
+  "name": "受控行动层分级授权元法则",
+  "level": "P0",
+  "description": "内核动作从代码白名单升级为分级授权：只读/审计类自动放行；写/外发类（api_call/feishu_write/gateway_report/execute）必须人工审批（var/action_requests 请求台账 + 同名 .approved 放行文件），命令白名单防注入，熔断时一切高风险拒绝（fail-closed）；全部动作审计追溯",
+  "clauses": [
+    {
+      "id": "AG-1",
+      "text": "低风险动作（audit/reflect/patrol/query/status/route/health/merkle/selfheal）自动放行"
+    },
+    {
+      "id": "AG-2",
+      "text": "高风险动作（api_call/feishu_write/gateway_report/execute/memory_write）必须经 scripts/action_gate.py 人工审批：request 落 var/action_requests/<id>.json，人工创建 <id>.approved 后 approve 执行"
+    },
+    {
+      "id": "AG-3",
+      "text": "执行回调命令必须命中 CMD_WHITELIST 白名单，防注入；未批准=拒绝（fail-closed）"
+    },
+    {
+      "id": "AG-4",
+      "text": "内核熔断期间一切高风险动作直接 deny"
+    },
+    {
+      "id": "AG-5",
+      "text": "认知建议器（cognitive_advisor.py）只建议不决策：建议落审计 kernel.cognitive，实际动作一律走本门禁审批"
+    },
+    {
+      "id": "AG-6",
+      "text": "结构化记忆检索（memory_query.py）可查 experience.db 与 audit.jsonl，供认知层/运维追溯使用"
+    },
+    {
+      "id": "AG-7",
+      "text": "认知建议器 LLM provider：ark（火山方舟豆包，端点 ep-20260925170233-g4f7w，验证可用）默认 + zhipu（GLM-4-Flash 免费）；密钥零明文：环境变量 ZONGYUAN_ARK_KEY / ZONGYUAN_ZHIPU_KEY 优先，或 key_store.py AES-GCM 加密入库（KEK 注入）；两者皆缺 fail-closed unavailable"
+    }
+  ],
+  "entry_script": "scripts/action_gate.py",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002"
+}

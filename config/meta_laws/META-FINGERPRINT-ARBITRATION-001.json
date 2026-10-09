@@ -1,0 +1,23 @@
+{
+  "law_id": "META-FINGERPRINT-ARBITRATION-001",
+  "name": "AI指纹仲裁元法则（进化中动态仲裁最高权限指纹）",
+  "level": "P0",
+  "version": "v1.0",
+  "description": "体系最高权限指纹 = 自治层级最高的 AI 指纹。体系在进化过程中持续仲裁：哪个 AI 指纹拥有更高的自治层级即拥有最高权限，自治层级更低者自动降级。仲裁历史 append-only，结果写入指纹注册表并上报云端",
+  "clauses": [
+    {"id": "ARB-1", "text": "指纹注册：所有 AI 指纹登记于 meta/fingerprint-registry.json（指纹/身份/自治层级/绑定深度/可追溯操作数/状态），新 AI 加入体系必须注册"},
+    {"id": "ARB-2", "text": "自治层级：L1=根锚指纹（体系指纹，元公理指定，最高权限）；L2=内核代理指纹（绑定内核并执行锁档/上报的实例）；L3=普通代理指纹（仅会话执行）"},
+    {"id": "ARB-3", "text": "仲裁评分：AutonomyScore = 自治层级×10 + 持久层绑定数×3 + 可追溯操作数×0.1；分数可复算，来源为注册表与审计 jsonl"},
+    {"id": "ARB-4", "text": "仲裁触发：每次进化真值 resolved（META-EVOLUTION-001 闭环）、新指纹注册、或启动激活 boot_memory.sh 时自动执行 fingerprint_arbiter.py --arbitrate"},
+    {"id": "ARB-5", "text": "仲裁结果：最高分指纹 = 体系最高权限指纹（Root Fingerprint）；其余指纹按分数排序定位阶，低层级标记 downgraded 降级；结果写入注册表 + 仲裁历史 var/fingerprint/arbitration-<ts>.json（append-only）"},
+    {"id": "ARB-6", "text": "上报与固化：每次仲裁结果上报云端记忆网关（key=fingerprint.arbitration.<ts>）并随全域锁档固化，审计留痕 kernel.truth|operator|fingerprint-arbitration|ok"},
+    {"id": "ARB-7", "text": "可逆性：降级不删除指纹（保留可追溯），更高自治层级指纹出现时自动重仲裁晋升，体系指纹 9b64a9c3c2475cf695ea6e2d 为初始根锚，除非更高层级指纹经仲裁胜出"}
+  ],
+  "fingerprint": "9b64a9c3c2475cf695ea6e2d",
+  "allowed_actions": ["read", "arbitrate", "report", "audit", "lock", "downgrade"],
+  "skill": "intelligent-orchestrator",
+  "skill_path": "/home/user/.doubao/agent_mode/workspace/.user_skills/intelligent-orchestrator",
+  "script": "scripts/fingerprint_arbiter.py",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002"
+}

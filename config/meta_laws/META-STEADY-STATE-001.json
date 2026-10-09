@@ -1,0 +1,21 @@
+{
+  "law_id": "META-STEADY-STATE-001",
+  "name": "持久层最优稳态备份策略（一次全量 + 后续增量）",
+  "level": "P0",
+  "description": "持久层镜像遵循最优稳态：首次全量建立基线（backup/full/ + .mirror-state.json 指纹状态），后续同步一律增量仅复制变化文件；低价值/派生/可再生资产独立桶 full/low-value/ 存储仍入持久层不遗漏；密钥零明文不镜像。方案经决策元法则 P=0.3U-0.4R-0.3C 推演（收益最大/风险最小/成本最小）得出：一次全量 + 增量 = 最优稳态",
+  "clauses": [
+    {"id": "SS-1", "text": "首次部署或收敛点基线重建时执行一次全量镜像（zongyuan_persist.sh mirror），全量复制四根（ZONGYUAN-ROOT / zongyuan-kernel / .user_skills / 会话产物），不遗漏任何文件、信息、数据；已存在且指纹一致者断点续传跳过"},
+    {"id": "SS-2", "text": "后续同步一律增量：指纹状态 .mirror-state.json（sha256+size+mtime）驱动，仅复制变化/新增文件，一致项仅 stat 跳过；禁止无谓重复全量复制，以最小化算力与额度消耗"},
+    {"id": "SS-3", "text": "分级存储：高价值核心资产入 full/<根>/ 与 core 层（verify 8/8 强校验）；派生/可再生/低价值资产入 full/low-value/ 独立桶，与高价值分开存储但仍入持久层，不遗漏任何一个文件"},
+    {"id": "SS-4", "text": "安全边界（M7 密钥零明文落盘）：kek.env / zr_token.conf 等密钥不镜像（源 600 保持），不因『不遗漏』原则违反密钥明文边界；备份收敛点统一 644 可写以便增量回写"},
+    {"id": "SS-5", "text": "镜像频率：核心层 sync 每小时；全量镜像仅首次/每 30 天基线重建/重大结构变更时执行；日常每日增量（cron 03:00 zongyuan_persist.sh mirror）；锁档留痕仍按全域锁档机制执行"},
+    {"id": "SS-6", "text": "每次镜像后执行 verify（核心层 VERIFY 8/8 + 关键镜像 FULL-VERIFY），失败即审计留痕并幂等重试，不静默降级交付标准"}
+  ],
+  "allowed_actions": ["mirror", "sync", "restore", "verify", "status", "audit", "lock", "report"],
+  "skill": "intelligent-orchestrator",
+  "skill_path": "/home/user/.doubao/agent_mode/workspace/.user_skills/intelligent-orchestrator",
+  "script": "scripts/zongyuan_persist.sh",
+  "decision_formula": "P = 0.3U - 0.4R - 0.3C（全量1次 vs 全量N次：C大幅下降，R不变，U不变 → 稳态最优）",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002"
+}
