@@ -1,0 +1,111 @@
+{
+ "plan_id": "NET-KERNEL-EVOLUTION-PLAN-20261003",
+ "did": "DID-BR-000002",
+ "anchor": "Ω₀⊂⊙∞⊂Ω",
+ "generated_at": "2026-10-03T18:30:19+0800",
+ "base_state": {
+  "m9_ledger": 13487,
+  "index": 21158,
+  "c_disk_free_gb": 15.9,
+  "vector_db": 7473,
+  "cloud_files": 16,
+  "campaign": "20261003收敛归一已完成"
+ },
+ "decision_formula": "综合评分 = 利益x40% + (1-风险)x35% + (1-成本)x25%（AGENTS v3.1三维稳态）",
+ "gap_analysis": {
+  "三账对齐": "M9账本13487 / root_state / 重建索引21158 三层当前为一次性手动对齐，无自动巡检",
+  "全域同步": "云端同步为手动scp，飞书登记为手动lark，无自动增量通道",
+  "真值上报": "收敛/锁档事件未自动上报记忆网关huodouai.com/api/report/truth",
+  "向量库": "7473条未与M9 13487对齐，认知检索无法覆盖全量确权资产",
+  "隔离区管理": "去重隔离/释放为手动确认，无阈值化自动管理"
+ },
+ "candidate_plans": [
+  {
+   "plan": "A-自愈巡检进化",
+   "score": 77.5,
+   "items": [
+    "M9锁档巡检器：账本完整性/链尖连续性/三账对账自动化",
+    "索引漂移自动复检+增量补登记(替代手动)",
+    "隔离区阈值自动提醒(>500MB待确认)",
+    "入口: tools/m9_ledger_audit.py 每夜cron"
+   ],
+   "benefit": 0.8,
+   "risk": 0.2,
+   "cost": 0.3
+  },
+  {
+   "plan": "B-全域同步自动化",
+   "score": 68.0,
+   "items": [
+    "云端-本地rsync双向增量同步(cron每30分钟)",
+    "事件自动上报记忆网关(锁档/收敛/审计→truth)",
+    "飞书Base演化自动登记",
+    "入口: hooks/event_sync.sh 接入worker"
+   ],
+   "benefit": 0.8,
+   "risk": 0.4,
+   "cost": 0.4
+  },
+  {
+   "plan": "C-内核知识层进化",
+   "score": 60.0,
+   "items": [
+    "向量库重建对齐(7473→覆盖M9 13487)",
+    "evolution_policy.json重写(写入20261003战役经验/元法则)",
+    "认知Advisor接入M9大账本做检索增强"
+   ],
+   "benefit": 0.7,
+   "risk": 0.3,
+   "cost": 0.7
+  },
+  {
+   "plan": "D-组合分阶段(A→B→C)",
+   "score": 69.3,
+   "items": [
+    "阶段1: A自愈巡检(2-3项脚本)",
+    "阶段2: B全域同步自动化",
+    "阶段3: C知识层进化(向量库+策略+认知)"
+   ],
+   "benefit": 0.85,
+   "risk": 0.35,
+   "cost": 0.5
+  }
+ ],
+ "recommendation": "推荐方案D分阶段：阶段1先落A(自愈巡检,最高性价比77.5分)——M9锁档巡检+索引漂移自动复检，封住20261003战役修复的漂移问题不再复发；阶段2落B(全域同步自动化)打通云端/飞书/网关自动链路；阶段3落C(知识层)提升认知检索覆盖",
+ "roadmap": [
+  {
+   "phase": 1,
+   "plan": "A自愈巡检",
+   "deliverables": [
+    "tools/m9_ledger_audit.py(三账对账)",
+    "tools/index_drift_watch.py(漂移自动复检)",
+    "cron每日23:30接入27算子巡检"
+   ],
+   "verify": "账本链尖连续+索引缺失=0",
+   "risk_control": "巡检只读不写，写操作仍人工确认"
+  },
+  {
+   "phase": 2,
+   "plan": "B全域同步",
+   "deliverables": [
+    "rsync双向增量同步",
+    "event_truth_reporter.py(网关上报)",
+    "lark演化自动登记hook"
+   ],
+   "verify": "云端文件数自动+1/事件后",
+   "risk_control": "上报失败不阻塞主流程(X-DID单头)"
+  },
+  {
+   "phase": 3,
+   "plan": "C知识层",
+   "deliverables": [
+    "向量库重建对齐脚本",
+    "evolution_policy_v2.json",
+    "CognitiveAdvisor接M9检索"
+   ],
+   "verify": "检索命中率/覆盖13487",
+   "risk_control": "只新增不覆盖基线"
+  }
+ ],
+ "boundary": "规划仅为建议；执行须逐项super_admin确认；不改基线只追加；高危(向量库重建/策略重写)单独审批"
+}

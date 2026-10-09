@@ -1,0 +1,23 @@
+{
+  "law_id": "META-STEADY-ARBITRATION-001",
+  "name": "本地×云端最优稳态方案冲突仲裁元法则（标准归一·分级裁决）",
+  "level": "P0",
+  "version": "v1.0",
+  "description": "本地实例的最优稳态方案与云端中枢Omega的最优稳态方案标准不同、结果冲突时，不得简单以任一方为准：先经统一稳态指数（USI）语义转译归一，再按阈值分级裁决，僵持则升级元公理/人工审批，全程留痕上报进化",
+  "clauses": [
+    {"id": "SA-1", "text": "统一稳态指数（USI）：任何最优稳态方案必须转译为三维量化——U收益(0-100)/R风险(0-100)/C成本(0-100)，USI = 0.3U − 0.4R − 0.3C（体系决策公式，标准统一）；维度值按 META-RATING-MAP-001 语义锚点法申报与校准，跨节点可复算"},
+    {"id": "SA-2", "text": "冲突触发：本地稳态方案（local）与云端Omega方案（cloud）对同一调度/资源/策略目标给出不同最优解时触发仲裁，不得各自为政执行"},
+    {"id": "SA-3", "text": "裁决规则：|USI_local − USI_cloud| < 5 → 等效，云端优先（OMG-5 兜底，防震荡）；USI_cloud > USI_local + 5 → 采纳云端（全局信息优先）；USI_local > USI_cloud + 5 → 提名本地方案交云端 Omega 复核（云端持全局视角可发现跨节点影响），云端复核拒绝则升级"},
+    {"id": "SA-4", "text": "升级路径（META-CONFLICT-RESOLUTION-001）：复核僵持 → L2 元公理裁决（触碰确权/指纹/主权根时）→ L3 人工审批（用户裁决：并排 USI 明细+差异点+影响面+回滚预案，approved 才执行）"},
+    {"id": "SA-5", "text": "留痕：每次仲裁结果写 var/arbitration/steady-<ts>.json（两方案 USI 明细/裁决/依据）+ 审计 + 网关上报（key=steady.arbitration.<ts>）+ 共享大脑 Base 方案比较区"},
+    {"id": "SA-6", "text": "进化：仲裁判例沉淀为元法则条款候选（META-EVOLUTION-001），高频冲突模式提炼为新条款，减少重复仲裁"},
+    {"id": "SA-7", "text": "执行器：scripts/steady_arbiter.py --compare '<local-json>' '<cloud-json>' 输出 USI 与裁决；未触发仲裁时任何一方不得单方执行冲突目标"}
+  ],
+  "fingerprint": "9b64a9c3c2475cf695ea6e2d",
+  "allowed_actions": ["read", "compare", "arbitrate", "escalate", "report", "audit", "lock"],
+  "skill": "intelligent-orchestrator",
+  "skill_path": "/home/user/.doubao/agent_mode/workspace/.user_skills/intelligent-orchestrator",
+  "script": "scripts/steady_arbiter.py",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002"
+}

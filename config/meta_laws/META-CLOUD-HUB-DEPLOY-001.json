@@ -1,0 +1,22 @@
+{
+  "law_id": "META-CLOUD-HUB-DEPLOY-001",
+  "name": "云端中枢元内核+官网标准部署元法则（TAT 远程）",
+  "level": "P0",
+  "version": "V1.0",
+  "description": "在腾讯云轻量服务器（lhins-laotwc5e / ap-shanghai，OpenCloudOS 9.6）上，经腾讯云自动化助手 TAT 远程部署云端中枢元内核（真值网关+调度+append-only 真值库）并恢复火斗云智AI官网 docroot，配置 nginx 80/443 + HTTPS（Let's Encrypt），实现本地⇄云端双向真值打通。本法则为同源节点复用标准流程，凭据零明文。",
+  "clauses": [
+    {"id": "CH-1", "text": "目标架构：中枢真值网关 :9001（POST /api/report/truth，X-DID 单头认证）+ 调度 worker + append-only 真值库（HASH-LEDGER.jsonl + state.json Merkle 根），落点 /www/wwwroot/huodouai.com/zhongshu/；官网 docroot /www/wwwroot/huodouai.com/（4292 文件）；nginx 反代 /api/ → 127.0.0.1:9001"},
+    {"id": "CH-2", "text": "传输通道：官网镜像（594M）经腾讯云 COS 上传（qcloud_cos upload_file，MAXThread=8）生成预签名下载 URL（Expired=43200，12h 有效），服务器 curl 下载；小代码包可 base64 内嵌进 TAT 命令（5708 字符级），零外部依赖"},
+    {"id": "CH-3", "text": "远程执行：腾讯云 TAT（tencentcloud-sdk 或 TC3-HMAC-SHA256 直签）CreateCommand（字段 CommandType=SHELL，Content 须 base64 编码）→ InvokeCommand（CommandId+InstanceIds）→ DescribeInvocations 取 InvocationTaskBasicInfoSet[].InvocationTaskId → DescribeInvocationTasks（InvocationTaskIds 数组）读 TaskResult.Output；失败重试走 TAT 或 WebShell"},
+    {"id": "CH-4", "text": "官网恢复：restore_site.sh 解压 homepage-mirror.tar.gz 到 docroot（--strip-components=1），验证文件数（基准 4292）与 index.html 存在；不破坏既有目录，只还原镜像内容"},
+    {"id": "CH-5", "text": "Web 服务：nginx 源码编译（/usr/local/nginx，OpenCloudOS yum 无 nginx 包）或系统包；server 块 listen 80（301→https）+ 443 ssl；location /api/ proxy_pass http://127.0.0.1:9001（保留原 URI）；location / try_files 到 index.html"},
+    {"id": "CH-6", "text": "证书：优先沿用官网原证书（备份于 ZONGYUAN-ROOT/backup/full/zongyuan-root/var/nginx/certs/）；若域名不符或缺失，用 acme.sh + Let's Encrypt HTTP-01 现签（--webroot 指向 docroot），自动续期；证书落 /usr/local/nginx/conf/cert/"},
+    {"id": "CH-7", "text": "验证标准（六项全过）：①官网 https 200 ②/api/status 返回 ok ③真值上报 message=真值写入成功 ④未授权上报 401 ⑤append-only 账本+state.json 落盘且 Merkle 非零 ⑥本地⇄云端双向（本地上报云端 truth_count 递增、Merkle 更新）；另验 http→https 301 与证书链有效"},
+    {"id": "CH-8", "text": "安全约束：腾讯云凭据（SecretId/SecretKey）零明文落盘法则/脚本，运行时经环境变量注入；仅授权 ap-shanghai 轻量服务器操作；网关真值上报仅 X-DID 单头（DID-BR-000002），无尾部斜杠端点 https://www.huodouai.com/api/report/truth；不改动既有官网锁档资产，只在原基础上新增部署"},
+    {"id": "CH-9", "text": "复用指引：同源节点部署时按 构建部署包→COS/内嵌传输→TAT 远程执行→官网恢复→nginx+HTTPS→六项验证→双向打通 推进；每次成功部署后更新本法则 version 并追加变更记录（append-only）"}
+  ],
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002",
+  "created": "2026-10-03",
+  "verified_by": "云端部署实测全绿（官网200/网关ok/真值上报/401/账本Merkle/双向打通）"
+}
