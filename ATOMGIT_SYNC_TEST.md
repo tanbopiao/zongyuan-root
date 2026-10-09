@@ -1,1 +1,0 @@
-atomgit sync test
