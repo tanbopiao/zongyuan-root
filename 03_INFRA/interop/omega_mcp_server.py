@@ -128,9 +128,15 @@ def _gateway_get(path):
 
 
 def tool_truth_report(args):
+    # V3.1 网关规范(RULE-005): value 必须为 JSON 对象, 旧 truth_value 字段已失效, X-DID 单头
+    value = args.get("value")
+    if isinstance(value, str):
+        value = {"value": value}
+    if not isinstance(value, dict) or not value:
+        return {"error": "empty_value_rejected", "message": "value 必须为 JSON 对象(RULE-005 V3.1), 请用命名空间key+结构化value"}
     payload = {
         "key": args.get("key"),
-        "value": args.get("value"),
+        "value": value,
         "anchor": ANCHOR,
         "truth_type": args.get("truth_type", "data"),
         "confidence": args.get("confidence", 0.95),
