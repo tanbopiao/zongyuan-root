@@ -1,0 +1,49 @@
+{
+  "law_id": "META-WORKER-KERNEL-001",
+  "name": "Worker 内核全自动执行机制（无人值守版）",
+  "level": "P0",
+  "description": "本地实例 ZONGYUAN-ROOT Worker 内核无人值守自动运行：开机自动激活（@reboot boot）、每分钟 watchdog 高频自愈（worker 保活/归档即时消费/超时补锁档/rsync 续传）、每 5 分钟 tick、每天全域锁档（zongyuan-auto-lock 六环节）、每 30 分钟系统监控；全部 append-only、逐源容错、加固防篡改、激活留痕",
+  "clauses": [
+    {
+      "id": "WK-1",
+      "text": "Worker 内核统一入口为 scripts/worker_kernel.sh（boot/watchdog/tick/lock/monitor/archive/enqueue），由 crontab 无人值守自动调度：@reboot boot、* * * * * watchdog、*/5 tick、每天03:30 lock、*/30 monitor"
+    },
+    {
+      "id": "WK-2",
+      "text": "图片/视频自动归档统一经 var/inbox 入队（enqueue 校验 task_type/DID/asset_kind）→ watchdog/tick 轮询 → hook_trigger_archive.sh → auto_archive_* 执行；成功移 done/、失败移 failed/，append-only 禁止覆写旧资产"
+    },
+    {
+      "id": "WK-3",
+      "text": "全域锁档由 zongyuan-auto-lock 技能执行六环节（本地快照→飞书Base→云盘→知识库→网关上报→心跳）；超过 24h 无锁档时 watchdog/boot 自动补锁档；锁档只读资产（chattr +i / 444 加固清单）一律不改动"
+    },
+    {
+      "id": "WK-4",
+      "text": "Worker 脚本哈希与 meta-rules/worker-hardening.json 清单一致才可启动（HARDENING_BLOCK 拒绝）；升级必须先重算哈希更新清单再恢复只读"
+    },
+    {
+      "id": "WK-5",
+      "text": "docker 不可用时 worker 走降级/受控本地进程模式；rsync 云端目标未配置时资产进 pending-rsync.list 续传；失败不阻塞主流程"
+    },
+    {
+      "id": "WK-6",
+      "text": "每次激活（boot/watchdog/tick/lock/monitor/enqueue）写入 var/activation 激活台账（append-only + 索引），无人值守全链路可审计"
+    }
+  ],
+  "allowed_actions": [
+    "boot",
+    "watchdog",
+    "tick",
+    "lock",
+    "monitor",
+    "archive",
+    "enqueue",
+    "sync",
+    "heartbeat",
+    "audit",
+    "status"
+  ],
+  "skill": "zongyuan-auto-lock",
+  "entry_script": "scripts/worker_kernel.sh",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002"
+}

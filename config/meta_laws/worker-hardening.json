@@ -1,0 +1,60 @@
+{
+  "meta_rule_id": "META-RULE-WORKER-HARDENING-001",
+  "name": "Worker 加固与只读元规则",
+  "anchored": "Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002",
+  "version": "v1.2",
+  "created_at": "2026-09-27T02:45:55+0800",
+  "hardening_items": [
+    "防篡改自检：worker 脚本启动时校验自身 SHA-256 与本节清单一致，不一致拒绝启动（HARDENING_BLOCK）",
+    "脚本只读：chmod 555（owner 亦不可写，防意外/恶意修改）",
+    "元内核只读：本清单 chmod 444",
+    "升级流程：改脚本 → 重算哈希 → 更新本清单 → 重新只读 → 全域锁档",
+    "append-only 语义：哈希变更必须经锁档入账（HASH-LEDGER）"
+  ],
+  "scripts": {
+    "scripts/worker_local_process.sh": "d8cf0abf2395ba9aa5c966571468f7055ce3083b732a8200587eba3683033402",
+    "scripts/worker_controlled.sh": "4a02afdef0adb9188ae246a0f62d32766091ce096536fc62f6b5b96bfde61170",
+    "scripts/worker_auto_deploy_timer.sh": "5a60cc3e8a2db63aa78568c98d86beaf0533b8c3fcd51dace587c58c07bd1baf",
+    "scripts/task_timeout_recycle.sh": "8d7cf383c884c453706de29ca50a2b878ee1ab631daff5293633a99320fd4ce6",
+    "scripts/dyn_ip_manager.sh": "28015de454fc18d7553d08d8cb6112985084045a7fa05729a0c3d719900b040f",
+    "scripts/worker_ntfy_alert.sh": "a5df6c9c3763cd40484626bc01ecf1cb287018579fd8068a6d6b6f12a4244d5a",
+    "scripts/system_status_monitor.sh": "61ce7bf3d92c9c4e2064f5b84b878399459278272676b890b50c618cdbd38cfe",
+    "scripts/cos_reconcile.sh": "c207db943aea76b7511945fe6276788e5f0b45c86d494719f540aafa681e5bbc",
+    "scripts/ddns_update.sh": "77d9418c24b6fa036a7a05fae9f99a24403af1efdc0f213a192fe600ef262677",
+    "scripts/frp_tunnel_keepalive.sh": "bf956ea5e5a86b739fd68a8624edd365e6638a6944970da7a8575618a509bc58",
+    "scripts/openai_gateway.py": "5935ffb885998385f58c0ea3efb2a8b1ff9e8ceafa99c28c676c51b69337f764",
+    "scripts/gateway_keepalive.sh": "12c42c1ff5a8faaf8b5337b8ddad1ebf1efd23f0697527268d7e32f9450a9b7c",
+    "scripts/frps_guard.sh": "7f1e213751b110f173b328c1fb7491f107352587ae900548aac85f8cf3d63005",
+    "scripts/worker_kernel.sh": "fd78d3aa2d5743b00938852382752130e1b4af7c1ba662fb04f0be3cd047e5b0"
+  },
+  "readonly_modes": {
+    "scripts": "555",
+    "meta_rules": "444"
+  },
+  "block_behavior": "HARDENING_BLOCK exit 3（拒绝启动并留日志）",
+  "updated_at": "2026-09-27T11:51:09+0800",
+  "law_id": "META-RULE-WORKER-HARDENING-001",
+  "level": "P0",
+  "clauses": [
+    {
+      "id": "WH-01",
+      "text": "防篡改自检：worker 脚本启动时校验自身 SHA-256 与本节清单一致，不一致拒绝启动（HARDENING_BLOCK）"
+    },
+    {
+      "id": "WH-02",
+      "text": "脚本只读：chmod 555（owner 亦不可写，防意外/恶意修改）"
+    },
+    {
+      "id": "WH-03",
+      "text": "元内核只读：本清单 chmod 444"
+    },
+    {
+      "id": "WH-04",
+      "text": "升级流程：改脚本 → 重算哈希 → 更新本清单 → 重新只读 → 全域锁档"
+    },
+    {
+      "id": "WH-05",
+      "text": "append-only 语义：哈希变更必须经锁档入账（HASH-LEDGER）"
+    }
+  ]
+}

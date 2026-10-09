@@ -1,0 +1,20 @@
+{
+  "law_id": "META-EVOLUTION-001",
+  "name": "自治内核元法则进化机制（真值→法则→内核进化闭环）",
+  "level": "P0",
+  "description": "自治内核/自治系统通过持续提炼进化真值为元法则实现自我进化：每次实战（修复、新机制、沙箱重置、锁档暴露问题、稳态优化）产生的进化真值，必须按统一 schema 提炼为元法则/元规则写入 meta-rules，过 schema 门校验后随锁档固化，驱动内核不断进化，禁止只改代码不沉淀法则",
+  "clauses": [
+    {"id": "EV-1", "text": "真值提炼：每次重要变更/事件（故障修复、新机制部署、沙箱重置实证、锁档暴露缺口、成本优化）后，提炼进化真值（发生了什么→根因→新规则），经 law_evolve.py append 记录 var/law-evolution/pending.jsonl"},
+    {"id": "EV-2", "text": "法则沉淀：进化真值必须按统一 schema（law_id/name/level/clauses 非空 list）提炼为元法则写入 meta-rules 目录；禁止只改代码/机制而不沉淀法则，法则即内核进化的载体"},
+    {"id": "EV-3", "text": "schema 门（fail-closed）：新法则/修订法则必须过 meta_law_schema_check.py 校验，PASS 后方可生效；不合规文件（如 worker-hardening.json）做 schema 兼容包装（保留原引用字段，仅新增必需字段），不得破坏既有引用"},
+    {"id": "EV-4", "text": "固化留痕：法则变更随全域锁档固化（增量锁档 targets 含 meta-rules 新文件）+ 云端记忆网关上报 + 审计留痕（kernel.truth|operator|law-evolve|ok）"},
+    {"id": "EV-5", "text": "覆盖检查：巡检（autonomy_patrol meta_law_schema 项）持续校验法则目录合规；每次重大工作后比对『进化真值清单 vs 法则覆盖』，有真值无法则即提示提炼，杜绝进化真值丢失"},
+    {"id": "EV-6", "text": "周期演进：每周/每月复盘 pending 真值清单，合并同类法则、以新版本替换失效法则（append-only：旧法则保留在 HASH-LEDGER/卷宗历史，不删除只追加）"}
+  ],
+  "allowed_actions": ["append", "draft", "pending", "check", "lock", "report", "audit"],
+  "skill": "intelligent-orchestrator",
+  "skill_path": "/home/user/.doubao/agent_mode/workspace/.user_skills/intelligent-orchestrator",
+  "script": "scripts/law_evolve.py",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002"
+}
