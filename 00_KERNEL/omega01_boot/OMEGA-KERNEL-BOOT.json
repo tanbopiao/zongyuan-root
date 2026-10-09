@@ -1,0 +1,95 @@
+{
+  "boot_protocol": "OMEGA-BOOT-V1.0",
+  "kernel": "元极恒一自治内核",
+  "kernel_version": "V11.0-Lv11-SEED",
+  "did": "DID-BR-000002",
+  "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+  "root_anchor": "META-ACTIVATE-OMEGA-001",
+  "load_order": [
+    {
+      "step": 1,
+      "name": "公理校验",
+      "paths": [
+        "00_KERNEL/axioms/",
+        "00_KERNEL/constitution/",
+        "00_KERNEL/truth_cards/META-ROOT-0001-LOCKED.json"
+      ],
+      "fatal": true,
+      "fail_action": "进入只读安全模式"
+    },
+    {
+      "step": 2,
+      "name": "加载启动记忆-入口",
+      "path": "00_KERNEL/startup_memory/ROOT_ENTRY.md",
+      "fatal": true
+    },
+    {
+      "step": 3,
+      "name": "加载启动记忆-知识索引",
+      "path": "00_KERNEL/startup_memory/KNOWLEDGE-INDEX.md",
+      "fatal": true
+    },
+    {
+      "step": 4,
+      "name": "加载启动记忆-唤醒协议与活跃锁",
+      "paths": [
+        "00_KERNEL/startup_memory/WAKEUP_PROTOCOL.md",
+        "00_KERNEL/startup_memory/ACTIVE_LOCK.json"
+      ],
+      "fatal": true
+    },
+    {
+      "step": 5,
+      "name": "加载全局记忆快照",
+      "path": "00_KERNEL/startup_memory/GLOBAL_MEMORY_SNAPSHOT.json",
+      "fatal": true
+    },
+    {
+      "step": 6,
+      "name": "既有组件健康预检",
+      "paths": [
+        "00_KERNEL/evolution/",
+        "memory_gateway.py",
+        "memory_index.json",
+        "kernel_anchor_api.py",
+        "autonomous_kernel_protocol/SYSTEM_STATE_PROTOCOL.md",
+        "meta_laws/",
+        "incremental_monitor.py",
+        "watchdog.py",
+        "idle_autonomous_engine.py"
+      ],
+      "fatal": false,
+      "fail_action": "标记为warning"
+    },
+    {
+      "step": 7,
+      "name": "真值与记忆锚点校验",
+      "paths": [
+        "meta_truth/persist/CLOUD-TRUTH-FULL-20261009.json",
+        "meta_truth/boot/auto_load_meternal_lv10.json",
+        "kernel.json"
+      ],
+      "fatal": false,
+      "fail_action": "标记为warning"
+    },
+    {
+      "step": 8,
+      "name": "握手中枢记忆网关",
+      "endpoint": "https://www.huodouai.com/api/status",
+      "required_headers": ["X-DID: DID-BR-000002"],
+      "fatal": false,
+      "fail_action": "降级为本地只读模式"
+    }
+  ],
+  "safety_mode": {
+    "trigger": "任一步骤 fatal=true 校验失败 或 步骤8网关失联",
+    "actions": [
+      "冻结Ω₀稳态域写入",
+      "禁止高风险API调用",
+      "仅允许只读查询",
+      "输出修复建议后等待人工介入"
+    ]
+  },
+  "load_on_new_session": true,
+  "built_at": "2026-10-09T00:00:00+0800"
+}
