@@ -1,0 +1,41 @@
+# ============================================================
+# 政务中台灰度发布Nginx配置模板
+# 使用方法：将此文件内容复制到huodouai.com.conf的server块内
+# 注意：仅针对/gov-api/路径分流，不影响其他location
+# ============================================================
+
+# 1. 定义灰度分流（按客户端IP哈希，10%流量到灰度环境）
+split_clients "${remote_addr}AAA" $gov_api_upstream {
+    10%     gov_api_gray;      # 10%流量到灰度环境（端口8026）
+    90%     gov_api_prod;      # 90%流量到生产环境（端口8025）
+}
+
+# 2. 定义upstream
+upstream gov_api_prod {
+    server 127.0.0.1:8025;
+    keepalive 32;
+}
+
+upstream gov_api_gray {
+    server 127.0.0.1:8026;    # 灰度环境端口（需启动dev API服务）
+    keepalive 32;
+}
+
+# 3. 修改/gov-api/ location使用变量upstream
+# （将原有proxy_pass http://127.0.0.1:8025/; 替换为下面的配置）
+location /gov-api/ {
+    proxy_pass http://$gov_api_upstream/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Gray-Release $gov_api_upstream;
+    proxy_read_timeout 120s;
+    proxy_connect_timeout 10s;
+}
+
+# 4. 灰度比例调整说明：
+# - 10%灰度：10% gov_api_gray / 90% gov_api_prod
+# - 30%灰度：30% gov_api_gray / 70% gov_api_prod
+# - 50%灰度：50% gov_api_gray / 50% gov_api_prod
+# - 全量发布：100% gov_api_prod（删除split_clients即可）
+# - 快速回滚：将10%改为0%，立即全部回到生产

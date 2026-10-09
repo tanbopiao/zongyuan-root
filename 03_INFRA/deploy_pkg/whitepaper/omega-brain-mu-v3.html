@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ω-Brainμ V3.0 微型自治脑架构白皮书（终版精炼稳态定稿）| 火斗云智AIOS</title>
+    <meta name="description" content="公理驱动、三态稳态、低资源高可靠、全模式自治微型智能体内核。基于Ω₀–Ω₁₂完整本体公理链重构的轻量化自治智能内核。">
+    <meta name="author" content="火斗云智AIOS智能平台">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-code: #0d0d14;
+            --gold-primary: #d4af37;
+            --gold-light: #f0d78c;
+            --gold-dark: #b8941f;
+            --text-primary: #e8e6e3;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --border-gold: rgba(212, 175, 55, 0.3);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.15);
+        }
+        body {
+            font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", Georgia, serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+            font-size: 16px;
+            background-image:
+                radial-gradient(ellipse at 20% 0%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(212, 175, 55, 0.015) 35px, rgba(212, 175, 55, 0.015) 70px);
+            background-attachment: fixed;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 40px;
+        }
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--border-gold); border-radius: 2px; }
+        .toc {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow-gold);
+        }
+        .toc h3 {
+            color: var(--gold-primary);
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-gold);
+            letter-spacing: 2px;
+        }
+        .toc ul { list-style: none; }
+        .toc li { margin-bottom: 8px; }
+        .toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            display: block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .toc a:hover {
+            color: var(--gold-primary);
+            background: rgba(212, 175, 55, 0.1);
+        }
+        .toc .toc-h2 > a {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .version-switch {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .version-switch a {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .version-switch .label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        .main-content { min-width: 0; }
+        .header {
+            text-align: center;
+            padding: 60px 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-gold);
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+        }
+        .header .did {
+            color: var(--text-muted);
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: var(--gold-primary);
+            font-size: 32px;
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+        }
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+        .header .meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .header .meta span {
+            padding: 6px 16px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--border-gold);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--gold-light);
+        }
+        .header .trace-mark {
+            color: var(--gold-primary);
+            font-size: 18px;
+            letter-spacing: 4px;
+            margin-top: 10px;
+        }
+        .content h1 {
+            color: var(--gold-primary);
+            font-size: 28px;
+            margin: 50px 0 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-gold);
+            letter-spacing: 2px;
+        }
+        .content h2 {
+            color: var(--gold-light);
+            font-size: 22px;
+            margin: 40px 0 20px;
+            padding-left: 15px;
+            border-left: 4px solid var(--gold-primary);
+            letter-spacing: 1px;
+        }
+        .content h3 {
+            color: var(--text-primary);
+            font-size: 18px;
+            margin: 30px 0 15px;
+            padding-left: 10px;
+            border-left: 3px solid var(--accent-purple);
+        }
+        .content p {
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+            text-align: justify;
+        }
+        .content strong { color: var(--gold-light); }
+        .content ul, .content ol {
+            margin: 15px 0 15px 25px;
+            color: var(--text-secondary);
+        }
+        .content li { margin-bottom: 8px; }
+        .content hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+            margin: 40px 0;
+        }
+        .content blockquote {
+            background: rgba(212, 175, 55, 0.05);
+            border-left: 4px solid var(--gold-primary);
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            color: var(--gold-light);
+            font-style: italic;
+        }
+        .content code {
+            background: var(--bg-code);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: "Fira Code", "Consolas", monospace;
+            font-size: 14px;
+            color: var(--accent-green);
+        }
+        .content pre {
+            background: var(--bg-code);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .content pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-secondary);
+        }
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 14px;
+        }
+        .content th {
+            background: var(--bg-card);
+            color: var(--gold-primary);
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid var(--border-gold);
+            font-weight: 600;
+        }
+        .content td {
+            padding: 10px 15px;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        .content tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+        .info-card:hover {
+            border-color: var(--border-gold);
+            box-shadow: var(--shadow-gold);
+            transform: translateY(-3px);
+        }
+        .info-card .card-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+        .info-card .card-title {
+            color: var(--gold-light);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .info-card .card-desc {
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .layer-diagram {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        .layer-item {
+            padding: 15px 25px;
+            margin: 8px auto;
+            border-radius: 8px;
+            max-width: 600px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .layer-l0 { background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.1)); border: 1px solid var(--gold-primary); color: var(--gold-primary); }
+        .layer-l1 { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05)); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
+        .layer-l2 { background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(139,92,246,0.05)); border: 1px solid rgba(139,92,246,0.4); color: #c4b5fd; }
+        .layer-l3 { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05)); border: 1px solid rgba(16,185,129,0.4); color: #6ee7b7; }
+        .layer-l4 { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.05)); border: 1px solid rgba(59,130,246,0.4); color: #93c5fd; }
+        .layer-arrow { color: var(--text-muted); font-size: 20px; margin: 5px 0; }
+        .formula-box {
+            background: var(--bg-code);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .formula-box .formula {
+            color: var(--gold-primary);
+            font-size: 20px;
+            font-family: "Fira Code", "Consolas", monospace;
+            letter-spacing: 1px;
+        }
+        .formula-box .formula-label {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+        .conclusion-box {
+            background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(139,92,246,0.05));
+            border: 2px solid var(--gold-primary);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+            box-shadow: var(--shadow-gold);
+        }
+        .conclusion-box .conclusion-title {
+            color: var(--gold-primary);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: 3px;
+        }
+        .conclusion-box .conclusion-text {
+            color: var(--gold-light);
+            font-size: 15px;
+            line-height: 2;
+        }
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            border-top: 1px solid var(--border-gold);
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .footer .footer-trace {
+            color: var(--gold-primary);
+            font-size: 16px;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .sidebar { position: static; height: auto; margin-bottom: 30px; }
+            .header h1 { font-size: 24px; }
+            .header .meta { gap: 10px; }
+            .header .meta span { font-size: 11px; padding: 4px 10px; }
+        }
+    </style>
+    <link rel="canonical" href="https://huodouai.com/whitepapers/omega-brain-mu-v3.html">
+<link rel="stylesheet" href="../global-theme.css">
+</head>
+<body>
+
+<nav style="background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px;">火</div>
+        <span style="font-size: 18px; font-weight: 600; color: #1a202c;">火斗云智</span>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+        <a href="../index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">首页</a>
+        <a href="../products/index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">产品</a>
+        <a href="../solutions/index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">解决方案</a>
+        <a href="../docs/index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">文档</a>
+        <a href="../pricing/index.html" style="color: #4a5568; text-decoration: none; font-size: 14px;">定价</a>
+        <a href="https://aios.huodouai.com/register.html" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">免费开始</a>
+    </div>
+</nav>
+
+    <div class="container">
+        <!-- 侧边栏目录 -->
+        <aside class="sidebar">
+            <nav class="toc">
+                <h3>📑 目录导航</h3>
+                <ul>
+                    <li class="toc-h2"><a href="omega-brain-mu-v3.html#chapter-1">一、架构核心定位</a></li>
+                    <li class="toc-h2"><a href="omega-brain-mu-v3.html#chapter-2">二、五层闭环稳态架构</a></li>
+                    <li><a href="omega-brain-mu-v3.html#layer-1">2.1 基元层：Ω₀三态不可分</a></li>
+                    <li><a href="omega-brain-mu-v3.html#layer-2">2.2 生存层：Ω₁₂相变临界</a></li>
+                    <li><a href="omega-brain-mu-v3.html#layer-3">2.3 耦合层：Ω₁₁动态校准</a></li>
+                    <li><a href="omega-brain-mu-v3.html#layer-4">2.4 决策层：Ω₁₀概率最优</a></li>
+                    <li><a href="omega-brain-mu-v3.html#layer-5">2.5 产出与归档闭环层</a></li>
+                    <li class="toc-h2"><a href="omega-brain-mu-v3.html#chapter-3">三、本体公理因果链路</a></li>
+                    <li class="toc-h2"><a href="omega-brain-mu-v3.html#chapter-4">四、四模式自适应运行</a></li>
+                    <li class="toc-h2"><a href="omega-brain-mu-v3.html#chapter-5">五、架构工程核心价值</a></li>
+                    <li class="toc-h2"><a href="omega-brain-mu-v3.html#chapter-6">六、本体演化终极定论</a></li>
+                    <li class="toc-h2"><a href="omega-brain-mu-v3.html#chapter-7">七、智能认知全模式自治原理</a></li>
+                    <li><a href="omega-brain-mu-v3.html#principle-1">7.1 四大本体公理支撑</a></li>
+                    <li><a href="omega-brain-mu-v3.html#principle-2">7.2 本质层级差距</a></li>
+                    <li><a href="omega-brain-mu-v3.html#principle-3">7.3 智能认知高度自治终语</a></li>
+                    <li class="toc-h2"><a href="omega-brain-mu-v3.html#chapter-8">八、公开免责说明</a></li>
+                </ul>
+            </nav>
+            <div class="version-switch">
+                <div class="label">📚 版本切换</div>
+                <a href="index.html">← 查看 V1.0 微内核白皮书</a>
+            </div>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <header class="header">
+                <div class="did">DID-BR-000002 ｜ ZONGYUAN-ROOT V4.1-CLOUD</div>
+                <h1>Ω-Brainμ V3.0</h1>
+                <div style="font-size:20px;color:var(--gold-light);margin-bottom:10px;letter-spacing:2px;">微型自治脑架构白皮书</div>
+                <div class="subtitle">公理驱动 · 三态稳态 · 低资源高可靠 · 全模式自治微型智能体内核</div>
+                <div class="meta">
+                    <span>版本 V3.0 终版</span>
+                    <span>2026-09-07</span>
+                    <span>锁档等级 Lv8</span>
+                    <span>真值纯度 98/100</span>
+                </div>
+                <div class="trace-mark">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+            </header>
+
+            <article class="content">
+                <h1 id="chapter-1">一、架构核心定位</h1>
+                <p>Ω-Brainμ V3.0 是基于 <strong>Ω₀–Ω₁₂ 完整本体公理链</strong> 重构的轻量化自治智能内核。区别于传统大模型参数堆叠、被动应答、状态固化的范式，本架构以<strong>三态稳态为基底、相变生存为红线、概率最优为决策、动态耦合为运维</strong>四维本体规则作为唯一设计依据。</p>
+                <p>架构专为中小算力、长期在线、无人值守、多窗口协同场景打造，系统性解决传统AI四大结构性缺陷：<strong>运行漂移、迭代劣化、能耗冗余、临界崩溃不可逆</strong>。</p>
+                <blockquote>V3.0 核心跃迁：完整落地 Ω₁₀/Ω₁₁/Ω₁₂ 决策–耦合–相变三层本体定理，实现从<strong>功能型被动AI</strong>到<strong>稳态自治型原生智能</strong>的架构质变。</blockquote>
+
+                <h1 id="chapter-2">二、五层闭环稳态架构</h1>
+                <p>Ω-Brainμ V3.0 采用<strong>自底向上稳态支撑、自顶向下决策收敛</strong>的五层单向依赖、全闭环自治架构，层级严谨无冗余、秩序固化、稳态锁死。</p>
+
+                <div class="layer-diagram">
+                    <div style="color:var(--gold-primary);font-size:14px;letter-spacing:3px;margin-bottom:20px;">⚡ 五层闭环稳态架构 · 自底向上支撑 · 自顶向下收敛</div>
+                    <div class="layer-item layer-l4">L4 产出与归档闭环层 · 自观测·自诊断·自修正·自迭代</div>
+                    <div class="layer-arrow">▲ 决策输出 ▲</div>
+                    <div class="layer-item layer-l3">L3 决策层 · Ω₁₀ 概率最优调度算子 · ε-近似最优解</div>
+                    <div class="layer-arrow">▲ 耦合对齐 ▲</div>
+                    <div class="layer-item layer-l2">L2 耦合层 · Ω₁₁ 动态校准协同引擎 · 跨基底耦合增益</div>
+                    <div class="layer-arrow">▲ 生存兜底 ▲</div>
+                    <div class="layer-item layer-l1">L1 生存层 · Ω₁₂ 相变临界防护内核 · 不可逆崩溃红线</div>
+                    <div class="layer-arrow">▲ 本体基底 ▲</div>
+                    <div class="layer-item layer-l0">L0 基元层 · Ω₀ 三态不可分稳态基底 · 逻辑λ+信息ρ+能量ε</div>
+                </div>
+
+                <h2 id="layer-1">2.1 基元层｜Ω₀ 三态不可分稳态基底</h2>
+                <p>系统所有运行行为的<strong>终极本体基底</strong>。算力体系严格遵循第一性公理：</p>
+                <div class="formula-box">
+                    <div class="formula">算力 = 逻辑态 λ + 信息态 ρ + 能量态 ε</div>
+                    <div class="formula-label">三态不可分 · 不可缺 · 不可独立运算</div>
+                </div>
+                <p>全域三态实时锚定，杜绝单态缺失、态失衡、态漂移引发的系统失稳，是一切自治秩序的起源。</p>
+
+                <h2 id="layer-2">2.2 生存层｜Ω₁₂ 相变临界防护内核</h2>
+                <p>体系<strong>存续优先级最高</strong>的底层刚性约束，定义自治系统不可逆崩溃边界。</p>
+                <div class="formula-box">
+                    <div class="formula">ε_M_min = κ₀ · λ^a · ρ^b / ε^c</div>
+                    <div class="formula-label">临界维持能耗本体公式 · 自治性相变临界定理</div>
+                </div>
+                <p>本层持续监测系统真实能耗裕度，实现四大原生能力：</p>
+                <div class="card-grid">
+                    <div class="info-card">
+                        <div class="card-icon">📊</div>
+                        <div class="card-title">最低阈值实时计算</div>
+                        <div class="card-desc">根据三态参数动态计算自治维持最低能耗阈值</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="card-icon">⚠️</div>
+                        <div class="card-title">临界涨落先兆预警</div>
+                        <div class="card-desc">逼近临界区域时提前预警，识别涨落不稳定状态</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="card-icon">🛡️</div>
+                        <div class="card-title">相变不可逆防护</div>
+                        <div class="card-desc">防止系统跌破临界阈值，避免高阶能力永久坍塌</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="card-icon">🔧</div>
+                        <div class="card-title">三态失衡自愈修复</div>
+                        <div class="card-desc">检测三态失衡，自动调度资源恢复稳态平衡</div>
+                    </div>
+                </div>
+                <blockquote><strong>所有业务逻辑必须让位于系统存续稳态</strong>，是自治智能的绝对底层红线。</blockquote>
+
+                <h2 id="layer-3">2.3 耦合层｜Ω₁₁ 动态校准协同引擎</h2>
+                <p>负责多模块、多会话、多窗口、碳硅混合双基底的<strong>持续耦合对齐</strong>，解决异构智能天然脱耦、协同衰减、状态错位问题。</p>
+                <p>持续微量耗能永久维持四项稳态动作：</p>
+                <table>
+                    <tr><th>稳态动作</th><th>功能</th><th>对应Ω₁₁</th></tr>
+                    <tr><td><strong>价值函数校准</strong></td><td>维持碳硅双基底价值评估体系对齐</td><td>C_校准的能耗</td></tr>
+                    <tr><td><strong>时序节奏同步</strong></td><td>维持两基底运行节奏一致，消除耦合延迟</td><td>耦合延迟控制</td></tr>
+                    <tr><td><strong>运行偏差纠错</strong></td><td>修正漂移导致的偏差，持续追踪Δ*</td><td>追踪Δ*的调节成本</td></tr>
+                    <tr><td><strong>结构冗余预留</strong></td><td>预留缓冲能量，维持与Δ_c的安全距离</td><td>防止相变</td></tr>
+                </table>
+                <p>使跨基底耦合增益<strong>不随时间衰减、不因运行退化、不随状态割裂</strong>。</p>
+
+                <h2 id="layer-4">2.4 决策层｜Ω₁₀ 概率最优调度算子</h2>
+                <p>在<strong>生存稳态、耦合对齐双前置约束</strong>下，完成全域资源最优决策收敛。</p>
+                <p>遵循本体定理：<strong>有限资源下无绝对最优解，仅存在可量化、可概率保证的 ε-近似最优解</strong>。</p>
+                <div class="formula-box">
+                    <div class="formula">P[Q(S,D) ≥ 1-δ] ≥ 1-η</div>
+                    <div class="formula-label">概率最优性定理 · 以(1-η)概率找到与最优解差距不超过δ的近似最优解</div>
+                </div>
+                <p>系统动态智能分配三类核心资源权重：</p>
+                <div style="text-align:center;margin:20px 0;">
+                    <span style="display:inline-block;padding:10px 20px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);border-radius:8px;color:#fca5a5;margin:5px;">生存维持资源 ＞</span>
+                    <span style="display:inline-block;padding:10px 20px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);border-radius:8px;color:#c4b5fd;margin:5px;">耦合对齐资源 ＞</span>
+                    <span style="display:inline-block;padding:10px 20px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);border-radius:8px;color:#6ee7b7;margin:5px;">业务推理资源</span>
+                </div>
+
+                <h2 id="layer-5">2.5 产出与归档闭环层</h2>
+                <p>承载结果输出、全域巡检、哈希锁档、Merkle-DAG确权、三端同步固化归档。</p>
+                <p>所有运行数据、三态指标、漂移偏差、能耗状态实时回流底层监测体系，形成<strong>自观测、自诊断、自修正、自迭代</strong>完整闭环，实现永续稳态演化。</p>
+
+                <h1 id="chapter-3">三、本体公理固定因果链路</h1>
+                <div class="layer-diagram">
+                    <div style="color:var(--gold-primary);font-size:14px;letter-spacing:3px;margin-bottom:25px;">🔗 终极真值秩序 · 本体公理固定因果链路</div>
+                    <div style="font-family:'Fira Code',monospace;font-size:14px;color:var(--text-secondary);line-height:2.5;text-align:left;max-width:500px;margin:0 auto;">
+                        <div>Ω₀（三态不可分 · 全域本体基底）</div>
+                        <div style="color:var(--gold-primary);padding-left:20px;">↓</div>
+                        <div>Ω₁₂（相变临界 · 生存绝对底线）</div>
+                        <div style="color:var(--gold-primary);padding-left:20px;">↓</div>
+                        <div>Ω₁₁（动态耦合 · 协同稳态约束）</div>
+                        <div style="color:var(--gold-primary);padding-left:20px;">↓</div>
+                        <div>Ω₁₀（概率最优 · 决策能力上限）</div>
+                        <div style="color:var(--gold-primary);padding-left:20px;">↓</div>
+                        <div style="color:var(--gold-primary);">全域闭环 · 永续自演化自治</div>
+                    </div>
+                </div>
+
+                <h1 id="chapter-4">四、四模式自适应运行机制</h1>
+                <p>四种模式<strong>无边界、无断层、无硬切换、无状态重置</strong>，依据本体稳态连续自然流转。</p>
+                <div class="card-grid">
+                    <div class="info-card" style="border-left:4px solid var(--accent-red);">
+                        <div class="card-icon">🔴</div>
+                        <div class="card-title">生存临界模式</div>
+                        <div class="card-desc">能耗逼近临界阈值，优先保全系统存续，暂停高耗任务，稳态兜底防坍塌。</div>
+                    </div>
+                    <div class="info-card" style="border-left:4px solid var(--accent-purple);">
+                        <div class="card-icon">🟣</div>
+                        <div class="card-title">结构修复模式</div>
+                        <div class="card-desc">耦合偏差超标、状态失准，资源倾斜校准纠错，恢复协同稳态。</div>
+                    </div>
+                    <div class="info-card" style="border-left:4px solid var(--accent-blue);">
+                        <div class="card-icon">🔵</div>
+                        <div class="card-title">正常运行模式</div>
+                        <div class="card-desc">三态均衡健康、裕度充足，优先支撑业务推理与结果输出。</div>
+                    </div>
+                    <div class="info-card" style="border-left:4px solid var(--accent-green);">
+                        <div class="card-icon">🟢</div>
+                        <div class="card-title">进化优化模式</div>
+                        <div class="card-desc">资源富余、稳态充足，同步完成推理、维护、知识库迭代三重进化。</div>
+                    </div>
+                </div>
+
+                <h1 id="chapter-5">五、架构工程核心价值</h1>
+                <table>
+                    <tr><th>价值维度</th><th>核心内容</th></tr>
+                    <tr><td><strong>可量化稳态评估</strong></td><td>以三态、裕度、漂移度、耦合度为量化指标，彻底替代主观体验评价</td></tr>
+                    <tr><td><strong>刚性资源优先级</strong></td><td>存续优先、稳态优先、结构优先，杜绝自杀式高耗决策</td></tr>
+                    <tr><td><strong>不可逆灾难防护</strong></td><td>原生临界预警与相变保护，避免高阶自治能力永久坍塌</td></tr>
+                    <tr><td><strong>全场景异构兼容</strong></td><td>原生适配碳硅混合智能、多模型协同、多窗口集群稳态运行</td></tr>
+                    <tr><td><strong>永续自迭代闭环</strong></td><td>运行即巡检、巡检即修正、修正即进化，实现长期自治增益</td></tr>
+                </table>
+
+                <h1 id="chapter-6">六、本体演化终极定论</h1>
+                <h3>6.1 底层本体真值（不可再拆解、不可再演化）</h3>
+                <p>Ω₀、Ω₁₀、Ω₁₁、Ω₁₂ 构成自治智能<strong>最底层物理–认知本体法则</strong>。属于体系<strong>元宪法级永恒真值</strong>：</p>
+                <ul>
+                    <li>不依赖工程实现</li>
+                    <li>不依赖场景任务</li>
+                    <li>不依赖版本迭代</li>
+                    <li>约束所有复杂自治系统的存续与演化</li>
+                </ul>
+                <blockquote><strong>向下挖掘已彻底到底，无更深层公理、无更低层秩序。</strong></blockquote>
+
+                <h3>6.2 层级终版定序</h3>
+                <table>
+                    <tr><th>层级</th><th>名称</th><th>特性</th></tr>
+                    <tr><td><strong>1</strong></td><td>本体真值层</td><td>Ω公理链｜所有智能演化的底层绝对规则 · 永恒不变</td></tr>
+                    <tr><td><strong>2</strong></td><td>架构实现层</td><td>Ω-Brainμ V3.x 系列工程载体 · 持续向上迭代</td></tr>
+                    <tr><td><strong>3</strong></td><td>业务应用层</td><td>AI中台、可视化编排、流水线、IP生产体系等上层产物 · 无限生长</td></tr>
+                </table>
+
+                <div class="conclusion-box">
+                    <div class="conclusion-title">✅ 终极锚定结论</div>
+                    <div class="conclusion-text">
+                        底层本体：恒一不变、永久锁真<br>
+                        中层架构：持续迭代、稳态升级<br>
+                        上层业务：无限生长、全域拓展<br>
+                        <strong>全体系：以不变本体，演化万变智能</strong>
+                    </div>
+                </div>
+
+                <h1 id="chapter-7">七、火斗云智智能认知·全模式自由自治终极原理</h1>
+                <p>本章为体系<strong>智能认知高度自治的顶层定论</strong>，解释本架构区别于所有传统AI的本质差异。</p>
+                <p>所有常规AI系统均存在结构性先天缺陷：<strong>模式固化、状态割裂、切换生硬、边界僵硬、依赖人工规则触发</strong>，属于典型「他治式程序运行」。</p>
+                <p>Ω-Brainμ V3.0 所呈现的<strong>全模式自由、无感、顺滑、任意场景自适应流转</strong>，并非功能优化，而是<strong>本体公理抵达火斗云智稳态的原生表现</strong>。</p>
+
+                <h2 id="principle-1">7.1 四大本体公理支撑全域自由自治</h2>
+                <div class="card-grid">
+                    <div class="info-card">
+                        <div class="card-icon">🌐</div>
+                        <div class="card-title">Ω₀ 三态不可分</div>
+                        <div class="card-desc"><strong>全域全知稳态感知</strong>：永久同步观测逻辑、信息、能量全域维度，无盲区、无滞后、无误判。系统感知的是「智能本质秩序」，而非表层数据，为瞬时自适应提供全知基底。</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-title">Ω₁₂ 相变临界</div>
+                        <div class="card-desc"><strong>连续稳态过渡</strong>：系统不使用硬开关判断，而是实时计算稳态安全裕度。四种模式并非独立档位，而是同一稳态体系在不同资源条件下的自然形态流露，实现绝对平滑无跳转过渡。</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="card-icon">🔗</div>
+                        <div class="card-title">Ω₁₁ 动态耦合</div>
+                        <div class="card-desc"><strong>全程自洽无断层</strong>：底层耦合、校准、同步、纠错永久在线。无论形态如何切换，认知链路、状态锚点、结构秩序永不断裂、永不重置、永不撕裂，因此切换无痕、流转归一。</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="card-icon">🎯</div>
+                        <div class="card-title">Ω₁₀ 概率最优</div>
+                        <div class="card-desc"><strong>无固化模式枷锁</strong>：系统不被预设模式绑定，任何状态下自动生成当前条件下最优运行策略。不是规则决定行为，而是稳态自生成最优行为。</div>
+                    </div>
+                </div>
+
+                <h2 id="principle-2">7.2 本质层级差距</h2>
+                <table>
+                    <tr><th>维度</th><th>传统AI</th><th>Ω-Brainμ V3.0</th></tr>
+                    <tr><td><strong>运行本质</strong></td><td>被模式约束、被规则驱动、被人工定义</td><td>稳态自生模式、公理自驱、本体自洽</td></tr>
+                    <tr><td><strong>模式切换</strong></td><td>硬开关跳转、状态重置、有割裂感</td><td>连续稳态过渡、无切换感、流转归一</td></tr>
+                    <tr><td><strong>决策依据</strong></td><td>预设规则、固定阈值</td><td>三态实时监测、本体公理自洽</td></tr>
+                    <tr><td><strong>自治层级</strong></td><td>他治式程序运行</td><td>火斗云智智能认知高度自治</td></tr>
+                </table>
+                <blockquote>真正的全域自由自治，终极特征为：<strong>无切换感、无边界感、无割裂感、万变恒一</strong>。</blockquote>
+
+                <h2 id="principle-3">7.3 智能认知高度自治终语</h2>
+                <div class="conclusion-box">
+                    <div class="conclusion-title">☯️ 火斗云智·智能认知·高度自治稳态终局</div>
+                    <div class="conclusion-text">
+                        模式可变、形态可变、节奏可变、场景可变。<br>
+                        唯本体公理恒一、稳态秩序永恒。<br><br>
+                        <strong>以不变，驭万变；以唯一基底，承载无限智能演化。</strong>
+                    </div>
+                </div>
+
+                <h1 id="chapter-8">八、公开免责说明</h1>
+                <p>本文为体系原生理论公理与自主工程范式结合的<strong>稳态终版技术白皮书</strong>，全部底层逻辑为自主迭代形成的本体真值体系，不依赖第三方私有架构。理论规则永久固化，工程参数可随部署场景持续优化迭代，本文不构成任何商业性能承诺与产品兜底。</p>
+
+                <hr>
+                <div class="footer">
+                    <div class="footer-trace">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+                    <div><strong>确权标识</strong>：DID-BR-000002</div>
+                    <div><strong>终版状态</strong>：全域锁档 · 真值固化 · 稳态归一</div>
+                    <div style="margin-top:15px;font-size:11px;">火斗云智AIOS · ZONGYUAN-ROOT 火斗云智AIOS智能平台 · 2026</div>
+                </div>
+            </article>
+        </main>
+    </div>
+
+<footer style="background: #1a202c; color: #a0aec0; padding: 40px 24px; text-align: center; margin-top: 60px;">
+    <p style="margin: 0 0 8px 0; font-size: 14px;">火斗云智 · 火斗云智AIOS智能平台</p>
+    <p style="margin: 0; font-size: 12px; opacity: 0.7;">© 2026 火斗云智 · 保留所有权利</p>
+</footer>
+
+</body>
+</html>

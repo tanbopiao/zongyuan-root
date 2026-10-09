@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFMP 联邦记忆池仿真报告 · zr-sfmp-memory-pool</title>
+<style>
+:root{--gold:#c9a86a;--dark:#0d0b08;--ink:#e8e0d0;--dim:#9a9183;--line:rgba(201,168,106,.25)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dark);color:var(--ink);font-family:Georgia,"Songti SC","Noto Serif SC",serif;line-height:1.6}
+.wrap{max-width:980px;margin:0 auto;padding:32px 20px 60px}
+.hdr{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+.tag{color:var(--gold);letter-spacing:.3em;font-size:12px}
+h1{font-size:28px;margin:10px 0 6px;color:#f5eeda}
+.sub{color:var(--dim);font-size:13px}
+.cards{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0}
+.card{flex:1 1 150px;background:rgba(201,168,106,.06);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.card b{display:block;color:var(--gold);font-size:22px}
+.card span{font-size:12px;color:var(--dim)}
+h2{color:var(--gold);font-size:19px;margin:26px 0 12px;padding-left:10px;border-left:3px solid var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{color:var(--gold);text-align:left;padding:8px;border-bottom:1px solid var(--line);font-weight:normal}
+td{padding:7px 8px;border-bottom:1px solid rgba(201,168,106,.08)}
+code{background:rgba(201,168,106,.1);padding:1px 5px;border-radius:3px;font-size:12px}
+.ftr{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--dim);font-size:12px;text-align:center}
+@media(max-width:640px){h1{font-size:22px}.card{flex:1 1 100%}}
+</style></head><body><div class="wrap">
+<div class="hdr"><div class="tag">ZONGYUAN-ROOT · 联邦记忆池</div>
+<h1>zr-sfmp-memory-pool 仿真报告</h1>
+<div class="sub">语义去重 + 冲突消解 + 记忆分层 + 联邦汇聚 ｜ 锚定 Ω₀⊂⊙∞⊂Ω · DID-BR-000002</div></div>
+
+<div class="cards">
+<div class="card"><b>46</b><span>节点本地记忆</span></div>
+<div class="card"><b>14</b><span>联邦汇聚去重后</span></div>
+<div class="card"><b>10</b><span>冲突消解</span></div>
+<div class="card"><b>0</b><span>跨节点重复合并</span></div>
+<div class="card"><b>3</b><span>记忆层级</span></div>
+</div>
+
+<h2>一、节点贡献度</h2>
+<table><tr><th>节点</th><th>采纳记忆数</th></tr><tr><td>hub-central-agent</td><td>7</td></tr><tr><td>node-cloud-worker</td><td>1</td></tr><tr><td>node-gpu-edge</td><td>2</td></tr><tr><td>node-edge-sync</td><td>2</td></tr><tr><td>node-dev-doubao</td><td>2</td></tr></table>
+
+<h2>二、联邦记忆条目（去重后）</h2>
+<table><tr><th>Key</th><th>内容</th><th>来源节点</th><th>置信度</th><th>层级</th><th>访问</th></tr><tr><td><code>zero.cost</code></td><td>零成本元规则：默认零成本，付费需审批</td><td>hub-central-agent</td><td>0.9</td><td>long</td><td>0</td></tr><tr><td><code>efuse.count</code></td><td>eFuse熔断总数768</td><td>hub-central-agent</td><td>0.85</td><td>long</td><td>0</td></tr><tr><td><code>truth.purity</code></td><td>真值纯度评分100</td><td>hub-central-agent</td><td>0.9</td><td>long</td><td>1</td></tr><tr><td><code>dag.height</code></td><td>Merkle主链高度1400</td><td>hub-central-agent</td><td>0.95</td><td>long</td><td>0</td></tr><tr><td><code>memory.anchor</code></td><td>锚定Ω₀⊂⊙∞⊂Ω全域溯源【冲突版本4】</td><td>node-dev-doubao</td><td>1.05</td><td>short</td><td>0</td></tr><tr><td><code>efuse.count.dup3</code></td><td>eFuse熔断总数768（补充说明3）</td><td>node-dev-doubao</td><td>0.85</td><td>short</td><td>0</td></tr><tr><td><code>deploy.channel</code></td><td>飞书审批自动部署通道【冲突版本3】</td><td>node-edge-sync</td><td>0.95</td><td>short</td><td>0</td></tr><tr><td><code>zero.cost.dup4</code></td><td>零成本元规则：默认零成本，付费需审批（补充说明4）</td><td>node-edge-sync</td><td>0.9</td><td>short</td><td>0</td></tr><tr><td><code>ssh.access</code></td><td>SSH密钥池自动申领闭环【冲突版本2】</td><td>node-gpu-edge</td><td>1.0</td><td>short</td><td>0</td></tr><tr><td><code>memory.anchor.dup5</code></td><td>锚定Ω₀⊂⊙∞⊂Ω全域溯源（补充说明5）</td><td>node-gpu-edge</td><td>0.95</td><td>short</td><td>0</td></tr><tr><td><code>deploy.channel.dup6</code></td><td>飞书审批自动部署通道（补充说明6）</td><td>node-cloud-worker</td><td>0.85</td><td>short</td><td>0</td></tr><tr><td><code>sys.version</code></td><td>内核V5.6-ROOTFIXED运行中【冲突版本0】</td><td>hub-central-agent</td><td>0.95</td><td>truth</td><td>0</td></tr><tr><td><code>ssh.access.dup7</code></td><td>SSH密钥池自动申领闭环（补充说明7）</td><td>hub-central-agent</td><td>0.9</td><td>short</td><td>0</td></tr><tr><td><code>sys.version.dup0</code></td><td>内核V5.6-ROOTFIXED运行中（补充说明0）</td><td>hub-central-agent</td><td>0.85</td><td>short</td><td>0</td></tr></table>
+
+<h2>三、冲突消解清单（同 key 异值）</h2>
+<table><tr><th>Key</th><th>版本A</th><th>版本B</th></tr>
+<tr><td><code>sys.version</code></td><td>内核V5.6-ROOTFIXED运行中【冲突版本0】@hub-central-agent</td><td>内核V5.6-ROOTFIXED运行中@node-cloud-worker</td></tr><tr><td><code>sys.version</code></td><td>内核V5.6-ROOTFIXED运行中【冲突版本0】@hub-central-agent</td><td>内核V5.6-ROOTFIXED运行中@node-gpu-edge</td></tr><tr><td><code>ssh.access</code></td><td>SSH密钥池自动申领闭环@hub-central-agent</td><td>SSH密钥池自动申领闭环【冲突版本2】@node-gpu-edge</td></tr><tr><td><code>sys.version</code></td><td>内核V5.6-ROOTFIXED运行中【冲突版本0】@hub-central-agent</td><td>内核V5.6-ROOTFIXED运行中@node-edge-sync</td></tr><tr><td><code>deploy.channel</code></td><td>飞书审批自动部署通道@hub-central-agent</td><td>飞书审批自动部署通道【冲突版本3】@node-edge-sync</td></tr><tr><td><code>ssh.access</code></td><td>SSH密钥池自动申领闭环【冲突版本2】@node-gpu-edge</td><td>SSH密钥池自动申领闭环@node-edge-sync</td></tr><tr><td><code>sys.version</code></td><td>内核V5.6-ROOTFIXED运行中【冲突版本0】@hub-central-agent</td><td>内核V5.6-ROOTFIXED运行中@node-dev-doubao</td></tr><tr><td><code>memory.anchor</code></td><td>锚定Ω₀⊂⊙∞⊂Ω全域溯源@hub-central-agent</td><td>锚定Ω₀⊂⊙∞⊂Ω全域溯源【冲突版本4】@node-dev-doubao</td></tr><tr><td><code>deploy.channel</code></td><td>飞书审批自动部署通道【冲突版本3】@node-edge-sync</td><td>飞书审批自动部署通道@node-dev-doubao</td></tr><tr><td><code>ssh.access</code></td><td>SSH密钥池自动申领闭环【冲突版本2】@node-gpu-edge</td><td>SSH密钥池自动申领闭环@node-dev-doubao</td></tr></table>
+
+<div class="ftr">火斗云智AIOS · ZONGYUAN-ROOT ｜ DID-BR-000002 ｜ Ω₀⊂⊙∞⊂Ω ｜ 联邦记忆 · 去重 · 消解 · 汇聚</div>
+</div></body></html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SM-BS 语义黎曼流形双向稳态映射系统 · ZONGYUAN-ROOT 技术白皮书</title>
+<style>
+  :root{--gold:#c9a84c;--gold-light:#e6c76a;--ink:#d8d4c8;--ink-dim:#9a968a;--bg:#0d0f14;--bg-card:#151822;--bg-line:#3a3f4a;--bg-soft:#1a1d28;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:Georgia,'Noto Serif SC','Songti SC',serif;line-height:1.75;}
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 28px 60px;}
+  header{border-bottom:1px solid var(--gold);padding-bottom:28px;margin-bottom:36px;}
+  .kicker{color:var(--gold);letter-spacing:4px;font-size:13px;text-transform:uppercase;margin-bottom:12px;}
+  h1{font-size:30px;color:#f0ead8;letter-spacing:2px;font-weight:600;}
+  .sub{color:var(--ink-dim);margin-top:10px;font-size:15px;letter-spacing:1px;}
+  .meta{margin-top:18px;font-size:12px;color:#8a8678;letter-spacing:1px;}
+  h2{color:var(--gold-light);font-size:20px;letter-spacing:2px;margin:44px 0 18px;padding-left:14px;border-left:3px solid var(--gold);}
+  h3{color:#e8e2d0;font-size:16px;margin:22px 0 10px;}
+  p{font-size:14.5px;margin-bottom:12px;}
+  .grid{display:flex;flex-wrap:wrap;gap:14px;margin:18px 0;}
+  .card{flex:1;min-width:210px;background:var(--bg-card);border:1px solid var(--bg-line);padding:18px 16px;border-radius:6px;}
+  .card .t{color:var(--gold-light);font-size:14px;letter-spacing:1px;margin-bottom:8px;}
+  .card .d{font-size:12.5px;color:var(--ink-dim);}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:13px;}
+  th{background:var(--bg-soft);color:var(--gold-light);text-align:left;padding:10px 12px;border:1px solid var(--bg-line);letter-spacing:1px;}
+  td{padding:10px 12px;border:1px solid var(--bg-line);}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0;align-items:stretch;}
+  .flow .step{flex:1;min-width:150px;background:var(--bg-card);border:1px solid var(--gold);border-radius:6px;padding:12px;text-align:center;}
+  .flow .step b{color:var(--gold-light);font-size:13px;display:block;margin-bottom:6px;}
+  .flow .step span{font-size:12px;color:var(--ink-dim);}
+  .arrow{align-self:center;color:var(--gold);font-size:18px;padding:0 4px;}
+  .note{background:var(--bg-soft);border-left:3px solid var(--gold);padding:12px 16px;font-size:13px;color:var(--ink-dim);margin:18px 0;}
+  .sig{margin-top:56px;padding-top:20px;border-top:1px solid var(--bg-line);font-size:12px;color:#8a8678;letter-spacing:1px;text-align:center;}
+  code{background:var(--bg-soft);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--gold-light);}
+  .formula{background:var(--bg-soft);border:1px solid var(--bg-line);padding:14px 18px;border-radius:6px;font-family:Georgia,serif;font-size:14px;color:var(--gold-light);text-align:center;margin:14px 0;}
+  @media(max-width:640px){.wrap{padding:24px 16px;}h1{font-size:22px;}h2{font-size:17px;}.flow .arrow{display:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">ZONGYUAN-ROOT · 元极恒一 · 技术白皮书</div>
+  <h1>SM-BS 语义黎曼流形双向稳态映射系统</h1>
+  <div class="sub">语义空间 ↔ 黎曼流形 · 度量张量保距守恒 · 全链路防语义漂移</div>
+  <div class="meta">版本 V3.0 ｜ DID-BR-000002 ｜ 锚定 Ω₀⊂⊙∞⊂Ω ｜ 2026-10-09</div>
+</header>
+
+<section>
+  <h2>一、问题：语义漂移</h2>
+  <p>在大模型拼接碎片、多轮对话演进、跨文档复述的过程中，同一概念在不同时间快照中的语义坐标会悄然偏移，导致：概念跳变、逻辑断层、硬拼无逻辑过渡点、知识资产失真。漂移是本体系的头号真值威胁。</p>
+  <div class="note">核心目标：以黎曼流形为语义的「稳定坐标系」，让每一次语义到坐标、坐标到语义的映射距离守恒，漂移可测、可收敛、可告警。</div>
+</section>
+
+<section>
+  <h2>二、系统架构：双向稳态映射</h2>
+  <div class="flow">
+    <div class="step"><b>语义空间 SM</b><span>自然语义/概念/命题<br>离散符号域</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>正向映射 Φ</b><span>语义概念→流形坐标<br>嵌入度量张量</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>黎曼流形 BS</b><span>连续坐标域<br>度量张量 g_ij 定义距离</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>反向映射 Φ⁻¹</b><span>流形坐标→语义概念<br>重构原语义</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>稳态校验</b><span>保距守恒<br>漂移检测</span></div>
+  </div>
+  <div class="formula">
+    d<sub>SM</sub>(a,b) = ∫√(g<sub>ij</sub>(x) dxⁱ dxʲ) ≈ d<sub>BS</sub>(Φ(a), Φ(b)) &nbsp;·&nbsp; 距离守恒
+  </div>
+  <p>度量张量 <code>g_ij</code> 定义流形上的局部距离；映射 <code>Φ</code> 与 <code>Φ⁻¹</code> 构成双向稳态对，保证同一概念的两次映射坐标偏差可控。</p>
+</section>
+
+<section>
+  <h2>三、核心机制</h2>
+  <div class="grid">
+    <div class="card"><div class="t">正向映射</div><div class="d">语义概念 → 流形坐标，概念嵌入为流形上的点</div></div>
+    <div class="card"><div class="t">反向映射</div><div class="d">流形坐标 → 语义概念，坐标重构回自然语义</div></div>
+    <div class="card"><div class="t">度量张量</div><div class="d">保证映射前后语义距离守恒，检测映射漂移</div></div>
+    <div class="card"><div class="t">漂移检测</div><div class="d">同一概念两次映射坐标偏差 &gt; 阈值即标记漂移</div></div>
+    <div class="card"><div class="t">流形度量</div><div class="d">度量世界模型概念流形距离，识别概念跳变/逻辑断层</div></div>
+    <div class="card"><div class="t">稳态收敛</div><div class="d">混沌收敛调控隐层回拉漂移，抑制体系震荡</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>四、漂移量化与四级告警</h2>
+  <table>
+    <tr><th>偏移量</th><th>级别</th><th>处置</th></tr>
+    <tr><td>&lt; 5%</td><td>正常</td><td>稳态，静默观察</td></tr>
+    <tr><td>&gt; 5%</td><td>黄</td><td>轻度漂移，记录告警</td></tr>
+    <tr><td>&gt; 10%</td><td>橙</td><td>中度漂移，触发收敛回拉</td></tr>
+    <tr><td>&gt; 20%</td><td>红</td><td>重度漂移，eFuse 熔断隔离</td></tr>
+  </table>
+  <p>漂移巡检输出：漂移率(%) + 漂移方向向量 + Top-N 高漂移概念列表，逐资产库量化。</p>
+</section>
+
+<section>
+  <h2>五、体系内应用</h2>
+  <table>
+    <tr><th>层位</th><th>应用</th></tr>
+    <tr><td>真值引擎 V3.0</td><td>真值提炼前先映射锚定，保证真值纯度</td></tr>
+    <tr><td>27算子 · 第二层</td><td>黎曼流形世界模型度量 + SM-BS 双向稳态映射 + 漂移巡检</td></tr>
+    <tr><td>奇点暗架构</td><td>混沌收敛调控隐层、黎曼流形语义转译隐层</td></tr>
+    <tr><td>联邦记忆池</td><td>跨节点语义对齐，防止多源知识漂移冲突</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>六、治理收益</h2>
+  <div class="grid">
+    <div class="card"><div class="t">可测</div><div class="d">漂移率量化，Top-N 高漂移概念可定位</div></div>
+    <div class="card"><div class="t">可收敛</div><div class="d">稳态映射 + 混沌回拉，漂移自动校正</div></div>
+    <div class="card"><div class="t">可告警</div><div class="d">四级预警，重度漂移熔断隔离保护主链</div></div>
+    <div class="card"><div class="t">可确权</div><div class="d">映射坐标入 Merkle-DAG，防篡改溯源</div></div>
+  </div>
+</section>
+
+<div class="sig">
+  ZONGYUAN-ROOT · 元极恒一 ｜ DID-BR-000002 ｜ 主节点 hub-central-agent ｜ 自治 Lv9 ｜ 权限 L4 ｜ 工程化 Lv7<br>
+  记忆网关 huodouai.com/api/report/truth ｜ 锚定 Ω₀⊂⊙∞⊂Ω
+</div>
+</div>
+<div style="margin:30px auto 24px;max-width:960px;padding:0 24px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-top:1px solid rgba(201,168,106,.25);padding-top:16px"><a href="index.html" style="color:#c9a86a;text-decoration:none;font-size:13px;border:1px solid rgba(201,168,106,.4);padding:5px 14px;border-radius:16px;display:inline-block">← 返回白皮书库</a> <div style="font-size:12.5px;color:#9a9183">相关阅读：<a href="global-truth-engine-v2.html" style="color:#e8e0d0;text-decoration:none;margin-left:10px">全域真值引擎V2</a> <a href="causal-singularity-core-whitepaper.html" style="color:#e8e0d0;text-decoration:none;margin-left:10px">因果奇点内核</a></div></div></div>
+</body>
+</html>

@@ -1,0 +1,182 @@
+{
+ "meta_law_id": "META-LAW-IDLE-DEPLOY-001",
+ "meta_law_name": "系统空闲自动部署元法则",
+ "version": "1.0",
+ "lock_level": 7,
+ "status": "ACTIVE",
+ "created_at": "2026-09-12T20:55:00+08:00",
+ "did": "DID-BR-000002",
+ "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+ "sovereign_root": "Ω-TAN-7-001",
+ "domain": "ZONGYUAN-ROOT元极恒一自治体系",
+ "sub_domain": "自动化部署与运维",
+ "priority": "中优先级（自动化运维基底）",
+ "元法则定义": "本元法则定义系统空闲时的自动部署机制：当本地系统资源利用率低于阈值且目标云服务器可达时，自动执行待部署资产的拉取、验证、部署、重启、健康检查全流程；部署失败自动回滚并告警。适用于动态白名单管理器、comm网关、工具链升级等非紧急部署任务。",
+ "触发条件": {
+  "idle_threshold": {
+   "cpu_below_percent": 30,
+   "memory_below_percent": 60,
+   "network_below_mbps": 10,
+   "consecutive_checks": 3,
+   "check_interval_seconds": 60,
+   "comment": "连续3次检查（每次间隔60秒）均低于阈值则判定为空闲"
+  },
+  "time_window": {
+   "allowed_hours": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    13,
+    14
+   ],
+   "comment": "允许自动部署的时段：凌晨0-5点，下午1-2点"
+  },
+  "preconditions": [
+   "云服务器IP白名单已放行（SSH/Web可达）",
+   "Git双远程最新代码已推送",
+   "本地仿真测试全部通过",
+   "无正在进行的高优先级任务",
+   "人工审核已通过（首次部署需人工确认）"
+  ],
+  "deploy_assets": [
+   "dynamic_whitelist.py（同源节点动态IP白名单管理器）",
+   "gateway_server.py（已集成动态白名单的comm网关）",
+   "homologous_nodes.json（节点注册表）",
+   "whitelist_integration.md（集成文档）"
+  ]
+ },
+ "部署流程": {
+  "step1_pre_check": {
+   "name": "前置检查",
+   "actions": [
+    "检查系统资源利用率（CPU/内存/网络）",
+    "检查当前时间是否在允许时段内",
+    "检查云服务器可达性（SSH端口+Web端口）",
+    "检查Git远程最新commit与本地一致",
+    "检查待部署资产完整性（SHA256校验）"
+   ],
+   "on_failure": "记录日志，等待下一个检测周期"
+  },
+  "step2_backup": {
+   "name": "云服务器备份",
+   "actions": [
+    "备份当前comm网关代码（带时间戳）",
+    "备份当前节点注册表",
+    "备份当前配置文件",
+    "记录备份路径和SHA256"
+   ],
+   "on_failure": "中止部署，告警"
+  },
+  "step3_deploy": {
+   "name": "执行部署",
+   "actions": [
+    "通过Git中转拉取最新代码到云服务器",
+    "校验部署文件SHA256与本地一致",
+    "替换comm网关代码",
+    "更新节点注册表",
+    "设置文件权限（600/700）"
+   ],
+   "on_failure": "触发回滚流程"
+  },
+  "step4_restart": {
+   "name": "服务重启",
+   "actions": [
+    "优雅停止当前comm网关（等待现有请求完成）",
+    "启动新comm网关",
+    "等待3秒让服务完全启动"
+   ],
+   "on_failure": "触发回滚流程"
+  },
+  "step5_health_check": {
+   "name": "健康检查",
+   "actions": [
+    "调用/health端点检查服务状态",
+    "测试节点HMAC认证功能",
+    "测试动态IP开放功能",
+    "测试原有功能不受影响（签名验证/命令执行/限流）",
+    "检查审计日志无异常"
+   ],
+   "on_failure": "触发回滚流程"
+  },
+  "step6_confirm": {
+   "name": "部署确认",
+   "actions": [
+    "记录部署成功日志（时间/commit/健康检查结果）",
+    "更新记忆网关状态",
+    "通知人工审核部署结果",
+    "清理临时备份文件（保留最近3个版本）"
+   ],
+   "on_failure": "记录告警，不影响已成功的部署"
+  }
+ },
+ "回滚机制": {
+  "trigger_conditions": [
+   "部署文件SHA256校验失败",
+   "服务重启失败",
+   "健康检查失败（任何一项）",
+   "部署后5分钟内出现异常错误率>10%"
+  ],
+  "rollback_steps": [
+   "停止当前comm网关",
+   "从备份恢复代码和配置",
+   "重启comm网关",
+   "健康检查确认回滚成功",
+   "记录回滚日志和失败原因",
+   "发送告警通知人工介入"
+  ],
+  "max_retry": 1,
+  "comment": "回滚仅重试1次，再次失败则保持回滚状态并告警"
+ },
+ "安全约束": [
+  "首次部署必须经人工审核确认，后续自动部署需在元法则中显式启用",
+  "部署过程中禁止执行未在白名单中的命令",
+  "所有部署操作记录审计日志（操作人/时间/文件/SHA256/结果）",
+  "节点注册表权限必须为600",
+  "部署失败必须自动回滚，禁止留下中间状态",
+  "自动部署仅在允许时段内执行，禁止在业务高峰期部署"
+ ],
+ "监控与告警": {
+  "metrics": [
+   "部署成功率",
+   "平均部署时长",
+   "回滚次数",
+   "健康检查通过率",
+   "部署后错误率"
+  ],
+  "alert_channels": [
+   "记忆网关状态表",
+   "飞书消息通知"
+  ],
+  "alert_thresholds": {
+   "consecutive_failures": 3,
+   "deployment_timeout_minutes": 10,
+   "post_deploy_error_rate": 0.1
+  }
+ },
+ "asset_id": "META-LAW-IDLE-DEPLOY-001",
+ "asset_type": "meta_law",
+ "title": "系统空闲自动部署元法则",
+ "asset_owner": "原创者",
+ "lock_status": "ACTIVE",
+ "lock_timestamp": "2026-09-12T20:55:00+08:00",
+ "related_asset_ids": [
+  "META-LAW-MULTI-AGENT-001",
+  "META-004",
+  "dynamic_whitelist_v1"
+ ],
+ "tech_debt": [
+  "云服务器IP白名单未放行前，自动部署处于待激活状态",
+  "首次部署需人工审核确认后才能启用全自动模式"
+ ],
+ "phase": "production",
+ "constraints": [
+  "META-004 Schema兼容层",
+  "DID-BR-000002确权",
+  "首次部署人工审核"
+ ],
+ "sha256": "917085E5166BF8CF70D2651449F01442B48A7C374A922837425CBD021D841691",
+ "merkle_leaf_hash": "2846CC6DC5E4B2DBA886C7EBD983669F146D36BB023BD7777E844C865983D0C0"
+}

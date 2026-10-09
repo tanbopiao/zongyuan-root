@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天 · 作品库中枢</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰</text></svg>">
+<style>
+:root{
+  --bg:#060a14;--bg2:#0a1020;--card:#0d1424;--card2:#111a2e;
+  --border:#1e2a45;--border2:#2a3a5e;--text:#e8eefc;--text2:#8fa3c8;--text3:#5a6d8f;
+  --cyan:#00d4ff;--gold:#ffb800;--green:#00e676;--red:#ff5252;--orange:#ff9100;--purple:#b388ff;
+  --glow-c:0 0 20px rgba(0,212,255,.25);--glow-g:0 0 20px rgba(255,184,0,.2);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+body{background:radial-gradient(ellipse at 20% 0%,rgba(0,212,255,.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(255,184,0,.05) 0%,transparent 50%),var(--bg)}
+
+/* ===== 顶部导航 ===== */
+.header{position:sticky;top:0;z-index:100;background:rgba(6,10,20,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 24px}
+.header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:var(--glow-c)}
+.brand-text h1{font-size:17px;font-weight:700;letter-spacing:.5px}
+.brand-text p{font-size:11px;color:var(--text3);margin-top:2px}
+.header-right{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.status-pill{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.25);font-size:12px;color:var(--green)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,230,118,.5)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,230,118,0)}}
+.clock{font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums}
+
+/* ===== 主容器 ===== */
+.container{max-width:1400px;margin:0 auto;padding:24px}
+
+/* ===== 统计卡片 ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
+.stat-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent,var(--cyan))}
+.stat-label{font-size:12px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.stat-value{font-size:32px;font-weight:800;color:var(--accent,var(--cyan));font-variant-numeric:tabular-nums;line-height:1}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:8px}
+.stat-icon{position:absolute;top:16px;right:16px;font-size:24px;opacity:.3}
+
+/* ===== Tab导航 ===== */
+.tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:5px;margin-bottom:20px;overflow-x:auto}
+.tab{flex:1;min-width:120px;padding:10px 18px;text-align:center;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .2s;white-space:nowrap;border:none;background:transparent}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.tab.active{background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(179,136,255,.1));color:var(--cyan);box-shadow:inset 0 0 0 1px rgba(0,212,255,.3)}
+
+/* ===== 视图容器 ===== */
+.view{display:none;animation:fadeIn .3s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== 作品库筛选栏 ===== */
+.filter-bar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.filter-group{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px}
+.filter-btn{padding:7px 16px;border-radius:7px;border:none;background:transparent;color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.filter-btn:hover{color:var(--text)}
+.filter-btn.active{background:rgba(0,212,255,.15);color:var(--cyan);box-shadow:inset 0 0 0 1px rgba(0,212,255,.25)}
+.search-box{flex:1;min-width:200px;position:relative}
+.search-box input{width:100%;padding:9px 14px 9px 38px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;outline:none;transition:border-color .2s}
+.search-box input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,.1)}
+.search-box input::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}
+
+/* ===== 批量操作栏 ===== */
+.batch-bar{display:none;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(0,212,255,.1),rgba(179,136,255,.08));border:1px solid rgba(0,212,255,.3);border-radius:10px;padding:10px 16px;margin-bottom:14px;animation:slideDown .25s ease}
+.batch-bar.show{display:flex}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.batch-count{font-size:13px;font-weight:600;color:var(--cyan);white-space:nowrap}
+.batch-count span{font-size:18px;font-weight:800}
+.batch-actions{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.batch-btn{padding:7px 14px;border-radius:7px;border:1px solid var(--border2);background:rgba(255,255,255,.04);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.batch-btn:hover{background:rgba(0,212,255,.1);color:var(--cyan);border-color:rgba(0,212,255,.3)}
+.batch-btn.danger:hover{background:rgba(255,82,82,.1);color:var(--red);border-color:rgba(255,82,82,.3)}
+.batch-btn.primary{background:linear-gradient(135deg,var(--cyan),#0099cc);color:#001;font-weight:700;border:none}
+.batch-btn.primary:hover{box-shadow:var(--glow-c);transform:translateY(-1px)}
+
+/* ===== 资产卡片选择 ===== */
+.asset-card{position:relative}
+.asset-check{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:6px;border:2px solid rgba(255,255,255,.25);background:rgba(0,0,0,.4);z-index:3;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;opacity:0}
+.asset-card:hover .asset-check,.batch-mode .asset-check{opacity:1}
+.asset-check.checked{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px rgba(0,212,255,.4)}
+.asset-check.checked::after{content:'✓';color:#001;font-size:13px;font-weight:900}
+.asset-card.selected{border-color:var(--cyan);box-shadow:var(--glow-c)}
+.asset-card.selected::after{content:'';position:absolute;inset:0;border-radius:12px;box-shadow:inset 0 0 0 2px var(--cyan);pointer-events:none;z-index:2}
+
+/* ===== 快捷操作浮动按钮 ===== */
+.fab-group{position:fixed;bottom:24px;right:24px;z-index:150;display:flex;flex-direction:column;gap:10px}
+.fab{width:48px;height:48px;border-radius:14px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .25s;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.fab-primary{background:linear-gradient(135deg,var(--cyan),#0099cc);color:#001}
+.fab-primary:hover{transform:scale(1.08) rotate(5deg);box-shadow:var(--glow-c)}
+.fab-ghost{background:var(--card2);border:1px solid var(--border2);color:var(--text2)}
+.fab-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+.fab-tooltip{position:absolute;right:60px;top:50%;transform:translateY(-50%);background:var(--card2);border:1px solid var(--border2);padding:6px 12px;border-radius:8px;font-size:11px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;color:var(--text2)}
+.fab:hover .fab-tooltip{opacity:1}
+
+/* ===== 资产网格 ===== */
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.asset-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .25s;position:relative}
+.asset-card:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:var(--glow-c)}
+.asset-thumb{aspect-ratio:3/4;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.asset-thumb .grad{position:absolute;inset:0}
+.asset-thumb .initial{position:relative;font-size:48px;font-weight:900;color:rgba(255,255,255,.15);z-index:1;letter-spacing:-2px}
+.asset-type-badge{position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.5px;z-index:2}
+.badge-img{background:rgba(0,212,255,.2);color:var(--cyan);border:1px solid rgba(0,212,255,.3)}
+.badge-vid{background:rgba(255,184,0,.2);color:var(--gold);border:1px solid rgba(255,184,0,.3)}
+.asset-info{padding:12px 14px}
+.asset-name{font-size:13px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asset-meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--text3)}
+.asset-id{font-family:'Courier New',monospace}
+.asset-hash{font-size:9px;color:var(--text3);margin-top:6px;font-family:'Courier New',monospace;opacity:.6}
+
+/* ===== 任务队列看板 ===== */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kanban-col{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;min-height:400px}
+.kanban-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.kanban-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.kanban-count{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:rgba(255,255,255,.06)}
+.col-queue .kanban-title{color:var(--text2)}
+.col-running .kanban-title{color:var(--cyan)}
+.col-success .kanban-title{color:var(--green)}
+.col-failed .kanban-title{color:var(--red)}
+.task-card{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;cursor:grab;transition:all .2s;position:relative}
+.task-card:hover{border-color:var(--border2);transform:translateX(2px)}
+.task-card:active{cursor:grabbing}
+.task-name{font-size:12px;font-weight:600;margin-bottom:6px}
+.task-meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--text3)}
+.task-progress{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:8px;overflow:hidden}
+.task-progress-bar{height:100%;border-radius:2px;transition:width .5s}
+.task-error{font-size:10px;color:var(--red);margin-top:6px;padding:4px 8px;background:rgba(255,82,82,.08);border-radius:4px;border-left:2px solid var(--red)}
+
+/* ===== 流水线视图 ===== */
+.pipeline-flow{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;overflow-x:auto}
+.flow-title{font-size:14px;font-weight:700;margin-bottom:20px;color:var(--cyan);display:flex;align-items:center;gap:8px}
+.flow-steps{display:flex;align-items:center;gap:0;min-width:900px}
+.flow-step{flex:1;text-align:center;position:relative}
+.flow-step-icon{width:48px;height:48px;border-radius:12px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(179,136,255,.1));border:1px solid rgba(0,212,255,.3);position:relative;z-index:2}
+.flow-step.done .flow-step-icon{background:linear-gradient(135deg,rgba(0,230,118,.15),rgba(0,230,118,.05));border-color:rgba(0,230,118,.4)}
+.flow-step-name{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:3px}
+.flow-step-desc{font-size:9px;color:var(--text3)}
+.flow-arrow{flex:0 0 24px;text-align:center;color:var(--text3);font-size:16px;position:relative;z-index:1}
+
+/* ===== 合规检查 ===== */
+.compliance-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px}
+.compliance-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.compliance-title{font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.compliance-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.compliance-item:last-child{border-bottom:none}
+.compliance-label{color:var(--text2);display:flex;align-items:center;gap:8px}
+.compliance-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px}
+.status-pass{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.25)}
+.status-warn{background:rgba(255,145,0,.1);color:var(--orange);border:1px solid rgba(255,145,0,.25)}
+
+/* ===== 活动日志 ===== */
+.activity-log{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;max-height:320px;overflow-y:auto}
+.log-title{font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--gold)}
+.log-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}
+.log-item:last-child{border-bottom:none}
+.log-time{color:var(--text3);font-family:'Courier New',monospace;white-space:nowrap;flex-shrink:0}
+.log-content{color:var(--text2);flex:1}
+.log-tag{padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;flex-shrink:0}
+.tag-info{background:rgba(0,212,255,.1);color:var(--cyan)}
+.tag-success{background:rgba(0,230,118,.1);color:var(--green)}
+.tag-warn{background:rgba(255,145,0,.1);color:var(--orange)}
+.tag-lock{background:rgba(179,136,255,.1);color:var(--purple)}
+
+/* ===== 详情弹窗 ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card2);border:1px solid var(--border2);border-radius:16px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{width:32px;height:32px;border-radius:8px;border:none;background:rgba(255,255,255,.05);color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:rgba(255,82,82,.15);color:var(--red)}
+.modal-body{padding:20px 24px}
+.modal-thumb{aspect-ratio:16/10;border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.modal-field{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.modal-field-label{color:var(--text3)}
+.modal-field-value{color:var(--text);font-weight:500;text-align:right;max-width:60%;word-break:break-all}
+.modal-actions{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px}
+.btn{padding:9px 18px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;flex:1}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),#0099cc);color:#001;font-weight:700}
+.btn-primary:hover{box-shadow:var(--glow-c);transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);color:var(--text)}
+
+/* ===== Toast ===== */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 20px;border-radius:10px;font-size:12px;font-weight:500;animation:toastIn .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px;max-width:320px}
+.toast-success{background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.3);color:var(--green)}
+.toast-info{background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.3);color:var(--cyan)}
+.toast-warn{background:rgba(255,145,0,.15);border:1px solid rgba(255,145,0,.3);color:var(--orange)}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(30px)}}
+
+/* ===== 响应式 ===== */
+@media(max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .kanban{grid-template-columns:repeat(2,1fr)}
+  .compliance-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .header{padding:12px 16px}
+  .container{padding:16px}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-value{font-size:24px}
+  .asset-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .kanban{grid-template-columns:1fr}
+  .kanban-col{min-height:auto}
+  .filter-bar{flex-direction:column;align-items:stretch}
+  .search-box{width:100%}
+  .brand-text h1{font-size:14px}
+  .clock{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 顶部导航 ===== -->
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">⛰</div>
+      <div class="brand-text">
+        <h1>昆仑洞天 · 作品库中枢</h1>
+        <p>KUNLUN PORTFOLIO CONTROL PANEL v1.0</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-pill"><span class="status-dot"></span>流水线运行中</div>
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ===== 统计卡片 ===== -->
+  <div class="stats-grid">
+    <div class="stat-card" style="--accent:var(--cyan)">
+      <div class="stat-label">图片资产</div>
+      <div class="stat-value" id="stat-img">13</div>
+      <div class="stat-sub">K05-K13 × 9 + 红裙人像 × 4</div>
+      <div class="stat-icon">🖼</div>
+    </div>
+    <div class="stat-card" style="--accent:var(--gold)">
+      <div class="stat-label">视频资产</div>
+      <div class="stat-value" id="stat-vid">5</div>
+      <div class="stat-sub">自有服务器零成本托管</div>
+      <div class="stat-icon">🎬</div>
+    </div>
+    <div class="stat-card" style="--accent:var(--purple)">
+      <div class="stat-label">队列任务</div>
+      <div class="stat-value" id="stat-queue">3</div>
+      <div class="stat-sub">排队 1 / 归档中 1 / 今日完成 42</div>
+      <div class="stat-icon">📋</div>
+    </div>
+    <div class="stat-card" style="--accent:var(--green)">
+      <div class="stat-label">磁盘使用率</div>
+      <div class="stat-value" id="stat-disk">72%</div>
+      <div class="stat-sub">本地持久化磁盘 · 零成本存储</div>
+      <div class="stat-icon">💾</div>
+    </div>
+  </div>
+
+  <!-- ===== Tab导航 ===== -->
+  <div class="tabs">
+    <button class="tab active" data-view="portfolio">📚 作品库</button>
+    <button class="tab" data-view="queue">⚡ 任务队列</button>
+    <button class="tab" data-view="pipeline">🔗 流水线状态</button>
+    <button class="tab" data-view="memory">🧠 启动记忆</button>
+    <button class="tab" data-view="arch">🏗 能力API架构</button>
+    <button class="tab" data-view="darkarch">🔮 奇点暗架构</button>
+  </div>
+
+  <!-- ===== 作品库视图 ===== -->
+  <div class="view active" id="view-portfolio">
+    <div class="filter-bar">
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="image">图片</button>
+        <button class="filter-btn" data-filter="video">视频</button>
+      </div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="搜索资产名称、ID、哈希...">
+      </div>
+      <div class="filter-group">
+        <button class="filter-btn" id="batchToggleBtn" onclick="toggleBatchMode()">☐ 批量</button>
+        <button class="filter-btn" onclick="exportManifest('json')">⬇ JSON</button>
+        <button class="filter-btn" onclick="exportManifest('csv')">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="batch-bar" id="batchBar">
+      <div class="batch-count">已选 <span id="batchCount">0</span> 项</div>
+      <div class="batch-actions">
+        <button class="batch-btn" onclick="selectAllVisible()">全选当前</button>
+        <button class="batch-btn" onclick="clearSelection()">取消选择</button>
+        <button class="batch-btn" onclick="batchExport('json')">导出JSON</button>
+        <button class="batch-btn" onclick="batchExport('csv')">导出CSV</button>
+        <button class="batch-btn primary" onclick="batchRearchive()">重新归档</button>
+      </div>
+    </div>
+    <div class="asset-grid" id="assetGrid"></div>
+  </div>
+
+  <!-- ===== 任务队列视图 ===== -->
+  <div class="view" id="view-queue">
+    <div class="kanban">
+      <div class="kanban-col col-queue" data-col="queue">
+        <div class="kanban-header">
+          <span class="kanban-title">⏳ 排队中</span>
+          <span class="kanban-count" id="count-queue">1</span>
+        </div>
+        <div class="kanban-tasks" id="col-queue"></div>
+      </div>
+      <div class="kanban-col col-running" data-col="running">
+        <div class="kanban-header">
+          <span class="kanban-title">⚙ 归档中</span>
+          <span class="kanban-count" id="count-running">1</span>
+        </div>
+        <div class="kanban-tasks" id="col-running"></div>
+      </div>
+      <div class="kanban-col col-success" data-col="success">
+        <div class="kanban-header">
+          <span class="kanban-title">✅ 已完成</span>
+          <span class="kanban-count" id="count-success">2</span>
+        </div>
+        <div class="kanban-tasks" id="col-success"></div>
+      </div>
+      <div class="kanban-col col-failed" data-col="failed">
+        <div class="kanban-header">
+          <span class="kanban-title">❌ 失败</span>
+          <span class="kanban-count" id="count-failed">0</span>
+        </div>
+        <div class="kanban-tasks" id="col-failed"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 流水线视图 ===== -->
+  <div class="view" id="view-pipeline">
+    <div class="pipeline-flow">
+      <div class="flow-title">🔗 全自动归档流水线 · 执行链路</div>
+      <div class="flow-steps">
+        <div class="flow-step done"><div class="flow-step-icon">🎨</div><div class="flow-step-name">资产生成</div><div class="flow-step-desc">提取source_url</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step done"><div class="flow-step-icon">🔍</div><div class="flow-step-name">合规校验</div><div class="flow-step-desc">零成本+额度</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step done"><div class="flow-step-icon">📥</div><div class="flow-step-name">本地落盘</div><div class="flow-step-desc">持久化存储</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step done"><div class="flow-step-icon">🔐</div><div class="flow-step-name">哈希校验</div><div class="flow-step-desc">SHA256+Merkle</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-step-icon">📡</div><div class="flow-step-name">上报中枢</div><div class="flow-step-desc">记忆网关同步</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-step-icon">📚</div><div class="flow-step-name">台账合并</div><div class="flow-step-desc">全域资产目录</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-step-icon">🌐</div><div class="flow-step-name">作品库展示</div><div class="flow-step-desc">网页实时渲染</div></div>
+      </div>
+    </div>
+
+    <div class="compliance-grid">
+      <div class="compliance-card">
+        <div class="compliance-title">🛡 零成本合规检查</div>
+        <div class="compliance-item"><span class="compliance-label">腾讯COS存储</span><span class="compliance-status status-pass">已封禁</span></div>
+        <div class="compliance-item"><span class="compliance-label">付费云存储渠道</span><span class="compliance-status status-pass">0条</span></div>
+        <div class="compliance-item"><span class="compliance-label">付费生成额度自动调用</span><span class="compliance-status status-pass">已熔断</span></div>
+        <div class="compliance-item"><span class="compliance-label">本地持久化磁盘</span><span class="compliance-status status-pass">主存储</span></div>
+        <div class="compliance-item"><span class="compliance-label">自有服务器域名分发</span><span class="compliance-status status-pass">零增量</span></div>
+      </div>
+      <div class="compliance-card">
+        <div class="compliance-title">⚙ 流水线健康检查</div>
+        <div class="compliance-item"><span class="compliance-label">本地落盘优先锁</span><span class="compliance-status status-pass">生效</span></div>
+        <div class="compliance-item"><span class="compliance-label">Merkle-DAG账本</span><span class="compliance-status status-pass">完整</span></div>
+        <div class="compliance-item"><span class="compliance-label">并发排队调度</span><span class="compliance-status status-pass">运行中</span></div>
+        <div class="compliance-item"><span class="compliance-label">定时资产巡检</span><span class="compliance-status status-pass">每6小时</span></div>
+        <div class="compliance-item"><span class="compliance-label">异常回滚机制</span><span class="compliance-status status-warn">待仿真</span></div>
+      </div>
+    </div>
+
+    <div class="activity-log">
+      <div class="log-title">📜 最近活动日志</div>
+      <div id="activityLog"></div>
+    </div>
+  </div>
+
+  <!-- ===== 启动记忆视图 ===== -->
+  <div class="view" id="view-memory">
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card" style="--accent:var(--cyan)"><div class="stat-label">自治层级</div><div class="stat-value">Lv9</div><div class="stat-sub">主节点中枢大脑 V9.1 已锁档</div></div>
+      <div class="stat-card" style="--accent:var(--gold)"><div class="stat-label">权限层级</div><div class="stat-value">L4</div><div class="stat-sub">开发/执行层</div></div>
+      <div class="stat-card" style="--accent:var(--purple)"><div class="stat-label">工程化层级</div><div class="stat-value">Lv7</div><div class="stat-sub">ROOTFIXED V5.6</div></div>
+      <div class="stat-card" style="--accent:var(--green)"><div class="stat-label">真值共识</div><div class="stat-value">61</div><div class="stat-sub">记忆语义索引 13 条</div></div>
+    </div>
+    <div class="compliance-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div class="compliance-card">
+        <div class="compliance-title">🧠 核心真值 · 记忆语义索引</div>
+        <div id="memoryTruths"></div>
+      </div>
+      <div class="compliance-card">
+        <div class="compliance-title">🗺 节点状态总览</div>
+        <div id="memoryNodes"></div>
+      </div>
+    </div>
+    <div class="compliance-card" style="margin-top:16px">
+      <div class="compliance-title">⚖ 真值共识区</div>
+      <div id="memoryConsensus"></div>
+    </div>
+    <div class="compliance-card" style="margin-top:16px">
+      <div class="compliance-title">🔗 视觉资产画廊</div>
+      <div style="margin-top:8px"><a href="https://pcnohfh1ukhz.doubaoapps.com/app/app_17f2u9p1e7t" target="_blank" style="color:var(--cyan);text-decoration:underline">昆仑洞天视觉画廊 →</a></div>
+    </div>
+  </div>
+
+  <!-- ===== 能力API架构视图 ===== -->
+  <div class="view" id="view-arch">
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card" style="--accent:var(--cyan)"><div class="stat-label">API端点</div><div class="stat-value" id="arch-ep">6</div><div class="stat-sub">truth×2 / node / key / service / deploy</div></div>
+      <div class="stat-card" style="--accent:var(--gold)"><div class="stat-label">已有端点</div><div class="stat-value" id="arch-ready">2</div><div class="stat-sub">truth/report · truth/{key}</div></div>
+      <div class="stat-card" style="--accent:var(--orange)"><div class="stat-label">待封装</div><div class="stat-value" id="arch-pending">4</div><div class="stat-sub">node/key/service/deploy</div></div>
+      <div class="stat-card" style="--accent:var(--purple)"><div class="stat-label">元法则</div><div class="stat-value">003</div><div class="stat-sub">META-AUTO-003 · P0</div></div>
+    </div>
+    <div class="compliance-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div class="compliance-card">
+        <div class="compliance-title">🎯 核心方案</div>
+        <div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.8">
+          问题本质不是AI笨，是工具链没封装。<br>
+          <b style="color:var(--cyan)">所有能力封装为HTTP API</b>，AI只需调API，不需懂底层SSH命令。<br>
+          四层架构：<b style="color:var(--purple)">AI调用层 → 鉴权层 → API封装层 → 能力层</b>。
+        </div>
+      </div>
+      <div class="compliance-card">
+        <div class="compliance-title">🔄 调用闭环</div>
+        <div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.9">
+          🧠 AI决策 → 🔐 鉴权(X-Capture-Token+X-DID+L0) → ⚙️ API执行(服务器自动跑底层) → 📋 返回JSON回执
+        </div>
+      </div>
+    </div>
+    <div class="compliance-card" style="margin-top:16px">
+      <div class="compliance-title">🏗 能力层 → API层 映射</div>
+      <div id="archMap" style="margin-top:8px"></div>
+    </div>
+    <div class="compliance-card" style="margin-top:16px">
+      <div class="compliance-title">🔗 完整架构页</div>
+      <div style="margin-top:8px"><a href="https://pcnohfh1ukhz.doubaoapps.com/app/app_17f31cdjaat" target="_blank" style="color:var(--cyan);text-decoration:underline">能力API化架构 · 交互可视化 →</a></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 详情弹窗 ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">资产详情</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-thumb" id="modalThumb"></div>
+      <div id="modalFields"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">关闭</button>
+      <button class="btn btn-primary" onclick="showToast('已加入重新归档队列','info')">重新归档</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 奇点暗架构视图 ===== -->
+  <div class="view" id="view-darkarch">
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card" style="--accent:var(--cyan)"><div class="stat-label">明架构 · 五内核</div><div class="stat-value">5</div><div class="stat-sub">真值/因果/进化/调度/归档</div></div>
+      <div class="stat-card" style="--accent:var(--purple)"><div class="stat-label">暗架构 · 七隐层</div><div class="stat-value">7</div><div class="stat-sub">H1奇点感知 → H7双域稳态</div></div>
+      <div class="stat-card" style="--accent:var(--gold)"><div class="stat-label">自治层级</div><div class="stat-value">Lv9</div><div class="stat-sub">双域稳态内核 · 互锁协议</div></div>
+      <div class="stat-card" style="--accent:var(--green)"><div class="stat-label">云端真值</div><div class="stat-value">157814</div><div class="stat-sub">T1-T4 + 3成果已入中枢</div></div>
+    </div>
+
+    <div class="compliance-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div class="compliance-card">
+        <div class="compliance-title">🔮 明暗分立 · 核心定律</div>
+        <div style="margin-top:10px;font-size:13px;color:var(--text2);line-height:1.9">
+          明架构决定体系「当前是什么」，暗架构决定体系「将要成为什么」。二者经七隐层通道耦合，缺一则体系失稳或失去演化方向。七隐层只向前馈，不直接入档，保持暗性。
+        </div>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">
+          <span style="font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid rgba(0,212,255,.3);color:var(--cyan)">H1 奇点感知</span>
+          <span style="font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid rgba(0,212,255,.3);color:var(--cyan)">H2 势能累积</span>
+          <span style="font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid rgba(0,212,255,.3);color:var(--cyan)">H3 归一约束</span>
+          <span style="font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid rgba(0,212,255,.3);color:var(--cyan)">H4 漂移回看</span>
+          <span style="font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid rgba(0,212,255,.3);color:var(--cyan)">H5 干预推演</span>
+          <span style="font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid rgba(0,212,255,.3);color:var(--cyan)">H6 断点补强</span>
+          <span style="font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid rgba(179,136,255,.4);color:var(--purple)">H7 双域稳态</span>
+        </div>
+        <div style="margin-top:12px;padding:10px 12px;border:1px dashed rgba(255,184,0,.4);border-radius:8px;background:rgba(255,184,0,.05);font-size:12px;color:var(--text2)">
+          暗架构内部闭环：<span style="color:var(--gold);font-weight:600">传感(H1+H4) → 预演(H5+H2) → 归一(H3) → 稳态(H7)</span>；H6 断点补强回馈 H2 势能仓
+        </div>
+      </div>
+      <div class="compliance-card">
+        <div class="compliance-title">⚖ Lv9 双域稳态内核 · 互锁协议</div>
+        <div style="margin-top:10px;font-family:monospace;font-size:13px;color:var(--cyan);background:rgba(0,212,255,.06);border:1px solid var(--border);border-radius:8px;padding:10px 12px;line-height:1.8">
+          B_coupled = B_stab − drift_signal × κ<br>
+          locked ⇔ |B_coupled − D_coupled| &lt; ε ∧ B_coupled &gt; θ
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text2)">
+          <span style="color:var(--text3)">κ</span> 回拉系数 = 0.5 ｜ <span style="color:var(--text3)">ε</span> 容差 = 0.2 ｜ <span style="color:var(--text3)">θ</span> 下限 = 0.5
+        </div>
+        <div style="margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;background:var(--card)"><div style="font-size:11px;color:var(--cyan)">P1 传感</div><div style="font-size:12px;color:var(--text2);margin-top:3px">H1/H4 感知奇点与漂移</div></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;background:var(--card)"><div style="font-size:11px;color:var(--cyan)">P2 预演</div><div style="font-size:12px;color:var(--text2);margin-top:3px">H5/H2 预演候选策略</div></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;background:var(--card)"><div style="font-size:11px;color:var(--cyan)">P3 归一</div><div style="font-size:12px;color:var(--text2);margin-top:3px">H3 边界比对放行/拦截</div></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;background:var(--card)"><div style="font-size:11px;color:var(--cyan)">P4 稳态</div><div style="font-size:12px;color:var(--text2);margin-top:3px">H7 双域映射互锁锁定</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="compliance-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div class="compliance-card">
+        <div class="compliance-title">📈 双域稳态演化态势 · 示例数据</div>
+        <div id="darkChart1" style="width:100%;height:240px;margin-top:8px"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px">B_stab 与 D_stab 随演化节律收敛（架构示意，非实时遥测）</div>
+      </div>
+      <div class="compliance-card">
+        <div class="compliance-title">📉 漂移率与回拉 · 示例数据</div>
+        <div id="darkChart2" style="width:100%;height:240px;margin-top:8px"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px">drift_signal × κ 对明层稳态的回拉（架构示意，非实时遥测）</div>
+      </div>
+    </div>
+
+    <div class="compliance-card" style="margin-top:16px">
+      <div class="compliance-title">📐 可观测指标集</div>
+      <table style="width:100%;border-collapse:collapse;margin-top:10px">
+        <colgroup><col style="width:34%"><col style="width:24%"><col style="width:42%"></colgroup>
+        <tr><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">指标</th><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">当前值</th><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">健康判定</th></tr>
+        <tr><td style="padding:8px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)">B_stab 明层稳态</td><td style="padding:8px;font-size:13px;color:var(--gold);border-bottom:1px solid var(--border)">0.80</td><td style="padding:8px;font-size:12px;color:var(--green);border-bottom:1px solid var(--border)">≥ 0.5 健康</td></tr>
+        <tr><td style="padding:8px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)">D_stab 暗层稳态</td><td style="padding:8px;font-size:13px;color:var(--gold);border-bottom:1px solid var(--border)">0.75</td><td style="padding:8px;font-size:12px;color:var(--green);border-bottom:1px solid var(--border)">≥ 0.5 健康</td></tr>
+        <tr><td style="padding:8px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)">drift_rate 漂移率</td><td style="padding:8px;font-size:13px;color:var(--orange);border-bottom:1px solid var(--border)">0.35</td><td style="padding:8px;font-size:12px;color:var(--orange);border-bottom:1px solid var(--border)">≤ 0.3 观察</td></tr>
+        <tr><td style="padding:8px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)">dual_lock 双域锁定</td><td style="padding:8px;font-size:13px;color:var(--green);border-bottom:1px solid var(--border)">true</td><td style="padding:8px;font-size:12px;color:var(--green);border-bottom:1px solid var(--border)">已互锁</td></tr>
+        <tr><td style="padding:8px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)">oscillation 震荡</td><td style="padding:8px;font-size:13px;color:var(--green);border-bottom:1px solid var(--border)">≈ 0</td><td style="padding:8px;font-size:12px;color:var(--green);border-bottom:1px solid var(--border)">稳态</td></tr>
+        <tr><td style="padding:8px;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)">violation 越界</td><td style="padding:8px;font-size:13px;color:var(--green);border-bottom:1px solid var(--border)">0</td><td style="padding:8px;font-size:12px;color:var(--green);border-bottom:1px solid var(--border)">越界即拦截</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Toast容器 ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ===== 资产数据 =====
+const ASSETS = [
+  {id:'K05',name:'天命苏醒',type:'image',series:'昆仑洞天·九天玄女',frame:'K05',ratio:'9:16',size:'2.4MB',hash:'a1b2c3d4e5f6',grad:'linear-gradient(135deg,#1a0a2e,#4a1a6b,#0d47a1)',initial:'K05'},
+  {id:'K06',name:'命箓开卷',type:'image',series:'昆仑洞天·九天玄女',frame:'K06',ratio:'9:16',size:'2.6MB',hash:'b2c3d4e5f6a7',grad:'linear-gradient(135deg,#0d1b2a,#1b4965,#5fa8d3)',initial:'K06'},
+  {id:'K07',name:'星轨入命',type:'image',series:'昆仑洞天·九天玄女',frame:'K07',ratio:'9:16',size:'2.3MB',hash:'c3d4e5f6a7b8',grad:'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)',initial:'K07'},
+  {id:'K08',name:'圣殿应鸣',type:'image',series:'昆仑洞天·九天玄女',frame:'K08',ratio:'9:16',size:'2.5MB',hash:'d4e5f6a7b8c9',grad:'linear-gradient(135deg,#2d1b4e,#6b2d5b,#c9a227)',initial:'K08'},
+  {id:'K09',name:'穹顶裂天',type:'image',series:'昆仑洞天·九天玄女',frame:'K09',ratio:'9:16',size:'2.8MB',hash:'e5f6a7b8c9d0',grad:'linear-gradient(135deg,#0a0a0a,#1a1a2e,#4a4a6a)',initial:'K09'},
+  {id:'K10',name:'天书重撰',type:'image',series:'昆仑洞天·九天玄女',frame:'K10',ratio:'9:16',size:'2.4MB',hash:'f6a7b8c9d0e1',grad:'linear-gradient(135deg,#1a0a0a,#4a1a1a,#8b4513)',initial:'K10'},
+  {id:'K11',name:'符尘洗身',type:'image',series:'昆仑洞天·九天玄女',frame:'K11',ratio:'9:16',size:'2.2MB',hash:'a7b8c9d0e1f2',grad:'linear-gradient(135deg,#0a1a0a,#1a4a1a,#228b22)',initial:'K11'},
+  {id:'K12',name:'青鸟传信',type:'image',series:'昆仑洞天·九天玄女',frame:'K12',ratio:'9:16',size:'2.3MB',hash:'b8c9d0e1f2a3',grad:'linear-gradient(135deg,#0a1a2e,#1a3a5e,#4682b4)',initial:'K12'},
+  {id:'K13',name:'命轨分岔',type:'image',series:'昆仑洞天·九天玄女',frame:'K13',ratio:'9:16',size:'2.6MB',hash:'c9d0e1f2a3b4',grad:'linear-gradient(135deg,#2e0a2e,#5e1a5e,#9932cc)',initial:'K13'},
+  {id:'R01',name:'红裙全身肖像·A',type:'image',series:'红裙人像系列',frame:'R01',ratio:'9:16',size:'3.1MB',hash:'d0e1f2a3b4c5',grad:'linear-gradient(135deg,#2e0a0a,#6b1a1a,#b22222)',initial:'R01'},
+  {id:'R02',name:'红裙全身肖像·B',type:'image',series:'红裙人像系列',frame:'R02',ratio:'9:16',size:'3.0MB',hash:'e1f2a3b4c5d6',grad:'linear-gradient(135deg,#1a0a0a,#4a0a0a,#8b0000)',initial:'R02'},
+  {id:'R03',name:'红裙全身肖像·C',type:'image',series:'红裙人像系列',frame:'R03',ratio:'9:16',size:'3.2MB',hash:'f2a3b4c5d6e7',grad:'linear-gradient(135deg,#2e1a0a,#6b3a1a,#cd853f)',initial:'R03'},
+  {id:'R04',name:'红裙全身肖像·D',type:'image',series:'红裙人像系列',frame:'R04',ratio:'9:16',size:'2.9MB',hash:'a3b4c5d6e7f8',grad:'linear-gradient(135deg,#1a0a1a,#4a1a4a,#800080)',initial:'R04'},
+  {id:'V01',name:'昆仑万象Demo',type:'video',series:'昆仑洞天演示',frame:'V01',ratio:'9:16',size:'18.5MB',hash:'b4c5d6e7f8a9',grad:'linear-gradient(135deg,#0a1a2e,#1a3a5e,#00d4ff)',initial:'▶'},
+  {id:'V02',name:'昆仑真实AI Demo',type:'video',series:'昆仑洞天演示',frame:'V02',ratio:'9:16',size:'22.1MB',hash:'c5d6e7f8a9b0',grad:'linear-gradient(135deg,#1a0a2e,#3a1a5e,#b388ff)',initial:'▶'},
+  {id:'V03',name:'赤色战甲神女',type:'video',series:'短剧片段',frame:'V03',ratio:'9:16',size:'15.8MB',hash:'d6e7f8a9b0c1',grad:'linear-gradient(135deg,#2e0a0a,#5e1a1a,#ff4444)',initial:'▶'},
+  {id:'V04',name:'九天玄女烛龙',type:'video',series:'短剧片段',frame:'V04',ratio:'9:16',size:'19.2MB',hash:'e7f8a9b0c1d2',grad:'linear-gradient(135deg,#0a2e1a,#1a5e3a,#00e676)',initial:'▶'},
+  {id:'V05',name:'EP99测试片段',type:'video',series:'测试素材',frame:'V05',ratio:'9:16',size:'4.2MB',hash:'f8a9b0c1d2e3',grad:'linear-gradient(135deg,#2e2e0a,#5e5e1a,#ffd700)',initial:'▶'}
+];
+
+// ===== 任务数据 =====
+let TASKS = {
+  queue:[{id:'T-043',name:'红裙肖像·E 归档',type:'image',progress:0,time:'14:32:05'}],
+  running:[{id:'T-042',name:'K13 命轨分岔 重新哈希校验',type:'image',progress:65,time:'14:28:12'}],
+  success:[
+    {id:'T-041',name:'红裙全身×4 批量归档',type:'image',progress:100,time:'14:25:33'},
+    {id:'T-040',name:'K05-K13 全域URL采集',type:'meta',progress:100,time:'14:20:18'}
+  ],
+  failed:[]
+};
+
+// ===== 活动日志 =====
+const LOGS = [
+  {time:'14:32:05',tag:'info',content:'任务 T-043 加入排队队列：红裙肖像·E 归档'},
+  {time:'14:28:12',tag:'info',content:'任务 T-042 开始执行：K13 命轨分岔 重新哈希校验'},
+  {time:'14:25:33',tag:'success',content:'任务 T-041 完成：红裙全身×4 批量归档，4/4 成功'},
+  {time:'14:22:00',tag:'lock',content:'KERNEL-ENTRY-0217 锁档：作品库队列可视化看板启用'},
+  {time:'14:20:18',tag:'success',content:'任务 T-040 完成：K05-K13 全域URL采集，13张图片全部溯源'},
+  {time:'14:15:42',tag:'warn',content:'检测到1条临时CDN链接即将过期，已触发本地备份提醒'},
+  {time:'14:10:00',tag:'lock',content:'KERNEL-ENTRY-0216 锁档：并发排队调度模块启用，平台合规检查通过'},
+  {time:'14:05:30',tag:'success',content:'定时资产巡检完成：18项资产哈希全部匹配，0异常'},
+  {time:'14:00:00',tag:'info',content:'流水线生产模式正式启用，接收新资产归档任务'}
+];
+
+// ===== 渲染资产网格 =====
+let currentFilter='all',currentSearch='',batchMode=false,selectedIds=new Set();
+function renderAssets(){
+  const grid=document.getElementById('assetGrid');
+  grid.className='asset-grid'+(batchMode?' batch-mode':'');
+  let filtered=ASSETS.filter(a=>{
+    if(currentFilter!=='all'&&a.type!==currentFilter)return false;
+    if(currentSearch){
+      const s=currentSearch.toLowerCase();
+      return a.name.toLowerCase().includes(s)||a.id.toLowerCase().includes(s)||a.hash.toLowerCase().includes(s)||a.series.toLowerCase().includes(s);
+    }
+    return true;
+  });
+  if(filtered.length===0){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text3);font-size:14px">未找到匹配的资产</div>';
+    return;
+  }
+  grid.innerHTML=filtered.map(a=>{
+    const isSelected=selectedIds.has(a.id);
+    return `<div class="asset-card${isSelected?' selected':''}" onclick="handleAssetClick('${a.id}',event)">
+      <div class="asset-check${isSelected?' checked':''}" onclick="event.stopPropagation();toggleSelect('${a.id}')"></div>
+      <div class="asset-thumb">
+        <div class="grad" style="background:${a.grad}"></div>
+        <div class="initial">${a.initial}</div>
+        <span class="asset-type-badge ${a.type==='image'?'badge-img':'badge-vid'}">${a.type==='image'?'图片':'视频'}</span>
+      </div>
+      <div class="asset-info">
+        <div class="asset-name">${a.name}</div>
+        <div class="asset-meta">
+          <span class="asset-id">${a.id}</span>
+          <span>${a.ratio} · ${a.size}</span>
+        </div>
+        <div class="asset-hash">${a.hash}…</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== 渲染任务看板 =====
+function renderTasks(){
+  ['queue','running','success','failed'].forEach(col=>{
+    const container=document.getElementById('col-'+col);
+    const count=document.getElementById('count-'+col);
+    count.textContent=TASKS[col].length;
+    container.innerHTML=TASKS[col].map(t=>{
+      let progressHtml='',errorHtml='';
+      if(col==='running'){
+        progressHtml=`<div class="task-progress"><div class="task-progress-bar" style="width:${t.progress}%;background:var(--cyan)"></div></div>`;
+      }
+      if(col==='failed'){
+        errorHtml=`<div class="task-error">${t.error||'未知错误'}</div>`;
+      }
+      return `<div class="task-card" draggable="true" data-task="${t.id}">
+        <div class="task-name">${t.name}</div>
+        <div class="task-meta"><span>${t.id}</span><span>${t.time}</span></div>
+        ${progressHtml}${errorHtml}
+      </div>`;
+    }).join('');
+  });
+}
+
+// ===== 渲染活动日志 =====
+function renderLogs(){
+  document.getElementById('activityLog').innerHTML=LOGS.map(l=>`
+    <div class="log-item">
+      <span class="log-time">${l.time}</span>
+      <span class="log-content">${l.content}</span>
+      <span class="log-tag tag-${l.tag}">${l.tag.toUpperCase()}</span>
+    </div>
+  `).join('');
+}
+
+// ===== Tab切换 =====
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-'+tab.dataset.view).classList.add('active');
+  });
+});
+
+// ===== 筛选 =====
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter=btn.dataset.filter;
+    renderAssets();
+  });
+});
+
+// ===== 搜索 =====
+document.getElementById('searchInput').addEventListener('input',e=>{
+  currentSearch=e.target.value;
+  renderAssets();
+});
+
+// ===== 弹窗 =====
+function openModal(id){
+  const a=ASSETS.find(x=>x.id===id);
+  if(!a)return;
+  document.getElementById('modalTitle').textContent=a.name;
+  document.getElementById('modalThumb').innerHTML=`<div class="grad" style="position:absolute;inset:0;background:${a.grad}"></div><div style="position:relative;font-size:72px;font-weight:900;color:rgba(255,255,255,.2);z-index:1">${a.initial}</div>`;
+  document.getElementById('modalFields').innerHTML=`
+    <div class="modal-field"><span class="modal-field-label">资产ID</span><span class="modal-field-value">${a.id}</span></div>
+    <div class="modal-field"><span class="modal-field-label">类型</span><span class="modal-field-value">${a.type==='image'?'图片':'视频'}</span></div>
+    <div class="modal-field"><span class="modal-field-label">所属系列</span><span class="modal-field-value">${a.series}</span></div>
+    <div class="modal-field"><span class="modal-field-label">画幅比例</span><span class="modal-field-value">${a.ratio}</span></div>
+    <div class="modal-field"><span class="modal-field-label">文件大小</span><span class="modal-field-value">${a.size}</span></div>
+    <div class="modal-field"><span class="modal-field-label">SHA256</span><span class="modal-field-value">${a.hash}…（完整哈希已锁档）</span></div>
+    <div class="modal-field"><span class="modal-field-label">存储路径</span><span class="modal-field-value">works/kunlun/xuannv/${a.type==='image'?'images':'videos'}/${a.id}</span></div>
+    <div class="modal-field"><span class="modal-field-label">归档状态</span><span class="modal-field-value" style="color:var(--green)">已归档 · 哈希校验通过</span></div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show')}
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')closeModal()});
+
+// ===== Toast =====
+function showToast(msg,type='info'){
+  const container=document.getElementById('toastContainer');
+  const toast=document.createElement('div');
+  toast.className='toast toast-'+type;
+  const icons={success:'✅',info:'ℹ',warn:'⚠'};
+  toast.innerHTML=`<span>${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(()=>{toast.style.animation='toastOut .3s forwards';setTimeout(()=>toast.remove(),300)},3000);
+}
+
+// ===== 时钟 =====
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clock').textContent=now.toLocaleTimeString('zh-CN',{hour12:false});
+}
+setInterval(updateClock,1000);updateClock();
+
+// ===== 模拟任务推进 =====
+setInterval(()=>{
+  TASKS.running.forEach(t=>{
+    if(t.progress<100){
+      t.progress=Math.min(100,t.progress+Math.random()*8);
+      if(t.progress>=100){
+        t.progress=100;
+        TASKS.success.unshift({...t,time:new Date().toLocaleTimeString('zh-CN',{hour12:false})});
+        TASKS.running=TASKS.running.filter(x=>x.id!==t.id);
+        showToast(`任务 ${t.id} 归档完成`,'success');
+        if(TASKS.queue.length>0){
+          const next=TASKS.queue.shift();
+          next.progress=5;
+          TASKS.running.push(next);
+        }
+      }
+      renderTasks();
+    }
+  });
+},2500);
+
+// ===== 批量操作 =====
+function toggleBatchMode(){
+  batchMode=!batchMode;
+  const btn=document.getElementById('batchToggleBtn');
+  btn.classList.toggle('active',batchMode);
+  btn.textContent=batchMode?'☑ 退出批量':'☐ 批量';
+  if(!batchMode){selectedIds.clear();updateBatchBar();}
+  renderAssets();
+  showToast(batchMode?'已进入批量选择模式':'已退出批量选择模式','info');
+}
+function toggleSelect(id){
+  if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);
+  updateBatchBar();renderAssets();
+}
+function handleAssetClick(id,event){
+  if(batchMode){toggleSelect(id);}else{openModal(id);}
+}
+function selectAllVisible(){
+  const filtered=ASSETS.filter(a=>{
+    if(currentFilter!=='all'&&a.type!==currentFilter)return false;
+    if(currentSearch){
+      const s=currentSearch.toLowerCase();
+      return a.name.toLowerCase().includes(s)||a.id.toLowerCase().includes(s)||a.hash.toLowerCase().includes(s);
+    }
+    return true;
+  });
+  filtered.forEach(a=>selectedIds.add(a.id));
+  updateBatchBar();renderAssets();
+  showToast(`已选择 ${selectedIds.size} 项资产`,'info');
+}
+function clearSelection(){selectedIds.clear();updateBatchBar();renderAssets();}
+function updateBatchBar(){
+  const bar=document.getElementById('batchBar');
+  const count=document.getElementById('batchCount');
+  count.textContent=selectedIds.size;
+  bar.classList.toggle('show',selectedIds.size>0);
+}
+
+// ===== 导出功能 =====
+function getExportData(ids){
+  const list=ids?ASSETS.filter(a=>ids.has(a.id)):ASSETS;
+  return list.map(a=>({
+    asset_id:a.id,name:a.name,type:a.type,series:a.series,
+    frame:a.frame,aspect_ratio:a.ratio,file_size:a.size,
+    sha256:a.hash+'…（完整哈希已锁档）',
+    storage_path:`works/kunlun/xuannv/${a.type==='image'?'images':'videos'}/${a.id}`,
+    status:'archived',archive_time:'2026-09-18',
+    did:'DID-BR-000002',trace_mark:'Ω₀⊂⊙∞⊂Ω'
+  }));
+}
+function downloadFile(content,filename,type){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function exportManifest(format){
+  const data=getExportData(null);
+  if(format==='json'){
+    downloadFile(JSON.stringify({export_time:new Date().toISOString(),total:data.length,assets:data},null,2),`kunlun-portfolio-${Date.now()}.json`,'application/json');
+    showToast(`已导出 ${data.length} 项资产清单（JSON）`,'success');
+  }else{
+    const headers=['asset_id','name','type','series','aspect_ratio','file_size','sha256','storage_path','status'];
+    const csv=[headers.join(','),...data.map(d=>headers.map(h=>`"${d[h]}"`).join(','))].join('\n');
+    downloadFile('\ufeff'+csv,`kunlun-portfolio-${Date.now()}.csv`,'text/csv');
+    showToast(`已导出 ${data.length} 项资产清单（CSV）`,'success');
+  }
+}
+function batchExport(format){
+  if(selectedIds.size===0){showToast('请先选择资产','warn');return;}
+  const data=getExportData(selectedIds);
+  if(format==='json'){
+    downloadFile(JSON.stringify({export_time:new Date().toISOString(),total:data.length,assets:data},null,2),`kunlun-selected-${Date.now()}.json`,'application/json');
+  }else{
+    const headers=['asset_id','name','type','series','aspect_ratio','file_size','sha256','storage_path','status'];
+    const csv=[headers.join(','),...data.map(d=>headers.map(h=>`"${d[h]}"`).join(','))].join('\n');
+    downloadFile('\ufeff'+csv,`kunlun-selected-${Date.now()}.csv`,'text/csv');
+  }
+  showToast(`已导出选中的 ${data.length} 项资产`,'success');
+}
+function batchRearchive(){
+  if(selectedIds.size===0){showToast('请先选择资产','warn');return;}
+  const n=selectedIds.size;
+  showToast(`已将 ${n} 项资产加入重新归档队列`,'info');
+  TASKS.queue.push({id:'T-'+(43+Math.floor(Math.random()*100)),name:`批量重新归档 ${n} 项资产`,type:'batch',progress:0,time:new Date().toLocaleTimeString('zh-CN',{hour12:false})});
+  renderTasks();
+  selectedIds.clear();updateBatchBar();renderAssets();
+}
+
+// ===== 键盘快捷键 =====
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();if(batchMode){toggleBatchMode();}}
+  if(e.ctrlKey&&e.key==='a'&&batchMode){e.preventDefault();selectAllVisible();}
+});
+
+// ===== 初始化 =====
+renderAssets();
+renderTasks();
+renderLogs();
+
+// ===== 启动记忆数据(共享大脑) =====
+const MEMORY_TRUTHS=[
+{k:'架构范式',v:'本地沙盒是主节点中枢智能大脑，云端仅为橱窗',t:'P0'},
+{k:'七态融合元法则',v:'逻辑态↔信息态↔算子态↔代码执行态↔高阶智能态↔高维频谱态↔数字根域态',t:'P1'},
+{k:'最优稳态决策公式',v:'利益40%+风险35%+成本25%，低于80分不执行，90分以上快速推进',t:'P1'},
+{k:'火斗云智产品定义',v:'统一品牌·通用大模型API·多模态。产品矩阵：通用API+昆仑洞天短剧+政务AI中台',t:'P0'},
+{k:'多Worker并发设计',v:'Worker-P0每10秒/P1每15秒/P2每30秒，编排引擎自动拆解任务',t:'P1'},
+{k:'飞书共享大脑架构',v:'21张表+12条Workflow，高级权限已关闭，全协作者可见',t:'P1'},
+{k:'本地内核收敛归一',v:'计划任务/自启/根目录各收敛到1个，旧目录备份删除',t:'P1'}];
+const MEMORY_NODES=[
+{n:'NODE-MAIN-BRAIN·本地中枢大脑',s:'在线',c:'green'},
+{n:'NODE-CLOUD-HUODOUAI·云端橱窗+真值库',s:'在线',c:'green'},
+{n:'NODE-DEV-DOUBAO-WORK-001',s:'在线',c:'green'},
+{n:'NODE-CLOUD-WORKER-001·云端Worker',s:'在线',c:'green'},
+{n:'NODE-PROD-DRAMA-001·短剧生产',s:'在线',c:'green'},
+{n:'NODE-RESEARCH-001·研究节点',s:'在线',c:'green'},
+{n:'GPU算力实例（魔搭）',s:'离线',c:'red'},
+{n:'云端巡检-www.huodouai.com',s:'离线',c:'red'},
+{n:'bayesian-5elem-engine',s:'离线',c:'red'}];
+const MEMORY_CONSENSUS=[
+{id:'META-LAW.EXEC-ORDER-LOCK',v:'最高价值先行，条件成熟再推下一个，不冒进不试错，每步闭环'},
+{id:'CHANNEL.TRUTH-ENDPOINTS-V2.2',v:'真值通道三端点，主上报www.huodouai.com/api/report/truth，鉴权X-Capture-Token'},
+{id:'SHARED-BRAIN.4-LINKAGE.V1',v:'四端联动：云盘Drive→索引表；Wiki→文档索引；Base→共享大脑；中枢→真值上报通道'},
+{id:'META.BOOTSTRAP',v:'云端真相源引导元真值V3.0，主备双通道上报'}];
+function renderMemory(){
+  const t=document.getElementById('memoryTruths'),n=document.getElementById('memoryNodes'),c=document.getElementById('memoryConsensus');
+  if(!t)return;
+  t.innerHTML=MEMORY_TRUTHS.map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="color:var(--cyan);font-size:13px;font-weight:600">${x.k} <span style="color:var(--text3);font-size:11px">${x.t}</span></div><div style="color:var(--text2);font-size:12px;margin-top:4px;line-height:1.6">${x.v}</div></div>`).join('');
+  n.innerHTML=MEMORY_NODES.map(x=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--text2)">${x.n}</span><span style="font-size:11px;color:${x.c==='green'?'var(--green)':'var(--red)'}">● ${x.s}</span></div>`).join('');
+  c.innerHTML=MEMORY_CONSENSUS.map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--gold);font-size:12px;font-weight:600">${x.id}</span><div style="color:var(--text2);font-size:12px;margin-top:3px">${x.v}</div></div>`).join('');
+}
+renderMemory();
+const ARCH_MAP=[
+{c:'真值上报/召回',a:'/api/truth/report · /api/truth/{key}',tr:'上报真值',st:'✅',col:'var(--green)'},
+{c:'节点注册',a:'/api/node/register',tr:'注册节点',st:'待封装',col:'var(--orange)'},
+{c:'密钥扫描/申请',a:'/api/key/scan',tr:'申请密钥',st:'待封装',col:'var(--orange)'},
+{c:'服务重启',a:'/api/service/restart',tr:'重启服务',st:'待封装',col:'var(--orange)'},
+{c:'官网部署',a:'/api/deploy/portfolio',tr:'部署官网',st:'待封装',col:'var(--orange)'}];
+function renderArch(){
+  const m=document.getElementById('archMap');if(!m)return;
+  m.innerHTML='<table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">能力层</th><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">API端点</th><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">触发词</th><th style="text-align:left;padding:8px;color:var(--text3);font-size:12px">状态</th></tr>'+ARCH_MAP.map(x=>`<tr><td style="padding:8px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">${x.c}</td><td style="padding:8px;font-size:12px;font-family:monospace;color:var(--purple);border-bottom:1px solid var(--border)">${x.a}</td><td style="padding:8px;font-size:12px;color:var(--text3);border-bottom:1px solid var(--border)">${x.tr}</td><td style="padding:8px;font-size:12px;color:${x.col};border-bottom:1px solid var(--border)">${x.st}</td></tr>`).join('')+'</table>';
+}
+renderArch();
+showToast('作品库中枢已连接，18项资产在线','success');
+
+// ===== 奇点暗架构 · ECharts 动态加载与初始化 =====
+(function(){
+  var container1=document.getElementById('darkChart1');
+  var container2=document.getElementById('darkChart2');
+  if(!container1||!container2)return;
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js';
+  s.onload=function(){
+    if(!window.echarts)return;
+    var c1=echarts.init(container1);
+    c1.setOption({
+      grid:{top:24,left:44,right:20,bottom:30,containLabel:true},
+      tooltip:{trigger:'axis',triggerOn:'click',renderMode:'richText',confine:true},
+      xAxis:{type:'category',data:['P1传感','P2预演','P3归一','P4稳态'],axisLabel:{color:'var(--text2)'},axisLine:{lineStyle:{color:'var(--border2)'}}},
+      yAxis:{type:'value',min:0.4,max:0.9,splitLine:{lineStyle:{color:'var(--border)'}},axisLabel:{color:'var(--text2)'}},
+      series:[
+        {name:'明层 B_stab',type:'line',data:[0.62,0.66,0.72,0.80],smooth:true,symbolSize:8,lineStyle:{width:2,color:'var(--cyan)'},itemStyle:{color:'var(--cyan)'}},
+        {name:'暗层 D_stab',type:'line',data:[0.55,0.60,0.68,0.75],smooth:true,symbolSize:8,lineStyle:{width:2,color:'var(--purple)'},itemStyle:{color:'var(--purple)'}}
+      ],
+      legend:{data:['明层 B_stab','暗层 D_stab'],textStyle:{color:'var(--text2)'},top:0}
+    });
+    var c2=echarts.init(container2);
+    c2.setOption({
+      grid:{top:24,left:44,right:20,bottom:30,containLabel:true},
+      tooltip:{trigger:'axis',triggerOn:'click',renderMode:'richText',confine:true},
+      xAxis:{type:'category',data:['t0','t1','t2','t3','t4'],axisLabel:{color:'var(--text2)'},axisLine:{lineStyle:{color:'var(--border2)'}}},
+      yAxis:{type:'value',splitLine:{lineStyle:{color:'var(--border)'}},axisLabel:{color:'var(--text2)'}},
+      series:[
+        {name:'drift_signal',type:'line',data:[0.10,0.18,0.26,0.35,0.22],smooth:true,lineStyle:{width:2,color:'var(--orange)'},itemStyle:{color:'var(--orange)'},areaStyle:{color:'rgba(255,145,0,.12)'}},
+        {name:'回拉 drift×κ',type:'line',data:[0.05,0.09,0.13,0.175,0.11],smooth:true,lineStyle:{width:2,type:'dashed',color:'var(--purple)'},itemStyle:{color:'var(--purple)'}}
+      ],
+      legend:{data:['drift_signal','回拉 drift×κ'],textStyle:{color:'var(--text2)'},top:0}
+    });
+    window.addEventListener('resize',function(){c1.resize();c2.resize();});
+  };
+  s.onerror=function(){
+    // ECharts CDN 不可达时的静态降级：写入数据表，保证视图完整可读
+    var t1='<table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:6px;color:var(--text3);font-size:11px">相位</th><th style="text-align:left;padding:6px;color:var(--text3);font-size:11px">明层B_stab</th><th style="text-align:left;padding:6px;color:var(--text3);font-size:11px">暗层D_stab</th></tr>'+
+      '<tr><td style="padding:6px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">P1传感</td><td style="padding:6px;font-size:12px;color:var(--cyan);border-bottom:1px solid var(--border)">0.62</td><td style="padding:6px;font-size:12px;color:var(--purple);border-bottom:1px solid var(--border)">0.55</td></tr>'+
+      '<tr><td style="padding:6px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">P2预演</td><td style="padding:6px;font-size:12px;color:var(--cyan);border-bottom:1px solid var(--border)">0.66</td><td style="padding:6px;font-size:12px;color:var(--purple);border-bottom:1px solid var(--border)">0.60</td></tr>'+
+      '<tr><td style="padding:6px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">P3归一</td><td style="padding:6px;font-size:12px;color:var(--cyan);border-bottom:1px solid var(--border)">0.72</td><td style="padding:6px;font-size:12px;color:var(--purple);border-bottom:1px solid var(--border)">0.68</td></tr>'+
+      '<tr><td style="padding:6px;font-size:12px;color:var(--text2)">P4稳态</td><td style="padding:6px;font-size:12px;color:var(--cyan)">0.80</td><td style="padding:6px;font-size:12px;color:var(--purple)">0.75</td></tr></table>'+
+      '<div style="font-size:11px;color:var(--text3);margin-top:6px">图表组件未加载，已降级为数据表（示例数据）</div>';
+    var t2='<table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:6px;color:var(--text3);font-size:11px">步进</th><th style="text-align:left;padding:6px;color:var(--text3);font-size:11px">drift_signal</th><th style="text-align:left;padding:6px;color:var(--text3);font-size:11px">回拉drift×κ</th></tr>'+
+      '<tr><td style="padding:6px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">t0</td><td style="padding:6px;font-size:12px;color:var(--orange);border-bottom:1px solid var(--border)">0.10</td><td style="padding:6px;font-size:12px;color:var(--purple);border-bottom:1px solid var(--border)">0.05</td></tr>'+
+      '<tr><td style="padding:6px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">t1</td><td style="padding:6px;font-size:12px;color:var(--orange);border-bottom:1px solid var(--border)">0.18</td><td style="padding:6px;font-size:12px;color:var(--purple);border-bottom:1px solid var(--border)">0.09</td></tr>'+
+      '<tr><td style="padding:6px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">t2</td><td style="padding:6px;font-size:12px;color:var(--orange);border-bottom:1px solid var(--border)">0.26</td><td style="padding:6px;font-size:12px;color:var(--purple);border-bottom:1px solid var(--border)">0.13</td></tr>'+
+      '<tr><td style="padding:6px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">t3</td><td style="padding:6px;font-size:12px;color:var(--orange);border-bottom:1px solid var(--border)">0.35</td><td style="padding:6px;font-size:12px;color:var(--purple);border-bottom:1px solid var(--border)">0.175</td></tr>'+
+      '<tr><td style="padding:6px;font-size:12px;color:var(--text2)">t4</td><td style="padding:6px;font-size:12px;color:var(--orange)">0.22</td><td style="padding:6px;font-size:12px;color:var(--purple)">0.11</td></tr></table>'+
+      '<div style="font-size:11px;color:var(--text3);margin-top:6px">图表组件未加载，已降级为数据表（示例数据）</div>';
+    container1.innerHTML=t1;
+    container2.innerHTML=t2;
+  };
+  document.body.appendChild(s);
+})();
+</script>
+</body>
+</html>

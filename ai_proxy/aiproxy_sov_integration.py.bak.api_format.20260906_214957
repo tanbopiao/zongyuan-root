@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""
+aiproxy 国家主权根集成中间件
+AI Proxy Sovereignty Root Integration Middleware
+
+在所有AI调用返回结果后自动进行合规校验，一次接入覆盖所有业务线。
+确权: DID-BR-000002 | 锚点: Ω₀⊂⊙∞⊂Ω | 根: ZONGYUAN-ROOT V1.7
+"""
+import os
+import json
+import time
+import hashlib
+import urllib.request
+import urllib.error
+from datetime import datetime
+
+# 配置
+SOV_API_URL = os.environ.get("SOV_API_URL", "http://127.0.0.1:8031")
+SOV_API_KEY = os.environ.get("SOV_API_KEY", "761828c27706eecca9660f7bbd46e03a5926ef2ab85ddaa4f21ad8a1ede2e942")
+SOV_TIMEOUT = 2  # 2秒超时，避免阻塞AI调用
+SOV_ENABLED = True  # 总开关
+
+# 按模型配置校验策略
+MODEL_COMPLIANCE_POLICY = {
+    # 高风险模型：严格校验
+    "doubao": {"check_content": True, "check_prompt": False, "block_on_violation": False, "log_only": True},
+    "hunyuan": {"check_content": True, "check_prompt": False, "block_on_violation": False, "log_only": True},
+    "kimi": {"check_content": True, "check_prompt": False, "block_on_violation": False, "log_only": True},
+    "aliyun": {"check_content": True, "check_prompt": False, "block_on_violation": False, "log_only": True},
+    "zhipu": {"check_content": True, "check_prompt": False, "block_on_violation": False, "log_only": True},
+    "agnes": {"check_content": True, "check_prompt": False, "block_on_violation": False, "log_only": True},
+    "siliconflow": {"check_content": True, "check_prompt": False, "block_on_violation": False, "log_only": True},
+    # 本地模型：仅记录不校验
+    "ollama-local": {"check_content": False, "check_prompt": False, "block_on_violation": False, "log_only": True},
+    "ollama-win": {"check_content": False, "check_prompt": False, "block_on_violation": False, "log_only": True},
+    # 默认策略
+    "default": {"check_content": True, "check_prompt": False, "block_on_violation": False, "log_only": True},
+}
+
+# 日志
+LOG_DIR = "/opt/ZONGYUAN-ROOT/ai_proxy/logs"
+os.makedirs(LOG_DIR, exist_ok=True)
+AUDIT_LOG = os.path.join(LOG_DIR, "sov_aiproxy_audit.log")
+
+def _log_audit(model_key, action, result, level="info"):
+    """记录审计日志"""
+    try:
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "model": model_key,
+            "action": action,
+            "result": result,
+            "level": level,
+            "did": "DID-BR-000002"
+        }
+        with open(AUDIT_LOG, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except:
+        pass
+
+def _sov_request(endpoint, payload, timeout=SOV_TIMEOUT):
+    """调用国家主权根API"""
+    if not SOV_ENABLED:
+        return {"fallback": True, "reason": "sov_disabled"}
+    try:
+        url = f"{SOV_API_URL}{endpoint}"
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={
+                'Content-Type': 'application/json',
+                'X-API-Key': SOV_API_KEY
+            },
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode('utf-8'))
+    except Exception as e:
+        return {"fallback": True, "reason": str(e)[:100]}
+
+def check_ai_output_compliance(model_key, content, messages=None):
+    """
+    校验AI输出内容合规性
+    在call_llm返回结果前调用
+    
+    Args:
+        model_key: 模型标识（如doubao/hunyuan/ollama-local）
+        content: AI生成的内容
+        messages: 原始请求消息（可选）
+    
+    Returns:
+        dict: {
+            "passed": bool,           # 是否通过
+            "fallback": bool,         # 是否降级（国家主权根不可用）
+            "level": str,             # 合规等级
+            "score": int,             # 合规评分
+            "issues": list,           # 问题列表
+            "blocked": bool,          # 是否被阻断
+            "audit_hash": str         # 审计哈希
+        }
+    """
+    if not SOV_ENABLED:
+        return {"passed": True, "fallback": True, "reason": "sov_disabled", "blocked": False}
+    
+    # 获取模型策略
+    policy = MODEL_COMPLIANCE_POLICY.get(model_key, MODEL_COMPLIANCE_POLICY["default"])
+    
+    if not policy.get("check_content", True):
+        return {"passed": True, "fallback": False, "reason": "policy_skip", "blocked": False}
+    
+    # 内容摘要（避免发送过长内容）
+    content_summary = content[:500] if content else ""
+    
+    payload = {
+        "operation": "content_generation",
+        "data_type": "ai_output",
+        "content_summary": content_summary,
+        "risk_level": "medium",
+        "context": {
+            "pipeline": "aiproxy",
+            "model": model_key,
+            "content_length": len(content) if content else 0,
+            "has_messages": messages is not None
+        }
+    }
+    
+    result = _sov_request("/api/v1/compliance/check", payload)
+    
+    if result.get("fallback"):
+        _log_audit(model_key, "compliance_check", 
+                   {"passed": True, "fallback": True, "reason": result.get("reason")}, "info")
+        return {"passed": True, "fallback": True, "reason": result.get("reason"), "blocked": False}
+    
+    passed = result.get("passed", True)
+    level = result.get("level", "info")
+    score = result.get("score", -1)
+    issues = result.get("issues", [])
+    
+    # 是否阻断（根据策略）
+    blocked = False
+    if not passed and policy.get("block_on_violation", False):
+        blocked = True
+    elif not passed and policy.get("log_only", True):
+        # 仅记录不阻断
+        blocked = False
+    
+    audit_hash = hashlib.sha256(
+        f"{model_key}{passed}{level}{time.time()}".encode()
+    ).hexdigest()[:16]
+    
+    _log_audit(model_key, "compliance_check",
+               {"passed": passed, "level": level, "score": score, 
+                "issues": issues, "blocked": blocked, "audit_hash": audit_hash},
+               level if level in ["warning", "critical"] else "info")
+    
+    return {
+        "passed": passed,
+        "fallback": False,
+        "level": level,
+        "score": score,
+        "issues": issues,
+        "blocked": blocked,
+        "audit_hash": audit_hash
+    }
+
+def get_integration_stats():
+    """获取集成统计信息"""
+    try:
+        if os.path.exists(AUDIT_LOG):
+            with open(AUDIT_LOG, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            total = len(lines)
+            passed = sum(1 for l in lines if '"passed": true' in l)
+            blocked = sum(1 for l in lines if '"blocked": true' in l)
+            fallback = sum(1 for l in lines if '"fallback": true' in l)
+            warnings = sum(1 for l in lines if '"level": "warning"' in l)
+            critical = sum(1 for l in lines if '"level": "critical"' in l)
+            return {
+                "total_checks": total,
+                "passed": passed,
+                "blocked": blocked,
+                "fallback": fallback,
+                "warnings": warnings,
+                "critical": critical,
+                "sov_enabled": SOV_ENABLED,
+                "sov_url": SOV_API_URL
+            }
+    except:
+        pass
+    return {"total_checks": 0, "sov_enabled": SOV_ENABLED}

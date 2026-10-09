@@ -1,0 +1,209 @@
+{
+  "meta_rules": [
+    {
+      "rule_id": "TRUTH-MEDIA-018",
+      "name": "产线上下文边界约束",
+      "context": "MediaProduceContext",
+      "severity": "HIGH",
+      "description": "产线只负责物料生产，不实现内核Merkle/锁档逻辑；产出资产以DTO交付内核真值上下文完成快照固化"
+    },
+    {
+      "rule_id": "TRUTH-MEDIA-019",
+      "name": "IP角色基准版本控制",
+      "context": "MediaProduceContext",
+      "severity": "HIGH",
+      "description": "IP角色基准、世界观范式修改必须走Command命令产生版本事件；禁止直接修改内存对象；角色携带版本哈希防漂移"
+    },
+    {
+      "rule_id": "TRUTH-MEDIA-020",
+      "name": "视觉范式强制校验",
+      "context": "MediaProduceContext",
+      "severity": "CRITICAL",
+      "description": "提示词组装强制校验永久视觉范式约束；检测违背东方审美基准直接抛出领域异常终止任务"
+    },
+    {
+      "rule_id": "TRUTH-MEDIA-021",
+      "name": "部分成功留存策略",
+      "context": "MediaProduceContext",
+      "severity": "MEDIUM",
+      "description": "产线支持PARTIAL_SUCCESS部分成功状态；部分物料失败不丢弃已产出有效资产，一并提交内核归档留存"
+    },
+    {
+      "rule_id": "TRUTH-MEDIA-022",
+      "name": "渲染完成≠归档完成",
+      "context": "MediaProduceContext",
+      "severity": "HIGH",
+      "description": "MediaTaskCompletedEvent仅代表渲染完成；不能等同于归档锁档完成，归档状态以内核侧事件为准"
+    },
+    {
+      "rule_id": "TRUTH-GATEWAY-023",
+      "name": "OpenAI协议兼容约束",
+      "context": "API网关",
+      "severity": "HIGH",
+      "description": "API网关保持OpenAI协议兼容，扩展信息全部放在meta/z_meta字段，不破坏原生结构，第三方SDK可无感对接"
+    },
+    {
+      "rule_id": "TRUTH-GATEWAY-024",
+      "name": "协议过滤网层隔离",
+      "context": "API网关",
+      "severity": "HIGH",
+      "description": "协议过滤网属于adapters网关层组件，拦截逻辑不侵入kernel领域层；网关校验失败直接返回，不生成领域聚合、不产生快照"
+    },
+    {
+      "rule_id": "TRUTH-GATEWAY-025",
+      "name": "meta参数边界约束",
+      "context": "API网关",
+      "severity": "MEDIUM",
+      "description": "meta仅作为外部控制参数，内核真值以Command内部DTO为准；meta参数非法时网关直接拦截，不向下透传脏参数"
+    },
+    {
+      "rule_id": "TRUTH-GATEWAY-026",
+      "name": "z_meta溯源信息携带",
+      "context": "API网关",
+      "severity": "MEDIUM",
+      "description": "z_meta携带所有溯源链路信息（task_id、snapshot_id、merkle_root），供外部应用做审计溯源；OpenAI标准客户端可以忽略该字段"
+    },
+    {
+      "rule_id": "TRUTH-EVOLUTION-027",
+      "name": "进化域完全闭合",
+      "context": "CTE进化域",
+      "severity": "HIGH",
+      "description": "进化域从预激活升级为完全闭合运行，EvolutionToCausal适配器必须真实生成do-calculus干预设计和因果传播路径"
+    },
+    {
+      "rule_id": "TRUTH-EVOLUTION-028",
+      "name": "自进化六阶段约束",
+      "context": "P1体系自进化",
+      "severity": "HIGH",
+      "description": "P1体系自进化必须严格遵循检测→分析→创建→验证→锁档→部署六阶段，跳过验证或锁档的进化不得部署"
+    },
+    {
+      "rule_id": "TRUTH-EVOLUTION-029",
+      "name": "自动进化技能确权",
+      "context": "技能创建器",
+      "severity": "MEDIUM",
+      "description": "所有自动创建的进化技能必须经过SHA256哈希确权和锁档，未锁档的自动技能不得激活使用"
+    },
+    {
+      "rule_id": "TRUTH-BACKUP-030",
+      "rule_name": "精简核心备份原则",
+      "category": "backup",
+      "priority": "P0",
+      "description": "所有自动备份仅针对核心高价值内核资产执行，禁止对可复现内容、大体积生成产物、临时缓存执行全量备份。单次备份压缩体积不得超过10MB。",
+      "core_assets": [
+        "kernel/root_state.json",
+        "kernel/kernel_state.json",
+        "kernel/locks/",
+        "kernel/kernel_config/",
+        "autonomous_kernel_protocol/",
+        "meta_laws/",
+        "memory_index.json",
+        "asset_manifest.json",
+        "docs/",
+        "truth_architecture/",
+        "whitepaper/",
+        "cte/",
+        "evolution/"
+      ],
+      "max_backup_size_mb": 10,
+      "status": "ACTIVE"
+    },
+    {
+      "rule_id": "TRUTH-BACKUP-031",
+      "rule_name": "备份排除原则",
+      "category": "backup",
+      "priority": "P0",
+      "description": "以下内容禁止纳入自动备份范围：logs、__pycache__、assets大体积生成产物、临时文件、node_modules。避免备份体积膨胀导致磁盘占用过高被系统清理。",
+      "excluded": [
+        "logs/",
+        "__pycache__/",
+        "*.pyc",
+        "*.pyo",
+        "assets/",
+        "*.tmp",
+        "*.temp",
+        "node_modules/",
+        "render_output_temp/",
+        "trash_buffer/"
+      ],
+      "large_asset_threshold_mb": 100,
+      "status": "ACTIVE"
+    },
+    {
+      "rule_id": "TRUTH-BACKUP-032",
+      "rule_name": "备份保留与清理原则",
+      "category": "backup",
+      "priority": "P1",
+      "description": "自动备份保留最近7天，超出保留期自动清理。每日03:00执行，备份失败触发告警，连续2次失败标记P0故障。每月1日执行备份恢复验证。",
+      "schedule": "daily 03:00",
+      "retention_days": 7,
+      "backup_dir": "/opt/ZONGYUAN-ROOT/backup/minimal/",
+      "alert_on_failure": true,
+      "failure_threshold": 2,
+      "monthly_restore_verify": true,
+      "status": "ACTIVE"
+    },
+    {
+      "rule_id": "TRUTH-PIPELINE-033",
+      "category": "pipeline",
+      "content": "短剧产线镜头分片仅允许5s/10s，输出固定1080×1920 24fps，禁止其他格式",
+      "status": "ACTIVE",
+      "created_at": "2026-09-08"
+    },
+    {
+      "rule_id": "TRUTH-PIPELINE-034",
+      "category": "pipeline",
+      "content": "产线任务执行必须先校验后执行，禁止先执行后拦截；校验失败直接终止任务",
+      "status": "ACTIVE",
+      "created_at": "2026-09-08"
+    },
+    {
+      "rule_id": "TRUTH-PIPELINE-035",
+      "category": "pipeline",
+      "content": "单镜头/单算子异常仅隔离局部，已生成片段断点复用，禁止整体任务作废",
+      "status": "ACTIVE",
+      "created_at": "2026-09-08"
+    },
+    {
+      "rule_id": "TRUTH-PIPELINE-036",
+      "category": "pipeline",
+      "content": "产线熔断S0/S1风险触发后系统不可自动恢复，必须人工闸门放行",
+      "status": "ACTIVE",
+      "created_at": "2026-09-08"
+    },
+    {
+      "rule_id": "TRUTH-DAO-XING-037",
+      "name": "道形分层独立公理",
+      "category": "dao_xing",
+      "context": "世界模型/空间智能",
+      "severity": "critical",
+      "content": "道层与形层必须分层独立，禁止将因果、空间、真值公理隐式编码进大模型权重；道层负责秩序推演，形层负责感知生成，双向闭环耦合",
+      "status": "ACTIVE",
+      "created_at": "2026-09-08"
+    },
+    {
+      "rule_id": "TRUTH-DAO-XING-038",
+      "name": "道层容错校验公理",
+      "category": "dao_xing",
+      "context": "感知翻译链路",
+      "severity": "high",
+      "content": "道层不得无条件采信形层输出，必须执行校验过滤、冲突检测、拒绝错误观测；形层解析错误由道层容错机制补偿",
+      "status": "ACTIVE",
+      "created_at": "2026-09-08"
+    },
+    {
+      "rule_id": "TRUTH-DAO-XING-039",
+      "name": "协同涌现公理",
+      "category": "dao_xing",
+      "context": "系统能力评估",
+      "severity": "medium",
+      "content": "世界模型与空间智能是道-形两层协同涌现产物，不得归因于单独某一层；评估系统能力时必须同时评估两层协同效果",
+      "status": "ACTIVE",
+      "created_at": "2026-09-08"
+    }
+  ],
+  "did": "DID-BR-000002",
+  "updated_at": "2026-09-08T03:44:21.478153+00:00",
+  "total_rules": 22,
+  "last_update": "2026-09-08T11:30:00Z"
+}

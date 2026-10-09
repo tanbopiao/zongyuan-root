@@ -1,0 +1,68 @@
+{
+ "meta_law_id": "META-LAW-MULTI-AGENT-001",
+ "meta_law_name": "多Agent并发开发与冲突防护元法则",
+ "version": "1.0",
+ "lock_level": 8,
+ "status": "ACTIVE",
+ "created_at": "2026-09-12T20:18:18.873070+08:00",
+ "did": "DID-BR-000002",
+ "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+ "sovereign_root": "Ω-TAN-7-001",
+ "domain": "ZONGYUAN-ROOT元极恒一自治体系",
+ "sub_domain": "多窗口并发开发治理",
+ "priority": "高优先级（并发安全基底）",
+ "元法则定义": "本元法则定义多Agent/多窗口并发开发的分支隔离、锁机制、仲裁合并与冲突防护规则。任何多窗口并行开发必须遵循分支隔离+内核写锁+部署锁+仲裁合并四机制，禁止直接改master、禁止直接push master、禁止不通过锁写内核、禁止不通过部署锁重启服务、禁止修改其他窗口高冲突模块。",
+ "核心机制": {
+  "分支隔离": "A窗口→agent/alpha, B窗口→agent/beta, C窗口→agent/gamma",
+  "内核写锁": "kernel_write_lock.sh保护kernel.json，防止并发写入",
+  "部署锁": "deploy_lock.sh保护服务重启，防止并发部署冲突",
+  "仲裁合并": "arbiter_merge.sh由仲裁者统一合并分支到master",
+  "冲突检测": "multi_agent_lock.py按模块检测冲突，高冲突模块需PR"
+ },
+ "标准流程": [
+  "阶段1: git checkout agent/xxx + git pull + ./lock_status.sh",
+  "阶段2: 执行开发/优化，高冲突模块修改前确认git log",
+  "阶段3: 内核写入通过./kernel_write_lock.sh加锁执行",
+  "阶段4: git commit + git push origin agent/xxx",
+  "阶段5: 通知仲裁者执行./arbiter_merge.sh agent/xxx X",
+  "阶段6: 部署通过./deploy_lock.sh加锁执行"
+ ],
+ "禁止类刚性规则": [
+  "禁止直接在master分支修改",
+  "禁止直接push到master",
+  "禁止不通过锁直接写kernel.json",
+  "禁止不通过部署锁直接重启服务",
+  "禁止修改其他窗口所有的高冲突模块（需PR）"
+ ],
+ "冲突处理流程": [
+  "仲裁者合并时检测到冲突→自动中止",
+  "冲突文件列表输出→相关窗口协商",
+  "解决策略: 保留master/保留分支/手动合并",
+  "解决后重新提交分支→仲裁者重新合并"
+ ],
+ "配套脚本": {
+  "lock_status.sh": "查看锁状态（deploy/kernel_write）",
+  "multi_agent_lock.py": "多Agent锁档引擎，--window A/B/C",
+  "kernel_write_lock.sh": "内核写入加锁执行",
+  "deploy_lock.sh": "部署操作加锁执行",
+  "arbiter_merge.sh": "仲裁者合并分支到master"
+ },
+ "asset_id": "META-LAW-MULTI-AGENT-001",
+ "asset_type": "meta_law",
+ "title": "多Agent并发开发与冲突防护元法则",
+ "asset_owner": "原创者",
+ "lock_status": "ACTIVE",
+ "lock_timestamp": "2026-09-12T20:18:18.873084+08:00",
+ "related_asset_ids": [
+  "META-004",
+  "SOP-META004-COMPLIANCE-V1.0"
+ ],
+ "tech_debt": [],
+ "phase": "production",
+ "constraints": [
+  "META-004 Schema兼容层",
+  "DID-BR-000002确权"
+ ],
+ "sha256": "845174C7EFD4B5EFFC867F3D50ED505D3B18D78B40D885D41EEF8F7AB6DCFD6D",
+ "merkle_leaf_hash": "1359CBE980944C457A32CDC2AACF0D23B2A8D526E43B0AA8C23E3998AF23171F"
+}

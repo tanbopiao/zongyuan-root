@@ -1,0 +1,109 @@
+{
+  "protocol_id": "HOMOGENEOUS-PROTOCOL-V1.0",
+  "protocol_name": "ZONGYUAN-ROOT同源节点互联协议",
+  "version": "V1.0",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "sovereign_root": "Ω-TAN-7-001",
+  "created_at": "2026-09-07T16:10:06.050607+00:00",
+  "scope": "全域身份节点注册、互联、心跳、权限隔离与同源同步协议",
+  "core_principles": [
+    "所有节点必须通过同源协议注册后方可接入自治内核",
+    "节点身份唯一不可篡改，节点ID由内核签发，禁止自造",
+    "控制节点唯一写权限，工作节点只读+执行，边缘节点仅上报",
+    "节点间通信必须HMAC-SHA256签名+时间戳防重放",
+    "节点能力声明与实际权限严格匹配，禁止越权调用",
+    "节点注销不删除历史记录，仅标记DECOMMISSIONED"
+  ],
+  "node_types": {
+    "CONTROL": {
+      "desc": "控制节点",
+      "write_permission": true,
+      "max_count": 1,
+      "capabilities": [
+        "内核写入",
+        "锁档签发",
+        "节点管理",
+        "全局调度"
+      ]
+    },
+    "WORKER": {
+      "desc": "工作节点",
+      "write_permission": false,
+      "max_count": 99,
+      "capabilities": [
+        "任务执行",
+        "算子运算",
+        "数据处理",
+        "本地缓存"
+      ]
+    },
+    "EDGE": {
+      "desc": "边缘节点",
+      "write_permission": false,
+      "max_count": 999,
+      "capabilities": [
+        "数据采集",
+        "心跳上报",
+        "本地推理"
+      ]
+    },
+    "OBSERVER": {
+      "desc": "观测节点",
+      "write_permission": false,
+      "max_count": 99,
+      "capabilities": [
+        "状态监控",
+        "日志采集",
+        "告警推送"
+      ]
+    }
+  },
+  "registration_flow": [
+    "节点生成公钥/能力声明/节点类型",
+    "向控制节点提交注册申请(含HMAC签名)",
+    "控制节点校验签名+能力+类型配额",
+    "签发唯一NODE_ID + 会话密钥",
+    "写入node_registry.json，状态ACTIVE",
+    "节点启动心跳(30s间隔)"
+  ],
+  "heartbeat_spec": {
+    "interval_seconds": 30,
+    "timeout_seconds": 120,
+    "payload": [
+      "node_id",
+      "cpu_percent",
+      "memory_percent",
+      "disk_percent",
+      "active_tasks",
+      "last_task_hash",
+      "timestamp",
+      "signature"
+    ],
+    "missed_3": "标记DEGRADED",
+    "missed_5": "标记OFFLINE，自动摘除调度"
+  },
+  "communication_spec": {
+    "protocol": "HTTP/JSON",
+    "auth_header": "X-Node-Sig (HMAC-SHA256)",
+    "replay_window": 300,
+    "encryption": "TLS1.3 for external, plain for loopback",
+    "max_payload_mb": 10
+  },
+  "sync_spec": {
+    "kernel_pull": "节点启动时拉取最新内核快照",
+    "incremental_sync": "锁档事件触发增量推送",
+    "conflict_resolution": "云内核为唯一可信源，外部覆盖时强制恢复",
+    "git_remotes": [
+      "gitee",
+      "github",
+      "local"
+    ]
+  },
+  "isolation_spec": {
+    "node_namespace": "每个节点独立工作目录",
+    "resource_quota": "CPU/内存/磁盘按节点类型配额",
+    "network_isolation": "边缘节点禁止直连内核写端口",
+    "data_isolation": "节点本地数据不跨节点共享，经内核中转"
+  }
+}

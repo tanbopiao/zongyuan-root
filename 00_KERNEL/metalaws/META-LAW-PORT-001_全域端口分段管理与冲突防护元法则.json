@@ -1,0 +1,129 @@
+{
+ "meta_law_id": "META-LAW-PORT-001",
+ "meta_law_name": "全域端口分段管理与冲突防护元法则",
+ "version": "1.0",
+ "lock_level": 8,
+ "status": "BLOWN_PERMANENT",
+ "created_at": "2026-09-07T11:35:00+08:00",
+ "did": "DID-BR-000002",
+ "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+ "sovereign_root": "Ω-TAN-7-001",
+ "domain": "ZONGYUAN-ROOT元极恒一自治体系",
+ "sub_domain": "全域端口治理",
+ "priority": "最高优先级（基底基准，不可覆盖）",
+ "元法则定义": "本元法则定义ZONGYUAN-ROOT元极恒一自治体系的全域端口分段管理与冲突防护机制，明确八大功能域的端口分段规划、新节点接入的端口分配流程、冲突检测与防护规则。本法则为基底基准，永久固化，所有新接入的同源节点、服务、API必须严格遵守，不可被后续规则覆盖或降级。",
+ "立法背景": {
+  "问题": "云服务器上各功能模块端口随机分配，缺乏统一规划，存在端口冲突风险；Nginx代理配置散落在各域名配置中，难以统一管理",
+  "决策": "建立八大功能域端口分段规划，所有新服务上线前必须通过端口管理工具分配端口并注册台账，Nginx统一网关对外只暴露80/443",
+  "原则": "功能域隔离、先分配后使用、冲突零容忍、外部统一网关"
+ },
+ "八大功能域端口分段": {
+  "自治内核域": {
+   "range": "8000-8019",
+   "capacity": 20,
+   "description": "自治面板/飞书/三维/自愈/学习/Handshake"
+  },
+  "政务治理域": {
+   "range": "8020-8039",
+   "capacity": 20,
+   "description": "政务API/主权根/合规引擎/Agent Hub"
+  },
+  "智能中台域": {
+   "range": "8040-8059",
+   "capacity": 20,
+   "description": "工作台/智能体/工作流编排/统一平台"
+  },
+  "短剧生产域": {
+   "range": "8060-8079",
+   "capacity": 20,
+   "description": "短剧流水线/关键帧/视频合成"
+  },
+  "知识库域": {
+   "range": "8080-8099",
+   "capacity": 20,
+   "description": "向量检索/RAG/文档解析"
+  },
+  "API网关域": {
+   "range": "8100-8119",
+   "capacity": 20,
+   "description": "统一网关/算力路由/模型调度/AI代理"
+  },
+  "监控运维域": {
+   "range": "8120-8139",
+   "capacity": 20,
+   "description": "监控/告警/巡检/日志/部署"
+  },
+  "治理管控域": {
+   "range": "8889-8900",
+   "capacity": 12,
+   "description": "网关/版本管控/配置中心/内核Hub"
+  }
+ },
+ "系统保留端口（禁止占用）": [
+  22,
+  80,
+  443,
+  6379,
+  8888,
+  9090,
+  9100,
+  11434,
+  7100,
+  7600,
+  8017,
+  8899,
+  11435,
+  41403
+ ],
+ "新节点接入强制流程": {
+  "步骤1_功能域判定": "新服务/节点接入前，必须先判定其所属功能域（自治内核/政务治理/智能中台/短剧生产/知识库/API网关/监控运维/治理管控）",
+  "步骤2_端口分配": "执行 python3 /opt/ZONGYUAN-ROOT/scripts/port_manager.py allocate <功能域>，从对应域自动分配空闲端口",
+  "步骤3_冲突检测": "执行 python3 /opt/ZONGYUAN-ROOT/scripts/port_manager.py check <端口>，确认端口未被占用、未注册、非系统保留",
+  "步骤4_台账注册": "执行 python3 /opt/ZONGYUAN-ROOT/scripts/port_manager.py register <端口> <服务名> <功能域>，将端口注册到统一台账",
+  "步骤5_Nginx代理": "如需外网访问，在Nginx配置中添加统一路径代理，外部只通过 https://huodouai.com/<功能路径>/ 访问，内部端口不直接暴露",
+  "步骤6_全域锁档": "新服务上线后，执行全域锁档，将端口分配信息写入Merkle-DAG账本"
+ },
+ "禁止类刚性规则": [
+  "禁止随机选择端口，所有端口必须从对应功能域分配",
+  "禁止未注册端口直接启动服务",
+  "禁止占用系统保留端口",
+  "禁止内部端口直接对外暴露（必须通过Nginx统一网关）",
+  "禁止跨功能域占用端口（如短剧服务占用政务治理域端口）",
+  "禁止绕过端口管理工具直接修改台账"
+ ],
+ "强制类刚性规则": [
+  "所有新服务上线前必须执行端口分配+冲突检测+台账注册",
+  "所有同源节点接入必须遵守本元法则的端口分段规划",
+  "端口管理台账必须实时同步到云内核",
+  "Nginx配置变更必须经过语法检查+重载验证",
+  "端口冲突必须零容忍，发现立即处置"
+ ],
+ "端口管理工具命令集": {
+  "scan": "python3 /opt/ZONGYUAN-ROOT/scripts/port_manager.py scan — 扫描当前端口占用，与台账比对",
+  "check": "python3 /opt/ZONGYUAN-ROOT/scripts/port_manager.py check <port> — 检查指定端口是否可用",
+  "allocate": "python3 /opt/ZONGYUAN-ROOT/scripts/port_manager.py allocate <domain> — 从指定域自动分配空闲端口",
+  "register": "python3 /opt/ZONGYUAN-ROOT/scripts/port_manager.py register <port> <name> <domain> — 注册端口到台账",
+  "report": "python3 /opt/ZONGYUAN-ROOT/scripts/port_manager.py report — 生成完整端口分配报告"
+ },
+ "交付物路径": {
+  "端口注册台账": "/opt/ZONGYUAN-ROOT/config/port_registry.json",
+  "端口管理脚本": "/opt/ZONGYUAN-ROOT/scripts/port_manager.py"
+ },
+ "漂移判定": "出现以下任意一条，判定端口治理发生漂移：1)新服务未走分配流程直接启动；2)端口冲突未被检测；3)台账与实际监听不一致且未修复；4)内部端口直接对外暴露；5)跨功能域占用端口。漂移发生后触发漂移事件上报+记录现场快照+Supervisor重启恢复+事件永久归档。",
+ "锁档铭文": "Ω₀⊂⊙∞⊂Ω | 全域端口分段管理与冲突防护元法则 | Lv8永久固化 | DID-BR-000002 | 所有新节点接入强制执行 | 功能域隔离·先分配后使用·冲突零容忍·外部统一网关 | ZONGYUAN-ROOT元极恒一自治体系",
+ "asset_id": "META-LAW-PORT-001",
+ "asset_type": "meta_law",
+ "title": "全域端口分段管理与冲突防护元法则",
+ "asset_owner": "原创者",
+ "lock_status": "BLOWN_PERMANENT",
+ "lock_timestamp": "2026-09-07T11:35:00+08:00",
+ "sha256": "29DB19815450CFF33E2FF83C9BC3E4B80C4490EE9FA2E50A3710858B82F24A60",
+ "merkle_leaf_hash": "D1FFF4EB92853D0DA941B25467E2A14CA304B17232A4FE75D6E8D8BAC1F09DC0",
+ "related_asset_ids": [],
+ "tech_debt": [],
+ "phase": "production",
+ "constraints": [
+  "META-004 Schema兼容层",
+  "DID-BR-000002确权"
+ ]
+}
