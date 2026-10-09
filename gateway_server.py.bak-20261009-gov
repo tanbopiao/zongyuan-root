@@ -94,10 +94,6 @@ class GW(BaseHTTPRequestHandler):
         if not isinstance(value, dict):
             self._send(400, {"error": "value_must_be_object"})
             return
-        # [20261009-GOV] 空value防护: 拒绝空对象, 防自动噪声污染真值库
-        if not value or not key or str(key).startswith("truth-"):
-            self._send(400, {"error": "empty_value_rejected", "message": "value不可为空对象, key不可为空或truth-自动前缀; 请用命名空间key+结构化value(见RULE-005 V3.1)"})
-            return
         try:
             res = append_truth(key, value, x_did)
             self._send(200, {
