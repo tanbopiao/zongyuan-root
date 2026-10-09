@@ -39,29 +39,3 @@ SNAPEOF
 echo "[$TS] 锁档完成: root=$ROOT_HASH"
 echo "账本: $LEDGER (尾部已追加)"
 echo "快照: $SNAP"
-
-# 5. Git 三远端自动推送 (Gitee/GitHub/atomgit)
-echo "[$TS] 开始 Git 三远端推送..."
-cd $ROOT || true
-git add -A 2>/dev/null || true
-if git diff --cached --quiet 2>/dev/null; then
-  echo "[$TS] 无变更, 跳过提交"
-else
-  git -c user.name="ZONGYUAN-ROOT" -c user.email="zr@huodouai.com" commit -m "lock: $EVENT root=$ROOT_HASH" 2>&1 | tail -1
-fi
-for remote in atomgit gitee github; do
-  if timeout 60 git push "$remote" main 2>/dev/null; then
-    echo "[$TS] $remote 推送成功"
-  else
-    echo "[$TS] $remote 推送失败, 尝试合并远端历史..."
-    timeout 60 git fetch "$remote" main 2>/dev/null
-    timeout 60 git merge --allow-unrelated-histories FETCH_HEAD -m "merge: $remote 远端历史" 2>/dev/null || true
-    if timeout 60 git push "$remote" main 2>/dev/null; then
-      echo "[$TS] $remote 推送成功(合并后)"
-    else
-      echo "[$TS] $remote 推送失败, 已记录告警"
-      echo "$TS,$EVENT,$ROOT_HASH,git-push-fail,$remote" >> "$LEDGER" 2>/dev/null || true
-    fi
-  fi
-done
-echo "[$TS] 三远端推送流程完成"
