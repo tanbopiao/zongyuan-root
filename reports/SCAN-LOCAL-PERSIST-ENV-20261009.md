@@ -6,6 +6,22 @@
 
 ---
 
+## 〇、当前实例运行时环境实测（ps/ss/env 实测）
+
+| 项 | 实测值 |
+|---|---|
+| 主机 | Huawei Cloud EulerOS 3.0 **aarch64**，内核 6.6.0-72，容器实例（主机名 nacre-2026-10-09-*） |
+| CPU/内存/磁盘 | 2 核 / 7.8Gi（可用 7.0Gi）/ 磁盘 30G（已用 786M，3%） |
+| 运行进程 | 仅 CodeArts 自身：`agentkernel :9800(127.0.0.1)`、`python3 -m src.main :9803(169.254.1.1)`，另有 2 个 rsync 僵尸进程 |
+| 监听端口 | **仅 9800/9803** —— 本实例无任何 zongyuan 服务（memory_gateway 8077 / anchor 8006 / ance 8002 均未运行） |
+| 运行时 | Python 3.12.5、git、curl、node v22；JAVA/MAVEN 可用 |
+| 工作区 | `/workspace/` 仅含 `.codeartsdoer`（agent 记忆/技能）与 `zongyuan-root-sync`（工作克隆） |
+| 环境变量键 | CODEAGENT_*/OPENCODE/AGENTARTS_RUNTIME_PORT/SCENARIO 等 CodeArts 运行时变量 |
+
+**结论**：当前实例 = CodeArts 沙箱（只读工作副本 + agent 运行时）。仓库内 supervisord/llm/node_registry 配置描述云端实例，在本实例**均未部署/未运行**；zongyuan 服务如需在本实例验证须手动启动（且路径基准需先适配，见§三建议3）。
+
+---
+
 ## 一、本地持久层盘点
 
 | 模块 | 路径 | 实测大小 | 实测文件数 | 说明 |
@@ -22,7 +38,9 @@
 
 **持久层合计：约 145MB / 158 文件**（不含 memory_index/HASH-LEDGER 单体文件）。
 
-## 二、实例环境配置盘点
+## 二、实例环境配置盘点（仓库内配置=云端部署基准）
+
+> **范围澄清（2026-10-09 复核）**：本节盘点的是**仓库内配置文件的内容**，这些文件描述的是**云端部署基准**（/home/user/ZONGYUAN-ROOT + 123.207.202.158），并非当前实例正在运行的配置。当前实例运行时状态见第〇章。持久层文件本身（第一章）均为本实例本地真实文件（du/find 实测）。
 
 ### 2.1 代码托管远端
 - `origin` → https://atomgit.com/zongyuangen/zongyuan-root-sync.git（**仅此一个 remote**）
