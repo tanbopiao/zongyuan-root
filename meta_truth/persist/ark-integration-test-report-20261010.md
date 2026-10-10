@@ -107,3 +107,12 @@ curl https://ark.cn-beijing.volces.com/api/v3/chat/completions \
 - **修复**：删除冗余 `import time`（备份 `wrapper.py.bak-timebug-20261010`），重启 `yuanji-wrapper.service`
 - **验证**：带 `X-DID: DID-BR-000002` 鉴权 → HTTP 200，真实回复元极恒一自治内核身份；无鉴权 → 401（鉴权拦截正常）
 - **边界**：读取/诊断为巡检，修复属用户明确授权；改前已备份可回退
+
+---
+
+## 八、云端原生执行闭环打通（2026-10-10）
+
+- **真相修正**：此前多轮核验判定"云端未消费"实为误判——核验只查飞书共识区，而云端消费回执只写本地 truth.db
+- **关键事实**：记忆网关（www.huodouai.com/api/report/truth）= 云端 9001 gateway_server，数据库 = `/www/wwwroot/huodouai.com/zhongshu/data/truth/truth.db`（同库）；DIRECTIVE 种子 24 条全部落库；`directive_consumer.py` 每小时已消费 23 条（consumed_at 可见，13:00 消费 SPAWN V3）；工单 23 个已生成；`ticket_executor.py` 决策引擎 ≥90 分自动执行
+- **修复**：新增 `/usr/local/bin/feishu_consume_sync.py` 增量回写 KERNEL.CONSUME.* → 飞书共识区 tbl9QxL35rwA16eS（按 key 查重幂等，状态文件 last_seq 增量）；cron `5 * * * *`
+- **验证**：首跑回写 11 条；端到端测试投喂 TEST-CLOSED-LOOP 种子 → 消费 1 条 → 回写 1 条 → 共识区出现 KERNEL.CONSUME.TEST-CLOSED-LOOP.20261010 痕迹
