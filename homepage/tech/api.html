@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="canonical" href="https://www.huodouai.com/tech/api.html">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>API 文档 · 火斗云智AIOS</title>
+<link rel="icon" href="/assets/aios-logo.png">
+<meta name="description" content="ZONGYUAN-ROOT公开API文档：试用网关智能路由、DAL部署仲裁、记忆网关真值上报">
+</head>
+<body>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#d4af37;--bg:#0a0a0f;--card:#12121a;--border:rgba(212,175,55,.2);--txt:#eee;--dim:#888;--code:#1a1a24}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:url('/assets/dragon-pattern.webp') center/cover no-repeat fixed;opacity:.2}
+.header{position:sticky;top:0;background:rgba(10,10,15,.95);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:10}
+.header img{width:28px;height:28px;border-radius:50%}
+.header .t{color:var(--gold);font-weight:700;font-size:15px}
+.header .sp{flex:1}
+.header a{color:var(--dim);text-decoration:none;font-size:12px;padding:6px 10px;border-radius:6px;transition:.2s}
+.header a:hover,.header a.on{color:var(--gold);border-bottom:1px solid var(--gold)}
+.wrap{max-width:920px;margin:0 auto;padding:24px 16px 60px}
+.hero{padding:20px 0 10px}
+.hero h1{font-size:26px;background:linear-gradient(135deg,var(--gold),#f4d03f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.hero p{color:var(--dim);font-size:13px}
+.api{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px}
+.api .head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.api .m{font-family:monospace;font-size:12px;padding:3px 10px;border-radius:6px}
+.api .m.get{background:rgba(46,204,113,.15);color:#2ecc71}
+.api .m.post{background:rgba(212,175,55,.15);color:var(--gold)}
+.api h3{font-size:15px;color:var(--gold);flex:1}
+.api .desc{font-size:12px;color:var(--dim);line-height:1.8;margin-bottom:10px}
+.api .route{font-family:monospace;font-size:12px;background:var(--code);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;white-space:pre-wrap;word-break:break-all;color:#e8d9a0}
+.api pre{font-family:monospace;font-size:11px;background:var(--code);border:1px solid var(--border);border-radius:8px;padding:12px;overflow-x:auto;color:#c9d4e3;line-height:1.6}
+.api .t{font-size:11px;color:var(--gold);margin:10px 0 4px}
+table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed}
+th,td{border:1px solid var(--border);padding:7px 9px;font-size:11px;text-align:left;color:var(--dim);word-break:break-all}
+th{color:var(--gold);background:rgba(212,175,55,.06);font-weight:600}
+td code{color:#e8d9a0;font-family:monospace}
+.foot{text-align:center;margin-top:40px;padding:20px;color:var(--dim);font-size:11px;border-top:1px solid var(--border)}
+.foot .anchor{color:var(--gold)}
+</style>
+<div class="header">
+<img src="/assets/aios-logo.png"><span class="t">火斗云智 AIOS</span><span class="sp"></span>
+<a href="/">主页</a><a href="/products.html">产品</a><a href="/tech/" class="on">技术</a><a href="/status.html">状态</a>
+</div>
+<div class="wrap">
+<div class="hero"><h1>API 文档</h1><p>公开接口规范：试用网关智能路由 · DAL 部署仲裁 · 记忆网关真值上报。所有接口均要求 X-DID 身份头。</p></div>
+
+<div class="api">
+<div class="head"><span class="m post">POST</span><h3>试用网关 · 智能路由</h3></div>
+<div class="desc">官网试用通道核心接口：体系内问题（知识卡/真值库/语义向量）毫秒级本地直答，体系外问题自动转发外部推理，外部不可用时降级本地 1.5B。</div>
+<div class="route">POST https://www.huodouai.com/try/chat
+Headers: Content-Type: application/json · X-DID: DID-BR-000002</div>
+<div class="t">请求体</div>
+<pre>{"messages":[{"role":"user","content":"什么是联邦记忆池"}]}</pre>
+<div class="t">响应体</div>
+<pre>{
+  "ok": true,
+  "reply": "联邦记忆池（SFMP）是ZONGYUAN-ROOT的多节点语义记忆同步系统…",
+  "source": "knowledge-card | semantic | ark-external | local-1.5b-fallback",
+  "elapsed_ms": 0,
+  "锚定": "Ω₀⊂⊙∞⊂Ω"
+}</pre>
+<table><colgroup><col style="width:22%"><col style="width:38%"><col style="width:40%"></colgroup>
+<tr><th>字段</th><th>说明</th><th>取值</th></tr>
+<tr><td>source</td><td>回答来源，标识命中层级</td><td><code>knowledge-card</code> 知识卡 0ms<br><code>semantic</code> 语义向量检索 ~0.5s<br><code>ark-external</code> 外部推理 ~30s<br><code>local-1.5b-fallback</code> 应急降级</td></tr>
+<tr><td>elapsed_ms</td><td>响应耗时</td><td>毫秒</td></tr>
+<tr><td>限流</td><td>每 IP 10 分钟 5 次</td><td>超出返回 429</td></tr></table>
+</div>
+
+<div class="api">
+<div class="head"><span class="m get">GET</span><h3>DAL 部署仲裁层 · 健康检查</h3></div>
+<div class="desc">DAL（Deployment Arbitration Layer）是云端原子发布仲裁网关：X-DID 动态认证、软链原子发布、一键回滚、配置片段校验、端口池分配。健康检查公开可读。</div>
+<div class="route">GET https://www.huodouai.com/dal/health</div>
+<div class="t">响应体</div>
+<pre>{"ok": true, "service": "dal-gateway", "version": "V2.0", "port": 18900, "锚定": "Ω₀⊂⊙∞⊂Ω"}</pre>
+</div>
+
+<div class="api">
+<div class="head"><span class="m post">POST</span><h3>DAL 部署仲裁层 · 原子发布</h3></div>
+<div class="desc">节点通过统一客户端 <code>dal-deploy</code> 发起部署/回滚/配置/端口分配/工单投喂，由 DAL 仲裁执行并记账。</div>
+<div class="route">POST https://www.huodouai.com/dal/deploy
+Headers: Content-Type: application/json · X-DID: DID-BR-000002</div>
+<div class="t">请求体（动作示例）</div>
+<pre>{"action": "deploy", "target": "products.html", "content": "&lt;html&gt;…&lt;/html&gt;"}
+{"action": "rollback", "target": "products.html"}
+{"action": "port_alloc", "app": "try-gateway"}
+{"action": "inbox_push", "key": "…", "value": {"directive_action": "…"}}</pre>
+<div class="t">支持动作</div>
+<table><colgroup><col style="width:28%"><col style="width:72%"></colgroup>
+<tr><th>action</th><th>说明</th></tr>
+<tr><td>deploy</td><td>软链原子发布（版本化，可回滚）</td></tr>
+<tr><td>rollback</td><td>一键回滚上一版本</td></tr>
+<tr><td>config</td><td>nginx 配置片段合并（-t 校验失败自动回滚）</td></tr>
+<tr><td>port_alloc / port_release / port_register</td><td>:18xxx 端口池分配与管理</td></tr>
+<tr><td>did_register / did_revoke</td><td>节点密钥 ↔ DID 注册表联动</td></tr>
+<tr><td>inbox_push / inbox_ack</td><td>执行种子工单投喂与确认</td></tr></table>
+</div>
+
+<div class="api">
+<div class="head"><span class="m post">POST</span><h3>记忆网关 · 真值上报</h3></div>
+<div class="desc">全网真值共识的唯一写入通道：节点将提炼的结构化真值（L0 种子）上报记忆网关，供云端仲裁引擎扫描消费。</div>
+<div class="route">POST https://www.huodouai.com/api/report/truth
+Headers: Content-Type: application/json · X-DID: DID-BR-000002</div>
+<div class="t">请求体（规范要点）</div>
+<pre>{
+  "key": "命名空间.key（禁止 truth- 前缀；执行种子用 KERNEL.EVOLUTION.DIRECTIVE. 前缀）",
+  "value": {"结构化JSON对象（必须为对象，字符串将被拒）"},
+  "truth_type": "meta_law|rule|config|decision|data|creative|risk|protocol|unknown",
+  "did": "DID-BR-000002"
+}</pre>
+<div class="t">响应体</div>
+<pre>{"ok": true, "truth_count": 5211, "seq": 5312, "event_id": "truth-…"}</pre>
+<table><colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+<tr><th>错误</th><th>含义</th></tr>
+<tr><td>401</td><td>缺少/错误 X-DID 头</td></tr>
+<tr><td>value_must_be_object</td><td>value 必须是 JSON 对象</td></tr>
+<tr><td>empty_value_rejected</td><td>旧 content/truth_value 顶层字段已失效</td></tr></table>
+</div>
+
+</div>
+<div class="foot">火斗云智AIOS · ZONGYUAN-ROOT 元极恒一自治体系 · 接口文档与线上行为一致<br><span class="anchor">Ω₀⊂⊙∞⊂Ω</span> · DID-BR-000002</div>
+</body>
+</html>

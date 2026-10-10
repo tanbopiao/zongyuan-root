@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="canonical" href="https://www.huodouai.com/tech/bench.html">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>实测基准 · 火斗云智AIOS</title>
+<link rel="icon" href="/assets/aios-logo.png">
+<meta name="description" content="ZONGYUAN-ROOT实测基准数据：路由延迟对比、语义命中相似度、云端资源占用">
+</head>
+<body>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#d4af37;--bg:#0a0a0f;--card:#12121a;--border:rgba(212,175,55,.2);--txt:#eee;--dim:#888}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:url('/assets/dragon-pattern.webp') center/cover no-repeat fixed;opacity:.2}
+.header{position:sticky;top:0;background:rgba(10,10,15,.95);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:10}
+.header img{width:28px;height:28px;border-radius:50%}
+.header .t{color:var(--gold);font-weight:700;font-size:15px}
+.header .sp{flex:1}
+.header a{color:var(--dim);text-decoration:none;font-size:12px;padding:6px 10px;border-radius:6px;transition:.2s}
+.header a:hover,.header a.on{color:var(--gold);border-bottom:1px solid var(--gold)}
+.wrap{max-width:920px;margin:0 auto;padding:24px 16px 60px}
+.hero{padding:20px 0 10px;text-align:center}
+.hero h1{font-size:26px;background:linear-gradient(135deg,var(--gold),#f4d03f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.hero p{color:var(--dim);font-size:13px}
+.section{margin:26px 0 10px}
+.section h2{color:var(--gold);font-size:15px;display:flex;align-items:center;gap:8px}
+.section h2::after{content:'';flex:1;height:1px;background:var(--border)}
+.section .note{font-size:11px;color:var(--dim);margin:4px 0 8px}
+table{width:100%;border-collapse:collapse;table-layout:fixed;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+th,td{border-bottom:1px solid var(--border);padding:11px 12px;font-size:12px;text-align:left;word-break:break-all}
+th{color:var(--gold);background:rgba(212,175,55,.06);font-weight:600}
+td{color:var(--dim)}
+td b{color:var(--txt)}
+.gold{color:var(--gold)}
+.chart{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}
+#bar{width:100%;height:300px}
+.foot{text-align:center;margin-top:40px;padding:20px;color:var(--dim);font-size:11px;border-top:1px solid var(--border)}
+.foot .anchor{color:var(--gold)}
+@media(max-width:560px){th,td{font-size:11px;padding:8px}}
+</style>
+<div class="header">
+<img src="/assets/aios-logo.png"><span class="t">火斗云智 AIOS</span><span class="sp"></span>
+<a href="/">主页</a><a href="/products.html">产品</a><a href="/tech/" class="on">技术</a><a href="/status.html">状态</a>
+</div>
+<div class="wrap">
+<div class="hero"><h1>实测基准</h1><p>以下全部为真实运行数据（2026-10-10 云端实测），非模拟值。</p></div>
+
+<div class="section"><h2>试用通道 · 四级路由延迟</h2><p class="note">同一体系问题，智能路由按命中层级自动选择最快通道</p></div>
+<table><colgroup><col style="width:26%"><col style="width:22%"><col style="width:52%"></colgroup>
+<tr><th>通道</th><th>实测耗时</th><th>适用场景</th></tr>
+<tr><td><b>知识卡</b><br><span class="gold">knowledge-card</span></td><td><b>0 ms</b></td><td>体系内高频问题（联邦记忆池 / 自治决策 / DAL）本地直答，零外部调用</td></tr>
+<tr><td><b>语义向量检索</b><br><span class="gold">semantic</span></td><td><b>~0.5 s</b></td><td>关键词未覆盖的模糊体系问题（如"魔搭offering怎么定价"），embedding-vision 余弦匹配</td></tr>
+<tr><td><b>外部推理</b><br><span class="gold">ark-external</span></td><td><b>~30 s</b></td><td>体系外/复杂推理（豆包 Seed-2.1-turbo），由门控关键词触发</td></tr>
+<tr><td><b>本地 1.5B 应急</b><br><span class="gold">local-1.5b</span></td><td><b>~42 s</b></td><td>外部 API 不可用时的离线兜底（Qwen2.5-1.5B Q4_K_M，CPU 推理）</td></tr></table>
+
+<div class="section"><h2>语义检索命中质量</h2><p class="note">embedding-vision 2048 维 · 索引 164 条 · 余弦相似度阈值 0.42（2026-10-10 抽样实测）</p></div>
+<table><colgroup><col style="width:40%"><col style="width:20%"><col style="width:40%"></colgroup>
+<tr><th>测试问题</th><th>相似度</th><th>命中真值</th></tr>
+<tr><td>魔搭 offering 什么价格</td><td><b class="gold">0.562</b></td><td>truth.product.zragent-suite.ms-offering</td></tr>
+<tr><td>云端中枢自主决策链路是什么</td><td><b class="gold">0.448</b></td><td>truth.kernel.scheduler.autonomy.lv3</td></tr>
+<tr><td>真值库怎么确权</td><td><b class="gold">0.435</b></td><td>truth.exchange.pipeline.batch2</td></tr>
+<tr><td>DAL 怎么原子发布</td><td><b>0.489</b></td><td>truth.kernel.evolution.pulse（DAL 相关）</td></tr>
+<tr><td>联邦记忆池容灾备份</td><td><b class="gold">0.593</b></td><td>truth.federal.sfmp 核心设计</td></tr></table>
+
+<div class="section"><h2>云端资源占用（2026-10-11 00:00 快照）</h2></div>
+<div class="chart"><div id="bar"></div></div>
+<table><colgroup><col style="width:30%"><col style="width:22%"><col style="width:48%"></colgroup>
+<tr><th>指标</th><th>实测值</th><th>说明</th></tr>
+<tr><td>磁盘占用</td><td><b>68%</b></td><td>含真值库 5000+ 条 + 向量索引 + 7 节点快照（RPO=1h）</td></tr>
+<tr><td>内存占用</td><td><b>44%</b></td><td>3.6GB 可用 · llama.cpp 按需拉起空闲自动卸载</td></tr>
+<tr><td>网关延迟</td><td><b>181 ms</b></td><td>zhongshu 指标采样</td></tr>
+<tr><td>任务闭环率</td><td><b>58%</b></td><td>343 总任务 / 199 完成 / 144 待开始</td></tr>
+<tr><td>云端集群</td><td><b>7 节点</b></td><td>全部在线心跳 · 快照 6786 份</td></tr></table>
+
+<div class="section"><h2>架构能力对照</h2><p class="note">核心机制与对应实现位置</p></div>
+<table><colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+<tr><th>能力</th><th>实现</th></tr>
+<tr><td>原子发布 / 回滚</td><td>DAL 部署仲裁层（软链版本化 + 一键回滚，实测非法配置自动回滚且主配置完好）</td></tr>
+<tr><td>并发请求</td><td>try 网关多线程化（ThreadingHTTPServer），外部慢调用不阻塞其他请求</td></tr>
+<tr><td>语义防漂移</td><td>SM-BS 双向稳态映射 + embedding 向量索引每日重建</td></tr>
+<tr><td>安全确权</td><td>X-DID 认证 + SHA256 哈希 + Merkle 链 + 溯源锚 Ω₀⊂⊙∞⊂Ω</td></tr></table>
+
+</div>
+<div class="foot">火斗云智AIOS · ZONGYUAN-ROOT 元极恒一自治体系 · 基准数据来源：云端实测日志 metrics/run.log + try 网关测试<br><span class="anchor">Ω₀⊂⊙∞⊂Ω</span> · DID-BR-000002</div>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script>
+(function(){
+if(!window.echarts)return;
+var c=echarts.init(document.getElementById("bar"));
+c.setOption({backgroundColor:"transparent",
+tooltip:{trigger:"axis",axisPointer:{type:"shadow"}},
+grid:{left:60,right:20,top:20,bottom:40},
+xAxis:{type:"value",name:"占用 %",axisLabel:{color:"#888",fontSize:10},splitLine:{lineStyle:{color:"#222"}}},
+yAxis:{type:"category",data:["网关延迟(ms)","内存","磁盘"],axisLabel:{color:"#eee",fontSize:11}},
+series:[{type:"bar",data:[{value:181,itemStyle:{color:"#d4af37"}},{value:44,itemStyle:{color:"#7a9c4a"}},{value:68,itemStyle:{color:"#c96a3a"}}],barWidth:22,label:{show:true,position:"right",color:"#eee",fontSize:11}}]});
+window.addEventListener("resize",function(){c.resize()});
+})();
+</script>
+</body>
+</html>
