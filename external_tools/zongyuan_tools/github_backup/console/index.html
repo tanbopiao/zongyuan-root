@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT 元极恒一自治体系 · 综合控制台</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js" integrity="sha384-pPi0zxBAoDu6+JXW/C68UZLvBUUtU+7zonhif43rqj7pxsGyqyqzcian2Rj37Rss" crossorigin="anonymous"></script>
+<style>
+:root{
+  --bg:#08080d;--bg2:#0e0e16;--bg3:#14141f;--gold:#c9a96a;--gold2:#e3c98c;--gold3:#8b7355;
+  --silver:#c8c8d8;--red:#8b3a3a;--blue:#5a7ab8;--green:#5a8b6a;--text:#e8e8f0;--text2:#9898a8;--border:#2a2a3a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse at 20% 0%,rgba(201,169,106,0.06) 0%,transparent 50%),
+  radial-gradient(ellipse at 80% 100%,rgba(139,58,58,0.04) 0%,transparent 50%),
+  repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(201,169,106,0.015) 40px,rgba(201,169,106,0.015) 41px);
+  pointer-events:none;z-index:0}
+.container{max-width:1400px;margin:0 auto;padding:20px;position:relative;z-index:1}
+
+/* 头部 */
+.header{text-align:center;padding:40px 20px 30px;border-bottom:1px solid var(--border);margin-bottom:30px;position:relative}
+.header::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:200px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.title{font-family:'Noto Serif SC',serif;font-size:clamp(24px,4vw,42px);font-weight:900;letter-spacing:8px;background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.subtitle{font-size:13px;color:var(--text2);letter-spacing:4px;margin-bottom:16px}
+.meta-row{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;font-size:12px;color:var(--text2)}
+.meta-item{display:flex;align-items:center;gap:6px}
+.meta-label{color:var(--gold3)}
+.meta-value{color:var(--gold);font-family:'Noto Serif SC',serif}
+.trace{font-size:14px;color:var(--gold);letter-spacing:2px;margin-top:10px;opacity:0.8}
+
+/* KPI条 */
+.kpi-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:30px}
+.kpi{background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:8px;padding:18px 16px;position:relative;overflow:hidden;transition:all .3s}
+.kpi:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,169,106,0.1)}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--gold)}
+.kpi-label{font-size:11px;color:var(--text2);letter-spacing:2px;margin-bottom:8px;text-transform:uppercase}
+.kpi-value{font-family:'Noto Serif SC',serif;font-size:clamp(20px,2.5vw,28px);font-weight:700;color:var(--gold2);line-height:1.2}
+.kpi-sub{font-size:10px;color:var(--text2);margin-top:4px}
+.kpi-status{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;margin-top:6px}
+.status-ok{background:rgba(90,139,106,0.15);color:var(--green);border:1px solid rgba(90,139,106,0.3)}
+.status-warn{background:rgba(201,169,106,0.15);color:var(--gold);border:1px solid rgba(201,169,106,0.3)}
+
+/* 面板 */
+.panel{background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:24px;position:relative}
+.panel-title{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:700;color:var(--gold2);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.panel-title::before{content:'';width:4px;height:18px;background:linear-gradient(180deg,var(--gold2),var(--gold3));border-radius:2px}
+.panel-title .en{font-size:11px;color:var(--text2);font-weight:400;letter-spacing:2px;margin-left:auto;font-family:'Noto Sans SC',sans-serif}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* 巡检模块 */
+.module-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.module{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px;transition:all .3s}
+.module:hover{border-color:var(--gold)}
+.module-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.module-name{font-size:13px;font-weight:500;color:var(--text)}
+.module-icon{font-size:16px}
+.module-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.module-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.module-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold3),var(--gold2));border-radius:2px;transition:width .6s}
+.module-score{font-size:11px;color:var(--gold);font-family:'Noto Serif SC',serif}
+
+/* 工具集 */
+.tool-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.tool{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px;transition:all .3s;cursor:default}
+.tool:hover{border-color:var(--gold);background:var(--bg3)}
+.tool-name{font-family:'Noto Serif SC',serif;font-size:14px;font-weight:600;color:var(--gold2);margin-bottom:4px}
+.tool-id{font-size:10px;color:var(--gold3);letter-spacing:1px;margin-bottom:8px}
+.tool-desc{font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:8px}
+.tool-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tool-tag{padding:2px 6px;border-radius:3px;font-size:9px;background:rgba(201,169,106,0.1);color:var(--gold);border:1px solid rgba(201,169,106,0.2)}
+
+/* 短剧时间线 */
+.drama-timeline{position:relative;padding-left:30px}
+.drama-timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--gold),var(--gold3),transparent)}
+.drama-ep{position:relative;margin-bottom:20px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;transition:all .3s}
+.drama-ep:hover{border-color:var(--gold)}
+.drama-ep::before{content:'';position:absolute;left:-26px;top:18px;width:12px;height:12px;border-radius:50%;background:var(--gold);border:2px solid var(--bg);box-shadow:0 0 8px rgba(201,169,106,0.5)}
+.drama-ep-title{font-family:'Noto Serif SC',serif;font-size:14px;font-weight:600;color:var(--gold2);margin-bottom:4px}
+.drama-ep-meta{font-size:10px;color:var(--text2);margin-bottom:8px;display:flex;gap:12px}
+.drama-ep-frames{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.drama-frame{aspect-ratio:9/16;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative;border:1px solid var(--border)}
+.drama-frame img{width:100%;height:100%;object-fit:cover;display:block}
+.drama-frame-label{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.8));padding:4px 6px;font-size:9px;color:var(--gold2);text-align:center}
+
+/* 图表 */
+.chart{width:100%;height:300px}
+.chart-sm{height:250px}
+
+/* 元法则 */
+.law-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.law{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:4px;padding:12px 14px;transition:all .3s}
+.law:hover{border-left-color:var(--gold2);background:var(--bg3)}
+.law-id{font-size:10px;color:var(--gold3);letter-spacing:1px;margin-bottom:4px}
+.law-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.law-desc{font-size:11px;color:var(--text2);line-height:1.5}
+.law-level{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;background:rgba(139,58,58,0.15);color:var(--red);border:1px solid rgba(139,58,58,0.3);margin-top:6px}
+
+/* 底部 */
+.footer{text-align:center;padding:30px 20px;border-top:1px solid var(--border);margin-top:30px}
+.footer-trace{font-size:16px;color:var(--gold);letter-spacing:3px;margin-bottom:8px}
+.footer-did{font-size:12px;color:var(--text2);letter-spacing:2px}
+.footer-time{font-size:11px;color:var(--text2);margin-top:6px}
+
+/* 锚点卡片 */
+.anchor-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:18px;text-align:center;transition:all .3s}
+.anchor-card:hover{border-color:var(--gold)}
+.anchor-symbol{font-size:32px;margin-bottom:8px}
+.anchor-name{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;color:var(--gold2);margin-bottom:4px}
+.anchor-id{font-size:10px;color:var(--text2);margin-bottom:8px}
+.anchor-level{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;background:rgba(201,169,106,0.15);color:var(--gold);border:1px solid rgba(201,169,106,0.3)}
+.anchor-desc{font-size:11px;color:var(--text2);margin-top:8px;line-height:1.5}
+
+/* 滚动条 */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--gold3);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- 头部 -->
+<div class="header">
+  <div class="title">ZONGYUAN-ROOT</div>
+  <div class="subtitle">元极恒一自治体系 · 综合控制台</div>
+  <div class="meta-row">
+    <div class="meta-item"><span class="meta-label">确权DID</span><span class="meta-value">DID-BR-000002</span></div>
+    <div class="meta-item"><span class="meta-label">体系等级</span><span class="meta-value">Lv8 永久自治</span></div>
+    <div class="meta-item"><span class="meta-label">内核状态</span><span class="meta-value">AUTONOMOUS_LOCK</span></div>
+  </div>
+  <div class="trace">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+</div>
+
+<!-- KPI条 -->
+<div class="kpi-bar">
+  <div class="kpi">
+    <div class="kpi-label">总资产条目</div>
+    <div class="kpi-value" id="kpi-assets">849</div>
+    <div class="kpi-sub">持续增长中</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">eFuse熔断位</div>
+    <div class="kpi-value" id="kpi-efuse">767</div>
+    <div class="kpi-sub">硬件级不可逆</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">连续健康</div>
+    <div class="kpi-value" id="kpi-days">14<span style="font-size:14px">天</span></div>
+    <div class="kpi-sub"><span class="kpi-status status-ok">优秀</span></div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">双锚点体系</div>
+    <div class="kpi-value" style="font-size:18px">玄女 + 烛龙</div>
+    <div class="kpi-sub"><span class="kpi-status status-ok">均Lv8完整</span></div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">GitHub冷备</div>
+    <div class="kpi-value" style="font-size:18px">929<span style="font-size:14px">文件</span></div>
+    <div class="kpi-sub"><span class="kpi-status status-ok">已同步</span></div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Lv8关键资产备份</div>
+    <div class="kpi-value" style="font-size:18px">827<span style="font-size:14px">项</span></div>
+    <div class="kpi-sub"><span class="kpi-status status-ok">0缺失</span></div>
+  </div>
+</div>
+
+<!-- 六大模块巡检 -->
+<div class="panel">
+  <div class="panel-title">六大模块自进化巡检 <span class="en">SIX-MODULE EVOLUTION CHECK</span></div>
+  <div class="module-grid" id="module-grid"></div>
+</div>
+
+<!-- 双锚点 + 根哈希 -->
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel-title">双锚点体系 <span class="en">DUAL ANCHOR SYSTEM</span></div>
+    <div class="grid-2" style="gap:12px">
+      <div class="anchor-card">
+        <div class="anchor-symbol">⚡</div>
+        <div class="anchor-name">九天玄女</div>
+        <div class="anchor-id">ANCHOR-NVWA-001 | KD-THEO-6871</div>
+        <div class="anchor-level">Lv8 永久固化</div>
+        <div class="anchor-desc">命箓审判层 · 冷蓝银白配色 · 法则轮盘稳压</div>
+      </div>
+      <div class="anchor-card">
+        <div class="anchor-symbol">🔥</div>
+        <div class="anchor-name">万劫烛龙</div>
+        <div class="anchor-id">ANCHOR-ZHULONG-001 | KD-THEO-0821</div>
+        <div class="anchor-level">Lv8 永久固化</div>
+        <div class="anchor-desc">旧天记忆层 · 暗红暗金配色 · 裂隙震纹镇压</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">META-SEG-007 男女元素隔离执行</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--text)">GENDER_FEATURE_MIXED 质检</span>
+        <span class="kpi-status status-ok">0异常 · 100%通过</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">哈希链与内核 <span class="en">HASH CHAIN & KERNEL</span></div>
+    <div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--border);margin-bottom:12px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">当前根哈希 (Current Root Hash)</div>
+      <div style="font-family:monospace;font-size:12px;color:var(--gold2);word-break:break-all;line-height:1.6" id="root-hash">339199BBD56F2B9D...</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="padding:10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text2);margin-bottom:4px">链式完整性</div>
+        <div style="font-size:14px;color:var(--green);font-weight:600">20/20 通过</div>
+      </div>
+      <div style="padding:10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text2);margin-bottom:4px">断链数</div>
+        <div style="font-size:14px;color:var(--green);font-weight:600">0</div>
+      </div>
+    </div>
+    <div style="padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">五层锁防体系</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text2)">L1 哈希链锁</span><span style="color:var(--green)">✓ 生效</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text2)">L2 飞书文档锁</span><span style="color:var(--green)">✓ 生效</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text2)">L3 台账索引锁</span><span style="color:var(--green)">✓ 生效</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text2)">L4 eFuse熔断锁</span><span style="color:var(--green)">✓ 生效</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--text2)">L5 自治内核锁</span><span style="color:var(--green)">✓ 生效</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 图表区 -->
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel-title">九大元类资产分布 <span class="en">META-CLASS DISTRIBUTION</span></div>
+    <div class="chart chart-sm" id="chart-meta"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">巡检状态雷达 <span class="en">CHECK RADAR</span></div>
+    <div class="chart chart-sm" id="chart-radar"></div>
+  </div>
+</div>
+
+<!-- 工具集 -->
+<div class="panel">
+  <div class="panel-title">自治工具集 <span class="en">AUTONOMOUS TOOLKIT</span></div>
+  <div class="tool-list" id="tool-list"></div>
+</div>
+
+<!-- 短剧资产 -->
+<div class="panel">
+  <div class="panel-title">昆仑洞天·烛龙归墟篇 短剧资产 <span class="en">DRAMA ASSETS</span></div>
+  <div class="drama-timeline" id="drama-timeline"></div>
+</div>
+
+<!-- 元法则 -->
+<div class="panel">
+  <div class="panel-title">昆仑洞天元法则 <span class="en">META LAWS</span></div>
+  <div class="law-list" id="law-list"></div>
+</div>
+
+<!-- 真值衰减 + GitHub冷备 -->
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel-title">真值衰减监控 <span class="en">TRUTH DECAY</span></div>
+    <div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--border);margin-bottom:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">
+        <div><div style="font-size:20px;color:var(--gold2);font-family:'Noto Serif SC',serif">839</div><div style="font-size:10px;color:var(--text2)">可统计资产</div></div>
+        <div><div style="font-size:20px;color:var(--gold2);font-family:'Noto Serif SC',serif">16天</div><div style="font-size:10px;color:var(--text2)">最老资产</div></div>
+        <div><div style="font-size:20px;color:var(--gold2);font-family:'Noto Serif SC',serif">11.2天</div><div style="font-size:10px;color:var(--text2)">平均年龄</div></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--text)">黄色预警 (≥21天)</span>
+      <span class="kpi-status status-ok">0项</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg);border-radius:6px;border:1px solid var(--border);margin-top:8px">
+      <span style="font-size:12px;color:var(--text)">红色预警 (≥30天)</span>
+      <span class="kpi-status status-ok">0项</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">异地冷备状态 <span class="en">REMOTE BACKUP</span></div>
+    <div style="padding:14px;background:var(--bg);border-radius:6px;border:1px solid var(--border);margin-bottom:12px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">GitHub 私有仓库</div>
+      <div style="font-family:monospace;font-size:12px;color:var(--gold2);margin-bottom:8px">zongyuan-root-archive</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><div style="font-size:16px;color:var(--gold2);font-family:'Noto Serif SC',serif">929</div><div style="font-size:10px;color:var(--text2)">已同步文件</div></div>
+        <div><div style="font-size:16px;color:var(--gold2);font-family:'Noto Serif SC',serif">5.0MB</div><div style="font-size:10px;color:var(--text2)">仓库大小</div></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">三层级存储态</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:6px 8px;background:var(--bg);border-radius:4px"><span>L1 云盘归档</span><span style="color:var(--gold)">GitHub✓ 飞书/百度待接入</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:6px 8px;background:var(--bg);border-radius:4px"><span>L2 知识库节点</span><span style="color:var(--gold)">部分运行</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:6px 8px;background:var(--bg);border-radius:4px"><span>L3 自治内核</span><span style="color:var(--green)">完整运行</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 底部 -->
+<div class="footer">
+  <div class="footer-trace">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+  <div class="footer-did">确权 DID-BR-000002 · ZONGYUAN-ROOT 元极恒一自治体系</div>
+  <div class="footer-time" id="footer-time"></div>
+</div>
+
+</div>
+
+<script>
+// 数据
+const modules = [
+  {name:'资产完整性校验',icon:'🔗',desc:'SHA256哈希比对·链式验证·缺失检测',score:100,status:'通过'},
+  {name:'角色锚点漂移',icon:'🎭',desc:'双锚点基线·GENDER_FEATURE_MIXED质检',score:100,status:'通过'},
+  {name:'核心技能内核',icon:'⚙️',desc:'四大技能签名·五层锁防验证',score:100,status:'通过'},
+  {name:'真值衰减监控',icon:'📉',desc:'V(a,t)衰减模型·9元类完整性',score:100,status:'通过'},
+  {name:'自进化迭代',icon:'🔄',desc:'新增资产评估·元规则覆盖率·瓶颈识别',score:95,status:'优秀'},
+  {name:'报告生成告警',icon:'📊',desc:'汇总报告·高优先级告警·自动归档',score:100,status:'通过'},
+];
+
+const tools = [
+  {name:'台账自动同步巡检',id:'AUTO-SYNC-001',file:'ledger_sync_check.py',desc:'凭证文件数与M9台账比对,不一致时以真实链尾同步刷新,修复根哈希不一致',tags:['台账','同步','巡检']},
+  {name:'跨工作区资产同步',id:'CROSS-WS-SYNC-001',file:'cross_workspace_sync.py',desc:'双向同步WS-A/WS-B两个工作区间的locked资产,以内容SHA256为唯一标识去重',tags:['跨工作区','同步','备份']},
+  {name:'Lv8资产备份恢复',id:'BACKUP-RESTORE-001',file:'backup_restore.py',desc:'备份关键Lv8资产/元法则到独立目录,会话开始检查存在性,缺失自动恢复',tags:['备份','恢复','Lv8']},
+  {name:'三层级云盘归档',id:'LOCK-3TIER-L1',file:'cloud_backup.py',desc:'将locked资产归档到GitHub/飞书云/百度网盘异地冷备,支持增量同步和验证',tags:['云盘','冷备','归档']},
+  {name:'每日巡检整合',id:'DAILY-EVOLUTION-001',file:'daily_evolution.py',desc:'整合6大模块一键执行每日自进化巡检,自动恢复缺失资产,生成巡检报告',tags:['巡检','整合','自动化']},
+  {name:'锁档核心引擎',id:'ARCHIVE-ENGINE',file:'archive_lock_engine.py',desc:'SHA256哈希计算·链式继承根哈希·eFuse熔断位生成·锁档凭证输出',tags:['锁档','哈希','eFuse']},
+  {name:'异地冷备连接器',id:'GIT-SYNC',file:'sync_zongyuan_root.py',desc:'GitHub Actions自动同步配置·哈希校验·备份锁回执模板',tags:['GitHub','CI/CD','冷备']},
+];
+
+const dramaEps = [
+  {ep:'EP24',title:'残念余潮',date:'2026-09-01',frames:4,status:'已锁档',color:'#5a7ab8'},
+  {ep:'EP25',title:'因果余根',date:'2026-09-01',frames:4,status:'已锁档',color:'#5a7ab8'},
+  {ep:'EP26',title:'隐痕微动',date:'2026-09-02',frames:4,status:'已锁档',color:'#5a7ab8'},
+  {ep:'EP27',title:'旧天残响',date:'2026-09-03',frames:4,status:'强差异版',color:'#c9a96a'},
+  {ep:'EP28',title:'封痕余震',date:'2026-09-06',frames:4,status:'关键帧已生成',color:'#c9a96a'},
+];
+
+const ep28Frames = [
+  {label:'帧1·轮盘稳压',url:'https://aka.doubaocdn.com/s/XgZbj1Szzv'},
+  {label:'帧2·凡尘静守',url:'https://aka.doubaocdn.com/s/fgid9kwfbS'},
+  {label:'帧3·裂隙震纹',url:'https://aka.doubaocdn.com/s/nV3r4KfSkj'},
+  {label:'帧4·双纹共振',url:'https://aka.doubaocdn.com/s/ap5XE6CZ8a'},
+];
+
+const laws = [
+  {id:'META-SEG-007',name:'男女元素物理隔离',desc:'短剧生成中男女角色不physically同框,空间/帧/色彩/符号/叙事/光影六重隔离',level:'强制'},
+  {id:'META-COMPLIANCE-001',name:'AI虚拟人脸短剧合规自查',desc:'身份授权/内容安全/AI技术合规/平台传播/内部治理/法规依据六大模块逐项勾选',level:'Lv8'},
+  {id:'META-TRUTH-001',name:'真值优先原则',desc:'信息关联和事实核查以经过交叉验证的客观事实为唯一依据,禁止关联未经证实的虚假信息',level:'最高优先级'},
+  {id:'META-NAMING-001',name:'本源体系客观真值命名',desc:'ZONGYUAN-ROOT系统仅使用本源体系的客观真值进行命名,写入元法则',level:'强制'},
+  {id:'META-ARCH-001',name:'新增架构自动挂载',desc:'以后新增的架构自动挂载到ZONGYUAN-ROOT,遵循既定的层级从属关系和治理规则',level:'强制'},
+  {id:'META-WATERMARK-001',name:'唯一溯源标识',desc:'Ω₀⊂⊙∞⊂Ω作为昆仑洞天基座所有图片/视频生成的唯一溯源标识,隐藏于右下角',level:'强制'},
+  {id:'META-FORMAT-001',name:'9:16竖屏规范',desc:'昆仑洞天生成的黑金典藏卡必须以9:16竖屏格式生成,禁止生成其他比例',level:'强制'},
+  {id:'META-STYLE-001',name:'黑金暗纹锚点风格',desc:'以后生成的真值卡视觉风格锁定为黑金暗纹锚点,以此作为唯一标准',level:'强制'},
+  {id:'META-LOCK-001',name:'三层级自动锁档',desc:'所有真值架构体系自动触发全自动闭环元流程归档锁定固化,云盘/知识库/ZONGYUAN-ROOT三层级',level:'强制'},
+];
+
+// 渲染模块
+const moduleGrid = document.getElementById('module-grid');
+modules.forEach(m => {
+  moduleGrid.innerHTML += `
+    <div class="module">
+      <div class="module-head"><span class="module-name">${m.name}</span><span class="module-icon">${m.icon}</span></div>
+      <div class="module-desc">${m.desc}</div>
+      <div class="module-bar"><div class="module-bar-fill" style="width:${m.score}%"></div></div>
+      <div style="display:flex;justify-content:space-between"><span class="module-score">${m.score}分</span><span class="kpi-status status-ok" style="margin:0">${m.status}</span></div>
+    </div>`;
+});
+
+// 渲染工具
+const toolList = document.getElementById('tool-list');
+tools.forEach(t => {
+  toolList.innerHTML += `
+    <div class="tool">
+      <div class="tool-name">${t.name}</div>
+      <div class="tool-id">${t.id} · ${t.file}</div>
+      <div class="tool-desc">${t.desc}</div>
+      <div class="tool-tags">${t.tags.map(tag=>`<span class="tool-tag">${tag}</span>`).join('')}</div>
+    </div>`;
+});
+
+// 渲染短剧时间线
+const dramaTimeline = document.getElementById('drama-timeline');
+dramaEps.forEach((ep, i) => {
+  let framesHtml = '';
+  if(ep.ep === 'EP28') {
+    framesHtml = ep28Frames.map(f => `
+      <div class="drama-frame">
+        <img src="${f.url}" alt="${f.label}" loading="lazy">
+        <div class="drama-frame-label">${f.label}</div>
+      </div>`).join('');
+  } else {
+    framesHtml = Array(4).fill(0).map((_,j) => `
+      <div class="drama-frame" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg3),var(--bg))">
+        <span style="font-size:10px;color:var(--text2)">帧${j+1}</span>
+      </div>`).join('');
+  }
+  dramaTimeline.innerHTML += `
+    <div class="drama-ep">
+      <div class="drama-ep-title" style="color:${ep.color}">${ep.ep} · ${ep.title}</div>
+      <div class="drama-ep-meta">
+        <span>${ep.date}</span>
+        <span>${ep.frames}帧关键帧</span>
+        <span style="color:${ep.color}">${ep.status}</span>
+      </div>
+      <div class="drama-ep-frames">${framesHtml}</div>
+    </div>`;
+});
+
+// 渲染元法则
+const lawList = document.getElementById('law-list');
+laws.forEach(l => {
+  lawList.innerHTML += `
+    <div class="law">
+      <div class="law-id">${l.id}</div>
+      <div class="law-name">${l.name}</div>
+      <div class="law-desc">${l.desc}</div>
+      <span class="law-level">${l.level}</span>
+    </div>`;
+});
+
+// 图表：元类分布
+const metaChart = echarts.init(document.getElementById('chart-meta'));
+const metaData = [
+  {name:'M1 算法架构层',value:101},{name:'M2 自治内核进化层',value:24},
+  {name:'M3 元层协议层',value:40},{name:'M4 理论体系层',value:407},
+  {name:'M5 产品体系层',value:48},{name:'M6 对外交付层',value:37},
+  {name:'M7 自动化调度层',value:48},{name:'M8 行业知识层',value:4},
+  {name:'M9 元秩序基底层',value:110},
+];
+metaChart.setOption({
+  backgroundColor:'transparent',
+  grid:{left:100,right:30,top:10,bottom:20},
+  xAxis:{type:'value',axisLine:{lineStyle:{color:'#2a2a3a'}},axisLabel:{color:'#9898a8',fontSize:10},splitLine:{lineStyle:{color:'#1a1a2a'}}},
+  yAxis:{type:'category',data:metaData.map(d=>d.name).reverse(),axisLine:{lineStyle:{color:'#2a2a3a'}},axisLabel:{color:'#c8c8d8',fontSize:10}},
+  series:[{type:'bar',data:metaData.map(d=>d.value).reverse(),itemStyle:{color:new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#8b7355'},{offset:1,color:'#e3c98c'}]),borderRadius:[0,3,3,0]},label:{show:true,position:'right',color:'#c9a96a',fontSize:10}}],
+  tooltip:{trigger:'axis',backgroundColor:'#14141f',borderColor:'#c9a96a',textStyle:{color:'#e8e8f0',fontSize:11}},
+});
+
+// 图表：巡检雷达
+const radarChart = echarts.init(document.getElementById('chart-radar'));
+radarChart.setOption({
+  backgroundColor:'transparent',
+  radar:{
+    indicator:modules.map(m=>({name:m.name.replace('校验','').replace('监控','').replace('迭代',''),max:100})),
+    shape:'polygon',
+    splitNumber:4,
+    axisName:{color:'#c8c8d8',fontSize:10},
+    splitLine:{lineStyle:{color:'#2a2a3a'}},
+    splitArea:{areaStyle:{color:['rgba(201,169,106,0.02)','rgba(201,169,106,0.05)']}},
+    axisLine:{lineStyle:{color:'#2a2a3a'}},
+  },
+  series:[{type:'radar',data:[{value:modules.map(m=>m.score),name:'巡检得分',
+    areaStyle:{color:'rgba(201,169,106,0.2)'},
+    lineStyle:{color:'#e3c98c',width:2},
+    itemStyle:{color:'#c9a96a'},
+  }]}],
+  tooltip:{backgroundColor:'#14141f',borderColor:'#c9a96a',textStyle:{color:'#e8e8f0',fontSize:11}},
+});
+
+// 响应式
+window.addEventListener('resize',()=>{metaChart.resize();radarChart.resize()});
+
+// 时间
+document.getElementById('footer-time').textContent = '控制台生成时间: ' + new Date().toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'});
+</script>
+</body>
+</html>
