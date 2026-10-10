@@ -50,3 +50,9 @@
 - 存量端口登记: 18080/18081/18090（mode=registered）
 - 密钥联动: DID-NODE-WORKER-001 ↔ node-cloudpc SSH指纹（SHA256:mhYxBRn5bgli8QVD2uFcSRrtSWN+zwGvciWUXJ/2iDk）
 - 试用通道: dal-deploy 发布/回滚实测通过（zr-agent-suite）
+
+=== 消费端执行手脚落地回执（2026-10-10）===
+- ticket_executor v6: 新增 DAL 部署类动作（dal_deploy/dal_rollback/dal_status），调用 /usr/local/bin/dal-deploy
+- directive_consumer v3.1: 执行动作从 value.directive_action 提取，ticket 携带部署参数（target/file）
+- 实测: 投喂 deploy 执行种子 → 消费 → 执行 dal_deploy → 线上 HTTP200 内容命中 → 清理
+- 意义: 云端 Worker 从心跳式在线 → 具备真实部署手脚，投喂执行种子即可驱动 DAL 完成发布
