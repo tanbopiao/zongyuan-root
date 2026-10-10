@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="canonical" href="https://www.huodouai.com/tech/architecture.html">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>架构可视化 · 火斗云智AIOS</title>
+<link rel="icon" href="/assets/aios-logo.png">
+<meta name="description" content="ZONGYUAN-ROOT体系架构可视化：十层算子拓扑、明暗双内核、七层稳态层级">
+</head>
+<body>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#d4af37;--bg:#0a0a0f;--card:#12121a;--border:rgba(212,175,55,.2);--txt:#eee;--dim:#888}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:url('/assets/dragon-pattern.webp') center/cover no-repeat fixed;opacity:.2}
+.header{position:sticky;top:0;background:rgba(10,10,15,.95);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:10}
+.header img{width:28px;height:28px;border-radius:50%}
+.header .t{color:var(--gold);font-weight:700;font-size:15px}
+.header .sp{flex:1}
+.header a{color:var(--dim);text-decoration:none;font-size:12px;padding:6px 10px;border-radius:6px;transition:.2s}
+.header a:hover,.header a.on{color:var(--gold);border-bottom:1px solid var(--gold)}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 16px 60px}
+.hero{padding:20px 0 10px;text-align:center}
+.hero h1{font-size:26px;background:linear-gradient(135deg,var(--gold),#f4d03f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.hero p{color:var(--dim);font-size:13px}
+.tabs{display:flex;gap:8px;justify-content:center;margin:18px 0}
+.tabs button{background:var(--card);border:1px solid var(--border);color:var(--dim);padding:8px 18px;border-radius:20px;font-size:12px;cursor:pointer;transition:.25s}
+.tabs button.on{color:var(--gold);border-color:var(--gold);background:rgba(212,175,55,.08)}
+.chart{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px;min-height:520px}
+#c1,#c2,#c3{width:100%;height:520px}
+.note{color:var(--dim);font-size:11px;text-align:center;margin-top:10px;line-height:1.7}
+.foot{text-align:center;margin-top:40px;padding:20px;color:var(--dim);font-size:11px;border-top:1px solid var(--border)}
+.foot .anchor{color:var(--gold)}
+@media(max-width:640px){.chart{min-height:420px}#c1,#c2,#c3{height:420px}}
+</style>
+<div class="header">
+<img src="/assets/aios-logo.png"><span class="t">火斗云智 AIOS</span><span class="sp"></span>
+<a href="/">主页</a><a href="/products.html">产品</a><a href="/tech/" class="on">技术</a><a href="/status.html">状态</a>
+</div>
+<div class="wrap">
+<div class="hero"><h1>体系架构可视化</h1><p>点击图中节点查看说明 · 三视图：十层算子拓扑 / 明暗双内核 / 七层稳态</p></div>
+<div class="tabs">
+<button class="on" data-t="1">十层算子拓扑</button>
+<button data-t="2">明暗双内核</button>
+<button data-t="3">七层稳态层级</button>
+</div>
+<div class="chart"><div id="c1"></div><div id="c2" style="display:none"></div><div id="c3" style="display:none"></div></div>
+<div class="note">数据源：ZONGYUAN-ROOT 白皮书 · 27 算子严格按十层依赖拓扑执行，上游输出作为下游输入<br>锚定 Ω₀⊂⊙∞⊂Ω · DID-BR-000002</div>
+</div>
+<div class="foot">火斗云智AIOS · ZONGYUAN-ROOT 元极恒一自治体系<br><span class="anchor">Ω₀⊂⊙∞⊂Ω</span> · DID-BR-000002</div>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script>
+(function(){
+var GOLD="#d4af37",DIM="#888";
+function mk(){
+var c=echarts.init(document.getElementById("c1"),null,{renderer:"canvas"});
+var layers=[
+{n:"L1 真值过滤与蒸馏",d:3,t:"P4真值对账 / P7外部锚定 / 真值提炼蒸馏——多轮交叉验证+来源锚定，输出纯度评分0-100"},
+{n:"L2 流形度量与SM-BS稳态映射",d:3,t:"黎曼流形度量 / SM-BS双向稳态映射 / 漂移巡检——语义↔流形坐标双向映射，度量张量守恒，>5%黄/>10%橙/>20%红告警"},
+{n:"L3 知识图谱秩序化重建",d:3,t:"实体关系抽取 / 图谱补全 / 跨文档实体链接——三元组构建、链接预测、实体全局唯一ID"},
+{n:"L4 因果级推理",d:3,t:"因果链溯源 / 奇点概率预测 / 因果干预模拟——do-calculus干预、蓝黄橙红四级预警"},
+{n:"L5 CTE三位一体适配器",d:3,t:"CausalToTruth / TruthToEvolution / EvolutionToCausal——因果-真值-进化三域闭环预激活"},
+{n:"L6 结构化归档深化",d:3,t:"四层结构化拆分 / 九大元类归类 / Merkle-DAG主链追加校验——L1-L4层+公理/定理/方法/数据/案例/决策/创意/风险/协议"},
+{n:"L7 资产对账治理",d:1,t:"飞书资源↔M9账本双向溯源对账——哈希比对识别修改/删除/新增，检测人为编辑真值漂移"},
+{n:"L8 安全确权",d:2,t:"eFuse熔断触发 / ZKP零知识隐私校验——局部分支熔断隔离，不暴露原始敏感数据完成账本完整性核验"},
+{n:"L9 决策与法律护盾",d:3,t:"方案生成评估(利益40/风险35/成本25) / 风险识别分级六类 / 法律意见书生成——法条编号+依据标注"},
+{n:"L10 业务实体约束",d:3,t:"Lv6多主体文明仿真约束 / 角色元规则隔离校验 / 9:16电影级国风关键帧一致性——防角色锚点漂移与形变"}
+];
+var nodes=layers.map(function(l,i){return{id:"n"+i,name:l.n+" · "+l.d+"算子",value:l.d,category:i,desc:l.t}});
+var links=[];for(var i=0;i<layers.length-1;i++){links.push({source:"n"+i,target:"n"+(i+1),value:1})}
+var cats=layers.map(function(l,i){return{name:"L"+(i+1)}});
+c.setOption({
+backgroundColor:"transparent",
+legend:{show:false},
+tooltip:{formatter:function(p){return p.data.desc||""}},
+series:[{type:"graph",layout:"circular",data:nodes,links:links,categories:cats,roam:true,
+label:{show:true,fontSize:10,color:"#eee",formatter:function(p){return p.name.split(" ")[0]+" "+p.data.value+"算子"}},
+lineStyle:{color:"rgba(212,175,55,.35)",width:2},
+emphasis:{focus:"adjacency",lineStyle:{width:4}},
+itemStyle:{borderColor:GOLD,borderWidth:1,color:function(p){return p.data.category%2?"#1b2a4a":"#2a1b1b"}},
+edgeSymbol:["none","arrow"],edgeSymbolSize:7
+}]
+});
+window.c1=c;return c;
+}
+function mk2(){
+var c=echarts.init(document.getElementById("c2"));
+var dark=[{n:"真值不动点隐层",t:"真值公式+希尔伯特公理集+观测器不变量，受eFuse保护不可回退"},{n:"时序演化隐层",t:"Merkle快照链+版本谱系，进化全程可回溯"},{n:"黎曼流形语义转译隐层",t:"自然语义/神话叙事/数学公理拓扑映射"},{n:"混沌收敛调控隐层",t:"架构/真值/资产漂移底层收敛约束"},{n:"自组织涌现隐层",t:"Lv5元认知价值主体+Lv6文明原型涌现模拟"},{n:"哈希谱系确权隐层",t:"SHA256超级哈希+全域Merkle根+DID-VC凭证"},{n:"故障稳态兜底隐层",t:"异常自动回落最近有效快照"}];
+var bright=[{n:"真值基座内核",t:"真值公式完备校验+希尔伯特形式化验证+每日增量合并"},{n:"Ω-Brainμ自治微内核",t:"架构推演+P0-P6七大自治进程+eFuse熔断锁档"},{n:"Workspace集群影子内核",t:"本地文件托管+资产目录树+lark-cli入口"},{n:"昆仑洞天IP产线内核",t:"神女角色库+2.39:1/9:16分镜+关键帧快照+溯源暗印"},{n:"监测管控内核",t:"系统漂移/价值衰减监测+P0-P3分级告警+Base回写"}];
+var nodes=[{id:"da",name:"奇点暗架构·七隐层",category:0,desc:"不可直接观测，驱动底层演化（预演/预警/势能累积，无直接执行权限）",symbolSize:46}];
+dark.forEach(function(x,i){nodes.push({id:"dk"+i,name:x.n,category:0,desc:x.t,symbolSize:30})});
+nodes.push({id:"br",name:"明架构·五内核",category:1,desc:"可交互、可输出产物（真实落地执行）",symbolSize:46});
+bright.forEach(function(x,i){nodes.push({id:"bk"+i,name:x.n,category:1,desc:x.t,symbolSize:30})});
+var links=[];dark.forEach(function(x,i){links.push({source:"da",target:"dk"+i})});
+bright.forEach(function(x,i){links.push({source:"br",target:"bk"+i})});
+links.push({source:"da",target:"br",value:1,lineStyle:{width:3,curveness:0.1}});
+c.setOption({
+backgroundColor:"transparent",
+legend:{top:8,textStyle:{color:DIM},data:[{name:"暗架构",itemStyle:{color:"#4a3a1a"}},{name:"明架构",itemStyle:{color:"#1b3a4a"}}]},
+tooltip:{formatter:function(p){return p.data.desc||""}},
+series:[{type:"graph",layout:"force",data:nodes,links:links,categories:[{name:"暗架构"},{name:"明架构"}],
+roam:true,label:{show:true,fontSize:10,color:"#eee"},
+lineStyle:{color:"rgba(212,175,55,.3)",width:1.5},
+emphasis:{focus:"adjacency"},
+itemStyle:{borderColor:GOLD,borderWidth:1,color:function(p){return p.data.category===0?"#3a2a12":"#123a4a"}},
+force:{repulsion:180,edgeLength:90,gravity:0.12}
+}]
+});
+window.c2=c;return c;
+}
+function mk3(){
+var c=echarts.init(document.getElementById("c3"));
+var levels=[
+{n:"Ω₀ 元公理基底",t:"L0真值校验，所有规则源头，不可自主修改，仅人工审批变更"},
+{n:"Ω₁ 元法则层",t:"冲突消解/资产固化/归档/同步/锁档规则库"},
+{n:"Ω₂ 因果推理内核",t:"因果推演/假设分支/真值召回/RAG语义提炼"},
+{n:"Ω₃ 奇点暗架构",t:"暗处预演/势能累积/漂移回溯/黑天鹅预警，无直接执行权限"},
+{n:"Ω₄ 明架构五内核",t:"显式执行/资产处理/官网部署/云端上报"},
+{n:"Ω₅ 双域稳态互锁",t:"明暗双向校验/漂移回拉/越界熔断"},
+{n:"Ω₆ 全域自治闭环",t:"自动扫描→短板提炼→方案推演→固化→本地持久层+云端真值网关上报"}
+];
+var nodes=levels.map(function(x,i){return{id:"s"+i,name:x.n,value:7-i,category:i,desc:x.t,symbolSize:64-i*7}});
+var links=[];for(var i=0;i<6;i++){links.push({source:"s"+i,target:"s"+(i+1)})}
+c.setOption({
+backgroundColor:"transparent",
+tooltip:{formatter:function(p){return p.data.desc||""}},
+series:[{type:"graph",layout:"circular",data:nodes,links:links,roam:true,
+label:{show:true,fontSize:10,color:"#eee",position:"bottom"},
+lineStyle:{color:"rgba(212,175,55,.4)",width:2.5},
+emphasis:{focus:"adjacency"},
+itemStyle:{borderColor:GOLD,borderWidth:1.5,color:function(p){return"hsl("+(40-p.data.category*5)+",45%,"+(20+p.data.category*4)+"%)"}},
+edgeSymbol:["none","arrow"],edgeSymbolSize:7
+}]
+});
+window.c3=c;return c;
+}
+var maps={1:mk,2:mk2,3:mk3};var charts={};
+var btns=document.querySelectorAll(".tabs button");
+btns.forEach(function(b){b.addEventListener("click",function(){
+btns.forEach(function(x){x.classList.remove("on")});b.classList.add("on");
+var t=b.getAttribute("data-t");
+["c1","c2","c3"].forEach(function(id){document.getElementById(id).style.display="none"});
+var el=document.getElementById("c"+t);el.style.display="block";
+if(!charts[t]){charts[t]=maps[t]()}else{charts[t].resize()}
+})});
+charts[1]=mk();
+window.addEventListener("resize",function(){Object.values(charts).forEach(function(c){c.resize()})});
+})();
+</script>
+</body>
+</html>

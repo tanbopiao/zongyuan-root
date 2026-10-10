@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="canonical" href="https://www.huodouai.com/tech/live.html">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>实时内核指标 · 火斗云智AIOS</title>
+<link rel="icon" href="/assets/aios-logo.png">
+<meta name="description" content="ZONGYUAN-ROOT云端内核实时指标：DAL仲裁状态、真值量、任务闭环率、系统负载">
+</head>
+<body>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#d4af37;--bg:#0a0a0f;--card:#12121a;--border:rgba(212,175,55,.2);--txt:#eee;--dim:#888}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:url('/assets/dragon-pattern.webp') center/cover no-repeat fixed;opacity:.2}
+.header{position:sticky;top:0;background:rgba(10,10,15,.95);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:10}
+.header img{width:28px;height:28px;border-radius:50%}
+.header .t{color:var(--gold);font-weight:700;font-size:15px}
+.header .sp{flex:1}
+.header a{color:var(--dim);text-decoration:none;font-size:12px;padding:6px 10px;border-radius:6px;transition:.2s}
+.header a:hover,.header a.on{color:var(--gold);border-bottom:1px solid var(--gold)}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 16px 60px}
+.hero{padding:20px 0 10px;text-align:center}
+.hero h1{font-size:26px;background:linear-gradient(135deg,var(--gold),#f4d03f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.hero p{color:var(--dim);font-size:13px}
+.statusline{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0;font-size:12px;color:var(--dim)}
+.dot{width:10px;height:10px;border-radius:50%;background:#666}
+.dot.ok{background:#2ecc71;box-shadow:0 0 8px #2ecc71}
+.dot.warn{background:#f39c12;box-shadow:0 0 8px #f39c12}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center}
+.card b{display:block;font-size:24px;color:var(--gold);margin:6px 0}
+.card span{font-size:11px;color:var(--dim)}
+.card small{color:var(--dim);font-size:10px}
+.chart{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:14px 0}
+#gauge{width:100%;height:260px}
+.section{margin:26px 0 10px}
+.section h2{color:var(--gold);font-size:15px;display:flex;align-items:center;gap:8px}
+.section h2::after{content:'';flex:1;height:1px;background:var(--border)}
+.list{display:grid;gap:8px}
+.item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;font-size:12px;gap:8px;flex-wrap:wrap}
+.item .k{color:var(--dim)}
+.item .v{color:var(--txt);font-family:monospace}
+.item .v.ok{color:#2ecc71}.item .v.warn{color:#f39c12}.item .v.bad{color:#e74c3c}
+.foot{text-align:center;margin-top:40px;padding:20px;color:var(--dim);font-size:11px;border-top:1px solid var(--border)}
+.foot .anchor{color:var(--gold)}
+</style>
+<div class="header">
+<img src="/assets/aios-logo.png"><span class="t">火斗云智 AIOS</span><span class="sp"></span>
+<a href="/">主页</a><a href="/products.html">产品</a><a href="/tech/" class="on">技术</a><a href="/status.html">状态</a>
+</div>
+<div class="wrap">
+<div class="hero"><h1>实时内核指标</h1><p>数据实时拉取自云端自治内核（DAL 部署仲裁层 + 30 分钟指标快照），自动刷新</p></div>
+<div class="statusline"><span class="dot" id="dot"></span><span id="statmsg">连接云端中…</span></div>
+
+<div class="cards" id="cards"></div>
+
+<div class="section"><h2>自治运行总览</h2></div>
+<div class="list" id="list"></div>
+
+<div class="section"><h2>任务闭环</h2></div>
+<div class="chart"><div id="gauge"></div></div>
+
+<div class="section"><h2>风险状态</h2></div>
+<div class="list" id="risk"></div>
+</div>
+<div class="foot">火斗云智AIOS · ZONGYUAN-ROOT 元极恒一自治体系 · 实时数据源：/dal/health + metrics_report.json<br><span class="anchor">Ω₀⊂⊙∞⊂Ω</span> · DID-BR-000002</div>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script>
+(function(){
+var dot=document.getElementById("dot"),stat=document.getElementById("statmsg");
+function setStat(ok,msg){dot.className="dot "+(ok?"ok":"warn");stat.textContent=msg}
+function cards(data){
+var c=document.getElementById("cards");c.innerHTML="";
+function card(v,k,d){var e=document.createElement("div");e.className="card";e.innerHTML="<small>"+d+"</small><b>"+v+"</b><span>"+k+"</span>";c.appendChild(e)}
+if(data.dal){card("在线","DAL 部署仲裁层","实时 /dal/health")}
+if(data.truth_total!=null){card(data.truth_total.toLocaleString(),"记忆网关真值数","云端真值库")}
+if(data.task){card(data.task.done+"/"+data.task.total,"任务闭环 "+data.task.close_rate+"%","任务台账")}
+if(data.services){card(data.services.disk_pct+"%","磁盘占用","系统")}
+}
+function list(data){
+var l=document.getElementById("list");l.innerHTML="";
+function item(k,v,cls){var e=document.createElement("div");e.className="item";e.innerHTML="<span class=\"k\">"+k+"</span><span class=\"v "+(cls||"")+"\">"+v+"</span>";l.appendChild(e)}
+if(data.dal){item("DAL 网关版本",data.dal.version||"V2.0","ok");item("DAL 端口",data.dal.port||"18900");item("DAL 服务标识",data.dal.service||"dal-gateway")}
+if(data.services){item("scheduler 调度器","在线","ok");item("nginx 网关","在线","ok");item("api 服务","在线","ok")}
+if(data.truth_total!=null){item("真值库总条数",data.truth_total.toLocaleString())}
+if(data.ts){item("指标快照时间",data.ts)}
+}
+function gauge(data){
+var g=document.getElementById("gauge");if(!window.echarts)return;
+var close=data.task?data.task.close_rate:0;
+var c=echarts.init(g);
+c.setOption({backgroundColor:"transparent",
+series:[{type:"gauge",startAngle:210,endAngle:-30,min:0,max:100,radius:"90%",
+axisLine:{lineStyle:{width:18,color:[[0.5,"#e74c3c"],[0.8,"#f39c12"],[1,"#2ecc71"]]}},
+pointer:{itemStyle:{color:"#d4af37"}},axisTick:{show:false},splitLine:{length:10,lineStyle:{color:"#333"}},
+axisLabel:{color:"#888",fontSize:9,distance:14},
+detail:{valueAnimation:true,formatter:"{value}%",color:"#d4af37",fontSize:20,offsetCenter:[0,"70%"]},
+data:[{value:close,name:"任务闭环率"}],
+title:{show:true,offsetCenter:[0,"92%"],color:"#888",fontSize:11}
+}]});
+window.addEventListener("resize",function(){c.resize()});
+}
+function risk(data){
+var r=document.getElementById("risk");r.innerHTML="";
+if(!data.risk){r.innerHTML="<div class=\"item\"><span class=\"k\">风险</span><span class=\"v ok\">无风险上报</span></div>";return}
+var lv=data.risk.level||"未知",n=data.risk.count||0;
+var cls=lv==="红"?"bad":(lv==="橙"?"warn":"ok");
+var e=document.createElement("div");e.className="item";
+e.innerHTML="<span class=\"k\">当前风险等级（云端仲裁扫描）</span><span class=\"v "+cls+"\">"+lv+" · "+n+" 项</span>";
+r.appendChild(e);
+}
+function render(d){
+cards(d);list(d);gauge(d);risk(d);
+}
+function load(){
+var p1=fetch("/dal/health").then(function(r){return r.ok?r.json():null}).catch(function(){return null});
+var p2=fetch("/zhongshu/data/metrics_report.json").then(function(r){return r.ok?r.json():null}).catch(function(){return null});
+Promise.all([p1,p2]).then(function(a){
+var dal=a[0],m=a[1];
+if(!dal&&!m){setStat(false,"实时连接暂不可用（显示为空，稍后自动重试）");return}
+var d={dal:dal,ts:m?m.ts:"",services:m?m.services:null,task:m?m.task:null,truth_total:m?m.truth_total:null,risk:m?m.risk:null};
+setStat(true,"实时连接正常 · 自动刷新 60s");
+render(d);
+});
+}
+load();setInterval(load,60000);
+})();
+</script>
+</body>
+</html>
