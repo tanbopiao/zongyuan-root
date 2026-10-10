@@ -22,3 +22,11 @@
   "status": "CONFIRMED",
   "verified_by": "方案经多同源节点并发冲突源分析固化；P0 落地后以实测并发工单验证互斥与回滚"
 }
+
+=== P0 落地回执（2026-10-10 19:0x）===
+- dal_gateway.py（云端 /usr/local/bin/dal_gateway.py，:18900，纯标准库零依赖）
+- 五道闸：X-DID认证 / 路径穿越防护(相对路径白名单+禁../) / SHA256哈希防旧覆盖 / 单写者flock队列(TTL30s) / 版本化releases+原子发布+验证回滚
+- 审计：DAL-LEDGER.jsonl append-only（/opt/ZONGYUAN-ROOT/scripts/）
+- nginx：/dal/ 反代入 https www server（备份 bak_dal_*）
+- 实测：health200 / 无X-DID 401 / 绝对路径400 / 越界../ 400 / 5并发全200串行落账 / 官网全页回归200
+- 遗留：授权DID集合当前= {DID-BR-000002}，多节点密钥池自动下发后可扩展
