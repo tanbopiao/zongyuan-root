@@ -116,3 +116,14 @@ curl https://ark.cn-beijing.volces.com/api/v3/chat/completions \
 - **关键事实**：记忆网关（www.huodouai.com/api/report/truth）= 云端 9001 gateway_server，数据库 = `/www/wwwroot/huodouai.com/zhongshu/data/truth/truth.db`（同库）；DIRECTIVE 种子 24 条全部落库；`directive_consumer.py` 每小时已消费 23 条（consumed_at 可见，13:00 消费 SPAWN V3）；工单 23 个已生成；`ticket_executor.py` 决策引擎 ≥90 分自动执行
 - **修复**：新增 `/usr/local/bin/feishu_consume_sync.py` 增量回写 KERNEL.CONSUME.* → 飞书共识区 tbl9QxL35rwA16eS（按 key 查重幂等，状态文件 last_seq 增量）；cron `5 * * * *`
 - **验证**：首跑回写 11 条；端到端测试投喂 TEST-CLOSED-LOOP 种子 → 消费 1 条 → 回写 1 条 → 共识区出现 KERNEL.CONSUME.TEST-CLOSED-LOOP.20261010 痕迹
+
+---
+
+## 九、云端自治升级V1（2026-10-10 人工审核批准执行）
+
+- **P0-1** auto_claimer 接入 cron `10 * * * *`（每小时 arbiter 后 10 分钟），激活 Lv10 认领自动执行引擎
+- **P0-2** meta_learner 空转修复：兼容 CONSUMED/CONSUME 双键，learned_from 0→40，上报 META.LEARN.DAILY.V2
+- **P1-1** decision_engine 权重对齐元法则 40/35/25（原 40/40/20 漂移已校准）
+- **P1-2** ticket_executor 扩业务动作库（report/exchange_probe/whitelist_gc）+ 模糊匹配治本；directive_consumer action 优先取 value.action
+- **验证**：权重实测 patrol 86 分自动执行；learned_from=40；端到端 action=report 种子→消费→执行→回执 `auto-execute:ok`；claimer MiniLM 加载正常、审批类 fail-closed
+- **备份**：/root/backups/auto-upgrade/20261010-175029（旧版 decision_engine/ticket_executor/meta_learner）
