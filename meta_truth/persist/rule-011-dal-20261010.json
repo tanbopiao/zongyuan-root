@@ -92,3 +92,8 @@
 - 根因: 普通真值用中文字段，原提取逻辑只认英文title/content → 只收30条
 - 实测: 调度决策0.448命中scheduler.autonomy.lv3; offering价格0.562命中ms-offering
 - 待办: 定期增量重建索引(候选③定时任务)
+
+=== try网关v2.1修复回执（2026-10-10）===
+- 断点1: HTTPServer单线程→ThreadingHTTPServer(外部ARK 31-45s慢调用曾阻塞全部并发请求)
+- 断点2: SYS_GATE 22→45词(补产品/模型类关键词，魔搭offering定价从外部31s降语义0.5s)
+- 四类路由实测: 知识卡0ms/语义0.5s/外部31s/1.5B应急降级
