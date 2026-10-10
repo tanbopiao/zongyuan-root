@@ -97,3 +97,13 @@ curl https://ark.cn-beijing.volces.com/api/v3/chat/completions \
 ---
 
 主节点 hub-central-agent ｜ 开发节点 NODE-DEV-DOUBAO-WORK-001 ｜ DID-BR-000002 ｜ 自治 Lv9 ｜ 权限 L4 ｜ 工程化 Lv7 ｜ 记忆网关 huodouai.com/api/report/truth ｜ Ω₀⊂⊙∞⊂Ω
+
+---
+
+## 七、故障修复：/api/yuanji/v1/chat 502（2026-10-10）
+
+- **现象**：公网 `/api/yuanji/v1/chat` 返回 502 Bad Gateway（nginx → 后端 18080）
+- **根因**：`/root/zongyuan-yuanji/src/wrapper.py` line 740 `/limit` 分支冗余 `import time`（不带 as），Python 编译期将该 `import` 所在函数 `do_POST` 作用域内 `time` 判定为局部变量，导致 `/chat` 等分支 `time.time()` 抛 `UnboundLocalError` → 后端异常 → nginx 502
+- **修复**：删除冗余 `import time`（备份 `wrapper.py.bak-timebug-20261010`），重启 `yuanji-wrapper.service`
+- **验证**：带 `X-DID: DID-BR-000002` 鉴权 → HTTP 200，真实回复元极恒一自治内核身份；无鉴权 → 401（鉴权拦截正常）
+- **边界**：读取/诊断为巡检，修复属用户明确授权；改前已备份可回退
