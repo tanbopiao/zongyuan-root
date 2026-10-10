@@ -30,3 +30,10 @@
 - nginx：/dal/ 反代入 https www server（备份 bak_dal_*）
 - 实测：health200 / 无X-DID 401 / 绝对路径400 / 越界../ 400 / 5并发全200串行落账 / 官网全页回归200
 - 遗留：授权DID集合当前= {DID-BR-000002}，多节点密钥池自动下发后可扩展
+
+=== P1+P2 落地回执（2026-10-10）===
+- DAL 网关 V2.0（:18900）：P0(认证/路径/哈希/队列) + P1(软链版本化+回滚) + P2(config/port)
+- P1: releases/<sha>/ 不可变版本库 + current 软链原子切换 + dal_state.json 版本栈 + POST /rollback
+- P2: /config -> conf.d/dal-*.conf(nginx -t 校验回滚) + /port 端口分配器(:18xxx池 dal_ports.json)
+- 关键修复: safe_target 用 normpath(不跟软链)+父目录realpath(防逃逸)，保证版本栈key稳定
+- 实测: P1部署V1→V2→回滚→V1全通；P2端口分配/释放/配置校验回滚全通；官网回归200
