@@ -42,3 +42,11 @@
 - DAL 网关 V3.0: DID 授权动态化（dal_dids.json 实时读取，did_register/did_revoke 仅主 DID）
 - dal-deploy 统一部署客户端（云端 /usr/local/bin/dal-deploy，本地副本 homepage-evo/dal-deploy）
 - 实测：新DID注册→立即部署(免重启)→未注册401→非主DID注册403→撤销后401
+
+=== 消费端闭环落地回执（2026-10-10）===
+- DAL 网关 V3.1: /inbox 指令队列（inbox_push/inbox_ack/GET inbox）+ port_register + DID绑定ssh_fp
+- directive_consumer.py v3: 新增DAL inbox通道，保留truth.db通道；每小时arbiter cron自动消费
+- 实测: 投喂→消费→ticket→执行→ack→账本全通；arbiter自动链路验证通过
+- 存量端口登记: 18080/18081/18090（mode=registered）
+- 密钥联动: DID-NODE-WORKER-001 ↔ node-cloudpc SSH指纹（SHA256:mhYxBRn5bgli8QVD2uFcSRrtSWN+zwGvciWUXJ/2iDk）
+- 试用通道: dal-deploy 发布/回滚实测通过（zr-agent-suite）
