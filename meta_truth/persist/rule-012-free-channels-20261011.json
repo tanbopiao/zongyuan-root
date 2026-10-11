@@ -1,0 +1,42 @@
+{
+  "lock_id": "LOCK-CHANNELS-20261011",
+  "rule": "RULE-012 · 免费推理通道矩阵全域锁档",
+  "bind_did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "kernel": "ZONGYUAN-ROOT V5.6-ROOTFIXED · yuanji-wrapper 多通道路由",
+  "created_at": "2026-10-11",
+  "status": "LOCKED",
+  "channels": {
+    "doubao": {"model": "ep-20260925170233-g4f7w", "priority": 1, "type": "main", "status": "主通道"},
+    "zhipu-glm-flash": {"model": "glm-4.7-flash", "endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions", "priority": 1.2, "type": "free", "status": "已接入实测OK 0.8s,高峰429快速失败不影响链路"},
+    "sensenova": {"model": "sensenova-6.8-flash-lite", "priority": 1.5, "type": "free", "status": "已接入"},
+    "deepseek-pro": {"model": "deepseek-v4-pro-0813", "priority": 2, "type": "fallback", "status": "书生端砚,修复reasoning_content解析后OK 0.7s"},
+    "deepseek-flash": {"model": "deepseek-v4-flash-0731", "priority": 3, "type": "fast", "status": "书生端砚 OK 1.4s"},
+    "glm": {"model": "glm-5.3", "priority": 4, "type": "fallback", "status": "书生代理 OK 10.7s"},
+    "ms-deepseek-flash": {"model": "deepseek-ai/DeepSeek-V4.1-Flash", "priority": 5, "type": "free", "status": "魔搭 OK 1.6-2.7s"},
+    "local-qwen-fallback": {"model": "yuanjihengyi_int4(本地1.5B)", "priority": 99, "type": "local", "status": "外部全挂兜底"}
+  },
+  "fixes": [
+    "reasoning_content 回退解析: content为null时回退reasoning_content(备份api_router.py.bak-20261011-reasoning)",
+    "yuanji-wrapper 重启恢复公网502(此前/api/yuanji/v1 502→200)"
+  ],
+  "backups": [
+    "api_router.py.bak-20261011-zhipu",
+    "api_router.py.bak-20261011-reasoning"
+  ],
+  "truth_entries": [
+    "truth.kernel.channel.zhipu.free.test.20261011 (seq 5661)",
+    "truth.kernel.channel.zhipu.integrated.20261011 (seq 5666)",
+    "truth.kernel.channel.modelscope.free.test.20261011 (seq 5674)",
+    "truth.kernel.channel.internai.free.test.20261011 (seq 5682)"
+  ],
+  "verify": {
+    "zhipu": "HTTP200 0.8s(非高峰)",
+    "modelscope": "HTTP200 短指令正常",
+    "internai_flash": "HTTP200 1.4s",
+    "internai_glm": "HTTP200 10.7s",
+    "internai_pro": "HTTP200 0.7s(修复后)",
+    "yuanji公网": "200(修复502)"
+  },
+  "recovery": "新会话自动加载本持久层,通道矩阵完整继承;改配置先备份"
+}
