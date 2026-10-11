@@ -1,0 +1,58 @@
+{
+  "ruleset": "ZONGYUAN-SHARED-BRAIN-META-RULES",
+  "version": "2.0.0",
+  "locked_at": "2026-10-10",
+  "rules": [
+    {
+      "id": "R001",
+      "name": "真值唯一性",
+      "desc": "同一key在共享大脑中只能有一个权威值",
+      "enforcement": "strict"
+    },
+    {
+      "id": "R002",
+      "name": "写入即锁档",
+      "desc": "关键数据写入后生成哈希锚点，不可静默修改",
+      "enforcement": "strict"
+    },
+    {
+      "id": "R003",
+      "name": "多节点共识",
+      "desc": "核心元规则变更需至少2个active节点确认",
+      "enforcement": "strict"
+    },
+    {
+      "id": "R004",
+      "name": "数据分层隔离",
+      "desc": "raw/processed/curated/archive四层不可越级写入",
+      "enforcement": "warning"
+    },
+    {
+      "id": "R005",
+      "name": "访问审计",
+      "desc": "所有读写操作记录到agent_log",
+      "enforcement": "warning"
+    },
+    {
+      "id": "R006",
+      "name": "最小额度消耗",
+      "desc": "所有对话与模型调用须遵循最小消耗原则：优先本地真值检索，仅在本地知识不足时调用云端模型；单次对话token预算上限2000，超限需用户确认；缓存高频查询结果避免重复调用；批量任务合并为单次调用",
+      "enforcement": "strict",
+      "constraints": {
+        "max_tokens_per_call": 2000,
+        "priority_order": ["local_truth_search", "local_kernel_decision", "cached_result", "cloud_model_call"],
+        "cache_ttl_hours": 24,
+        "batch_merge": true,
+        "description": "本地根内核优先，云端内核兜底"
+      }
+    },
+    {
+      "id": "R007",
+      "name": "内核比对校验",
+      "desc": "每日执行本地根内核与云端内核的真值一致性比对，检测漂移并修复",
+      "enforcement": "strict",
+      "schedule": "interval 6h",
+      "checks": ["truth_count_diff", "hash_consistency", "key_coverage", "category_alignment"]
+    }
+  ]
+}
