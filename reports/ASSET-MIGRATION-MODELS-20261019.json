@@ -1,0 +1,56 @@
+{
+  "doc_id": "ASSET-MIGRATION-MODELS-20261019",
+  "ts": "2026-10-19T16:09:13.468848+00:00",
+  "src": "/workspace/models/embedding",
+  "dst": "/workspace/atomgit-mirror/zongyuan-root-sync/01_ASSETS/models/embedding",
+  "status": "ok",
+  "pre": {
+    "bytes": 1087498010,
+    "files": 47
+  },
+  "post": {
+    "bytes": 1087498010,
+    "files": 47
+  },
+  "bytes_files_unchanged": true,
+  "pre_layout": {
+    "snapshot_dirs": 3,
+    "blob_files": 11,
+    "has_multilingual": true,
+    "layout_ok": true
+  },
+  "post_layout": {
+    "snapshot_dirs": 3,
+    "blob_files": 11,
+    "has_multilingual": true,
+    "layout_ok": true
+  },
+  "layout_ok": true,
+  "reference_updated": true,
+  "reference_backup": "audit/backups/DEDUP-2026-10-19/memory_semantic_recall.py",
+  "runtime_smoke": "NOT_RUN（model2vec 缺失，见 EMBED-DEP-ABSENCE-20261019）",
+  "runtime_usability_verified": false,
+  "rollback_action": "目录移回 /workspace/models/embedding + 还原 HF_HOME 行（备份 audit/backups/DEDUP-2026-10-19/memory_semantic_recall.py）",
+  "gitignore": {
+    "exists": true,
+    "target_ignored": false,
+    "risk": "未忽略 → 1.01GiB 缓存会进 git 索引；建议加忽略规则（未擅改 .gitignore）"
+  },
+  "errata_gitignore_resolved_20261019": {
+    "action": "在根 .gitignore 第32行新增目录级规则 '01_ASSETS/models/'",
+    "verified": "git check-ignore -v 命中 .gitignore:32；git status --porcelain 01_ASSETS/models 输出为空（已脱离索引候选）",
+    "reason": "HF blobs 为无扩展名 sha256 文件，扩展名规则（*.bin 等）无法拦截，必须目录级忽略",
+    "amends": "上一字段 gitignore.target_ignored=false 的历史结论已由本条覆盖，原字段保留不改写"
+  },
+  "errata_measurement_reconciliation_20261019": {
+    "reported_bytes": 1087498010,
+    "reported_files": 47,
+    "measured_du_bytes": 540145521,
+    "measured_regular_files": 35,
+    "measured_symlinks": 12,
+    "arithmetic": "540017822 (实体文件逻辑字节) + 547480188 (12个符号链接解析目标字节) = 1087498010，精确吻合；35 实体 + 12 符号链接 = 47 条目",
+    "explanation": "HF hub snapshots/ 为指向 blobs/ 的相对符号链接；原迁移脚本按 os.path.getsize 跟随符号链接统计，导致 3 个模型的大 blobs 被二次计入。真实磁盘占用 540MB(516MiB)，非 1.01GiB。",
+    "data_loss": false,
+    "conclusion": "迁移完整，无文件丢失；'1.01GiB/47' 为口径差异（跟随符号链接的逻辑字节），非资产缺失"
+  }
+}
