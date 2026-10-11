@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智·三态治理V2.0仪表盘</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0d13'/%3E%3Cpath d='M16 5 27 24H5z' fill='%23c9a227'/%3E%3C/svg%3E">
+<link href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Serif SC', 'SimSun', serif;
+    background: #0a0a0f;
+    color: #d4af37;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(212,175,55,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(139,69,19,0.06) 0%, transparent 50%);
+  }
+  .header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+    background: linear-gradient(180deg, rgba(212,175,55,0.05) 0%, transparent 100%);
+  }
+  .header h1 {
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: #f0d878;
+    text-shadow: 0 0 20px rgba(212,175,55,0.3);
+    margin-bottom: 8px;
+  }
+  .header .subtitle {
+    font-size: 13px;
+    color: #8b7355;
+    letter-spacing: 2px;
+  }
+  .header .meta {
+    margin-top: 12px;
+    font-size: 11px;
+    color: #6b5344;
+    font-family: monospace;
+  }
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+  .section-title {
+    font-size: 16px;
+    color: #f0d878;
+    margin: 30px 0 15px;
+    padding-left: 12px;
+    border-left: 3px solid #d4af37;
+    letter-spacing: 2px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: linear-gradient(135deg, rgba(20,18,15,0.9) 0%, rgba(15,12,10,0.95) 100%);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  }
+  .card-title {
+    font-size: 14px;
+    color: #c9a96e;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+  .gauge-box { height: 220px; }
+  .chart-box { height: 280px; }
+  .stats-row {
+    display: flex;
+    justify-content: space-around;
+    margin: 15px 0;
+    text-align: center;
+  }
+  .stat-item .num {
+    font-size: 28px;
+    font-weight: bold;
+    color: #f0d878;
+    font-family: monospace;
+  }
+  .stat-item .label {
+    font-size: 11px;
+    color: #8b7355;
+    margin-top: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  th {
+    background: rgba(212,175,55,0.1);
+    color: #f0d878;
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid rgba(212,175,55,0.3);
+    font-weight: normal;
+    letter-spacing: 1px;
+  }
+  td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(212,175,55,0.1);
+    color: #b8a070;
+  }
+  tr:hover td { background: rgba(212,175,55,0.05); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+  .badge-A { background: rgba(212,175,55,0.2); color: #f0d878; border: 1px solid #d4af37; }
+  .badge-B { background: rgba(100,149,237,0.15); color: #87ceeb; border: 1px solid #4682b4; }
+  .methodology {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+  }
+  .method-card {
+    background: rgba(212,175,55,0.03);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 6px;
+    padding: 15px;
+  }
+  .method-card h4 {
+    color: #f0d878;
+    font-size: 13px;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .method-card p {
+    font-size: 11px;
+    color: #8b7355;
+    line-height: 1.6;
+  }
+  .method-card .formula {
+    font-family: monospace;
+    font-size: 10px;
+    color: #c9a96e;
+    background: rgba(0,0,0,0.3);
+    padding: 6px 8px;
+    border-radius: 3px;
+    margin-top: 8px;
+  }
+  .footer {
+    text-align: center;
+    padding: 30px 20px;
+    border-top: 1px solid rgba(212,175,55,0.15);
+    margin-top: 40px;
+    font-size: 11px;
+    color: #6b5344;
+    font-family: monospace;
+  }
+  @media (max-width: 900px) {
+    .grid-3, .grid-2, .methodology { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<style>
+.gnav{background:linear-gradient(90deg,#0b2a5b,#123c7a);border-bottom:3px solid #c9a227;position:relative;z-index:60;color:#fff;}
+.gnav .in{max-width:1200px;margin:0 auto;padding:9px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.gnav .bd{font-weight:700;letter-spacing:1px;font-size:15px;white-space:nowrap;}
+.gnav .bd small{font-size:10.5px;opacity:.7;margin-left:8px;letter-spacing:0;}
+.gnav .lk{display:flex;gap:13px;flex-wrap:wrap;flex:1;justify-content:flex-end;}
+.gnav .lk a{color:#dbe4f2;text-decoration:none;font-size:13px;padding:3px 2px;}
+.gnav .lk a:hover{color:#f3d98c;}
+.gnav .lk a.cur{color:#f3d98c;border-bottom:2px solid #c9a227;font-weight:600;}
+.gnav .hm{background:#c9a227;color:#0b2a5b;padding:6px 14px;border-radius:4px;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap;}
+.gnav .hm:hover{background:#dbb93a;}
+@media(max-width:640px){.gnav .in{flex-direction:column;align-items:flex-start;gap:8px;} .gnav .lk{justify-content:flex-start;} }
+</style>
+<div class="gnav"><div class="in"><div class="bd">火斗云智 · 政务AI中台<small>GOV AI MID-PLATFORM</small></div><div class="lk"><a href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6k1tt06c">总门户</a><a href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6ydf277b">中台门户</a><a href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6wmgtav6">教育中台</a><a href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6ydf2rdm" class="cur">治理看板</a><a href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6nx2zqdj">白皮书</a><a href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6wmq4b4u">驾驶舱</a><a href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6vmuc3jh">AI助手</a></div><a class="hm" href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6ty0z7c0">&#10229; 产品矩阵总入口</a><a class="hm" href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6k1tt06c" style="background:transparent;border:1px solid #c9a227;color:#f3d98c;margin-left:8px;">返回总门户</a></div></div>
+
+<div class="header">
+  <h1>三态治理 V2.0 · 全域资产高秩序治理仪表盘</h1>
+  <div class="subtitle">逻辑态 · 信息态 · 能量态 三维度闭环治理体系</div>
+  <div class="meta">DID-BR-000002 | Ω₀⊂⊙∞⊂Ω | ZONGYUAN-ROOT | 引擎版本 V2.0</div>
+</div>
+
+<div class="container">
+
+  <!-- 核心指标 -->
+  <div class="stats-row">
+    <div class="stat-item"><div class="num">12,350</div><div class="label">治理资产总数</div></div>
+    <div class="stat-item"><div class="num">155</div><div class="label">A级高价值资产</div></div>
+    <div class="stat-item"><div class="num">100%</div><div class="label">内容哈希覆盖</div></div>
+    <div class="stat-item"><div class="num">12,350</div><div class="label">元类补全完成</div></div>
+    <div class="stat-item"><div class="num">59.88</div><div class="label">综合均分</div></div>
+  </div>
+
+  <!-- 三态仪表盘 -->
+  <div class="section-title">三态综合评分仪表盘</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">逻辑态 Logic State</div>
+      <div id="gauge-logic" class="gauge-box"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">信息态 Info State</div>
+      <div id="gauge-info" class="gauge-box"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">能量态 Energy State</div>
+      <div id="gauge-energy" class="gauge-box"></div>
+    </div>
+  </div>
+
+  <!-- 分布图 -->
+  <div class="section-title">等级分布分析</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">综合评级分布</div>
+      <div id="chart-composite" class="chart-box"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">元类分布（M1-M9）</div>
+      <div id="chart-metaclass" class="chart-box"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">信息态等级分布</div>
+      <div id="chart-info-dist" class="chart-box"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">能量态等级分布</div>
+      <div id="chart-energy-dist" class="chart-box"></div>
+    </div>
+  </div>
+
+  <!-- TOP高价值资产 -->
+  <div class="section-title">TOP 10 高价值资产（综合评级A级）</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>排名</th><th>资产ID</th><th>元类</th><th>逻辑态</th><th>信息态</th><th>能量态</th><th>综合分</th><th>等级</th>
+        </tr>
+      </thead>
+      <tbody id="top-assets-body"></tbody>
+    </table>
+  </div>
+
+  <!-- 方法论 -->
+  <div class="section-title">V2.0 方法论体系（融合全网前沿技术）</div>
+  <div class="methodology">
+    <div class="method-card">
+      <h4>Shannon 信息熵</h4>
+      <p>衡量资产文本的不确定性与信息丰富度，熵值越高表示信息密度越大。</p>
+      <div class="formula">H(K) = -Σ p(ki) log₂ p(ki)</div>
+    </div>
+    <div class="method-card">
+      <h4>CIME 价值模型</h4>
+      <p>四维度资产评估：成本费用、固有价值、市场供求、环境约束，信息熵权重法融合。</p>
+      <div class="formula">V = C×w_c + I×w_i + M×w_m + E×w_e</div>
+    </div>
+    <div class="method-card">
+      <h4>知识图谱语义密度</h4>
+      <p>实体关系密度+语义连通度，衡量资产在全域知识网络中的结构丰富度。</p>
+      <div class="formula">SDI = 实体数×关系数 / 文本长度</div>
+    </div>
+    <div class="method-card">
+      <h4>互信息 & 进化势能</h4>
+      <p>与核心公理体系的关联度，引用网络中心性，时间衰减活跃度模型。</p>
+      <div class="formula">I(X;Y) = H(X) - H(X|Y)</div>
+    </div>
+  </div>
+
+  <!-- 三态详细指标 -->
+  <div class="section-title">三态详细指标均值</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">逻辑态指标</div>
+      <table>
+        <tr><td>结构完整性</td><td style="text-align:right;color:#f0d878">62.93</td></tr>
+        <tr><td>实体关系密度</td><td style="text-align:right;color:#f0d878">2.16</td></tr>
+        <tr><td>语义连通度</td><td style="text-align:right;color:#f0d878">40.05</td></tr>
+        <tr><td>综合均分</td><td style="text-align:right;color:#f0d878;font-weight:bold">57.24</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">信息态指标</div>
+      <table>
+        <tr><td>Shannon熵</td><td style="text-align:right;color:#f0d878">4.40</td></tr>
+        <tr><td>语义密度指数</td><td style="text-align:right;color:#f0d878">43.79</td></tr>
+        <tr><td>互信息</td><td style="text-align:right;color:#f0d878">40.03</td></tr>
+        <tr><td>真值置信度</td><td style="text-align:right;color:#f0d878">80.21</td></tr>
+        <tr><td>综合均分</td><td style="text-align:right;color:#f0d878;font-weight:bold">71.34</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">能量态指标</div>
+      <table>
+        <tr><td>CIME价值</td><td style="text-align:right;color:#f0d878">53.03</td></tr>
+        <tr><td>进化势能</td><td style="text-align:right;color:#f0d878">56.05</td></tr>
+        <tr><td>活跃度</td><td style="text-align:right;color:#f0d878">40.00</td></tr>
+        <tr><td>综合均分</td><td style="text-align:right;color:#f0d878;font-weight:bold">50.68</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer" style="text-align:left;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;max-width:1400px;margin:40px auto 0;">
+  <span>火斗云智AIOS | 三态治理V2.0 | DID-BR-000002 | ZONGYUAN-ROOT 元极恒一自治体系</span>
+  <span style="color:#d4af37;letter-spacing:1px;">Ω₀⊂⊙∞⊂Ω</span>
+</div>
+
+<script>
+// 黑金配色
+const GOLD = '#d4af37';
+const LIGHT_GOLD = '#f0d878';
+const DARK_BG = 'rgba(10,10,15,0.9)';
+
+// 仪表盘配置
+function makeGauge(value, title) {
+  return {
+    series: [{
+      type: 'gauge',
+      startAngle: 210,
+      endAngle: -30,
+      min: 0, max: 100,
+      radius: '90%',
+      axisLine: {
+        lineStyle: {
+          width: 15,
+          color: [[0.3, '#4a3728'], [0.7, '#8b6914'], [1, GOLD]]
+        }
+      },
+      pointer: { itemStyle: { color: GOLD } },
+      axisTick: { distance: -20, length: 5, lineStyle: { color: '#8b7355' } },
+      splitLine: { distance: -20, length: 10, lineStyle: { color: GOLD } },
+      axisLabel: { distance: -35, color: '#8b7355', fontSize: 10 },
+      detail: {
+        valueAnimation: true,
+        formatter: '{value}',
+        color: LIGHT_GOLD,
+        fontSize: 28,
+        fontWeight: 'bold',
+        offsetCenter: [0, '30%']
+      },
+      data: [{ value: value, name: title }],
+      title: { offsetCenter: [0, '65%'], color: '#8b7355', fontSize: 11 }
+    }]
+  };
+}
+
+echarts.init(document.getElementById('gauge-logic')).setOption(makeGauge(57.24, '逻辑态'));
+echarts.init(document.getElementById('gauge-info')).setOption(makeGauge(71.34, '信息态'));
+echarts.init(document.getElementById('gauge-energy')).setOption(makeGauge(50.68, '能量态'));
+
+// 综合评级分布
+echarts.init(document.getElementById('chart-composite')).setOption({
+  tooltip: { trigger: 'item' },
+  legend: { bottom: 0, textStyle: { color: '#8b7355' } },
+  series: [{
+    type: 'pie',
+    radius: ['40%', '70%'],
+    center: ['50%', '45%'],
+    itemStyle: { borderColor: DARK_BG, borderWidth: 2 },
+    label: { color: '#b8a070', fontSize: 11 },
+    data: [
+      { value: 155, name: 'A级', itemStyle: { color: GOLD } },
+      { value: 12195, name: 'B级', itemStyle: { color: '#4682b4' } }
+    ]
+  }]
+});
+
+// 元类分布
+echarts.init(document.getElementById('chart-metaclass')).setOption({
+  tooltip: { trigger: 'axis' },
+  grid: { left: '10%', right: '5%', top: '10%', bottom: '15%' },
+  xAxis: {
+    type: 'category',
+    data: ['M1','M2','M3','M4','M5','M6','M7','M8','M9'],
+    axisLabel: { color: '#8b7355' },
+    axisLine: { lineStyle: { color: '#4a3728' } }
+  },
+  yAxis: {
+    type: 'value',
+    axisLabel: { color: '#8b7355' },
+    splitLine: { lineStyle: { color: 'rgba(212,175,55,0.1)' } }
+  },
+  series: [{
+    type: 'bar',
+    data: [1447,400,232,1644,91,91,95,5856,2494],
+    itemStyle: {
+      color: new echarts.graphic.LinearGradient(0,0,0,1,[
+        {offset:0,color:GOLD},{offset:1,color:'#4a3728'}
+      ])
+    },
+    barWidth: '50%'
+  }]
+});
+
+// 信息态分布
+echarts.init(document.getElementById('chart-info-dist')).setOption({
+  tooltip: { trigger: 'axis' },
+  grid: { left: '15%', right: '10%', top: '10%', bottom: '15%' },
+  xAxis: {
+    type: 'category',
+    data: ['A级(≥75)','B级(≥55)'],
+    axisLabel: { color: '#8b7355' },
+    axisLine: { lineStyle: { color: '#4a3728' } }
+  },
+  yAxis: {
+    type: 'value',
+    axisLabel: { color: '#8b7355' },
+    splitLine: { lineStyle: { color: 'rgba(212,175,55,0.1)' } }
+  },
+  series: [{
+    type: 'bar',
+    data: [603, 11747],
+    itemStyle: { color: GOLD },
+    barWidth: '40%',
+    label: { show: true, position: 'top', color: LIGHT_GOLD, fontSize: 11 }
+  }]
+});
+
+// 能量态分布
+echarts.init(document.getElementById('chart-energy-dist')).setOption({
+  tooltip: { trigger: 'axis' },
+  grid: { left: '15%', right: '10%', top: '10%', bottom: '15%' },
+  xAxis: {
+    type: 'category',
+    data: ['B级(≥50)','C级(≥30)'],
+    axisLabel: { color: '#8b7355' },
+    axisLine: { lineStyle: { color: '#4a3728' } }
+  },
+  yAxis: {
+    type: 'value',
+    axisLabel: { color: '#8b7355' },
+    splitLine: { lineStyle: { color: 'rgba(212,175,55,0.1)' } }
+  },
+  series: [{
+    type: 'bar',
+    data: [6271, 6079],
+    itemStyle: { color: '#4682b4' },
+    barWidth: '40%',
+    label: { show: true, position: 'top', color: '#87ceeb', fontSize: 11 }
+  }]
+});
+
+// TOP10资产表格
+const topAssets = [
+  {rank:1,id:'S4yUdMkvSo3Oukx8Rglco8ufnmc',mc:'M9',L:77.22,I:77.12,E:64.14,score:72.61,level:'A'},
+  {rank:2,id:'ZKhWfX3Pplmh14dlCDLcoxSVnig',mc:'M9',L:73.9,I:75.33,E:65.79,score:71.56,level:'A'},
+  {rank:3,id:'YVMQdNlJAoFepqxwrJbcDDNGn1f',mc:'M9',L:73.9,I:75.24,E:65.87,score:71.56,level:'A'},
+  {rank:4,id:'MMH4dMbhGon1YSxhcuVcoNptnWf',mc:'M9',L:73.9,I:74.94,E:65.81,score:71.43,level:'A'},
+  {rank:5,id:'WIkGdUw7Io9Z9MxqHXKcdbgcnQc',mc:'M9',L:73.9,I:74.53,E:65.81,score:71.29,level:'A'},
+  {rank:6,id:'Upy7dyq3FoS9GFxTd9kc5l4anHd',mc:'M9',L:73.9,I:73.24,E:65.91,score:70.87,level:'A'},
+  {rank:7,id:'Uqmld4jlVoptdqxN34CcT6R2n8e',mc:'M4',L:72.4,I:77.65,E:62.74,score:70.86,level:'A'},
+  {rank:8,id:'Z21fdhp7Yo9B5Kxv8UnccmkCn9e',mc:'M4',L:72.4,I:76.88,E:62.35,score:70.45,level:'A'},
+  {rank:9,id:'Gna3dYtTyosrHgxvRvCcOhibn2e',mc:'M4',L:72.4,I:75.83,E:63.16,score:70.37,level:'A'},
+  {rank:10,id:'AD9HdClfXo152NxoG6Uck6lSnne',mc:'M9',L:73.9,I:71.65,E:65.92,score:70.32,level:'A'}
+];
+const tbody = document.getElementById('top-assets-body');
+topAssets.forEach(a => {
+  tbody.innerHTML += `<tr>
+    <td>${a.rank}</td>
+    <td style="font-family:monospace;font-size:10px">${a.id}</td>
+    <td>${a.mc}</td>
+    <td>${a.L}</td>
+    <td>${a.I}</td>
+    <td>${a.E}</td>
+    <td style="color:#f0d878;font-weight:bold">${a.score}</td>
+    <td><span class="badge badge-${a.level}">${a.level}</span></td>
+  </tr>`;
+});
+</script>
+
+</body>
+</html>
