@@ -1,0 +1,136 @@
+{
+  "law_id": "RULE-011-DEPLOY-ARBITRATION-001",
+  "name": "云端部署仲裁层 DAL 元法则（多同源节点并发部署防冲突）",
+  "level": "P0",
+  "version": "V1.0",
+  "description": "多个同源节点（本地笔记本/云端中枢/GPU/CloudBase/多账号Worker）并发部署到同一云端（123.207.202.158 / www.huodouai.com）时，所有写入必须收敛至云端唯一部署仲裁层 DAL（Deploy Arbitration Layer），按资源维度互斥排队、原子发布、校验回滚、审计留痕，杜绝互相覆盖、配置竞争、端口抢占与旧版覆盖新版。",
+  "clauses": [
+    {"id": "DAL-1", "text": "唯一入口：任何节点的云端部署请求必须经 DAL 部署网关（云端 :18900）提交 JSON 工单（X-DID 认证 + 目标路径 + 资产哈希 + 优先级），禁止任何节点直写 /www/wwwroot、nginx 配置、系统配置或共享台账；违反者工单拒绝并记审计告警"},
+    {"id": "DAL-2", "text": "单写者队列：按目标路径加互斥锁（flock 租约 TTL 30s），同一路径同时仅允许一个写任务，其余工单排队；锁超时自动释放，防死锁"},
+    {"id": "DAL-3", "text": "哈希防旧覆盖新：发布前比对源资产 SHA256 与当前线上版本哈希，低版本/同版本请求直接拒绝；同路径版本号单调递增"},
+    {"id": "DAL-4", "text": "配置片段合并：共享配置（nginx.conf 等）禁止整体覆盖，节点仅提交 conf.d/*.conf 片段，DAL include 合并后 nginx -t 校验，失败自动回滚到上一配置"},
+    {"id": "DAL-5", "text": "端口分配器：节点需要起服务必须先向 DAL 申请端口（:18xxx 池），DAL 登记端口→服务→节点映射后方可使用，杜绝抢占；释放走显式工单"},
+    {"id": "DAL-6", "text": "版本化原子发布：资产落 releases/<sha>/ 目录，线上路径用软链原子切换，发布后 curl HTTP 200 + 内容特征双条件验证，失败一键回滚上一版本"},
+    {"id": "DAL-7", "text": "审计留痕：每笔部署写入 DAL-LEDGER 账本（节点/目标路径/版本/哈希/结果/时间），高权限操作（改配置/开端口/覆盖既有资产）需人工审批后方可执行"},
+    {"id": "DAL-8", "text": "与体系衔接：复用同源协议（X-DID+JSON工单+三层解耦）、飞书审批、记忆网关调度；DAL 即执行态的唯一收敛通道，逻辑态生成工单、算子态校验路由、执行态由 DAL 统一跑代码"},
+    {"id": "DAL-9", "text": "落地顺序：P0 网关骨架（:18900 收工单+路径锁+审计账本）→ P1 原子发布（releases/ 软链切换+校验回滚，复用 zr-deploy 引擎升级）→ P2 配置/端口治理（conf.d 合并+端口分配器）"},
+    {"id": "DAL-10", "text": "零成本元规则：DAL 全部实现走云端已有服务器与免费工具链，不引入付费云服务；违反 META-ISO-051 隔离边界的行为一律拒绝"}
+  ],
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002",
+  "created": "2026-10-10",
+  "status": "CONFIRMED",
+  "verified_by": "方案经多同源节点并发冲突源分析固化；P0 落地后以实测并发工单验证互斥与回滚"
+}
+
+=== P0 落地回执（2026-10-10 19:0x）===
+- dal_gateway.py（云端 /usr/local/bin/dal_gateway.py，:18900，纯标准库零依赖）
+- 五道闸：X-DID认证 / 路径穿越防护(相对路径白名单+禁../) / SHA256哈希防旧覆盖 / 单写者flock队列(TTL30s) / 版本化releases+原子发布+验证回滚
+- 审计：DAL-LEDGER.jsonl append-only（/opt/ZONGYUAN-ROOT/scripts/）
+- nginx：/dal/ 反代入 https www server（备份 bak_dal_*）
+- 实测：health200 / 无X-DID 401 / 绝对路径400 / 越界../ 400 / 5并发全200串行落账 / 官网全页回归200
+- 遗留：授权DID集合当前= {DID-BR-000002}，多节点密钥池自动下发后可扩展
+
+=== P1+P2 落地回执（2026-10-10）===
+- DAL 网关 V2.0（:18900）：P0(认证/路径/哈希/队列) + P1(软链版本化+回滚) + P2(config/port)
+- P1: releases/<sha>/ 不可变版本库 + current 软链原子切换 + dal_state.json 版本栈 + POST /rollback
+- P2: /config -> conf.d/dal-*.conf(nginx -t 校验回滚) + /port 端口分配器(:18xxx池 dal_ports.json)
+- 关键修复: safe_target 用 normpath(不跟软链)+父目录realpath(防逃逸)，保证版本栈key稳定
+- 实测: P1部署V1→V2→回滚→V1全通；P2端口分配/释放/配置校验回滚全通；官网回归200
+
+=== P3 落地回执（2026-10-10）===
+- DAL 网关 V3.0: DID 授权动态化（dal_dids.json 实时读取，did_register/did_revoke 仅主 DID）
+- dal-deploy 统一部署客户端（云端 /usr/local/bin/dal-deploy，本地副本 homepage-evo/dal-deploy）
+- 实测：新DID注册→立即部署(免重启)→未注册401→非主DID注册403→撤销后401
+
+=== 消费端闭环落地回执（2026-10-10）===
+- DAL 网关 V3.1: /inbox 指令队列（inbox_push/inbox_ack/GET inbox）+ port_register + DID绑定ssh_fp
+- directive_consumer.py v3: 新增DAL inbox通道，保留truth.db通道；每小时arbiter cron自动消费
+- 实测: 投喂→消费→ticket→执行→ack→账本全通；arbiter自动链路验证通过
+- 存量端口登记: 18080/18081/18090（mode=registered）
+- 密钥联动: DID-NODE-WORKER-001 ↔ node-cloudpc SSH指纹（SHA256:mhYxBRn5bgli8QVD2uFcSRrtSWN+zwGvciWUXJ/2iDk）
+- 试用通道: dal-deploy 发布/回滚实测通过（zr-agent-suite）
+
+=== 消费端执行手脚落地回执（2026-10-10）===
+- ticket_executor v6: 新增 DAL 部署类动作（dal_deploy/dal_rollback/dal_status），调用 /usr/local/bin/dal-deploy
+- directive_consumer v3.1: 执行动作从 value.directive_action 提取，ticket 携带部署参数（target/file）
+- 实测: 投喂 deploy 执行种子 → 消费 → 执行 dal_deploy → 线上 HTTP200 内容命中 → 清理
+- 意义: 云端 Worker 从心跳式在线 → 具备真实部署手脚，投喂执行种子即可驱动 DAL 完成发布
+
+=== 动作库v7+fmp接入回执（2026-10-10）===
+- ticket_executor v7: dal_config（content写临时文件→dal-deploy config）+ dal_port（port-alloc）
+- config链路实测: 非法location片段被DAL nginx -t校验自动回滚拦截，主配置完好（安全机制验证）
+- fmp.html 正式纳入 DAL 版本栈（发布 7afd9b97，HTTP200 联邦记忆池命中，可回滚）
+- 消费端可驱动动作全集: patrol/backup/report/arbiter/exchange_probe/whitelist_gc/restart_wrapper/restart_gov/baidu_push + dal_deploy/dal_rollback/dal_status/dal_config/dal_port
+
+=== 魔搭offering上架回执（2026-10-10）===
+- zongyuanroot/zr-agent-suite-offering 数据集创建并公开（visibility=public）
+- 上传: README.md（定价¥199/能力/架构/部署/试用入口）+ docs/DEPLOY-GUIDE.md + scripts/dal-deploy样例
+- 验证: 数据集主页 HTTP200、README HTTP200、定价文案命中
+- 商务链路: 魔搭站内信/飞书审批；试用入口 www.huodouai.com/zr-agent-suite/try.html
+
+=== offering升级回执（2026-10-10）===
+- 数据湖: 11份核心白皮书归拢至 zongyuanroot/zongyuan-root-achievements/whitepaper（27算子/CTE-Agent/CTE-Fusion/SM-BS/ZONGYUAN-HUB/decision-pipeline/meta-order-archive/shield-pipeline/truth-value-engine/unified-orchestrator/联邦记忆池）
+- Pilot: zr-agent-suite/pilot.html 上线（前10家30天免费，CTA真实链接试用页），经DAL发布版本c208963c
+- 专业版: ¥499/实例/年（LoRA微调+SFMP实现+DAL源码+专属支持）写入offering README对比表
+- offering README 重新上传并验证含数据湖/Pilot/专业版关键词
+
+=== try网关v2智能路由+产品页入口回执（2026-10-10）===
+- try_gateway.py v2: 真值库(truth.db 600条缓存)+知识卡(10类)+白皮书索引 三层本地检索 → 命中毫秒级直答；未命中才调ARK外部API
+- 实测: 体系内问题 elapsed_ms=0(knowledge-card)；体系外 elapsed_ms=24s(ark-external)；公网/try/chat 200
+- try.html 集成魔搭Offering/数据湖(11+白皮书)/Pilot免费试用/专业版¥499 入口，DAL发布版本7aa614d6
+- 收益: 体系内问答响应20+s→0ms，且体系内问题零外部API额度消耗
+
+=== try网关v2.1语义路由+产品页回执（2026-10-10）===
+- 语义层: embedding-vision(2048维)为30条核心真值建向量索引; 问题经SYS_GATE体系关键词触发embedding余弦检索, 阈值0.42命中直答
+- 实测: 知识卡0ms / 语义检索347ms / 外部ARK 29.5s; 1.5B CPU 42s仅应急
+- products.html 新增资源与商业入口卡(Offering/数据湖/Pilot/专业版), DAL发布6655a6ba线上200
+- 三级路由: 知识卡→真值库关键词→语义向量→外部ARK(失败降级本地1.5B)
+
+=== 语义索引扩充回执（2026-10-10）===
+- embed_index.json: 30→162条×2048维（全字段值提取，跳过元数据字段）
+- 根因: 普通真值用中文字段，原提取逻辑只认英文title/content → 只收30条
+- 实测: 调度决策0.448命中scheduler.autonomy.lv3; offering价格0.562命中ms-offering
+- 待办: 定期增量重建索引(候选③定时任务)
+
+=== try网关v2.1修复回执（2026-10-10）===
+- 断点1: HTTPServer单线程→ThreadingHTTPServer(外部ARK 31-45s慢调用曾阻塞全部并发请求)
+- 断点2: SYS_GATE 22→45词(补产品/模型类关键词，魔搭offering定价从外部31s降语义0.5s)
+- 四类路由实测: 知识卡0ms/语义0.5s/外部31s/1.5B应急降级
+
+=== 语义索引每日重建回执（2026-10-10）===
+- 云端crontab每日3:47: build_embed_index.py全量重建embed_index.json(flock防重入)
+- 手动验证: 162→164条(增量收录新真值)，embedding-vision 2048维
+- 脚本: /usr/local/bin/build_embed_index.py；日志: embed_build.log
+
+=== 官网技术中心六页部署回执（2026-10-11）===
+- 交付: /tech/ 六页 + 入口页，全部 DAL 原子发布 verify=200
+  index(技术中心入口,统计5211真值/164向量/11白皮书/10算子层)
+  docs(11白皮书可搜索文档站,链接全部指向云端真实whitepaper文件名)
+  architecture(ECharts三视图:十层算子拓扑/明暗双内核/七层稳态)
+  live(实时指标:fetch /dal/health + /zhongshu/data/metrics_report.json,60s轮询,失败降级)
+  api(试用网关/DAL/记忆网关curl文档+响应格式+错误码)
+  timeline(时间轴V2.0→V5.6-ROOTFIXED→DAL→语义检索→魔搭Offering)
+  bench(四级路由延迟0ms/0.5s/31s/42s+语义命中0.435-0.593+资源68%/44%/181ms)
+- 导航接入: 根index.html+products.html header新增"技术"入口,备份.bak_technav,部署200
+- 自检: shot.py桌面+移动通过(仅本地assets缺失假象,云端/assets/均200)
+- 记忆网关: truth.kernel.website.techcenter.20261011 (seq 5325, truth_count 5224)
+- 锚定 Ω₀⊂⊙∞⊂Ω | DID-BR-000002
+
+=== 官网P0互通互联部署回执（2026-10-11）===
+- 主页互通: hero新增金色"技术中心→"按钮 + hero下新增技术能力中心4卡(文档/架构/指标/API),DAL部署a6267604d4b66368 verify=200
+- 统一导航: 18页注入.zrtop统一导航(主页/产品/技术/状态/定价/创作),备份.bak_p0nav; 修复seven-layer.html无body标签致404(恢复+正确注入)
+- 导航补链: pipeline/status/fmp/kunlun/evolution/research 6页补"技术"链接
+- 姊妹页互链: /architecture.html ↔ /tech/architecture.html(文字总览<->交互可视化)
+- 互通验证: 13核心页全200+技术链接; 核心导航0死链; 历史蓝图页(sitemap/assets/research)死链100+列入P1信息架构重整归档/legacy/
+- 记忆网关: truth.kernel.website.p0.interlink.20261011 (seq 5333, truth_count 5232)
+- 锚定 Ω₀⊂⊙∞⊂Ω | DID-BR-000002
+
+=== 官网B→C序贯进化部署回执（2026-10-11）===
+- B-1 蓝图页归档: sitemap.html/assets.html 移入 /legacy/ + nginx 301(配置备份.bak_p0_20261011, 源站301+200双验证; 公网404为CDN缓存旧响应,TTL后自然生效)
+- B-2 sitemap.xml: 71条(核心13+tech7+白皮书51真实文件), robots.txt已引用, 公网200
+- C-1 状态中心合流: status.html 新增DAL仲裁+自治指标两区块(与tech/live同源 /dal/health+metrics_report), 部署8e544597c91d6b24 verify=200
+- C-2 首页实时指标条: hero下livebar(任务闭环率/DAL仲裁/磁盘内存/云端集群), fetch同源实时数据失败保持静态, 部署ef84aea2a8ecc026 verify=200
+- C-3 试用漏斗闭环: pricing→try→pilot(¥499)→魔搭offering全链打通, pricing补立即试用CTA
+- 记忆网关: truth.kernel.website.bc.evolution.20261011 (seq 5369, truth_count 5268)
+- 锚定 Ω₀⊂⊙∞⊂Ω | DID-BR-000002

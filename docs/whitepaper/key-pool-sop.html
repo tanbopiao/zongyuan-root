@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>密钥池自动申领 SOP · 火斗云智AIOS</title><link rel="icon" href="/assets/aios-logo.png">
+<style>*{margin:0;padding:0;box-sizing:border-box}:root{--gold:#d4af37;--bg:#0a0a0f;--card:#12121a;--border:rgba(212,175,55,.25)}
+body{background:var(--bg);color:#e8e6e0;font-family:"Noto Serif SC",serif;line-height:1.7}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:url('/assets/dragon-pattern.webp') center/cover no-repeat fixed;opacity:.12}
+.wrap{max-width:860px;margin:0 auto;padding:30px 22px}h1{color:var(--gold);font-size:26px;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:14px}
+.sub{color:#888;font-size:13px;margin-bottom:26px}h2{color:var(--gold);font-size:20px;margin:30px 0 12px}h3{color:#e8c15a;font-size:16px;margin:20px 0 8px}
+p{margin:10px 0}code{background:rgba(212,175,55,.1);padding:2px 6px;border-radius:4px;font-size:13px;color:#f4d03f}
+pre{background:#0d0d14;border:1px solid var(--border);border-radius:10px;padding:14px;overflow-x:auto;font-size:12.5px;margin:12px 0}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}th,td{border:1px solid var(--border);padding:9px 12px;text-align:left}th{background:rgba(212,175,55,.12);color:var(--gold)}
+a{color:#f4d03f;text-decoration:none}ul,ol{margin:10px 0 10px 22px}.foot{text-align:center;font-size:11px;color:#777;border-top:1px solid var(--border);margin-top:40px;padding-top:16px}
+<div class="wrap"><h1>密钥池自动申领 SOP V1.0</h1>
+<div class="sub">ZONGYUAN-ROOT 多节点密钥自动化闭环 · 人工仅介入审批关键节点</div>
+<h2>一、目标</h2><p>多节点/多账号自动化申领 SSH 密钥与登录态，减少人工介入；密钥管理全程留痕、可审计、可回收。</p>
+<h2>二、核心链路（四步闭环）</h2>
+<table><tr><th>步骤</th><th>动作</th><th>载体</th></tr>
+<tr><td>1 申领请求</td><td>节点以 X-DID 身份发起密钥申领工单（JSON）</td><td>记忆网关 / DAL</td></tr>
+<tr><td>2 权限仲裁</td><td>DID 白名单 + 权限层级（L4）校验，生成一次性发放令牌</td><td>dal-dids.json / DAL 仲裁层</td></tr>
+<tr><td>3 人工审批</td><td>关键节点（元宪法/密钥/高额付费）走飞书审批，其余自动放行</td><td>飞书审批流</td></tr>
+<tr><td>4 发放回执</td><td>密钥下发 + authorized_keys 注入 + 台账留痕 + ntfy 通知</td><td>云端 Worker / 共享大脑</td></tr></table>
+<h2>三、密钥池管理规则</h2>
+<ul><li>密钥池表仅 Owner 可见，其他角色无访问权限</li><li>SSH 仅允许密钥登录，禁用密码爆破入口</li><li>泄露风险：立即吊销旧密钥、全量轮换、ntfy 告警</li><li>密钥与 DID 注册表自动联动：节点开箱即用</li></ul>
+<h2>四、安全边界</h2><p>密钥发放走 X-DID 认证 + 权限校验；SSH 通道禁止修改云端元内核（META-ISO-051），仅限运维与部署类操作。</p><div class="foot">主节点hub-central-agent · DID-BR-000002 · 自治Lv9 · 锚定 Ω₀⊂⊙∞⊂Ω · 火斗云智AIOS</div></div></body></html>

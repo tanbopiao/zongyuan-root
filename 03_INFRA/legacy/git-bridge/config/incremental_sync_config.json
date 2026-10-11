@@ -1,0 +1,50 @@
+{
+  "config_id": "INCR-SYNC-FEISHU-20260907",
+  "enabled": true,
+  "schedule": "daily_0200",
+  "source": "飞书云盘(=豆包云盘底层)",
+  "scan_depth": "recursive_5_levels",
+  "filter_strategy": {
+    "high_value_keywords": [
+      "ZONGYUAN",
+      "元极恒一",
+      "内核",
+      "白皮书",
+      "元法则",
+      "锁档",
+      "真值",
+      "自治"
+    ],
+    "min_keyword_score": 2,
+    "max_docs_per_run": 100
+  },
+  "processing_pipeline": [
+    "metadata_collection",
+    "high_value_filter",
+    "content_export_markdown",
+    "truth_distillation",
+    "entity_extraction",
+    "meta_class_classification",
+    "hash_verification",
+    "lock_and_archive"
+  ],
+  "storage": {
+    "truth_library": "/opt/ZONGYUAN-ROOT/kernel/truths/",
+    "knowledge_graph": "/opt/ZONGYUAN-ROOT/kernel/knowledge_graphs/",
+    "manifests": "/opt/ZONGYUAN-ROOT/kernel/cloud_disk_manifests/",
+    "locks": "/opt/ZONGYUAN-ROOT/kernel/locks/"
+  },
+  "incremental_logic": {
+    "compare_by": [
+      "content_hash",
+      "modified_time"
+    ],
+    "new_assets": "process_and_lock",
+    "modified_assets": "create_REV_revision",
+    "deleted_assets": "flag_DELETED_FLAGGED",
+    "unchanged_assets": "skip"
+  },
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-09-06T19:51:21.219483+00:00"
+}

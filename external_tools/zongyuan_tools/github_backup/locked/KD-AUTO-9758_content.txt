@@ -1,0 +1,125 @@
+# ZONGYUAN-ROOT STANDARD-CORE-V4.0
+# 哈希链深度分级规则｜全局运维标准补充条款
+# 归属模块：密码学底座 / L8-MDAG八前驱存证子系统
+# 巡检联动：300s自治巡检同时校验哈希值 + depth深度指标 + PQC签名合规
+# 确权：DID-BR-000002 | 溯源：Ω₀⊂⊙∞⊂Ω
+
+meta:
+  doc_id: CRYPTO-HASH-DEPTH-001
+  version: "V1.1-PQC"
+  did_owner: "DID-BR-000002"
+  trace_symbol: "Ω₀⊂⊙∞⊂Ω"
+  enable: true
+  drift_tolerance: 0
+
+depth_grade_definition:
+  shallow_chain:
+    name: "浅层链"
+    depth_range: [1, 5]
+    security_level: "low"
+    allow_alg: ["SHA-256","SHA-512","SHA3-256","SHA3-512"]
+    forbidden_alg: ["MD5","SHA-1"]
+    special_alg_limit:
+      MD5: {max_depth: 3}
+      SHA-1: {max_depth: 5}
+    scene:
+      - "临时草稿"
+      - "短期中间台账"
+      - "非核心临时导出文档"
+    alarm_trigger:
+      depth_drop: true
+      algorithm_overflow_depth: true
+
+  middle_chain:
+    name: "中层链"
+    depth_range: [6, 30]
+    security_level: "medium"
+    allow_alg: ["SHA-256","SHA-512","SHA3-256","SHA3-512"]
+    forbidden_alg: ["MD5","SHA-1"]
+    scene:
+      - "常规工程文档"
+      - "云盘普通业务资产"
+      - "普通业务锁档快照"
+    alarm_trigger:
+      depth_drop: true
+      algorithm_overflow_depth: true
+      depth_stagnation_cycle: 1200
+
+  deep_chain:
+    name: "深层链"
+    depth_range: [31, 100]
+    security_level: "high"
+    allow_alg: ["SHA-256","SHA-512","SHA3-256","SHA3-512"]
+    forbidden_alg: ["MD5","SHA-1"]
+    enable_double_hash: false
+    scene:
+      - "核心架构文档"
+      - "代码库基线版本"
+      - "中长期归档资产"
+    alarm_trigger:
+      depth_drop: true
+      algorithm_overflow_depth: true
+      depth_stagnation_cycle: 600
+      bypass_depth_abnormal: warn
+
+  eternal_chain:
+    name: "永恒深度链"
+    depth_range: [101, null]
+    security_level: "Lv8_max"
+    allow_alg: ["SHA-256","SHA-512","SHA3-256","SHA3-512"]
+    forbidden_alg: ["MD5","SHA-1"]
+    enable_double_hash: true
+    double_hash_pair: ["SHA-256", "SHA3-512"]
+    scene:
+      - "技术白皮书"
+      - "自治内核协议"
+      - "本源真值确权凭证"
+      - "ZONGYUAN-ROOT核心体系资产"
+    alarm_trigger:
+      depth_drop: block_readonly
+      algorithm_overflow_depth: block_readonly
+      depth_stagnation_cycle: 300
+      bypass_depth_abnormal: block_readonly
+
+l8_mdag_multidepth:
+  main_depth:
+    name: "主时序深度链"
+    auto_increment: true
+    increment_trigger: "全域锁档完成事件"
+  bypass_depth_list:
+    - "历史版本快照分支"
+    - "架构迭代快照分支"
+    - "巡检基准分支"
+    - "飞书资产台账分支"
+    - "数理真值库分支"
+    - "工程SOP分支"
+    - "内核元规则分支"
+
+depth_behavior_rules:
+  normal_stable: "每次全域锁档 main_depth +=1，旁路同步更新深度快照"
+  inspect_ok: "300s巡检通过，深度快照固化留存，不做回退"
+  partial_repair: "副本异常修复，仅修复对应旁路深度，不改动主深度"
+  history_delete: "删除历史区块，对应链路深度冻结，触发depth_drop告警"
+  main_depth_fail_1: "单轮主深度校验失败：告警、快照留存、冻结异常副本"
+  main_depth_fail_3: "连续三轮主深度不匹配：停止深度增长，进入全域只读保护"
+
+password_hash_constraint:
+  enable_chain_join: false
+  note: "密码哈希禁止接入全局哈希链，不参与深度累加，使用Argon2id / PBKDF2"
+
+post_quantum_ext:
+  eternal_chain:
+    hash_alg: "SHA3-512"
+    sig_alg_primary: "Dilithium-5"
+    sig_alg_backup: "SPHINCS-SHA2-256"
+    double_sign: true
+  deep_chain:
+    hash_alg_prefer: "SHA3-512"
+    sig_alg_primary: "Dilithium-3"
+  transition_policy:
+    allow_old_ecc_verify: true
+    forbid_new_ecc_sign: true
+
+inspect_binding:
+  check_item: ["hash_value_match","depth_value_match","algorithm_allowlist","pqc_sign_compliance"]
+  period_second: 300

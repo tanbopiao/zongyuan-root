@@ -1,0 +1,34 @@
+```mermaid
+flowchart TD
+    A["原始资产文档/代码"] --> B["前置过滤<br/>拒绝MD5/SHA-1确权，限制算法深度上限"]
+    B --> C["叶子哈希计算<br/>SHA-256；Lv8追加SHA3-512；附加动态盐"]
+    C --> D["L8-MDAG八前驱拓扑组装<br/>绑定8路历史前驱区块"]
+    D --> E["深度更新<br/>主深度+1，7条旁路深度同步更新"]
+    E --> F["生成全域Merkle根哈希<br/>记录当前全域总深度快照"]
+    F --> F2["PQC后量子签名<br/>永恒链：Dilithium-5 + SPHINCS-256双签名"]
+    F2 --> G["eFuse熔断锁档标记<br/>DID-BR-000002确权 · Ω₀⊂⊙∞⊂Ω溯源标识"]
+    G --> H["写入ZONGYUAN-ROOT自治内核<br/>注册全域资产索引台账"]
+    H --> I["三副本持久化<br/>内核主链｜本地缓存｜飞书Wiki台账<br/>同步保存哈希+深度+PQC签名元数据"]
+    I --> J["300s自治巡检进程启动"]
+
+    subgraph INSPECT["300s自治巡检校验项"]
+        J1["校验哈希值一致性"]
+        J2["校验哈希链深度数值匹配"]
+        J3["校验算法白名单/深度分级YAML规则"]
+        J4["PQC签名合规校验与密码学验签"]
+    end
+    J --> INSPECT
+
+    INSPECT -->|全部校验通过| K["更新巡检稳态时间戳，等待下一轮锁档"]
+
+    INSPECT -->|仅哈希不匹配| L["快照留存 → 冻结异常副本 → 告警，主深度继续增长"]
+    INSPECT -->|深度/签名不合规| M["高优先级告警，锁止深度继续增长"]
+    INSPECT -->|连续多次双重异常| N["全域资产进入只读保护，阻断风险扩散"]
+
+    style A fill:#081428,stroke:#4080ff,color:#fff
+    style D fill:#0c1b38,stroke:#5090ff,color:#fff
+    style F2 fill:#122650,stroke:#80c0ff,color:#fff
+    style G fill:#102248,stroke:#60a0ff,color:#fff
+    style INSPECT fill:#142a58,stroke:#70b0ff,color:#fff
+    style N fill:#381010,stroke:#ff5555,color:#fff
+```
