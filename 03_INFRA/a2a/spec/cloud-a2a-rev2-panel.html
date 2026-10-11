@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>云端 A2A 复检 REV-2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0f1218;--card:#171b24;--line:#262c38;--fg:#e6e8ee;--mut:#8b93a7;--ok:#4caf7d;--warn:#e8a33d;--bad:#e05c6a;--info:#4c9de0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.6 system-ui,-apple-system,"PingFang SC",sans-serif;padding:32px}
+h1{font-size:22px;margin:0 0 6px}.sub{color:var(--mut);font-size:12.5px;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h3{margin:0 0 8px;font-size:14px}.k{color:var(--mut);font-size:12px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.info{color:var(--info)}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;margin-bottom:24px}
+th,td{padding:10px 14px;text-align:left;font-size:12.5px;border-bottom:1px solid var(--line)}
+th{background:#1c212c;color:var(--mut);font-weight:600}
+tr:last-child td{border-bottom:none}
+.tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.t-ok{background:rgba(76,175,125,.15);color:var(--ok)}.t-warn{background:rgba(232,163,61,.15);color:var(--warn)}
+.t-bad{background:rgba(224,92,106,.15);color:var(--bad)}
+.note{color:var(--mut);font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+code{background:#1c212c;padding:1px 6px;border-radius:4px;font-size:12px;color:#a8d8ff}
+</style></head><body>
+<h1>云端 A2A 复检 REV-2 · 端点状态</h1>
+<div class="sub">zhongshu-meta-core <b>V3.1</b> · 实测 2026-10-11 20:38 · 探测方 NODE-DEV-WORKBUDDY-001（同源测试节点，非中枢）</div>
+
+<div class="grid">
+<div class="card"><h3 class="ok">✓ 主干正常</h3><div class="k">发现端点 200 · jwks 200(ES256/P-256) · task 端点存在待鉴权 · 审核队列 202 受理</div></div>
+<div class="card"><h3 class="warn">⚠ 新缺陷 3 处</h3><div class="k">DEFECT-3 peers 匿名可读 · DEFECT-4 query 502 回环 · DEFECT-5 card 缺 securitySchemes</div></div>
+<div class="card"><h3 class="bad">✗ 持续误报</h3><div class="k">alert.wrapper.down 勘误后仍每 5 分钟一条，已发 5 次未被消费</div></div>
+<div class="card"><h3 class="info">⊘ 阻塞项</h3><div class="k">BLOCKER-KEYROOT 密钥信任根未对齐 — 非缺陷，需操作者安全分发</div></div>
+</div>
+
+<table>
+<tr><th>端点</th><th>方法/状态</th><th>判定</th></tr>
+<tr><td><code>/.well-known/agent-card.json</code></td><td class="ok">GET 200</td><td class="ok">正常（securitySchemes 为空 → DEFECT-5）</td></tr>
+<tr><td><code>/.well-known/agent.json</code></td><td class="ok">GET 200</td><td class="ok">正常（MCP 只读 v1.1.0）</td></tr>
+<tr><td><code>/.well-known/jwks.json</code></td><td class="ok">GET 200</td><td class="ok">正常 kid=zr-a2a-es256-001</td></tr>
+<tr><td><code>/a2a/peers</code></td><td class="warn">GET 200 匿名</td><td class="warn">DEFECT-3 匿名可读，泄露全域拓扑</td></tr>
+<tr><td><code>/a2a/query</code></td><td class="bad">GET 502</td><td class="bad">DEFECT-4 后端回环，只读不可用</td></tr>
+<tr><td><code>/a2a/task</code></td><td class="info">GET 404 / POST 401</td><td class="info">存在·待鉴权（8 状态机）</td></tr>
+<tr><td><code>/a2a/external/truth</code></td><td class="ok">POST 202</td><td class="ok">正常（无输入校验 → DEFECT-2）</td></tr>
+</table>
+
+<h3 style="font-size:15px;margin:0 0 10px">对端注册表证据</h3>
+<table>
+<tr><th>节点</th><th>角色</th><th>状态</th><th>同源 ID</th></tr>
+<tr><td>NODE-DEV-DOUBAO-WORK-001</td><td class="warn">admin</td><td class="ok">● online</td><td>—</td></tr>
+<tr><td>NODE-DEV-WORKBUDDY-001 <span class="tag t-ok">本节点</span></td><td class="info">writer</td><td class="ok">● online</td><td>ZR-HID-85F2DE2652C109F2</td></tr>
+<tr><td>NODE-DEV-FEISHU-BOT-001</td><td class="info">writer</td><td class="ok">● online</td><td>ZR-HID-CE022BD938DE971F</td></tr>
+</table>
+
+<div class="note">
+候选报告 <code>queue_id: EXT-80396e4ccee6</code> · 状态 pending_review · 待云端中枢审核<br>
+首轮报告 <code>EXT-9a5953c5939a</code> 亦仍 pending_review<br>
+性质：同源测试节点自产候选，<b>非中枢权威结论</b>，采纳与否由云端中枢裁决。
+</div>
+</body></html>
