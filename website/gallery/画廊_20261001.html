@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智 · 作品画廊 · 全量关键帧</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0d13'/><text x='50' y='74' font-size='60' text-anchor='middle' fill='%23c9a86a'>Ω</text></svg>">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500&display=swap">
+<style>
+  :root{--bg:#0a0d13;--bg2:#0d111b;--card:#131926;--gold:#c9a86a;--gold2:#e0c689;--teal:#5f7a9e;--ink:#e8e4dc;--dim:#8a94a8;--line:#232c3d;--violet:#a08fc0}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;font-weight:300;line-height:1.7;min-height:100vh;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(1000px 420px at 50% -8%,rgba(201,168,106,.09),transparent 60%),radial-gradient(700px 400px at 95% 20%,rgba(95,122,158,.06),transparent 60%);opacity:.9}
+  .wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 22px}
+
+  /* hero */
+  .hero{padding:72px 0 34px;text-align:center}
+  .crest{font-family:'Noto Serif SC',serif;font-size:20px;color:var(--gold);letter-spacing:.3em;margin-bottom:14px}
+  .hero h1{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(38px,7vw,64px);color:var(--gold2);letter-spacing:.14em;line-height:1.1}
+  .hero .en{margin-top:10px;font-size:13px;color:var(--dim);letter-spacing:.34em;text-transform:uppercase}
+  .hero .desc{margin-top:18px;font-size:15px;color:var(--dim);max-width:560px;margin-left:auto;margin-right:auto}
+  .hero .meta{margin-top:14px;font-size:12px;color:var(--dim);letter-spacing:.1em}
+
+  /* nav */
+  nav.chip-nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(10,13,19,.82);border-bottom:1px solid var(--line);margin-top:28px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px 4px}
+  .chips a{color:var(--dim);text-decoration:none;font-size:13px;padding:6px 14px;border:1px solid var(--line);border-radius:40px;transition:.2s}
+  .chips a:hover{color:var(--gold2);border-color:var(--gold)}
+  .chips a .n{color:var(--gold);margin-left:5px;font-size:12px}
+
+  /* section */
+  .sec{padding:56px 0 16px}
+  .sec-head{margin-bottom:28px}
+  .anchor{display:block;width:44px;height:3px;background:linear-gradient(90deg,var(--gold),transparent);margin-bottom:14px}
+  .sec-title{font-family:'Noto Serif SC',serif;font-size:clamp(22px,3.4vw,30px);color:var(--gold2);letter-spacing:.06em}
+  .sec-sub{margin-top:6px;font-size:13px;color:var(--dim);letter-spacing:.04em}
+
+  /* grid */
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .card{background:linear-gradient(180deg,var(--card),#0f141f);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s}
+  .card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 12px 30px rgba(0,0,0,.5)}
+  .imgwrap{aspect-ratio:9/16;overflow:hidden;background:#0a0d13}
+  .imgwrap img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+  .card figcaption{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-top:1px solid var(--line)}
+  .card .no{font-family:'Noto Serif SC',serif;color:var(--gold);font-size:14px;letter-spacing:.05em}
+  .card .tag{font-size:12px;color:var(--dim);letter-spacing:.06em}
+
+  /* lightbox */
+  .lb{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(5,7,12,.94);backdrop-filter:blur(6px)}
+  .lb.open{display:flex}
+  .lb img{max-width:88vw;max-height:88vh;object-fit:contain;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.7)}
+  .lb .cap{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);color:var(--dim);font-size:13px;letter-spacing:.1em;white-space:nowrap}
+  .lb .x{position:absolute;top:18px;right:22px;color:var(--dim);font-size:30px;cursor:pointer;padding:8px;line-height:1}
+  .lb .x:hover{color:var(--gold2)}
+
+  .foot{margin:40px 0 0;padding:34px 0 50px;border-top:1px solid var(--line);text-align:center;font-size:12px;color:var(--dim);letter-spacing:.1em;line-height:2}
+  @media (max-width:820px){.g3{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:520px){.g3,.g2{grid-template-columns:1fr}.hero{padding-top:50px}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="crest">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+    <h1>作品画廊</h1>
+    <div class="en">ZONGYUAN-ROOT · GALLERY</div>
+    <p class="desc">九天玄女 / 赛博国风 / 红裙 / 银蓝 —— 全量 AI 关键帧资产库，9:16 竖屏电影感国风霓虹。</p>
+    <div class="meta">DID-BR-000002 · 火斗云智 AIOS · 64 帧</div>
+  </header>
+</div>
+<nav class="chip-nav"><div class="chips" id="chips"></div></nav>
+<div class="wrap">
+  <section class="sec" id="s-jiutian_xuannv">
+    <div class="sec-head"><span class="anchor"></span>
+      <h2 class="sec-title">昆仑洞天 · 九天玄女</h2>
+      <p class="sec-sub">蓄势劈击 / 悬停突进 / 静势破界 · 三型战斗关键帧</p>
+    </div>
+    <div class="grid g3">
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_01/KF-JTX-01-01_%E8%93%84%E5%8A%BF%E8%81%9A%E8%83%BD%E5%8A%88%E5%87%BB%E6%94%B6%E5%8A%BF.jpg" alt="九天玄女 蓄势劈击 01" loading="lazy"></div>
+        <figcaption><span class="no">01</span><span class="tag">蓄势劈击</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_01/KF-JTX-01-02_%E8%93%84%E5%8A%BF%E8%81%9A%E8%83%BD%E5%8A%88%E5%87%BB%E6%94%B6%E5%8A%BF.jpg" alt="九天玄女 蓄势劈击 02" loading="lazy"></div>
+        <figcaption><span class="no">02</span><span class="tag">蓄势劈击</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_01/KF-JTX-01-03_%E8%93%84%E5%8A%BF%E8%81%9A%E8%83%BD%E5%8A%88%E5%87%BB%E6%94%B6%E5%8A%BF.jpg" alt="九天玄女 蓄势劈击 03" loading="lazy"></div>
+        <figcaption><span class="no">03</span><span class="tag">蓄势劈击</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_01/KF-JTX-01-04_%E8%93%84%E5%8A%BF%E8%81%9A%E8%83%BD%E5%8A%88%E5%87%BB%E6%94%B6%E5%8A%BF.jpg" alt="九天玄女 蓄势劈击 04" loading="lazy"></div>
+        <figcaption><span class="no">04</span><span class="tag">蓄势劈击</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_01/KF-JTX-01-05_%E8%93%84%E5%8A%BF%E8%81%9A%E8%83%BD%E5%8A%88%E5%87%BB%E6%94%B6%E5%8A%BF.jpg" alt="九天玄女 蓄势劈击 05" loading="lazy"></div>
+        <figcaption><span class="no">05</span><span class="tag">蓄势劈击</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_01/KF-JTX-01-06_%E8%93%84%E5%8A%BF%E8%81%9A%E8%83%BD%E5%8A%88%E5%87%BB%E6%94%B6%E5%8A%BF.jpg" alt="九天玄女 蓄势劈击 06" loading="lazy"></div>
+        <figcaption><span class="no">06</span><span class="tag">蓄势劈击</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_02/KF-JTX-02-01_%E6%82%AC%E5%81%9C%E7%AA%81%E8%BF%9B%E6%97%8B%E8%BA%AB%E4%B8%8A%E6%8C%91%E9%95%87%E5%8E%8B%E5%B0%81%E5%8D%B0.jpg" alt="九天玄女 悬停突进 07" loading="lazy"></div>
+        <figcaption><span class="no">07</span><span class="tag">悬停突进</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_02/KF-JTX-02-02_%E6%82%AC%E5%81%9C%E7%AA%81%E8%BF%9B%E6%97%8B%E8%BA%AB%E4%B8%8A%E6%8C%91%E9%95%87%E5%8E%8B%E5%B0%81%E5%8D%B0.jpg" alt="九天玄女 悬停突进 08" loading="lazy"></div>
+        <figcaption><span class="no">08</span><span class="tag">悬停突进</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_02/KF-JTX-02-03_%E6%82%AC%E5%81%9C%E7%AA%81%E8%BF%9B%E6%97%8B%E8%BA%AB%E4%B8%8A%E6%8C%91%E9%95%87%E5%8E%8B%E5%B0%81%E5%8D%B0.jpg" alt="九天玄女 悬停突进 09" loading="lazy"></div>
+        <figcaption><span class="no">09</span><span class="tag">悬停突进</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_02/KF-JTX-02-04_%E6%82%AC%E5%81%9C%E7%AA%81%E8%BF%9B%E6%97%8B%E8%BA%AB%E4%B8%8A%E6%8C%91%E9%95%87%E5%8E%8B%E5%B0%81%E5%8D%B0.jpg" alt="九天玄女 悬停突进 10" loading="lazy"></div>
+        <figcaption><span class="no">10</span><span class="tag">悬停突进</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_02/KF-JTX-02-05_%E6%82%AC%E5%81%9C%E7%AA%81%E8%BF%9B%E6%97%8B%E8%BA%AB%E4%B8%8A%E6%8C%91%E9%95%87%E5%8E%8B%E5%B0%81%E5%8D%B0.jpg" alt="九天玄女 悬停突进 11" loading="lazy"></div>
+        <figcaption><span class="no">11</span><span class="tag">悬停突进</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_02/KF-JTX-02-06_%E6%82%AC%E5%81%9C%E7%AA%81%E8%BF%9B%E6%97%8B%E8%BA%AB%E4%B8%8A%E6%8C%91%E9%95%87%E5%8E%8B%E5%B0%81%E5%8D%B0.jpg" alt="九天玄女 悬停突进 12" loading="lazy"></div>
+        <figcaption><span class="no">12</span><span class="tag">悬停突进</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_03/KF-JTX-03-01_%E9%9D%99%E5%8A%BF%E7%AA%81%E8%BF%9B%E7%A0%B4%E7%95%8C%E7%BF%BB%E8%BD%AC%E9%95%87%E5%8E%8B%E6%94%B6%E6%9D%9F.jpg" alt="九天玄女 静势破界 13" loading="lazy"></div>
+        <figcaption><span class="no">13</span><span class="tag">静势破界</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_03/KF-JTX-03-02_%E9%9D%99%E5%8A%BF%E7%AA%81%E8%BF%9B%E7%A0%B4%E7%95%8C%E7%BF%BB%E8%BD%AC%E9%95%87%E5%8E%8B%E6%94%B6%E6%9D%9F.jpg" alt="九天玄女 静势破界 14" loading="lazy"></div>
+        <figcaption><span class="no">14</span><span class="tag">静势破界</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_03/KF-JTX-03-03_%E9%9D%99%E5%8A%BF%E7%AA%81%E8%BF%9B%E7%A0%B4%E7%95%8C%E7%BF%BB%E8%BD%AC%E9%95%87%E5%8E%8B%E6%94%B6%E6%9D%9F.jpg" alt="九天玄女 静势破界 15" loading="lazy"></div>
+        <figcaption><span class="no">15</span><span class="tag">静势破界</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_03/KF-JTX-03-04_%E9%9D%99%E5%8A%BF%E7%AA%81%E8%BF%9B%E7%A0%B4%E7%95%8C%E7%BF%BB%E8%BD%AC%E9%95%87%E5%8E%8B%E6%94%B6%E6%9D%9F.jpg" alt="九天玄女 静势破界 16" loading="lazy"></div>
+        <figcaption><span class="no">16</span><span class="tag">静势破界</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_03/KF-JTX-03-05_%E9%9D%99%E5%8A%BF%E7%AA%81%E8%BF%9B%E7%A0%B4%E7%95%8C%E7%BF%BB%E8%BD%AC%E9%95%87%E5%8E%8B%E6%94%B6%E6%9D%9F.jpg" alt="九天玄女 静势破界 17" loading="lazy"></div>
+        <figcaption><span class="no">17</span><span class="tag">静势破界</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=jiutian_xuannv/batch_03/KF-JTX-03-06_%E9%9D%99%E5%8A%BF%E7%AA%81%E8%BF%9B%E7%A0%B4%E7%95%8C%E7%BF%BB%E8%BD%AC%E9%95%87%E5%8E%8B%E6%94%B6%E6%9D%9F.jpg" alt="九天玄女 静势破界 18" loading="lazy"></div>
+        <figcaption><span class="no">18</span><span class="tag">静势破界</span></figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="sec" id="s-cyber_chinese">
+    <div class="sec-head"><span class="anchor"></span>
+      <h2 class="sec-title">赛博国风</h2>
+      <p class="sec-sub">新中式赛博人像 · 五版变体演绎</p>
+    </div>
+    <div class="grid g2">
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v1_%E5%88%9D%E5%A7%8B/CB-V1-01_%E5%88%9D%E5%A7%8B%E5%86%99%E7%9C%9F.jpg" alt="赛博国风 初始写真 01" loading="lazy"></div>
+        <figcaption><span class="no">01</span><span class="tag">初始写真</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v1_%E5%88%9D%E5%A7%8B/CB-V1-02_%E5%88%9D%E5%A7%8B%E5%86%99%E7%9C%9F.jpg" alt="赛博国风 初始写真 02" loading="lazy"></div>
+        <figcaption><span class="no">02</span><span class="tag">初始写真</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v1_%E5%88%9D%E5%A7%8B/CB-V1-03_%E5%88%9D%E5%A7%8B%E5%86%99%E7%9C%9F.jpg" alt="赛博国风 初始写真 03" loading="lazy"></div>
+        <figcaption><span class="no">03</span><span class="tag">初始写真</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v1_%E5%88%9D%E5%A7%8B/CB-V1-04_%E5%88%9D%E5%A7%8B%E5%86%99%E7%9C%9F.jpg" alt="赛博国风 初始写真 04" loading="lazy"></div>
+        <figcaption><span class="no">04</span><span class="tag">初始写真</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v2_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1/CB-V2-01_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1.jpg" alt="赛博国风 体态丰盈 05" loading="lazy"></div>
+        <figcaption><span class="no">05</span><span class="tag">体态丰盈</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v2_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1/CB-V2-02_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1.jpg" alt="赛博国风 体态丰盈 06" loading="lazy"></div>
+        <figcaption><span class="no">06</span><span class="tag">体态丰盈</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v2_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1/CB-V2-03_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1.jpg" alt="赛博国风 体态丰盈 07" loading="lazy"></div>
+        <figcaption><span class="no">07</span><span class="tag">体态丰盈</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v2_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1/CB-V2-04_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1.jpg" alt="赛博国风 体态丰盈 08" loading="lazy"></div>
+        <figcaption><span class="no">08</span><span class="tag">体态丰盈</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v3_%E6%9B%B4%E6%80%A7%E6%84%9F/CB-V3-01_%E6%9B%B4%E6%80%A7%E6%84%9F%E6%9B%B2%E7%BA%BF.jpg" alt="赛博国风 气韵流转 09" loading="lazy"></div>
+        <figcaption><span class="no">09</span><span class="tag">气韵流转</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v3_%E6%9B%B4%E6%80%A7%E6%84%9F/CB-V3-02_%E6%9B%B4%E6%80%A7%E6%84%9F%E6%9B%B2%E7%BA%BF.jpg" alt="赛博国风 气韵流转 10" loading="lazy"></div>
+        <figcaption><span class="no">10</span><span class="tag">气韵流转</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v3_%E6%9B%B4%E6%80%A7%E6%84%9F/CB-V3-03_%E6%9B%B4%E6%80%A7%E6%84%9F%E6%9B%B2%E7%BA%BF.jpg" alt="赛博国风 气韵流转 11" loading="lazy"></div>
+        <figcaption><span class="no">11</span><span class="tag">气韵流转</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v3_%E6%9B%B4%E6%80%A7%E6%84%9F/CB-V3-04_%E6%9B%B4%E6%80%A7%E6%84%9F%E6%9B%B2%E7%BA%BF.jpg" alt="赛博国风 气韵流转 12" loading="lazy"></div>
+        <figcaption><span class="no">12</span><span class="tag">气韵流转</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v4_%E6%9B%B4%E5%A4%B8%E5%BC%A0/CB-V4-01_%E6%9B%B4%E5%A4%B8%E5%BC%A0.jpg" alt="赛博国风 更具张力 13" loading="lazy"></div>
+        <figcaption><span class="no">13</span><span class="tag">更具张力</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v4_%E6%9B%B4%E5%A4%B8%E5%BC%A0/CB-V4-02_%E6%9B%B4%E5%A4%B8%E5%BC%A0.jpg" alt="赛博国风 更具张力 14" loading="lazy"></div>
+        <figcaption><span class="no">14</span><span class="tag">更具张力</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v4_%E6%9B%B4%E5%A4%B8%E5%BC%A0/CB-V4-03_%E6%9B%B4%E5%A4%B8%E5%BC%A0.jpg" alt="赛博国风 更具张力 15" loading="lazy"></div>
+        <figcaption><span class="no">15</span><span class="tag">更具张力</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v4_%E6%9B%B4%E5%A4%B8%E5%BC%A0/CB-V4-04_%E6%9B%B4%E5%A4%B8%E5%BC%A0.jpg" alt="赛博国风 更具张力 16" loading="lazy"></div>
+        <figcaption><span class="no">16</span><span class="tag">更具张力</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v5_%E9%87%8D%E7%94%9F%E6%88%90%E5%85%B3%E9%94%AE%E5%B8%A7/CB-V5-01_%E5%85%B3%E9%94%AE%E5%B8%A7.jpg" alt="赛博国风 迭代重绘 17" loading="lazy"></div>
+        <figcaption><span class="no">17</span><span class="tag">迭代重绘</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v5_%E9%87%8D%E7%94%9F%E6%88%90%E5%85%B3%E9%94%AE%E5%B8%A7/CB-V5-02_%E5%85%B3%E9%94%AE%E5%B8%A7.jpg" alt="赛博国风 迭代重绘 18" loading="lazy"></div>
+        <figcaption><span class="no">18</span><span class="tag">迭代重绘</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v5_%E9%87%8D%E7%94%9F%E6%88%90%E5%85%B3%E9%94%AE%E5%B8%A7/CB-V5-03_%E5%85%B3%E9%94%AE%E5%B8%A7.jpg" alt="赛博国风 迭代重绘 19" loading="lazy"></div>
+        <figcaption><span class="no">19</span><span class="tag">迭代重绘</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v5_%E9%87%8D%E7%94%9F%E6%88%90%E5%85%B3%E9%94%AE%E5%B8%A7/CB-V5-04_%E5%85%B3%E9%94%AE%E5%B8%A7.jpg" alt="赛博国风 迭代重绘 20" loading="lazy"></div>
+        <figcaption><span class="no">20</span><span class="tag">迭代重绘</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v5_%E9%87%8D%E7%94%9F%E6%88%90%E5%85%B3%E9%94%AE%E5%B8%A7/CB-V5-05_%E5%85%B3%E9%94%AE%E5%B8%A7.jpg" alt="赛博国风 迭代重绘 21" loading="lazy"></div>
+        <figcaption><span class="no">21</span><span class="tag">迭代重绘</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=cyber_chinese/v5_%E9%87%8D%E7%94%9F%E6%88%90%E5%85%B3%E9%94%AE%E5%B8%A7/CB-V5-06_%E5%85%B3%E9%94%AE%E5%B8%A7.jpg" alt="赛博国风 迭代重绘 22" loading="lazy"></div>
+        <figcaption><span class="no">22</span><span class="tag">迭代重绘</span></figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="sec" id="s-hongqun">
+    <div class="sec-head"><span class="anchor"></span>
+      <h2 class="sec-title">红裙系列</h2>
+      <p class="sec-sub">基准 / 体态丰盈 / 身形强化 / 动势延展 / 正面近景</p>
+    </div>
+    <div class="grid g3">
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v1_%E5%9F%BA%E5%87%86/eUUvfmiQUw.jpg" alt="红裙 基准 01" loading="lazy"></div>
+        <figcaption><span class="no">01</span><span class="tag">基准</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v1_%E5%9F%BA%E5%87%86/%E7%BA%A2%E8%A3%99_%E5%8E%9F%E5%A7%8B01.jpg" alt="红裙 基准 02" loading="lazy"></div>
+        <figcaption><span class="no">02</span><span class="tag">基准</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v1_%E5%9F%BA%E5%87%86/%E7%BA%A2%E8%A3%99_%E5%8E%9F%E5%A7%8B02.jpg" alt="红裙 基准 03" loading="lazy"></div>
+        <figcaption><span class="no">03</span><span class="tag">基准</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v1_%E5%9F%BA%E5%87%86/%E7%BA%A2%E8%A3%99_%E5%8E%9F%E5%A7%8B03.jpg" alt="红裙 基准 04" loading="lazy"></div>
+        <figcaption><span class="no">04</span><span class="tag">基准</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v1_%E5%9F%BA%E5%87%86/%E7%BA%A2%E8%A3%99_%E5%8E%9F%E5%A7%8B04.jpg" alt="红裙 基准 05" loading="lazy"></div>
+        <figcaption><span class="no">05</span><span class="tag">基准</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v2_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1/GaDyntYqt8.jpg" alt="红裙 体态丰盈 06" loading="lazy"></div>
+        <figcaption><span class="no">06</span><span class="tag">体态丰盈</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v2_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1/XvoDJ6qUEy.jpg" alt="红裙 体态丰盈 07" loading="lazy"></div>
+        <figcaption><span class="no">07</span><span class="tag">体态丰盈</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v2_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1/ZaUt3tUfOL.jpg" alt="红裙 体态丰盈 08" loading="lazy"></div>
+        <figcaption><span class="no">08</span><span class="tag">体态丰盈</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v2_%E8%83%B8%E9%83%A8%E9%A5%B1%E6%BB%A1/ssJcYHAQ7g.jpg" alt="红裙 体态丰盈 09" loading="lazy"></div>
+        <figcaption><span class="no">09</span><span class="tag">体态丰盈</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v3_%E5%BC%BA%E5%8C%96%E8%83%B8%E5%9E%8B/HVBtLUatge.jpg" alt="红裙 身形强化 10" loading="lazy"></div>
+        <figcaption><span class="no">10</span><span class="tag">身形强化</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v4_%E9%94%81%E5%AE%9A%E5%9F%BA%E5%87%86%E5%BB%B6%E5%B1%95/QkSjY7EOQI.jpg" alt="红裙 动势延展 11" loading="lazy"></div>
+        <figcaption><span class="no">11</span><span class="tag">动势延展</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v4_%E9%94%81%E5%AE%9A%E5%9F%BA%E5%87%86%E5%BB%B6%E5%B1%95/Z8uLDI0T7V.jpg" alt="红裙 动势延展 12" loading="lazy"></div>
+        <figcaption><span class="no">12</span><span class="tag">动势延展</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v4_%E9%94%81%E5%AE%9A%E5%9F%BA%E5%87%86%E5%BB%B6%E5%B1%95/fW5bUGG4Om.jpg" alt="红裙 动势延展 13" loading="lazy"></div>
+        <figcaption><span class="no">13</span><span class="tag">动势延展</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v4_%E9%94%81%E5%AE%9A%E5%9F%BA%E5%87%86%E5%BB%B6%E5%B1%95/kiA7lPhZ7U.jpg" alt="红裙 动势延展 14" loading="lazy"></div>
+        <figcaption><span class="no">14</span><span class="tag">动势延展</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v5_%E6%AD%A3%E9%9D%A2%E8%BF%91%E7%85%A7/Dg0sevwTjb.jpg" alt="红裙 正面近景 15" loading="lazy"></div>
+        <figcaption><span class="no">15</span><span class="tag">正面近景</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v5_%E6%AD%A3%E9%9D%A2%E8%BF%91%E7%85%A7/ElFf4NRsnk.jpg" alt="红裙 正面近景 16" loading="lazy"></div>
+        <figcaption><span class="no">16</span><span class="tag">正面近景</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v5_%E6%AD%A3%E9%9D%A2%E8%BF%91%E7%85%A7/FgyxvMeIHw.jpg" alt="红裙 正面近景 17" loading="lazy"></div>
+        <figcaption><span class="no">17</span><span class="tag">正面近景</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=hongqun/v5_%E6%AD%A3%E9%9D%A2%E8%BF%91%E7%85%A7/ZiLPjjyzQw.jpg" alt="红裙 正面近景 18" loading="lazy"></div>
+        <figcaption><span class="no">18</span><span class="tag">正面近景</span></figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="sec" id="s-yinlan">
+    <div class="sec-head"><span class="anchor"></span>
+      <h2 class="sec-title">银蓝系列</h2>
+      <p class="sec-sub">银蓝霓虹国风 · 基准延展</p>
+    </div>
+    <div class="grid g2">
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=yinlan/v1_%E5%9F%BA%E5%87%86%E5%BB%B6%E5%B1%95/E09Vtk8Hnz.jpg" alt="银蓝 基准延展 01" loading="lazy"></div>
+        <figcaption><span class="no">01</span><span class="tag">基准延展</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=yinlan/v1_%E5%9F%BA%E5%87%86%E5%BB%B6%E5%B1%95/M1fmlQamW6.jpg" alt="银蓝 基准延展 02" loading="lazy"></div>
+        <figcaption><span class="no">02</span><span class="tag">基准延展</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=yinlan/v1_%E5%9F%BA%E5%87%86%E5%BB%B6%E5%B1%95/o9uOUEFhwB.jpg" alt="银蓝 基准延展 03" loading="lazy"></div>
+        <figcaption><span class="no">03</span><span class="tag">基准延展</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=yinlan/v1_%E5%9F%BA%E5%87%86%E5%BB%B6%E5%B1%95/qtFjOUh7Ct.jpg" alt="银蓝 基准延展 04" loading="lazy"></div>
+        <figcaption><span class="no">04</span><span class="tag">基准延展</span></figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="sec" id="s-reference">
+    <div class="sec-head"><span class="anchor"></span>
+      <h2 class="sec-title">参考图</h2>
+      <p class="sec-sub">创作参考基准（原图）</p>
+    </div>
+    <div class="grid g2">
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=reference/EVgMUID4vx.webp" alt="参考 EVgMUID4vx.webp 01" loading="lazy"></div>
+        <figcaption><span class="no">01</span><span class="tag">EVgMUID4vx.webp</span></figcaption>
+      </figure>
+      <figure class="card">
+        <div class="imgwrap"><img src="https://modelscope.cn/api/v1/datasets/zongyuanroot/zongyuan-gallery/repo?Revision=master&FilePath=reference/s3eoy6GODP.webp" alt="参考 s3eoy6GODP.webp 02" loading="lazy"></div>
+        <figcaption><span class="no">02</span><span class="tag">s3eoy6GODP.webp</span></figcaption>
+      </figure>
+    </div>
+  </section>
+  <footer class="foot">确权 DID-BR-000002 ｜ Ω₀⊂⊙∞⊂Ω ｜ 主节点 hub-central-agent ｜ 自治 Lv9<br>魔搭公开数据集 zongyuanroot/zongyuan-gallery · 全量直链</footer>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-label="图片预览">
+  <span class="x" id="lbx">×</span>
+  <img id="lbimg" alt="预览">
+  <div class="cap" id="lbcap"></div>
+</div>
+
+<script>
+  // 顶部分类计数导航（静态生成，URL 仍在 img src 属性中）
+  var groups = [
+    ["九天玄女","s-jiutian_xuannv",18],
+    ["赛博国风","s-cyber_chinese",22],
+    ["红裙系列","s-hongqun",18],
+    ["银蓝系列","s-yinlan",4],
+    ["参考图","s-reference",2]
+  ];
+  var chips = document.getElementById('chips');
+  groups.forEach(function(g){
+    var a = document.createElement('a');
+    a.href = '#' + g[1];
+    a.innerHTML = g[0] + '<span class="n">' + g[2] + '</span>';
+    chips.appendChild(a);
+  });
+
+  // 灯箱：点击卡片放大（URL 读取自卡片内 img 的 src，保持静态）
+  var lb = document.getElementById('lb');
+  var lbimg = document.getElementById('lbimg');
+  var lbcap = document.getElementById('lbcap');
+  document.querySelectorAll('.card').forEach(function(card){
+    card.addEventListener('click', function(){
+      var img = card.querySelector('img');
+      lbimg.src = img.getAttribute('src');
+      lbcap.textContent = card.querySelector('.tag').textContent;
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+  function close(){
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('lbx').addEventListener('click', close);
+  lb.addEventListener('click', function(e){ if(e.target === lb) close(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+</script>
+</body>
+</html>

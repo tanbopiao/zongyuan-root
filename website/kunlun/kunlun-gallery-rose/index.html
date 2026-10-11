@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天 · 玫瑰诗篇 | 作品库</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>">
+<style>
+:root{
+  --bg:#0a0608;--bg2:#140a10;--card:#1a0e14;--card2:#22121a;
+  --border:#3a1f2a;--border2:#5a2f3a;
+  --text:#f5e8ec;--text2:#b89aa5;--text3:#7a5a68;
+  --rose:#e8385a;--rose2:#ff6b8a;--gold:#d4a857;--wine:#6b1a2a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:'Noto Serif SC','Songti SC','PingFang SC',serif;min-height:100vh;overflow-x:hidden}
+body{background:
+  radial-gradient(ellipse at 20% 0%,rgba(232,56,90,.08) 0%,transparent 50%),
+  radial-gradient(ellipse at 80% 100%,rgba(212,168,87,.06) 0%,transparent 50%),
+  var(--bg)}
+
+/* 顶部 */
+.header{position:sticky;top:0;z-index:100;background:rgba(10,6,8,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:16px 28px}
+.header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--rose),var(--wine));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 24px rgba(232,56,90,.35)}
+.brand-text h1{font-size:18px;font-weight:700;letter-spacing:2px}
+.brand-text p{font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:1px}
+.anchor-tag{font-size:11px;color:var(--gold);letter-spacing:1px;padding:6px 14px;border:1px solid var(--border2);border-radius:20px;background:rgba(212,168,87,.06)}
+
+.container{max-width:1400px;margin:0 auto;padding:32px 24px}
+
+/* Hero */
+.hero{text-align:center;padding:48px 20px 36px;position:relative}
+.hero::before{content:'';position:absolute;top:20px;left:50%;transform:translateX(-50%);width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.hero h2{font-size:42px;font-weight:800;letter-spacing:8px;background:linear-gradient(135deg,#fff 20%,var(--rose2) 50%,var(--gold) 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:14px}
+.hero p{font-size:14px;color:var(--text2);letter-spacing:3px;line-height:1.9;max-width:680px;margin:0 auto}
+.hero .divider{width:60px;height:2px;background:linear-gradient(90deg,var(--rose),var(--gold));margin:24px auto;border-radius:2px}
+
+/* Tab */
+.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:6px;margin:28px auto;max-width:520px}
+.tab{flex:1;padding:12px 20px;text-align:center;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;letter-spacing:3px;color:var(--text2);transition:all .3s;white-space:nowrap;border:none;background:transparent;font-family:inherit}
+.tab:hover{color:var(--text)}
+.tab.active{background:linear-gradient(135deg,rgba(232,56,90,.2),rgba(212,168,87,.1));color:var(--rose2);box-shadow:inset 0 0 0 1px rgba(232,56,90,.4)}
+
+/* Gallery */
+.view{display:none;animation:fadeIn .4s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;margin-top:24px}
+.card{background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .35s,border-color .35s,box-shadow .35s;position:relative}
+.card:hover{transform:translateY(-6px);border-color:var(--rose);box-shadow:0 16px 40px rgba(232,56,90,.18)}
+.card-img{width:100%;aspect-ratio:9/14;overflow:hidden;background:#000}
+.card-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+.card:hover .card-img img{transform:scale(1.05)}
+.card-info{padding:16px 18px}
+.card-title{font-size:15px;font-weight:700;letter-spacing:2px;color:var(--text);margin-bottom:6px}
+.card-meta{font-size:11px;color:var(--text3);letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.card-tag{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;letter-spacing:1px;background:rgba(212,168,87,.1);color:var(--gold);border:1px solid rgba(212,168,87,.2)}
+
+/* 统计条 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.stat-num{font-size:28px;font-weight:800;color:var(--rose2);font-variant-numeric:tabular-nums}
+.stat-label{font-size:11px;color:var(--text3);letter-spacing:2px;margin-top:6px}
+
+/* Lightbox */
+.lightbox{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.94);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:40px;cursor:zoom-out}
+.lightbox.show{display:flex}
+.lightbox img{max-width:90vw;max-height:88vh;border-radius:12px;box-shadow:0 30px 80px rgba(232,56,90,.25)}
+.lb-close{position:absolute;top:24px;right:32px;color:#fff;font-size:32px;cursor:pointer;opacity:.7;transition:opacity .2s;line-height:1}
+.lb-close:hover{opacity:1}
+
+/* Footer */
+.footer{margin-top:60px;padding:32px;text-align:center;border-top:1px solid var(--border)}
+.footer .anchor{font-size:13px;color:var(--gold);letter-spacing:3px;margin-bottom:8px}
+.footer p{font-size:11px;color:var(--text3);letter-spacing:1px;line-height:1.8}
+
+@media(max-width:720px){
+  .hero h2{font-size:28px;letter-spacing:4px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .gallery{grid-template-columns:repeat(2,1fr);gap:14px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">🌹</div>
+      <div class="brand-text">
+        <h1>昆仑洞天 · 玫瑰诗篇</h1>
+        <p>KUNLUN ROSE GALLERY · 东方高定时装艺术人像</p>
+      </div>
+    </div>
+    <div class="anchor-tag">Ω₀⊂⊙∞⊂Ω</div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="hero">
+    <h2>玫 瑰 诗 篇</h2>
+    <div class="divider"></div>
+    <p>昆仑洞天子域视觉资产 · 东方高定时装艺术人像<br>
+    以黑金为底、红纱为骨、玫瑰为魂，定格东方女性的冷艳与华贵。</p>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">2</div><div class="stat-label">视觉子域</div></div>
+    <div class="stat"><div class="stat-num">12</div><div class="stat-label">精选作品</div></div>
+    <div class="stat"><div class="stat-num">9:16</div><div class="stat-label">竖屏画幅</div></div>
+    <div class="stat"><div class="stat-num">Lv9</div><div class="stat-label">自治锁档</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-view="oriental">东方玫瑰</button>
+    <button class="tab" data-view="dark">暗夜玫瑰</button>
+  </div>
+
+  <!-- 东方玫瑰 -->
+  <div class="view active" id="view-oriental">
+    <div class="gallery">
+      <div class="card" data-full="assets/oriental-rose/oriental-rose-brightred-01.png">
+        <div class="card-img"><img src="assets/oriental-rose/oriental-rose-brightred-01.png" alt="侧身回眸"></div>
+        <div class="card-info">
+          <div class="card-title">侧身回眸</div>
+          <div class="card-meta"><span>清亮宝石红 · 丝缎</span><span class="card-tag">OR-01</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/oriental-rose-brightred-02.png">
+        <div class="card-img"><img src="assets/oriental-rose/oriental-rose-brightred-02.png" alt="近景持花"></div>
+        <div class="card-info">
+          <div class="card-title">近景持花</div>
+          <div class="card-meta"><span>金色发饰 · 玫瑰触颌</span><span class="card-tag">OR-02</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/oriental-rose-brightred-03.png">
+        <div class="card-img"><img src="assets/oriental-rose/oriental-rose-brightred-03.png" alt="仰拍红纱"></div>
+        <div class="card-info">
+          <div class="card-title">仰拍红纱</div>
+          <div class="card-meta"><span>多层透光 · 冷艳气场</span><span class="card-tag">OR-03</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/oriental-rose-brightred-04.png">
+        <div class="card-img"><img src="assets/oriental-rose/oriental-rose-brightred-04.png" alt="露背转侧"></div>
+        <div class="card-info">
+          <div class="card-title">露背转侧</div>
+          <div class="card-meta"><span>金色盘扣 · 红纱披肩</span><span class="card-tag">OR-04</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/or-final-01.png">
+        <div class="card-img"><img src="assets/oriental-rose/or-final-01.png" alt="红纱叠加"></div>
+        <div class="card-info">
+          <div class="card-title">红纱叠加</div>
+          <div class="card-meta"><span>半透明边缘 · 呼吸感</span><span class="card-tag">OR-05</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/or-final-02.png">
+        <div class="card-img"><img src="assets/oriental-rose/or-final-02.png" alt="正面立姿"></div>
+        <div class="card-info">
+          <div class="card-title">正面立姿</div>
+          <div class="card-meta"><span>正式封面 · 端庄华贵</span><span class="card-tag">OR-06</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-017.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-017.webp" alt="侧身缓步"></div>
+        <div class="card-info">
+          <div class="card-title">侧身缓步</div>
+          <div class="card-meta"><span>红纱轻扬 · 玫瑰花海</span><span class="card-tag">OR-07</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-018.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-018.webp" alt="手托玫瑰"></div>
+        <div class="card-info">
+          <div class="card-title">手托玫瑰</div>
+          <div class="card-meta"><span>四分之三侧颜 · 暗黑金光影</span><span class="card-tag">OR-08</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-019.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-019.webp" alt="低角度裙摆"></div>
+        <div class="card-info">
+          <div class="card-title">低角度裙摆</div>
+          <div class="card-meta"><span>花瓣散落 · 烟雾氛围</span><span class="card-tag">OR-09</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-020.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-020.webp" alt="肩颈特写"></div>
+        <div class="card-info">
+          <div class="card-title">肩颈特写</div>
+          <div class="card-meta"><span>蕾丝肌理 · 红丝绒发饰</span><span class="card-tag">OR-10</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-021.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-021.webp" alt="回头回眸"></div>
+        <div class="card-info">
+          <div class="card-title">回头回眸</div>
+          <div class="card-meta"><span>纱幔轻落 · 克制构图</span><span class="card-tag">OR-11</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-022.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-022.webp" alt="正面静立"></div>
+        <div class="card-info">
+          <div class="card-title">正面静立</div>
+          <div class="card-meta"><span>手持玫瑰 · 对称黑金</span><span class="card-tag">OR-12</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-023.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-023.webp" alt="斜向半身"></div>
+        <div class="card-info">
+          <div class="card-title">斜向半身</div>
+          <div class="card-meta"><span>发丝微动 · 薄纱半裹</span><span class="card-tag">OR-13</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-024.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-024.webp" alt="远景全身"></div>
+        <div class="card-info">
+          <div class="card-title">远景全身</div>
+          <div class="card-meta"><span>玫瑰丛中央 · 宏大静谧</span><span class="card-tag">OR-14</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-025.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-025.webp" alt="月洞门"></div>
+        <div class="card-info">
+          <div class="card-title">月洞门</div>
+          <div class="card-meta"><span>月下庭院 · 红纱披帛</span><span class="card-tag">OR-15</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-026.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-026.webp" alt="回廊漫步"></div>
+        <div class="card-info">
+          <div class="card-title">回廊漫步</div>
+          <div class="card-meta"><span>石栏回廊 · 冷月光影</span><span class="card-tag">OR-16</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-027.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-027.webp" alt="凭栏望月"></div>
+        <div class="card-info">
+          <div class="card-title">凭栏望月</div>
+          <div class="card-meta"><span>池水倒影 · 暗夜金轮廓</span><span class="card-tag">OR-17</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-028.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-028.webp" alt="花瓣落水"></div>
+        <div class="card-info">
+          <div class="card-title">花瓣落水</div>
+          <div class="card-meta"><span>特写 · 玫瑰瓣浮水</span><span class="card-tag">OR-18</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-029.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-029.webp" alt="月下回眸"></div>
+        <div class="card-info">
+          <div class="card-title">月下回眸</div>
+          <div class="card-meta"><span>月辉侧影 · 红蕾丝高定</span><span class="card-tag">OR-19</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-030.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-030.webp" alt="庭中静立"></div>
+        <div class="card-info">
+          <div class="card-title">庭中静立</div>
+          <div class="card-meta"><span>月洞门框景 · 对称构图</span><span class="card-tag">OR-20</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-031.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-031.webp" alt="薄纱披风"></div>
+        <div class="card-info">
+          <div class="card-title">薄纱披风</div>
+          <div class="card-meta"><span>夜风吹纱 · 动态瞬间</span><span class="card-tag">OR-21</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-032.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-032.webp" alt="夜宴远望"></div>
+        <div class="card-info">
+          <div class="card-title">夜宴远望</div>
+          <div class="card-meta"><span>远景 · 月下宏大静谧</span><span class="card-tag">OR-22</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-033.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-033.webp" alt="残殿远景"></div>
+        <div class="card-info">
+          <div class="card-title">残殿远景</div>
+          <div class="card-meta"><span>废墟古殿 · 史诗氛围</span><span class="card-tag">OR-23</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-034.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-034.webp" alt="断石玫瑰"></div>
+        <div class="card-info">
+          <div class="card-title">断石玫瑰</div>
+          <div class="card-meta"><span>残垣间红玫瑰盛放</span><span class="card-tag">OR-24</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-035.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-035.webp" alt="侧脸逆光"></div>
+        <div class="card-info">
+          <div class="card-title">侧脸逆光</div>
+          <div class="card-meta"><span>半身 · 暗金轮廓光</span><span class="card-tag">OR-25</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-036.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-036.webp" alt="手扶残石"></div>
+        <div class="card-info">
+          <div class="card-title">手扶残石</div>
+          <div class="card-meta"><span>手部特写 · 石与玫瑰</span><span class="card-tag">OR-26</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-037.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-037.webp" alt="废墟漫步"></div>
+        <div class="card-info">
+          <div class="card-title">废墟漫步</div>
+          <div class="card-meta"><span>红纱拖地 · 荒芜遗迹</span><span class="card-tag">OR-27</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-038.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-038.webp" alt="废墟回眸"></div>
+        <div class="card-info">
+          <div class="card-title">废墟回眸</div>
+          <div class="card-meta"><span>断壁残垣 · 冷艳侧影</span><span class="card-tag">OR-28</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-039.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-039.webp" alt="玫瑰丛生"></div>
+        <div class="card-info">
+          <div class="card-title">玫瑰丛生</div>
+          <div class="card-meta"><span>断石间红玫瑰 · 生命力</span><span class="card-tag">OR-29</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-040.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-040.webp" alt="烬红远景"></div>
+        <div class="card-info">
+          <div class="card-title">烬红远景</div>
+          <div class="card-meta"><span>宏大废墟 · 史诗收束</span><span class="card-tag">OR-30</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/oriental-rose/keyframes/OR-KEY-041.png">
+        <div class="card-img"><img loading="lazy" src="/assets/thumbs/keyframes/OR-KEY-041.webp" alt="雾中持花"></div>
+        <div class="card-info">
+          <div class="card-title">雾中持花</div>
+          <div class="card-meta"><span>晨雾山林 · 柔光通透</span><span class="card-tag">OR-31</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 暗夜玫瑰 -->
+  <div class="view" id="view-dark">
+    <div class="gallery">
+      <div class="card" data-full="assets/dark-rose/dr-compliant-01.png">
+        <div class="card-img"><img src="assets/dark-rose/dr-compliant-01.png" alt="侧身回眸"></div>
+        <div class="card-info">
+          <div class="card-title">侧身回眸</div>
+          <div class="card-meta"><span>黑蕾丝交叠 · 曲线自然</span><span class="card-tag">DR-01</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/dark-rose/dr-compliant-02.png">
+        <div class="card-img"><img src="assets/dark-rose/dr-compliant-02.png" alt="正面立姿"></div>
+        <div class="card-info">
+          <div class="card-title">正面立姿</div>
+          <div class="card-meta"><span>暗红薄纱 · 胸腰曲线</span><span class="card-tag">DR-02</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/dark-rose/dr-compliant-03.png">
+        <div class="card-img"><img src="assets/dark-rose/dr-compliant-03.png" alt="近景肖像"></div>
+        <div class="card-info">
+          <div class="card-title">近景肖像</div>
+          <div class="card-meta"><span>肩颈纱层 · 克制高级</span><span class="card-tag">DR-03</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/dark-rose/dr-compliant-04.png">
+        <div class="card-img"><img src="assets/dark-rose/dr-compliant-04.png" alt="低重心站姿"></div>
+        <div class="card-info">
+          <div class="card-title">低重心站姿</div>
+          <div class="card-meta"><span>黑红纱层 · 暗黑奢华</span><span class="card-tag">DR-04</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/dark-rose/dr-extend-01.png">
+        <div class="card-img"><img src="assets/dark-rose/dr-extend-01.png" alt="手扶发冠"></div>
+        <div class="card-info">
+          <div class="card-title">手扶发冠</div>
+          <div class="card-meta"><span>红宝石发饰 · 冷艳</span><span class="card-tag">DR-05</span></div>
+        </div>
+      </div>
+      <div class="card" data-full="assets/dark-rose/dr-extend-02.png">
+        <div class="card-img"><img src="assets/dark-rose/dr-extend-02.png" alt="玫瑰锁骨"></div>
+        <div class="card-info">
+          <div class="card-title">玫瑰锁骨</div>
+          <div class="card-meta"><span>黑玫瑰点缀 · 肖像感</span><span class="card-tag">DR-06</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="anchor">Ω₀⊂⊙∞⊂Ω</div>
+    <p>昆仑洞天 · 玫瑰诗篇 | 火斗云智 AIOS 出品<br>
+    资产锁档编号 KUNLUN-ROSE-GALLERY-2026-09-25 | 合规边界已锁定</p>
+  </footer>
+
+</main>
+
+<div class="lightbox" id="lightbox">
+  <span class="lb-close">×</span>
+  <img id="lightbox-img" src="" alt="preview">
+</div>
+
+<script>
+// Tab切换
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-'+tab.dataset.view).classList.add('active');
+  });
+});
+
+// Lightbox
+const lb=document.getElementById('lightbox');
+const lbImg=document.getElementById('lightbox-img');
+document.querySelectorAll('.card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    lbImg.src=card.dataset.full;
+    lb.classList.add('show');
+  });
+});
+lb.addEventListener('click',()=>lb.classList.remove('show'));
+
+// 访问统计
+fetch('/api/report/truth',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({truth_value:JSON.stringify({page:'gallery-rose',ref:document.referrer||'direct',ua:navigator.userAgent.slice(0,80),ts:Date.now()}),truth_type:'data'})
+}).catch(()=>{});
+</script>
+
+</body>
+</html>

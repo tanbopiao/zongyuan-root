@@ -1,0 +1,89 @@
+# =============================================================================
+# AtomGit Action 草案：main 分支 push → 构建静态产物 → 发布 Pages
+# -----------------------------------------------------------------------------
+# 官方存放路径：仓库根目录  .gitcode/workflows/website-deploy.yml
+#   （注意：不是 .github/workflows/ ！官方《快速开始》明确要求 .gitcode/workflows/）
+# 官方文档：
+#   https://docs.atomgit.com/docs/help/home/org_project/pipeline/overview/
+#   https://docs.atomgit.com/docs/help/home/org_project/pipeline/quick-start/
+#
+# 【前置门槛】须先联系 AtomGit 客服开通「代码化流水线(Pipeline as Code)」能力，
+#   否则本 YAML 不会被调度执行。
+#
+# 【诚实声明】官方文档未给出名为 deploy-pages 的内置 Action 插件的确切名称。
+#   下面 deploy 作业里的「发布到 Pages」一步以占位注释 + artifact 上传给出；
+#   若 Pages 采用「网页端选分支+目录」模式，则本 YAML 可只保留 build 作业，
+#   直接在 Pages 设置里指向 main 分支 / website 目录即可，无需此发布步。
+# =============================================================================
+
+name: Website Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'website/**'
+      - '.gitcode/workflows/website-deploy.yml'
+  workflow_dispatch:   # 允许在 仓库→流水线/Actions→Run workflow 手动触发
+
+# 工作流级变量
+env:
+  SITE_SRC_DIR: website/kunlun-portfolio   # 站点源码目录（含 index.html）
+  DIST_DIR: public                          # 构建产物输出目录
+
+jobs:
+  # ---- 构建：拉代码 → 拷贝静态文件到 public/ → 上传产物 ----
+  build:
+    name: Build Static Site
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare dist directory
+        run: |
+          set -e
+          mkdir -p "$DIST_DIR"
+          if [ -f "$SITE_SRC_DIR/index.html" ]; then
+            cp -r "$SITE_SRC_DIR"/. "$DIST_DIR"/
+          else
+            echo "::warning::未找到 $SITE_SRC_DIR/index.html，产物可能为空"
+          fi
+          echo "--- dist contents ---"
+          ls -la "$DIST_DIR"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: ${{ env.DIST_DIR }}
+          retention-days: 7
+
+  # ---- 发布：下载产物 → 发布到 Pages ----
+  # 说明：AtomGit 是否提供官方 deploy-pages 插件，需在 项目→Actions 插件市场确认。
+  # 若 Pages 为「网页端选 main 分支 + website 目录」的静态托管，则本作业可整段删除，
+  # 仅保留上面的 build 作业即可。下面给出两种候选写法，二选一（取消注释其一）。
+  deploy:
+    name: Publish to Pages
+    needs: build
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site-dist
+          path: public
+
+      # 候选 A：若官方提供 pages-deploy 类插件（以实际插件名替换 <OFFICIAL_PAGES_ACTION>）
+      # - name: Publish to AtomGit Pages
+      #   uses: <OFFICIAL_PAGES_ACTION>@v1
+      #   with:
+      #   path: public
+
+      # 候选 B：无插件时，仅打印结果（Pages 由网页端 main+website 目录直接托管）
+      - name: Report (fallback)
+        run: |
+          echo "仓库: ${ATOMGIT_REPOSITORY:-zongyuangen/zongyuan-root-sync}"
+          echo "触发: ${ATOMGIT_EVENT_NAME:-push} @ ${ATOMGIT_REF:-refs/heads/main}"
+          echo "SHA : ${ATOMGIT_SHA:-unknown}"
+          echo "产物已就绪；Pages 请在 Settings→Pages 选择 main 分支 + website 目录发布。"
