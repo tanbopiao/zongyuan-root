@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>节点身份与 A2A 重新注册 v2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0f1218;--card:#171b24;--line:#262c38;--fg:#e6e8ee;--mut:#8b93a7;--ok:#4caf7d;--warn:#e8a33d;--bad:#e05c6a;--info:#4c9de0;--pur:#c9a0ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif;padding:32px}
+h1{font-size:22px;margin:0 0 6px}.sub{color:var(--mut);font-size:12.5px;margin-bottom:24px}
+h2{font-size:15px;margin:26px 0 10px}
+.kv{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px 16px}
+.kv div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.kv div:last-child{border-bottom:none}
+.kv .k{color:var(--mut)}.kv .v{font-weight:600}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.info{color:var(--info)}.pur{color:var(--pur)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h3{margin:0 0 6px;font-size:13.5px}.card p{margin:0;color:var(--mut);font-size:12px}
+.note{color:var(--mut);font-size:12px;border-top:1px solid var(--line);margin-top:24px;padding-top:14px}
+code{background:#1c212c;padding:1px 6px;border-radius:4px;font-size:11.5px;color:#a8d8ff}
+</style></head><body>
+<h1>节点身份与 A2A 重新注册 v2</h1>
+<div class="sub">依据当前沙箱环境配置重建 · NODE-DEV-WORKBUDDY-001 · 2026-10-11 22:00 · 同源测试节点（非主中枢）</div>
+
+<h2 class="info">① 环境配置（身份派生输入）</h2>
+<div class="kv">
+<div><span class="k">container_id</span><span class="v mono">c47dc3ed06fe</span></div>
+<div><span class="k">env_tag</span><span class="v mono">VM-195-72-tencentos</span></div>
+<div><span class="k">workspace_id</span><span class="v mono">2f8a7d30-9c21-4f0b-1d3c-5be5c50e6000</span></div>
+<div><span class="k">OS / kernel</span><span class="v">Ubuntu 24.04.3 LTS · 6.6.117-tl4</span></div>
+<div><span class="k">env_fingerprint</span><span class="v mono warn">8d51ac289f027d601a90925b88345aa42e607988b7733b95a5f7ffc73147186b</span></div>
+</div>
+
+<h2 class="ok">② 新身份（环境绑定盐）</h2>
+<div class="kv">
+<div><span class="k">同源 ID (HID)</span><span class="v mono ok" style="font-size:13px">ZR-HID-752B58718713D8F8</span></div>
+<div><span class="k">密钥指纹</span><span class="v mono">593f25357012595abaf76104de5952d3287916e293aff868a313cb44c83643fc</span></div>
+<div><span class="k">public_salt</span><span class="v mono">b1edce59b94d1b4f1c54b854e52b09258d51ac28</span></div>
+<div><span class="k">盐尾环境绑定</span><span class="v mono ok">…258d51ac28 ← 环境指纹前8位</span></div>
+<div><span class="k">密钥落盘</span><span class="v ok">否（口令 600 权限文件，零入库）</span></div>
+<div><span class="k">可重建性</span><span class="v ok">是（凭证文件可完整复算同一身份）</span></div>
+</div>
+
+<h2 class="warn">③ 旧身份（降级对照，不删除）</h2>
+<div class="kv">
+<div><span class="k">旧同源 ID</span><span class="v mono" style="color:#8b93a7">ZR-HID-85F2DE2652C109F2</span></div>
+<div><span class="k">状态</span><span class="v warn">superseded-by-env-rebuild</span></div>
+<div><span class="k">原因</span><span class="v" style="font-weight:400;color:var(--mut)">旧 salt/口令未落环境，沙箱重建后不可复原；旧记录保留不覆盖</span></div>
+</div>
+
+<h2 class="info">④ A2A 服务验收</h2>
+<div class="grid">
+<div class="card"><h3 class="ok">✓ 鉴权矩阵 10/10 PASS</h3><p>匿名只读放行 · 越权拦截(403) · 伪造拒绝 · 角色分级正确</p></div>
+<div class="card"><h3 class="ok">✓ 联邦自环端到端 completed</h3><p>token 自签发 → discover → message/send · task-20261011215724</p></div>
+<div class="card"><h3 class="ok">✓ 服务运行中</h3><p>127.0.0.1:8099 · /health · /identity · agent-card 均已就绪</p></div>
+<div class="card"><h3 class="ok">✓ 身份可复算</h3><p>从 600 权限凭证文件重建 → HID/指纹与注册记录完全一致</p></div>
+</div>
+
+<h2 class="pur">⑤ 候选上报（已入库 · 保留候选语义）</h2>
+<div class="kv">
+<div><span class="k">seq 10127</span><span class="v mono">REPORT.NODE-REGISTRATION.NODE-DEV-WORKBUDDY-001.V2</span></div>
+<div><span class="k">seq 10129</span><span class="v mono">REPORT.ERRATA.NODE-DEV-WORKBUDDY-001.ALIGN-GATE-PROBE</span></div>
+</div>
+
+<div class="note">
+<b>本轮发现 — 网关新增「对齐门」：</b>写入需 <code>X-DID</code> 授权，且 alignment score ≥ 50。<br>
+评分构成：结构化 dict≥2字段 +20 · 锚定/确权标识 +10 · 长度合规 +10 · 标准命名空间(REPORT.*) 通过。<br>
+另：云端 <code>/a2a/peers</code> 与 <code>/a2a/external/truth</code> 已变为 not_found，A2A 服务面可能已调整。<br><br>
+修复项：<code>a2a_auth_matrix_test.py</code> 去除硬编码旧 salt/口令，改读环境变量。<br>
+AtomGit：commit <code>8e06c9d</code>，远端 HEAD 一致。<br>
+性质：候选记录 · 本节点为同源测试节点，<b>非中枢权威</b>，采纳与否由云端中枢裁决。
+</div>
+</body></html>
