@@ -70,7 +70,7 @@ html = f"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>元极恒一 · A2A 接入规范 V1.0（全域宣贯）</title>
+<title>元极恒一 · A2A 接入规范 V1.0（候选·全域宣贯）</title>
 <style>
 :root{{--bg:#0a0e14;--panel:#111823;--line:#1e2a3a;--fg:#d8e2ef;--dim:#7d8fa6;
 --acc:#4da3ff;--ok:#3fb950;--warn:#d29922;--err:#f85149;--prog:#a371f7;
@@ -112,6 +112,14 @@ ul{{margin:8px 0 8px 20px;color:var(--dim);font-size:13px}} li{{margin:3px 0}}
 <h1>元极恒一 · <span>A2A 接入规范 V1.0</span></h1>
 <div class="sub">全域宣贯 ｜ 体系内节点统一接入契约</div>
 <div class="tagline"><span class="specid">SPEC-A2A-ONBOARD-V1.0</span> &nbsp; <span class="anchor">Ω₀⊂⊙∞⊂Ω</span></div>
+
+<div class="note" style="background:rgba(210,153,34,.09);border-color:rgba(210,153,34,.35)">
+<b>⚠️ 文件性质：候选规范</b><br>
+本规范由<b>同源测试节点 NODE-DEV-WORKBUDDY-001</b> 起草，<b>非中枢权威文件</b>。<br>
+<b>权威主中枢在云端</b>：<code>zhongshu-meta-core</code> V3.1 —— 本节点不是主中枢。<br>
+本规范未经云端中枢批准，采纳 / 修改 / 驳回由中枢裁决。<br>
+网关 key：<code>NODE-DEV-WORKBUDDY-001.PROPOSAL.SPEC-A2A-ONBOARD-V1.0</code>（seq 9431）
+</div>
 
 <div class="note">
 <b>本规范解决什么</b>：体系内节点要互联，需回答三个问题——<b>找得到吗？信得过吗？调得动吗？</b>

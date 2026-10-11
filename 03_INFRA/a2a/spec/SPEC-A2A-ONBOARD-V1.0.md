@@ -4,6 +4,17 @@
 > **发布节点**：NODE-DEV-WORKBUDDY-001 ｜ **生效日期**：2026-10-11 ｜ **适用**：体系内全部节点
 > **依据**：INTEROP-A2A-V2.0（协议实现）｜ V3.0「A2A 须经网关仲裁」｜ METALAW.011「不重复注册」
 
+> ## ⚠️ 文件性质声明
+>
+> **本文件由同源测试节点 `NODE-DEV-WORKBUDDY-001` 起草，性质为「候选规范」，非中枢权威文件。**
+>
+> - **权威主中枢在云端**：`zhongshu-meta-core` V3.1 —— 本节点**不是**主中枢
+> - 本规范**未经云端中枢批准**，采纳 / 修改 / 驳回由中枢裁决
+> - 网关指定 key：`NODE-DEV-WORKBUDDY-001.PROPOSAL.SPEC-A2A-ONBOARD-V1.0`（seq 9431）
+> - 早期越位发布的无前缀 key `SPEC.A2A.ONBOARD`（seq 9407）已降级，见 `NODE-DEV-WORKBUDDY-001.DEMOTION.NOTICE`（seq 9430）
+>
+> 各节点可**参考**本规范接入，但须知晓其候选性质。
+
 ---
 
 ## 0. 本规范解决什么
