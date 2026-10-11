@@ -1,0 +1,64 @@
+{
+  "ledger_id": "A2A-LEDGER-001",
+  "protocol": "INTEROP-A2A-V2.0",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "ontology_root": "Ω-TAN-7-001",
+  "did_root": "DID-BR-000002",
+  "node_id": "NODE-DEV-WORKBUDDY-001",
+  "generated_at": "2026-10-11T19:49:00+08:00",
+  "channel": "CH-A2A-001",
+  "artifacts": {
+    "server": "/workspace/a2a/server/omega_a2a_v2.py",
+    "server_baseline": "/workspace/a2a/server/omega_a2a_server.baseline.py (原版完整留存)",
+    "agent_card": "/workspace/a2a/server/agent-card.json",
+    "identity_layer": "/workspace/a2a/lib/a2a_identity.py",
+    "peer_registry_lib": "/workspace/a2a/lib/a2a_registry.py",
+    "auth_matrix_test": "/workspace/a2a/lib/a2a_auth_matrix_test.py",
+    "federation_client": "/workspace/a2a/federation/a2a_federation_client.py",
+    "peer_registry_data": "/workspace/a2a/federation/peer-registry.json",
+    "portal_html": "/workspace/a2a/portal/a2a-portal.html",
+    "readme": "/workspace/a2a/A2A-README.md"
+  },
+  "atomgit": {
+    "repo": "zongyuan-root-sync",
+    "path": "03_INFRA/a2a/",
+    "commit": "51db5c7",
+    "pushed": true,
+    "remote_head_synced": true
+  },
+  "library": {
+    "node_id": "DbivkOTBZZxwtLxUklB1LM",
+    "publish_url": "https://workbuddy.link/p/DbivkOTBZZxwtLxUklB1LM",
+    "title_verified": "元极恒一 · A2A 联邦互操作门户",
+    "public": true
+  },
+  "identity": {
+    "homologous_id": "ZR-HID-85F2DE2652C109F2",
+    "key_fingerprint": "64f7dcc374cf63e13dd481b6ceb0bebc1636f67a55a01c8aeafeaa576e74446e",
+    "key_persisted": false,
+    "token_format": "ZRH1.<b64url(payload)>.<hmac16>"
+  },
+  "gap_closure": [
+    {"gap": "匿名端点", "before": "do_POST 无鉴权，任何人可写网关", "after": "ZRH1 四层校验", "verified": true},
+    {"gap": "零对端 L-31", "before": "仅 127.0.0.1，无注册表无 client", "after": "对端注册表 + 联邦出站客户端", "verified": true},
+    {"gap": "崩溃式断连", "before": "网关不可达线程异常静默断连", "after": "全量降级 try/except", "verified": true},
+    {"gap": "双执行副作用", "before": "技能预判触发真实网关写入", "after": "classify() 纯识别拆分", "verified": true}
+  ],
+  "verification": {
+    "auth_matrix": {"total": 10, "pass": 10, "fail": 0},
+    "federation_e2e": {"discover": true, "token_self_issue": true, "send": true, "peer_auth_layer": "ok"},
+    "peer_probe": {"state": "online", "card_name": "Omega Zongyuan Kernel (WorkBuddy Node)"},
+    "reversibility": "原版 server 未改动，基线文件完整留存，可随时回退"
+  },
+  "endpoints": {
+    "discovery": "GET /.well-known/agent-card.json (匿名)",
+    "health": "GET /health (匿名)",
+    "identity": "GET /identity (匿名摘要)",
+    "rpc": "POST / (message/send 分级鉴权)"
+  },
+  "next_actions": [
+    "更换测试口令 YuanJiHengYi-2026 为强口令并记入密码管理器",
+    "为真实对端节点签发 writer 令牌并登记信任等级",
+    "如需跨公网联邦，绑定 0.0.0.0 并前置 TLS 反代"
+  ]
+}
