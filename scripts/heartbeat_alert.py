@@ -7,10 +7,11 @@ ALERT_FILE = os.path.join(LOGDIR, "heartbeat_alerts.jsonl")
 
 def check():
     try:
-        with urllib.request.urlopen("https://www.huodouai.com/api/report/status", timeout=10) as r:
+        req = urllib.request.Request("https://www.huodouai.com/api/status", headers={"X-DID": "DID-BR-000002"})
+        with urllib.request.urlopen(req, timeout=10) as r:
             d = json.load(r)
-        ok = d.get("status") == "ok" and d.get("stats", {}).get("truths", 0) > 0
-        info = {"ok": ok, "truths": d.get("stats", {}).get("truths"), "nodes": d.get("stats", {}).get("nodes")}
+        ok = d.get("status") == "ok" and d.get("truth_count", 0) > 0
+        info = {"ok": ok, "truths": d.get("truth_count"), "nodes": d.get("nodes", 1)}
     except Exception as e:
         info = {"ok": False, "error": str(e)}
     entry = {"time": datetime.datetime.now().isoformat(timespec="seconds"), "did": "DID-BR-000002", **info}

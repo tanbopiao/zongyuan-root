@@ -32,12 +32,11 @@ def run(cmd, t=90):
     return r.stdout + r.stderr
 
 def get_status():
-    req = urllib.request.Request(f"{GATEWAY}/api/report/status", method="GET")
+    req = urllib.request.Request(f"{GATEWAY}/api/status", headers={"X-DID": "DID-BR-000002"}, method="GET")
     try:
         with urllib.request.urlopen(req, timeout=12) as r:
             d = json.loads(r.read().decode())
-            s = d.get("stats", {})
-            return 200, s.get("truths", 0), s.get("nodes", 0)
+            return 200, d.get("truth_count", 0), d.get("nodes", 1)
     except Exception as e:
         return 502, 0, 0
 
