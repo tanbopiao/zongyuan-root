@@ -14,9 +14,14 @@ import urllib.error
 sys.path.insert(0, "/workspace/a2a/lib")
 from a2a_identity import A2AIdentity
 
-SALT = "ZR-HOMOLOGOUS-SALT-2026-OMEGA"
-PP = "YuanJiHengYi-2026"
+import os
+# 从环境变量读取真实同源参数（与 server 同源），避免硬编码旧 salt 导致签名不匹配
+SALT = os.environ.get("ZR_HOMOLOGOUS_SALT", "")
+PP = os.environ.get("ZR_HOMOLOGOUS_PASSPHRASE", "")
 ENDPOINT = "http://127.0.0.1:8099/"
+if not SALT or not PP:
+    print("[跳过] 未设置 ZR_HOMOLOGOUS_SALT / ZR_HOMOLOGOUS_PASSPHRASE 环境变量")
+    sys.exit(2)
 idn = A2AIdentity(SALT, PP)
 
 
