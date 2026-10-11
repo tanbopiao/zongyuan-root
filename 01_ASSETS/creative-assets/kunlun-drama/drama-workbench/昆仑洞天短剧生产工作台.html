@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智·昆仑洞天短剧生产工作台</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23c9a84c'>Ω</text></svg>">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>if(typeof JSZip==='undefined')document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>');</script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script>if(typeof saveAs==='undefined')document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"><\/script>');</script>
+<style>
+:root{
+  --bg:#0a0a0c;
+  --bg2:#111114;
+  --bg3:#18181d;
+  --line:#2a2a30;
+  --gold:#c9a84c;
+  --gold2:#e6c878;
+  --gold-dim:#8a7433;
+  --text:#d8d4c8;
+  --text2:#8a8678;
+  --red:#c0392b;
+  --green:#4a8c5c;
+  --amber:#c98a3d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Noto Sans SC',system-ui,-apple-system,sans-serif;
+  font-size:14px;line-height:1.6;
+  min-height:100vh;
+}
+.serif{font-family:'Noto Serif SC',serif}
+/* ===== 顶部条 ===== */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:linear-gradient(180deg,#0d0d10 0%,#0a0a0c 100%);
+  border-bottom:1px solid var(--line);
+  padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{
+  width:36px;height:36px;border:1px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gold);font-family:'Noto Serif SC',serif;font-size:20px;
+  background:radial-gradient(circle at 50% 30%,#1a1a1e,#0a0a0c);
+}
+.brand h1{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;color:var(--gold2);letter-spacing:2px}
+.brand .sub{font-size:11px;color:var(--text2);letter-spacing:1px}
+.did-tag{
+  font-size:11px;color:var(--gold-dim);border:1px solid var(--line);
+  padding:4px 10px;border-radius:2px;letter-spacing:1px;
+}
+/* ===== 布局 ===== */
+.wrap{display:flex;min-height:calc(100vh - 65px)}
+.sidebar{
+  width:200px;flex-shrink:0;border-right:1px solid var(--line);
+  background:var(--bg2);padding:16px 0;
+}
+.nav-item{
+  display:block;width:100%;text-align:left;
+  padding:12px 20px;background:none;border:none;cursor:pointer;
+  color:var(--text2);font-size:13px;letter-spacing:1px;
+  border-left:2px solid transparent;
+  font-family:'Noto Sans SC',sans-serif;
+  transition:all .15s;
+}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--gold2);border-left-color:var(--gold);background:var(--bg3)}
+.nav-item .num{color:var(--gold-dim);margin-right:8px;font-size:11px}
+.main{flex:1;padding:24px 28px;max-width:1200px}
+.view{display:none}
+.view.active{display:block}
+/* ===== 卡片 ===== */
+.card{
+  background:var(--bg2);border:1px solid var(--line);
+  padding:20px;margin-bottom:18px;
+}
+.card h2{
+  font-family:'Noto Serif SC',serif;font-size:16px;color:var(--gold2);
+  margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line);
+  letter-spacing:1px;
+}
+.card h3{font-size:13px;color:var(--gold);margin:14px 0 8px;letter-spacing:1px}
+label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;letter-spacing:1px}
+input[type=text],textarea,select{
+  width:100%;background:var(--bg);border:1px solid var(--line);
+  color:var(--text);padding:9px 12px;font-size:13px;
+  font-family:'Noto Sans SC',sans-serif;border-radius:2px;
+}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--gold-dim)}
+textarea{resize:vertical;min-height:80px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>div{flex:1;min-width:140px}
+/* ===== 按钮 ===== */
+.btn{
+  display:inline-block;padding:9px 18px;cursor:pointer;
+  background:linear-gradient(180deg,#c9a84c,#a88838);
+  color:#0a0a0c;border:none;font-size:13px;font-weight:600;
+  letter-spacing:1px;border-radius:2px;
+  font-family:'Noto Sans SC',sans-serif;
+}
+.btn:hover{background:linear-gradient(180deg,#dbb85c,#b89848)}
+.btn.ghost{
+  background:transparent;border:1px solid var(--gold-dim);color:var(--gold2);
+}
+.btn.ghost:hover{background:var(--bg3)}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+/* ===== 表格 ===== */
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top;word-wrap:break-word}
+th{background:var(--bg3);color:var(--gold2);font-weight:600;letter-spacing:1px;font-size:11px}
+td input,td textarea{border:none;background:transparent;padding:4px;font-size:12px;min-height:auto}
+td input:focus,td textarea:focus{background:var(--bg)}
+.tbl-wrap{overflow-x:auto;margin-top:12px}
+/* ===== 提示词列表 ===== */
+.prompt-item{
+  background:var(--bg);border:1px solid var(--line);
+  padding:12px;margin-bottom:10px;position:relative;
+}
+.prompt-item .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prompt-item .pn{color:var(--gold);font-size:12px;font-weight:600}
+.prompt-item .pt{font-size:12px;color:var(--text);white-space:pre-wrap;line-height:1.7}
+.prompt-item .law{
+  margin-top:8px;padding:8px;background:#1a1410;border-left:2px solid var(--red);
+  font-size:11px;color:#d4a08a;white-space:pre-wrap;line-height:1.6;
+}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:2px;letter-spacing:1px}
+.badge.pass{background:rgba(74,140,92,.15);color:var(--green);border:1px solid var(--green)}
+.badge.warn{background:rgba(201,138,61,.15);color:var(--amber);border:1px solid var(--amber)}
+.badge.err{background:rgba(192,57,43,.15);color:#e07a6a;border:1px solid var(--red)}
+/* ===== 校验面板 ===== */
+.check-row{
+  display:flex;align-items:flex-start;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--line);font-size:12px;
+}
+.check-row:last-child{border-bottom:none}
+.check-icon{flex-shrink:0;width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:2px}
+.check-icon.ok{background:rgba(74,140,92,.2);color:var(--green)}
+.check-icon.no{background:rgba(192,57,43,.2);color:#e07a6a}
+.check-icon.pending{background:rgba(201,138,61,.2);color:var(--amber)}
+/* ===== 输出区 ===== */
+.output-box{
+  background:#0d0d10;border:1px solid var(--line);padding:14px;
+  font-family:monospace;font-size:12px;white-space:pre-wrap;
+  max-height:400px;overflow-y:auto;color:var(--text2);line-height:1.7;
+}
+.stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.stat{background:var(--bg);border:1px solid var(--line);padding:10px 16px;min-width:120px}
+.stat .v{font-size:20px;color:var(--gold2);font-family:'Noto Serif SC',serif}
+.stat .l{font-size:11px;color:var(--text2)}
+/* ===== 底部 ===== */
+.footer{
+  border-top:1px solid var(--line);padding:16px 24px;
+  text-align:center;font-size:11px;color:var(--text2);letter-spacing:1px;
+}
+.footer .omega{color:var(--gold);font-family:'Noto Serif SC',serif;font-size:13px}
+/* ===== 响应式 ===== */
+@media(max-width:768px){
+  .wrap{flex-direction:column}
+  .sidebar{width:100%;display:flex;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--line)}
+  .nav-item{border-left:none;border-bottom:2px solid transparent;white-space:nowrap;padding:12px 14px}
+  .nav-item.active{border-left:none;border-bottom-color:var(--gold)}
+  .main{padding:16px}
+  .topbar{padding:10px 14px}
+  .row{flex-direction:column}
+  body{font-size:15px}
+  input[type=text],textarea,select{font-size:15px}
+  td input,td textarea{font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark serif">Ω</div>
+    <div>
+      <h1>火斗云智 · 昆仑洞天短剧生产工作台</h1>
+      <div class="sub">DRM-PIPE-001 · 可产出型生产系统 V2.0</div>
+    </div>
+  </div>
+  <div class="did-tag">DID-BR-000002</div>
+</div>
+
+<div class="wrap">
+  <nav class="sidebar">
+    <button class="nav-item active" data-view="v-storyboard"><span class="num">01</span>分镜批量生成器</button>
+    <button class="nav-item" data-view="v-keyframe"><span class="num">02</span>关键帧提示词生成器</button>
+    <button class="nav-item" data-view="v-voice"><span class="num">03</span>配音台词导出</button>
+    <button class="nav-item" data-view="v-pack"><span class="num">04</span>素材包导出</button>
+    <button class="nav-item" data-view="v-check"><span class="num">05</span>约束校验面板</button>
+    <button class="nav-item nav-ext" onclick="location.href='https://xcnvv9zlflhm.doubaoapps.com/app/app_17f791j403r'"><span class="num">⟶</span>一键量产向导</button>
+    <button class="nav-item nav-ext" onclick="location.href='https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6ty0z7c0'"><span class="num">⟵</span>返回产品矩阵</button>
+  </nav>
+
+  <main class="main">
+
+  <!-- ===== 视图1：分镜批量生成器 ===== -->
+  <section id="v-storyboard" class="view active">
+    <div class="card">
+      <h2>分镜批量生成器</h2>
+      <div class="row">
+        <div style="flex:0 0 120px">
+          <label>集号</label>
+          <input type="text" id="epNum" value="01">
+        </div>
+        <div style="flex:0 0 120px">
+          <label>镜数（10-14）</label>
+          <input type="text" id="shotCount" value="12">
+        </div>
+        <div style="flex:0 0 180px">
+          <label>主角色</label>
+          <select id="sbChar">
+            <option value="xuanxi">玄汐 · L0天元境</option>
+            <option value="jiutian_normal">九天玄女 · 常态</option>
+            <option value="jiutian_war" selected>九天玄女 · 战争形态</option>
+            <option value="nuwa">女娲 · 创世形态</option>
+            <option value="zhenwu">真武大帝 · 镇世形态</option>
+            <option value="canhun">神女残魂 · 半透明光影</option>
+          </select>
+        </div>
+      </div>
+      <h3>剧情梗概（粘贴文本）</h3>
+      <textarea id="plotInput" rows="5" placeholder="粘贴本集剧情梗概，例如：九天玄女率神兵镇守归墟入口，魔族先锋冲破封印，玄女披红裙凤冠执昆吾长矛出战，一枪破敌阵，封印重阖，归墟重归沉寂。"></textarea>
+      <div class="btn-row">
+        <button class="btn" onclick="genStoryboard()">一键生成分镜表</button>
+        <button class="btn ghost" onclick="loadExamplePlot()">载入示例剧情</button>
+        <button class="btn ghost" onclick="addShotRow()">追加镜</button>
+      </div>
+    </div>
+
+    <div class="card" id="sbResultCard" style="display:none">
+      <h2>分镜表（可编辑）</h2>
+      <div class="stats" id="sbStats"></div>
+      <div class="tbl-wrap">
+        <table id="sbTable">
+          <colgroup>
+            <col style="width:7%">
+            <col style="width:22%">
+            <col style="width:7%">
+            <col style="width:24%">
+            <col style="width:18%">
+            <col style="width:12%">
+            <col style="width:10%">
+          </colgroup>
+          <thead><tr>
+            <th>镜号</th><th>画面描述</th><th>时长</th><th>关键帧提示词</th>
+            <th>视频提示词</th><th>音效配乐</th><th>转场</th>
+          </tr></thead>
+          <tbody id="sbBody"></tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="exportStoryboardJSON()">导出 JSON</button>
+        <button class="btn ghost" onclick="exportStoryboardMD()">导出 Markdown</button>
+        <button class="btn ghost" onclick="copyStoryboardMD()">复制 Markdown</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图2：关键帧提示词生成器 ===== -->
+  <section id="v-keyframe" class="view">
+    <div class="card">
+      <h2>关键帧提示词批量生成器</h2>
+      <div class="row">
+        <div>
+          <label>角色库</label>
+          <select id="kfChar">
+            <option value="xuanxi">玄汐 · L0天元境（黑金灵纹肃穆神性纯净女相）</option>
+            <option value="jiutian_normal">九天玄女 · 常态（衣袂飘逸金光内敛）</option>
+            <option value="jiutian_war" selected>九天玄女 · 战争形态（红裙凤冠杀伐威仪战甲神兵）</option>
+            <option value="nuwa">女娲 · 创世形态（史诗氛围馆藏质感浮雕立体感五彩石）</option>
+            <option value="zhenwu">真武大帝 · 镇世形态（玄黑金甲伦勃朗光影威严镇压）</option>
+            <option value="canhun">神女残魂 · 半透明光影（肃穆神性不恐怖不鬼魅）</option>
+          </select>
+        </div>
+      </div>
+      <h3>场景描述</h3>
+      <textarea id="kfScene" rows="2" placeholder="例如：归墟深渊入口，黑雾翻涌，上古封印石门残破，血色天光">归墟深渊入口，黑雾翻涌，上古封印石门残破，血色天光自裂隙倾泻</textarea>
+      <h3>动作 / 状态描述</h3>
+      <textarea id="kfAction" rows="2" placeholder="例如：九天玄女双手紧握昆吾长矛，侧身立于阵前，长矛直指前方，衣袂与长发被风压扬起">九天玄女双手紧握昆吾长矛，侧身立于阵前，长矛直指前方空域，红裙与长发被风压扬起，目光如炬直视前方</textarea>
+      <div class="btn-row">
+        <button class="btn" onclick="genKeyframe()">追加生成提示词</button>
+        <button class="btn ghost" onclick="clearKeyframes()">清空列表</button>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text2)">
+        自动附带：9:16竖屏 · 黑金暗纹 · 国风仙侠写实厚涂 · 史诗创世氛围 · 博物馆馆藏质感 · 浮雕立体感 · 伦勃朗光影 · UE5.7全局光追 · 8K · 右下角Ω₀⊂⊙∞⊂Ω；检测到长兵器关键词将自动追加昆仑天元法则V1.2结构铁律全文。
+      </div>
+    </div>
+
+    <div class="card" id="kfResultCard" style="display:none">
+      <h2>已生成关键帧提示词（<span id="kfCount">0</span> 条）</h2>
+      <div class="btn-row" style="margin-top:0;margin-bottom:12px">
+        <button class="btn" onclick="copyAllKeyframes()">批量复制全部</button>
+        <button class="btn ghost" onclick="exportKeyframesTXT()">导出 TXT</button>
+      </div>
+      <div id="kfList"></div>
+    </div>
+  </section>
+
+  <!-- ===== 视图3：配音台词导出 ===== -->
+  <section id="v-voice" class="view">
+    <div class="card">
+      <h2>配音台词导出</h2>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">从分镜表自动生成对应配音台词脚本（按镜号分段）。可在下方编辑后导出。</p>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn" onclick="genVoiceover()">从分镜表生成台词</button>
+        <button class="btn ghost" onclick="copyVoiceover()">复制台词</button>
+        <button class="btn ghost" onclick="exportVoiceoverTXT()">导出 TXT</button>
+      </div>
+      <h3 style="margin-top:16px">台词脚本</h3>
+      <div class="output-box" id="voiceBox">（尚未生成。请先在「分镜批量生成器」中生成分镜表，再点击「从分镜表生成台词」。）</div>
+    </div>
+  </section>
+
+  <!-- ===== 视图4：素材包导出 ===== -->
+  <section id="v-pack" class="view">
+    <div class="card">
+      <h2>素材包导出</h2>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">一键打包当前工作台全部产出为 ZIP 压缩包（纯前端 JSZip 实现）。包含：分镜表 JSON、分镜表 Markdown、关键帧提示词集、配音台词脚本。</p>
+      <div id="packContents"></div>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn" onclick="exportPack()">一键打包下载 ZIP</button>
+      </div>
+      <div id="packStatus" style="margin-top:12px;font-size:12px;color:var(--text2)"></div>
+    </div>
+  </section>
+
+  <!-- ===== 视图5：约束校验面板 ===== -->
+  <section id="v-check" class="view">
+    <div class="card">
+      <h2>约束校验面板</h2>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px">对当前工作台全部生成结果执行文本级自检。</p>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn" onclick="runChecks()">执行约束自检</button>
+      </div>
+      <div id="checkResults" style="margin-top:16px"></div>
+    </div>
+    <div class="card">
+      <h2>体系约束检查清单</h2>
+      <div id="checklist">
+        <div class="check-row"><div class="check-icon pending">?</div><div>人体结构绝对禁止法则：四肢/躯干/比例/手部细节完整，禁畸形穿模</div></div>
+        <div class="check-row"><div class="check-icon pending">?</div><div>角色元规则隔离：各角色形态参数锁定，禁跨位面属性泄漏、禁武器形变/人设崩坏</div></div>
+        <div class="check-row"><div class="check-icon pending">?</div><div>9:16 竖屏一致性：提示词中明确含 9:16竖屏</div></div>
+        <div class="check-row"><div class="check-icon pending">?</div><div>右下角 Ω₀⊂⊙∞⊂Ω 标识完整性：每条关键帧提示词必须包含</div></div>
+        <div class="check-row"><div class="check-icon pending">?</div><div>长兵器结构铁律 V1.2：检测到长兵器镜头时必须自动附带铁律全文</div></div>
+        <div class="check-row"><div class="check-icon pending">?</div><div>禁用慢淡入淡出转场：转场仅限硬切/闪白/快切</div></div>
+        <div class="check-row"><div class="check-icon pending">?</div><div>禁血腥/禁恐怖化：以能量碰撞光效表达，神女残魂不鬼魅</div></div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<div class="footer">
+  <span class="omega">Ω₀ ⊂ ⊙∞ ⊂ Ω</span> &nbsp;|&nbsp; DID-BR-000002 &nbsp;|&nbsp; 昆仑洞天短剧工业化流水线 DRM-PIPE-001 V2.0
+</div>
+
+<script>
+/* ===== 全局状态 ===== */
+var state = {
+  storyboard: [],   // [{id, desc, dur, kfPrompt, vPrompt, sfx, trans, char}]
+  keyframes: [],    // [{char, scene, action, prompt, hasLaw}]
+  voiceover: ''
+};
+
+/* ===== 角色库描述 ===== */
+var CHAR_DESC = {
+  xuanxi: '玄汐，L0天元境女神，黑金灵纹覆体，肃穆神性，纯净女相，玄色长袍流转金色纹路',
+  jiutian_normal: '九天玄女常态，白衣素裙衣袂飘逸，金光内敛，仙风道骨，神态淡然慈悲',
+  jiutian_war: '九天玄女战争形态，大红战甲长裙，金凤冠，银甲护肩，杀伐威仪，面容冷峻英武，绝不狰狞雄性化',
+  nuwa: '女娲创世形态，人首蛇身，五彩石悬浮于身侧，洪荒创世氛围，博物馆馆藏浮雕立体感，庄严肃穆',
+  zhenwu: '真武大帝镇世形态，玄黑金甲，手持镇妖剑，龟蛇二将隐于身后，北极玄天真龙气场，伦勃朗光影',
+  canhun: '神女残魂，半透明光影灵体，轮廓朦胧发光，肃穆神性，绝不恐怖鬼魅化'
+};
+
+/* ===== 风格基准后缀（强制） ===== */
+var STYLE_SUFFIX = '黑金暗纹风格, 国风仙侠写实厚涂, 史诗创世氛围, 博物馆馆藏质感, 浮雕立体感, 伦勃朗光影, UE5.7全局光追, 8K超清, 9:16竖屏, 右下角Ω₀⊂⊙∞⊂Ω';
+
+/* ===== 长兵器铁律 V1.2（强制原文） ===== */
+var WEAPON_LAW = '【结构铁律·V1.2强制】长兵器几何连续完整,禁断裂/分段/凭空多生成; 矛尖与人物头部强制安全空域,禁穿插/重叠/刺头; 双手握持同一根矛杆,手指-手腕-小臂-肩部形成连续力学握持关系,接触点光影匹配; 武器延伸动线不切割人物主体剪影,矛尖落于独立空域或延伸至画面边界外; 能量光效仅作叠加照射层,禁止覆盖/融合/扭曲武器实体几何; 武器-手部-角色遮挡/接触阴影/环境反光全局光源统一。';
+
+/* 长兵器关键词 */
+var WEAPON_KW = ['矛','枪','戟','棍','戈','长刀','长枪','方天画戟','昆吾','长枪','长矛','大戟','铁棍','禅杖','大刀','剑','刀'];
+
+/* ===== 导航切换 ===== */
+document.querySelectorAll('.nav-item').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    if(!btn.dataset.view || !document.getElementById(btn.dataset.view)) return;
+    document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active')});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.view).classList.add('active');
+  });
+});
+
+/* ===== 示例剧情 ===== */
+var EXAMPLE_PLOT = '九天玄女率神兵镇守归墟深渊入口。千年封印出现裂痕，黑雾翻涌，魔族先锋自裂隙中探出狰狞轮廓。玄女身披大红战甲，头戴金凤冠，双手紧握昆吾长矛，立于残破石门之前。她转身面向身后退避的凡人，目光沉稳。随即她回身踏步，长矛前指，一道金色枪芒撕裂黑雾。魔族先锋只露出巨爪局部便被枪芒击碎。封印裂隙在金光中重新闭合，归墟重归沉寂。玄女收矛而立，衣袂缓缓垂落。';
+function loadExamplePlot(){
+  document.getElementById('plotInput').value = EXAMPLE_PLOT;
+}
+
+/* ===== 分镜生成（规则模板法） ===== */
+function detectWeapon(text){
+  for(var i=0;i<WEAPON_KW.length;i++){
+    if(text.indexOf(WEAPON_KW[i])>=0) return true;
+  }
+  return false;
+}
+
+function genStoryboard(){
+  var plot = document.getElementById('plotInput').value.trim();
+  if(!plot){ alert('请先粘贴剧情梗概'); return; }
+  var ep = document.getElementById('epNum').value.trim() || '01';
+  var n = parseInt(document.getElementById('shotCount').value) || 12;
+  if(n<10) n=10; if(n>14) n=14;
+  var charKey = document.getElementById('sbChar').value;
+  var charName = document.getElementById('sbChar').selectedOptions[0].text;
+  var charDesc = CHAR_DESC[charKey];
+
+  // 将剧情按句号/分号切分为节拍
+  var beats = plot.split(/[。；！？!?\n]/).map(function(s){return s.trim()}).filter(function(s){return s.length>4});
+  if(beats.length===0) beats=[plot];
+
+  state.storyboard = [];
+  var transOpts = ['硬切','闪白','快切'];
+  var sfxPool = ['低沉环境嗡鸣+史诗鼓点渐起','冷风呼啸+封印裂隙轰鸣','金属战甲铿锵+能量低频震颤','金色光效爆发+弦乐拉升','死寂+残响消散','战鼓骤停+呼吸声'];
+
+  for(var i=0;i<n;i++){
+    var beatIdx = Math.floor(i / n * beats.length);
+    var beat = beats[Math.min(beatIdx, beats.length-1)];
+    var shotId = 'S'+ep+'-'+String(i+1).padStart(3,'0');
+    var dur = (i===n-1) ? 6 : (6 + Math.floor(Math.random()*7)); // 5-15s
+
+    // 画面描述
+    var desc = beat;
+
+    // 关键帧提示词
+    var hasWeapon = detectWeapon(beat) || detectWeapon(document.getElementById('kfAction').value);
+    var kfPrompt = charDesc + '，' + beat + '，伦勃朗侧光勾勒轮廓，暗部黑金环境光晕，' + STYLE_SUFFIX;
+    if(hasWeapon) kfPrompt += '。' + WEAPON_LAW;
+
+    // 视频提示词
+    var vPrompt = '';
+    if(i===0) vPrompt = '镜头缓慢推近，黑雾翻涌动效，角色静立，衣袂微动，氛围压迫';
+    else if(i===Math.floor(n/2)) vPrompt = '快速运镜跟随动作，能量光效迸发，粒子飞散，帧率卡点';
+    else if(i===n-1) vPrompt = '镜头缓缓拉远，光效消散，画面归于静谧';
+    else vPrompt = '镜头微幅推进，角色动作连贯，环境光效流动，衣袂与长发随风扬起';
+
+    var sfx = sfxPool[i % sfxPool.length];
+    var trans = transOpts[i % transOpts.length];
+
+    state.storyboard.push({
+      id: shotId, desc: desc, dur: dur,
+      kfPrompt: kfPrompt, vPrompt: vPrompt,
+      sfx: sfx, trans: trans,
+      char: charName, hasWeapon: hasWeapon
+    });
+  }
+  renderStoryboard();
+}
+
+function renderStoryboard(){
+  document.getElementById('sbResultCard').style.display='block';
+  var tb = document.getElementById('sbBody');
+  tb.innerHTML='';
+  var totalDur=0;
+  state.storyboard.forEach(function(s,idx){
+    totalDur += parseInt(s.dur)||0;
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><input value="'+esc(s.id)+'" onchange="state.storyboard['+idx+'].id=this.value"></td>'+
+      '<td><textarea rows="2" onchange="state.storyboard['+idx+'].desc=this.value">'+esc(s.desc)+'</textarea></td>'+
+      '<td><input value="'+s.dur+'" onchange="state.storyboard['+idx+'].dur=this.value"></td>'+
+      '<td><textarea rows="3" onchange="state.storyboard['+idx+'].kfPrompt=this.value">'+esc(s.kfPrompt)+'</textarea></td>'+
+      '<td><textarea rows="2" onchange="state.storyboard['+idx+'].vPrompt=this.value">'+esc(s.vPrompt)+'</textarea></td>'+
+      '<td><input value="'+esc(s.sfx)+'" onchange="state.storyboard['+idx+'].sfx=this.value"></td>'+
+      '<td><input value="'+esc(s.trans)+'" onchange="state.storyboard['+idx+'].trans=this.value"></td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('sbStats').innerHTML =
+    '<div class="stat"><div class="v">'+state.storyboard.length+'</div><div class="l">分镜数</div></div>'+
+    '<div class="stat"><div class="v">'+totalDur+'s</div><div class="l">总时长</div></div>'+
+    '<div class="stat"><div class="v">'+state.storyboard.filter(function(s){return s.hasWeapon}).length+'</div><div class="l">长兵器镜头</div></div>';
+}
+
+function addShotRow(){
+  if(state.storyboard.length===0){ alert('请先生成分镜表'); return; }
+  var ep = document.getElementById('epNum').value.trim()||'01';
+  var n = state.storyboard.length+1;
+  state.storyboard.push({
+    id:'S'+ep+'-'+String(n).padStart(3,'0'), desc:'（新镜头画面描述）', dur:8,
+    kfPrompt:CHAR_DESC[document.getElementById('sbChar').value]+'，（场景动作描述），'+STYLE_SUFFIX,
+    vPrompt:'镜头微幅推进，角色动作连贯', sfx:'环境配乐', trans:'硬切',
+    char:document.getElementById('sbChar').selectedOptions[0].text, hasWeapon:false
+  });
+  renderStoryboard();
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ===== 导出 ===== */
+function download(filename, text){
+  var blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  saveAs(blob, filename);
+}
+
+function exportStoryboardJSON(){
+  if(state.storyboard.length===0){ alert('暂无分镜数据'); return; }
+  var data = {
+    meta:{project:'昆仑洞天·玄汐归墟', ep:document.getElementById('epNum').value, shotCount:state.storyboard.length, did:'DID-BR-000002', omega:'Ω₀⊂⊙∞⊂Ω', exportedAt:new Date().toISOString()},
+    shots: state.storyboard
+  };
+  download('分镜表_EP'+document.getElementById('epNum').value+'.json', JSON.stringify(data,null,2));
+}
+
+function storyboardMD(){
+  var md = '# 昆仑洞天·短剧分镜表 EP'+document.getElementById('epNum').value+'\n\n';
+  md += '- 项目：昆仑洞天·玄汐归墟\n- DID：DID-BR-000002\n- 溯源：Ω₀⊂⊙∞⊂Ω\n- 分镜数：'+state.storyboard.length+'\n\n';
+  md += '| 镜号 | 画面描述 | 时长 | 关键帧提示词 | 视频提示词 | 音效配乐 | 转场方式 |\n';
+  md += '|---|---|---|---|---|---|---|\n';
+  state.storyboard.forEach(function(s){
+    md += '| '+s.id+' | '+s.desc+' | '+s.dur+'s | '+s.kfPrompt+' | '+s.vPrompt+' | '+s.sfx+' | '+s.trans+' |\n';
+  });
+  return md;
+}
+function exportStoryboardMD(){
+  if(state.storyboard.length===0){ alert('暂无分镜数据'); return; }
+  download('分镜表_EP'+document.getElementById('epNum').value+'.md', storyboardMD());
+}
+function copyStoryboardMD(){
+  if(state.storyboard.length===0){ alert('暂无分镜数据'); return; }
+  navigator.clipboard.writeText(storyboardMD()).then(function(){ alert('Markdown 已复制到剪贴板'); });
+}
+
+/* ===== 关键帧提示词生成 ===== */
+function genKeyframe(){
+  var charKey = document.getElementById('kfChar').value;
+  var charDesc = CHAR_DESC[charKey];
+  var scene = document.getElementById('kfScene').value.trim();
+  var action = document.getElementById('kfAction').value.trim();
+  var text = scene + ' ' + action;
+  var hasWeapon = detectWeapon(text);
+
+  var prompt = charDesc + '，' + scene + '，' + action + '，伦勃朗侧光勾勒，黑金环境光晕，' + STYLE_SUFFIX;
+  if(hasWeapon) prompt += '。' + WEAPON_LAW;
+
+  state.keyframes.push({char:charKey, scene:scene, action:action, prompt:prompt, hasWeapon:hasWeapon});
+  renderKeyframes();
+}
+
+function renderKeyframes(){
+  document.getElementById('kfResultCard').style.display='block';
+  document.getElementById('kfCount').textContent = state.keyframes.length;
+  var list = document.getElementById('kfList');
+  list.innerHTML='';
+  state.keyframes.forEach(function(k,i){
+    var div = document.createElement('div');
+    div.className='prompt-item';
+    var badge = k.hasWeapon ? '<span class="badge warn">长兵器·铁律已附带</span>' : '<span class="badge pass">普通镜头</span>';
+    div.innerHTML =
+      '<div class="ph"><span class="pn">KF-'+String(i+1).padStart(3,'0')+'</span>'+badge+
+      '<button class="btn sm ghost" onclick="copyOneKf('+i+')">复制</button></div>'+
+      '<div class="pt">'+esc(k.prompt)+'</div>'+
+      (k.hasWeapon ? '<div class="law">'+esc(WEAPON_LAW)+'</div>' : '');
+    list.appendChild(div);
+  });
+}
+
+function copyOneKf(i){
+  navigator.clipboard.writeText(state.keyframes[i].prompt).then(function(){ alert('已复制 KF-'+(i+1)); });
+}
+function copyAllKeyframes(){
+  if(state.keyframes.length===0){ alert('暂无提示词'); return; }
+  var txt = state.keyframes.map(function(k,i){return '【KF-'+String(i+1).padStart(3,'0')+'】\n'+k.prompt}).join('\n\n---\n\n');
+  navigator.clipboard.writeText(txt).then(function(){ alert('已复制全部 '+state.keyframes.length+' 条提示词'); });
+}
+function exportKeyframesTXT(){
+  if(state.keyframes.length===0){ alert('暂无提示词'); return; }
+  var txt = '昆仑洞天·关键帧提示词集\nDID-BR-000002 | Ω₀⊂⊙∞⊂Ω\n导出时间：'+new Date().toISOString()+'\n\n';
+  txt += state.keyframes.map(function(k,i){return '【KF-'+String(i+1).padStart(3,'0')+'】\n'+k.prompt}).join('\n\n---\n\n');
+  download('关键帧提示词集.txt', txt);
+}
+function clearKeyframes(){
+  state.keyframes=[];
+  renderKeyframes();
+}
+
+/* ===== 配音台词 ===== */
+function genVoiceover(){
+  if(state.storyboard.length===0){ alert('请先生成分镜表'); return; }
+  var lines = [];
+  state.storyboard.forEach(function(s,i){
+    var charName = s.char || '玄女';
+    // 从画面描述提炼旁白
+    var narration = s.desc;
+    var speed = (i===Math.floor(state.storyboard.length/2)) ? '快速' : '中速';
+    var mood = (i===0||i===state.storyboard.length-1) ? '肃穆' : ((i===Math.floor(state.storyboard.length/2)) ? '威严' : '沉稳');
+    lines.push('['+s.id+'] '+charName+'（'+mood+'/'+speed+'）："'+narration+'"');
+  });
+  state.voiceover = lines.join('\n');
+  document.getElementById('voiceBox').textContent = state.voiceover;
+}
+function copyVoiceover(){
+  if(!state.voiceover){ alert('请先生成台词'); return; }
+  navigator.clipboard.writeText(state.voiceover).then(function(){ alert('台词已复制'); });
+}
+function exportVoiceoverTXT(){
+  if(!state.voiceover){ alert('请先生成台词'); return; }
+  download('配音台词脚本_EP'+document.getElementById('epNum').value+'.txt',
+    '昆仑洞天·配音台词脚本 EP'+document.getElementById('epNum').value+'\nDID-BR-000002 | Ω₀⊂⊙∞⊂Ω\n\n'+state.voiceover);
+}
+
+/* ===== 素材包导出 ===== */
+function exportPack(){
+  var status = document.getElementById('packStatus');
+  status.textContent = '正在打包...';
+  var zip = new JSZip();
+  var ep = document.getElementById('epNum').value||'01';
+  var hasSb = state.storyboard.length>0;
+  var hasKf = state.keyframes.length>0;
+  var hasVo = !!state.voiceover;
+
+  if(hasSb){
+    zip.file('分镜表_EP'+ep+'.json', JSON.stringify({meta:{project:'昆仑洞天',ep:ep,did:'DID-BR-000002'},shots:state.storyboard},null,2));
+    zip.file('分镜表_EP'+ep+'.md', storyboardMD());
+  }
+  if(hasKf){
+    var kfTxt = state.keyframes.map(function(k,i){return '【KF-'+String(i+1).padStart(3,'0')+'】\n'+k.prompt}).join('\n\n---\n\n');
+    zip.file('关键帧提示词集.txt', kfTxt);
+  }
+  if(hasVo){
+    zip.file('配音台词脚本_EP'+ep+'.txt', state.voiceover);
+  }
+  zip.file('_MANIFEST.txt', '昆仑洞天短剧生产工作台素材包\n导出：'+new Date().toISOString()+'\nDID-BR-000002 | Ω₀⊂⊙∞⊂Ω\n分镜表：'+(hasSb?'已包含':'未生成')+'\n关键帧提示词：'+(hasKf?state.keyframes.length+'条':'未生成')+'\n配音台词：'+(hasVo?'已包含':'未生成'));
+
+  zip.generateAsync({type:'blob'}).then(function(content){
+    saveAs(content, '昆仑洞天_EP'+ep+'_生产素材包.zip');
+    status.textContent = '打包完成，已开始下载。包含：'+(hasSb?'分镜表JSON+MD ':'')+(hasKf?'提示词集 ':'')+(hasVo?'配音台词':'');
+  });
+}
+
+/* ===== 约束校验 ===== */
+function runChecks(){
+  var results = [];
+  var allPrompts = [];
+  state.storyboard.forEach(function(s){ allPrompts.push(s.kfPrompt); });
+  state.keyframes.forEach(function(k){ allPrompts.push(k.prompt); });
+
+  if(allPrompts.length===0){
+    document.getElementById('checkResults').innerHTML='<div class="check-row"><div class="check-icon pending">?</div><div>尚未生成任何提示词，请先生成分镜表或关键帧提示词。</div></div>';
+    return;
+  }
+
+  // 检查1：Ω标识
+  var missingOmega = allPrompts.filter(function(p){return p.indexOf('Ω₀⊂⊙∞⊂Ω')<0});
+  results.push({ok: missingOmega.length===0, label:'右下角 Ω₀⊂⊙∞⊂Ω 标识', detail: missingOmega.length===0?('全部 '+allPrompts.length+' 条提示词均包含标识'):missingOmega.length+' 条提示词缺失标识'});
+
+  // 检查2：9:16
+  var missing916 = allPrompts.filter(function(p){return p.indexOf('9:16')<0});
+  results.push({ok: missing916.length===0, label:'9:16 竖屏一致性', detail: missing916.length===0?'全部提示词含 9:16竖屏':missing916.length+' 条缺失 9:16'});
+
+  // 检查3：黑金暗纹风格
+  var missingStyle = allPrompts.filter(function(p){return p.indexOf('黑金暗纹')<0 || p.indexOf('国风仙侠')<0});
+  results.push({ok: missingStyle.length===0, label:'黑金暗纹+国风仙侠风格基准', detail: missingStyle.length===0?'风格标签完整':missingStyle.length+' 条风格标签缺失'});
+
+  // 检查4：长兵器铁律
+  var weaponShots = [];
+  state.storyboard.forEach(function(s){ if(detectWeapon(s.desc)||detectWeapon(s.kfPrompt)) weaponShots.push(s.id); });
+  state.keyframes.forEach(function(k,i){ if(k.hasWeapon) weaponShots.push('KF-'+(i+1)); });
+  var missingLaw = weaponShots.filter(function(id){
+    // 找对应prompt
+    return true; // 生成时已自动附带，此处统计
+  });
+  var lawOk = true;
+  state.storyboard.forEach(function(s){ if(detectWeapon(s.desc)&&s.kfPrompt.indexOf('结构铁律')<0) lawOk=false; });
+  state.keyframes.forEach(function(k){ if(k.hasWeapon&&k.prompt.indexOf('结构铁律')<0) lawOk=false; });
+  results.push({ok: lawOk, label:'长兵器结构铁律 V1.2 自动附带', detail: '检测到长兵器镜头 '+weaponShots.length+' 个：'+(weaponShots.join(', ')||'无')+(lawOk?'（铁律已全部附带）':'（存在缺失！）')});
+
+  // 检查5：转场禁用慢淡入淡出
+  var badTrans = state.storyboard.filter(function(s){return s.trans.indexOf('淡入')>=0||s.trans.indexOf('淡出')>=0});
+  results.push({ok: badTrans.length===0, label:'禁用慢淡入淡出转场', detail: badTrans.length===0?('转场均为硬切/闪白/快切'):badTrans.length+' 个镜头违规使用淡入淡出'});
+
+  // 检查6：人体结构/角色元规则（文本级：检查是否有禁用词）
+  var bannedWords = ['血腥','狰狞','恐怖','鬼魅','暴力','残肢'];
+  var bannedHits = [];
+  allPrompts.forEach(function(p){ bannedWords.forEach(function(w){ if(p.indexOf(w)>=0) bannedHits.push(w); }); });
+  results.push({ok: bannedHits.length===0, label:'人体结构+角色元规则+禁血腥恐怖', detail: bannedHits.length===0?'未检出禁用词':'检出禁用词：'+bannedHits.join(',')});
+
+  var html = '';
+  results.forEach(function(r){
+    html += '<div class="check-row"><div class="check-icon '+(r.ok?'ok':'no')+'">'+(r.ok?'✓':'!')+'</div><div><b>'+esc(r.label)+'</b><br><span style="color:var(--text2)">'+esc(r.detail)+'</span></div></div>';
+  });
+  document.getElementById('checkResults').innerHTML = html;
+}
+
+/* ===== 初始化：自动载入示例分镜 ===== */
+(function(){
+  loadExamplePlot();
+  document.getElementById('plotInput').value = EXAMPLE_PLOT;
+})();
+</script>
+</body>
+</html>
+

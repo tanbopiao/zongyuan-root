@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天 · 关键帧可视化作品展</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{
+  --bg:#0a0d13; --ink:#e8e6e1; --dim:#8a93a6; --gold:#c9a86a; --gold2:#e6cf9a;
+  --line:rgba(201,168,106,.16); --card:#101420;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;font-weight:300;line-height:1.7;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(1000px 420px at 50% -8%,rgba(201,168,106,.09),transparent 60%),radial-gradient(700px 400px at 95% 20%,rgba(95,122,158,.06),transparent 60%)}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 20px}
+/* 顶栏 */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(10,13,19,.85);backdrop-filter:blur(10px);z-index:30}
+.brand{font-family:'Noto Serif SC',serif;font-size:15px;color:var(--gold);letter-spacing:.2em}
+.topnav a{color:var(--dim);text-decoration:none;font-size:13px;margin-left:20px;letter-spacing:.05em;transition:.2s}
+.topnav a:hover{color:var(--gold2)}
+.topnav a.home{color:var(--gold2);border:1px solid var(--line);padding:5px 14px;border-radius:40px}
+/* Hero */
+.hero{padding:64px 0 40px;text-align:center}
+.crest{font-family:'Noto Serif SC',serif;font-size:20px;color:var(--gold);letter-spacing:.3em;margin-bottom:12px}
+.hero h1{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(36px,6.5vw,60px);color:var(--gold2);letter-spacing:.12em;line-height:1.12}
+.hero .en{margin-top:10px;font-size:12px;color:var(--dim);letter-spacing:.34em;text-transform:uppercase}
+.hero .desc{margin-top:18px;font-size:15px;color:var(--dim);max-width:680px;margin-left:auto;margin-right:auto}
+/* 统计 */
+.stats{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:30px}
+.stat{background:linear-gradient(180deg,var(--card),#0d1119);border:1px solid var(--line);border-radius:10px;padding:14px 26px;text-align:center;min-width:110px}
+.stat b{font-family:'Noto Serif SC',serif;font-size:26px;color:var(--gold2);display:block;font-weight:700}
+.stat span{font-size:12px;color:var(--dim);letter-spacing:.06em}
+/* 筛选 */
+.filter{position:sticky;top:61px;z-index:20;backdrop-filter:blur(10px);background:rgba(10,13,19,.82);border-bottom:1px solid var(--line);margin-top:8px;padding:12px 0}
+.f-inner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:1200px;margin:0 auto;padding:0 20px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{color:var(--dim);text-decoration:none;font-size:13px;padding:6px 14px;border:1px solid var(--line);border-radius:40px;transition:.2s;cursor:pointer;background:none;font-family:inherit}
+.chip:hover{color:var(--gold2);border-color:var(--gold)}
+.chip.on{color:#0a0d13;background:var(--gold2);border-color:var(--gold2);font-weight:500}
+.chip .n{color:var(--gold);margin-left:5px;font-size:12px}
+.chip.on .n{color:#6b5a26}
+.f-count{margin-left:auto;color:var(--dim);font-size:12px;white-space:nowrap}
+/* 画廊 */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;padding:26px 0 60px}
+.item{background:linear-gradient(180deg,var(--card),#0f141f);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;position:relative}
+.item:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 10px 30px rgba(201,168,106,.12)}
+.item img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block}
+.item .meta{padding:8px 10px}
+.item .meta b{font-size:12px;color:var(--ink);font-weight:400;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .meta i{font-style:normal;font-size:11px;color:var(--dim)}
+.item .id{position:absolute;top:8px;right:8px;font-size:9px;color:rgba(230,207,154,.7);background:rgba(10,13,19,.6);padding:2px 7px;border-radius:20px;letter-spacing:.05em;font-family:monospace}
+/* 灯箱 */
+.lightbox{position:fixed;inset:0;background:rgba(5,7,11,.94);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.lightbox.open{display:flex}
+.lb-img{max-height:88vh;max-width:92vw;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.6);object-fit:contain}
+.lb-close{position:absolute;top:20px;right:26px;font-size:34px;color:var(--dim);cursor:pointer;background:none;border:none;font-family:inherit}
+.lb-close:hover{color:var(--gold2)}
+.lb-cap{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);text-align:center;color:var(--dim);font-size:13px;width:90%}
+.lb-cap b{color:var(--gold2);font-weight:500}
+.lb-arrow{position:absolute;top:50%;transform:translateY(-50%);font-size:40px;color:var(--dim);cursor:pointer;background:none;border:none;padding:10px;font-family:inherit}
+.lb-arrow:hover{color:var(--gold2)}
+.lb-prev{left:14px}.lb-next{right:14px}
+/* 确权 */
+.footer{border-top:1px solid var(--line);padding:34px 0 50px;text-align:center}
+.footer .omega{font-family:'Noto Serif SC',serif;color:var(--gold);letter-spacing:.15em;font-size:14px}
+.footer p{color:var(--dim);font-size:12px;margin-top:8px;letter-spacing:.05em}
+.footer .did{color:var(--gold);font-family:monospace;font-size:11px;margin-top:6px;letter-spacing:.08em}
+@media(max-width:640px){
+  .gallery{grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:9px}
+  .topnav a{margin-left:10px;font-size:12px}
+  .stats{gap:10px}.stat{padding:10px 16px;min-width:88px}.stat b{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">昆仑洞天 · KUNLUN</div>
+    <nav class="topnav">
+      <a href="/">首页</a>
+      <a href="/kunlun.html">昆仑洞天</a>
+      <a href="/gallery/rose/">作品库</a>
+      <a href="/creation-plan.html">创作规划</a>
+      <a class="home" href="/kunlun/workbench.html">短剧编排台</a>
+    </nav>
+  </div>
+
+  <div class="hero">
+    <div class="crest">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+    <h1>关键帧 · 可视化作品展</h1>
+    <div class="en">Kunlun Dongtian Keyframe Gallery</div>
+    <p class="desc">九天玄女等角色自昆仑洞天短剧编排台生成，经批量产线推演、角色一致性校验与 SHA256 哈希确权锁档。本页为可视化作品展示，供角色比对与质检规则训练。</p>
+    <div class="stats">
+      <div class="stat"><b id="stTotal">21</b><span>关键帧</span></div>
+      <div class="stat"><b id="stSeries">2</b><span>系列</span></div>
+      <div class="stat"><b>9:16</b><span>画幅</span></div>
+      <div class="stat"><b>DID-BR-000002</b><span>确权</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="filter">
+  <div class="f-inner">
+    <div class="chips" id="chips">
+      <button class="chip on" data-f="all">全部 <span class="n" id="cAll">0</span></button>
+      <button class="chip" data-f="series-ver">一致性验证 <span class="n" id="cVer">0</span></button>
+      <button class="chip" data-f="series-char">角色资产 <span class="n" id="cChar">0</span></button>
+    </div>
+    <div class="f-count" id="fcount">0 帧</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="gallery" id="gallery"></div>
+</div>
+
+<div class="lightbox" id="lb">
+  <button class="lb-close" id="lbClose" aria-label="关闭">×</button>
+  <button class="lb-arrow lb-prev" id="lbPrev" aria-label="上一张">‹</button>
+  <img class="lb-img" id="lbImg" alt="">
+  <button class="lb-arrow lb-next" id="lbNext" aria-label="下一张">›</button>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<div class="footer">
+  <div class="omega">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+  <p>昆仑洞天 · 全域自治创作体系 · 短剧编排台关键帧资产</p>
+  <div class="did">DID-BR-000002 · SHA256 确权 · huodouai.com</div>
+</div>
+
+<script>
+(function(){
+  // 关键帧数据（文件名 / 系列 / 标题）
+  var FRAMES=[
+    {f:"frame_1791595177",s:"series-ver",t:"基准帧 · 仙山结印",d:"九天玄女 · 角色基准形象 · 闭目结印金冠花钿"},
+    {f:"frame_1791601971",s:"series-ver",t:"推演 · 云海施法",d:"九天玄女 · 云海结印 · 蓝色灵气"},
+    {f:"frame_1791602046",s:"series-ver",t:"推演 · 雪山落日",d:"九天玄女 · 雪山远眺 · 金色光带"},
+    {f:"frame_1791602000",s:"series-ver",t:"推演 · 细化帧",d:"九天玄女 · 推演细化"},
+    {f:"frame_1791594856",s:"series-char",t:"角色资产 · 九天玄女",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791595026",s:"series-char",t:"角色资产 · 九天玄女",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791598809",s:"series-char",t:"角色资产 · 昆仑仙山",d:"昆仑洞天场景关键帧"},
+    {f:"frame_1791452211",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791466888",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791467073",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791467123",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791467143",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791467518",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791467637",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791468100",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791469082",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791469661",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791469708",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791472314",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791472315",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"},
+    {f:"frame_1791472316",s:"series-char",t:"角色资产 · 昆仑角色",d:"昆仑洞天角色关键帧"}
+  ];
+  var cur="all", shown=[], curIdx=0;
+  var gallery=document.getElementById("gallery");
+  var lb=document.getElementById("lb"), lbImg=document.getElementById("lbImg"), lbCap=document.getElementById("lbCap");
+  var BASE="/kunlun/frames/";
+
+  function countSeries(){
+    document.getElementById("cAll").textContent=FRAMES.length;
+    document.getElementById("cVer").textContent=FRAMES.filter(x=>x.s==="series-ver").length;
+    document.getElementById("cChar").textContent=FRAMES.filter(x=>x.s==="series-char").length;
+    document.getElementById("stTotal").textContent=FRAMES.length;
+    document.getElementById("stSeries").textContent=new Set(FRAMES.map(x=>x.s)).size;
+  }
+
+  function render(){
+    shown=FRAMES.filter(x=>cur==="all"||x.s===cur);
+    gallery.innerHTML="";
+    shown.forEach(function(it){
+      var d=document.createElement("div");
+      d.className="item";
+      d.innerHTML='<img src="'+BASE+it.f+'.jpg" alt="'+it.t+'" loading="lazy">'
+        +'<span class="id">'+it.f.slice(-4)+'</span>'
+        +'<div class="meta"><b>'+it.t+'</b><i>'+it.d+'</i></div>';
+      d.onclick=function(){openLB(shown.indexOf(it));};
+      gallery.appendChild(d);
+    });
+    document.getElementById("fcount").textContent=shown.length+" 帧";
+  }
+
+  function openLB(i){
+    if(i<0||i>=shown.length)return;
+    curIdx=i;
+    var it=shown[i];
+    lbImg.src=BASE+it.f+".jpg";
+    lbCap.innerHTML='<b>'+it.t+'</b> · '+it.d;
+    lb.classList.add("open");
+  }
+  function closeLB(){lb.classList.remove("open");}
+
+  // 筛选
+  document.getElementById("chips").addEventListener("click",function(e){
+    var b=e.target.closest(".chip"); if(!b)return;
+    document.querySelectorAll(".chip").forEach(function(c){c.classList.remove("on");});
+    b.classList.add("on"); cur=b.dataset.f; render();
+  });
+  document.getElementById("lbClose").onclick=closeLB;
+  document.getElementById("lbPrev").onclick=function(){openLB(curIdx-1);};
+  document.getElementById("lbNext").onclick=function(){openLB(curIdx+1);};
+  lb.addEventListener("click",function(e){if(e.target===lb)closeLB();});
+  document.addEventListener("keydown",function(e){
+    if(!lb.classList.contains("open"))return;
+    if(e.key==="Escape")closeLB();
+    if(e.key==="ArrowLeft")openLB(curIdx-1);
+    if(e.key==="ArrowRight")openLB(curIdx+1);
+  });
+
+  countSeries(); render();
+})();
+</script>
+</body>
+</html>

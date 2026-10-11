@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS · ZR 自治内核可视化控制台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230B0D12'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='%23C9A962' font-family='serif'%3E%CE%A9%3C/text%3E%3C/svg%3E">
+<script src="/assets/echarts.min.js"></script>
+<style>
+:root{
+  --bg:#0a0d13;--card:#101420;--line:rgba(201,168,106,.16);--gold:#c9a86a;--gold2:#e6cf9a;
+  --ink:#e8e6e1;--dim:#8a93a6;--green:#2ecc71;--red:#e74c3c;--blue:#5b7ea6;--amber:#e6a23c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;font-weight:300;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(1000px 420px at 50% -8%,rgba(201,168,106,.08),transparent 60%),radial-gradient(700px 400px at 95% 20%,rgba(95,122,158,.05),transparent 60%)}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 18px}
+/* 顶栏 */
+.topline{height:2px;background:linear-gradient(90deg,var(--gold),transparent 60%)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;max-width:1240px;margin:0 auto;flex-wrap:wrap;gap:10px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-badge{width:40px;height:40px;border:1px solid var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold);background:linear-gradient(180deg,var(--card),#0c1018)}
+.brand-name{font-family:'Noto Serif SC',serif;font-size:17px;color:var(--gold2);letter-spacing:.1em}
+.brand-sub{font-size:10px;color:var(--dim);letter-spacing:.28em;text-transform:uppercase;margin-top:2px}
+.nav-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.api-base,.api-key{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
+.api-base input,.api-key input{background:#0f141f;border:1px solid var(--line);color:var(--ink);padding:7px 10px;border-radius:6px;font-size:12px;outline:none;width:190px}
+.api-key input{width:150px}
+.nav-cta{background:linear-gradient(90deg,var(--gold),var(--gold2));color:#0a0d13;border:none;padding:8px 18px;border-radius:40px;font-weight:600;cursor:pointer;font-size:13px}
+.nav-cta:hover{filter:brightness(1.1)}
+.nav-ghost{background:none;border:1px solid var(--gold);color:var(--gold);padding:8px 16px;border-radius:40px;cursor:pointer;font-size:13px;font-family:inherit}
+.nav-ghost:hover{background:rgba(201,168,106,.12)}
+/* tabs */
+.tabs{display:flex;gap:8px;padding:10px 18px;max-width:1240px;margin:0 auto;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:1px solid var(--line);color:var(--dim);padding:8px 16px;border-radius:40px;cursor:pointer;font-size:13px;transition:.2s;font-family:inherit}
+.tabs button:hover{color:var(--gold2);border-color:var(--gold)}
+.tabs button.active{background:var(--gold2);color:#0a0d13;border-color:var(--gold2);font-weight:600}
+.main{max-width:1240px;margin:0 auto;padding:20px 18px 50px}
+.view{display:none}.view.active{display:block}
+/* offline */
+.offline{max-width:620px;margin:60px auto;text-align:center;padding:40px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--card),#0d1119)}
+.offline-seal{display:inline-block;border:2px solid var(--red);color:var(--red);padding:4px 16px;border-radius:40px;font-size:12px;letter-spacing:.2em;margin-bottom:18px}
+.offline h2{font-family:'Noto Serif SC',serif;color:var(--ink);font-size:24px;margin-bottom:12px}
+.offline p{color:var(--dim);font-size:13px;margin-bottom:16px}
+.offline ol{text-align:left;color:var(--dim);font-size:13px;padding-left:20px;margin-bottom:20px;line-height:2}
+.offline code{background:#0f141f;border:1px solid var(--line);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--gold2)}
+.btn-ghost{background:none;border:1px solid var(--gold);color:var(--gold);padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit}
+.btn-ghost:hover{background:rgba(201,168,106,.12)}
+/* cards */
+.card{background:linear-gradient(180deg,var(--card),#0d1119);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.card-head h3{font-family:'Noto Serif SC',serif;font-size:16px;color:var(--gold2);letter-spacing:.05em}
+.card-head .muted{font-size:11px;color:var(--dim);font-family:monospace}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row.full{width:100%;margin-top:10px}
+.muted{color:var(--dim);font-size:12px}
+/* 概览仪表盘 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px}
+.stat{background:linear-gradient(180deg,var(--card),#0d1119);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;inset:auto 0 0 0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);opacity:.5}
+.stat b{font-family:'Noto Serif SC',serif;font-size:28px;color:var(--gold2);display:block;font-weight:700}
+.stat span{font-size:11px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+@media(max-width:760px){.dash-grid{grid-template-columns:1fr}}
+.chart-box{background:linear-gradient(180deg,var(--card),#0d1119);border:1px solid var(--line);border-radius:12px;padding:14px}
+.chart-box h3{font-family:'Noto Serif SC',serif;font-size:14px;color:var(--gold2);margin-bottom:8px}
+.chart{width:100%;height:240px}
+.chart.sm{height:170px}
+/* 模块状态 */
+.mod-list{display:flex;gap:10px;flex-wrap:wrap}
+.mod{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:30px;padding:6px 14px;font-size:13px}
+.mod .dot{width:8px;height:8px;border-radius:50%}
+.mod.up .dot{background:var(--green)}.mod.down .dot{background:var(--red)}
+.mod.up{color:var(--ink)}.mod.down{color:var(--red)}
+.pre{background:#0b0e14;border:1px solid var(--line);border-radius:8px;padding:12px;font-family:monospace;font-size:11px;color:#9aa7bd;overflow:auto;max-height:260px;line-height:1.7}
+/* 真值列表 */
+.truth-list,.task-list{display:flex;flex-direction:column;gap:8px}
+.t-item{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;background:#0c1018}
+.t-item .tag{padding:2px 10px;border-radius:30px;font-size:11px;background:rgba(201,168,106,.15);color:var(--gold);border:1px solid var(--line)}
+.t-item .id{font-family:monospace;color:var(--gold2);font-size:11px}
+.t-item .hash{font-family:monospace;color:var(--dim);font-size:10px;word-break:break-all}
+.t-item .time{color:var(--dim);font-size:11px;margin-left:auto}
+.empty{color:var(--dim);font-size:13px;text-align:center;padding:20px}
+/* 算子拓扑 */
+.layers{display:flex;flex-direction:column;gap:10px}
+.layer{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.layer-head{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:rgba(201,168,106,.07);font-size:13px;border-bottom:1px solid var(--line)}
+.layer-head b{color:var(--gold2);font-weight:600}
+.layer-head span{color:var(--dim);font-size:11px}
+.ops{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;padding:10px}
+.op{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:12px;background:#0c1018}
+.op .on{color:var(--ink)}.op .oid{font-size:10px;color:var(--dim);font-family:monospace}
+.badge{padding:2px 10px;border-radius:30px;font-size:11px}
+.badge.active{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.4)}
+.badge.registered{background:rgba(138,147,166,.12);color:var(--dim);border:1px solid var(--line)}
+/* 表单 */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--dim)}
+.form label.full{grid-column:span 2}
+.form input,.form select,.form textarea{background:#0f141f;border:1px solid var(--line);color:var(--ink);padding:9px 12px;border-radius:6px;font-size:13px;outline:none;font-family:inherit}
+.form input:focus,.form textarea:focus{border-color:var(--gold)}
+.btn-primary{background:linear-gradient(90deg,var(--gold),var(--gold2));color:#0a0d13;border:none;padding:9px 22px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px;font-family:inherit}
+.btn-primary:hover{filter:brightness(1.1)}
+/* 溯源链 */
+.chain-meta{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:12px}
+.chain-meta>div{display:flex;flex-direction:column;gap:4px}
+.chain-meta .mono{font-family:monospace;color:var(--gold2);font-size:12px;word-break:break-all}
+/* 网关 */
+.ch-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.ch-card{border:1px solid var(--line);border-radius:10px;padding:14px;background:#0c1018}
+.ch-card h4{font-family:'Noto Serif SC',serif;color:var(--gold2);font-size:14px;margin-bottom:10px}
+.ch-card .kv{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+.ch-card .kv span{color:var(--dim)}.ch-card .kv b{color:var(--ink);font-weight:400}
+.chat-out{margin-top:14px}
+.footer{max-width:1240px;margin:0 auto;padding:24px 18px 40px;border-top:1px solid var(--line);text-align:center}
+.footer>div:first-child{color:var(--dim);font-size:13px;letter-spacing:.06em}
+.footer .mono{color:var(--gold);font-family:monospace;font-size:12px;margin-top:6px;letter-spacing:.08em}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f141f;border:1px solid var(--gold);color:var(--ink);padding:10px 20px;border-radius:8px;font-size:13px;z-index:99;display:none;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.toast.show{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.link{background:none;border:none;color:var(--gold);cursor:pointer;font-size:12px;font-family:inherit}
+/* 轮询状态徽章 */
+.poll-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);margin-left:auto}
+.poll-badge .pdot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.poll-badge.off .pdot{background:var(--red);animation:none}
+/* 大屏投屏模式 */
+body.fullscreen .nav .nav-right .api-base,body.fullscreen .nav .nav-right .api-key,body.fullscreen .footer{display:none}
+body.fullscreen .nav{justify-content:space-between}
+body.fullscreen .brand-name{font-size:24px}
+body.fullscreen .brand-sub{font-size:13px;opacity:.8}
+body.fullscreen .tabs button{font-size:16px;padding:10px 22px}
+body.fullscreen .main{max-width:1600px}
+body.fullscreen .stat b{font-size:42px}
+body.fullscreen .stat span{font-size:14px}
+body.fullscreen .card-head h3,body.fullscreen .chart-box h3{font-size:20px}
+body.fullscreen .chart{height:420px!important}
+body.fullscreen .chart.sm{height:280px!important}
+body.fullscreen form,body.fullscreen .btn-ghost,body.fullscreen .btn-primary,body.fullscreen .link{display:none}
+body.fullscreen .offline{display:none}
+.poll-badge .ptime{font-family:monospace}
+@media(max-width:640px){.form{grid-template-columns:1fr}.form label.full{grid-column:span 1}.api-base input{width:140px}}
+</style>
+</head>
+<body>
+<div class="topline"></div>
+<header class="nav">
+  <div class="brand">
+    <div class="brand-badge">Ω</div>
+    <div>
+      <div class="brand-name">火斗云智AIOS</div>
+      <div class="brand-sub">ZR Autonomous Console · 可视化</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <label class="api-base"><span>API</span><input id="apiBase" type="text" value="" placeholder="自动检测（默认 /zr-api/api/v1）" spellcheck="false"></label>
+    <label class="api-key"><span>Key</span><input id="apiKey" type="password" placeholder="X-API-Key" spellcheck="false" autocomplete="off"></label>
+    <button class="nav-cta" id="btnRefresh">重连</button>
+    <button class="nav-ghost" id="btnExport" title="导出监控数据快照 JSON">导出</button>
+    <button class="nav-ghost" id="btnFullscreen" title="一键全屏投屏视图">大屏</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-view="overview" class="active">概览</button>
+  <button data-view="truth">真值库</button>
+  <button data-view="task">任务调度</button>
+  <button data-view="operators">算子拓扑</button>
+  <button data-view="provenance">溯源链</button>
+  <button data-view="gateway">模型网关</button>
+</nav>
+
+<main class="main">
+  <!-- 离线提示 -->
+  <section id="offline" class="offline" style="display:none">
+    <div class="offline-seal">服务未连接</div>
+    <h2>未获得后端响应</h2>
+    <p>请确认 API 地址与密钥。当前探测地址 <code id="offlineUrl"></code></p>
+    <button class="btn-ghost" id="btnRetry">重试连接</button>
+  </section>
+
+  <!-- 告警横幅 -->
+  <div id="alertBar" style="display:none;max-width:1240px;margin:10px auto 0;padding:12px 16px;border-radius:10px;background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.4);color:#ff8a8a;font-size:13px"></div>
+
+  <!-- 1. 概览 -->
+  <section id="view-overview" class="view active">
+    <div class="stats">
+      <div class="stat"><b id="ovUptime">--</b><span>UPTIME 秒</span></div>
+      <div class="stat"><b id="ovTruthCount">--</b><span>真值总数</span></div>
+      <div class="stat"><b id="ovTaskCount">--</b><span>任务数</span></div>
+      <div class="stat"><b id="ovOpCount">--</b><span>已注册算子</span></div>
+    </div>
+    <div class="dash-grid">
+      <div class="chart-box"><h3>模块运行状态</h3><div id="chMods" class="chart sm"></div></div>
+      <div class="chart-box"><h3>系统健康概览</h3><div id="chHealth" class="chart sm"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>模块状态</h3><span class="muted">modules</span></div>
+      <div id="modList" class="mod-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>健康探测</h3><span class="muted">GET /api/v1/health</span></div>
+      <pre id="ovHealth" class="pre"></pre>
+    </div>
+  </section>
+
+  <!-- 2. 真值库 -->
+  <section id="view-truth" class="view">
+    <div class="dash-grid">
+      <div class="chart-box"><h3>真值类型分布</h3><div id="chTruthType" class="chart"></div></div>
+      <div class="chart-box"><h3>真值入库时间线</h3><div id="chTruthTime" class="chart"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h3>真值库</h3>
+        <div class="row">
+          <select id="truthType">
+            <option value="">全部类型</option>
+            <option value="meta_law">meta_law · 元法则</option>
+            <option value="rule">rule · 规则</option>
+            <option value="config">config · 配置</option>
+            <option value="decision">decision · 决策</option>
+            <option value="data">data · 数据</option>
+            <option value="creative">creative · 创意</option>
+            <option value="risk">risk · 风险</option>
+            <option value="protocol">protocol · 协议</option>
+            <option value="unknown">unknown · 未知</option>
+          </select>
+          <input id="truthQ" type="text" placeholder="搜索 id / source" spellcheck="false" style="background:#0f141f;border:1px solid var(--line);color:var(--ink);padding:7px 10px;border-radius:6px;font-size:12px">
+          <button class="btn-ghost" id="btnTruthList">查询</button>
+        </div>
+      </div>
+      <div id="truthList" class="truth-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>新增真值</h3><span class="muted">POST /api/v1/truth</span></div>
+      <form id="truthForm" class="form">
+        <label>truth_type
+          <select name="truth_type" required>
+            <option value="meta_law">meta_law</option><option value="rule">rule</option><option value="config" selected>config</option>
+            <option value="decision">decision</option><option value="data">data</option><option value="creative">creative</option>
+            <option value="risk">risk</option><option value="protocol">protocol</option><option value="unknown">unknown</option>
+          </select>
+        </label>
+        <label>source <input name="source" type="text" placeholder="e.g. manual" required></label>
+        <label>confidence (0~1) <input name="confidence" type="number" step="0.01" min="0" max="1" value="0.9"></label>
+        <label>id (可选) <input name="truth_id" type="text" placeholder="如 DEPLOY.X.001"></label>
+        <label class="full">content (JSON 对象)
+          <textarea name="content" rows="5" spellcheck="false">{"note":"hello from console"}</textarea>
+        </label>
+        <div class="row full">
+          <button class="btn-primary" type="submit">提交真值</button>
+          <span id="truthFormMsg" class="muted"></span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- 3. 任务调度 -->
+  <section id="view-task" class="view">
+    <div class="dash-grid">
+      <div class="chart-box"><h3>任务类型分布</h3><div id="chTaskType" class="chart sm"></div></div>
+      <div class="chart-box"><h3>任务调度状态</h3><div id="chTaskStatus" class="chart sm"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>创建任务</h3><span class="muted">POST /api/v1/task</span></div>
+      <form id="taskForm" class="form">
+        <label>name <input name="name" type="text" placeholder="e.g. daily-truth-audit" required></label>
+        <label>task_type
+          <select name="task_type" required>
+            <option value="truth_audit">truth_audit · 真值对账</option>
+            <option value="drift_scan">drift_scan · 漂移巡检</option>
+            <option value="provenance_verify">provenance_verify · 溯源校验</option>
+            <option value="gateway_probe">gateway_probe · 网关探测</option>
+            <option value="custom">custom · 自定义</option>
+          </select>
+        </label>
+        <label>schedule
+          <select name="schedule" id="taskSchedule">
+            <option value="once">once · 一次性</option>
+            <option value="interval">interval · 周期</option>
+          </select>
+        </label>
+        <label>interval_secs <input name="interval_secs" type="number" min="0" value="0" id="taskInterval"></label>
+        <label class="full">params (JSON 对象)
+          <textarea name="params" rows="3" spellcheck="false">{}</textarea>
+        </label>
+        <div class="row full">
+          <button class="btn-primary" type="submit">创建</button>
+          <span id="taskFormMsg" class="muted"></span>
+        </div>
+      </form>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>任务列表</h3><button class="btn-ghost" id="btnTaskList">刷新</button></div>
+      <div id="taskList" class="task-list"></div>
+    </div>
+  </section>
+
+  <!-- 4. 算子拓扑 -->
+  <section id="view-operators" class="view">
+    <div class="chart-box" style="margin-bottom:16px">
+      <h3>27 算子 · 十层依赖拓扑 <span class="muted" id="opCount"></span></h3>
+      <div id="chTopology" class="chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>算子分层明细</h3><span class="muted" id="opCount2"></span></div>
+      <div id="opLayers" class="layers"></div>
+    </div>
+  </section>
+
+  <!-- 5. 溯源链 -->
+  <section id="view-provenance" class="view">
+    <div class="chart-box" style="margin-bottom:16px">
+      <h3>Merkle-DAG 主链</h3>
+      <div id="chChain" class="chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h3>链数据</h3>
+        <div class="row">
+          <button class="btn-ghost" id="btnChain">拉取链</button>
+          <button class="btn-primary" id="btnVerify">执行校验</button>
+        </div>
+      </div>
+      <div class="chain-meta">
+        <div><span class="muted">merkle_root</span><div id="chainRoot" class="mono">--</div></div>
+        <div><span class="muted">链长</span><div id="chainLen" class="mono">--</div></div>
+      </div>
+      <pre id="chainData" class="pre"></pre>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>校验结果</h3><span class="muted">POST /api/v1/provenance/verify</span></div>
+      <pre id="verifyResult" class="pre">尚未校验。</pre>
+    </div>
+  </section>
+
+  <!-- 6. 模型网关 -->
+  <section id="view-gateway" class="view">
+    <div class="dash-grid">
+      <div class="chart-box"><h3>网关通道健康雷达</h3><div id="chGatewayRadar" class="chart"></div></div>
+      <div class="chart-box"><h3>调用量时序监控</h3><div id="chGatewayTime" class="chart"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>三通道状态</h3><button class="btn-ghost" id="btnChannels">刷新通道</button></div>
+      <div id="channelCards" class="ch-cards"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Chat 测试</h3><span class="muted">POST /api/v1/gateway/chat</span></div>
+      <form id="chatForm" class="form">
+        <label>channel
+          <select name="channel">
+            <option value="auto">auto · 自动选择</option>
+            <option value="local">local · 本地 ollama</option>
+            <option value="licensed">licensed · 授权商用</option>
+            <option value="byok">byok · 自带密钥</option>
+          </select>
+        </label>
+        <label class="full">model <input name="model" type="text" placeholder="e.g. qwen2.5 / gpt-4o-mini" value=""></label>
+        <label class="full">messages (JSON 数组)
+          <textarea name="messages" rows="5" spellcheck="false">[{"role":"user","content":"用一句话介绍你自己。"}]</textarea>
+        </label>
+        <div class="row full">
+          <button class="btn-primary" type="submit">发送</button>
+          <span id="chatMsg" class="muted"></span>
+        </div>
+      </form>
+      <div class="chat-out">
+        <div class="card-head"><h3>响应</h3><span class="muted" id="chatAudit"></span></div>
+        <pre id="chatResult" class="pre">（等待请求）</pre>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div>火斗云智AIOS · ZR Autonomous Suite Console</div>
+  <div class="mono">Ω₀⊂⊙∞⊂Ω &nbsp;|&nbsp; DID-BR-000002 &nbsp;|&nbsp; huodouai.com</div>
+</footer>
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+  var LS_BASE='zr_console_base', LS_KEY='zr_console_key';
+  function getBase(){
+    var v=($('apiBase').value||'').trim().replace(/\/+$/,'');
+    if(v) return v;
+    // 自动探测：优先 /zr-api/api/v1（子路径部署），回退 /api/v1（根部署）
+    return window.location.pathname.indexOf('/zr-api')>=0 ? '/zr-api/api/v1' : '/api/v1';
+  }
+  function getKey(){ return ($('apiKey').value||'').trim(); }
+
+  // ---- ECharts 辅助 ----
+  function mkChart(el){
+    if(!window.echarts) return null;
+    var c=echarts.init(el);
+    c.setOption({backgroundColor:'transparent'});
+    return c;
+  }
+  var gMods=null,gHealth=null,gType=null,gTime=null,gTopo=null,gChain=null,gTaskType=null,gTaskStatus=null,gRadar=null,gTime2=null;
+  var pollTimer=null, pollInterval=10000, lastOkTime=0, alertShown=false;
+  var pendingAlerts=[];
+  var gwHistory=[], gwSeries={};
+
+  function api(method,path,body){
+    var base=getBase(), key=getKey();
+    var headers={'Content-Type':'application/json'};
+    if(key) headers['X-API-Key']=key;
+    var opts={method:method,headers:headers};
+    if(body!==undefined) opts.body=JSON.stringify(body);
+    return fetch(base+path,opts).then(function(r){
+      if(!r.ok) return r.json().then(function(j){ throw new Error((j.detail||j.message||('HTTP '+r.status))); });
+      return r.json();
+    });
+  }
+
+  function toast(msg,err){
+    var t=$('toast'); t.textContent=msg; t.className='toast show';
+    t.style.borderColor=err?'var(--red)':'var(--gold)';
+    setTimeout(function(){t.className='toast';},2600);
+  }
+
+  // 简化颜色
+  var COLOR_OK='#2ecc71',COLOR_WARN='#e6a23c',COLOR_ERR='#e74c3c',COLOR_DIM='#8a93a6',COLOR_GOLD='#c9a86a';
+
+  // ============ 概览 ============
+  function renderMods(mods){
+    var box=$('modList'); box.innerHTML='';
+    mods.forEach(function(m){
+      var up=m.status!=='down'&&m.status!=='down'?true:(m.status==='up');
+      var cls=(m.status==='up'||m.status===true||m.status==='ok')?'up':'down';
+      var d=document.createElement('div');
+      d.className='mod '+cls;
+      d.innerHTML='<span class="dot"></span>'+m.name+' · '+m.status;
+      box.appendChild(d);
+    });
+    // 图
+    if(!gMods){gMods=mkChart($('chMods'));}
+    if(gMods){
+      var up=mods.filter(function(m){return m.status==='up'||m.status==='ok'||m.status===true;}).length;
+      gMods.setOption({
+        series:[{type:'gauge',startAngle:90,endAngle:-270,radius:'92%',center:['50%','58%'],
+          progress:{show:true,width:14,itemStyle:{color:COLOR_OK}},axisLine:{lineStyle:{width:14,color:[[1,'#1a2230']]}},
+          axisTick:{show:false},splitLine:{show:false},axisLabel:{show:false},pointer:{show:false},
+          title:{show:true,offsetCenter:[0,'32%'],fontSize:12,color:'#8a93a6'},detail:{valueAnimation:true,offsetCenter:[0,'-4%'],
+            formatter:up+'/'+mods.length,fontSize:22,color:COLOR_GOLD,fontWeight:700},
+          data:[{value:up}]}]
+      });
+    }
+  }
+
+  function renderHealthChart(h){
+    if(!gHealth){gHealth=mkChart($('chHealth'));}
+    if(!gHealth) return;
+    var items=[];
+    if(h.modules) Object.keys(h.modules).forEach(function(k){items.push({name:k,value:h.modules[k]==='up'?100:30});});
+    else items=[{name:'ok',value:100},{name:'gateway',value:h.gateway_online?100:40},{name:'truth',value:100}];
+    var colors=items.map(function(i){return i.value>=90?COLOR_OK:(i.value>=60?COLOR_WARN:COLOR_ERR);});
+    gHealth.setOption({
+      tooltip:{trigger:'item',formatter:'{b}: {c}'},
+      series:[{type:'pie',radius:['42%','70%'],center:['50%','50%'],itemStyle:{borderRadius:6,borderColor:'#0d1119',borderWidth:2},
+        label:{color:'#c9a86a',fontSize:11},data:items.map(function(i,idx){return {name:i.name,value:i.value,itemStyle:{color:colors[idx]}};})}]
+    });
+  }
+
+  function fmtTime(s){
+    if(!s&&s!==0) return '--';
+    var d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),sec=Math.floor(s%60);
+    if(d>0) return d+'d '+h+'h '+m+'m';
+    if(h>0) return h+'h '+m+'m '+sec+'s';
+    if(m>0) return m+'m '+sec+'s';
+    return sec+'s';
+  }
+
+  function loadOverview(){
+    var offline=$('offline');
+    Promise.all([
+      api('GET','/health').catch(function(e){return {_err:e.message};}),
+      api('GET','/truth?limit=200').catch(function(e){return {_err:e.message};}),
+      api('GET','/task').catch(function(e){return {_err:e.message};}),
+      api('GET','/operators').catch(function(e){return {_err:e.message};})
+    ]).then(function(rs){
+      var health=rs[0], truth=rs[1], tasks=rs[2], ops=rs[3];
+      if(health&&health._err){
+        offline.style.display='block';
+        $('offlineUrl').textContent=getBase()+'/health';
+        setAlert('无法连接后端：'+(health._err||'网络错误'));
+        setPoll(false);
+        return;
+      }
+      offline.style.display='none';
+      lastOkTime=Date.now(); alertShown=false; clearAlert();
+      setPoll(true);
+      // 检查模块告警
+      var downMods=(health.modules?Object.keys(health.modules).filter(function(k){return health.modules[k]!=='up'&&health.modules[k]!=='ok'&&health.modules[k]!==true;}):[]);
+      if(downMods.length) setAlert('模块异常：'+downMods.join(', '));
+      else if(health.gateway_online===false) setAlert('模型网关离线（gateway_online=false）');
+      else clearAlert();
+      // 统计
+      $('ovUptime').textContent=fmtTime(health.uptime||health.uptime_secs||0);
+      $('ovTruthCount').textContent=health.truth_count!=null?health.truth_count:((truth&&truth.items)?truth.items.length:'--');
+      var tl=tasks&&tasks.items?tasks.items:[];
+      $('ovTaskCount').textContent=tl.length;
+      var opTotal=ops&&ops.total!=null?ops.total:27;
+      var opActive=ops&&ops.active!=null?ops.active:0;
+      $('ovOpCount').textContent=opActive+' / '+opTotal;
+      // 模块
+      var mods=health.modules?Object.keys(health.modules).map(function(k){return {name:k,status:health.modules[k]};}):[{name:'memory',status:'up'},{name:'provenance',status:'up'},{name:'scheduler',status:'up'},{name:'gateway',status:health.gateway_online?'up':'down'}];
+      renderMods(mods);
+      renderHealthChart(health);
+      $('ovHealth').textContent=JSON.stringify(health,null,2);
+      // 真值图
+      renderTruthCharts(truth&&truth.items?truth.items:[]);
+      // 算子
+      renderOperatorCharts(ops);
+      // 溯源
+      api('GET','/provenance/chain').then(function(d){ renderChainChart(d); }).catch(function(){});
+    }).catch(function(e){
+      offline.style.display='block';
+      $('offlineUrl').textContent=getBase()+'/health';
+      setAlert('概览加载失败：'+e.message);
+      setPoll(false);
+    });
+  }
+
+  // ============ 告警系统 ============
+  function setAlert(msg){
+    var bar=$('alertBar');
+    bar.style.display='block';
+    bar.innerHTML='<b>⚠ 告警</b> '+msg;
+    alertShown=true;
+  }
+  function clearAlert(){
+    $('alertBar').style.display='none';
+    alertShown=false;
+  }
+
+  // ============ 轮询状态 ============
+  function setPoll(on){
+    var badge=document.getElementById('pollBadge');
+    if(!badge){
+      // 在 tabs 栏右侧创建轮询徽章
+      var tabs=document.getElementById('tabs');
+      badge=document.createElement('div');
+      badge.id='pollBadge';
+      badge.className='poll-badge off';
+      badge.style.marginLeft='auto';
+      badge.innerHTML='<span class="pdot"></span><span class="ptime">--</span>';
+      tabs.appendChild(badge);
+    }
+    badge.className='poll-badge'+(on?'':' off');
+    badge.querySelector('.ptime').textContent=(on?(pollInterval/1000)+'s 轮询':'已停止');
+  }
+  function startPoll(){
+    if(pollTimer) clearInterval(pollTimer);
+    pollTimer=setInterval(function(){
+      api('GET','/health').then(function(h){
+        lastOkTime=Date.now(); setPoll(true);
+        if(alertShown) clearAlert();
+        // 网关tab活跃时同步刷新网关时序
+        var gw=$('view-gateway');
+        if(gw&&gw.classList.contains('active')) loadChannels();
+      }).catch(function(){
+        setPoll(false);
+        setAlert('实时探测失败：后端无响应（上次正常 '+Math.round((Date.now()-lastOkTime)/1000)+'s 前）');
+      });
+    },pollInterval);
+  }
+
+  // ============ 真值 ============
+  var TRUTH_TYPES=['meta_law','rule','config','decision','data','creative','risk','protocol','unknown'];
+  var truthCache=[];
+  function renderTruthCharts(arr){
+    truthCache=arr||[];
+    // 类型分布
+    if(!gType){gType=mkChart($('chTruthType'));}
+    if(gType&&arr.length){
+      var count={};
+      arr.forEach(function(t){var k=t.truth_type||'unknown';count[k]=(count[k]||0)+1;});
+      var data=Object.keys(count).map(function(k){return {name:k,value:count[k]};});
+      var colors=['#c9a86a','#5b7ea6','#2ecc71','#e6a23c','#e74c3c','#9b59b6','#1abc9c','#e67e22','#8a93a6'];
+      gType.setOption({
+        tooltip:{trigger:'item',formatter:'{b}: {c}'},
+        series:[{type:'pie',radius:['38%','66%'],center:['50%','50%'],itemStyle:{borderRadius:5,borderColor:'#0d1119',borderWidth:2},
+          label:{color:'#c9a86a',fontSize:11},data:data.map(function(d,i){return {name:d.name,value:d.value,itemStyle:{color:colors[TRUTH_TYPES.indexOf(d.name)]||colors[8]}};})}]
+      });
+    }
+    // 时间线
+    if(!gTime){gTime=mkChart($('chTruthTime'));}
+    if(gTime&&arr.length){
+      var sorted=arr.slice().sort(function(a,b){return (a.created_at||0)-(b.created_at||0);});
+      var xs=sorted.map(function(t,i){return '#'+(i+1);});
+      var ys=sorted.map(function(t){return Math.round((t.confidence||0.5)*100);});
+      gTime.setOption({
+        tooltip:{trigger:'axis',formatter:function(p){var i=p[0].dataIndex;var t=sorted[i];return '#'+(i+1)+' '+t.truth_id+'<br>conf: '+(t.confidence||0.5);}},
+        grid:{left:34,right:14,top:18,bottom:24},
+        xAxis:{type:'category',data:xs,axisLabel:{color:'#8a93a6',fontSize:9,interval:0},axisLine:{lineStyle:{color:'#22304a'}}},
+        yAxis:{type:'value',min:0,max:100,axisLabel:{color:'#8a93a6',fontSize:9},splitLine:{lineStyle:{color:'#1a2230'}}},
+        series:[{type:'line',data:ys,smooth:true,symbol:'circle',symbolSize:6,lineStyle:{color:COLOR_GOLD,width:2},
+          itemStyle:{color:COLOR_GOLD},areaStyle:{color:'rgba(201,168,106,.12)'},markLine:{silent:true,symbol:'none',
+            lineStyle:{color:COLOR_GOLD,type:'dashed'},data:[{yAxis:90,label:{formatter:'90',color:COLOR_GOLD}}]}}]
+      });
+    }
+  }
+
+  function loadTruth(){
+    var type=$('truthType').value, q=$('truthQ').value.trim();
+    var url='/truth?limit=200'+(type?'&truth_type='+encodeURIComponent(type):'');
+    api('GET',url).then(function(d){
+      var arr=d&&d.items?d.items:[];
+      if(q) arr=arr.filter(function(t){return (t.truth_id||'').indexOf(q)>=0||(t.source||'').indexOf(q)>=0;});
+      renderTruthList(arr);
+      renderTruthCharts(arr);
+    }).catch(function(e){ toast('加载真值失败：'+e.message,true); });
+  }
+  function renderTruthList(arr){
+    var box=$('truthList');
+    if(!arr.length){box.innerHTML='<div class="empty">暂无真值</div>';return;}
+    box.innerHTML='';
+    arr.forEach(function(t){
+      var d=document.createElement('div');
+      d.className='t-item';
+      d.innerHTML='<span class="tag">'+t.truth_type+'</span><span class="id">'+t.truth_id+'</span><span class="hash">'+t.sha256+'</span><span class="time">'+new Date(t.created_at*1000).toLocaleString()+'</span>';
+      box.appendChild(d);
+    });
+  }
+  $('btnTruthList').addEventListener('click',loadTruth);
+
+  $('truthForm').addEventListener('submit',function(ev){
+    ev.preventDefault();
+    var fd=new FormData(ev.target);
+    var content; try{ content=JSON.parse(fd.get('content')||'{}'); }catch(e){ toast('content 不是合法 JSON',true); return; }
+    var body={truth_type:fd.get('truth_type'),source:fd.get('source'),confidence:parseFloat(fd.get('confidence'))||0.9,content:content};
+    if(fd.get('truth_id')) body.truth_id=fd.get('truth_id');
+    api('POST','/truth',body).then(function(r){
+      $('truthFormMsg').textContent='✓ '+r.truth_id;
+      toast('真值已提交');loadTruth();
+    }).catch(function(e){ toast('提交失败：'+e.message,true); });
+  });
+
+  // ============ 任务 ============
+  function loadTasks(){
+    api('GET','/task').then(function(d){
+      var arr=d&&d.items?d.items:[];
+      var box=$('taskList');
+      if(!arr.length){box.innerHTML='<div class="empty">暂无任务</div>';}
+      else{
+        box.innerHTML='';
+        arr.forEach(function(t){
+          var d=document.createElement('div');
+          d.className='t-item';
+          d.innerHTML='<span class="tag">'+t.task_type+'</span><span class="id">'+t.name+'</span><span style="color:var(--dim);font-size:11px">'+t.schedule+'</span>';
+          box.appendChild(d);
+        });
+      }
+      renderTaskCharts(arr);
+    }).catch(function(e){ $('taskList').innerHTML='<div class="empty">加载失败：'+e.message+'</div>'; });
+  }
+  function renderTaskCharts(arr){
+    // 类型分布
+    if(!gTaskType){gTaskType=mkChart($('chTaskType'));}
+    if(gTaskType){
+      if(!arr.length){gTaskType.clear();}
+      else{
+        var count={};
+        arr.forEach(function(t){var k=t.task_type||'custom';count[k]=(count[k]||0)+1;});
+        var cols=['#c9a86a','#5b7ea6','#2ecc71','#e6a23c','#e74c3c'];
+        gTaskType.setOption({
+          tooltip:{trigger:'item',formatter:'{b}: {c}'},
+          series:[{type:'pie',radius:['40%','68%'],center:['50%','50%'],itemStyle:{borderRadius:5,borderColor:'#0d1119',borderWidth:2},
+            label:{color:'#c9a86a',fontSize:11},
+            data:Object.keys(count).map(function(k,i){return {name:k,value:count[k],itemStyle:{color:cols[i%5]}};})}]
+        });
+      }
+    }
+    // 调度状态
+    if(!gTaskStatus){gTaskStatus=mkChart($('chTaskStatus'));}
+    if(gTaskStatus){
+      if(!arr.length){gTaskStatus.clear();}
+      else{
+        var once=arr.filter(function(t){return t.schedule==='once';}).length;
+        var inter=arr.filter(function(t){return t.schedule==='interval'||t.interval_secs;}).length;
+        gTaskStatus.setOption({
+          tooltip:{trigger:'item',formatter:'{b}: {c}'},
+          legend:{data:['一次性','周期'],textStyle:{color:'#8a93a6',fontSize:10},top:0},
+          series:[{type:'pie',radius:['38%','66%'],center:['50%','52%'],itemStyle:{borderRadius:5,borderColor:'#0d1119',borderWidth:2},
+            label:{color:'#c9a86a',fontSize:11},
+            data:[{name:'一次性',value:once,itemStyle:{color:'#5b7ea6'}},{name:'周期',value:inter,itemStyle:{color:'#2ecc71'}}]}]
+        });
+      }
+    }
+  }
+  $('btnTaskList').addEventListener('click',loadTasks);
+  $('taskForm').addEventListener('submit',function(ev){
+    ev.preventDefault();
+    var fd=new FormData(ev.target);
+    var params; try{ params=JSON.parse(fd.get('params')||'{}'); }catch(e){ toast('params 不是合法 JSON',true); return; }
+    var body={name:fd.get('name'),task_type:fd.get('task_type'),schedule:fd.get('schedule'),params:params};
+    if(fd.get('schedule')==='interval') body.interval_secs=parseInt(fd.get('interval_secs'))||0;
+    api('POST','/task',body).then(function(r){
+      $('taskFormMsg').textContent='✓ 已创建 '+(r.task_id||r.id||'');
+      toast('任务已创建');loadTasks();
+    }).catch(function(e){ toast('创建失败：'+e.message,true); });
+  });
+
+  // ============ 算子拓扑 ============
+  var OPERATORS=[];
+  var LAYER_NAMES={1:'真值过滤蒸馏',2:'流形度量映射',3:'知识图谱重建',4:'因果级推理',5:'CTE适配器流转',6:'结构化归档',7:'资产对账治理',8:'安全确权',9:'决策法律护盾',10:'业务实体约束'};
+  function renderOperatorCharts(ops){
+    if(!ops||!ops.items||!ops.items.length) return;
+    var live=ops.items, total=ops.total||27, active=ops.active||0;
+    OPERATORS=live;
+    $('opCount').textContent='已注册 '+active+' / '+total;
+    $('opCount2').textContent=total+' 算子';
+    // 分层柱状
+    if(!gTopo){gTopo=mkChart($('chTopology'));}
+    if(gTopo){
+      var layerCount={};
+      live.forEach(function(o){var L=o.layer||1;layerCount[L]=(layerCount[L]||0)+1;});
+      var xs=[];for(var L=1;L<=10;L++)xs.push('L'+L+' '+LAYER_NAMES[L].slice(0,4));
+      var vals=[];for(var L=1;L<=10;L++)vals.push(layerCount[L]||0);
+      var actLayer={};live.forEach(function(o){if(o.status==='active'){var L=o.layer||1;actLayer[L]=(actLayer[L]||0)+1;}});
+      var actVals=[];for(var L=1;L<=10;L++)actVals.push(actLayer[L]||0);
+      gTopo.setOption({
+        tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+        legend:{data:['全部','活跃'],textStyle:{color:'#8a93a6',fontSize:10},top:0},
+        grid:{left:52,right:14,top:26,bottom:64},
+        xAxis:{type:'category',data:xs,axisLabel:{color:'#8a93a6',fontSize:9,rotate:30,interval:0},axisLine:{lineStyle:{color:'#22304a'}}},
+        yAxis:{type:'value',axisLabel:{color:'#8a93a6',fontSize:9},splitLine:{lineStyle:{color:'#1a2230'}}},
+        series:[
+          {name:'全部',type:'bar',data:vals,itemStyle:{color:'rgba(201,168,106,.55)',borderRadius:[4,4,0,0]},barWidth:14},
+          {name:'活跃',type:'bar',data:actVals,itemStyle:{color:'#2ecc71',borderRadius:[4,4,0,0]},barWidth:14}
+        ]
+      });
+    }
+    // 分层明细
+    renderOpLayers(live);
+  }
+  function renderOpLayers(live){
+    var box=$('opLayers'); box.innerHTML='';
+    for(var L=1;L<=10;L++){
+      var ops=live.filter(function(o){return (o.layer||1)===L;});
+      if(!ops.length) continue;
+      var div=document.createElement('div');div.className='layer';
+      var html='<div class="layer-head"><b>第 '+L+' 层 · '+(LAYER_NAMES[L]||'')+'</b><span>'+ops.length+' 个算子</span></div><div class="ops">';
+      ops.forEach(function(o){
+        var st=o.status||'registered';
+        var cls=st==='active'?'active':'registered';
+        html+='<div class="op"><div><div class="on">'+(o.name||o.code||o.operator_id||o.id||'op')+'</div><div class="oid">'+(o.id||o.oid||'')+'</div></div><span class="badge '+cls+'">'+st+'</span></div>';
+      });
+      html+='</div>';div.innerHTML=html;box.appendChild(div);
+    }
+  }
+
+  // ============ 溯源链 ============
+  function renderChainChart(d){
+    if(!gChain){gChain=mkChart($('chChain'));}
+    if(!gChain) return;
+    var chain=(d&&d.chain)||(d&&d.items)||[];
+    var root=(d&&d.merkle_root)||(d&&d.root)||'-';
+    var len=(d&&d.length!=null)?d.length:chain.length;
+    $('chainRoot').textContent=root;
+    $('chainLen').textContent=len;
+    var names=chain.map(function(c,i){return '#'+i;});
+    var conf=chain.map(function(c){return c.confidence?Math.round(c.confidence*100):85;});
+    gChain.setOption({
+      tooltip:{trigger:'axis',formatter:function(p){var i=p[0].dataIndex;var c=chain[i];return '区块 #'+i+'<br>'+(c.truth_id||'')+'<br>hash: '+(c.sha256||c.content_hash||'').slice(0,20)+'…';}},
+      grid:{left:34,right:14,top:20,bottom:24},
+      xAxis:{type:'category',data:names,axisLabel:{color:'#8a93a6',fontSize:9},axisLine:{lineStyle:{color:'#22304a'}}},
+      yAxis:{type:'value',min:0,max:100,axisLabel:{color:'#8a93a6',fontSize:9},splitLine:{lineStyle:{color:'#1a2230'}}},
+      series:[{type:'line',data:conf,smooth:true,symbol:'circle',symbolSize:8,lineStyle:{color:COLOR_GOLD,width:2},
+        itemStyle:{color:COLOR_GOLD},step:'middle',
+        areaStyle:{color:'rgba(201,168,106,.12)'},markLine:{silent:true,symbol:'none',lineStyle:{color:'#2ecc71',type:'dashed'},data:[{yAxis:95,label:{formatter:'校验线 95',color:'#2ecc71'}}]}}]
+    });
+  }
+  function loadChain(){
+    api('GET','/provenance/chain').then(function(d){renderChainChart(d);$('chainData').textContent=JSON.stringify(d,null,2);})
+      .catch(function(e){ $('chainRoot').textContent='--';$('chainLen').textContent='--';$('chainData').textContent='加载失败：'+e.message; });
+  }
+  $('btnChain').addEventListener('click',loadChain);
+  $('btnVerify').addEventListener('click',function(){
+    $('verifyResult').textContent='校验中…';
+    api('POST','/provenance/verify',{}).then(function(res){
+      $('verifyResult').textContent=JSON.stringify(res,null,2);
+      toast(res.ok===false?'校验未通过':'校验完成');
+    }).catch(function(e){ $('verifyResult').textContent='校验失败：'+e.message; });
+  });
+
+  // ============ 网关 ============
+  function loadChannels(){
+    api('GET','/gateway/channels').then(function(d){
+      var arr;
+      if(Array.isArray(d)) arr=d;
+      else if(d&&d.channels&&Array.isArray(d.channels)) arr=d.channels;
+      else if(d&&d.items&&Array.isArray(d.items)) arr=d.items;
+      else if(d&&typeof d==='object'){ // {local:{status,base},licensed:{...}}
+        arr=Object.keys(d).map(function(k){return {channel:k,status:d[k].status||'unknown',model:d[k].model||'—',endpoint:d[k].base||d[k].base_url||'—',api_key:d[k].api_key||d[k].key};});
+      }
+      else arr=[];
+      renderChannels(arr.length?arr:defaultChannels());
+    }).catch(function(){ renderChannels(defaultChannels()); });
+  }
+  function defaultChannels(){
+    return [
+      {channel:'local',model:'ollama',status:'unknown',endpoint:'127.0.0.1:11434'},
+      {channel:'licensed',model:'—',status:'unknown',endpoint:'ZR_LICENSED_BASE_URL'},
+      {channel:'byok',model:'—',status:'unknown',endpoint:'ZR_BYOK_BASE_URL'}
+    ];
+  }
+  function mask(k){ if(!k)return '未配置'; k=String(k); if(k.length<=8)return '****'; return k.slice(0,4)+'****'+k.slice(-4); }
+  function renderChannels(arr){
+    var box=$('channelCards'); box.innerHTML='';
+    arr.forEach(function(c){
+      var div=document.createElement('div');div.className='ch-card';
+      div.innerHTML='<h4>'+c.channel+'</h4><div class="kv"><span>model</span><b></b></div><div class="kv"><span>status</span><b></b></div><div class="kv"><span>endpoint</span><b></b></div><div class="kv"><span>key</span><b></b></div>';
+      div.querySelectorAll('b')[0].textContent=c.model||'—';
+      div.querySelectorAll('b')[1].textContent=c.status||'unknown';
+      div.querySelectorAll('b')[2].textContent=c.endpoint||c.base_url||'—';
+      div.querySelectorAll('b')[3].textContent=mask(c.api_key||c.key);
+      box.appendChild(div);
+    });
+    renderGatewayCharts(arr);
+  }
+  function renderGatewayCharts(arr){
+    // ---- 健康雷达 ----
+    if(!gRadar){gRadar=mkChart($('chGatewayRadar'));}
+    if(gRadar){
+      var indicators=[
+        {name:'连通性',max:100},{name:'响应速度',max:100},{name:'配额余量',max:100},{name:'稳定性',max:100}
+      ];
+      var colors={local:'#c9a86a',licensed:'#5b7ea6',byok:'#2ecc71'};
+      var seriesData=arr.map(function(c){
+        var st=c.status||'unknown';
+        var ok=(st==='up'||st==='ok'||st==='online'||st===true);
+        var val=ok?92:(st==='http_401'?55:20);
+        // 用状态推导各维评分
+        var base=ok?92:(st==='http_401'?50:18);
+        var vals=[base, base-8, base+((st==='http_401')?5:0), base-4];
+        return {name:c.channel,value:vals,itemStyle:{color:colors[c.channel]||'#8a93a6'},lineStyle:{color:colors[c.channel]||'#8a93a6'}};
+      });
+      gRadar.setOption({
+        tooltip:{trigger:'item'},
+        legend:{data:arr.map(function(c){return c.channel;}),textStyle:{color:'#8a93a6',fontSize:10},top:0},
+        radar:{indicator:indicators,radius:'60%',center:['50%','55%'],axisName:{color:'#8a93a6',fontSize:10},
+          splitLine:{lineStyle:{color:'#1a2230'}},splitArea:{areaStyle:{color:['rgba(201,168,106,.02)','rgba(201,168,106,.04)']}},
+          axisLine:{lineStyle:{color:'#22304a'}}},
+        series:[{type:'radar',data:seriesData,symbol:'circle',symbolSize:4,areaStyle:{opacity:.12}}]
+      });
+    }
+    // ---- 调用量时序 ----
+    if(!gTime2){gTime2=mkChart($('chGatewayTime'));}
+    if(gTime2){
+      var now=new Date();
+      var ts=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+      var total=arr.reduce(function(s,c){return s+((c.calls!=null)?c.calls:(c.call_count!=null?c.call_count:0));},0);
+      gwHistory.push(total);
+      if(gwHistory.length>30) gwHistory.shift();
+      gTime2.setOption({
+        tooltip:{trigger:'axis',formatter:function(p){return '调用量: '+p[0].value;}},
+        grid:{left:36,right:14,top:20,bottom:26},
+        xAxis:{type:'category',data:gwHistory.map(function(){return '';}),axisLabel:{show:false},axisLine:{lineStyle:{color:'#22304a'}}},
+        yAxis:{type:'value',min:0,axisLabel:{color:'#8a93a6',fontSize:9},splitLine:{lineStyle:{color:'#1a2230'}}},
+        series:[{type:'line',data:gwHistory,smooth:true,symbol:'circle',symbolSize:5,lineStyle:{color:'#c9a86a',width:2},
+          itemStyle:{color:'#c9a86a'},areaStyle:{color:'rgba(201,168,106,.15)'}}]
+      });
+    }
+  }
+  $('btnChannels').addEventListener('click',loadChannels);
+
+  $('chatForm').addEventListener('submit',function(ev){
+    ev.preventDefault();
+    var fd=new FormData(ev.target);
+    var messages; try{ messages=JSON.parse(fd.get('messages')||'[]'); }catch(e){ toast('messages 不是合法 JSON 数组',true); return; }
+    var body={channel:fd.get('channel'),model:fd.get('model')||undefined,messages:messages};
+    $('chatResult').textContent='请求中…';$('chatAudit').textContent='';
+    api('POST','/gateway/chat',body).then(function(res){
+      $('chatResult').textContent=JSON.stringify(res,null,2);
+      $('chatAudit').textContent='audit_id: '+(res.audit_id||res.request_id||'-');
+      $('chatMsg').textContent='OK';
+    }).catch(function(e){ $('chatResult').textContent='失败：'+e.message;$('chatMsg').textContent=''; });
+  });
+
+  // ============ tabs & boot ============
+  $('tabs').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    document.querySelectorAll('#tabs button').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    var v=b.dataset.view;
+    document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');});
+    $('view-'+v).classList.add('active');
+    // 懒加载
+    if(v==='truth') loadTruth();
+    if(v==='task') loadTasks();
+    if(v==='operators') api('GET','/operators').then(function(d){renderOperatorCharts(d);}).catch(function(e){toast('算子加载失败',true);});
+    if(v==='provenance') loadChain();
+    if(v==='gateway') loadChannels();
+    // resize
+    if(window.echarts){setTimeout(function(){var cs=[gMods,gHealth,gType,gTime,gTopo,gChain,gTaskType,gTaskStatus,gRadar,gTime2];cs.forEach(function(c){if(c)c.resize();});},50);}
+  });
+
+  $('btnRefresh').addEventListener('click',function(){ loadOverview(); startPoll(); toast('已重连'); });
+  $('btnRetry').addEventListener('click',function(){ loadOverview(); startPoll(); });
+
+  // 导出监控数据快照
+  $('btnExport').addEventListener('click',function(){
+    toast('正在聚合监控数据…');
+    Promise.all([
+      api('GET','/health').catch(function(){return null;}),
+      api('GET','/truth?limit=200&truth_type=').catch(function(){return null;}),
+      api('GET','/task').catch(function(){return null;}),
+      api('GET','/operators').catch(function(){return null;}),
+      api('GET','/provenance/chain').catch(function(){return null;}),
+      api('GET','/gateway/channels').catch(function(){return null;})
+    ]).then(function(rs){
+      var snap={
+        exported_at:new Date().toISOString(),
+        source:'https://www.huodouai.com/zr-api/',
+        anchor:'Ω₀⊂⊙∞⊂Ω',
+        did:'DID-BR-000002',
+        brand:'火斗云智AIOS',
+        health:rs[0]||null,
+        truth:rs[1]||null,
+        tasks:rs[2]||null,
+        operators:rs[3]||null,
+        provenance:rs[4]||null,
+        gateway_channels:rs[5]||null
+      };
+      var blob=new Blob([JSON.stringify(snap,null,2)],{type:'application/json'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;
+      a.download='zr-console-snapshot-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast('已导出监控数据快照 JSON');
+    }).catch(function(){ toast('导出失败',true); });
+  });
+
+  // 大屏投屏模式
+  $('btnFullscreen').addEventListener('click',function(){
+    var fs=document.body.classList.toggle('fullscreen');
+    $('btnFullscreen').textContent=fs?'退出大屏':'大屏';
+    if(document.fullscreenEnabled!==false){
+      if(fs&&!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}
+      else if(!fs&&document.fullscreenElement){document.exitFullscreen&&document.exitFullscreen();}
+    }
+    // 放大所有图表
+    if(window.echarts){
+      var cs=[gMods,gHealth,gType,gTime,gTopo,gChain,gTaskType,gTaskStatus,gRadar,gTime2];
+      cs.forEach(function(c){if(c){setTimeout(function(){c.resize();},120);}});
+    }
+    toast(fs?'已进入大屏投屏模式':'已退出大屏模式');
+  });
+  document.addEventListener('fullscreenchange',function(){
+    if(!document.fullscreenElement&&document.body.classList.contains('fullscreen')){
+      document.body.classList.remove('fullscreen');
+      $('btnFullscreen').textContent='大屏';
+    }
+  });
+
+  // 初始化 key 记忆
+  $('apiKey').value=localStorage.getItem(LS_KEY)||'';
+  $('apiKey').addEventListener('change',function(){localStorage.setItem(LS_KEY,$('apiKey').value);});
+  $('apiBase').value=localStorage.getItem(LS_BASE)||'';
+
+  loadOverview();
+  startPoll();
+  setTimeout(function(){if(window.echarts&&gMods)gMods.resize();},600);
+})();
+</script>
+</body>
+</html>

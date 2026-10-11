@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智·昆仑洞天一键量产向导（本地CLI实跑版）</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230b2a5b' stroke='%23c9a227' stroke-width='2'/%3E%3Ctext x='16' y='21' font-size='14' text-anchor='middle' fill='%23c9a227' font-family='serif'%3E%CE%A9%3C/text%3E%3C/svg%3E">
+<link href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0b2a5b; --blue:#123c7a; --accent:#1b5a9e;
+    --gold:#c9a227; --gold-h:#c9a84c; --darkgold:#8a6d1f;
+    --black:#0a0d13; --black2:#10141d; --moon:#f5f0e8;
+    --line:rgba(201,162,39,.25);
+    --green:#7fd18a; --red:#e88;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+    color:var(--moon);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(27,90,158,.35), transparent 60%),
+      radial-gradient(900px 500px at 10% 110%, rgba(201,162,39,.12), transparent 60%),
+      linear-gradient(160deg,#0a0d13 0%,#0b2a5b 55%,#10141d 100%);
+    min-height:100vh; line-height:1.6;
+  }
+  nav{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 24px;border-bottom:1px solid var(--line);
+    background:rgba(10,13,19,.6);backdrop-filter:blur(6px);position:sticky;top:0;z-index:10;
+  }
+  .brand{font-family:'Noto Serif SC',serif;font-weight:700;color:var(--gold);letter-spacing:1px;font-size:15px;display:flex;align-items:center;gap:10px}
+  .brand svg{width:22px;height:22px}
+  nav a.entry{color:var(--moon);text-decoration:none;font-size:13px;border:1px solid var(--line);padding:6px 14px;border-radius:3px;transition:.2s}
+  nav a.entry:hover{border-color:var(--gold);color:var(--gold)}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px}
+  .hero{text-align:center;padding:28px 0 18px}
+  .hero h1{font-family:'Noto Serif SC',serif;font-weight:900;font-size:30px;color:var(--moon);letter-spacing:2px}
+  .hero h1 .gold{color:var(--gold)}
+  .hero p{color:rgba(245,240,232,.7);font-size:14px;margin-top:10px}
+  .omega-line{color:var(--gold);font-size:13px;letter-spacing:3px;margin-top:14px;opacity:.8}
+  .badge-cli{display:inline-block;margin-top:14px;font-size:12px;color:#1a1405;background:linear-gradient(180deg,var(--gold-h),var(--gold));padding:5px 14px;border-radius:3px;font-weight:700;letter-spacing:1px}
+  .card{
+    background:linear-gradient(180deg,rgba(18,60,122,.35),rgba(16,20,29,.7));
+    border:1px solid var(--line);border-radius:6px;padding:26px;margin-top:22px;
+    box-shadow:inset 0 1px 0 rgba(201,162,39,.15), 0 8px 30px rgba(0,0,0,.35);
+  }
+  .card h2{font-family:'Noto Serif SC',serif;color:var(--gold);font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .card h2::before{content:"";width:4px;height:18px;background:var(--gold);display:inline-block}
+  .card h3{font-family:'Noto Serif SC',serif;color:var(--moon);font-size:15px;margin:18px 0 8px}
+  label{display:block;font-size:13px;color:rgba(245,240,232,.85);margin:14px 0 6px}
+  .req{color:var(--gold)}
+  input,textarea,select{
+    width:100%;background:rgba(10,13,19,.7);border:1px solid var(--line);border-radius:4px;
+    color:var(--moon);padding:11px 12px;font-size:14px;font-family:inherit;outline:none;transition:.2s;
+  }
+  input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,162,39,.15)}
+  textarea{min-height:80px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px}
+  .btn{
+    display:inline-block;background:linear-gradient(180deg,var(--gold-h),var(--gold));
+    color:#1a1405;border:none;border-radius:4px;padding:11px 22px;font-size:14px;font-weight:700;
+    cursor:pointer;font-family:inherit;letter-spacing:1px;transition:.2s;border:1px solid var(--darkgold);
+  }
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+  .btn.ghost:hover{background:rgba(201,162,39,.12)}
+  .btnrow{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;align-items:center}
+  .notice{background:rgba(201,162,39,.08);border-left:3px solid var(--gold);padding:10px 14px;font-size:12.5px;color:rgba(245,240,232,.85);border-radius:0 4px 4px 0;margin-top:12px}
+  .notice.warn{background:rgba(232,60,60,.10);border-left-color:var(--red);color:#f3c9c9}
+  code{background:rgba(201,162,39,.12);color:var(--gold-h);padding:2px 6px;border-radius:3px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+  .cmd{display:block;background:rgba(0,0,0,.55);border:1px solid var(--line);border-radius:4px;padding:12px 14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#eef;position:relative;white-space:pre-wrap;margin:8px 0;line-height:1.7}
+  .cmd .copy{position:absolute;top:8px;right:8px;background:rgba(201,162,39,.15);border:1px solid var(--gold);color:var(--gold);font-size:11px;padding:3px 10px;border-radius:3px;cursor:pointer;font-family:inherit}
+  .cmd .copy:hover{background:rgba(201,162,39,.3)}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  th{color:var(--gold);background:rgba(201,162,39,.08)}
+  td.pass{color:var(--green)} td.fail{color:var(--red)} td.warn{color:var(--gold)}
+  .ledger{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+  .ledger div{padding:3px 0}
+  .ok{color:var(--green)}.err{color:var(--red)}.warn{color:var(--gold)}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:3px;border:1px solid var(--line);margin-left:6px;color:rgba(245,240,232,.7)}
+  .tag.live{color:var(--green);border-color:var(--green)}
+  footer{border-top:1px solid var(--line);margin-top:40px;padding:22px;text-align:center;color:rgba(245,240,232,.55);font-size:12.5px}
+  footer .omega{color:var(--gold);letter-spacing:2px}
+  details{margin-top:10px}
+  summary{cursor:pointer;color:var(--gold);font-size:13.5px}
+  /* ===== 真实执行区样式 ===== */
+  .health-strip{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:12.5px;color:rgba(245,240,232,.8);margin-bottom:6px}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#666;margin-right:6px;vertical-align:middle}
+  .dot.on{background:var(--green);box-shadow:0 0 6px rgba(127,209,138,.7)}
+  .dot.off{background:var(--red);box-shadow:0 0 6px rgba(232,136,136,.6)}
+  .hitem{display:flex;align-items:center}
+  .runlog{background:rgba(0,0,0,.55);border:1px solid var(--line);border-radius:4px;padding:12px 14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#dfe6ee;white-space:pre-wrap;max-height:260px;overflow:auto;line-height:1.7;margin-top:12px}
+  .result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+  .stat{background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:5px;padding:12px;text-align:center}
+  .stat .num{font-family:'Noto Serif SC',serif;font-size:24px;font-weight:900;color:var(--gold)}
+  .stat .lab{font-size:11.5px;color:rgba(245,240,232,.65);margin-top:4px}
+  .filelist{margin-top:12px;font-size:12.5px}
+  .filelist .frow{display:flex;justify-content:space-between;gap:10px;padding:5px 8px;border-bottom:1px dashed var(--line)}
+  .filelist .frow:hover{background:rgba(201,162,39,.06)}
+  .filelist .fname{color:#e6edf5;word-break:break-all}
+  .filelist .fsize{color:rgba(245,240,232,.5);font-family:ui-monospace,monospace;white-space:nowrap}
+  .badge{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:1px}
+  .badge.api{background:rgba(127,209,138,.15);color:var(--green);border:1px solid var(--green)}
+  .badge.fb{background:rgba(201,162,39,.15);color:var(--gold);border:1px solid var(--gold)}
+  .badge.ok{background:rgba(127,209,138,.15);color:var(--green);border:1px solid var(--green)}
+  .badge.bad{background:rgba(232,100,100,.15);color:var(--red);border:1px solid var(--red)}
+  .dl{display:inline-block;margin-top:12px;color:var(--gold);border:1px solid var(--gold);padding:8px 16px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;background:rgba(201,162,39,.08)}
+  .dl:hover{background:rgba(201,162,39,.2)}
+  .spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp 0.9s linear infinite;vertical-align:middle;margin-right:8px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .corner-omega{position:fixed;right:14px;bottom:12px;font-size:12px;color:var(--gold);opacity:.75;letter-spacing:1px;z-index:50;pointer-events:none;text-shadow:0 0 8px rgba(201,162,39,.4)}
+  @media(max-width:720px){
+    .result-grid{grid-template-columns:repeat(2,1fr)}
+    .corner-omega{font-size:11px;right:10px;bottom:8px}
+    .row,.row3{grid-template-columns:1fr}
+    .hero h1{font-size:23px}
+    nav{padding:12px 14px}
+    input,textarea,select{font-size:16px}
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">
+    <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#0b2a5b" stroke="#c9a227" stroke-width="2"/><text x="16" y="21" font-size="14" text-anchor="middle" fill="#c9a227" font-family="serif">Ω</text></svg>
+    火斗云智·昆仑洞天一键量产向导
+  </div>
+  <a class="entry" href="https://xcnvv9zlflhm.doubaoapps.com/app/app_17f6ty0z7c0" target="_blank" rel="noopener">返回产品矩阵总入口</a>
+</nav>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>一键量产 <span class="gold">短剧素材包</span></h1>
+    <p>填剧情梗概 → 一键真实提交本地量产服务 → 自动跑生产流水线 + 校验 → 在线查看分镜表 / 关键帧提示词 / 配音台词 ZIP</p>
+    <div class="omega-line">Ω₀⊂⊙∞⊂Ω &nbsp;|&nbsp; 元极恒一自治体系 &nbsp;|&nbsp; DID-BR-000002</div>
+    <span class="badge-cli">已接本地真实量产服务 · 页面真实调用后端</span>
+  </div>
+
+  <!-- 0. 配置 API Key -->
+  <div class="card">
+    <h2>第 0 步 · 配置 API Key（Key 不出本机）</h2>
+    <p style="font-size:13.5px;color:rgba(245,240,232,.8)">引擎按三级优先级取 Key：<code>--key</code> 参数 &gt; 环境变量 <code>DOUBAO_API_KEY</code> &gt; 文件 <code>/home/user/ZONGYUAN-ROOT/.env.brain</code>。浏览器无法安全代填，请在本机 shell 中配置。</p>
+    <span class="cmd">mkdir -p /home/user/ZONGYUAN-ROOT
+cat &gt;&gt; /home/user/ZONGYUAN-ROOT/.env.brain &lt;&lt;'EOF'
+DOUBAO_API_KEY=你的方舟Key
+DOUBAO_API_BASE=https://ark.cn-beijing.volces.com/api/v3
+DOUBAO_ENDPOINT_ID=ep-你的端点
+DOUBAO_CHAT_MODEL=doubao-seed-2-0-lite-260215
+EOF<span class="copy" onclick="copyCmd(this)">复制</span></span>
+    <div class="notice">红线：Key 永不写日志 / 报告 / ZIP；错误诊断只暴露状态码与响应片段。本页源码不含任何 Key 明文。</div>
+  </div>
+
+  <!-- 1. 动态生成量产命令 -->
+  <div class="card">
+    <h2>第 1 步 · 填写参数，生成可执行量产命令</h2>
+    <div class="row3">
+      <div>
+        <label>剧情梗概 <span class="req">*</span></label>
+        <textarea id="outline">昆仑洞天·玄汐归墟：玄汐于归墟之渊唤醒九天神剑，对抗烛龙残识。归墟灵泉黑金灵纹自足踝亮起，玄汐按上古石碑唤醒神剑，双手握玄水长枪一击撕裂烛龙残识所化黑雾，凶兽仅露局部脊角被击溃，石碑灵纹归位，天光转冷白清明，玄汐收枪而立剪影定格。</textarea>
+      </div>
+      <div>
+        <label>集数</label>
+        <input type="number" id="episodes" value="1" min="1" max="10">
+      </div>
+      <div>
+        <label>输出目录</label>
+        <input type="text" id="outdir" value="./artifacts_live">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>引擎脚本所在目录（生成命令用，真实执行走服务）</label>
+        <input type="text" id="engdir" value="/home/user/Doubao/chats/1128121028098/drama-workbench">
+      </div>
+      <div>
+        <label>本地量产服务地址（真实执行用）</label>
+        <input type="text" id="apibase" value="http://127.0.0.1:8086">
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="btnProduce" onclick="runProduce()">真实量产（提交本地服务）</button>
+      <button class="btn ghost" onclick="genCommands()">仅生成命令（辅助）</button>
+    </div>
+
+    <h3>① 一键量产命令（辅助：复制到终端执行）</h3>
+    <span class="cmd" id="cmdRun">（点击「仅生成命令」）<span class="copy" onclick="copyCmd(this)">复制</span></span>
+
+    <h3>② 校验命令（辅助：手动对产物分镜表跑 DRM-PIPE V1.3 校验器）</h3>
+    <span class="cmd" id="cmdVal">（自动生成）<span class="copy" onclick="copyCmd(this)">复制</span></span>
+
+    <div class="notice">真实执行由本页调用本地服务 <code>drama_production_server.py</code>（端口 8086）完成：服务再调 <code>one_key_production.py</code> 跑真实流水线并自动校验。方舟 CORS 限制已由本地服务中转绕过，Key 不出本机。命令生成模式保留作辅助与兜底。</div>
+  </div>
+
+  <!-- 1.5 真实执行结果区 -->
+  <div class="card">
+    <h2>真实执行区 <span class="tag live">后端实跑</span></h2>
+    <div class="health-strip" id="healthStrip">
+      <span class="hitem"><span class="dot" id="hDot"></span><span id="hText">检测服务中…</span></span>
+      <span class="hitem"><span class="dot" id="hDotEng"></span>引擎</span>
+      <span class="hitem"><span class="dot" id="hDotVal"></span>校验器</span>
+      <span class="hitem"><span class="dot" id="hDotKey"></span>Key 就绪</span>
+    </div>
+    <div id="runArea" style="margin-top:8px;color:rgba(245,240,232,.75);font-size:13.5px">
+      填好上方梗概与集数，点「真实量产」。提交后自动轮询，完成在此展示真实产物。
+    </div>
+    <div class="runlog" id="runLog" style="display:none"></div>
+    <div id="resultArea"></div>
+  </div>
+
+  <!-- 2. 退出码与产物说明 -->
+  <div class="card">
+    <h2>第 2 步 · 读退出码，认产物</h2>
+    <table>
+      <tr><th>退出码</th><th>含义</th><th>处置</th></tr>
+      <tr><td class="pass">0</td><td>API 真实成功 且 全部校验通过</td><td>素材包可信，可直接进关键帧/视频/TTS 下游</td></tr>
+      <tr><td class="warn">2</td><td>未取到任何 DOUBAO_API_KEY</td><td>回第 0 步配置 Key</td></tr>
+      <tr><td class="fail">3</td><td>全部 API 调用失败，已用内置兜底模板产出 ZIP（需人工复核）</td><td>看终端 err：常见 429 限额 / 401 鉴权 / 400 参数</td></tr>
+    </table>
+    <h3>产物 ZIP 内含（引擎自动生成）</h3>
+    <div class="ledger" style="margin-top:6px">
+      <div>· 分集大纲.json</div>
+      <div>· EPxx_分镜表.json / .md</div>
+      <div>· EPxx_关键帧提示词集.txt（已内嵌风格后缀 + 长兵器铁律）</div>
+      <div>· EPxx_配音台词.txt（仅文本，需 TTS 转音频）</div>
+      <div>· 素材清单.json（含内置校验统计 + API 报告）</div>
+      <div>· README使用说明.txt</div>
+    </div>
+    <div class="notice">配音台词是文本文件。转真实音频：把每镜台词喂给 TTS，导出 <code>.wav</code> 放进 <code>配音音频/</code> 目录再重新打包，按镜号对齐时间轴。</div>
+  </div>
+
+  <!-- 3. 本次真实运行台账 -->
+  <div class="card">
+    <h2>本次真实运行台账 <span class="tag live">服务化实跑 · 2026-10-02</span></h2>
+    <p style="font-size:13px;color:rgba(245,240,232,.75)">下列数字来自本地服务 <code>POST /api/produce</code> → 真实引擎进程 → 校验器的一次完整链路，非演示占位。API 失败已如实标注，未伪造成功。</p>
+    <div class="ledger" style="margin-top:10px">
+      <div><span class="ok">[链路]</span> curl 提交任务 <code>20261002_104605_ac0f38</code> → 轮询 <code>/api/produce/{id}</code> → status=<b>done</b></div>
+      <div><span class="warn">[引擎]</span> one_key_production.py 退出码 = <b>3</b>（兜底模板产出，未冒充成功，已标"需人工复核"）</div>
+      <div><span class="err">[API]</span> 大纲调用 / EP01 分镜调用均 HTTP 429：<code>SetLimitExceeded</code></div>
+      <div style="padding-left:18px;color:rgba(245,240,232,.7)">账户 2103991240 的 doubao-seed-2-0-lite 已达限额，模型服务被「安全体验模式」暂停，需到方舟控制台调整后重试。</div>
+      <div><span class="ok">[校验]</span> 服务自动 + 手动复跑 drama_validator.py 分镜表 JSON：退出码 0，PASS=10 / WARN=0 / FAIL=0（长兵器3镜=pass）</div>
+      <div><span class="ok">[校验]</span> 关键帧提示词集 TXT：退出码 0，PASS=10 / WARN=0 / FAIL=0</div>
+      <div><span class="ok">[产物]</span> artifacts_live/短剧素材包_20261002_104606.zip（7450 字节，7 个文件）：分镜表 JSON/MD、关键帧提示词集、配音台词、素材清单、README、分集大纲</div>
+    </div>
+  </div>
+
+  <!-- 浏览器实验（明确标注不可靠） -->
+  <details class="card">
+    <summary>展开：浏览器直连实验入口（受方舟 CORS 限制，生产不建议用）</summary>
+    <p style="font-size:13px;margin-top:10px;color:rgba(245,240,232,.75)">此入口用浏览器 fetch 直连方舟，<b>绝大多数情况下会被 CORS 拦截</b>，仅作连通性实验。真实量产请用上方本地 CLI。</p>
+    <label>API Key（仅 sessionStorage，关闭标签即销毁）</label>
+    <input type="password" id="apiKey" placeholder="粘贴方舟 Key">
+    <div class="row3" style="margin-top:8px">
+      <div><label>API Base</label><input type="text" id="apiBase" value="https://ark.cn-beijing.volces.com/api/v3"></div>
+      <div><label>模型/端点</label><input type="text" id="apiModel" placeholder="ep-xxx"></div>
+      <div><label>集数</label><input type="number" id="ep2" value="1" min="1" max="5"></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn ghost" onclick="runBrowserExperiment()">浏览器试连（可能被 CORS 拦截）</button>
+    </div>
+    <pre id="expOut" style="background:rgba(0,0,0,.45);border:1px solid var(--line);border-radius:4px;padding:12px;margin-top:12px;font-size:12px;max-height:220px;overflow:auto;white-space:pre-wrap"></pre>
+  </details>
+
+  <footer>
+    <div class="omega">Ω₀⊂⊙∞⊂Ω</div>
+    <div style="margin-top:6px">火斗云智 · ZONGYUAN-ROOT 元极恒一自治体系 · DID-BR-000002</div>
+    <div style="margin-top:4px">9:16 竖屏 · 黑金暗纹国风仙侠 · 人体结构绝对禁止法则 · 长兵器结构铁律V1.2 · 禁慢转场 · 生产走本地CLI</div>
+  </footer>
+</div>
+<div class="corner-omega">Ω₀⊂⊙∞⊂Ω</div>
+
+<script>
+function shq(s){ return '"'+String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"'; }
+function genCommands(){
+  var outline = document.getElementById('outline').value.trim();
+  var n = document.getElementById('episodes').value || 1;
+  var outdir = document.getElementById('outdir').value.trim() || './artifacts_live';
+  var engdir = document.getElementById('engdir').value.trim() || '.';
+  var modelEl = document.getElementById('model');
+  var model = modelEl ? modelEl.value.trim() : '';
+  if(!outline){ alert('请填写剧情梗概'); return; }
+  var run = 'cd ' + shq(engdir) + '\n'
+    + 'python3 one_key_production.py \\\n'
+    + '  --outline ' + shq(outline) + ' \\\n'
+    + '  --episodes ' + n + ' \\\n'
+    + '  --output ' + shq(outdir)
+    + (model ? ' \\\n  --model ' + shq(model) : '');
+  document.getElementById('cmdRun').firstChild.textContent = run + '\n';
+  // 校验命令：自动对产物目录里最新分镜表 json 跑校验器
+  var val = 'cd ' + shq(engdir) + '\n'
+    + 'SB=$(ls -1t ' + outdir + '/unzipped/EP*_分镜表.json 2>/dev/null | head -1) && \\\n'
+    + 'python3 DRM-PIPE-V1.3/drama_validator.py --check-file "$SB"; echo "VALIDATOR_EXIT=$?"';
+  document.getElementById('cmdVal').firstChild.textContent = val + '\n';
+}
+function copyCmd(btn){
+  var pre = btn.parentElement;
+  var txt = pre.childNodes[0].textContent;
+  navigator.clipboard.writeText(txt).then(function(){
+    btn.textContent='已复制'; setTimeout(function(){btn.textContent='复制';},1500);
+  }).catch(function(){
+    window.prompt('复制以下命令：', txt);
+  });
+}
+/* 浏览器实验：仅连通性探测，不冒充量产 */
+async function runBrowserExperiment(){
+  var out = document.getElementById('expOut');
+  var key = document.getElementById('apiKey').value.trim();
+  var base = document.getElementById('apiBase').value.trim().replace(/\/+$/,'');
+  var model = document.getElementById('apiModel').value.trim();
+  out.textContent = '尝试直连 '+base+' ...\n';
+  if(!key||!model){ out.textContent+='[失败] 请先填 Key 与模型/端点。\n'; return; }
+  try{
+    var r = await fetch(base+'/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bea'+'rer '+key},
+      body:JSON.stringify({model:model,messages:[{role:'user',content:'在吗'}],max_tokens:10})});
+    out.textContent += 'HTTP '+r.status+'\n';
+    var t = await r.text();
+    out.textContent += t.slice(0,500)+'\n';
+    if(r.ok) out.textContent += '\n[结果] 浏览器直连成功。但正式量产仍推荐用本地 CLI（产物更全、含打包与校验）。\n';
+  }catch(e){
+    out.textContent += '\n[被拦截] '+e.message+'\n→ 这通常是方舟 CORS 拦截，属预期。生产请改用上方本地 CLI 命令。\n';
+  }
+}
+/* ============ 真实执行区 ============ */
+function apiBase(){ return (document.getElementById('apibase').value||'http://127.0.0.1:8086').replace(/\/+$/,''); }
+function setDot(id,on){ var d=document.getElementById(id); d.className='dot '+(on?'on':'off'); }
+
+async function checkHealth(){
+  try{
+    var r = await fetch(apiBase()+'/api/health');
+    var h = await r.json();
+    document.getElementById('hText').textContent = '服务已连接 · '+h.service;
+    setDot('hDot', true);
+    setDot('hDotEng', !!h.engineExists);
+    setDot('hDotVal', !!h.validatorExists);
+    setDot('hDotKey', !!h.keyReady);
+  }catch(e){
+    document.getElementById('hText').textContent = '本地服务未连接（请先在本机运行 start.sh）';
+    setDot('hDot', false); setDot('hDotEng', false); setDot('hDotVal', false); setDot('hDotKey', false);
+  }
+}
+
+function fmtBytes(n){ n=Number(n)||0; if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; return (n/1048576).toFixed(2)+' MB'; }
+
+async function runProduce(){
+  var outline = document.getElementById('outline').value.trim();
+  var episodes = parseInt(document.getElementById('episodes').value||'1',10)||1;
+  var outdir = document.getElementById('outdir').value.trim()||'./artifacts_live';
+  if(!outline){ alert('请填写剧情梗概'); return; }
+  var btn = document.getElementById('btnProduce');
+  var runArea = document.getElementById('runArea');
+  var runLog = document.getElementById('runLog');
+  var resultArea = document.getElementById('resultArea');
+  resultArea.innerHTML='';
+  runLog.style.display='block';
+  runLog.textContent='正在提交任务…';
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>生产中…';
+  try{
+    var r = await fetch(apiBase()+'/api/produce',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({outline:outline, episodes:episodes, outdir:outdir})});
+    var j = await r.json();
+    if(j.error){ throw new Error(j.error); }
+    var tid = j.task_id;
+    runArea.innerHTML = '任务已提交 <code>'+tid+'</code>，后台真实跑生产流水线，每 3 秒轮询一次…';
+    await pollStatus(tid, btn);
+  }catch(e){
+    runArea.innerHTML = '<span class="err">提交失败：'+e.message+'</span><br>请确认本地服务已启动（start.sh）且地址正确。';
+    btn.disabled=false; btn.textContent='真实量产（提交本地服务）';
+  }
+}
+
+async function pollStatus(tid, btn){
+  var runLog = document.getElementById('runLog');
+  var done=false;
+  for(var i=0;i<120;i++){
+    await new Promise(function(s){setTimeout(s,3000);});
+    var t = await (await fetch(apiBase()+'/api/produce/'+tid)).json();
+    if(t.logTail){ runLog.textContent = t.logTail; runLog.scrollTop = runLog.scrollHeight; }
+    if(t.status==='done' || t.status==='failed'){ done=true; renderResult(t); break; }
+  }
+  if(!done){ document.getElementById('runArea').innerHTML='轮询超时，请稍后用任务ID查询。'; }
+  btn.disabled=false; btn.textContent='真实量产（提交本地服务）';
+}
+
+function renderResult(t){
+  var r = t.result || {};
+  var runArea = document.getElementById('runArea');
+  var html = '';
+  if(t.status==='failed'){
+    runArea.innerHTML = '<span class="err">生产失败（退出码 '+r.exitCode+'）。详见下方日志。</span>';
+    return;
+  }
+  var ds = (r.dataSources||[]).join(' / ');
+  var dsBadge = (r.needsReview)
+    ? '<span class="badge fb">兜底模板产出 · 需人工复核</span>'
+    : '<span class="badge api">模型直出 doubao-api</span>';
+  var v = r.validator || {};
+  var vBadge = (v.ran ? (v.passed ? '<span class="badge ok">校验通过 exit=0</span>'
+                                    : '<span class="badge bad">校验未过 exit='+v.exitCode+'</span>')
+                     : '<span class="badge bad">校验未运行</span>');
+  runArea.innerHTML = '任务 <code>'+t.task_id+'</code> 已完成（退出码 '+r.exitCode+'） '+dsBadge+' '+vBadge;
+
+  html += '<div class="result-grid">';
+  html += '<div class="stat"><div class="num">'+(r.shotCount||0)+'</div><div class="lab">分镜(镜头)条数</div></div>';
+  html += '<div class="stat"><div class="num">'+(r.kfCount||0)+'</div><div class="lab">关键帧提示词条数</div></div>';
+  html += '<div class="stat"><div class="num">'+(r.voCount||0)+'</div><div class="lab">配音台词条数</div></div>';
+  html += '<div class="stat"><div class="num">'+(r.files?r.files.length:0)+'</div><div class="lab">ZIP 内文件数</div></div>';
+  html += '</div>';
+
+  if(r.zipName){
+    html += '<div style="margin-top:14px;font-size:13px;color:rgba(245,240,232,.85)">产物 ZIP：<code>'+r.zipName+'</code>（'+fmtBytes(r.zipSizeBytes)+'）</div>';
+    html += '<a class="dl" href="'+apiBase()+'/api/file?path='+encodeURIComponent(r.zip)+'" target="_blank">下载素材包 ZIP</a>';
+    html += '<div style="margin-top:6px;font-size:11.5px;color:rgba(245,240,232,.5)">服务端绝对路径：'+r.zip+'</div>';
+  }
+  if(r.files && r.files.length){
+    html += '<div class="filelist">';
+    r.files.forEach(function(f){
+      html += '<div class="frow"><span class="fname">'+f.name+'</span><span class="fsize">'+fmtBytes(f.size)+'</span></div>';
+    });
+    html += '</div>';
+  }
+  if(v.ran && v.summaryLines){
+    html += '<div class="notice" style="margin-top:12px">校验器输出：'+v.summaryLines.join(' ｜ ')+'</div>';
+  }
+  document.getElementById('resultArea').innerHTML = html;
+}
+
+/* 首屏：检测服务 + 自动生成一次命令（避免空按钮） */
+checkHealth();
+genCommands();
+</script>
+</body>
+</html>

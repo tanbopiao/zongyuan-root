@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天·作品关键帧画廊</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#0e1420; color:#dfe6f0; padding:20px; }
+  .wrap { max-width:1200px; margin:0 auto; }
+  header{text-align:center;padding:16px 0 8px;}
+  header h1{font-size:26px;color:#f0f4fb;letter-spacing:1px;}
+  header p{font-size:12px;color:#8aa0bf;margin-top:8px;}
+  .stats{display:flex;gap:10px;justify-content:center;margin:14px 0;flex-wrap:wrap;}
+  .stat{background:#16202e;border:1px solid #2a3a52;border-radius:10px;padding:8px 16px;text-align:center;min-width:100px;}
+  .stat .num{font-size:22px;font-weight:700;color:#63b3ed;}
+  .stat .lab{font-size:11px;color:#8aa0bf;}
+  .ctrl{display:flex;gap:10px;margin:14px 0;flex-wrap:wrap;align-items:center;}
+  select{padding:9px 12px;border-radius:8px;border:1px solid #2a3a52;background:#16202e;color:#dfe6f0;font-size:13px;}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  @media (min-width:600px){.grid{grid-template-columns:repeat(3,1fr);}}
+  @media (min-width:900px){.grid{grid-template-columns:repeat(4,1fr);}}
+  .card{background:#16202e;border:1px solid #2a3a52;border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .15s;}
+  .card:hover{transform:translateY(-2px);border-color:#63b3ed;}
+  .card img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;background:#0a0f18;}
+  .card .cap{padding:7px 9px;font-size:11px;color:#9fb3d0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #empty{display:none;text-align:center;padding:40px;color:#8aa0bf;}
+  /* lightbox */
+  .lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99;align-items:center;justify-content:center;flex-direction:column;}
+  .lb img{max-width:92vw;max-height:80vh;border-radius:8px;}
+  .lb .cap{color:#cfd8e6;margin-top:12px;font-size:14px;text-align:center;padding:0 20px;}
+  .lb .close{position:absolute;top:16px;right:24px;font-size:34px;color:#fff;cursor:pointer;background:none;border:none;}
+  footer{text-align:center;font-size:11px;color:#5f7a99;margin:20px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>昆仑洞天 · 作品关键帧画廊</h1>
+    <p>豆包生成 · 效果图精选 · 确权 DID-BR-000002 · 锚定 Ω₀⊂⊙∞⊂Ω</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="sTotal">0</div><div class="lab">关键帧</div></div>
+    <div class="stat"><div class="num" id="sCats">0</div><div class="lab">角色/主题</div></div>
+  </div>
+
+  <div class="ctrl">
+    <select id="f" onchange="render()"><option value="">全部分类</option></select>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div id="empty">无匹配关键帧</div>
+</div>
+
+<div class="lb" id="lb" onclick="this.style.display='none'">
+  <button class="close" onclick="document.getElementById('lb').style.display='none'">×</button>
+  <img id="lbImg" alt="关键帧大图">
+  <div class="cap" id="lbCap"></div>
+</div>
+
+<footer>昆仑洞天作品关键帧 · ZONGYUAN-ROOT 主节点 hub-central-agent</footer>
+
+<script>
+var FRAMES = __FRAMES_JSON__;
+
+var THEME = {
+  "01-jiutian_xuannv_20260929":"九天玄女",
+  "03-archive_ep01_03_xuannv":"九天玄女·横版",
+  "07-xuannv_works":"九天玄女",
+  "jiutian_xuannv-20260929":"九天玄女·三型",
+  "02-kunlun_dongtian":"昆仑洞天·太阴/角色",
+  "04-archive_zhulong_duizhi":"玄女×烛龙",
+  "05-archive_kunlun_assets_shennv":"神女·创世",
+  "08-taiyin_moon":"太阴月神"
+};
+function themeOf(p){
+  for(var k in THEME){ if((p||"").indexOf(k)>=0) return THEME[k]; }
+  var m=(p||"").match(/character-keyframes\/([^/]+)/); return m?m[1]:"其他";
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+function render(){
+  var f=document.getElementById("f").value;
+  var grid=document.getElementById("grid"); grid.innerHTML="";
+  var list=FRAMES.filter(function(it){return !f || it.theme===f;});
+  document.getElementById("empty").style.display=list.length?"none":"block";
+  list.forEach(function(it){
+    var c=document.createElement("div"); c.className="card";
+    c.innerHTML="<img loading='lazy' src='"+esc(it.url)+"' alt='"+esc(it.name)+"' onerror=\"this.style.visibility='hidden'\">"
+      +"<div class='cap'>"+esc(it.name)+"</div>";
+    c.onclick=function(){document.getElementById('lbImg').src=it.url;document.getElementById('lbCap').textContent=it.name;document.getElementById('lb').style.display='flex';};
+    grid.appendChild(c);
+  });
+}
+(function init(){
+  FRAMES.forEach(function(it){it.theme=themeOf(it.path);});
+  document.getElementById("sTotal").textContent=FRAMES.length;
+  var themes={};FRAMES.forEach(function(it){themes[it.theme]=(themes[it.theme]||0)+1;});
+  var ks=Object.keys(themes).sort();document.getElementById("sCats").textContent=ks.length;
+  var sel=document.getElementById("f");
+  ks.forEach(function(k){var o=document.createElement("option");o.value=k;o.textContent=k+" ("+themes[k]+")";sel.appendChild(o);});
+  render();
+})();
+</script>
+</body>
+</html>

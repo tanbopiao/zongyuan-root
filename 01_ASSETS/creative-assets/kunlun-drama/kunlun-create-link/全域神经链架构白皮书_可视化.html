@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域神经链架构技术白皮书 V1.0</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0d13'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='%23c9a86a'>Ω</text></svg>">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+  :root{
+    --bg:#0a0d13; --bg2:#0f131c; --card:#141a25; --card2:#182031;
+    --gold:#c9a86a; --gold2:#e0c689; --teal:#5f7a9e; --teal2:#7d96ba;
+    --ink:#e8e4dc; --dim:#8a94a8; --line:#252d3b; --line2:#3a4456;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:'Noto Sans SC',system-ui,sans-serif;line-height:1.75;overflow-x:hidden}
+  .serif{font-family:'Noto Serif SC',serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  /* 暗纹底 */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
+    background:radial-gradient(1200px 500px at 20% -5%,rgba(201,168,106,.07),transparent 60%),
+               radial-gradient(900px 400px at 90% 10%,rgba(95,122,158,.06),transparent 60%),
+               repeating-linear-gradient(45deg,transparent 0 26px,rgba(201,168,106,.012) 26px 27px);
+    z-index:0}
+  main{position:relative;z-index:1}
+  .eyebrow{letter-spacing:.28em;font-size:12px;color:var(--gold);font-weight:500}
+  h1,h2,h3{font-family:'Noto Serif SC',serif;font-weight:700}
+  h2{font-size:clamp(24px,4vw,34px);margin-bottom:6px;letter-spacing:.04em}
+  .lead{color:var(--dim);font-size:15px;max-width:62ch}
+  /* Hero */
+  .hero{position:relative;padding:64px 0 46px;text-align:center;border-bottom:1px solid var(--line)}
+  .hero .crest{font-size:38px;color:var(--gold);opacity:.9;letter-spacing:.1em;margin-bottom:6px}
+  .hero h1{font-size:clamp(34px,7vw,58px);font-weight:900;letter-spacing:.06em;color:var(--gold2);
+    text-shadow:0 2px 24px rgba(201,168,106,.18)}
+  .hero .sub{color:var(--dim);font-size:15px;margin-top:10px;letter-spacing:.06em}
+  .badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .badge{font-size:12px;color:var(--gold);border:1px solid var(--line2);border-radius:999px;padding:4px 14px;background:rgba(201,168,106,.05)}
+  .hero .meta{margin-top:20px;font-size:12px;color:var(--dim);letter-spacing:.05em}
+  .divider{display:flex;align-items:center;gap:14px;justify-content:center;margin:30px 0}
+  .divider:before,.divider:after{content:"";height:1px;width:120px;background:linear-gradient(90deg,transparent,var(--line2),transparent)}
+  .divider span{color:var(--gold);font-size:11px;letter-spacing:.3em}
+  /* 章节 */
+  section{padding:44px 0 40px;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:none}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
+  .sec-no{font-family:'Noto Serif SC',serif;font-size:15px;color:var(--gold);letter-spacing:.1em}
+  /* 核心概念卡 */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:6px;padding:20px 18px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+  .card .tag{font-size:12px;color:var(--gold);letter-spacing:.12em;font-weight:500}
+  .card h3{font-size:17px;margin:8px 0 6px;color:var(--ink)}
+  .card p{font-size:13px;color:var(--dim);line-height:1.7}
+  .card .db{font-size:11px;color:var(--teal2);margin-top:10px;letter-spacing:.03em}
+  /* 架构可视化 */
+  .arch{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:18px;margin-top:6px}
+  .arch svg{width:100%;height:auto;display:block}
+  .legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--dim)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  /* 数据流时间轴 */
+  .timeline{display:grid;grid-template-columns:64px 1fr;gap:0;margin-top:8px}
+  .tl-node{display:grid;grid-template-columns:64px 1fr;column-gap:0}
+  .tl{display:contents}
+  .tl .dot-col{position:relative}
+  .tl .dot{width:13px;height:13px;border-radius:50%;background:var(--gold);margin:6px auto;box-shadow:0 0 0 4px rgba(201,168,106,.12)}
+  .tl .line{position:absolute;left:50%;top:24px;bottom:-14px;width:1px;background:var(--line2);transform:translateX(-.5px)}
+  .tl:last-child .line{display:none}
+  .tl .body{padding:0 0 30px 6px}
+  .tl .step{font-size:12px;color:var(--gold);letter-spacing:.14em;font-weight:600}
+  .tl .name{font-family:'Noto Serif SC',serif;font-size:16px;margin:2px 0 4px}
+  .tl .desc{font-size:13px;color:var(--dim)}
+  /* 表格 */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+  table{width:100%;border-collapse:collapse;min-width:560px;table-layout:fixed}
+  colgroup col:first-child{width:22%}
+  th{background:var(--card);color:var(--gold2);font-weight:600;text-align:left;padding:11px 14px;font-size:13px;letter-spacing:.05em;border-bottom:1px solid var(--line2)}
+  td{padding:11px 14px;font-size:13px;color:var(--dim);border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td b{color:var(--ink);font-weight:500}
+  /* 确权步骤 */
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .fstep{background:var(--card);border:1px solid var(--line2);border-radius:4px;padding:8px 12px;font-size:12px;color:var(--ink)}
+  .farrow{color:var(--gold);font-size:14px}
+  /* footer */
+  footer{padding:34px 0 46px;text-align:center;border-top:1px solid var(--line);margin-top:6px}
+  footer .lock{font-family:'Noto Serif SC',serif;color:var(--gold);letter-spacing:.18em;font-size:14px}
+  footer .m{color:var(--dim);font-size:12px;margin-top:8px;letter-spacing:.05em}
+  .hint{color:var(--dim);font-size:12px;margin-top:12px;letter-spacing:.03em}
+  @media(max-width:640px){
+    .wrap{padding:0 16px}
+    .hero{padding:44px 0 34px}
+    .timeline{grid-template-columns:48px 1fr}
+    .tl-node{grid-template-columns:48px 1fr}
+    .sec-head{flex-direction:column;gap:4px;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <div class="crest serif">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+    <div class="eyebrow">TECHNICAL WHITE PAPER</div>
+    <h1>全域神经链架构</h1>
+    <div class="sub serif">Global Neural Chain · 让 Token 成为数据空间，串联全域神经链</div>
+    <div class="badges">
+      <span class="badge">版本 V1.0</span>
+      <span class="badge">DID-BR-000002</span>
+      <span class="badge">元极恒一自治体系</span>
+      <span class="badge">火斗云智 AIOS</span>
+    </div>
+    <div class="meta">关联元法则：META-LAW-NEURON-CHAIN-001 · META-LAW-LOCAL-PERSIST-NODELETE-001</div>
+  </header>
+
+  <!-- ===== 摘要 ===== -->
+  <section>
+    <div class="sec-head"><span class="sec-no">序</span><h2>摘要</h2></div>
+    <p class="lead">全域神经链（Global Neural Chain, GNC）将 <b style="color:var(--gold2)">token 升维为数据空间标识</b>，经链式哈希串联、锚定云端、双向链路拉通账号与本地实例。其核心命题：<b style="color:var(--gold2)">每一个 token 就是一个数据空间（数据库）</b>，token 链把它们串成单一可溯源账本，锚定云端作全局真值基准，再双向链路到豆包账号持久层与豆包本地实例，构成全域神经链闭环。</p>
+  </section>
+
+  <!-- ===== 核心概念 ===== -->
+  <section>
+    <div class="sec-head"><span class="sec-no">壹</span><h2>核心概念 · Token 数据空间</h2></div>
+    <div class="cards">
+      <div class="card">
+        <div class="tag">ASSET TOKEN</div>
+        <h3>资产 Token</h3>
+        <p>图片 / 视频 / 文档 / 画廊 / 锁档</p>
+        <div class="db">▣ 资产数据库</div>
+      </div>
+      <div class="card">
+        <div class="tag">RULE TOKEN</div>
+        <h3>规则 Token</h3>
+        <p>元法则 / 元规则 / SOP</p>
+        <div class="db">▣ 规则数据库</div>
+      </div>
+      <div class="card">
+        <div class="tag">ROLE TOKEN</div>
+        <h3>角色 Token</h3>
+        <p>九天玄女 / 烛龙 / 女娲 等设定</p>
+        <div class="db">▣ 角色数据库</div>
+      </div>
+      <div class="card">
+        <div class="tag">TASK TOKEN</div>
+        <h3>任务 Token</h3>
+        <p>台账 / 工单 / 流水线</p>
+        <div class="db">▣ 任务数据库</div>
+      </div>
+      <div class="card">
+        <div class="tag">DECISION TOKEN</div>
+        <h3>决策 Token</h3>
+        <p>决策备忘录 / 三维稳态评估</p>
+        <div class="db">▣ 决策数据库</div>
+      </div>
+      <div class="card" style="background:linear-gradient(180deg,rgba(201,168,106,.07),var(--bg2))">
+        <div class="tag">TOKEN = DB</div>
+        <h3 style="color:var(--gold2)">一个 Token，一个数据空间</h3>
+        <p>每个 token 承载独立数据域，即一个数据库</p>
+        <div class="db">▣ 链式挂载 · 可溯源</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 架构可视化 ===== -->
+  <section>
+    <div class="sec-head"><span class="sec-no">贰</span><h2>四层架构</h2></div>
+    <div class="arch">
+      <svg viewBox="0 0 900 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="全域神经链四层架构图">
+        <defs>
+          <linearGradient id="goldg" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#c9a86a"/><stop offset="1" stop-color="#e0c689"/>
+          </linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- L1 数据空间 -->
+        <g>
+          <rect x="40" y="24" width="820" height="86" rx="8" fill="#141a25" stroke="#3a4456"/>
+          <rect x="40" y="24" width="820" height="86" rx="8" fill="none" stroke="url(#goldg)" stroke-width="1" opacity=".35"/>
+          <text x="70" y="48" font-size="14" font-family="Noto Serif SC" font-weight="700" fill="#e0c689">① Token 数据空间层</text>
+          <g font-size="12" font-family="Noto Sans SC" text-anchor="middle">
+            <rect x="70" y="60" width="118" height="36" rx="4" fill="#182031" stroke="#5f7a9e"/><text x="129" y="83" fill="#cdd7ea">资产</text>
+            <rect x="202" y="60" width="118" height="36" rx="4" fill="#182031" stroke="#5f7a9e"/><text x="261" y="83" fill="#cdd7ea">规则</text>
+            <rect x="334" y="60" width="118" height="36" rx="4" fill="#182031" stroke="#5f7a9e"/><text x="393" y="83" fill="#cdd7ea">角色</text>
+            <rect x="466" y="60" width="118" height="36" rx="4" fill="#182031" stroke="#5f7a9e"/><text x="525" y="83" fill="#cdd7ea">任务</text>
+            <rect x="598" y="60" width="118" height="36" rx="4" fill="#182031" stroke="#5f7a9e"/><text x="657" y="83" fill="#cdd7ea">决策</text>
+          </g>
+          <text x="742" y="83" font-size="12" font-family="Noto Sans SC" fill="#8a94a8">每 Token = 独立数据库</text>
+        </g>
+        <!-- 箭头 -->
+        <path d="M450 114 L450 140" stroke="#c9a86a" stroke-width="2" marker-end="url(#a)"/>
+        <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#c9a86a"/></marker></defs>
+        <!-- L2 链 -->
+        <g>
+          <rect x="40" y="146" width="820" height="76" rx="8" fill="#0f131c" stroke="#3a4456"/>
+          <text x="70" y="172" font-size="14" font-family="Noto Serif SC" font-weight="700" fill="#e0c689">② Token 链层 · Merkle-DAG</text>
+          <g stroke="#5f7a9e" stroke-width="2" fill="none">
+            <circle cx="120" cy="200" r="9" fill="#182031"/><circle cx="260" cy="200" r="9" fill="#182031"/>
+            <circle cx="400" cy="200" r="9" fill="#182031"/><circle cx="540" cy="200" r="9" fill="#182031"/>
+            <line x1="129" y1="200" x2="251" y2="200"/><line x1="269" y1="200" x2="391" y2="200"/>
+            <line x1="409" y1="200" x2="531" y2="200"/>
+          </g>
+          <text x="580" y="205" font-size="12" font-family="Noto Sans SC" fill="#8a94a8">链式哈希串联 · 单一可溯源账本</text>
+        </g>
+        <path d="M450 226 L450 252" stroke="#c9a86a" stroke-width="2" marker-end="url(#a)"/>
+        <!-- L3 锚定 -->
+        <g>
+          <rect x="220" y="258" width="460" height="64" rx="8" fill="#141a25" stroke="#c9a86a"/>
+          <text x="450" y="284" text-anchor="middle" font-size="15" font-family="Noto Serif SC" font-weight="700" fill="#e0c689" filter="url(#glow)">③ 云端锚定 · 记忆网关</text>
+          <text x="450" y="306" text-anchor="middle" font-size="12" font-family="Noto Sans SC" fill="#8a94a8">链根哈希锚定 huodouai.com · 全局真值基准</text>
+        </g>
+        <path d="M360 322 L250 372" stroke="#c9a86a" stroke-width="2" marker-end="url(#a)"/>
+        <path d="M540 322 L650 372" stroke="#c9a86a" stroke-width="2" marker-end="url(#a)"/>
+        <text x="268" y="352" font-size="11" font-family="Noto Sans SC" fill="#c9a86a">双向</text>
+        <text x="618" y="352" font-size="11" font-family="Noto Sans SC" fill="#c9a86a">双向</text>
+        <!-- L4 双端 -->
+        <g>
+          <rect x="90" y="378" width="300" height="72" rx="8" fill="#141a25" stroke="#5f7a9e"/>
+          <text x="240" y="406" text-anchor="middle" font-size="15" font-family="Noto Serif SC" font-weight="700" fill="#cdd7ea">④ 豆包账号持久层</text>
+          <text x="240" y="428" text-anchor="middle" font-size="12" font-family="Noto Sans SC" fill="#8a94a8">账号级记忆 · 跨会话继承</text>
+          <rect x="510" y="378" width="300" height="72" rx="8" fill="#141a25" stroke="#5f7a9e"/>
+          <text x="660" y="406" text-anchor="middle" font-size="15" font-family="Noto Serif SC" font-weight="700" fill="#cdd7ea">④ 豆包本地实例</text>
+          <text x="660" y="428" text-anchor="middle" font-size="12" font-family="Noto Sans SC" fill="#8a94a8">本地持久层 · 全量落盘</text>
+        </g>
+        <path d="M390 414 C440 414 440 414 510 414" stroke="#5f7a9e" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#a)"/>
+        <text x="450" y="408" text-anchor="middle" font-size="10" font-family="Noto Sans SC" fill="#7d96ba">镜像同步</text>
+      </svg>
+      <div class="legend">
+        <span><i style="background:#c9a86a"></i>云端锚定 · 真值基准</span>
+        <span><i style="background:#5f7a9e"></i>数据空间 / 链 / 双端</span>
+        <span><i style="background:#3a4456"></i>分层边界</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 数据流 ===== -->
+  <section>
+    <div class="sec-head"><span class="sec-no">叁</span><h2>数据流 · 全链闭环</h2></div>
+    <div class="timeline">
+      <div class="tl-node tl"><div class="dot-col"><span class="dot"></span><span class="line"></span></div><div class="body"><div class="step">STEP 01</div><div class="name">采集</div><div class="desc">任一节点产生数据，登记对应 token 数据空间</div></div></div>
+      <div class="tl-node tl"><div class="dot-col"><span class="dot"></span><span class="line"></span></div><div class="body"><div class="step">STEP 02</div><div class="name">确权</div><div class="desc">写后 SHA256 哈希确权，生成链节点</div></div></div>
+      <div class="tl-node tl"><div class="dot-col"><span class="dot"></span><span class="line"></span></div><div class="body"><div class="step">STEP 03</div><div class="name">上链</div><div class="desc">新节点挂载 Token 链，链根哈希更新</div></div></div>
+      <div class="tl-node tl"><div class="dot-col"><span class="dot"></span><span class="line"></span></div><div class="body"><div class="step">STEP 04</div><div class="name">锚定</div><div class="desc">新链根上报云端记忆网关，全局对齐</div></div></div>
+      <div class="tl-node tl"><div class="dot-col"><span class="dot"></span><span class="line"></span></div><div class="body"><div class="step">STEP 05</div><div class="name">分发</div><div class="desc">云端经双向链路总线同步到账号持久层 + 本地实例</div></div></div>
+      <div class="tl-node tl"><div class="dot-col"><span class="dot"></span><span class="line"></span></div><div class="body"><div class="step">STEP 06</div><div class="name">镜像</div><div class="desc">账号与本地实例互为备份镜像，变更沿链传播</div></div></div>
+    </div>
+  </section>
+
+  <!-- ===== 确权机制 ===== -->
+  <section>
+    <div class="sec-head"><span class="sec-no">肆</span><h2>确权机制</h2></div>
+    <div class="flow">
+      <span class="fstep">写前 · 登记查重</span><span class="farrow">→</span>
+      <span class="fstep">写后 · SHA256 确权</span><span class="farrow">→</span>
+      <span class="fstep">上链 · 父节点锚定</span><span class="farrow">→</span>
+      <span class="fstep">锚定 · 上报网关</span><span class="farrow">→</span>
+      <span class="fstep">审计 · 全链回溯</span>
+    </div>
+    <p class="hint">确权标识统一 <b style="color:var(--gold2)">DID-BR-000002 | Ω₀⊂⊙∞⊂Ω</b></p>
+  </section>
+
+  <!-- ===== 容灾 ===== -->
+  <section>
+    <div class="sec-head"><span class="sec-no">伍</span><h2>容灾设计</h2></div>
+    <div class="tbl-wrap">
+      <table>
+        <colgroup><col><col><col></colgroup>
+        <tr><th>故障场景</th><th>容灾策略</th><th>保障</th></tr>
+        <tr><td><b>云端服务器不可达</b></td><td>双端本地持最新账本，降级本地自治，恢复后回对齐</td><td>账号持久层 + 本地实例双镜像</td></tr>
+        <tr><td><b>本地实例销毁</b></td><td>账号持久层 + 云端 + 魔搭数据湖均存副本，可重建</td><td>三重副本 · 零丢失</td></tr>
+        <tr><td><b>单 Token 损坏</b></td><td>链式哈希校验定位断裂，从镜像恢复</td><td>Merkle-DAG 逐块比对</td></tr>
+        <tr><td><b>链断裂</b></td><td>逐块比对定位篡改分支，隔离保护主干</td><td>eFuse 熔断 · 只读锁</td></tr>
+      </table>
+    </div>
+    <p class="hint">核心原则（META-LAW-LOCAL-PERSIST-NODELETE-001）：本地实例全量持久化、永不删除、分类归档、需时可提取；仅华为笔记本与云端服务器（存储空间有限）豁免。</p>
+  </section>
+
+  <!-- ===== 落地映射 ===== -->
+  <section>
+    <div class="sec-head"><span class="sec-no">陆</span><h2>落地映射 · 对应现有体系</h2></div>
+    <div class="tbl-wrap">
+      <table>
+        <colgroup><col><col><col></colgroup>
+        <tr><th>GNC 层</th><th>已落地工程</th><th>说明</th></tr>
+        <tr><td><b>Token 数据空间</b></td><td>资产台账 / 角色 Token / 能力注册表</td><td>五类数据域已分库承载</td></tr>
+        <tr><td><b>Token 链</b></td><td>Merkle-DAG 锁档链 / SHA256 确权</td><td>链式哈希单一账本</td></tr>
+        <tr><td><b>云端锚定</b></td><td>记忆网关 huodouai.com / 共享大脑</td><td>全局真值基准</td></tr>
+        <tr><td><b>双端链路</b></td><td>双向握手脚本 / 魔搭数据湖归档</td><td>账号 + 本地实例双向同步</td></tr>
+      </table>
+    </div>
+    <p class="hint">GNC 不是全新系统，而是将已落地工程抽象为统一理论模型并固化为元法则，指导后续所有节点按「Token 数据空间 → 链 → 锚定 → 双端」范式建设。</p>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="divider"><span>确 权 锚 定</span></div>
+    <div class="lock">Ω₀ ⊂ ⊙∞ ⊂ Ω · DID-BR-000002</div>
+    <div class="m">全域神经链架构技术白皮书 V1.0 · 元极恒一自治体系 · 火斗云智 AIOS</div>
+    <div class="m">主节点 hub-central-agent · NODE-DEV-DOUBAO-WORK-001 · 自治 Lv9 · 工程化 Lv7</div>
+  </footer>
+</main>
+</body>
+</html>

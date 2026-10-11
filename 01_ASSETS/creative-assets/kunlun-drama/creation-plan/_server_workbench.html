@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>昆仑洞天 · 短剧编排台</title>
+<link rel="icon" href="/assets/aios-logo.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#d4af37;--gold2:#f4d03f;--bg:#0a0a0f;--card:#12121a;--border:rgba(212,175,55,.2);--txt:#eee;--dim:#888}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,sans-serif;min-height:100vh}
+.header{position:sticky;top:0;background:rgba(10,10,15,.97);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:10}
+.header img{width:28px;height:28px;border-radius:50%}
+.header .t{color:var(--gold);font-weight:700;font-size:15px}
+.header .sp{flex:1}
+.header button{background:rgba(212,175,55,.12);border:1px solid var(--border);color:var(--gold);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px}
+
+.preview{width:100%;aspect-ratio:9:16;background:#000;position:relative;overflow:hidden}
+.preview img{width:100%;height:100%;object-fit:contain}
+.preview video{width:100%;height:100%}
+.preview .ph{color:#444;font-size:14px;display:flex;align-items:center;justify-content:center;height:100%}
+.preview .badge{position:absolute;top:10px;left:12px;background:rgba(0,0,0,.7);padding:4px 10px;border-radius:4px;font-size:11px;color:var(--gold)}
+
+.section{padding:16px}
+.section h3{color:var(--gold);font-size:13px;margin-bottom:12px}
+
+.shots{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px}
+.shot{flex:0 0 130px;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:.2s}
+.shot.active{border-color:var(--gold2);box-shadow:0 0 0 2px rgba(244,208,63,.3)}
+.shot .thumb{height:80px;background:#1a1a24;position:relative}
+.shot .thumb img{width:100%;height:100%;object-fit:cover}
+.shot .thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#444;font-size:10px}
+.shot .num{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.7);color:var(--gold);font-size:10px;padding:1px 6px;border-radius:3px;font-weight:700}
+.shot .status{position:absolute;bottom:4px;right:4px;font-size:9px;padding:1px 5px;border-radius:3px}
+.shot .status.img{background:rgba(46,204,113,.8);color:#000}
+.shot .status.vid{background:rgba(52,152,219,.8);color:#fff}
+.shot .info{padding:5px 7px}
+.shot .info .n{font-size:11px;color:var(--txt)}
+
+.ai-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center}
+.ai-btn{background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;color:#fff;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+.ai-btn:disabled{opacity:.5}
+.ai-suggest{background:var(--card);border:1px solid rgba(155,89,182,.3);border-radius:10px;padding:12px;margin-top:10px;display:none}
+.ai-suggest h5{color:#9b59b6;font-size:12px;margin-bottom:8px}
+.ai-suggest .opt{padding:8px 10px;background:#1a1a24;border-radius:6px;margin-bottom:6px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.ai-suggest .opt:hover{border:1px solid #9b59b6}
+.ai-suggest .opt .use{background:#9b59b6;color:#fff;padding:2px 8px;border-radius:4px;font-size:10px}
+
+.editor{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.editor h4{color:var(--gold);font-size:14px;margin-bottom:12px}
+.editor label{display:block;font-size:11px;color:var(--dim);margin-bottom:4px}
+.editor textarea{width:100%;background:#1a1a24;border:1px solid var(--border);color:var(--txt);padding:8px;border-radius:6px;font-size:13px;min-height:60px;resize:vertical;font-family:inherit}
+.editor textarea:focus{outline:none;border-color:var(--gold)}
+.step{margin:12px 0;padding:10px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.05)}
+.step h5{font-size:12px;color:var(--gold);margin-bottom:8px}
+.step .btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600}
+.btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
+.btn.outline{background:transparent;border:1px solid var(--border);color:var(--gold)}
+.btn:disabled{opacity:.5}
+.status{font-size:11px;color:var(--dim);margin-top:6px;min-height:16px}
+.upload-row{display:flex;gap:8px;margin-top:8px}
+.upload-row input{flex:1;background:#1a1a24;border:1px solid var(--border);color:var(--txt);padding:6px 8px;border-radius:6px;font-size:11px}
+
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--gold);color:var(--gold);padding:8px 20px;border-radius:8px;font-size:13px;z-index:99;display:none}
+::-webkit-scrollbar{height:4px;width:4px}
+::-webkit-scrollbar-thumb{background:rgba(212,175,55,.3);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="header">
+<img src="/assets/aios-logo.png">
+<a href="/" style="color:var(--gold);text-decoration:none;font-size:12px;margin-right:4px">首页</a>
+<span class="t">昆仑洞天编排台</span>
+<span class="sp"></span>
+<button onclick="location.href='/kunlun/gallery.html'">🖼️ 作品库</button>
+<button onclick="exportScript()">📄 剧本</button>
+</div>
+
+<div class="preview" id="preview"><div class="ph">选择镜头</div></div>
+<div class="badge" id="pvBadge">镜头 01</div>
+
+<div class="section">
+<h3>🎬 镜头列表</h3>
+<div class="shots" id="shotsBox">
+  <div class="shot active" onclick="sel(this,0)"><div class="thumb"><span class="num">01</span><img src="/assets/ep02.webp"></div><div class="info"><div class="n">凝元蓄势</div></div></div>
+  <div class="shot" onclick="sel(this,1)"><div class="thumb"><span class="num">02</span><img src="/assets/ep03.webp"></div><div class="info"><div class="n">凌虚突进</div></div></div>
+  <div class="shot" onclick="sel(this,2)"><div class="thumb"><span class="num">03</span><img src="/assets/ep04.webp"></div><div class="info"><div class="n">破界镇封</div></div></div>
+  <div class="shot" onclick="sel(this,3)"><div class="thumb"><span class="num">04</span><div class="ph">待生成</div></div><div class="info"><div class="n">天命玄鸟</div></div></div>
+  <div class="shot" onclick="sel(this,4)"><div class="thumb"><span class="num">05</span><div class="ph">待生成</div></div><div class="info"><div class="n">月华降世</div></div></div>
+  <div class="shot" onclick="sel(this,5)"><div class="thumb"><span class="num">06</span><div class="ph">待生成</div></div><div class="info"><div class="n">终章心誓</div></div></div>
+</div>
+<div class="ai-row">
+  <button class="ai-btn" id="aiBtn" onclick="aiEvolve()">✨ AI推演后续镜头</button>
+  <span class="status" id="aiStatus"></span>
+</div>
+<div class="ai-suggest" id="aiSuggest">
+  <h5>AI推演的3个后续镜头（点击采纳）</h5>
+  <div id="aiOptions"></div>
+</div>
+</div>
+
+<div class="section" style="padding-top:0">
+<div class="editor">
+<h4 id="edTitle">编辑镜头 01 · 凝元蓄势</h4>
+<label>画面描述（Prompt）</label>
+<textarea id="f-prompt">古风仙侠，九天玄女闭目盘坐于昆仑之巅，周身金色灵气汇聚成漩涡，衣袂飘飘，电影级光影，8k</textarea>
+
+<div class="step">
+<h5>第一步：生成关键帧图片</h5>
+<div class="btns">
+  <button class="btn gold" id="imgBtn" onclick="genImage()">🎨 文生关键帧</button>
+</div>
+<div class="status" id="imgStatus"></div>
+</div>
+
+<div class="step">
+<h5>🎨 图生图（以上一帧为参考，推演下一关键帧）</h5>
+<div class="upload-row">
+  <input id="refFrame" placeholder="参考帧URL（留空自动用当前帧）">
+</div>
+<div class="btns" style="margin-top:8px">
+  <button class="btn outline" id="editBtn" onclick="genImageEdit()">🖼️ 以上一帧推演新帧</button>
+</div>
+<div class="status" id="editStatus"></div>
+</div>
+<div class="step">
+<h5>第二步：图生视频</h5>
+<div class="btns">
+  <button class="btn gold" id="vidBtn" onclick="genVideo()">🎬 用关键帧生视频</button>
+  <button class="btn outline" onclick="genVideoText()">直接文生视频</button>
+</div>
+<div class="upload-row">
+  <input id="manualFrame" placeholder="或粘贴关键帧图片URL，直接生视频">
+  <button class="btn outline" onclick="genVideoManual()">用此帧</button>
+</div>
+<div class="status" id="vidStatus"></div>
+</div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+const shots=[
+ {t:"凝元蓄势",p:"古风仙侠，九天玄女闭目盘坐于昆仑之巅，周身金色灵气汇聚成漩涡，衣袂飘飘，电影级光影，8k",img:"/assets/ep02.webp",frameUrl:null,videoUrl:null},
+ {t:"凌虚突进",p:"玄女猛然睁眼，金光爆发，腾空飞起，衣袂翻飞，跟拍",img:"/assets/ep03.webp",frameUrl:null,videoUrl:null},
+ {t:"破界镇封",p:"玄女拔剑，金色剑气横扫，结界碎裂，慢动作",img:"/assets/ep04.webp",frameUrl:null,videoUrl:null},
+ {t:"天命玄鸟",p:"天命玄鸟俯冲而下，火焰遮天，玄女迎视，史诗大场面",img:null,frameUrl:null,videoUrl:null},
+ {t:"月华降世",p:"银色月光洒落，万象归寂，玄女背影，唯美",img:null,frameUrl:null,videoUrl:null},
+ {t:"终章心誓",p:"玄女立于昆仑之巅，长剑指天，立誓守护昆仑，镜头拉远全景",img:null,frameUrl:null,videoUrl:null}
+];
+let cur=0;
+function sel(el,i){
+ document.querySelectorAll('.shot').forEach(s=>s.classList.remove('active'));el.classList.add('active');cur=i;
+ document.getElementById('edTitle').textContent='编辑镜头 '+(i+1).toString().padStart(2,'0')+' · '+shots[i].t;
+ document.getElementById('f-prompt').value=shots[i].p;
+ document.getElementById('pvBadge').textContent='镜头 '+(i+1).toString().padStart(2,'0')+' · '+shots[i].t;
+ const pv=document.getElementById('preview');
+ if(shots[i].videoUrl) pv.innerHTML='<video controls autoplay><source src="'+shots[i].videoUrl+'"></video>';
+ else if(shots[i].frameUrl) pv.innerHTML='<img src="'+shots[i].frameUrl+'">';
+ else if(shots[i].img) pv.innerHTML='<img src="'+shots[i].img+'">';
+ else pv.innerHTML='<div class="ph">待生成</div>';
+ document.getElementById('imgStatus').textContent = shots[i].frameUrl?'✓ 关键帧已生成':'未生成';
+ document.getElementById('vidStatus').textContent = shots[i].videoUrl?'✓ 视频已生成':'未生成';
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2000);}
+
+function aiEvolve(){
+ const b=document.getElementById('aiBtn'),s=document.getElementById('aiStatus');
+ b.disabled=true;s.textContent='AI推演中...';
+ const plot=shots.map((sh,i)=>(i+1)+'.'+sh.t+':'+sh.p).join('\n');
+ fetch('/v1/ask',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({message:'你是短剧编剧。当前剧情：\n'+plot+'\n\n请推演后续3个新镜头，每个给出镜头名和画面描述prompt。只返回纯JSON数组：[{\"t\":\"镜头名\",\"p\":\"画面描述\"}]，不要其他文字。'})})
+ .then(r=>r.json()).then(d=>{
+   b.disabled=false;
+   let txt='';
+   txt=d.response||'';
+   s.textContent='';
+   try{
+     const arr=JSON.parse(txt.replace(/```json|```/g,'').trim());
+     const box=document.getElementById('aiOptions');box.innerHTML='';
+     arr.forEach(opt=>{
+       const div=document.createElement('div');div.className='opt';
+       div.innerHTML='<div><b>'+opt.t+'</b><br><span style="color:#888;font-size:11px">'+opt.p.slice(0,60)+'...</span></div><span class="use" onclick="adoptShot(\''+opt.t+'\',\''+opt.p.replace(/'/g,"\\'")+'\')">采纳</span>';
+       box.appendChild(div);
+     });
+     document.getElementById('aiSuggest').style.display='block';
+     toast('AI推演完成，点击采纳');
+   }catch(e){s.textContent='✗ 解析失败，重试';}
+ }).catch(e=>{b.disabled=false;s.textContent='✗ '+e.message;});
+}
+function adoptShot(name,prompt){
+ const nextIdx=shots.length;
+ shots.push({t:name,p:prompt,img:null,frameUrl:null,videoUrl:null});
+ const box=document.getElementById('shotsBox');
+ const div=document.createElement('div');div.className='shot';div.onclick=function(){sel(this,nextIdx)};
+ div.innerHTML='<div class="thumb"><span class="num">'+String(nextIdx+1).padStart(2,'0')+'</span><div class="ph">待生成</div></div><div class="info"><div class="n">'+name+'</div></div>';
+ box.appendChild(div);
+ document.getElementById('aiSuggest').style.display='none';
+ toast('已添加镜头：'+name);
+ sel(div,nextIdx);
+}
+
+function genImage(){
+ const b=document.getElementById('imgBtn'),s=document.getElementById('imgStatus');
+ b.disabled=true;b.textContent='生成中...';s.textContent='生成关键帧...';
+ fetch('/v1/image/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:document.getElementById('f-prompt').value})})
+ .then(r=>r.json()).then(d=>{
+   b.disabled=false;b.textContent='🎨 文生关键帧';
+   if(d.ok){s.textContent='✓ 关键帧已生成';shots[cur].frameUrl=d.imageUrl;
+     document.getElementById('preview').innerHTML='<img src="'+d.imageUrl+'">';
+     document.querySelectorAll('.shot')[cur].querySelector('.thumb').innerHTML='<span class="num">'+String(cur+1).padStart(2,'0')+'</span><img src="'+d.imageUrl+'"><span class="status img">图</span>';
+     toast('关键帧生成完成');
+   } else s.textContent='✗ '+(d.error||'').slice(0,80);
+ }).catch(e=>{b.disabled=false;b.textContent='🎨 文生关键帧';s.textContent='✗ '+e.message;});
+}
+
+function genImageEdit(){
+ const ref=document.getElementById("refFrame").value.trim()||shots[cur].frameUrl||"";
+ if(!ref){document.getElementById("editStatus").textContent="⚠️ 请先生成关键帧或输入参考图URL";return;}
+ const b=document.getElementById("editBtn"),s=document.getElementById("editStatus");
+ b.disabled=true;b.textContent="推演中...";s.textContent="调图生图模型...";
+ fetch("/v1/image/edit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image_url:ref,prompt:document.getElementById("f-prompt").value+"，根据参考图姿态和构图生成新镜头，保持角色一致性"})})
+ .then(r=>r.json()).then(d=>{
+   b.disabled=false;b.textContent="🖼️ 以上一帧推演新帧";
+   if(d.ok){s.textContent="✓ 新关键帧已生成";shots[cur].frameUrl=d.imageUrl;
+     document.getElementById("preview").innerHTML="<img src="+d.imageUrl+">";
+     toast("图生图完成");
+   } else s.textContent="✗ "+(d.error||"").slice(0,80);
+ }).catch(e=>{b.disabled=false;b.textContent="🖼️ 以上一帧推演新帧";s.textContent="✗ "+e.message;});
+}
+function genVideo(){
+ if(!shots[cur].frameUrl){document.getElementById('vidStatus').textContent='⚠️ 请先生成关键帧，或点"直接文生视频"';return;}
+ doVideo({mode:'keyframe',first_frame:shots[cur].frameUrl,prompt:document.getElementById('f-prompt').value});
+}
+function genVideoText(){doVideo({mode:'text',prompt:document.getElementById('f-prompt').value});}
+function genVideoManual(){
+ const u=document.getElementById('manualFrame').value.trim();
+ if(!u){document.getElementById('vidStatus').textContent='⚠️ 请粘贴图片URL';return;}
+ doVideo({mode:'keyframe',first_frame:u,prompt:document.getElementById('f-prompt').value});
+}
+function doVideo(params){
+ const b=document.getElementById('vidBtn'),s=document.getElementById('vidStatus');
+ b.disabled=true;b.textContent='生成中...';s.textContent='提交视频任务...';
+ fetch('/v1/video/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params)})
+ .then(r=>r.json()).then(d=>{
+   if(d.ok&&d.id){s.textContent='✓ 任务已提交，等待渲染...';pollVideo(d.id);}
+   else{b.disabled=false;b.textContent='🎬 用关键帧生视频';s.textContent='✗ '+(d.error||JSON.stringify(d)).slice(0,100);}
+ }).catch(e=>{b.disabled=false;b.textContent='🎬 用关键帧生视频';s.textContent='✗ '+e.message;});
+}
+function pollVideo(tid){
+ const s=document.getElementById('vidStatus'),b=document.getElementById('vidBtn');let n=0;
+ const t=setInterval(()=>{n++;
+   fetch('/v1/video/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_id:tid})})
+   .then(r=>r.json()).then(d=>{
+     if(d.status==='completed'||d.status==='succeeded'){
+       clearInterval(t);b.disabled=false;b.textContent='🎬 用关键帧生视频';
+       s.textContent='✓ 视频生成完成!';shots[cur].videoUrl=d.url;
+       document.getElementById('preview').innerHTML='<video controls autoplay><source src="'+d.url+'"></video>';
+       toast('视频已生成');
+     } else if(d.status==='failed'){clearInterval(t);b.disabled=false;b.textContent='🎬 用关键帧生视频';s.textContent='✗ 生成失败';}
+     else s.textContent='⏳ 渲染中...'+(n*10)+'s';
+   });if(n>=60)clearInterval(t);
+ },10000);
+}
+function exportScript(){
+ let md='# 昆仑洞天·九天玄女\n\n';
+ shots.forEach((s,i)=>{md+='## 镜头'+(i+1)+'·'+s.t+'\nPrompt: '+s.p+'\n关键帧: '+(s.frameUrl||'无')+'\n视频: '+(s.videoUrl||'无')+'\n\n';});
+ const b=new Blob([md],{type:'text/markdown'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kunlun.md';a.click();toast('剧本已导出');
+}
+</script>
+<div style="text-align:center;padding:20px;font-size:11px;color:#666;border-top:1px solid #333"><a href="/" style="color:#888;margin:0 6px">主页</a>·<a href="/pipeline.html" style="color:#888;margin:0 6px">流水线</a>·<a href="/products.html" style="color:#888;margin:0 6px">产品</a>·<a href="/status.html" style="color:#888;margin:0 6px">状态</a></div></body>
+</html>

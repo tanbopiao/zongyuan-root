@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS · ZR 自治内核控制台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230B0D12'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='%23C9A962' font-family='serif'%3E%CE%A9%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<div class="topline"></div>
+<header class="nav">
+  <div class="brand">
+    <div class="brand-badge">Ω</div>
+    <div>
+      <div class="brand-name">火斗云智AIOS</div>
+      <div class="brand-sub">ZR AUTONOMOUS CONSOLE</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <label class="api-base">
+      <span>API</span>
+      <input id="apiBase" type="text" value="" placeholder="同源默认（留空）" spellcheck="false">
+    </label>
+    <label class="api-key">
+      <span>Key</span>
+      <input id="apiKey" type="password" placeholder="X-API-Key (可选)" spellcheck="false" autocomplete="off">
+    </label>
+    <button class="nav-cta" id="btnRefresh" title="重新拉取概览">重连</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-view="overview" class="active">概览</button>
+  <button data-view="truth">真值库</button>
+  <button data-view="task">任务调度</button>
+  <button data-view="operators">算子拓扑</button>
+  <button data-view="provenance">溯源链</button>
+  <button data-view="gateway">模型网关</button>
+</nav>
+
+<main class="main">
+  <!-- 服务未启动提示 -->
+  <section id="offline" class="offline hidden">
+    <div class="offline-card">
+      <div class="offline-seal">服务未启动</div>
+      <h2>无法连接到 ZR 自治内核</h2>
+      <p>控制台已加载，但在当前 API 地址 <code id="offlineUrl"></code> 上未获得 <code>GET /api/v1/health</code> 的正常响应。</p>
+      <ol>
+        <li>在后端目录执行 <code>./install.sh</code> 或 <code>python -m zr_agent_suite</code> 启动服务（端口 <b>8920</b>）。</li>
+        <li>确认右上角 API 地址正确；如服务监听在其它端口，请手动修改后点击「重连」。</li>
+        <li>若启用了鉴权，请在 Key 输入框填入 <code>ZR_API_KEY</code>。</li>
+      </ol>
+      <button class="btn-ghost" id="btnRetry">重试连接</button>
+    </div>
+  </section>
+
+  <!-- 1. 概览 -->
+  <section id="view-overview" class="view active">
+    <div class="grid stats">
+      <div class="stat"><b id="ovUptime">--</b><span>UPTIME</span></div>
+      <div class="stat"><b id="ovTruthCount">--</b><span>真值总数</span></div>
+      <div class="stat"><b id="ovTaskCount">--</b><span>任务数</span></div>
+      <div class="stat"><b id="ovOpCount">--</b><span>已注册算子</span></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>模块状态</h3><span class="muted">modules</span></div>
+      <div id="modList" class="mod-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>健康探测</h3><span class="muted">GET /api/v1/health</span></div>
+      <pre id="ovHealth" class="pre"></pre>
+    </div>
+  </section>
+
+  <!-- 2. 真值库 -->
+  <section id="view-truth" class="view">
+    <div class="card">
+      <div class="card-head">
+        <h3>真值库</h3>
+        <div class="row">
+          <select id="truthType">
+            <option value="">全部类型</option>
+            <option value="meta_law">meta_law · 元法则</option>
+            <option value="rule">rule · 规则</option>
+            <option value="config">config · 配置</option>
+            <option value="decision">decision · 决策</option>
+            <option value="data">data · 数据</option>
+            <option value="creative">creative · 创意</option>
+            <option value="risk">risk · 风险</option>
+            <option value="protocol">protocol · 协议</option>
+            <option value="unknown">unknown · 未知</option>
+          </select>
+          <input id="truthQ" type="text" placeholder="搜索 content / source" spellcheck="false">
+          <input id="truthLimit" type="number" value="50" min="1" max="500" title="limit">
+          <button class="btn-ghost" id="btnTruthList">查询</button>
+        </div>
+      </div>
+      <div id="truthList" class="truth-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>新增真值</h3><span class="muted">POST /api/v1/truth</span></div>
+      <form id="truthForm" class="form">
+        <label>truth_type
+          <select name="truth_type" required>
+            <option value="meta_law">meta_law</option>
+            <option value="rule">rule</option>
+            <option value="config" selected>config</option>
+            <option value="decision">decision</option>
+            <option value="data">data</option>
+            <option value="creative">creative</option>
+            <option value="risk">risk</option>
+            <option value="protocol">protocol</option>
+            <option value="unknown">unknown</option>
+          </select>
+        </label>
+        <label>source <input name="source" type="text" placeholder="e.g. manual / install.sh" required></label>
+        <label>confidence (0~1) <input name="confidence" type="number" step="0.01" min="0" max="1" value="0.9"></label>
+        <label class="full">content (JSON 对象)
+          <textarea name="content" rows="5" spellcheck="false">{"note":"hello from console"}</textarea>
+        </label>
+        <div class="row full">
+          <button class="btn-primary" type="submit">提交真值</button>
+          <span id="truthFormMsg" class="muted"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="card hidden" id="truthDetailCard">
+      <div class="card-head"><h3>真值详情</h3><button class="link" id="truthDetailClose">关闭</button></div>
+      <pre id="truthDetail" class="pre"></pre>
+    </div>
+  </section>
+
+  <!-- 3. 任务调度 -->
+  <section id="view-task" class="view">
+    <div class="card">
+      <div class="card-head"><h3>创建任务</h3><span class="muted">POST /api/v1/task</span></div>
+      <form id="taskForm" class="form">
+        <label>name <input name="name" type="text" placeholder="e.g. daily-truth-audit" required></label>
+        <label>task_type
+          <select name="task_type" required>
+            <option value="truth_audit">truth_audit · 真值对账</option>
+            <option value="drift_scan">drift_scan · 漂移巡检</option>
+            <option value="provenance_verify">provenance_verify · 溯源校验</option>
+            <option value="gateway_probe">gateway_probe · 网关探测</option>
+            <option value="custom">custom · 自定义</option>
+          </select>
+        </label>
+        <label>schedule
+          <select name="schedule" id="taskSchedule">
+            <option value="once">once · 一次性</option>
+            <option value="interval">interval · 周期</option>
+          </select>
+        </label>
+        <label>interval_secs <input name="interval_secs" type="number" min="0" value="0" id="taskInterval"></label>
+        <label class="full">params (JSON 对象)
+          <textarea name="params" rows="3" spellcheck="false">{}</textarea>
+        </label>
+        <div class="row full">
+          <button class="btn-primary" type="submit">创建</button>
+          <span id="taskFormMsg" class="muted"></span>
+        </div>
+      </form>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>任务列表</h3><button class="btn-ghost" id="btnTaskList">刷新</button></div>
+      <div id="taskList" class="task-list"></div>
+    </div>
+  </section>
+
+  <!-- 4. 算子拓扑 -->
+  <section id="view-operators" class="view">
+    <div class="card">
+      <div class="card-head">
+        <h3>27 算子 · 十层依赖拓扑</h3>
+        <span class="muted" id="opCount"></span>
+      </div>
+      <div id="opLayers" class="layers"></div>
+    </div>
+  </section>
+
+  <!-- 5. 溯源链 -->
+  <section id="view-provenance" class="view">
+    <div class="card">
+      <div class="card-head">
+        <h3>Merkle-DAG 主链</h3>
+        <div class="row">
+          <button class="btn-ghost" id="btnChain">拉取链</button>
+          <button class="btn-primary" id="btnVerify">执行校验</button>
+        </div>
+      </div>
+      <div class="chain-meta">
+        <div><span class="muted">merkle_root</span><div id="chainRoot" class="mono">--</div></div>
+        <div><span class="muted">链长</span><div id="chainLen" class="mono">--</div></div>
+      </div>
+      <pre id="chainData" class="pre"></pre>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>校验结果</h3><span class="muted">POST /api/v1/provenance/verify</span></div>
+      <pre id="verifyResult" class="pre">尚未校验。</pre>
+    </div>
+  </section>
+
+  <!-- 6. 模型网关 -->
+  <section id="view-gateway" class="view">
+    <div class="card">
+      <div class="card-head">
+        <h3>三通道状态</h3>
+        <button class="btn-ghost" id="btnChannels">刷新通道</button>
+      </div>
+      <div id="channelCards" class="ch-cards"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Chat 测试</h3><span class="muted">POST /api/v1/gateway/chat</span></div>
+      <form id="chatForm" class="form">
+        <label>channel
+          <select name="channel">
+            <option value="auto">auto · 自动选择</option>
+            <option value="local">local · 本地 ollama</option>
+            <option value="licensed">licensed · 授权商用</option>
+            <option value="byok">byok · 自带密钥</option>
+          </select>
+        </label>
+        <label class="full">model <input name="model" type="text" placeholder="e.g. qwen2.5 / gpt-4o-mini" value=""></label>
+        <label class="full">messages (JSON 数组)
+          <textarea name="messages" rows="5" spellcheck="false">[{"role":"user","content":"用一句话介绍你自己。"}]</textarea>
+        </label>
+        <div class="row full">
+          <button class="btn-primary" type="submit">发送</button>
+          <span id="chatMsg" class="muted"></span>
+        </div>
+      </form>
+      <div class="chat-out">
+        <div class="card-head"><h3>响应</h3><span class="muted" id="chatAudit"></span></div>
+        <pre id="chatResult" class="pre">（等待请求）</pre>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div>火斗云智AIOS · ZR Autonomous Suite Console</div>
+  <div class="mono">Ω₀⊂⊙∞⊂Ω &nbsp;|&nbsp; DID-BR-000002</div>
+</footer>
+
+<div id="toast" class="toast hidden"></div>
+<script src="/assets/app.js"></script>
+</body>
+</html>
