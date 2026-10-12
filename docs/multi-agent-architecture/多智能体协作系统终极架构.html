@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多智能体协作系统·终极技术架构总图</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111827'/%3E%3Cg stroke='%237c3aed' stroke-width='2' fill='none'%3E%3Ccircle cx='16' cy='10' r='4'/%3E%3Ccircle cx='8' cy='22' r='3.5'/%3E%3Ccircle cx='24' cy='22' r='3.5'/%3E%3Cline x1='13' y1='12' x2='10' y2='19'/%3E%3Cline x1='19' y1='12' x2='22' y2='19'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#f6f7f9;--card:#ffffff;--line:#e4e6ec;
+    --ink:#1f2329;--muted:#6b7280;
+    --red:#c0392b;--blue:#2563eb;--purple:#7c3aed;--green:#16a34a;--amber:#b45309;
+  }
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 20px 60px}
+  .hero{background:#111827;color:#fff;border-radius:12px;padding:28px 28px 22px;margin-bottom:20px}
+  .hero h1{font-size:24px;font-weight:800;letter-spacing:.5px}
+  .hero p{font-size:13px;opacity:.78;margin-top:6px}
+  .hero .tags{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+  .hero .tags span{background:#374151;padding:4px 12px;border-radius:20px;font-size:12px}
+  .sec{margin:26px 0 10px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .sec .no{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:6px;background:#111827;color:#fff;font-size:13px;padding:0 6px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .note{font-size:13px;color:var(--muted)}
+  /* 表格 */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px;table-layout:fixed}
+  th{background:#f3f4f6;padding:10px 10px;text-align:left;border:1px solid var(--line);font-weight:600}
+  td{padding:10px;border:1px solid var(--line);vertical-align:top;word-break:break-word}
+  th:nth-child(1){width:15%}th:nth-child(2){width:21%}th:nth-child(3){width:21%}th:nth-child(4){width:21%}th:nth-child(5){width:22%}
+  /* 范式卡 */
+  .flex{display:flex;gap:12px;flex-wrap:wrap}
+  .para{flex:1;min-width:230px;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c,var(--blue));border-radius:10px;padding:14px}
+  .para h3{font-size:15px;color:var(--c,var(--blue));font-weight:700}
+  .para .sub{font-size:12px;color:var(--muted);margin:4px 0 8px}
+  .para ul{list-style:none;font-size:13px}
+  .para li{padding:3px 0 3px 16px;position:relative}
+  .para li::before{content:"▪";position:absolute;left:2px;color:var(--c,var(--blue))}
+  .ok{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}
+  /* 演进链 */
+  .evo{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+  .evo .chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+  .pill{background:#eef2ff;color:#3730a3;padding:4px 11px;border-radius:20px;font-weight:600;font-size:12px}
+  .tag-p{padding:3px 10px;border-radius:16px;font-size:12px}
+  .tp{background:#eef2ff;color:#3730a3}.tv{background:#f5f3ff;color:#6d28d9}.tc{background:#eff6ff;color:#1d4ed8}.tl{background:#ecfdf5;color:#15803d}
+  /* 难点 */
+  .diff{flex:1;min-width:200px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px}
+  .diff h4{font-size:13px;color:var(--amber);font-weight:700;margin-bottom:4px}
+  .diff p{font-size:12px;color:#444;line-height:1.55}
+  .diff.d2{background:#fef2f2;border-color:#fecaca}.diff.d2 h4{color:var(--red)}
+  .diff.d3{background:#eff6ff;border-color:#bfdbfe}.diff.d3 h4{color:var(--blue)}
+  .diff.d4{background:#f0fdf4;border-color:#bbf7d0}.diff.d4 h4{color:var(--green)}
+  /* 工程栈 */
+  .stack{background:#111827;color:#e5e7eb;border-radius:10px;padding:18px;font-size:13px;line-height:2}
+  .stack b{color:#fff}
+  .chips{background:#374151;padding:3px 11px;border-radius:16px;font-size:12px;margin:0 2px;white-space:nowrap}
+  /* 选型 */
+  .pick{margin-top:18px;padding:14px 16px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;font-size:13px;line-height:1.9}
+  .pick b{color:#3730a3}
+  .pick .arrow{color:#7c3aed;font-weight:700}
+  .foot{margin-top:28px;text-align:center;font-size:12px;color:var(--muted)}
+  @media(max-width:640px){.hero h1{font-size:20px}.wrap{padding:16px 12px 48px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>多智能体协作系统 · 终极技术架构总图</h1>
+    <p>四条协作范式 · 决策集中度 × 通信显隐性 × 算法演进谱系 · LLM 新范式 · 工程落地栈</p>
+    <div class="tags"><span>中心化</span><span>CTDE 隐式协作</span><span>显式通信去中心化</span><span>LLM 语言协作</span></div>
+  </div>
+
+  <!-- ① 定位矩阵 -->
+  <div class="sec"><span class="no">1</span>协作范式定位矩阵：横向=决策集中度，纵向=通信显隐性</div>
+  <div class="card" style="overflow:auto">
+    <table>
+      <tr>
+        <th>维度 \ 范式</th>
+        <th style="color:var(--red)">中心化</th>
+        <th style="color:var(--blue)">CTDE（隐式协作）</th>
+        <th style="color:var(--purple)">显式通信去中心化</th>
+        <th style="color:var(--green)">LLM 协作（语言驱动）</th>
+      </tr>
+      <tr><td><b>决策权</b></td><td>全局集中</td><td>训练集中 / 执行独立</td><td>完全独立 + 消息</td><td>独立，经会话/工具协作</td></tr>
+      <tr><td><b>信息可见度</b></td><td>全局完整</td><td>训练全局 / 执行局部</td><td>局部 + 显式消息</td><td>局部 + 自然语言上下文</td></tr>
+      <tr><td><b>通信机制</b></td><td>指令下发（单向）</td><td><b>隐式</b>：靠策略默契</td><td><b>显式</b>：向量/注意消息</td><td><b>显式语言</b>：可解释</td></tr>
+      <tr><td><b>核心矛盾</b></td><td>扩展性 / 单点</td><td>Train-Test Gap / 非稳态</td><td>通信带宽 / 消息选择</td><td>Token 成本 / 幻觉 / 漂移</td></tr>
+    </table>
+  </div>
+
+  <!-- ② 四条范式 -->
+  <div class="sec"><span class="no">2</span>四条范式全景（含 CTDE 与显式通信的对比要点）</div>
+  <div class="flex">
+    <div class="para" style="--c:var(--red)">
+      <h3>A · 中心化</h3><div class="sub">Centralized</div>
+      <ul>
+        <li>中心收集全观测 → 统一规划 → 下发动作</li>
+        <li>代表：集中调度、SWARM 集中规划</li>
+        <li class="bad">缺点：单点故障 · 通信/算力爆炸 · 实时性差</li>
+        <li class="ok">优点：信用分配天然解决 · 全局最优可寻</li>
+      </ul>
+    </div>
+    <div class="para" style="--c:var(--blue)">
+      <h3>B · CTDE（隐式）</h3><div class="sub">Centralized Training / Decentralized Exec.</div>
+      <ul>
+        <li>值分解线：<b>VDN → QMIX</b>（Q_tot 分解/单调混合）</li>
+        <li>策略梯度线：<b>MADDPG → FACMAC</b>、<b>COMA</b></li>
+        <li class="warn">注意：无显式信道，靠默契，噪声下协作易崩</li>
+        <li class="ok">优点：执行零通信开销 · 训练稳定</li>
+      </ul>
+    </div>
+    <div class="para" style="--c:var(--purple)">
+      <h3>C · 显式通信去中心化</h3><div class="sub">Explicit Communication</div>
+      <ul>
+        <li><b>CommNet</b>：全连接广播，连续通信向量</li>
+        <li><b>TarMAC</b>：attention 定向消息，按接收者定制</li>
+        <li><b>DGN</b>：图卷积聚合邻居信息</li>
+        <li class="ok">优点：显式协作 · 抗噪声 · 可扩展</li>
+        <li class="bad">缺点：通信成本 · 冗余 · 学出"语言"不可解释</li>
+      </ul>
+    </div>
+    <div class="para" style="--c:var(--green)">
+      <h3>D · LLM 协作</h3><div class="sub">Language-Driven</div>
+      <ul>
+        <li>框架：<b>AutoGen / CrewAI / MetaGPT / LangGraph</b></li>
+        <li>角色分工 + 工具调用 + 共享上下文</li>
+        <li class="ok">优点：可解释 · 零强化训练 · 角色灵活</li>
+        <li class="bad">缺点：Token 成本 · 幻觉传播 · 无全局优化保证</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ③ 演进谱系 -->
+  <div class="sec"><span class="no">3</span>算法演进谱系（经典 → 前沿）</div>
+  <div class="evo">
+    <div class="chain">
+      <span class="tag-p tp">基础</span><span>独立 IQL / DQN</span><span>→</span>
+      <span class="tag-p tv">值分解</span><span>VDN → QMIX → QPLEX</span><span>→</span>
+      <span class="tag-p tv">策略梯度+反事实</span><span>COMA → MADDPG → FACMAC</span><span>→</span>
+      <span class="tag-p tc">显式通信</span><span>CommNet → DIAL/IA2C → TarMAC → DGN</span><span>→</span>
+      <span class="tag-p tl">层次/组织化</span><span>HRL → Transformer 多智能体</span><span>→</span>
+      <span class="tag-p tl">LLM 协作</span><span>AutoGen / CrewAI / MetaGPT</span>
+    </div>
+    <div style="margin-top:12px;padding:10px 12px;background:#f5f3ff;border-radius:8px;font-size:13px">
+      <b>演进主线</b>：从"共享奖励·隐式默契"（值分解）→"个体归因·反事实"（策略梯度）→"显式消息·意图可读"（通信）→"语言协作·零训练"（LLM）。可解释性与灵活性逐步上升，代价是通信/推理成本上升。
+    </div>
+  </div>
+
+  <!-- ④ 共性难点 -->
+  <div class="sec"><span class="no">4</span>贯穿四范式的共性难点</div>
+  <div class="flex">
+    <div class="diff"><h4>非稳态</h4><p>队友即环境，策略互变 → 训练震荡；需缓解（CTDE / 通信注意力）</p></div>
+    <div class="diff d2"><h4>信用分配</h4><p>联合奖励→个体贡献难归因；值分解 / 反事实 / 消息因果各自应对</p></div>
+    <div class="diff d3"><h4>扩展性</h4><p>N 增大动作空间指数爆炸；分解 / 图结构 / 层次化缓解</p></div>
+    <div class="diff d4"><h4>对齐与安全</h4><p>奖励黑客 / 旁路行为、目标冲突仲裁、可解释审计、故障容错</p></div>
+  </div>
+
+  <!-- ⑤ 工程落地层 -->
+  <div class="sec"><span class="no">5</span>工程落地层（系统级难点）</div>
+  <div class="stack">
+    <span class="chips">分布式部署</span>异步执行·时钟同步 ·
+    <span class="chips">异构融合</span>不同模型/能力接入统一协议 ·
+    <span class="chips">消息总线</span>带宽/延迟/丢包/优先级 ·
+    <span class="chips">状态一致性</span>共享工作区/竞态 ·
+    <span class="chips">故障容错</span>降级/重组/心跳 ·
+    <span class="chips">评估基准</span>协作质量/效率/能耗 ·
+    <span class="chips">安全审计</span>决策追溯/权限边界
+  </div>
+
+  <!-- 选型 -->
+  <div class="pick">
+    <b>选型结论</b>：中小规模·纯合作 <span class="arrow">→</span> <b>QMIX</b>；
+    异构·连续·混合博弈 <span class="arrow">→</span> <b>MADDPG / FACMAC</b>；
+    需显式协同·抗噪声 <span class="arrow">→</span> <b>TarMAC / DGN</b>；
+    要可解释·快速搭建 <span class="arrow">→</span> <b>LLM 框架（AutoGen / CrewAI）</b>；
+    上百节点·强容错 <span class="arrow">→</span> <b>层次化 + 显式通信</b>。
+  </div>
+
+  <div class="foot">多智能体协作系统 · 终极技术架构总图（可上线产物包）</div>
+</div>
+</body>
+</html>
