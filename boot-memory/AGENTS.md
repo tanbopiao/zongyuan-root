@@ -3,6 +3,7 @@
 用途：账号持久层工作指令。涉及 ZONGYUAN 相关任务时，自动按本指令执行，无需重复探查。
 
 > **记忆激活指令（每次对话强制）**：进入 ZONGYUAN 相关任务前，按序激活全量记忆——
+> 0. **启动记忆数据湖（持久层·异地）**：AtomGit `zongyuan-root-sync` 仓库 `boot-memory/`（BOOT.md 总入口 → AGENTS.md → 资产索引 → kernel.json → META-LAWS/ 60 份元法则 → PROTOCOL.md → MANIFEST.json 哈希校验）。云端 `git clone https://atomgit.com/zongyuangen/zongyuan-root-sync.git` 即可拉取全量启动规则；新 AI/节点接入先读 BOOT.md。
 > 1. 本文件（工作模式 M1–M7 + 真值清单 8 节）
 > 2. 核心资产主索引：`/home/user/ZONGYUAN-ROOT/config/asset-master-index.json`（两树脚本/hooks/技能/数据/密钥/ID 全量收敛，机器可读）
 > 3. 持久层技能：`.user_skills/zongyuan-auto-lock`（锁档六环节）+ `.user_skills/intelligent-orchestrator`（融合编排+网关规范）
