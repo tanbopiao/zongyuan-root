@@ -1,0 +1,52 @@
+{
+  "name": "zongyuan-kernel",
+  "description": "自治内核：元法则 + 五层链式锁 + Merkle 哈希巡检 + 审计 + 引擎 + 三端口服务",
+  "bind_host": "127.0.0.1",
+  "ports": {
+    "brain_proxy": 8081,
+    "brain_router": 8082,
+    "causal": 8092
+  },
+  "paths": {
+    "meta_laws": "config/meta_laws",
+    "audit_log": "var/audit/audit.jsonl",
+    "baseline_state": "var/state/baseline.json",
+    "experience_db": "var/state/experience.db",
+    "pid_file": "var/run/kernel.pid",
+    "reset_request": "var/run/reset_fuse.request"
+  },
+  "intervals": {
+    "reflection_sec": 3600,
+    "patrol_sec": 1800,
+    "merkle_patrol_sec": 21600,
+    "selfheal_sec": 3600,
+    "watchdog_sec": 5
+  },
+  "watch_dir": "config/meta_laws",
+  "fuse_on_hash_mismatch": true,
+  "syslog_forward": {
+    "enabled": false,
+    "host": "127.0.0.1",
+    "port": 514
+  },
+  "allowed_actions": ["audit", "reflect", "patrol", "selfheal", "query", "status", "route"],
+  "code_lock": {
+    "mount_point": "",
+    "protected": [
+      "config/meta_laws/META-FIVE-LOCK-001.json",
+      "config/meta_laws/META-LAW-CRYPT-LOCK-001.json",
+      "config/meta_laws/META-LAYER-SEPARATE-001.json"
+    ]
+  },
+  "selfheal": {
+    "tasks": [
+      {"id": "audit_size",       "type": "audit_size",     "enabled": true,  "max_bytes": 5000000},
+      {"id": "experience_db",    "type": "db_writable",    "enabled": true},
+      {"id": "threads_alive",    "type": "thread_alive",   "enabled": true,  "names": ["scheduler", "watchdog"]},
+      {"id": "baseline_present", "type": "baseline_exists","enabled": true},
+      {"id": "meta_laws_valid",  "type": "meta_law_valid", "enabled": true},
+      {"id": "disk_free",        "type": "disk_free",      "enabled": false, "min_percent": 10, "path": "var"},
+      {"id": "custom_ping",      "type": "custom_command", "enabled": false, "command": ["/usr/bin/true"], "timeout": 10}
+    ]
+  }
+}

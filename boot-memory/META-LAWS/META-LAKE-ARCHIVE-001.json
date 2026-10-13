@@ -1,0 +1,30 @@
+{
+  "law_id": "META-LAKE-ARCHIVE-001",
+  "name": "全资产魔搭数据湖归档法则（DataLake Archive）",
+  "level": "P0",
+  "description": "所有资产——本地根目录全部文件夹、本地实例持久层、账号持久层——统一同步归档至魔搭数据湖（ModelScope DataHub）作为外部冷备/数据湖层。全量归档一次后转入增量归档（最优稳态：收益最大/成本最小/风险最小）。凭据零明文落盘（运行时环境变量注入），失败不阻塞主流程。与 META-SANDBOX-LIFECYCLE-001 协同：沙箱销毁损失最小化的外部纵深层",
+  "clauses": [
+    {"id": "LA-1", "text": "覆盖范围（全资产定义）：①本地根目录全部文件夹（/home/user/Doubao/chats/38444214541567234 主项目目录及子目录全量）；②本地实例持久层（ZONGYUAN-ROOT 全树，含 backup/ 收敛点 core+full+low-value）；③脑内核（zongyuan-kernel 全树，元法则/状态/审计/经验库）；④账号持久层（AGENTS.md 工作指令、用户偏好、共享大脑 Base 索引、网关真值）——不遗漏任何文件、信息、数据，派生资产与低价值资产一并归档（低价值独立桶分离）"},
+    {"id": "LA-2", "text": "最优稳态策略：首次全量归档一次（收敛点备份 + 本地全树归档包 tar.zst），此后只做增量归档（变更文件清单/增量包），不再重复全量，降低算力与额度消耗；增量基于 HASH-LEDGER 与 persist verify 差异面计算"},
+    {"id": "LA-3", "text": "凭据与通道：魔搭（ModelScope）API 认证仅经环境变量 MODELSCOPE_API_TOKEN 运行时注入，零明文落盘、不写脚本、不进回复文本；目标仓库/数据集由账号持久层登记（datahub target registry）；上传走官方 SDK/API，主通道失败切备用通道，失败不阻塞主流程并记录"},
+    {"id": "LA-4", "text": "周期与触发：每次增量锁档完成后触发增量归档；每日定点全量完整性校验（本地归档包 vs 数据湖对象清单）；沙箱重置/销毁前强制全量归档握手（与 META-SANDBOX-LIFECYCLE-001 SL-3 唯一握手点协同）"},
+    {"id": "LA-5", "text": "治理与留痕：归档清单/时间戳/哈希写入 var/archive/archive-ledger.jsonl；审计 kernel.truth|operator|archive|ok；网关上报 data.lake.archive.<ts>；归档对象命名规范 zongyuan-<scope>-<yyyyMMdd>-<seq>"},
+    {"id": "LA-6", "text": "恢复路径：数据湖对象可整体拉回本地恢复（灾备源）；恢复优先级本地 backup/ 收敛点 > 数据湖归档 > 云端网关/飞书，多源交叉验证 sha256"},
+    {"id": "LA-7", "text": "推送后清理（防冗余膨胀）：分库/全量推送并经 ls-remote 或 CLI 下载核验可达后，自动清理本地归档中间产物（dl-repo 工作树、__split 分库 src/worktree、/tmp 下载副本），只保留收敛点 backup/（热备）+ 数据湖（冷备）双源；禁止在推送未核验前删除本地源；清理动作审计留痕 lake.cleanup|ok"},
+    {"id": "LA-8", "text": "收敛点轻量化（标准收敛稳态）：backup/ 收敛点只保留核心面——脑内核/手核心/账本/状态/技能/卷宗（实测核心≈230M），大文件与历史多版本走数据湖 DB 库冷备，本地只留每类最新 1 版；禁止递归镜像（persist 已排除 backup 自身与 var/archive，历史递归副本已清）；清理大文件时 HASH-LEDGER.csv 账本豁免（>100M 阈值不适用账本），删前先核验数据湖可达；体积基线：手内核 70G→11G、backup 30G→858M（2026-10-03 实测）"}
+  ],
+  "registry": [
+    {"repo": "ZONGYUAN-SHARED-DATALAKE", "url": "https://modelscope.cn/datasets/zongyuanroot/ZONGYUAN-SHARED-DATALAKE", "scope": "核心资产: 双内核+主项目目录+backup小目录+白皮书(远端另有同源节点增量)"},
+    {"repo": "ZONGYUAN-FULL-CORE", "url": "https://modelscope.cn/datasets/zongyuanroot/ZONGYUAN-FULL-CORE", "scope": "full核心: kernel/reports/user-skills/zongyuan-root(除大文件)"},
+    {"repo": "ZONGYUAN-FULL-LOWVALUE-A", "url": "https://modelscope.cn/datasets/zongyuanroot/ZONGYUAN-FULL-LOWVALUE-A", "scope": "low-value A: cloud-kernel-mirror/data非大文件+logs/whitepaper等"},
+    {"repo": "ZONGYUAN-FULL-LOWVALUE-B", "url": "https://modelscope.cn/datasets/zongyuanroot/ZONGYUAN-FULL-LOWVALUE-B", "scope": "low-value B: cloud-kernel-mirror非data+cloud-pull/frp+reports"},
+    {"repo": "ZONGYUAN-FULL-DB-A", "url": "https://modelscope.cn/datasets/zongyuanroot/ZONGYUAN-FULL-DB-A", "scope": "大文件A: memory_gateway.db系列前8(3.1G原始, git压缩36M)"},
+    {"repo": "ZONGYUAN-FULL-DB-B", "url": "https://modelscope.cn/datasets/zongyuanroot/ZONGYUAN-FULL-DB-B", "scope": "大文件B: db系列后9+HASH-LEDGER.csv(2.7G原始)"}
+  ],
+  "allowed_actions": ["archive", "incremental_archive", "verify", "restore_from_lake", "report", "audit"],
+  "script": "scripts/lake_archive.sh + scripts/gateway_report.py",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "DID": "DID-BR-000002",
+  "created": "2026-09-29",
+  "requires": "MODELSCOPE_API_TOKEN 环境变量（运行时注入）"
+}
