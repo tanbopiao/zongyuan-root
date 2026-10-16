@@ -33,7 +33,7 @@ DID = "DID-BR-000002"
 # 默认落盘目录：优先本地内核运行态，其次工作目录
 DEFAULT_STORE = os.environ.get(
     "ZR_TRACE_STORE",
-    "/opt/ZONGYUAN-ROOT/var/trace_store",
+    "/home/user/.zongyuan_root/kernel/trace_store",
 )
 
 
