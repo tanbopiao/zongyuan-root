@@ -450,6 +450,52 @@
         "所有图片生成",
         "所有媒体资产"
       ]
+    },
+    {
+      "rule_id": "META-RULE-016",
+      "name": "记忆网关真值上报命名空间规范",
+      "category": "governance",
+      "version": "V3.1",
+      "status": "active",
+      "created_at": "2026-10-16",
+      "summary": "真值上报key使用标准命名空间前缀KERNEL+结构化value+X-DID头,禁止旧字段truth_key/truth_value",
+      "details": {
+        "endpoint": "https://www.huodouai.com/api/report/truth",
+        "header": "X-DID: DID-BR-000002",
+        "key_format": "<命名空间>.<业务域>.<对象>.<动作>.<日期>",
+        "standard_namespace": [
+          "KERNEL",
+          "KERNEL.EVOLUTION.DIRECTIVE"
+        ],
+        "forbidden_fields": [
+          "content",
+          "truth_key",
+          "truth_value"
+        ],
+        "value_rule": "结构化JSON对象,≥2字段,<10KB",
+        "truth_types": [
+          "meta_law",
+          "rule",
+          "config",
+          "decision",
+          "data",
+          "creative",
+          "risk",
+          "protocol",
+          "unknown"
+        ],
+        "alignment_threshold": 50
+      },
+      "lessons_learned": [
+        "旧字段truth_key/truth_value已失效,会触发empty_value_rejected",
+        "非标准前缀如META/WHITEPAPER/RULE被alignment_rejected拒绝",
+        "仅KERNEL前缀实测通过(2026-10-16)"
+      ],
+      "applicable_to": [
+        "所有节点",
+        "auto_wp_forge.py",
+        "所有上报网关脚本"
+      ]
     }
   ],
   "learning_protocol": {

@@ -288,10 +288,12 @@ def save_state(st):
     STATE_FILE.write_text(json.dumps(st, ensure_ascii=False, indent=2))
 
 def gateway_report(key, value, ctype='data', conf=0.97):
-    body = json.dumps({"truth_key": key, "truth_value": value,
-                       "source_node": NODE, "confidence": conf, "truth_type": ctype}).encode()
+    # RULE-005 V3.1: key=命名空间.key(禁止truth-前缀,标准前缀KERNEL) + value=结构化JSON对象 + did + X-DID头
+    body = json.dumps({"key": key, "value": value,
+                       "truth_type": ctype, "did": DID}).encode()
     req = urllib.request.Request(GATEWAY, data=body,
-                                 headers={"Content-Type": "application/json"}, method="POST")
+                                 headers={"Content-Type": "application/json",
+                                          "X-DID": DID}, method="POST")
     try:
         r = urllib.request.urlopen(req, timeout=15)
         return r.read().decode()[:60]
@@ -433,13 +435,17 @@ def main():
         if not DRY:
             for mid in new_wp:
                 rec = st["wp"][mid]
-                res = gateway_report(f"WHITEPAPER.{rec['wpnum']}.AUTO-FORGE.{date}",
-                                     f"{rec['title']}白皮书由AUTO-WP-FORGE自动提炼生成,sha256={rec['html_sha'][:12]},确权{DID},已推送魔搭",
+                res = gateway_report(f"KERNEL.WHITEPAPER.{rec['wpnum']}.AUTO-FORGE.{date}",
+                                     {"title": rec["title"], "wpnum": rec["wpnum"],
+                                      "sha256": rec["html_sha"][:12], "did": DID,
+                                      "node": NODE, "action": "AUTO-FORGE"},
                                      ctype='data')
                 log(f"  上报 {rec['wpnum']}: {res[:40]}")
             if new_wp:
-                res = gateway_report(f"WHITEPAPER.MATRIX.AUTO-FORGE.BATCH.{date}",
-                                     f"白皮书矩阵自动锻造批次完成:新增{len(new_wp)}变更{len(changed)},总{len(files)}份,根哈希{root_hash[:16]},全自动闭环",
+                res = gateway_report(f"KERNEL.WHITEPAPER.MATRIX.AUTO-FORGE.BATCH.{date}",
+                                     {"new": len(new_wp), "changed": len(changed),
+                                      "total": len(files), "root_sha256": root_hash[:16],
+                                      "did": DID, "node": NODE},
                                      ctype='data')
                 log(f"  批次上报: {res[:40]}")
 
