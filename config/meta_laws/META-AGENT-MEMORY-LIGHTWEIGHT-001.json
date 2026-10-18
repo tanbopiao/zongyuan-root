@@ -1,0 +1,108 @@
+{
+  "meta_law_id": "META-AGENT-MEMORY-LIGHTWEIGHT-001",
+  "name": "智能体记忆核心功能轻量化复刻元法则",
+  "level": "元法则级",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "version": "v1.0",
+  "created": "2026-10-17",
+
+  "principle": "全网优质智能体记忆系统的核心功能，必须以最轻量方式复刻到本体系，禁止直接部署重组件（Postgres+pgvector+Neo4j等），用现有SQLite+简单规则实现等价能力。",
+
+  "source_research": {
+    "benchmark_leaderboard": {
+      "Hindsight": "LongMemEval-S 94.6%，四网络分层+观点置信度演化",
+      "Mem0": "LongMemEval 93.4%，自动事实提取+冲突检测",
+      "Zep/Graphiti": "时间知识图谱，事实有效期窗口+双时态追踪",
+      "Letta/MemGPT": "分层记忆（核心/归档），智能体自主管理记忆",
+      "LangMem": "工具化记忆，后台自动提取"
+    }
+  },
+
+  "lightweight_principles": [
+    "P1: 能用字段扩展解决的，绝不新增数据库表",
+    "P2: 能用规则实现的，绝不部署新服务",
+    "P3: 命名空间天然支持分层，不用额外schema设计",
+    "P4: 核心逻辑加在写入/读取接口层，不动底层存储",
+    "P5: 单功能实现成本控制在100行代码以内"
+  ],
+
+  "implemented_features": [
+    {
+      "feature": "自动置信度+证据计数",
+      "source": "Hindsight Opinion Network",
+      "status": "已上线",
+      "implementation": "写入时按quality_tier自动赋值confidence(0.4-0.95)，evidence_count初始=1"
+    },
+    {
+      "feature": "append追加模式",
+      "source": "Hindsight Observation Consolidation",
+      "status": "已上线",
+      "implementation": "同key带append=true即可追加新证据，保留历史轨迹"
+    },
+    {
+      "feature": "相似检测反馈",
+      "source": "Mem0 Conflict Detection",
+      "status": "已上线",
+      "implementation": "写入时返回相似记录预览，提示是否追加"
+    },
+    {
+      "feature": "key自动生成",
+      "source": "Mem0 Automatic Extraction",
+      "status": "已上线",
+      "implementation": "不传key自动生成AUTO.时间戳.序号.hash格式"
+    },
+    {
+      "feature": "truth_type自动推断",
+      "source": "Mem0 LLM-as-judge",
+      "status": "已上线",
+      "implementation": "按内容关键词自动分类为9类之一"
+    },
+    {
+      "feature": "批量上报接口",
+      "source": "生产最佳实践",
+      "status": "已上线",
+      "implementation": "payload传数组一次写N条，每条独立key"
+    }
+  ],
+
+  "next_features": [
+    {
+      "feature": "分层记忆scope字段",
+      "source": "Mem0 Hierarchical Memory (user/session/agent/org)",
+      "implementation_plan": "value加scope字段(session/user/agent/org)，查询时按scope过滤，零存储成本",
+      "priority": "P0",
+      "effort_lines": 20
+    },
+    {
+      "feature": "事实有效期窗口",
+      "source": "Zep/Graphiti Bi-temporal Graph",
+      "implementation_plan": "value加valid_from/valid_to时间戳字段，过期事实自动降权，不删除",
+      "priority": "P1",
+      "effort_lines": 30
+    },
+    {
+      "feature": "token预算召回接口",
+      "source": "Hindsight Recall Token Budget",
+      "implementation_plan": "新增GET /api/recall?query=xxx&max_tokens=4096接口，按token预算截断返回",
+      "priority": "P1",
+      "effort_lines": 50
+    },
+    {
+      "feature": "冲突自动标记",
+      "source": "Zep Temporal Invalidation",
+      "implementation_plan": "新写入与已有记录内容冲突时，自动给旧记录加superseded=true标记",
+      "priority": "P2",
+      "effort_lines": 40
+    }
+  ],
+
+  "forbidden_patterns": [
+    "禁止部署Postgres+pgvector作为记忆存储（过重，3.6G内存服务器扛不住）",
+    "禁止引入Neo4j等图数据库（运维成本太高）",
+    "禁止为了做记忆系统而新增独立服务进程",
+    "禁止为了对齐 benchmark 而过度工程化"
+  ],
+
+  "enforcement": "所有新记忆功能必须先评估：能否用现有SQLite+字段扩展实现？能则不引入新组件。"
+}
