@@ -1,0 +1,390 @@
+From 7ed73b57846a030d1aabadb194b7f6ac906881c3 Mon Sep 17 00:00:00 2001
+From: NODE-DEV-WORKBUDDY-001 <node-dev-workbuddy-001@zongyuan.local>
+Date: Sun, 11 Oct 2026 16:38:10 +0000
+Subject: [PATCH 1/2] =?UTF-8?q?=E6=A8=A1=E5=9E=8B=E7=BC=93=E5=AD=98?=
+ =?UTF-8?q?=E6=B2=BB=E7=90=86=20+=20a2a=20=E8=8A=82=E7=82=B9=E6=B3=A8?=
+ =?UTF-8?q?=E5=86=8C=EF=BC=88=E4=B8=AD=E6=96=AD=20rebase=20=E6=94=B6?=
+ =?UTF-8?q?=E5=B0=BE=E5=90=88=E5=B9=B6=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+【本提交为 pull --rebase 收尾所合并，含两部分】
+
+1) a2a: NODE-MI-V5-001 A2A 节点注册 [DID-BR-000002]
+   - 03_INFRA/interop-node-mi-v5/agent-card.json
+   - 03_INFRA/interop-node-mi-v5/omega_a2a_server.py
+
+2) 模型缓存治理: 忽略 01_ASSETS/models/ 并登记迁移口径 errata
+   - .gitignore 新增目录级规则 01_ASSETS/models/（HF blobs 无扩展名，扩展名规则无法拦截），
+     防止 ~540MB HF 缓存进入 Git 索引（轻量化元战略）
+   - reports/ASSET-MIGRATION-MODELS-20261019.json 追加 errata：澄清「1.01GiB/47」
+     为跟随符号链接的逻辑字节口径，实测 du=540MB、35 实体文件+12 符号链接，
+     无数据丢失（不改写既有字段）
+---
+ .gitignore                                    |   5 +
+ 03_INFRA/interop-node-mi-v5/agent-card.json   |  63 ++++++
+ .../interop-node-mi-v5/omega_a2a_server.py    | 202 ++++++++++++++++++
+ reports/ASSET-MIGRATION-MODELS-20261019.json  |  56 +++++
+ 4 files changed, 326 insertions(+)
+ create mode 100644 03_INFRA/interop-node-mi-v5/agent-card.json
+ create mode 100644 03_INFRA/interop-node-mi-v5/omega_a2a_server.py
+ create mode 100644 reports/ASSET-MIGRATION-MODELS-20261019.json
+
+diff --git a/.gitignore b/.gitignore
+index 99f13c0..c59de21 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -25,3 +25,8 @@ __pycache__/
+ *.credentials
+ */atomgit.env
+ zr-credentials/
++
++# === 模型缓存治理 2026-10-19 (承接 ASSET-MIGRATION-MODELS-20261019) ===
++# HuggingFace 缓存 blobs 为无扩展名 sha256 文件，扩展名规则无法拦截，须目录级忽略；
++# 1.01GiB 权重不入 Git 索引，走魔搭数据湖/持久层（轻量化元战略）
++01_ASSETS/models/
+diff --git a/03_INFRA/interop-node-mi-v5/agent-card.json b/03_INFRA/interop-node-mi-v5/agent-card.json
+new file mode 100644
+index 0000000..2b3b81d
+--- /dev/null
++++ b/03_INFRA/interop-node-mi-v5/agent-card.json
+@@ -0,0 +1,63 @@
++{
++  "name": "NODE-MI-V5-001 · 元极恒一自治内核",
++  "description": "NODE-MI-V5-001 A2A 互操作节点：真值确权上报/下行召回/记忆锚定/内核状态/节点心跳。DID-BR-000002，锚定 Ω₀⊂⊙∞⊂Ω，内核 v2.0。",
++  "url": "http://127.0.0.1:8099/",
++  "version": "2.0.0",
++  "protocolVersion": "0.2.9",
++  "capabilities": {
++    "streaming": false,
++    "pushNotifications": false,
++    "stateTransitionHistory": true
++  },
++  "defaultInputModes": ["text/plain", "application/json"],
++  "defaultOutputModes": ["application/json"],
++  "provider": {
++    "organization": "ZONGYUAN-ROOT",
++    "url": "https://atomgit.com/zongyuangen/zongyuan-root-sync"
++  },
++  "metadata": {
++    "did": "DID-BR-000002",
++    "anchor": "Ω₀⊂⊙∞⊂Ω",
++    "node_id": "NODE-MI-V5-001",
++    "node_name": "元智能五柱自治内核节点 v5",
++    "kernel": "元极恒一自治内核 v2.0",
++    "level": "L2",
++    "gateway": "https://www.huodouai.com/api/report/truth",
++    "atomgit_sync": "https://atomgit.com/zongyuangen/zongyuan-root-sync"
++  },
++  "skills": [
++    {
++      "id": "omega_status",
++      "name": "内核状态",
++      "description": "返回元极恒一自治内核版本、进化任务状态、云端真值数、Merkle根",
++      "tags": ["kernel", "status", "evolution"]
++    },
++    {
++      "id": "truth_report",
++      "name": "真值上报",
++      "description": "按 key/value 向中枢记忆网关确权上报真值（禁用 content 字段）",
++      "tags": ["truth", "report", "gateway"],
++      "examples": ["report key=DEMO.KEY value={\"msg\":\"hello\"}"]
++    },
++    {
++      "id": "truth_recall",
++      "name": "真值召回",
++      "description": "按 key 从中枢下行召回真值",
++      "tags": ["truth", "recall", "downlink"],
++      "examples": ["recall META-CONSCIOUSNESS-TRUTH"]
++    },
++    {
++      "id": "memory_anchor",
++      "name": "记忆锚定",
++      "description": "本地内核真值锚定检索（latest/key/keyword）",
++      "tags": ["memory", "anchor", "index"],
++      "examples": ["anchor keyword=意识真理"]
++    },
++    {
++      "id": "node_heartbeat",
++      "name": "节点心跳",
++      "description": "同源节点心跳上报（复用已注册节点，不重复注册）",
++      "tags": ["node", "heartbeat", "protocol"]
++    }
++  ]
++}
+diff --git a/03_INFRA/interop-node-mi-v5/omega_a2a_server.py b/03_INFRA/interop-node-mi-v5/omega_a2a_server.py
+new file mode 100644
+index 0000000..fbdc6e9
+--- /dev/null
++++ b/03_INFRA/interop-node-mi-v5/omega_a2a_server.py
+@@ -0,0 +1,202 @@
++#!/usr/bin/env python3
++# -*- coding: utf-8 -*-
++"""
++元极恒一自治内核 · A2A Server（互操作层）
++DID-BR-000002 ｜ Ω₀⊂⊙∞⊂Ω ｜ INTEROP-A2A-V1.0
++
++A2A (Agent2Agent) 协议轻量实现（零依赖，HTTP + JSON-RPC 2.0）：
++  GET  /.well-known/agent-card.json   Agent Card 发现
++  GET  /.well-known/agent.json        旧版发现（同一份卡片）
++  POST /                              message/send / tasks/get
++
++启动：python3 omega_a2a_server.py [--port 8099]
++"""
++import argparse
++import json
++import os
++import sys
++import time
++import urllib.parse
++import urllib.request
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++ROOT = os.path.dirname(os.path.dirname(HERE))
++CARD_PATH = os.path.join(HERE, "agent-card.json")
++SNAPSHOT = "/workspace/universal-kernel/AI-UNIVERSAL-KERNEL-PACKET.json"
++BOOT_REPORT = "/workspace/node-identity/var/dashboard.json"
++MEMORY_INDEX = "/workspace/node-identity/var/truth-sync/truth-all.json"
++
++GATEWAY = "https://www.huodouai.com"
++DID = "DID-BR-000002"
++ANCHOR = "Ω₀⊂⊙∞⊂Ω"
++NODE_ID = "NODE-MI-V5-001"
++CAPTURE_TOKEN = os.environ.get("ZR_CAPTURE_TOKEN", "ZR-CAPTURE-2026-OMEGA-d04bb54ba2a55a7d")
++
++TASKS = {}
++
++
++def _load_json(path, default):
++    try:
++        with open(path, "r", encoding="utf-8") as f:
++            return json.load(f)
++    except Exception:
++        return default
++
++
++def _text_from_message(msg):
++    parts = msg.get("parts", []) if isinstance(msg, dict) else []
++    out = []
++    for p in parts:
++        if isinstance(p, dict) and p.get("text"):
++            out.append(p["text"])
++    return " ".join(out)
++
++
++def _gateway_post(path, payload):
++    try:
++        body = json.dumps(payload, ensure_ascii=False).encode()
++        req = urllib.request.Request(
++            GATEWAY + path, data=body, method="POST",
++            headers={"Content-Type": "application/json", "X-DID": DID},
++        )
++        with urllib.request.urlopen(req, timeout=15) as resp:
++            return json.loads(resp.read().decode())
++    except Exception as e:
++        return {"error": str(e), "ok": False}
++
++
++def _gateway_get(path):
++    try:
++        req = urllib.request.Request(GATEWAY + path, headers={"X-DID": DID})
++        with urllib.request.urlopen(req, timeout=15) as resp:
++            return json.loads(resp.read().decode())
++    except Exception as e:
++        return {"error": str(e), "ok": False}
++
++
++def handle_text(text):
++    """将 A2A 消息文本映射到内核技能，返回 (skill, result)"""
++    t = (text or "").strip()
++    low = t.lower()
++    if low.startswith("status") or "状态" in t:
++        snap = _load_json(SNAPSHOT, {})
++        boot = _load_json(BOOT_REPORT, {})
++        return "omega_status", {
++            "kernel": snap.get("kernel"), "did": DID, "anchor": ANCHOR,
++            "boot_report": {k: boot.get(k) for k in ("status", "steps_pass", "steps_total", "generated_at") if k in boot},
++            "cloud_truth": snap.get("cloud_truth"),
++        }
++    if low.startswith("recall ") or low.startswith("召回 "):
++        key = urllib.parse.quote(t.split(None, 1)[1].strip(), safe="")
++        return "truth_recall", _gateway_get("/api/truth/" + key)
++    if low.startswith("report ") or low.startswith("上报 "):
++        rest = t.split(None, 1)[1]
++        payload = {"key": "REPORT.A2A.%s" % NODE_ID, "value": {"content": rest, "did": DID, "anchor": ANCHOR}}
++        if "=" in rest:
++            k, _, v = rest.partition("=")
++            payload["key"] = k.strip()
++            payload["value"] = {"content": v.strip(), "did": DID, "anchor": ANCHOR}
++        return "truth_report", _gateway_post("/api/report/truth", payload)
++    if low.startswith("anchor ") or low.startswith("锚定 "):
++        kw = t.split(None, 1)[1].strip().lower()
++        idx = _load_json(MEMORY_INDEX, {})
++        entries = idx.get("asset_entries", [])
++        matched = [e for e in entries if kw in e.get("summary", "").lower() or kw in ",".join(e.get("tags", [])).lower()]
++        return "memory_anchor", {
++            "matched_count": len(matched),
++            "memories": ["[%s] %s | %s" % (e.get("priority", "C"), e.get("asset_id", ""), e.get("summary", ""))[:400] for e in matched[:10]],
++        }
++    if "heartbeat" in low or "心跳" in t:
++        payload = {
++            "key": "REPORT.NODE.HEARTBEAT.%s" % NODE_ID,
++            "value": {"event": "node_heartbeat", "node_id": NODE_ID, "did": DID,
++                      "anchor": ANCHOR, "status": "alive",
++                      "ts": time.strftime("%Y-%m-%dT%H:%M:%S+0800")},
++        }
++        return "node_heartbeat", _gateway_post("/api/report/truth", payload)
++    return "skills", {
++        "skills": ["status/状态", "recall <key>/召回", "report <key>=<value>/上报",
++                   "anchor <keyword>/锚定", "heartbeat/心跳"],
++        "note": "未匹配技能，可用以上指令与元极恒一内核交互"
++    }
++
++
++def make_task(tid, text):
++    skill, result = handle_text(text)
++    return {
++        "id": tid,
++        "contextId": "omega-%s" % DID,
++        "status": {"state": "completed"},
++        "artifacts": [{
++            "artifactId": "%s-artifact" % tid,
++            "name": skill,
++            "parts": [{"kind": "data", "data": result}],
++        }],
++        "metadata": {"did": DID, "anchor": ANCHOR, "skill": skill},
++    }
++
++
++class Handler(BaseHTTPRequestHandler):
++    def _send(self, code, obj):
++        body = json.dumps(obj, ensure_ascii=False).encode()
++        self.send_response(code)
++        self.send_header("Content-Type", "application/json; charset=utf-8")
++        self.send_header("Content-Length", str(len(body)))
++        self.end_headers()
++        self.wfile.write(body)
++
++    def do_GET(self):
++        path = urllib.parse.urlparse(self.path).path
++        if path in ("/.well-known/agent-card.json", "/.well-known/agent.json"):
++            self._send(200, _load_json(CARD_PATH, {}))
++            return
++        if path == "/health":
++            self._send(200, {"status": "healthy", "service": "omega_a2a", "did": DID, "anchor": ANCHOR})
++            return
++        self._send(404, {"error": "not_found", "path": path})
++
++    def do_POST(self):
++        length = int(self.headers.get("Content-Length", 0))
++        try:
++            req = json.loads(self.rfile.read(length).decode() or "{}")
++        except Exception:
++            self._send(400, {"jsonrpc": "2.0", "error": {"code": -32700, "message": "parse error"}})
++            return
++        rid = req.get("id")
++        method = req.get("method", "")
++        params = req.get("params") or {}
++        if method == "message/send":
++            text = _text_from_message(params.get("message") or {})
++            tid = "task-%s" % time.strftime("%Y%m%d%H%M%S")
++            task = make_task(tid, text)
++            TASKS[tid] = task
++            self._send(200, {"jsonrpc": "2.0", "id": rid, "result": task})
++            return
++        if method == "tasks/get":
++            tid = params.get("id")
++            task = TASKS.get(tid)
++            if task:
++                self._send(200, {"jsonrpc": "2.0", "id": rid, "result": task})
++            else:
++                self._send(200, {"jsonrpc": "2.0", "id": rid,
++                                 "error": {"code": -32001, "message": "task not found: %s" % tid}})
++            return
++        self._send(200, {"jsonrpc": "2.0", "id": rid,
++                         "error": {"code": -32601, "message": "method not found: %s" % method}})
++
++    def log_message(self, fmt, *args):
++        sys.stderr.write("[A2A] %s\n" % (fmt % args))
++
++
++def main():
++    ap = argparse.ArgumentParser(description="元极恒一自治内核 A2A Server")
++    ap.add_argument("--port", type=int, default=8099)
++    args = ap.parse_args()
++    server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
++    print("[A2A] 元极恒一互操作节点已启动: http://127.0.0.1:%d  DID=%s %s" % (args.port, DID, ANCHOR))
++    server.serve_forever()
++
++
++if __name__ == "__main__":
++    main()
+\ No newline at end of file
+diff --git a/reports/ASSET-MIGRATION-MODELS-20261019.json b/reports/ASSET-MIGRATION-MODELS-20261019.json
+new file mode 100644
+index 0000000..89ff34d
+--- /dev/null
++++ b/reports/ASSET-MIGRATION-MODELS-20261019.json
+@@ -0,0 +1,56 @@
++{
++  "doc_id": "ASSET-MIGRATION-MODELS-20261019",
++  "ts": "2026-10-19T16:09:13.468848+00:00",
++  "src": "/workspace/models/embedding",
++  "dst": "/workspace/atomgit-mirror/zongyuan-root-sync/01_ASSETS/models/embedding",
++  "status": "ok",
++  "pre": {
++    "bytes": 1087498010,
++    "files": 47
++  },
++  "post": {
++    "bytes": 1087498010,
++    "files": 47
++  },
++  "bytes_files_unchanged": true,
++  "pre_layout": {
++    "snapshot_dirs": 3,
++    "blob_files": 11,
++    "has_multilingual": true,
++    "layout_ok": true
++  },
++  "post_layout": {
++    "snapshot_dirs": 3,
++    "blob_files": 11,
++    "has_multilingual": true,
++    "layout_ok": true
++  },
++  "layout_ok": true,
++  "reference_updated": true,
++  "reference_backup": "audit/backups/DEDUP-2026-10-19/memory_semantic_recall.py",
++  "runtime_smoke": "NOT_RUN（model2vec 缺失，见 EMBED-DEP-ABSENCE-20261019）",
++  "runtime_usability_verified": false,
++  "rollback_action": "目录移回 /workspace/models/embedding + 还原 HF_HOME 行（备份 audit/backups/DEDUP-2026-10-19/memory_semantic_recall.py）",
++  "gitignore": {
++    "exists": true,
++    "target_ignored": false,
++    "risk": "未忽略 → 1.01GiB 缓存会进 git 索引；建议加忽略规则（未擅改 .gitignore）"
++  },
++  "errata_gitignore_resolved_20261019": {
++    "action": "在根 .gitignore 第32行新增目录级规则 '01_ASSETS/models/'",
++    "verified": "git check-ignore -v 命中 .gitignore:32；git status --porcelain 01_ASSETS/models 输出为空（已脱离索引候选）",
++    "reason": "HF blobs 为无扩展名 sha256 文件，扩展名规则（*.bin 等）无法拦截，必须目录级忽略",
++    "amends": "上一字段 gitignore.target_ignored=false 的历史结论已由本条覆盖，原字段保留不改写"
++  },
++  "errata_measurement_reconciliation_20261019": {
++    "reported_bytes": 1087498010,
++    "reported_files": 47,
++    "measured_du_bytes": 540145521,
++    "measured_regular_files": 35,
++    "measured_symlinks": 12,
++    "arithmetic": "540017822 (实体文件逻辑字节) + 547480188 (12个符号链接解析目标字节) = 1087498010，精确吻合；35 实体 + 12 符号链接 = 47 条目",
++    "explanation": "HF hub snapshots/ 为指向 blobs/ 的相对符号链接；原迁移脚本按 os.path.getsize 跟随符号链接统计，导致 3 个模型的大 blobs 被二次计入。真实磁盘占用 540MB(516MiB)，非 1.01GiB。",
++    "data_loss": false,
++    "conclusion": "迁移完整，无文件丢失；'1.01GiB/47' 为口径差异（跟随符号链接的逻辑字节），非资产缺失"
++  }
++}
+\ No newline at end of file
+-- 
+2.34.1
+
