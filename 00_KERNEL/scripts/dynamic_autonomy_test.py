@@ -9,7 +9,7 @@ DID-BR-000002 | Ω₀⊂⊙∞⊂Ω | 2026-10-01
 """
 import json, os, sys, time, urllib.request, subprocess
 
-PRJ = "/home/user/Doubao/chats/38418284746129666"
+PRJ = "/opt/ZONGYUAN-ROOT"
 KERNEL_SCRIPTS = os.path.join(PRJ, "00_KERNEL", "scripts")
 sys.path.insert(0, KERNEL_SCRIPTS)
 from llm_kernel_bridge import chat, decide, refine, generate, status  # noqa

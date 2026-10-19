@@ -10,7 +10,7 @@ ZONGYUAN-ROOT 自治内核 · DID-BR-000002 · Ω₀⊂⊙∞⊂Ω
 """
 import os, sys, json, hashlib, time, subprocess, argparse
 
-PRJ = "/home/user/Doubao/chats/38418284746129666"
+PRJ = "/opt/ZONGYUAN-ROOT"
 DID = "DID-BR-000002"
 TRACE = "Ω₀⊂⊙∞⊂Ω"
 VERSION = "AUTO-PERSIST-V1.0"

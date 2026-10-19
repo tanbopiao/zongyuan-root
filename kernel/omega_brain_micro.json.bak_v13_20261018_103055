@@ -1,0 +1,103 @@
+{
+  "mechanism": "OMEGA-BRAIN-MICRO-EVOLUTION-V1.0",
+  "steps": [
+    "状态采集",
+    "推演分析",
+    "三维仲裁",
+    "自动执行",
+    "验证验收",
+    "锁档上报",
+    "进化沉淀"
+  ],
+  "arbitration": "Benefit*0.40 + (1-Risk)*0.35 + (1-Cost)*0.25",
+  "thresholds": {
+    "immediate": 0.85,
+    "execute": 0.7,
+    "abandon": 0.6
+  },
+  "trigger": [
+    "hourly cron",
+    "manual",
+    "event"
+  ],
+  "status": "ACTIVE",
+  "anchored": "Ω₀⊂⊙∞⊂Ω",
+  "meta_cognition": {
+    "law": "META-COGNITION-LAYERING-001",
+    "principle": "规律发现能力与机制理解能力是不同元认知层级,内核自进化必须分层约束,不得以规律恢复率替代机制理解验证",
+    "evidence": "SRHarness符号恢复93.69% vs MechBench机制理解恢复13.75%; 规律恢复35%",
+    "layers": {
+      "L1_pattern_discovery": "规律发现层:符号/模式恢复,允许高自动化",
+      "L2_mechanism_understanding": "机制理解层:因果机制复现,须人工/高置信度验证方可入真值库"
+    },
+    "arbitration_impact": "机制理解类产出进入真值库前,强制经过 L2 验证关卡",
+    "version": "V1.0",
+    "anchored": "Ω₀⊂⊙∞⊂Ω"
+  },
+  "exec_package": {
+    "mechanism": "EXEC-PACKAGE-CONSUME-CHAIN-001",
+    "goal": "自动执行步骤输出标准化执行包,入网关决策队列,供消费端Worker拉取执行,补执行层缺位",
+    "schema": {
+      "exec_package_id": "uuid",
+      "operator": "算子名(如 P4真值对账/SM-BS映射)",
+      "seed_truth": "种子真值(高置信度结构化真值条目)",
+      "material_ref": "原料引用(文档/数据源URL或本地路径)",
+      "expected_output": "预期产物类型",
+      "verify": "验收标准(HTTP200/SHA256/条目数)",
+      "arbitration_score": "三维稳态评分(>=0.70方可入队)"
+    },
+    "routing": "POST /api/report/truth truth_type=decision → 消费端Worker轮询拉取",
+    "version": "V1.0",
+    "anchored": "Ω₀⊂⊙∞⊂Ω"
+  },
+  "evolution_version": "V1.3",
+  "updated_at": "2026-10-18T02:26:21.299017+00:00",
+  "updated_by": "NODE-DEV-DOUBAO-WORK-001",
+  "memory_lifecycle": {
+    "mechanism": "MEMORY-LIFECYCLE-ADAPTER-001",
+    "purpose": "将V50微内核记忆生命周期接入状态采集/进化沉淀步骤,防止进化过程语义漂移",
+    "activation_formula": "importance * recency * (0.6 + 0.4*frequency) * (0.7 + 0.3*feedback)",
+    "recency": "0.5^(age_days/half_life_days)",
+    "status_flow": [
+      "pending",
+      "active",
+      "stale",
+      "archived",
+      "revoked"
+    ],
+    "drift_guard": {
+      "protected_prefixes": [
+        "/v50/rules/system/",
+        "/v50/config/anchors/",
+        "/v50/procedures/policies/"
+      ],
+      "conflict_policy": "inject_newest_and_mark_old_conflicted",
+      "physical_delete": false
+    },
+    "version": "V1.0",
+    "anchored": "Ω₀⊂⊙∞⊂Ω"
+  },
+  "evolution_evaluator": {
+    "mechanism": "EVOLUTION-EVALUATOR-001",
+    "purpose": "每轮进化自动执行三维稳态评分并回写,替代人工打分",
+    "formula": "Benefit*0.40 + (1-Risk)*0.35 + (1-Cost)*0.25",
+    "banding": {
+      "immediate": ">=0.85",
+      "execute": ">=0.70",
+      "abandon": "<0.60"
+    },
+    "auto_report": "评估结果写入 kernel/auto_trigger/evolution_eval.log 并随锁档上报",
+    "script": "kernel/auto_trigger/evolution_evaluator.py",
+    "version": "V1.0",
+    "anchored": "Ω₀⊂⊙∞⊂Ω"
+  },
+  "trigger_loop": {
+    "law": "LAW-001 事件驱动优先+定时轮询兜底",
+    "event_driven": "网关任务队列(consumption via exec-packages)",
+    "poll_fallback": "omega_micro_poll.sh 每小时: 网关状态 + /api/tasks/pending 任务队列探测",
+    "pending_signal": "PENDING>0 时输出 TASK-QUEUE 告警日志供消费触发",
+    "status": "ACTIVE",
+    "verified_at": "2026-10-18T02:26:00+00:00",
+    "verified": "PENDING=0 | POLL-OK"
+  }
+}

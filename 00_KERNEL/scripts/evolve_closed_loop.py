@@ -8,7 +8,7 @@ V2.0: 短板自主驱动 --auto 模式(检测短板→自动生成命题/候选�
 """
 import os, sys, json, hashlib, time, subprocess, argparse
 
-PRJ = "/home/user/Doubao/chats/38418284746129666"
+PRJ = "/opt/ZONGYUAN-ROOT"
 DID = "DID-BR-000002"
 TRACE = "Ω₀⊂⊙∞⊂Ω"
 VERSION = "EVOLVE-CLOSED-LOOP-V2.2"

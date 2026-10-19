@@ -16,7 +16,7 @@ DID-BR-000002 · Ω₀⊂⊙∞⊂Ω
 """
 import os, sys, json, time, subprocess, hashlib, argparse
 
-PRJ = "/home/user/Doubao/chats/38418284746129666"
+PRJ = "/opt/ZONGYUAN-ROOT"
 DID = "DID-BR-000002"
 TRACE = "Ω₀⊂⊙∞⊂Ω"
 VERSION = "AUTO-INSPECT-PIPELINE-V1.0"
