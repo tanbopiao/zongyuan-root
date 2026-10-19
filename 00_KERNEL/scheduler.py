@@ -35,6 +35,7 @@ import sys
 import time
 import signal
 import json
+import re
 import subprocess
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -177,6 +178,15 @@ TASKS = [
         "description": "R007：每6小时比对本地根内核与云端内核真值一致性，检测漂移并生成修复建议",
         "enabled": True,
     },
+    # ===== P1 补偿机制（COMPENSAT ORCHESTRATOR）=====
+    {
+        "id": "p1_compensation_cycle",
+        "name": "补偿机制周期",
+        "interval_hours": 2,
+        "command": "python3 /workspace/atomgit-mirror/zongyuan-root-sync/00_KERNEL/compensate/COMPENSAT_ORCHESTRATOR.py",
+        "description": "P1：每2小时执行一次九枢补偿周期（衡准→优化→归档→镇守→定果→立序）",
+        "enabled": True,
+    },
     # ===== AtomGit 双向握手同步 =====
     {
         "id": "atomgit_bidirectional_sync",
@@ -263,48 +273,115 @@ class TaskScheduler:
             if "interval_hours" in task:
                 task["_next_run"] = datetime.now()
 
+    # 失败重试配置：最多 3 次退避重试（5s/15s/45s），
+    # 瞬时故障不再静默等待下个周期（原失败一次即放弃）
+    RETRY_MAX = 3
+    RETRY_BACKOFF = [5, 15, 45]
+
+    @staticmethod
+    def _is_permanent_failure(command: str) -> bool:
+        """命令引用的脚本不存在 = 永久故障，重试无意义
+        （避免调度循环被成批缺失脚本的重试退避长期阻塞）"""
+        for m in re.finditer(r'python3\s+(\S+\.py)', command or ''):
+            path = m.group(1)
+            if os.path.isabs(path) and not os.path.exists(path):
+                return True
+        return False
+
+    @staticmethod
+    def _record_retry_event(task_id: str, attempt: int, return_code, reason: str = ""):
+        """重试事件落盘（JSONL），供评估采证真实自愈记录"""
+        try:
+            event = {
+                "event": "task_retry",
+                "task_id": task_id,
+                "attempt": attempt,
+                "return_code": return_code,
+                "reason": reason,
+                "ts": datetime.now().isoformat(),
+            }
+            with open(SCHEDULER_DIR / "retry_events.jsonl", "a", encoding="utf-8") as f:
+                f.write(json.dumps(event, ensure_ascii=False) + "\n")
+        except OSError:
+            pass
+
     def execute_task(self, task: Dict[str, Any]):
-        """执行单个任务。"""
+        """执行单个任务（失败按退避重试，retry_count 落盘供评估采证）"""
         task_id = task["id"]
         log(f"开始执行任务: {task['name']} ({task_id})")
 
-        try:
-            result = subprocess.run(
-                task["command"],
-                shell=True,
-                capture_output=True,
-                text=True,
-                timeout=600,  # 10 分钟超时
-            )
+        retry_count = 0
+        while True:
+            try:
+                result = subprocess.run(
+                    task["command"],
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=600,  # 10 分钟超时
+                )
 
-            success = result.returncode == 0
-            self.task_status[task_id] = {
-                "last_run": datetime.now().isoformat(),
-                "success": success,
-                "return_code": result.returncode,
-                "output_length": len(result.stdout),
-            }
+                success = result.returncode == 0
+                if success:
+                    self.task_status[task_id] = {
+                        "last_run": datetime.now().isoformat(),
+                        "success": True,
+                        "return_code": 0,
+                        "output_length": len(result.stdout),
+                        "retry_count": retry_count,
+                    }
+                    if retry_count:
+                        log(f"任务完成(第{retry_count}次重试成功): {task['name']}")
+                    else:
+                        log(f"任务完成: {task['name']}")
+                    return
 
-            if success:
-                log(f"任务完成: {task['name']}")
-            else:
-                log(f"任务失败: {task['name']}, 返回码: {result.returncode}")
-                log(f"错误输出: {result.stderr[:500]}")
+                # 失败 → 判断是否还有重试额度
+                if retry_count < self.RETRY_MAX and not self._is_permanent_failure(task["command"]):
+                    delay = self.RETRY_BACKOFF[retry_count]
+                    retry_count += 1
+                    self._record_retry_event(task_id, retry_count, result.returncode, "transient_failure")
+                    log(f"任务失败: {task['name']}, 返回码: {result.returncode}; "
+                        f"{delay}s 后第 {retry_count}/{self.RETRY_MAX} 次重试")
+                    time.sleep(delay)
+                    continue
 
-        except subprocess.TimeoutExpired:
-            log(f"任务超时: {task['name']}")
-            self.task_status[task_id] = {
-                "last_run": datetime.now().isoformat(),
-                "success": False,
-                "error": "timeout",
-            }
-        except Exception as e:
-            log(f"任务异常: {task['name']}, {e}")
-            self.task_status[task_id] = {
-                "last_run": datetime.now().isoformat(),
-                "success": False,
-                "error": str(e),
-            }
+                permanent = self._is_permanent_failure(task["command"])
+                self.task_status[task_id] = {
+                    "last_run": datetime.now().isoformat(),
+                    "success": False,
+                    "return_code": result.returncode,
+                    "output_length": len(result.stdout),
+                    "retry_count": retry_count,
+                    "retries_exhausted": retry_count >= self.RETRY_MAX,
+                    "permanent_failure": permanent,
+                }
+                if permanent:
+                    log(f"任务失败(目标脚本缺失,永久故障不重试): {task['name']}")
+                else:
+                    log(f"任务失败(已重试{retry_count}次放弃): {task['name']}, "
+                        f"返回码: {result.returncode}")
+                    log(f"错误输出: {result.stderr[:500]}")
+                return
+
+            except subprocess.TimeoutExpired:
+                log(f"任务超时: {task['name']}")
+                self.task_status[task_id] = {
+                    "last_run": datetime.now().isoformat(),
+                    "success": False,
+                    "error": "timeout",
+                    "retry_count": retry_count,
+                }
+                return
+            except Exception as e:
+                log(f"任务异常: {task['name']}, {e}")
+                self.task_status[task_id] = {
+                    "last_run": datetime.now().isoformat(),
+                    "success": False,
+                    "error": str(e),
+                    "retry_count": retry_count,
+                }
+                return
 
     def run(self):
         """主调度循环。"""

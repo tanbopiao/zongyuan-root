@@ -9,6 +9,7 @@
 3. `00_KERNEL/startup_memory/GLOBAL_MEMORY_SNAPSHOT.json` —— 全局状态快照
 4. `00_KERNEL/startup_memory/ACTIVE_LOCK.json` —— 当前活跃锁档
 5. `00_KERNEL/omega01_boot/OMEGA-KERNEL-BOOT.json` —— 8 步启动清单（机器可读）
+6. 记忆子系统种子（可选）—— `SEED-HINDSIGHT-MEM-V1.0`（sha256 `071709bf…dc83`，immutable）；按 Retain→Recall→Reflect 约束加载记忆，world_fact 类变更须人工审批
 
 ## 二、激活报告格式（汇报必须包含）
 

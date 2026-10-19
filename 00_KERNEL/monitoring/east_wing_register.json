@@ -1,0 +1,33 @@
+{
+  "register_id": "EAST-WING-OBSERVATION-REGISTER",
+  "name": "东翼观测寄存器",
+  "version": "V1.0",
+  "did": "DID-BR-000002",
+  "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+  "aligned_standard": "00_KERNEL/monitoring/HIGH-ORDER-MONITORING-STANDARD-V1.0.md",
+  "provenance": {
+    "term_source": "reports/AUTONOMY-EVAL-20261018-MARKDOWN.md 建议项『东翼寄存器配置』",
+    "note": "术语仅见于自治层级评估报告，体系内无既有定义；按观测域首翼（主观测翼）落地为阈值化观测寄存器",
+    "status": "reconstructed"
+  },
+  "collection": {
+    "interval_seconds": 60,
+    "snapshot_path": "audit_logs/east_wing_register.state.json",
+    "core_metrics": ["memory_percent", "disk_percent", "load_avg_1m", "process_status", "service_status"]
+  },
+  "thresholds": {
+    "memory_warn_percent": 85,
+    "memory_error_percent": 90,
+    "disk_warn_percent": 85,
+    "disk_error_percent": 90,
+    "load_warn_per_cpu": 1.5,
+    "load_error_per_cpu": 3.0
+  },
+  "watched_processes": ["nginx", "python", "aios_backend", "omega_brain", "memory_gateway"],
+  "watched_services": {"anchor_api": "http://127.0.0.1:8006/api/v1/sync/handshake", "ntfy_port": 7100},
+  "alert": {
+    "enabled": true,
+    "min_anomalies_for_alert": 3,
+    "sink": "audit_logs/east_wing_alerts.jsonl"
+  }
+}

@@ -2,7 +2,7 @@
   "registry_id": "ZONGYUAN-META-RULE-REGISTRY-V1",
   "version": "1.0.0",
   "created_at": "2026-09-14T12:10:00+08:00",
-  "updated_at": "2026-09-14T15:14:59.425285",
+  "updated_at": "2026-10-19T15:27:38.352084+00:00",
   "description": "元极恒一自治体系全域元规则注册中心。所有试错经验、新增能力、架构原则统一归档，全体智能体共享学习。",
   "governance": {
     "principle": "一次试错，全体学习；一次新增，全域推广",
@@ -496,6 +496,43 @@
         "auto_wp_forge.py",
         "所有上报网关脚本"
       ]
+    },
+    {
+      "rule_id": "TRUTH-HASH-CONVENTION-001",
+      "law_no": "META-LAW-012",
+      "law_doc": "meta_laws/META-LAW-012-真值哈希口径统一元法则.md",
+      "name": "真值哈希口径统一元规则",
+      "category": "governance",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-10-19",
+      "summary": "协议件 self_sha256 须按 RESIGN-CONVENTION-V1.0 计算；禁止自指；哈希字段变更必须走备份链；不可复现哈希不得作为确权依据",
+      "details": {
+        "convention_id": "RESIGN-CONVENTION-V1.0",
+        "formula": "self_sha256 = sha256(utf8(JSON{obj去掉self_sha256,键排序,紧凑}))",
+        "iron_laws": [
+          "新增与修订一律按新口径计算",
+          "禁止自指：计算时必须剔除 self_sha256 自身",
+          "哈希字段变更必须变更前逐件备份，无备份即拒绝",
+          "不可复现的哈希审计权重为 0，不得作确权依据",
+          "改哈希不得改语义，须经字节级逆向校验证明",
+          "校验必须独立复核，生成脚本自检不构成通过依据",
+          "跨系统互验须替换为完整 RFC8785(JCS)"
+        ],
+        "verification": "V1口径复算 / V2语义不变 / V3字节逆向 / V4独立复核，四重全过方 PASS",
+        "implementation": "scripts/resign_apply.py + reports/RESIGN-INDEPENDENT-VERIFY-20261019.json"
+      },
+      "lessons_learned": [
+        "自指哈希——把哈希值本身纳入取值对象，写入即失效，导致永不可复现",
+        "66 件协议 self_sha256 修复前可复现为 0；修复后 66/66（独立复核 PASS）",
+        "生成口径不统一（1 件大写 HEX、65 件小写）会进一步掩盖问题",
+        "回写必须外科式替换，禁止整文件重新序列化，否则无法证明只改了哈希字段"
+      ],
+      "applicable_to": [
+        "所有协议件生成",
+        "所有协议件修订",
+        "所有哈希校验与审计场景"
+      ]
     }
   ],
   "learning_protocol": {
@@ -505,8 +542,8 @@
     "review_cycle": "每周审核元规则有效性，过时规则标记为deprecated"
   },
   "stats": {
-    "total_rules": 15,
-    "active": 15,
+    "total_rules": 17,
+    "active": 17,
     "deprecated": 0,
     "categories": [
       "infrastructure",

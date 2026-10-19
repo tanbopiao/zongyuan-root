@@ -1,0 +1,53 @@
+{
+  "lock_id": "P2-EVO-OBS-LOCK-V1.0",
+  "did": "DID-BR-000002",
+  "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-10-18T08:26:00+08:00",
+  "task": "P2 剩余两项：配备演化引擎 + 观测寄存器（东翼）",
+  "priority": "P2",
+  "status": "DEPLOYED_AND_VERIFIED",
+  "deliverables": [
+    {
+      "item": "演化引擎配备",
+      "component": "00_KERNEL/autonomous_kernel_core.py EvolutionIterator",
+      "details": "3 小时脉冲循环生效（_cycle_due 判定，error 状态 3h 退避自愈）、锁档归档云端同步 _sync_to_cloud 真实实现（KERNEL.EVOLUTION.PULSE.V1）",
+      "evidence": "23/23 单测 PASS（A1-A10）；云端 pulse seq=16357/16361 回读 1/1；锁档 LOCK-*-EVO.json 落盘且 lock_hash 64 位可复算"
+    },
+    {
+      "item": "观测寄存器（东翼）",
+      "component": "00_KERNEL/monitoring/east_wing_register.json + ObservationAudit",
+      "details": "东翼寄存器配置（阈值/采集间隔/告警槽，provenance=reconstructed）、核心指标采集快照落盘 audit_logs/east_wing_register.state.json、阈值化异常检测（memory/disk 双级阈值 + load 每核阈值 + 采集失效可见化）、真实告警落盘 east_wing_alerts.jsonl",
+      "evidence": "23/23 单测 PASS（B1-B10）；重启后监控链实测：AUDIT-1792311918 单行 JSONL、severity=ERROR、6 异常分类正确、快照 08:25:18 刷新"
+    }
+  ],
+  "defects_fixed": [
+    "subprocess 未导入：进程/服务采集全部静默失效（except Exception 吞掉 NameError）",
+    "3 小时循环为死代码：cycle_interval_hours 从未参与判定，实际每小时跑一次",
+    "error 状态卡死循环：旧 cycle_loop 仅认 idle，异常后永不自愈",
+    "_cycle_due 基准优先级错误：started_at 参与 max 导致 3h 判定恒 False",
+    "_sync_to_cloud 为 pass：锁档归档云端同步从未实现",
+    "_log_audit 被调用但未定义：监控异常时线程二次 NameError 崩溃",
+    "_check_processes 命令缺陷：`grep -q` 无 pattern 恒 exit 2，nginx/python 采集恒 False",
+    "_record_audit 用 indent 多行写入：get_status 尾行解析自首版即恒失败 → 改 JSONL + 尾部回扫兼容",
+    "EvolutionIterator.stop() 陈旧内存回滚：SIGTERM 时旧内存 state(5/stopped) 覆盖盘上(7/idle) → stop 先 load_state 刷新",
+    "审计 severity 按异常数量而非级别推导 → 改为含 ERROR 即 ERROR",
+    "load 无异常检测 → 按寄存器每核阈值补全"
+  ],
+  "state_recovery": {
+    "issue": "kill 旧进程触发 stop() 陈旧内存回滚，evolution_state.json 由 7/idle 倒退为 5/stopped",
+    "method": "以 history 证据复算（8 个 HIST completed + 8 个 LOCK）修复为 cycles=8/idle/last_success=2026-10-18T07:27:24",
+    "evidence": "evolution/evolution_state.json recovery_note 字段",
+    "next_pulse_due": "2026-10-18T10:27:24（last_success + 3h）"
+  },
+  "verification": {
+    "unit_test": "23/23 PASS (/tmp/test_p2_evo_obs.py)",
+    "py_compile": "PASS",
+    "kernel_pid_after_restart": 4296,
+    "monitor_chain": "60s 轮巡验证 PASS（单行 JSONL + 快照刷新 + get_status 回扫可读）",
+    "cycle_due_current": "False（未到 10:27 脉冲点，未误触发）",
+    "audit_log_legacy": "历史 indent 多行记录保留不动（append-only），新记录单行 JSONL，回扫解析兼容"
+  },
+  "provenance": {
+    "east_wing_term": "评估报告术语，体系内无既有定义，按观测域首翼落地（register JSON 内含 provenance 块）"
+  }
+}
