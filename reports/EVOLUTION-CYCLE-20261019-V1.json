@@ -1,0 +1,71 @@
+{
+  "lock_id": "EVOLUTION-CYCLE-20261019-V1",
+  "task_id": "LOCAL-PERSISTENT-KERNEL-EVOLUTION",
+  "did": "DID-BR-000002",
+  "axiom": "Ω₀⊂⊙∞⊂Ω",
+  "ts": "2026-10-19T10:36:27.191955",
+  "status": "closed",
+  "budget": {
+    "llm_tokens": 0,
+    "external_search_api": 0,
+    "hub_reports": 1
+  },
+  "steps": {
+    "EVO-P0-1": {
+      "result": "修正: 500条误注入移出→seed_backfill_raw.jsonl(sha256 7a1353ab...)",
+      "note": "方向勘误: seed_truths.jsonl 是引擎输出非输入"
+    },
+    "EVO-P0-2": {
+      "result": "根因修正: 提炼输入=搜索API(raw_info), 会话注入走 archive_from_session 契约",
+      "dependency": "persistence_manager 最小实现补齐(第三块缺失依赖)"
+    },
+    "EVO-P0-3": {
+      "result": "幂等全绿",
+      "second_run": {
+        "new_writes": 0,
+        "dup_skips": 4,
+        "rejected": 1
+      },
+      "seed_file_unchanged": true,
+      "index_delta": 0
+    },
+    "EVO-P1-1": {
+      "result": "合规单次上报 200",
+      "seq": 19551,
+      "event_id": "truth-1792406163249-03e227b0",
+      "truth_count": 18628,
+      "format": "key/value/node_id + X-DID (未用content字段, 遵铁律)"
+    }
+  },
+  "distill": {
+    "clustered": 4270,
+    "candidates": 5,
+    "archived": 4,
+    "rejected_by_kernel": 1,
+    "reject_reason": "含禁用词: 唯一（引擎质检生效）"
+  },
+  "artifacts": {
+    "persistent_layer": {
+      "path": "/workspace/evolution/persistent_layer/truths.jsonl",
+      "count": 4,
+      "sha256": "99ad0e07ca0e903c896f892567edf5f1608e1627b0bbc9b549c88336bfe797fb"
+    },
+    "engine_output": {
+      "path": "/workspace/evolution/seed_truths.jsonl",
+      "count": 4,
+      "sha256": "9250f939ba5d420408e61f1e7935d3e09945733d02a1a672ee26509b4ce432df"
+    },
+    "raw_staging": {
+      "path": "/workspace/evolution/seed_backfill_raw.jsonl",
+      "count": 500,
+      "sha256": "7a1353ab0390c92ea53cf63b268bad9d8d00b5cc6e497836b1b41f8bb11b357d"
+    },
+    "state": {
+      "path": "/workspace/evolution/state.json"
+    }
+  },
+  "new_modules": [
+    "persistence_manager.py (最小实现, 第三块缺失依赖)"
+  ],
+  "provenance": "measured"
+}

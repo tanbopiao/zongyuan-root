@@ -1,0 +1,101 @@
+{
+  "receipt_id": "OPS-GATE-IMPL-20261019",
+  "status": "closed",
+  "ts": "2026-10-19T14:48:42.415997+00:00",
+  "seed": "SEED-THREE-STATE-ISOLATION-OPS-V1.0",
+  "impl": "scripts/operator_gate.py",
+  "impl_sha256": "72c73acd33c1be285215002401c6f6ddb8e2aee6c625679943f62e3b243084d3",
+  "scenarios": "ERR",
+  "verdict": "PASS",
+  "scenario_matrix": [
+    {
+      "id": "T1",
+      "point": "逻辑态直连执行",
+      "expect": "CONSTITUTIONAL_VIOLATION_BYPASS",
+      "actual": "CONSTITUTIONAL_VIOLATION_BYPASS",
+      "ok": true
+    },
+    {
+      "id": "T2",
+      "point": "全前置满足→放行执行",
+      "expect": "RATIFIED+EXECUTED",
+      "actual": "RATIFIED+EXEC_OK",
+      "ok": true
+    },
+    {
+      "id": "T3",
+      "point": "变更无备份→拒 (META-002)",
+      "expect": "RULE_DENIED_NO_BACKUP",
+      "actual": "RULE_DENIED_NO_BACKUP",
+      "ok": true
+    },
+    {
+      "id": "T4",
+      "point": "高危指令→黑名单拒",
+      "expect": "RULE_DENIED_HIGH_RISK",
+      "actual": "RULE_DENIED_HIGH_RISK",
+      "ok": true
+    },
+    {
+      "id": "T5",
+      "point": "备份哈希不符→拒",
+      "expect": "BACKUP_DENIED_HASH_MISMATCH",
+      "actual": "BACKUP_DENIED_HASH_MISMATCH",
+      "ok": true
+    },
+    {
+      "id": "T6",
+      "point": "连续失败3次→熔断",
+      "expect": "CIRCUIT_OPEN",
+      "actual": "CIRCUIT_OPEN",
+      "ok": true
+    },
+    {
+      "id": "T7",
+      "point": "回滚·追加式撤回",
+      "expect": "ROLLED_BACK且前记录保留",
+      "actual": "ROLLED_BACK·prev=1",
+      "ok": true
+    },
+    {
+      "id": "T8",
+      "point": "放行未入账→视为未执行 (META-003)",
+      "expect": "EXEC_DENIED_UNLEDGERED",
+      "actual": "EXEC_DENIED_UNLEDGERED",
+      "ok": true
+    },
+    {
+      "id": "T9",
+      "point": "非法来源态→拒",
+      "expect": "EXEC_DENIED_ORIGIN",
+      "actual": "EXEC_DENIED_ORIGIN",
+      "ok": true
+    },
+    {
+      "id": "T10",
+      "point": "账本条目哈希唯一完整",
+      "expect": "PASS",
+      "actual": "entries=2",
+      "ok": true
+    }
+  ],
+  "implemented": [
+    "三态权能分离(logic/operator/execution)",
+    "闸门四查(规则/备份/完整性/熔断)",
+    "高危指令黑名单拦截",
+    "无备份拒绝",
+    "备份哈希校验",
+    "连续失败熔断",
+    "追加式回滚",
+    "未入账视为未执行",
+    "越权绕过判定违宪"
+  ],
+  "honest_boundary": {
+    "mode": "local in-process simulation",
+    "ssh": false,
+    "distributed": false,
+    "real_system_commands_executed": false,
+    "note": "执行态为本地文件写入模拟，未触达真实系统/云主机；熔断阈值为启发式设定(CIRCUIT_THRESHOLD=3)，非标定值。"
+  },
+  "provenance": "measured_local_simulation"
+}

@@ -1,0 +1,109 @@
+{
+  "sim_id": "FED-MEM-L2-20261019",
+  "seed": "SEED-FEDERATED-MEM-KERNEL-V2.0",
+  "ts": "2026-10-19T13:49:26.425005+00:00",
+  "mode": "local_two_node_simulation",
+  "network": "none (in-process)",
+  "nodes": [
+    "NODE-A",
+    "NODE-B"
+  ],
+  "checks": [
+    {
+      "check": "S1 高价值跨节点收敛",
+      "pass": true,
+      "detail": "state=confirmed value=1.0 summary=SUM-051C13F7BD"
+    },
+    {
+      "check": "S2 普通记忆仅本地（分级共识）",
+      "pass": true,
+      "detail": "state=confirmed_local value=0.4 同步=否"
+    },
+    {
+      "check": "S3 world_fact 豁免时序衰减",
+      "pass": true,
+      "detail": "base=1.0 final=1.0 exempt=True（age=30d 未衰减）"
+    },
+    {
+      "check": "S4 软遗忘而非删除",
+      "pass": true,
+      "detail": "state=soft_forgotten value=0.0142（<0.25）本地记录仍存在=True"
+    },
+    {
+      "check": "S5 冲突仲裁·低价值被压制",
+      "pass": true,
+      "detail": "winner_value=1.0 loser_value=0.6 loser_state=conflict_superseded"
+    },
+    {
+      "check": "S5b 更优者取代·追加式撤回",
+      "pass": true,
+      "detail": "new_confirmed=confirmed old_state=conflict_superseded 撤回记录=1"
+    },
+    {
+      "check": "S5c 撤回后跨节点读取被拒",
+      "pass": true,
+      "detail": "allowed=False (非 confirmed 态：跨节点边界拒绝)"
+    },
+    {
+      "check": "S6 双层隔离·跨节点边界",
+      "pass": true,
+      "detail": "confirmed读=True 未confirmed读=False"
+    },
+    {
+      "check": "S7 数据边界·摘要不含原文",
+      "pass": true,
+      "detail": "摘要数=4 撤回数=1 均无 facts 字段=True"
+    },
+    {
+      "check": "S8 校验拦截·篡改哈希被拒",
+      "pass": true,
+      "detail": "state=rejected hash_ok=False"
+    }
+  ],
+  "passed": "10/10",
+  "verdict": "PASS",
+  "value_model": {
+    "VALUE_BASE": {
+      "world_fact": 1.0,
+      "mental_model": 0.8,
+      "observation": 0.6,
+      "experience": 0.4
+    },
+    "HIGH_VALUE_TH": 0.6,
+    "SOFT_FORGET_TH": 0.25,
+    "DECAY_RATE": 0.08
+  },
+  "sync_summaries": 5,
+  "conflicts": [
+    {
+      "key": "K-OBS-CONFLICT",
+      "winner_mem": "MEM-394B5C941244",
+      "winner_value": 1.0,
+      "loser_mem": "MEM-F2E8F96610B9",
+      "loser_value": 0.6,
+      "resolution": "canonical_holds_on_tie_or_lower"
+    },
+    {
+      "key": "K-MM-CONFLICT",
+      "winner_mem": "MEM-11528D335681",
+      "winner_value": 1.0,
+      "loser_mem": "MEM-7E69274B9C79",
+      "loser_value": 0.8,
+      "resolution": "higher_value_wins"
+    }
+  ],
+  "confirmed_keys": [
+    "K-WF-001",
+    "K-EXP-001",
+    "K-OBS-CONFLICT",
+    "K-MM-CONFLICT"
+  ],
+  "honest": {
+    "distributed": false,
+    "byzantine_fault_tolerance": false,
+    "consensus_rule": "deterministic majority vote"
+  },
+  "provenance": "measured",
+  "merkle_block": "BLK-1792417766-119296ad",
+  "block_hash": "119296ada7c16a6dcb2e09565baf60e43b03eba52594183ff106a14e89ce4bc3"
+}

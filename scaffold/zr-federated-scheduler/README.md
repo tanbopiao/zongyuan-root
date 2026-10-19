@@ -14,7 +14,7 @@
 
 ## 二、特性
 
-- **五节点联邦拓扑**：hub-central-agent(主控/容量4) / node-cloud-worker(云端) / node-gpu-edge(GPU) / node-edge-sync(边缘) / node-dev-doubao(开发)
+- **六节点联邦主备拓扑**：hub-central-agent(主控/容量4) / node-cloud-worker(云端) / node-gpu-edge(GPU) / node-edge-sync(边缘) / node-dev-doubao(开发) / NODE-DEV-CODEARTS-001(备节点/容量4，P2 主备切换演练成员)
 - **认领仲裁共识**：存活 + 容量未满 + 心跳新鲜 → 按 (优先级↑, 负载↑, 心跳新鲜度) 收敛唯一 owner，确定性防重
 - **心跳超时回收**：任务认领后超过 TTL 无心跳 → 释放 owner、重试计数、重新入队；超 max_retries 判失败
 - **失败重试**：执行失败自动重试，8% 故障注入验证

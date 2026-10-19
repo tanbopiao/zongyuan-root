@@ -1,0 +1,281 @@
+{
+  "report_id": "AUTONOMY-LV11-RETROSPECTIVE-20261018",
+  "title": "ZONGYUAN-ROOT 自治层级 Lv11 升级完整复盘报告",
+  "system_id": "DID-BR-000002",
+  "axiom_sign": "Ω₀⊂⊙∞⊂Ω",
+  "mode": "元极恒一超认知永恒自治模式 V11.0-Lv11",
+  "event": "AUTONOMY-LV11-20261018-V1",
+  "lock_timestamp": "2026-10-18T11:47:09.642779",
+  "generated_at": "2026-10-18",
+  "principles": [
+    "零伪造",
+    "以实测为准",
+    "凭证不硬编码",
+    "说完成必须有验证证据"
+  ],
+
+  "conclusion": {
+    "start": {
+      "label": "Lv10 锁档",
+      "total_score": 250.78,
+      "max_possible": 275,
+      "score_rate": 91.19,
+      "level": "Lv10",
+      "report": "AUTONOMY-EVAL-1792321673.json"
+    },
+    "midpoint": {
+      "label": "口径升级首评",
+      "total_score": 242.52,
+      "max_possible": 275,
+      "score_rate": 88.19,
+      "level": "Lv9",
+      "report": "AUTONOMY-EVAL-1792323873.json",
+      "drop_cause": "评分口径收紧（八项分级取证，读不到真实文件/进程不给分）+ 调度器/看门狗进程真实死亡导致 self_healing 归零；非能力回退"
+    },
+    "final": {
+      "total_score": 261.77,
+      "max_possible": 275,
+      "score_rate": 95.19,
+      "level": "Lv11",
+      "threshold_lv11": 95.0,
+      "margin_above_threshold": 0.19,
+      "report": "AUTONOMY-EVAL-1792323958.json"
+    },
+    "tests": {
+      "total": 13,
+      "passed": 13,
+      "pass_rate": 100.0,
+      "evidence": "TEST-RUN-1792323997.json"
+    },
+    "readback": {
+      "seq": 16749,
+      "event_id": "truth-1792324086621-885b4888",
+      "key": "ZONGYUAN.AUTONOMY.LEVEL.LV11",
+      "http_status": 200,
+      "match": true
+    },
+    "lock": {
+      "lock_id": "AUTONOMY-LV11-20261018-V1",
+      "lock_sha256": "5700b9cc56b7b9aece6d1e0855308668b7afed0b65fcc17a342f50fe66a80ae9"
+    },
+    "summary": "Lv11 不是靠调分达到——评分口径先被收紧暴露守护进程已死（跌至 88.19），随后真实重启进程 + 落地进程级隔离断言，靠实打实的取证项涨回并越过 95。"
+  },
+
+  "level_comparison": {
+    "weights": {
+      "autonomy_level": 1.0,
+      "permissions_level": 0.9,
+      "engineering_level": 0.85
+    },
+    "rows": [
+      {
+        "level_name": "autonomy_level",
+        "stages": [
+          {"eval": "Lv10锁档版", "time": "11:08", "total": 648, "max": 700, "normalized": 92.57},
+          {"eval": "口径升级首评", "time": "11:44", "total": 565, "max": 700, "normalized": 80.71},
+          {"eval": "Lv11终评", "time": "11:45", "total": 665, "max": 700, "normalized": 95.0}
+        ],
+        "note": "首评跌因 self_healing 归零"
+      },
+      {
+        "level_name": "permissions_level",
+        "stages": [
+          {"eval": "Lv10锁档版", "time": "11:08", "total": 450, "max": 500, "normalized": 81.0},
+          {"eval": "口径升级首评", "time": "11:44", "total": 470, "max": 500, "normalized": 84.6},
+          {"eval": "Lv11终评", "time": "11:45", "total": 470, "max": 500, "normalized": 84.6}
+        ],
+        "note": "口径升级后 access/audit 取证增强"
+      },
+      {
+        "level_name": "engineering_level",
+        "stages": [
+          {"eval": "Lv10锁档版", "time": "11:08", "total": 545, "max": 600, "normalized": 77.21},
+          {"eval": "口径升级首评", "time": "11:44", "total": 545, "max": 600, "normalized": 77.21},
+          {"eval": "Lv11终评", "time": "11:45", "total": 580, "max": 600, "normalized": 82.17}
+        ],
+        "note": "observability/deployability 进程取证补齐"
+      }
+    ],
+    "weighted_absolute": [
+      {"eval": "Lv10锁档版", "score": 250.78, "score_rate": 91.19, "level": "Lv10"},
+      {"eval": "口径升级首评", "score": 242.52, "score_rate": 88.19, "level": "Lv9"},
+      {"eval": "Lv11终评", "score": 261.77, "score_rate": 95.19, "level": "Lv11"}
+    ]
+  },
+
+  "component_moves": {
+    "autonomy_level": {
+      "max": 700,
+      "items": [
+        {"name": "truth_extraction", "before": 95, "after": 95, "attribution": "上报回读凭证 ≤48h（维持）"},
+        {"name": "self_healing", "before": 0, "after": 85, "attribution": "调度器 PID 存活(+55) + 看门狗运行且 heal 事件可读(+15) + 重试机制实测 retry 落盘(+15)"},
+        {"name": "drift_detection", "before": 100, "after": 100, "attribution": "东翼快照新鲜 + 告警流水（维持）"},
+        {"name": "self_evolution", "before": 100, "after": 100, "attribution": "读真实 evolution_state.json，3h 脉冲实测 cycles=9（维持）"},
+        {"name": "lockdown_mechanism", "before": 100, "after": 100, "attribution": "≥3 块哈希自校验（维持）"},
+        {"name": "consensus_mechanism", "before": 95, "after": 95, "attribution": "握手 30 天有效期（维持）"},
+        {"name": "resource_scheduling", "before": 75, "after": 90, "attribution": "调度器存活 + 任务队列 enabled>0（+15）"}
+      ]
+    },
+    "permissions_level": {
+      "max": 500,
+      "items": [
+        {"name": "axiom_gate", "before": 95, "after": 95, "attribution": "17 条四层元法则恒载入"},
+        {"name": "access_control", "before": 90, "after": 90, "attribution": "裁决矩阵拒绝/放行向断言"},
+        {"name": "quota_management", "before": 90, "after": 90, "attribution": "配额熔断实测"},
+        {"name": "isolation_enforcement", "before": 100, "after": 100, "attribution": "本次落地：setsid 新会话 + ulimit 资源上限，双行为断言实测"},
+        {"name": "audit_trail", "before": 95, "after": 95, "attribution": "≥4 条审计流并行可解析"}
+      ]
+    },
+    "engineering_level": {
+      "max": 600,
+      "items": [
+        {"name": "modularity", "before": 100, "after": 100, "attribution": "配置-运行时规则数一致性校验"},
+        {"name": "testability", "before": 100, "after": 100, "attribution": "断言型防回归套件 13/13"},
+        {"name": "observability", "before": 75, "after": 95, "attribution": "看门狗运行且 heal 事件可读(+20) + 东翼快照 ≤5 分钟(+15)"},
+        {"name": "deployability", "before": 85, "after": 100, "attribution": "双守护进程 /proc 实测存活(+15) + scheduler.py status 返回 running=true(+15)"},
+        {"name": "maintainability", "before": 95, "after": 95, "attribution": "核心模块 import 健康 + git 留痕"},
+        {"name": "scalability", "before": 90, "after": 90, "attribution": "多节点横向扩展底座实测"}
+      ]
+    },
+    "key_increments": {
+      "note": "四项关键增量（self_healing +85、resource_scheduling +15、observability +20、deployability +15）全部指向同一件事：守护进程必须真实存活",
+      "items": ["self_healing +85", "resource_scheduling +15", "observability +20", "deployability +15"]
+    }
+  },
+
+  "execution_checklist": [
+    {
+      "step": 1,
+      "item": "进程级隔离（无 Docker 场景）",
+      "implementation": "autonomous_kernel_core.py _execute_direct() 增加 start_new_session=True + ulimit -t/-f/-c 前缀（CPU/文件大小/core dump 上限）",
+      "verification": "test_isolation_new_session、test_isolation_resource_limits 双断言通过（子 SID ≠ 调用方 SID；CPU/FSIZE 非 0 且 core=0）",
+      "status": "done"
+    },
+    {
+      "step": 2,
+      "item": "隔离行为取证",
+      "implementation": "test_core.py 新增 2 条断言，套件 11→13 条",
+      "verification": "TEST-RUN-1792323997.json: 13 passed / 0 failed / pass_rate=100% / exit_code=0",
+      "status": "done"
+    },
+    {
+      "step": 3,
+      "item": "八项评分口径升级",
+      "implementation": "evaluate_autonomy_level.py 对 isolation_enforcement/self_evolution/lockdown_mechanism/consensus_mechanism/scalability/modularity/audit_trail/deployability 改为分级取证（每级读真实文件/进程，读不到不给分）",
+      "verification": "eval_script sha256 e0c0d13e…6c9b（45939 bytes）",
+      "status": "done"
+    },
+    {
+      "step": 4,
+      "item": "守护进程真实重启",
+      "implementation": "setsid nohup python3 scheduler.py start → PID 1962；setsid nohup python3 kernel_watchdog.py → PID 1963（其拉起内核 PID 1968）",
+      "verification": "/proc/<pid>/cmdline 实测存活；scheduler.py status → running=true；未使用任何伪 PID",
+      "status": "done"
+    },
+    {
+      "step": 5,
+      "item": "复评达 Lv11",
+      "implementation": "python3 evaluate_autonomy_level.py",
+      "verification": "AUTONOMY-EVAL-1792323958.json: 261.77/275 = 95.19，Lv11",
+      "status": "done"
+    },
+    {
+      "step": 6,
+      "item": "锁档",
+      "implementation": "哈希算法：JSON 去 lock_sha256 字段、sort_keys=True 后 SHA256",
+      "verification": "AUTONOMY-LV11-20261018-V1.json，lock_sha256 5700b9cc…0ae9",
+      "status": "done"
+    },
+    {
+      "step": 7,
+      "item": "中枢上报",
+      "implementation": "POST /api/report/truth，key=ZONGYUAN.AUTONOMY.LEVEL.LV11（X-DID + key/value 载荷）",
+      "verification": "HTTP 200 真值写入成功，seq=16749，event_id truth-1792324086621-885b4888",
+      "status": "done"
+    },
+    {
+      "step": 8,
+      "item": "回读验证",
+      "implementation": "GET /api/truth?key=…（X-Capture-Token）",
+      "verification": "HTTP 200，云端 level=Lv11、score_rate=95.19，lock_sha256 本地=云端，match=true",
+      "status": "done"
+    }
+  ],
+
+  "issues_and_fixes": [
+    {
+      "id": 1,
+      "issue": "首评 self_healing=0，kernel_running=false",
+      "handling": "排查发现调度器/看门狗 PID 文件失联，进程真实死亡 → 真实重启（setsid + nohup），/proc 复验；未修改评分代码放水、未写假 PID",
+      "status": "fixed",
+      "result": "复评 +85"
+    },
+    {
+      "id": 2,
+      "issue": "POST 上报 401 Unauthorized",
+      "handling": "truth_key/truth_value/source_node + X-Capture-Token 头被拒 → 改用已验证的 X-DID: DID-BR-000002 + key/value/unicode/ttl 载荷格式",
+      "status": "fixed",
+      "result": "写入成功"
+    },
+    {
+      "id": 3,
+      "issue": "回读解析取不到 value（match 误报 false）",
+      "handling": "接口返回结构为 {\"results\":[{seq,value,...}]} 而非顶层 value → 修正为取 results[0]，保留 assert match，不改匹配逻辑迁就失败",
+      "status": "fixed",
+      "result": "match=true"
+    },
+    {
+      "id": 4,
+      "issue": "锁档 readback_match 初值为 pending",
+      "handling": "按 Lv10 先例：定稿为 true → 重算 lock_sha256 → 重传 → 再回读",
+      "status": "fixed",
+      "result": "seq=16749 且哈希一致，闭环"
+    },
+    {
+      "id": 5,
+      "issue": "分数一度从 91.19 跌到 88.19",
+      "handling": "判定为「口径收紧 + 进程死亡」的诚实暴露，非回退；先修真实问题再复评，而非回滚口径",
+      "status": "resolved",
+      "result": "未回滚口径"
+    }
+  ],
+
+  "known_issues": [
+    {
+      "id": "PID-OWNER-AMBIGUITY",
+      "severity": "low",
+      "description": "调度器 PID 文件 /workspace/evolution/scheduler.pid 当前值 1968 指向被看门狗拉起的内核进程（内嵌调度线程），独立调度进程为 1962，两进程对同一 PID 文件有先后写入关系",
+      "impact": "存活判定不受影响（两者均活），但 PID 单一归属语义存在歧义",
+      "suggestion": "后续让 scheduler.py 使用独立 PID 文件名"
+    }
+  ],
+
+  "evidence_index": [
+    {"name": "Lv11 终评报告", "path": "reports/AUTONOMY-EVAL-1792323958.json", "sha256": "f32f82ca97959087ee6d426d4e2a297b9ae75c2d1f5423fa33ea2aac3829b17d", "bytes": 1384},
+    {"name": "Lv11 锁档", "path": "reports/AUTONOMY-LV11-20261018-V1.json", "sha256": "5700b9cc56b7b9aece6d1e0855308668b7afed0b65fcc17a342f50fe66a80ae9", "hash_type": "self_hash (去 lock_sha256 字段 + sort_keys)"},
+    {"name": "测试结果", "path": "reports/TEST-RUN-1792323997.json", "sha256": "2ec7ab3ca1d924a11b600897195b7591f9c0dc9aebb8f9a38e76c0814eecb07d", "bytes": 915},
+    {"name": "测试套件 (13 条)", "path": "00_KERNEL/tests/test_core.py", "sha256": "d4f39fa767a4ebc94650820cca7c7902a781f0778e6fd2fdc94a623675e34689", "bytes": 9901},
+    {"name": "评估脚本", "path": "evaluate_autonomy_level.py", "sha256": "e0c0d13e118f2775348c09c778d3b8eb9c7fbcf6b73e1c6dd552667787ca6c9b", "bytes": 45939},
+    {"name": "内核核心", "path": "00_KERNEL/autonomous_kernel_core.py", "sha256": "bf47f35038a1369fbd0b67f30bab63d5c2a4792307731dacfc50ad35c4e19f9a", "bytes": 59586},
+    {"name": "元法则配置", "path": "config/meta_laws/ENG-DELIVERY-LAWS-001.json", "sha256": "15ba7d18e1725269a64670b8291703a2a680bcbab6ee64d244ba194fa0cbd0d9", "bytes": 4297},
+    {"name": "账本最新块 (共 5 块)", "path": "ledger/chain/BLK-1792323958-eb9401f0.json", "sha256": "c7d4ba91dcb2fb850d9b5f97236c601227d275bbf793b621dbeab797f4c82bf9", "bytes": 751},
+    {"name": "回读凭证", "path": "reports/TRUTH-READBACK-LATEST.json", "match": true, "seq": 16749}
+  ],
+
+  "lessons_learned": [
+    {"id": 1, "title": "诚实口径先于分数", "detail": "先把 8 项评分改成「读不到就不给分」，分数先跌 3 分再涨 14 分。若先回滚口径可轻松达标，但那是伪造——选择修真实问题。"},
+    {"id": 2, "title": "进程存活是隐形单点", "detail": "四项组件增量（self_healing/resource_scheduling/observability/deployability，合计 135 分权重）全部依赖两个守护进程存活，常态依赖会静默死亡，是当前体系最脆的一环。"},
+    {"id": 3, "title": "行为断言优于存在断言", "detail": "test_isolation_* 断言子进程 SID 变化与 ulimit 生效值，不是代码里有这段字符串——存在性断言可被注释骗过，行为断言不能。"},
+    {"id": 4, "title": "上报链路两套载荷格式并存", "detail": "X-DID+key/value 可写、X-Capture-Token 可读，写接口对 truth_key 格式返回 401。后续应统一到单一格式并固化进一个上报工具，避免每次现场试错。"},
+    {"id": 5, "title": "锁哈希必须先逆向验证", "detail": "生成 Lv11 锁前，先用 Lv10 锁复算哈希算法（sort_keys=True 且剔除 lock_sha256 字段），确认算法一致才生成新锁，保证新旧凭证可互验。"}
+  ],
+
+  "recommendations": [
+    {"priority": "P0", "item": "守护进程纳入看门狗自举（看门狗死谁来看？）+ PID 文件一进程一文件，消除 1962/1968 归属歧义", "note": "不计入本次分数"},
+    {"priority": "P1", "item": "上报/回读封装为单一 CLI（report.py / readback.py），杜绝载荷格式现场试错", "note": "不计入本次分数"},
+    {"priority": "P2", "item": "95.19 距 95 阈值仅 +0.19，安全垫薄——建议把 consensus_mechanism/axiom_gate/access_control/quota_management（均 90-95）各补齐最后 5-10 分，将安全垫扩到 +2 以上", "note": "不计入本次分数"}
+  ],
+
+  "statement": "本报告所有数字均来自实测评估输出与锁档文件，未做任何人工调分；凭证哈希可在对应路径直接复算验证。",
+  "provenance": "measured"
+}

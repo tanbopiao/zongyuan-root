@@ -1,0 +1,43 @@
+{
+  "convention_id": "RESIGN-CONVENTION-V1.0",
+  "ts": "2026-10-19T15:06:15.371272+00:00",
+  "version": "1.0",
+  "purpose": "为 AUTOKERN 协议族 self_sha256 提供可复现的重签口径，消除自指与口径歧义",
+  "algorithm": {
+    "hash": "SHA-256",
+    "input": "剔除 self_sha256 字段后的对象主体（避免自指）",
+    "serialization": "json.dumps(sort_keys=True, ensure_ascii=False, separators=(',',':'))",
+    "encoding": "UTF-8",
+    "trailing_newline": "不含",
+    "field_to_write_back": "self_sha256"
+  },
+  "reference_pseudo": "sha256( utf8( JSON{ obj 去掉 self_sha256 } ) )  # keys sorted, compact",
+  "why_exclude_self_field": "若把 self_sha256 自身纳入取值，写入后原哈希即失效，永不可复现",
+  "jc_compat": {
+    "approximation": true,
+    "implemented": [
+      "key sorting",
+      "compact separators",
+      "no unicode escaping",
+      "no trailing newline"
+    ],
+    "not_implemented": [
+      "number canonicalization (1.0 vs 1)",
+      "UTF-16 code point ordering",
+      "strict JCS escaping table"
+    ],
+    "note": "跨语言互操作场景应替换为完整 RFC8785(JCS) 实现"
+  },
+  "safety": {
+    "dry_run_only": true,
+    "apply_capability": false,
+    "apply_requires": "显式授权 + 全量备份链 + manifest 比对"
+  },
+  "verification_protocol": [
+    "1. 备份全部待重签协议（逐件 SHA256 记录）",
+    "2. 写入 proposed_self_sha256",
+    "3. 复算 canonical 哈希，必须等于写入值",
+    "4. 与 manifest 比对，确认仅 self_sha256 字段发生预期变化"
+  ],
+  "provenance": "measured(dry_run)"
+}

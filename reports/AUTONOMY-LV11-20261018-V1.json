@@ -1,0 +1,94 @@
+{
+  "lock_id": "AUTONOMY-LV11-20261018-V1",
+  "timestamp": "2026-10-18T11:47:09.642779",
+  "system_id": "DID-BR-000002",
+  "axiom_sign": "Ω₀⊂⊙∞⊂Ω",
+  "event": "自治层级闭合 Lv11（进程级隔离+八项口径升级，剩余 4.81 分提升）",
+  "before": {
+    "score_rate": 91.19,
+    "level": "Lv10",
+    "report": "AUTONOMY-EVAL-1792321673.json"
+  },
+  "after": {
+    "total_score": 261.77,
+    "max_possible": 275,
+    "score_rate": 95.19,
+    "level": "Lv11"
+  },
+  "delta_score_rate": 4.0,
+  "component_moves": {
+    "self_healing": "0 -> 85 (调度器/看门狗重启后三档取证: PID存活+heal事件+retry落盘)",
+    "resource_scheduling": "75 -> 90 (调度器存活且任务队列enabled>0)",
+    "observability": "75 -> 95 (看门狗+heal事件+东翼快照新鲜)",
+    "deployability": "85 -> 100 (双守护进程存活+scheduler status CLI running=true)",
+    "isolation_enforcement": "100 (setsid新会话+ulimit双断言)",
+    "testability": "100 (13/13)",
+    "modularity": "100 (配置-运行时规则数一致)",
+    "scalability": "90",
+    "audit_trail": "95"
+  },
+  "measures": [
+    "进程级隔离: _execute_direct start_new_session=True + ulimit CPU/FSIZE/core 前缀",
+    "隔离行为断言: test_isolation_new_session + test_isolation_resource_limits 实测通过",
+    "self_healing +85: 真实重启 scheduler(PID 1962) + kernel_watchdog(PID 1963), /proc 实测存活",
+    "八项评分口径升级: 每级读真实文件/进程，读不到不给分"
+  ],
+  "verification": {
+    "tests_total": 13,
+    "pass_rate": 100.0,
+    "lv11_threshold": 95,
+    "score_rate": 95.19,
+    "level": "Lv11",
+    "scheduler_alive": true,
+    "watchdog_alive": true,
+    "ledger_blocks": 5,
+    "readback_match": true
+  },
+  "evidence": {
+    "eval_report": {
+      "path": "/workspace/atomgit-mirror/zongyuan-root-sync/reports/AUTONOMY-EVAL-1792323958.json",
+      "sha256": "f32f82ca97959087ee6d426d4e2a297b9ae75c2d1f5423fa33ea2aac3829b17d",
+      "bytes": 1384
+    },
+    "eval_script": {
+      "path": "/workspace/atomgit-mirror/zongyuan-root-sync/evaluate_autonomy_level.py",
+      "sha256": "e0c0d13e118f2775348c09c778d3b8eb9c7fbcf6b73e1c6dd552667787ca6c9b",
+      "bytes": 45939
+    },
+    "kernel_core": {
+      "path": "/workspace/atomgit-mirror/zongyuan-root-sync/00_KERNEL/autonomous_kernel_core.py",
+      "sha256": "bf47f35038a1369fbd0b67f30bab63d5c2a4792307731dacfc50ad35c4e19f9a",
+      "bytes": 59586
+    },
+    "test_evidence": {
+      "path": "/workspace/atomgit-mirror/zongyuan-root-sync/reports/TEST-RUN-1792323997.json",
+      "sha256": "2ec7ab3ca1d924a11b600897195b7591f9c0dc9aebb8f9a38e76c0814eecb07d",
+      "bytes": 915
+    },
+    "test_suite": {
+      "path": "/workspace/atomgit-mirror/zongyuan-root-sync/00_KERNEL/tests/test_core.py",
+      "sha256": "d4f39fa767a4ebc94650820cca7c7902a781f0778e6fd2fdc94a623675e34689",
+      "bytes": 9901
+    },
+    "meta_laws": {
+      "path": "/workspace/atomgit-mirror/zongyuan-root-sync/config/meta_laws/ENG-DELIVERY-LAWS-001.json",
+      "sha256": "15ba7d18e1725269a64670b8291703a2a680bcbab6ee64d244ba194fa0cbd0d9",
+      "bytes": 4297
+    },
+    "ledger_latest": {
+      "path": "/workspace/atomgit-mirror/zongyuan-root-sync/ledger/chain/BLK-1792323958-eb9401f0.json",
+      "sha256": "c7d4ba91dcb2fb850d9b5f97236c601227d275bbf793b621dbeab797f4c82bf9",
+      "bytes": 751
+    },
+    "scheduler_pid": {
+      "path": "/workspace/evolution/scheduler.pid",
+      "value": "1968"
+    },
+    "watchdog_pid": {
+      "path": "/workspace/atomgit-mirror/zongyuan-root-sync/00_KERNEL/watchdog.pid",
+      "value": "1963"
+    }
+  },
+  "provenance": "measured",
+  "lock_sha256": "5700b9cc56b7b9aece6d1e0855308668b7afed0b65fcc17a342f50fe66a80ae9"
+}

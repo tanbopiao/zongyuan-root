@@ -1,0 +1,56 @@
+{
+  "errata_id": "ERRATA-DUPLICATE-ID-20261019",
+  "ts": "2026-10-19T15:49:01.236495+00:00",
+  "supersedes_claims": [
+    "上轮表述：'索引查出 4 个法则 id 跨目录重名'",
+    "上轮表述：'4 项裁定…0 项字节相同（说明两份非副本、是独立演化的双件）'",
+    "早期报告：模型资产 516MB"
+  ],
+  "corrections": [
+    {
+      "no": 1,
+      "field": "跨目录重名 id 计数",
+      "before": "4",
+      "after": "3",
+      "detail": "跨目录重名仅 META-LAW-007 / META-LAW-008 / KUN-LAW-019；第 4 项 META-RULE-001 的 10 件全部位于 00_KERNEL/metalaws/（同一目录），且属版本族（V2/V3/V31/V32 + lock_credential），非跨目录重名，亦非严格意义重名"
+    },
+    {
+      "no": 2,
+      "field": "same_file_bytes 语义/结论",
+      "before": "0 项字节相同 → '独立演化的双件'",
+      "after": "META-LAW-007 存在 2 对跨目录字节完全相同副本",
+      "detail": "该字段原义为'全部候选是否字节全同'（len(set)==1），非'是否存在相同对'。META-LAW-007 的 4 件含 2 种内容，且每种内容在两目录各存一份（12187B、8500B）→ 属真副本冗余，非独立演化。原表述在语义上误导，予以更正；字段定义已在结构分析件中精确化"
+    },
+    {
+      "no": 3,
+      "field": "KUN-LAW-019 形态",
+      "before": "与 META-LAW-007 同列为'跨目录双件'",
+      "after": "同名不同内容（5068B vs 5354B）",
+      "detail": "同一文件名分落两目录但内容不同 → 最危险形态（同名异义·真冲突），裁定不能仅按作用域，须先裁定内容权威性"
+    },
+    {
+      "no": 4,
+      "field": "索引字段名",
+      "before": "duplicate_ids_across_dirs",
+      "after": "名不副实（含目录内重复）",
+      "detail": "rev4 该字段同时收录目录内重复（META-RULE-001）与跨目录重复，字段名与内容不符；建议 rev5 拆分或更名"
+    },
+    {
+      "no": 5,
+      "field": "资产规模",
+      "before": "516MB",
+      "after": "1087498010 B (1037.1 MiB) / 47 文件 / 3 模型",
+      "detail": "该目录为 HuggingFace hub 缓存（models--.../snapshots），非单一模型单文件；上一轮 D 项探测报告已按实测值记录，本更正仅针对更早报告口径"
+    },
+    {
+      "no": 6,
+      "field": "自诊脚本",
+      "before": "模型资产 0 文件",
+      "after": "路径 bug（相对路径 ROOT.parent 解析错）",
+      "detail": "该错误仅出现在临时诊断命令中，被自查发现并立即用绝对路径复测更正，未进入任何报告结论"
+    }
+  ],
+  "correction_mode": "追加式：不改写 adjudication/index/既有报告，仅登记更正并指向结构分析件",
+  "evidence": "reports/DUPLICATE-ID-STRUCTURE-ANALYSIS-20261019.json",
+  "provenance": "measured"
+}

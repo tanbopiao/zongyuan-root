@@ -1,0 +1,128 @@
+{
+  "drill_id": "HA-FAILOVER-DRILL-P2",
+  "phases": [
+    {
+      "phase": "Phase1_稳态基线",
+      "detail": "12 任务全终态: done=12, 分配={'hub-central-agent': 4, 'node-cloud-worker': 3, 'node-gpu-edge': 0, 'node-edge-sync': 0, 'node-dev-doubao': 3, 'NODE-DEV-CODEARTS-001': 2}",
+      "ts": "08:05:00"
+    },
+    {
+      "phase": "Phase2_主节点崩溃",
+      "detail": "hub 在持任务卡死 4 个: ['TASK-0013', 'TASK-0014', 'TASK-0015', 'TASK-0016']",
+      "ts": "08:05:00"
+    },
+    {
+      "phase": "Phase3_备节点接管",
+      "detail": "回收重派 4 任务, 卡死任务全部终态: True, 备节点 NODE-DEV-CODEARTS-001 承接 1 个, 分配增量={'hub-central-agent': 0, 'node-cloud-worker': 1, 'node-gpu-edge': 0, 'node-edge-sync': 0, 'node-dev-doubao': 1, 'NODE-DEV-CODEARTS-001': 1}",
+      "ts": "08:05:00"
+    },
+    {
+      "phase": "Phase4_主节点恢复",
+      "detail": "hub 恢复后新增完成 4 任务, 分配={'hub-central-agent': 4, 'node-cloud-worker': 1, 'node-gpu-edge': 0, 'node-edge-sync': 0, 'node-dev-doubao': 1, 'NODE-DEV-CODEARTS-001': 0}",
+      "ts": "08:05:00"
+    }
+  ],
+  "assertions": {
+    "phase1_all_terminal": true,
+    "phase1_hub_leads": true,
+    "phase2_hub_stalled": true,
+    "phase3_reclaimed": true,
+    "phase3_stalled_resolved": true,
+    "phase3_backup_active": true,
+    "phase4_hub_recovered": true,
+    "global_no_stuck": true,
+    "global_no_duplicate": true,
+    "global_all_terminal": true
+  },
+  "did": "DID-BR-000002",
+  "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+  "phase1_distribution": {
+    "hub-central-agent": {
+      "done": 4,
+      "failed": 0
+    },
+    "node-cloud-worker": {
+      "done": 3,
+      "failed": 0
+    },
+    "node-gpu-edge": {
+      "done": 0,
+      "failed": 0
+    },
+    "node-edge-sync": {
+      "done": 0,
+      "failed": 0
+    },
+    "node-dev-doubao": {
+      "done": 3,
+      "failed": 0
+    },
+    "NODE-DEV-CODEARTS-001": {
+      "done": 2,
+      "failed": 0
+    }
+  },
+  "phase2_stalled_tasks": [
+    "TASK-0013",
+    "TASK-0014",
+    "TASK-0015",
+    "TASK-0016"
+  ],
+  "phase3_distribution_delta": {
+    "hub-central-agent": 0,
+    "node-cloud-worker": 1,
+    "node-gpu-edge": 0,
+    "node-edge-sync": 0,
+    "node-dev-doubao": 1,
+    "NODE-DEV-CODEARTS-001": 1
+  },
+  "phase3_backup_takeover": [
+    "TASK-0015"
+  ],
+  "phase4_distribution_delta": {
+    "hub-central-agent": 4,
+    "node-cloud-worker": 1,
+    "node-gpu-edge": 0,
+    "node-edge-sync": 0,
+    "node-dev-doubao": 1,
+    "NODE-DEV-CODEARTS-001": 0
+  },
+  "summary": {
+    "tasks_total": 30,
+    "tasks_done": 29,
+    "tasks_failed": 1,
+    "tasks_stuck": 0,
+    "duplicate_exec": 0,
+    "reclaimed_total": 4,
+    "ticks": 5,
+    "final_distribution": {
+      "hub-central-agent": {
+        "done": 8,
+        "failed": 4
+      },
+      "node-cloud-worker": {
+        "done": 8,
+        "failed": 1
+      },
+      "node-gpu-edge": {
+        "done": 0,
+        "failed": 0
+      },
+      "node-edge-sync": {
+        "done": 0,
+        "failed": 0
+      },
+      "node-dev-doubao": {
+        "done": 8,
+        "failed": 0
+      },
+      "NODE-DEV-CODEARTS-001": {
+        "done": 5,
+        "failed": 0
+      }
+    },
+    "node_count": 6
+  },
+  "verdict": "PASS",
+  "generated_at": "2026-10-18T08:05:00+0000"
+}

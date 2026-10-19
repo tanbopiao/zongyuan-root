@@ -1,0 +1,48 @@
+{
+  "lock_id": "FEDERATION-HA-DEPLOY-LOCK-V1.0",
+  "did": "DID-BR-000002",
+  "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-10-18T08:06:00+08:00",
+  "task": "P2 联邦主备部署（hub-central-agent 部署 + NODE-DEV-CODEARTS-001 配置 + 主备切换演练）",
+  "priority": "P2",
+  "status": "DEPLOYED_AND_DRILL_PASS",
+  "provenance": "extended_existing_zr-federated-scheduler_scaffold",
+  "components": [
+    {
+      "path": "scaffold/zr-federated-scheduler/zfsched/node.py",
+      "role": "六节点联邦主备拓扑注册（新增 NODE-DEV-CODEARTS-001 备节点 role=backup capacity=4 priority=2）"
+    },
+    {
+      "path": "scaffold/zr-federated-scheduler/run_failover_drill.py",
+      "role": "四阶段主备切换演练入口（稳态→主节点崩溃→备节点接管→主节点恢复），固定种子可复算"
+    },
+    {
+      "path": "scaffold/zr-federated-scheduler/reports/HA-FAILOVER-DRILL-20261018.json",
+      "role": "演练报告（10 断言 + 全局汇总）"
+    },
+    {
+      "path": "scaffold/zr-federated-scheduler/README.md",
+      "role": "拓扑说明 5→6 节点更新"
+    }
+  ],
+  "drill_results": {
+    "verdict": "PASS",
+    "assertions_total": 10,
+    "assertions_passed": 10,
+    "phase1_steady": "12 任务 hub 领跑(4)，备节点参与(2)",
+    "phase2_crash": "hub 在持 4 任务卡死（TASK-0013~0016）",
+    "phase3_takeover": "4 任务心跳超时回收重派，备节点承接 1 个，全部终态，零重复执行",
+    "phase4_recovery": "hub 恢复后新增完成 4 任务",
+    "summary": {"tasks_total": 30, "tasks_done": 29, "tasks_failed": 1, "tasks_stuck": 0, "duplicate_exec": 0, "reclaimed_total": 4, "ticks": 6},
+    "failed_note": "1 个 EXEC_FAIL 为 8% 故障注入确定性结果（种子 20261009，落在 node-cloud-worker）；hub 节点 failed=4 为回收记账非真实失败"
+  },
+  "regression": {
+    "standard_sim": "PASS",
+    "detail": "12 任务六节点 1 tick 完成，0 回收，FEDSCHED-STD 报告正常生成"
+  },
+  "verification": {
+    "drill_exit_code": 0,
+    "regression_exit_code": 0,
+    "topology_consistency": "drill 断言拓扑与 default_nodes() 一致 PASS"
+  }
+}

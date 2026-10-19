@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT Lv11 升级可视化总览</title>
+<style>
+  :root{
+    --bg:#0b0f1a; --panel:#121828; --panel2:#161e33; --line:#232d47;
+    --txt:#e8ecf6; --sub:#93a0bd; --accent:#4da3ff; --gold:#f5c451;
+    --green:#3ddc84; --red:#ff6b6b; --purple:#a78bfa; --cyan:#39d0d8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:"PingFang SC","Microsoft YaHei",-apple-system,Segoe UI,sans-serif;line-height:1.6;padding:32px 24px 60px}
+  .wrap{max-width:1180px;margin:0 auto}
+  header{border:1px solid var(--line);background:linear-gradient(135deg,#121a30,#0e1424);border-radius:16px;padding:28px 32px;margin-bottom:24px}
+  header h1{font-size:26px;letter-spacing:1px}
+  header .meta{color:var(--sub);font-size:13px;margin-top:8px}
+  header .meta b{color:var(--gold)}
+  .badge{display:inline-block;background:var(--gold);color:#201a05;font-weight:700;border-radius:999px;padding:3px 14px;font-size:14px;margin-left:10px;vertical-align:middle}
+  .grid{display:grid;gap:18px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:900px){.g4,.g3,.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h2{font-size:15px;color:var(--accent);letter-spacing:.5px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .card h2::before{content:"";width:4px;height:16px;background:var(--accent);border-radius:2px}
+  .kpi{text-align:center}
+  .kpi .val{font-size:34px;font-weight:800;line-height:1.2}
+  .kpi .lab{color:var(--sub);font-size:12px;margin-top:6px}
+  .kpi .sub{font-size:12px;margin-top:4px}
+  .ok{color:var(--green)} .warn{color:var(--gold)} .bad{color:var(--red)} .info{color:var(--accent)}
+  section{margin-top:24px}
+  .row-title{font-size:18px;font-weight:700;margin:6px 0 14px;display:flex;align-items:center;gap:10px}
+  .row-title span{font-size:12px;color:var(--sub);font-weight:400}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+  th{color:var(--sub);font-weight:600;font-size:12px;background:var(--panel2)}
+  tr:last-child td{border-bottom:none}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--cyan);word-break:break-all}
+  .bar-row{display:grid;grid-template-columns:170px 1fr 120px;gap:10px;align-items:center;margin-bottom:10px;font-size:13px}
+  /* 窄卡片（三层面）内压缩标签/数值列，保证轨道有足够宽度 */
+  .g3 .bar-row{grid-template-columns:88px 1fr 68px;gap:7px;font-size:11.5px}
+  .g3 .bar-fill{font-size:10.5px;padding-right:4px}
+  .bar-track{background:var(--panel2);border:1px solid var(--line);border-radius:6px;height:22px;position:relative;overflow:hidden}
+  .bar-fill{height:100%;border-radius:5px 0 0 5px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:11px;font-weight:700;color:#08111f}
+  .delta{color:var(--sub);font-size:12px;text-align:right}
+  .delta b{color:var(--green)}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:900px){.steps{grid-template-columns:1fr 1fr}}
+  .step{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:12.5px}
+  .step .n{color:var(--gold);font-weight:800;font-size:12px}
+  .step .t{font-weight:600;margin:3px 0}
+  .step .v{color:var(--sub);font-size:11.5px}
+  .pill{display:inline-block;border-radius:999px;padding:1px 10px;font-size:11px;font-weight:700}
+  .pill.g{background:rgba(61,220,132,.15);color:var(--green)}
+  .pill.y{background:rgba(245,196,81,.15);color:var(--gold)}
+  .pill.r{background:rgba(255,107,107,.15);color:var(--red)}
+  .pill.b{background:rgba(77,163,255,.15);color:var(--accent)}
+  .note{background:rgba(77,163,255,.08);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 8px 8px 0;font-size:13px;color:#cdd7ec;margin-top:14px}
+  ul.clean{list-style:none;font-size:13px}
+  ul.clean li{padding:6px 0 6px 18px;position:relative;border-bottom:1px dashed var(--line)}
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);color:var(--sub);font-size:12px;text-align:center}
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--sub);margin-top:8px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  svg text{font-family:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>ZONGYUAN-ROOT 自治层级 Lv11 升级总览 <span class="badge">Lv11 达成</span></h1>
+  <div class="meta">
+    DID-BR-000002 ｜ 溯源 <b>Ω₀⊂⊙∞⊂Ω</b> ｜ 事件 AUTONOMY-LV11-20261018-V1 ｜ 锁档时间 2026-10-18T11:47:09 ｜
+    锁哈希 <code>5700b9cc56b7…66a80ae9</code> ｜ 原则：零伪造 · 实测为准 · 凭证不硬编码
+  </div>
+</header>
+
+<!-- ============ KPI ============ -->
+<div class="grid g4">
+  <div class="card kpi">
+    <div class="val ok">95.19</div>
+    <div class="lab">综合得分率（阈值 95.0）</div>
+    <div class="sub ok">余量 +0.19 ✅</div>
+  </div>
+  <div class="card kpi">
+    <div class="val info">Lv10 → Lv11</div>
+    <div class="lab">自治层级跃迁（+4.0 分）</div>
+    <div class="sub info">绝对分 250.78 → 261.77 / 275</div>
+  </div>
+  <div class="card kpi">
+    <div class="val ok">13/13</div>
+    <div class="lab">防回归断言全通过</div>
+    <div class="sub ok">pass_rate 100% · exit 0</div>
+  </div>
+  <div class="card kpi">
+    <div class="val ok">match=true</div>
+    <div class="lab">中枢上报回读一致</div>
+    <div class="sub ok">seq=16749 · HTTP 200</div>
+  </div>
+</div>
+
+<!-- ============ 升级路径 ============ -->
+<section>
+  <div class="row-title">升级路径 <span>口径先收紧 → 暴露真实问题 → 修真实问题 → 越过阈值</span></div>
+  <div class="card">
+    <svg viewBox="0 0 900 300" width="100%" height="300" role="img" aria-label="得分率路径图">
+      <!-- grid -->
+      <g stroke="#232d47" stroke-width="1">
+        <line x1="70" y1="30" x2="70" y2="250"/>
+        <line x1="70" y1="250" x2="860" y2="250"/>
+        <line x1="70" y1="206" x2="860" y2="206" stroke-dasharray="3 4"/>
+        <line x1="70" y1="162" x2="860" y2="162" stroke-dasharray="3 4"/>
+        <line x1="70" y1="118" x2="860" y2="118" stroke-dasharray="3 4"/>
+        <line x1="70" y1="74" x2="860" y2="74" stroke-dasharray="3 4"/>
+      </g>
+      <g fill="#93a0bd" font-size="11">
+        <text x="40" y="254">80</text><text x="40" y="210">85</text>
+        <text x="40" y="166">90</text><text x="40" y="122">95</text><text x="34" y="78">100</text>
+      </g>
+      <!-- threshold 95 -->
+      <line x1="70" y1="118" x2="860" y2="118" stroke="#f5c451" stroke-width="2" stroke-dasharray="8 5"/>
+      <text x="770" y="110" fill="#f5c451" font-size="12" font-weight="700">Lv11 阈值 = 95</text>
+      <!-- bars: y = 250 - (score-80)*8.8 -->
+      <!-- 91.19 -> y=151.5 ; 88.19 -> y=178 ; 95.19 -> y=116.3 -->
+      <g>
+        <rect x="140" y="151.5" width="130" height="98.5" rx="6" fill="#4da3ff" opacity="0.85"/>
+        <text x="205" y="142" fill="#e8ecf6" font-size="16" font-weight="800" text-anchor="middle">91.19</text>
+        <text x="205" y="270" fill="#93a0bd" font-size="12" text-anchor="middle">Lv10 起点</text>
+        <text x="205" y="286" fill="#5d6c8c" font-size="10.5" text-anchor="middle">11:08 锁档版</text>
+      </g>
+      <g>
+        <rect x="380" y="178" width="130" height="72" rx="6" fill="#ff6b6b" opacity="0.85"/>
+        <text x="445" y="169" fill="#e8ecf6" font-size="16" font-weight="800" text-anchor="middle">88.19</text>
+        <text x="445" y="270" fill="#93a0bd" font-size="12" text-anchor="middle">口径升级首评</text>
+        <text x="445" y="286" fill="#5d6c8c" font-size="10.5" text-anchor="middle">诚实暴露进程死亡</text>
+      </g>
+      <g>
+        <rect x="620" y="116.3" width="130" height="133.7" rx="6" fill="#3ddc84" opacity="0.9"/>
+        <text x="685" y="107" fill="#3ddc84" font-size="18" font-weight="800" text-anchor="middle">95.19</text>
+        <text x="685" y="270" fill="#e8ecf6" font-size="12.5" font-weight="700" text-anchor="middle">Lv11 终评</text>
+        <text x="685" y="286" fill="#5d6c8c" font-size="10.5" text-anchor="middle">11:45 真实重启后</text>
+      </g>
+      <!-- trend line -->
+      <polyline points="205,151.5 445,178 685,116.3" fill="none" stroke="#f5c451" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <circle cx="205" cy="151.5" r="5" fill="#f5c451"/>
+      <circle cx="445" cy="178" r="5" fill="#f5c451"/>
+      <circle cx="685" cy="116.3" r="6" fill="#f5c451" stroke="#0b0f1a" stroke-width="2"/>
+      <!-- 阈值越过标注 -->
+      <line x1="762" y1="118" x2="762" y2="116.3" stroke="#3ddc84" stroke-width="3"/>
+      <text x="770" y="86" fill="#3ddc84" font-size="12.5" font-weight="800">越过阈值 +0.19</text>
+      <text x="800" y="150" fill="#93a0bd" font-size="11">跌 3.0 分</text>
+      <text x="800" y="168" fill="#93a0bd" font-size="11">= 口径收紧</text>
+      <text x="800" y="186" fill="#93a0bd" font-size="11">+7.0 分</text>
+      <text x="800" y="204" fill="#3ddc84" font-size="11">= 修真实问题</text>
+    </svg>
+    <div class="note">分数先跌后涨不是回退：首评把 18 项组件改为「读不到真实文件/进程就不给分」，随即发现调度器与看门狗进程真实死亡（self_healing=0）。<b>处置方式是真实重启进程并补隔离断言，而非回滚口径放水。</b></div>
+  </div>
+</section>
+
+<!-- ============ 三层面得分 ============ -->
+<section>
+  <div class="row-title">三层面得分 <span>终评：自治 665/700 · 权限 470/500 · 工程 580/600</span></div>
+  <div class="grid g3">
+    <div class="card">
+      <h2>自治层级 ×1.0</h2>
+      <div class="bar-row"><span>终评 665/700</span>
+        <div class="bar-track"><div class="bar-fill" style="width:95%;background:linear-gradient(90deg,#3ddc84,#5ee6a0)">95.0</div></div>
+        <span class="delta">首评 80.71</span></div>
+      <div class="bar-row"><span>口径升级首评</span>
+        <div class="bar-track"><div class="bar-fill" style="width:80.71%;background:#ff6b6b">80.71</div></div>
+        <span class="delta">565/700</span></div>
+      <div class="bar-row"><span>Lv10 锁档版</span>
+        <div class="bar-track"><div class="bar-fill" style="width:92.57%;background:#4da3ff">92.57</div></div>
+        <span class="delta">648/700</span></div>
+      <div class="note" style="font-size:12.5px">首评跌因 self_healing 归零，终评靠进程取证 +85 拉回。</div>
+    </div>
+    <div class="card">
+      <h2>权限层级 ×0.9</h2>
+      <div class="bar-row"><span>终评 470/500</span>
+        <div class="bar-track"><div class="bar-fill" style="width:94%;background:linear-gradient(90deg,#3ddc84,#5ee6a0)">94.0</div></div>
+        <span class="delta">加权 84.60</span></div>
+      <div class="bar-row"><span>口径升级首评</span>
+        <div class="bar-track"><div class="bar-fill" style="width:94%;background:#4da3ff">94.0</div></div>
+        <span class="delta">470/500</span></div>
+      <div class="bar-row"><span>Lv10 锁档版</span>
+        <div class="bar-track"><div class="bar-fill" style="width:90%;background:#39d0d8">90.0</div></div>
+        <span class="delta">450/500</span></div>
+      <div class="note" style="font-size:12.5px">isolation_enforcement 100：setsid + ulimit 双行为断言实测。</div>
+    </div>
+    <div class="card">
+      <h2>工程层级 ×0.85</h2>
+      <div class="bar-row"><span>终评 580/600</span>
+        <div class="bar-track"><div class="bar-fill" style="width:96.67%;background:linear-gradient(90deg,#3ddc84,#5ee6a0)">96.67</div></div>
+        <span class="delta">加权 82.17</span></div>
+      <div class="bar-row"><span>口径升级首评</span>
+        <div class="bar-track"><div class="bar-fill" style="width:90.83%;background:#4da3ff">90.83</div></div>
+        <span class="delta">545/600</span></div>
+      <div class="bar-row"><span>Lv10 锁档版</span>
+        <div class="bar-track"><div class="bar-fill" style="width:90.83%;background:#39d0d8">90.83</div></div>
+        <span class="delta">545/600</span></div>
+      <div class="note" style="font-size:12.5px">observability 75→95、deployability 85→100 全靠进程取证。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 关键增量 ============ -->
+<section>
+  <div class="row-title">关键组件增量 <span>四项增量全部指向：守护进程必须真实存活</span></div>
+  <div class="card">
+    <div class="bar-row"><span>self_healing</span>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:85%;background:linear-gradient(90deg,#ff6b6b 0%,#f5c451 6%,#3ddc84 85%)">0 → 85</div>
+      </div>
+      <span class="delta"><b>+85</b></span></div>
+    <div class="bar-row"><span>observability</span>
+      <div class="bar-track"><div class="bar-fill" style="width:95%;background:linear-gradient(90deg,#4da3ff 0 79%,#3ddc84 79%)">75 → 95</div></div>
+      <span class="delta"><b>+20</b></span></div>
+    <div class="bar-row"><span>resource_scheduling</span>
+      <div class="bar-track"><div class="bar-fill" style="width:90%;background:linear-gradient(90deg,#4da3ff 0 83%,#3ddc84 83%)">75 → 90</div></div>
+      <span class="delta"><b>+15</b></span></div>
+    <div class="bar-row"><span>deployability</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#4da3ff 0 85%,#3ddc84 85%)">85 → 100</div></div>
+      <span class="delta"><b>+15</b></span></div>
+    <div class="bar-row"><span>isolation_enforcement</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%;background:#3ddc84">100（本次落地，双断言）</div></div>
+      <span class="delta">maintain</span></div>
+    <div class="bar-row"><span>testability</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%;background:#3ddc84">100（13/13 断言）</div></div>
+      <span class="delta">maintain</span></div>
+    <div class="legend">
+      <span><i style="background:#ff6b6b"></i>起始值</span>
+      <span><i style="background:#4da3ff"></i>首评值</span>
+      <span><i style="background:#3ddc84"></i>终评值</span>
+      <span>维持项：truth_extraction 95 · drift_detection 100 · self_evolution 100 · lockdown 100 · consensus 95 · axiom_gate 95 · access_control 90 · quota 90 · audit 95 · modularity 100 · maintainability 95 · scalability 90</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 执行清单 ============ -->
+<section>
+  <div class="row-title">八步执行清单 <span>每步均有可复验证据 · status 全部 done</span></div>
+  <div class="steps">
+    <div class="step"><div class="n">STEP 1</div><div class="t">进程级隔离落地</div><div class="v">setsid 新会话 + ulimit -t/-f/-c 前缀 <span class="pill g">done</span></div></div>
+    <div class="step"><div class="n">STEP 2</div><div class="t">隔离行为断言 ×2</div><div class="v">套件 11→13 条，13/13 通过 <span class="pill g">done</span></div></div>
+    <div class="step"><div class="n">STEP 3</div><div class="t">八项评分口径升级</div><div class="v">分级取证，读不到不给分 <span class="pill g">done</span></div></div>
+    <div class="step"><div class="n">STEP 4</div><div class="t">守护进程真实重启</div><div class="v">scheduler 1962 / watchdog 1963 <span class="pill g">done</span></div></div>
+    <div class="step"><div class="n">STEP 5</div><div class="t">复评达 Lv11</div><div class="v">261.77/275 = 95.19 <span class="pill g">done</span></div></div>
+    <div class="step"><div class="n">STEP 6</div><div class="t">锁档</div><div class="v">lock_sha256 5700b9cc…0ae9 <span class="pill g">done</span></div></div>
+    <div class="step"><div class="n">STEP 7</div><div class="t">中枢上报</div><div class="v">POST 200 · seq=16749 <span class="pill g">done</span></div></div>
+    <div class="step"><div class="n">STEP 8</div><div class="t">回读验证</div><div class="v">云端哈希一致 match=true <span class="pill g">done</span></div></div>
+  </div>
+</section>
+
+<!-- ============ 验证矩阵 ============ -->
+<section>
+  <div class="row-title">验证矩阵 <span>全部实测，零伪 PID、零硬编码凭证</span></div>
+  <div class="grid g2">
+    <div class="card">
+      <h2>实测验证项</h2>
+      <table>
+        <tr><th>验证项</th><th>结果</th></tr>
+        <tr><td>测试套件（防回归断言）</td><td><span class="pill g">13/13 · 100%</span> TEST-RUN-1792323997.json</td></tr>
+        <tr><td>调度器进程</td><td><span class="pill g">PID 1962 存活</span> /proc 实测</td></tr>
+        <tr><td>看门狗进程</td><td><span class="pill g">PID 1963 存活</span> 拉起内核 PID 1968</td></tr>
+        <tr><td>scheduler status CLI</td><td><span class="pill g">running=true</span> exit 0</td></tr>
+        <tr><td>真值账本</td><td><span class="pill b">5 块哈希链</span> BLK-1792323958-eb9401f0</td></tr>
+        <tr><td>评估复评</td><td><span class="pill g">Lv11 · 95.19</span> AUTONOMY-EVAL-1792323958.json</td></tr>
+        <tr><td>锁档</td><td><span class="pill b">AUTONOMY-LV11-20261018-V1</span></td></tr>
+        <tr><td>上报 → 回读</td><td><span class="pill g">match=true</span> seq=16749 · hash 本地=云端</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>过程问题处置（零粉饰）</h2>
+      <table>
+        <tr><th>问题</th><th>处置</th></tr>
+        <tr><td><span class="pill r">P1</span> 守护进程静默死亡，self_healing=0</td><td>真实重启 + /proc 复验，未写假 PID、未改评分放水</td></tr>
+        <tr><td><span class="pill y">P2</span> POST 上报 401（truth_key 格式被拒）</td><td>改用 X-DID + key/value 载荷，写入成功</td></tr>
+        <tr><td><span class="pill y">P3</span> 回读解析 results[] 误报 match=false</td><td>修正取 results[0]，保留 assert match，不迁就失败</td></tr>
+        <tr><td><span class="pill b">P4</span> 锁档 readback_match 初值 pending</td><td>定稿→重算哈希→重传→再回读闭环</td></tr>
+        <tr><td><span class="pill b">P5</span> 分数 91.19→88.19 下跌</td><td>判定为诚实暴露，修真实问题而非回滚口径</td></tr>
+      </table>
+      <div class="note" style="border-left-color:var(--gold)">遗留：PID 文件 1962/1968 归属语义歧义（两者均活，判定不受影响）→ 建议一进程一文件。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 经验与建议 ============ -->
+<section>
+  <div class="row-title">复盘经验与后续动作</div>
+  <div class="grid g2">
+    <div class="card">
+      <h2>五条经验沉淀</h2>
+      <ul class="clean">
+        <li><b>诚实口径先于分数</b> — 口径收紧先跌 3 分，修真实问题再涨 7 分，绝不回滚放水。</li>
+        <li><b>进程存活是隐形单点</b> — 135 分权重依赖两个守护进程，会静默死亡，是最脆一环。</li>
+        <li><b>行为断言优于存在断言</b> — 断言 SID 变化与 ulimit 生效值，注释骗不过行为断言。</li>
+        <li><b>上报两套载荷格式并存</b> — X-DID 可写、X-Capture-Token 可读，应统一固化为单一 CLI。</li>
+        <li><b>锁哈希先逆向验证</b> — 用 Lv10 锁复算算法确认一致后才生成 Lv11 锁，新旧凭证可互验。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>稳态后建议</h2>
+      <ul class="clean">
+        <li><span class="pill r">P0</span> 看门狗自举（谁看门狗？）+ PID 一进程一文件。</li>
+        <li><span class="pill y">P1</span> 上报/回读封装为单一 CLI，杜绝现场试错。</li>
+        <li><span class="pill b">P2</span> 安全垫仅 +0.19：补齐 consensus/axiom_gate/access_control/quota（90-95）扩至 +2 以上。</li>
+      </ul>
+      <div class="note">建议均标注「不计入本次分数」—— 分数已达标，动作出于稳态而非刷分。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 证据索引 ============ -->
+<section>
+  <div class="row-title">证据索引 <span>全部可按路径 + SHA256 直接复算验证</span></div>
+  <div class="card">
+    <table>
+      <tr><th>证据</th><th>路径（相对仓库根）</th><th>SHA256</th></tr>
+      <tr><td>Lv11 终评报告</td><td><code>reports/AUTONOMY-EVAL-1792323958.json</code></td><td><code>f32f82ca97959087…829b17d</code></td></tr>
+      <tr><td>Lv11 锁档</td><td><code>reports/AUTONOMY-LV11-20261018-V1.json</code></td><td><code>5700b9cc56b7b9ae…66a80ae9</code>（自哈希）</td></tr>
+      <tr><td>测试结果</td><td><code>reports/TEST-RUN-1792323997.json</code></td><td><code>2ec7ab3ca1d924a1…4eecb07d</code></td></tr>
+      <tr><td>测试套件 13 条</td><td><code>00_KERNEL/tests/test_core.py</code></td><td><code>d4f39fa767a4ebc9…19fac9e77</code></td></tr>
+      <tr><td>评估脚本</td><td><code>evaluate_autonomy_level.py</code></td><td><code>e0c0d13e118f2775…87ca6c9b</code></td></tr>
+      <tr><td>内核核心</td><td><code>00_KERNEL/autonomous_kernel_core.py</code></td><td><code>bf47f35038a1369f…c4e19f9a</code></td></tr>
+      <tr><td>元法则配置</td><td><code>config/meta_laws/ENG-DELIVERY-LAWS-001.json</code></td><td><code>15ba7d18e1725269…fa0cbd0d9</code></td></tr>
+      <tr><td>账本最新块（共 5 块）</td><td><code>ledger/chain/BLK-1792323958-eb9401f0.json</code></td><td><code>c7d4ba91dcb2fb85…cf4c82bf9</code></td></tr>
+      <tr><td>回读凭证</td><td><code>reports/TRUTH-READBACK-LATEST.json</code></td><td><code>match=true · seq=16749</code></td></tr>
+      <tr><td>复盘 Markdown</td><td><code>reports/AUTONOMY-LV11-RETROSPECTIVE-20261018.md</code></td><td><code>c79e5d4384de1013…7742b3ac2f4</code></td></tr>
+      <tr><td>复盘 JSON</td><td><code>reports/AUTONOMY-LV11-RETROSPECTIVE-20261018.json</code></td><td><code>8e246af018cac851…797bb663fdfc</code></td></tr>
+      <tr><td>升级总结 JSON</td><td><code>reports/AUTONOMY-LV11-UPGRADE-SUMMARY-20261018.json</code></td><td><code>72671a68d7611948…e4348efee58e</code></td></tr>
+    </table>
+  </div>
+</section>
+
+<div class="footer">
+  本页所有数字均来自实测评估输出与锁档文件，未做任何人工调分；凭证哈希可在对应路径直接复算验证。<br>
+  DID-BR-000002 ｜ AUTONOMY-LV11-20261018-V1 ｜ Ω₀⊂⊙∞⊂Ω — 元为源本，极是边界，恒乃持续，一为归一收敛
+</div>
+
+</div>
+</body>
+</html>

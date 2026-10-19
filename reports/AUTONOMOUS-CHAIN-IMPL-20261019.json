@@ -1,0 +1,69 @@
+{
+  "receipt_id": "AUTONOMOUS-CHAIN-IMPL-20261019",
+  "seeds": [
+    "SEED-THREE-STATE-ISOLATION-OPS-V1.0",
+    "SEED-FEDERATED-MEM-KERNEL-V2.0"
+  ],
+  "ts": "2026-10-19T14:55:26.320983+00:00",
+  "mode": "local_in_process_simulation",
+  "chain": [
+    "operator_gate",
+    "federation_validate",
+    "vote",
+    "archive"
+  ],
+  "checks": [
+    {
+      "check": "CH1 闸门放行→联邦校验→归档 全链贯通",
+      "pass": true,
+      "detail": "chain=COMPLETE gate=RATIFIED state=confirmed"
+    },
+    {
+      "check": "CH2 闸门拦截→链路短路(联邦零调用)",
+      "pass": true,
+      "detail": "chain=SHORT_CIRCUIT_AT_GATE 联邦调用增量=0（应为0）"
+    },
+    {
+      "check": "CH3 第二道校验拦截(篡改哈希)",
+      "pass": true,
+      "detail": "chain=ABORTED_AT_VALIDATE code=VALIDATE_FAIL"
+    },
+    {
+      "check": "CH4 数据边界(摘要不含原文)",
+      "pass": true,
+      "detail": "摘要数=1 均无 facts=True"
+    },
+    {
+      "check": "CH5 断点续跑(跳过已完成·闸门不重复放行)",
+      "pass": true,
+      "detail": "中断于=validate 首跑done=['gate', 'validate'] 续跑executed=['vote', 'archive'] skipped=['gate', 'validate'] RATIFIED次数=1"
+    },
+    {
+      "check": "CH6 幂等(完成后再跑零执行)",
+      "pass": true,
+      "detail": "executed=[] skipped=['gate', 'validate', 'vote', 'archive']"
+    },
+    {
+      "check": "CH7 熔断开启→合法意图亦拒",
+      "pass": true,
+      "detail": "gate=REJECTED code=CIRCUIT_OPEN"
+    }
+  ],
+  "passed": "7/7",
+  "verdict": "PASS",
+  "resume": {
+    "checkpoint_file": "/workspace/evolution/autonomous_chain/checkpoint.json",
+    "resumed_task": "I-CH6",
+    "ratify_ledger_entries_for_resumed_task": 1
+  },
+  "honest": {
+    "ssh": false,
+    "distributed": false,
+    "byzantine_fault_tolerance": false,
+    "heuristic_params": {
+      "CIRCUIT_THRESHOLD": 3
+    },
+    "note": "本地进程内仿真；熔断阈值与联邦价值权重为启发式设定，非标定值。"
+  },
+  "provenance": "measured_local_simulation"
+}

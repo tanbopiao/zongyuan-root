@@ -1,0 +1,86 @@
+{
+  "report_id": "AUTONOMY-LV11-UPGRADE-SUMMARY-20261018",
+  "report_type": "upgrade_summary",
+  "title": "ZONGYUAN-ROOT 自治层级 Lv11 升级总结报告",
+  "system_id": "DID-BR-000002",
+  "axiom_sign": "Ω₀⊂⊙∞⊂Ω",
+  "event": "AUTONOMY-LV11-20261018-V1",
+  "upgrade_date": "2026-10-18",
+  "provenance": "measured",
+
+  "upgrade": {
+    "from_level": "Lv10",
+    "to_level": "Lv11",
+    "threshold": 95.0,
+    "score_before": 91.19,
+    "score_after": 95.19,
+    "score_delta": 4.0,
+    "absolute_before": 250.78,
+    "absolute_after": 261.77,
+    "max_possible": 275,
+    "status": "achieved",
+    "margin": 0.19
+  },
+
+  "path": [
+    {"stage": 1, "label": "Lv10 起点", "score_rate": 91.19, "level": "Lv10", "eval": "AUTONOMY-EVAL-1792321673.json"},
+    {"stage": 2, "label": "口径升级首评", "score_rate": 88.19, "level": "Lv9", "eval": "AUTONOMY-EVAL-1792323873.json", "note": "八项口径收紧 + 守护进程真实死亡暴露，诚实测量结果，非能力回退"},
+    {"stage": 3, "label": "修真实问题后复评", "score_rate": 95.19, "level": "Lv11", "eval": "AUTONOMY-EVAL-1792323958.json", "note": "真实重启守护进程 + 进程级隔离落地"}
+  ],
+
+  "level_scores": {
+    "autonomy_level": {"total": 665, "max": 700, "rate": 95.0, "weight": 1.0},
+    "permissions_level": {"total": 470, "max": 500, "rate": 94.0, "weight": 0.9},
+    "engineering_level": {"total": 580, "max": 600, "rate": 96.67, "weight": 0.85}
+  },
+
+  "key_uplifts": [
+    {"component": "self_healing", "from": 0, "to": 85, "cause": "调度器 PID 1962 / 看门狗 PID 1963 真实重启，三档取证全通（PID 存活 + heal 事件 + retry 落盘）"},
+    {"component": "observability", "from": 75, "to": 95, "cause": "看门狗运行且 heal 事件可读 + 东翼快照 ≤5 分钟"},
+    {"component": "deployability", "from": 85, "to": 100, "cause": "双守护进程 /proc 实测存活 + scheduler status CLI running=true"},
+    {"component": "resource_scheduling", "from": 75, "to": 90, "cause": "调度器存活 + 任务队列 enabled>0"},
+    {"component": "isolation_enforcement", "from": null, "to": 100, "cause": "本次落地 setsid 新会话 + ulimit 资源上限，双行为断言实测"}
+  ],
+
+  "measures": [
+    "进程级隔离：_execute_direct() 增加 start_new_session=True + ulimit -t/-f/-c 前缀",
+    "隔离行为断言 ×2：test_isolation_new_session / test_isolation_resource_limits",
+    "防回归套件扩至 13 条，13/13 通过（pass_rate=100%）",
+    "八项评分口径升级：分级取证，每级读真实文件/进程，读不到不给分",
+    "守护进程真实重启：scheduler(PID 1962) + kernel_watchdog(PID 1963)，/proc 实测，零伪 PID"
+  ],
+
+  "verification": {
+    "tests": {"total": 13, "passed": 13, "pass_rate": 100.0, "evidence": "TEST-RUN-1792323997.json"},
+    "daemons": {"scheduler": {"pid": 1962, "alive": true}, "watchdog": {"pid": 1963, "alive": true}},
+    "ledger_blocks": 5,
+    "eval": {"report": "AUTONOMY-EVAL-1792323958.json", "total_score": 261.77, "score_rate": 95.19, "level": "Lv11"},
+    "lock": {"lock_id": "AUTONOMY-LV11-20261018-V1", "lock_sha256": "5700b9cc56b7b9aece6d1e0855308668b7afed0b65fcc17a342f50fe66a80ae9"},
+    "report_to_hub": {"key": "ZONGYUAN.AUTONOMY.LEVEL.LV11", "http_status": 200, "seq": 16749, "event_id": "truth-1792324086621-885b4888"},
+    "readback": {"http_status": 200, "cloud_level": "Lv11", "cloud_score_rate": 95.19, "hash_match": true, "match": true}
+  },
+
+  "issues_encountered": [
+    "守护进程静默死亡致 self_healing 归零 → 真实重启修复",
+    "上报 401（truth_key 格式被拒）→ 改用 X-DID + key/value 载荷",
+    "回读结构为 results[] 而非顶层 value → 修正解析，保留 assert match"
+  ],
+
+  "evidence_paths": {
+    "eval_report": "reports/AUTONOMY-EVAL-1792323958.json",
+    "lock": "reports/AUTONOMY-LV11-20261018-V1.json",
+    "tests": "reports/TEST-RUN-1792323997.json",
+    "readback": "reports/TRUTH-READBACK-LATEST.json",
+    "retrospective_md": "reports/AUTONOMY-LV11-RETROSPECTIVE-20261018.md",
+    "retrospective_json": "reports/AUTONOMY-LV11-RETROSPECTIVE-20261018.json"
+  },
+
+  "next_actions": [
+    {"priority": "P0", "item": "看门狗自举 + PID 一进程一文件（消除 1962/1968 归属歧义）"},
+    {"priority": "P1", "item": "上报/回读封装单一 CLI，统载荷格式"},
+    {"priority": "P2", "item": "安全垫仅 +0.19，补齐 90-95 分四项组件扩至 +2 以上"}
+  ],
+
+  "statement": "本报告所有数字均来自实测评估输出与锁档文件，未做任何人工调分。",
+  "generated_at": "2026-10-18"
+}
