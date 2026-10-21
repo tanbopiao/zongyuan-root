@@ -1,0 +1,47 @@
+{
+  "block_id": "BLK-1792602595-995075e0",
+  "block_hash": "995075e0ad3221fae55511810cadbc1a3448e1a68a965a3977b6156b1a460df4",
+  "merkle_root": "995075e0ad3221fae55511810cadbc1a3448e1a68a965a3977b6156b1a460df4",
+  "prev_block_hash": "be58159eceb2ca4a17eb60f3afa2c2ab39a0b7ef26592b3ae5d67e1f9e976133",
+  "entry": {
+    "type": "status_pipeline_two_flaws_fixed",
+    "record_id": "CLOUD-HUB-STATUS-FLAWS-FIX-20261022",
+    "subject": "status链路两处设计缺陷修复: autonomy硬编码→权威等级文件(Lv11), heartbeat→HEARTBEAT.node.%优先",
+    "fix1": {
+      "file": "/usr/local/bin/status_sync_api.py",
+      "before": "\"autonomy\": \"Lv10\" (硬编码)",
+      "after": "read_level() ← /opt/ZONGYUAN-ROOT/var/autonomy_level.json (fallback Lv10)",
+      "level": "Lv11 source BASELINE-V40"
+    },
+    "fix2": {
+      "before": "heartbeat=最新HEARTBEAT.%行(TODO/RSI竞争)",
+      "after": "优先HEARTBEAT.node.% → fallback HEARTBEAT.%"
+    },
+    "safety": {
+      "backup": "status_sync_api.py.bak-autonomy-hb-20261022-010913 前置备份",
+      "compile": "py_compile OK",
+      "idempotent": true,
+      "mirror": "var/autonomy_level.json 本地持久层镜像"
+    },
+    "verify": {
+      "external": "/api/status autonomy=\"Lv11\" hb=2026-10-22T01:00:03+0800 nodes=2 (01:09:19实测)",
+      "manual_run": "OK ledger=24636"
+    },
+    "cloud_write": {
+      "gateway": "https://www.huodouai.com/api/report/truth",
+      "seq": 25633,
+      "key": "CLOUD.HUB.AUTONOMY-DYNAMIC.HB-PRIORITIZED.20261022"
+    },
+    "limitation": [
+      "Lv11为基线声明非运行时评估产生",
+      "等级文件单点静态, 未接评估循环自动刷新"
+    ],
+    "timestamp": "2026-10-22T01:09:55+08:00",
+    "truth_type": "config",
+    "axiom_sign": "Ω₀⊂⊙∞⊂Ω"
+  },
+  "sorted_at": "2026-10-22T01:09:55+08:00",
+  "溯源标识": "Ω₀⊂⊙∞⊂Ω",
+  "确权编码": "DID-BR-000002",
+  "体系基线": "ZONGYUAN-ROOT V1.0"
+}
