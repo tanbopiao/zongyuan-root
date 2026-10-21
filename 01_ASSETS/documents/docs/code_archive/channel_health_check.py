@@ -34,7 +34,7 @@ from pathlib import Path
 # 配置
 BASE_TOKEN = "AM2VbZ064akRc1sFWw3cVAdTnBg"
 STATUS_TABLE = "tblJg58700JMNxx7"
-MONITOR_DIR = "/home/user/Doubao/chats/1128121028098/monitoring"
+MONITOR_DIR = "/opt/ZONGYUAN-ROOT/monitoring"
 CHANNEL_REPORT = os.path.join(MONITOR_DIR, "channel_health_report.json")
 
 # 通道定义
@@ -186,7 +186,7 @@ def test_feishu_wiki():
 def test_feishu_im():
     """测试飞书IM通道（配置检查）"""
     # 检查是否有配置的群聊ID
-    config_path = "/home/user/Doubao/chats/1128121028098/sync_channels/im_config.json"
+    config_path = "/opt/ZONGYUAN-ROOT/sync_channels/im_config.json"
     if os.path.exists(config_path):
         try:
             with open(config_path) as f:
@@ -252,7 +252,7 @@ def test_memory_gateway():
 
 def test_git():
     """测试Git仓库通道（配置检查）"""
-    git_config = "/home/user/Doubao/chats/1128121028098/sync_channels/git_config.json"
+    git_config = "/opt/ZONGYUAN-ROOT/sync_channels/git_config.json"
     if os.path.exists(git_config):
         try:
             with open(git_config) as f:

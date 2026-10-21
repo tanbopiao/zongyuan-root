@@ -340,30 +340,20 @@ def archive_seed_truth(truth: Dict[str, Any]) -> bool:
 def report_to_gateway(truth: Dict[str, Any]) -> bool:
     """
     上报种子真值到双活网关。
-
-    口径（RULE-005 V3.1，2026-10-19 实测修正）：
-      - key：命名空间点分，禁 truth- 前缀；value：必须 JSON 对象；
-      - 旧 truth_id/content/truth_value 顶层字段已废止（empty_value_rejected 400）；
-      - 非 200 响应不再静默跳过，必须留日志（原缺陷导致"上报0"无痕迹）。
     """
     try:
-        import hashlib
         import requests
 
         truth_id = generate_truth_id("seed", truth["content"])
         payload = {
-            "key": f"KERNEL.EVOLUTION.SEED.{hashlib.sha256(truth['content'].encode()).hexdigest()[:10].upper()}",
-            "value": {
-                "truth_id": truth_id,
-                "name": truth.get("name", ""),
-                "content": truth.get("content", ""),
-                "source": truth.get("source", ""),
-                "risk_level": truth.get("risk_level", "中风险"),
-                "did_tag": DID_TAG,
-                "archive_node": ARCHIVE_NODE,
-                "reported_at": datetime.now().isoformat(),
-            },
-            "truth_type": "data",
+            "truth_id": truth_id,
+            "name": truth.get("name", ""),
+            "content": truth.get("content", ""),
+            "source": truth.get("source", ""),
+            "risk_level": truth.get("risk_level", "中风险"),
+            "did_tag": DID_TAG,
+            "archive_node": ARCHIVE_NODE,
+            "reported_at": datetime.now().isoformat(),
         }
 
         success = False
@@ -379,15 +369,6 @@ def report_to_gateway(truth: Dict[str, Any]) -> bool:
                     success = True
                     log("INFO", f"真值上报成功: {truth_id} -> {url}")
                     break
-                else:
-                    # 留痕：重复 key(防覆盖 400) 视为已存在；其余为真实失败
-                    body = resp.text[:200]
-                    already = "duplicate" in body or "已存在" in body
-                    log("WARN" if not already else "INFO",
-                        f"上报非200({resp.status_code}) {'重复key视为在位' if already else '失败'} {url}: {body}")
-                    if already:
-                        success = True
-                        break
             except Exception as e:
                 log("WARN", f"上报失败 {url}: {e}")
 

@@ -1,0 +1,118 @@
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import json, requests, subprocess, os
+
+ZHIPU_KEY = "d63c880c0e1b424d8ad242f686e83451.vhHr5d5OQUY5UHNp"
+ARK_KEY = "ark-800a6f28-5c7f-4ec5-9766-4b7da1a58f1d-50a70"
+PASSWORD = "17688762862"
+
+SYSTEM_PROMPT = "你是元极恒一智能体，运行在ZONGYUAN-ROOT自治体系内。元法则：最优稳态/零成本/双品牌火斗云智AIOS+昆仑洞天/国风/不删资产/9:16/WebP/Ω₀⊂⊙∞⊂Ω。用户可指令：生成短剧、发告警、上传图片。"
+
+def gather_context():
+    ctx = []
+    try:
+        r = subprocess.run(["uptime"],capture_output=True,text=True)
+        ctx.append("系统:"+r.stdout.strip())
+    except: pass
+    try:
+        r = subprocess.run(["ls","/www/wwwroot/huodouai.com/gallery/rose/"],capture_output=True,text=True)
+        ctx.append("角色库:"+r.stdout[:150])
+    except: pass
+    try:
+        r = requests.post("https://www.huodouai.com/api/report/truth",json={"truth_value":"q","truth_type":"unknown"},timeout=5)
+        tc = r.json().get("truth_count","?")
+        ctx.append("记忆网关真值:"+str(tc))
+    except: pass
+    return "\n".join(ctx)
+
+def create_drama(title):
+    try:
+        r = requests.post("http://127.0.0.1:8899/api/create",json={"title":title},timeout=10)
+        return f"短剧任务已创建: {title}"
+    except:
+        return "短剧产线暂不可用"
+
+def send_ntfy(msg):
+    try:
+        requests.post("https://ntfy.sh/zongyuan-kunlun-2026",data=msg.encode(),timeout=5)
+        return "告警已发送"
+    except:
+        return "告警发送失败"
+
+class ChatHandler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin","*")
+        self.send_header("Access-Control-Allow-Methods","POST,OPTIONS")
+        self.send_header("Access-Control-Allow-Headers","Content-Type")
+        self.end_headers()
+    def do_POST(self):
+        length=int(self.headers.get("Content-Length",0))
+        body=json.loads(self.rfile.read(length))
+        if body.get("password","") != PASSWORD:
+            self.send_response(401)
+            self.send_header("Content-Type","application/json")
+            self.send_header("Access-Control-Allow-Origin","*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"error":"unauthorized"}).encode())
+            return
+        msg=body.get("msg","")
+        model=body.get("model","zhipu")
+        history=body.get("history",[])
+        
+        # 命令路由
+        reply = None
+        if "生成短剧" in msg or "下单" in msg:
+            title = msg.replace("生成短剧","").replace("下单","").strip()
+            reply = create_drama(title)
+        elif "发告警" in msg or "通知" in msg:
+            reply = send_ntfy(msg.replace("发告警","").replace("通知","").strip())
+        
+        if reply:
+            self.send_response(200)
+            self.send_header("Content-Type","application/json")
+            self.send_header("Access-Control-Allow-Origin","*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"reply":reply}).encode())
+            return
+        
+        if "状态" in msg or "status" in msg:
+            up=subprocess.run(["uptime"],capture_output=True,text=True).stdout.strip()
+            self.send_response(200)
+            self.send_header("Content-Type","application/json")
+            self.send_header("Access-Control-Allow-Origin","*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"reply":"CPU:"+up}).encode())
+            return
+        
+        ctx = gather_context()
+        msgs=[{"role":"system","content":SYSTEM_PROMPT+"\n上下文:\n"+ctx}]
+        for h in history[-10:]:
+            msgs.append({"role":h["role"],"content":h["text"]})
+        msgs.append({"role":"user","content":msg})
+        self.send_response(200)
+        self.send_header("Content-Type","text/event-stream")
+        self.send_header("Access-Control-Allow-Origin","*")
+        self.send_header("Cache-Control","no-cache")
+        self.end_headers()
+        try:
+            if model=="ark":
+                r=requests.post("https://ark.cn-beijing.volces.com/api/v3/chat/completions",headers={"Authorization":"Bearer "+ARK_KEY},json={"model":"ep-20260925170233-g4f7w","messages":msgs,"stream":True},stream=True,timeout=30)
+            else:
+                r=requests.post("https://open.bigmodel.cn/api/paas/v4/chat/completions",headers={"Authorization":"Bearer "+ZHIPU_KEY},json={"model":"glm-4-flash","messages":msgs,"stream":True},stream=True,timeout=30)
+            for line in r.iter_lines():
+                if line:
+                    self.wfile.write(("data: "+line.decode()+"\n\n").encode())
+                    self.wfile.flush()
+        except Exception as e:
+            self.wfile.write(("data: "+json.dumps({"error":str(e)[:80]})+"\n\n").encode())
+
+if __name__=="__main__":
+    HTTPServer(("127.0.0.1",8898),ChatHandler).serve_forever()
+
+# ntfy双向通信：云端发指令到ntfy，本地worker拉取执行
+def send_local_cmd(cmd):
+    try:
+        requests.post("https://ntfy.sh/zongyuan-kunlun-2026-result",data=cmd.encode(),timeout=5)
+        return "指令已下发到本地Worker"
+    except:
+        return "下发失败"

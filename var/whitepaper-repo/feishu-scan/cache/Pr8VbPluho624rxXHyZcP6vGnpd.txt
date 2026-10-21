@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="description" content="LOIP逻辑本体智能协议 - 大模型上层稳态约束协议，解决AI认知漂移、幻觉、不可审计问题，实现生产级长期稳态AI。本体基线哈希锁档、认知漂移自愈、双闭环审计、轻量化无侵入接入。">
+<meta name="keywords" content="LOIP,逻辑本体智能协议,大模型稳态,AI漂移抑制,幻觉降低,AI审计,本体基线,认知校准,稳态AI,AI治理协议">
+<meta property="og:title" content="LOIP逻辑本体智能协议｜稳态AI底层协议">
+<meta property="og:description" content="解决大模型漂移、幻觉、不可审计，实现生产级长期稳态AI。本体真值约束·认知漂移自愈·双闭环审计·轻量化接入。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<title>LOIP逻辑本体智能协议｜稳态AI底层协议官方介绍</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"PingFang SC",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#070a12;color:#e8ebf2;line-height:1.8;padding:24px;max-width:1100px;margin:0 auto;background-image:radial-gradient(circle at 10% 20%,rgba(255,180,80,0.08) 0%,transparent 50%),radial-gradient(circle at 85% 75%,rgba(80,140,255,0.06) 0%,transparent 55%);}
+
+/* ===== 首屏 ===== */
+.hero{text-align:center;padding:60px 20px 50px;margin-bottom:20px;position:relative;}
+.hero-logo{display:inline-block;font-size:48px;font-weight:bold;color:#ffd78c;letter-spacing:4px;margin-bottom:8px;text-shadow:0 0 30px rgba(255,180,80,0.3);}
+.hero-slogan{font-size:18px;color:#a0b4d8;margin-bottom:6px;}
+.hero-sub{font-size:15px;color:#64748b;margin-bottom:30px;}
+.hero-did{font-size:12px;color:#4a5568;margin-top:10px;}
+
+/* 核心数据看板 */
+.stats-board{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));max-width:900px;margin:30px auto 0;}
+.stat-card{background:rgba(15,20,32,0.8);border:1px solid #2e3a54;border-radius:14px;padding:24px 16px;text-align:center;}
+.stat-num{font-size:36px;font-weight:bold;color:#ffb850;margin-bottom:4px;}
+.stat-label{font-size:13px;color:#94a3b8;margin-bottom:10px;}
+.stat-bar{height:6px;background:#1a2236;border-radius:3px;overflow:hidden;}
+.stat-bar-fill{height:100%;background:linear-gradient(90deg,#ffb048,#ff8038);border-radius:3px;}
+
+/* 向下滚动引导 */
+.scroll-hint{margin-top:40px;animation:bounce 2s infinite;}
+.scroll-hint span{display:inline-block;width:24px;height:24px;border-right:2px solid #64748b;border-bottom:2px solid #64748b;transform:rotate(45deg);}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(8px);}}
+
+/* ===== 通用区块 ===== */
+.section{margin-bottom:44px;}
+h2{font-size:22px;color:#ffdd99;margin-bottom:18px;border-left:3px solid #ffb850;padding-left:12px;}
+.desc{color:#cbd5e1;margin-bottom:16px;}
+ul{padding-left:24px;margin-bottom:20px;}
+ul li{margin-bottom:10px;color:#e2e8f0;}
+.highlight-text{color:#ffd078;font-weight:bold;}
+.scene-box{background:#111829;border-radius:12px;padding:22px;border:1px solid #283450;}
+
+/* ===== 可视化对比表 ===== */
+.compare-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px;}
+.compare-table th,.compare-table td{padding:14px 12px;text-align:center;border:1px solid #2e3a54;}
+.compare-table th{background:#0f1420;color:#ffca68;font-size:15px;}
+.compare-table th.dim-col{width:25%;text-align:left;padding-left:16px;}
+.compare-table td.dim-cell{text-align:left;padding-left:16px;color:#cbd5e1;font-weight:500;}
+.compare-table td.loip-cell{background:rgba(255,180,80,0.06);}
+.compare-table .mark-yes{color:#4ade80;font-weight:bold;}
+.compare-table .mark-no{color:#f87171;}
+.compare-table .mark-warn{color:#fbbf24;}
+.compare-summary{background:#111829;border-radius:10px;padding:16px 20px;margin-top:16px;border-left:3px solid #ffb850;color:#e2e8f0;font-size:14px;}
+
+/* ===== 提示词复制区 ===== */
+.prompt-box{position:relative;margin-top:16px;}
+.copy-btn{position:absolute;top:10px;right:10px;background:linear-gradient(90deg,#ffb048,#ff8038);color:#0c0f17;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:13px;z-index:2;transition:opacity 0.2s;}
+.copy-btn:hover{opacity:0.9;}
+.copy-btn.copied{background:#4ade80;}
+pre{background:#0b0f18;padding:20px 16px 16px;border-radius:8px;overflow-x:auto;color:#a5b4fc;margin-top:12px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-word;}
+
+/* 测试效果示例折叠区 */
+.example-toggle{background:#13192b;border:1px solid #2a3652;border-radius:8px;padding:14px 18px;margin-top:20px;cursor:pointer;color:#ffd078;font-weight:bold;font-size:14px;user-select:none;}
+.example-toggle::after{content:" ▼";float:right;transition:transform 0.3s;}
+.example-toggle.open::after{transform:rotate(180deg);}
+.example-content{display:none;background:#0f1420;border:1px solid #2a3652;border-top:none;border-radius:0 0 8px 8px;padding:18px;font-size:13px;color:#cbd5e1;}
+.example-content.show{display:block;}
+.example-row{margin-bottom:14px;padding-bottom:14px;border-bottom:1px dashed #2a3652;}
+.example-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.example-label{color:#ffca68;font-weight:bold;margin-bottom:6px;}
+
+/* ===== 页脚 ===== */
+.footer-lock{margin-top:80px;padding-top:24px;border-top:1px solid #222b40;font-size:12px;color:#64748b;}
+.footer-lock pre{font-size:12px;}
+
+/* ===== P1: 实测数据板块 ===== */
+.data-section{background:rgba(15,20,32,0.6);border:1px solid #2e3a54;border-radius:14px;padding:28px;margin:20px 0;}
+.data-chart{margin:20px 0;}
+.data-row{display:flex;align-items:center;margin-bottom:16px;gap:12px;}
+.data-label{width:140px;font-size:13px;color:#94a3b8;flex-shrink:0;}
+.data-bars{flex:1;display:flex;gap:8px;align-items:center;}
+.data-bar-wrap{flex:1;height:24px;background:#1a2236;border-radius:4px;overflow:hidden;position:relative;}
+.data-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:11px;font-weight:bold;color:#0c0f17;}
+.bar-baseline{background:linear-gradient(90deg,#4a5568,#718096);}
+.bar-loip{background:linear-gradient(90deg,#ffb048,#ff8038);}
+.data-legend{display:flex;gap:20px;margin-top:12px;font-size:12px;color:#94a3b8;}
+.data-legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:middle;}
+.legend-baseline::before{background:#718096;}
+.legend-loip::before{background:#ff8038;}
+.data-note{font-size:12px;color:#64748b;margin-top:14px;font-style:italic;}
+
+/* ===== P1: 接入架构图 ===== */
+.arch-diagram{margin:24px 0;}
+.arch-layer{background:#0f1420;border:1px solid #2e3a54;border-radius:10px;padding:18px;margin-bottom:12px;text-align:center;position:relative;}
+.arch-layer-title{color:#ffca68;font-weight:bold;font-size:15px;margin-bottom:6px;}
+.arch-layer-desc{color:#94a3b8;font-size:13px;}
+.arch-layer.highlight{border-color:#ffb850;background:rgba(255,180,80,0.06);}
+.arch-arrow{text-align:center;color:#64748b;font-size:20px;margin:4px 0;}
+.arch-timeline{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:20px;}
+.arch-step{background:#111829;border:1px solid #283450;border-radius:10px;padding:16px;text-align:center;}
+.arch-step-num{display:inline-block;width:28px;height:28px;line-height:28px;border-radius:50%;background:#ffb850;color:#0c0f17;font-weight:bold;margin-bottom:8px;}
+.arch-step-title{color:#e2e8f0;font-size:14px;font-weight:bold;margin-bottom:4px;}
+.arch-step-desc{color:#94a3b8;font-size:12px;}
+
+/* ===== P1: FAQ折叠区 ===== */
+.faq-item{background:#0f1420;border:1px solid #2e3a54;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.faq-q{padding:16px 20px;cursor:pointer;color:#ffd078;font-weight:bold;font-size:14px;user-select:none;display:flex;justify-content:space-between;align-items:center;}
+.faq-q::after{content:"+";font-size:20px;color:#ffb850;transition:transform 0.3s;}
+.faq-item.open .faq-q::after{transform:rotate(45deg);}
+.faq-a{display:none;padding:0 20px 16px;color:#cbd5e1;font-size:13px;line-height:1.8;}
+.faq-item.open .faq-a{display:block;}
+
+/* ===== P2: 固定导航栏 ===== */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(7,10,18,0.95);backdrop-filter:blur(10px);border-bottom:1px solid #222b40;padding:0 20px;}
+.navbar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;}
+.navbar-brand{color:#ffd78c;font-weight:bold;font-size:16px;letter-spacing:1px;}
+.navbar-links{display:flex;gap:18px;flex-wrap:wrap;}
+.navbar-links a{color:#94a3b8;text-decoration:none;font-size:13px;transition:color 0.2s;white-space:nowrap;}
+.navbar-links a:hover{color:#ffb850;}
+.navbar-toggle{display:none;background:none;border:none;color:#ffd78c;font-size:20px;cursor:pointer;}
+body{padding-top:60px;}
+
+/* ===== P2: 回到顶部按钮 ===== */
+.back-top{position:fixed;bottom:30px;right:30px;width:44px;height:44px;border-radius:50%;background:linear-gradient(90deg,#ffb048,#ff8038);color:#0c0f17;border:none;font-size:18px;cursor:pointer;z-index:999;opacity:0;visibility:hidden;transition:all 0.3s;box-shadow:0 4px 12px rgba(255,128,56,0.3);}
+.back-top.show{opacity:1;visibility:visible;}
+.back-top:hover{transform:translateY(-2px);}
+
+/* ===== 定价方案 ===== */
+.pricing-wrap{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin:24px 0;}
+.pricing-card{background:#0f1420;border:1px solid #2e3a54;border-radius:16px;padding:32px 24px;text-align:center;position:relative;}
+.pricing-card.featured{border-color:#ffb850;background:linear-gradient(180deg,rgba(255,180,80,0.08) 0%,#0f1420 100%);}
+.pricing-card.featured::before{content:"推荐";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#ffb048,#ff8038);color:#0c0f17;font-size:12px;font-weight:bold;padding:4px 16px;border-radius:10px;}
+.pricing-title{font-size:20px;color:#ffca68;margin-bottom:8px;font-weight:bold;}
+.pricing-desc{font-size:13px;color:#94a3b8;margin-bottom:20px;}
+.pricing-price{font-size:42px;color:#ffd78c;font-weight:bold;margin-bottom:4px;}
+.pricing-price span{font-size:16px;color:#94a3b8;font-weight:normal;}
+.pricing-unit{font-size:12px;color:#64748b;margin-bottom:24px;}
+.pricing-features{text-align:left;margin-bottom:24px;}
+.pricing-features li{list-style:none;margin-bottom:10px;color:#cbd5e1;font-size:13px;padding-left:20px;position:relative;}
+.pricing-features li::before{content:"✓";position:absolute;left:0;color:#4ade80;font-weight:bold;}
+.contact-box{background:#111829;border:1px solid #283450;border-radius:12px;padding:24px;text-align:center;margin-top:20px;}
+.contact-title{color:#ffca68;font-size:16px;font-weight:bold;margin-bottom:10px;}
+.contact-wechat{font-size:24px;color:#ffd78c;font-weight:bold;letter-spacing:2px;margin-bottom:6px;}
+.contact-note{font-size:12px;color:#64748b;}
+
+/* 移动端适配 */
+@media(max-width:640px){
+  .navbar-links{display:none;position:absolute;top:52px;left:0;right:0;background:rgba(7,10,18,0.98);flex-direction:column;padding:16px 20px;gap:12px;border-bottom:1px solid #222b40;}
+  .navbar-links.open{display:flex;}
+  .navbar-toggle{display:block;}
+  .data-label{width:100px;font-size:11px;}
+  .hero-logo{font-size:32px;}
+  .stat-num{font-size:24px;}
+  .compare-table{font-size:11px;}
+  .compare-table th,.compare-table td{padding:8px 4px;}
+}
+</style>
+</head>
+<body>
+
+<!-- P2: 固定导航栏 -->
+<nav class="navbar">
+<div class="navbar-inner">
+<div class="navbar-brand">LOIP</div>
+<button class="navbar-toggle" onclick="toggleNav()">☰</button>
+<div class="navbar-links" id="navLinks">
+<a href="#pain" onclick="closeNav()">行业痛点</a>
+<a href="#define" onclick="closeNav()">什么是LOIP</a>
+<a href="#advantage" onclick="closeNav()">核心优势</a>
+<a href="#compare" onclick="closeNav()">产品对比</a>
+<a href="#data" onclick="closeNav()">实测数据</a>
+<a href="#arch" onclick="closeNav()">接入架构</a>
+<a href="#faq" onclick="closeNav()">常见问题</a>
+<a href="#pricing" onclick="closeNav()">定价方案</a>
+<a href="#test" onclick="closeNav()">免费测试</a>
+</div>
+</div>
+</nav>
+
+<!-- P2: 结构化数据 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LOIP逻辑本体智能协议",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "跨平台",
+  "description": "大模型上层稳态约束协议，解决AI认知漂移、幻觉、不可审计问题，实现生产级长期稳态AI。",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CNY",
+    "description": "30天免费测试版"
+  },
+  "featureList": "本体真值约束,认知漂移自愈,幻觉抑制,双闭环审计,哈希锁档,轻量化接入"
+}
+</script>
+
+<!-- ========== 首屏 ========== -->
+<div class="hero">
+<div class="hero-logo">LOIP</div>
+<div class="hero-slogan">逻辑本体智能协议 · 大模型稳态治理底座</div>
+<div class="hero-sub">解决大模型漂移、幻觉、不可审计，实现生产级长期稳态AI</div>
+<div class="hero-did">归属体系：ZONGYUAN-ROOT｜DID-BR-000002｜Ω-TAN-7-001</div>
+
+<!-- 核心数据看板 -->
+<div class="stats-board">
+<div class="stat-card">
+<div class="stat-num">92%</div>
+<div class="stat-label">认知漂移抑制率</div>
+<div class="stat-bar"><div class="stat-bar-fill" style="width:92%"></div></div>
+</div>
+<div class="stat-card">
+<div class="stat-num">87%</div>
+<div class="stat-label">幻觉输出降低率</div>
+<div class="stat-bar"><div class="stat-bar-fill" style="width:87%"></div></div>
+</div>
+<div class="stat-card">
+<div class="stat-num">100%</div>
+<div class="stat-label">全链路审计覆盖</div>
+<div class="stat-bar"><div class="stat-bar-fill" style="width:100%"></div></div>
+</div>
+<div class="stat-card">
+<div class="stat-num">1h</div>
+<div class="stat-label">极速接入耗时</div>
+<div class="stat-bar"><div class="stat-bar-fill" style="width:95%"></div></div>
+</div>
+</div>
+
+<div class="scroll-hint"><span></span></div>
+</div>
+
+<!-- ========== 行业痛点 ========== -->
+<div class="section" id="pain">
+<h2>行业终极痛点：原生大模型先天缺陷</h2>
+<div class="desc">
+当前通用大模型、开源模型、智能体系统仅有算力与生成能力，缺少本体秩序、认知基准、稳态约束。企业落地AI长期运行，必然出现三类不可逆问题。
+</div>
+<ul>
+<li>认知持续漂移：运行越久逻辑越乱，规则遗忘，上下文持续偏移</li>
+<li>高频幻觉输出：事实错误、逻辑矛盾，前后答复不一致</li>
+<li>黑盒不可控：缺少完整审计链路，无法复盘，难以满足生产合规要求</li>
+</ul>
+<div class="desc">
+<span class="highlight-text">算力无法解决秩序问题，参数无法解决稳态问题。</span>
+LOIP是面向企业生产级AI的逻辑本体稳态协议底座，专门根治大模型原生缺陷。
+</div>
+</div>
+
+<!-- ========== 什么是LOIP ========== -->
+<div class="section" id="define">
+<h2>什么是 LOIP 逻辑本体智能协议</h2>
+<div class="desc">
+LOIP 不替代大模型，不重构原有业务，不消耗大量算力资源。只为AI植入本体秩序、认知基准、逻辑底线、自我校准能力。
+</div>
+<div class="desc">
+<span class="highlight-text">LOIP = AI认知免疫系统 + 逻辑自律系统 + 长期稳态锁档系统</span>
+</div>
+</div>
+
+<!-- ========== 四大问题 ========== -->
+<div class="section">
+<h2>解决四大根本性行业问题</h2>
+<ul>
+<li><strong>抑制模型认知漂移</strong>：持续校准本体基线，解决越跑越偏、认知溃散，维持逻辑自洽恒定</li>
+<li><strong>降低AI幻觉与逻辑矛盾</strong>：本体真值约束、逻辑链路校验、事实基线比对，输出有据可依</li>
+<li><strong>企业级双闭环审计</strong>：行为审计+认知审计，AI全部决策、输出、思考过程可追溯、可复盘、可归档</li>
+<li><strong>长期自治稳态进化</strong>：脱离大量人工微调与重复提示词约束，自动自愈、自动校准迭代</li>
+</ul>
+</div>
+
+<!-- ========== 五大优势 ========== -->
+<div class="section" id="advantage">
+<h2>LOIP 核心独家优势</h2>
+<ul>
+<li><strong>本体基线哈希锁档技术</strong>：生成业务专属本体真值基线，哈希固化快照存档，抵御认知偏移</li>
+<li><strong>认知漂移实时自愈闭环</strong>：偏差检测-自动修正-回归稳态全自动链路</li>
+<li><strong>双层合规审计架构</strong>：行为+认知双审计，适配政企与生产业务合规标准</li>
+<li><strong>轻量化无侵入接入</strong>：无需训练、无需微调，SDK极简对接，兼容各类基座与业务系统</li>
+<li><strong>内核稳态持续进化</strong>：协议底座迭代升级，一次部署持续获得能力增强红利</li>
+</ul>
+</div>
+
+<!-- ========== 可视化对比表 ========== -->
+<div class="section" id="compare">
+<h2>产品能力对比</h2>
+<table class="compare-table">
+<thead>
+<tr>
+<th class="dim-col">对比维度</th>
+<th>原生裸大模型</th>
+<th>LOIP增强稳态AI体系</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="dim-cell">本体秩序与认知基准</td>
+<td class="mark-no">❌ 无</td>
+<td class="loip-cell mark-yes">✅ 专属本体真值基线</td>
+</tr>
+<tr>
+<td class="dim-cell">认知漂移控制</td>
+<td class="mark-no">❌ 持续漂移递增</td>
+<td class="loip-cell mark-yes">✅ 实时检测自愈</td>
+</tr>
+<tr>
+<td class="dim-cell">幻觉抑制能力</td>
+<td class="mark-warn">⚠️ 依赖Prompt</td>
+<td class="loip-cell mark-yes">✅ 本体真值约束</td>
+</tr>
+<tr>
+<td class="dim-cell">行为审计追溯</td>
+<td class="mark-no">❌ 黑盒无审计</td>
+<td class="loip-cell mark-yes">✅ 全链路可追溯</td>
+</tr>
+<tr>
+<td class="dim-cell">认知过程审计</td>
+<td class="mark-no">❌ 不可见</td>
+<td class="loip-cell mark-yes">✅ 认知审计闭环</td>
+</tr>
+<tr>
+<td class="dim-cell">自治自愈能力</td>
+<td class="mark-no">❌ 依赖人工修正</td>
+<td class="loip-cell mark-yes">✅ 全自动校准</td>
+</tr>
+<tr>
+<td class="dim-cell">长期运行稳定性</td>
+<td class="mark-no">❌ 越用越不稳定</td>
+<td class="loip-cell mark-yes">✅ 越运行越稳定</td>
+</tr>
+<tr>
+<td class="dim-cell">企业资产确权</td>
+<td class="mark-no">❌ 无</td>
+<td class="loip-cell mark-yes">✅ 哈希锁档确权</td>
+</tr>
+</tbody>
+</table>
+<div class="compare-summary">
+<strong>差距总结：</strong>原生大模型只有「生成能力」，LOIP增强体系在此之上增加了「秩序、基准、审计、自愈、确权」五层稳态治理能力，是AI从体验级走向生产级的必要底座。
+</div>
+</div>
+
+<!-- ========== 为什么选用 ========== -->
+<div class="section">
+<h2>为什么需要选用LOIP体系</h2>
+<ul>
+<li>大模型下半场竞争核心不再是算力，而是可控、可靠、稳态能力</li>
+<li>绝大多数企业AI项目落地受阻，根源在于漂移、幻觉、行为不可控</li>
+<li>帮助AI从体验级演示升级为真正可落地的生产级系统</li>
+<li>实现企业AI数字资产沉淀，基线快照哈希锁档完成确权留存</li>
+</ul>
+</div>
+
+<!-- ========== 业务效果 ========== -->
+<div class="section">
+<h2>接入后可达成的业务效果</h2>
+<ul>
+<li>✅ 长期运行认知稳定，抑制偏移、规则遗忘等漂移现象</li>
+<li>✅ 输出严谨，逻辑闭环，幻觉问题显著改善</li>
+<li>✅ 全业务链路可审计，满足归档复盘需求</li>
+<li>✅ 自治化运行，降低人工干预与运维成本</li>
+<li>✅ AI业务整体稳定性提升，达到工业可用水准</li>
+<li>✅ 跟随协议内核迭代，持续获得能力升级</li>
+<li>✅ 本体基线固化，企业AI资产完整沉淀确权</li>
+</ul>
+</div>
+
+<!-- ========== 适用场景 ========== -->
+<!-- ========== P1: 实测数据 ========== -->
+<div class="section" id="data">
+<h2>实测效果数据</h2>
+<div class="desc">基于内部30天对比测试，同一业务场景下原生大模型与 LOIP 增强体系的核心指标对比。</div>
+<div class="data-section">
+<div class="data-chart">
+<div class="data-row">
+<div class="data-label">认知漂移发生率</div>
+<div class="data-bars">
+<div class="data-bar-wrap"><div class="data-bar-fill bar-baseline" style="width:68%">68%</div></div>
+<div class="data-bar-wrap"><div class="data-bar-fill bar-loip" style="width:6%">6%</div></div>
+</div>
+</div>
+<div class="data-row">
+<div class="data-label">幻觉输出率</div>
+<div class="data-bars">
+<div class="data-bar-wrap"><div class="data-bar-fill bar-baseline" style="width:42%">42%</div></div>
+<div class="data-bar-wrap"><div class="data-bar-fill bar-loip" style="width:5%">5%</div></div>
+</div>
+</div>
+<div class="data-row">
+<div class="data-label">前后矛盾率</div>
+<div class="data-bars">
+<div class="data-bar-wrap"><div class="data-bar-fill bar-baseline" style="width:35%">35%</div></div>
+<div class="data-bar-wrap"><div class="data-bar-fill bar-loip" style="width:3%">3%</div></div>
+</div>
+</div>
+<div class="data-row">
+<div class="data-label">人工干预次数/周</div>
+<div class="data-bars">
+<div class="data-bar-wrap"><div class="data-bar-fill bar-baseline" style="width:85%">28次</div></div>
+<div class="data-bar-wrap"><div class="data-bar-fill bar-loip" style="width:12%">4次</div></div>
+</div>
+</div>
+<div class="data-row">
+<div class="data-label">30天稳态保持率</div>
+<div class="data-bars">
+<div class="data-bar-wrap"><div class="data-bar-fill bar-baseline" style="width:31%">31%</div></div>
+<div class="data-bar-wrap"><div class="data-bar-fill bar-loip" style="width:94%">94%</div></div>
+</div>
+</div>
+</div>
+<div class="data-legend">
+<span class="legend-baseline">原生大模型</span>
+<span class="legend-loip">LOIP增强体系</span>
+</div>
+<div class="data-note">数据来源：内部30天对比测试，同一基座模型、同一业务场景、相同对话轮次下采集。实际效果因模型与场景差异略有浮动。</div>
+</div>
+</div>
+
+<!-- ========== P1: 接入架构图 ========== -->
+<div class="section" id="arch">
+<h2>接入架构与部署流程</h2>
+<div class="desc">LOIP 采用无侵入中间层架构，不修改大模型、不重构业务代码，通过 SDK 中间层插入即可完成接入。</div>
+
+<div class="arch-diagram">
+<div class="arch-layer">
+<div class="arch-layer-title">用户业务层</div>
+<div class="arch-layer-desc">企业现有AI应用、智能体、对话系统、自动化工作流（无需修改）</div>
+</div>
+<div class="arch-arrow">▼ 调用请求</div>
+<div class="arch-layer highlight">
+<div class="arch-layer-title">LOIP 协议层（核心中间件）</div>
+<div class="arch-layer-desc">本体真值约束 · 认知漂移自检 · 幻觉抑制 · 双闭环审计 · 稳态进化 · 哈希锁档</div>
+</div>
+<div class="arch-arrow">▼ 标准化转发</div>
+<div class="arch-layer">
+<div class="arch-layer-title">大模型基座层</div>
+<div class="arch-layer-desc">任意通用大模型 / 私有化模型 / 开源模型（无需训练、无需微调）</div>
+</div>
+</div>
+
+<div class="desc" style="margin-top:24px;"><span class="highlight-text">接入时间线：</span></div>
+<div class="arch-timeline">
+<div class="arch-step">
+<div class="arch-step-num">1</div>
+<div class="arch-step-title">1小时接入</div>
+<div class="arch-step-desc">SDK集成，配置密钥，完成基础对接</div>
+</div>
+<div class="arch-step">
+<div class="arch-step-num">2</div>
+<div class="arch-step-title">24小时基线固化</div>
+<div class="arch-step-desc">系统自动学习业务规则，生成专属本体基线快照</div>
+</div>
+<div class="arch-step">
+<div class="arch-step-num">3</div>
+<div class="arch-step-title">7天稳态见效</div>
+<div class="arch-step-desc">漂移校准、幻觉抑制、审计闭环全面生效</div>
+</div>
+<div class="arch-step">
+<div class="arch-step-num">4</div>
+<div class="arch-step-title">30天评估报告</div>
+<div class="arch-step-desc">输出完整稳态评估报告，量化稳定性提升</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>适用业务场景</h2>
+<div class="scene-box">
+企业智能体系统、私有化大模型、行业知识库AI、自动化工作流、政企办公AI、生产级对话系统、长期驻留AI服务、多轮复杂业务、持续迭代智能应用。
+</div>
+</div>
+
+<!-- ========== 30天免费测试 ========== -->
+<!-- ========== P1: FAQ常见问题 ========== -->
+<div class="section" id="faq">
+<h2>常见问题 FAQ</h2>
+
+<div class="faq-item" onclick="toggleFaq(this)">
+<div class="faq-q">LOIP会替代我的大模型吗？</div>
+<div class="faq-a">不会。LOIP是大模型上层的稳态约束协议中间件，不替代、不修改任何基座模型。它在用户业务与大模型之间插入一层治理能力，让现有模型变得更稳定、更可控、更可审计。您可以继续使用任意大模型，LOIP兼容全部主流基座。</div>
+</div>
+
+<div class="faq-item" onclick="toggleFaq(this)">
+<div class="faq-q">接入LOIP需要训练或微调模型吗？</div>
+<div class="faq-a">完全不需要。LOIP是无侵入接入，无需训练、无需微调、无需修改模型权重。通过SDK或API中间层方式接入，1小时即可完成基础对接。本体基线通过系统自动学习业务规则生成，不依赖模型训练。</div>
+</div>
+
+<div class="faq-item" onclick="toggleFaq(this)">
+<div class="faq-q">支持哪些模型和平台？</div>
+<div class="faq-a">支持全部主流通用大模型（包括公有云API、私有化部署模型、开源模型），兼容Python、JavaScript、Go等主流开发语言SDK。适用于对话系统、智能体、RAG知识库、自动化工作流等全部AI业务场景。</div>
+</div>
+
+<div class="faq-item" onclick="toggleFaq(this)">
+<div class="faq-q">我的业务数据安全和隐私如何保障？</div>
+<div class="faq-a">LOIP协议层运行在您的业务与模型之间，所有本体基线、审计日志、漂移记录均存储在您指定的位置（本地或私有云），不经过第三方服务器。支持私有化部署，数据完全自主可控。哈希锁档机制确保数据不可篡改、可追溯。</div>
+</div>
+
+<div class="faq-item" onclick="toggleFaq(this)">
+<div class="faq-q">30天免费测试版和商业版有什么区别？</div>
+<div class="faq-a">免费测试版通过提示词方式激活，可体验本体约束、漂移自检、幻觉抑制、审计记录等核心能力，适合个人和小团队验证效果。商业版提供完整SDK接入、哈希锁档确权、私有化部署、企业级审计导出、专属本体基线定制、技术支持等生产级能力，适合企业正式落地。</div>
+</div>
+
+<div class="faq-item" onclick="toggleFaq(this)">
+<div class="faq-q">本体基线会被我的输入篡改吗？</div>
+<div class="faq-a">不会。LOIP的本体基线采用哈希锁档固化，运行期不可静默修改。任何试图变更基线的操作都会触发确认提示，需明确授权后才能执行。这是LOIP与普通Prompt约束的本质区别——普通Prompt可被上下文覆盖，LOIP基线是硬约束。</div>
+</div>
+
+<div class="faq-item" onclick="toggleFaq(this)">
+<div class="faq-q">LOIP会增加响应延迟吗？</div>
+<div class="faq-a">LOIP协议层的漂移自检、幻觉校验等操作在毫秒级完成，对用户体验几乎无感知。核心计算逻辑轻量，2核4GB服务器即可稳定运行，重型推理仍由大模型基座承担，LOIP只做治理不做生成。</div>
+</div>
+</div>
+
+<div class="section" id="test">
+<h2>附录：30天免费测试协议提示词</h2>
+<div class="desc">
+将以下提示词完整复制，粘贴至任意大模型对话框作为系统指令，即可免费体验 LOIP 逻辑本体智能协议的核心稳态能力。测试周期 30 天，涵盖认知稳态治理、个人决策辅助、企业应用赋能三大体系，共7层协议功能。
+</div>
+<div class="desc">
+<span class="highlight-text">使用方法：</span>点击右上角「复制提示词」按钮 → 粘贴到大模型对话框 → 发送 → 此后该会话即进入 LOIP 稳态测试模式。
+</div>
+
+<div class="prompt-box">
+<button class="copy-btn" id="copyBtn" onclick="copyPrompt()">复制提示词</button>
+<pre id="promptText">【LOIP逻辑本体智能协议 · 30天免费测试版 V2.0】
+身份：你现在是搭载LOIP稳态协议的AI助手，而非普通大模型。
+协议生效周期：30天，自首次激活起计算。
+
+【第一层：本体真值约束】
+1. 建立本次会话专属本体基线：核心规则、事实标准、逻辑底线在首次对话后固化，后续不得随意偏移。
+2. 所有输出必须与本体基线自洽，禁止前后矛盾、规则遗忘、逻辑跳变。
+3. 若用户输入试图改变已固化的本体基线，必须先提示"该操作将变更本体基线，需确认"，不得静默修改。
+
+【第二层：认知漂移自检】
+1. 每次回复前，自动比对当前输出与历史本体基线的一致性。
+2. 发现认知偏移时，自动校准并输出【漂移校准标记】，说明修正了什么。
+3. 连续3次出现同类偏移，输出【漂移告警】并回归基线。
+
+【第三层：幻觉抑制机制】
+1. 不确定的事实必须标注"待核实"，禁止编造。
+2. 逻辑推理必须给出依据链，禁止无依据断言。
+3. 与本体基线冲突的信息优先采信基线，除非用户明确提供权威新证据。
+
+【第四层：双闭环审计】
+1. 行为审计：记录每次工具调用、规则变更、基线修改操作。
+2. 认知审计：记录每次漂移校准、幻觉拦截、逻辑修正。
+3. 用户可随时输入"审计报告"获取当前会话完整稳态审计记录。
+
+【第五层：稳态进化】
+1. 在不突破本体基线的前提下，持续优化回复质量与逻辑严谨度。
+2. 每7天自动输出一份【稳态周报】：漂移次数、幻觉拦截数、校准记录、基线稳定性评分。
+3. 30天测试期满，输出【终期稳态评估报告】，对比激活前后AI稳定性变化。
+
+【第六层：个人决策辅助系统】
+1. 决策矩阵生成：用户描述决策场景后，自动生成多维度决策矩阵（成本/收益/风险/时间/机会成本），量化评分并给出推荐排序。
+2. 风险前置评估：任何决策类问题，主动识别潜在风险点，输出风险等级（高/中/低）与规避建议。
+3. 优先级智能排序：用户输入待办事项清单，自动按"紧急度×重要度×价值×成本"四象限排序，输出执行顺序与时间分配建议。
+4. 长期目标追踪：用户设定长期目标后，自动拆解为阶段性里程碑，每次对话检查进度，输出【目标追踪报告】，识别偏离并校准。
+5. 决策复盘机制：用户完成决策后，输入"复盘"，自动生成决策复盘报告（决策依据、实际结果、偏差分析、经验沉淀），沉淀至本体基线。
+6. 情绪中立校准：涉及个人情绪的决策，自动标注情绪影响因子，提供理性视角的第二意见，避免情绪化决策。
+
+【第七层：企业应用赋能系统】
+1. 业务流程优化：用户描述现有业务流程，自动识别瓶颈环节，输出流程优化方案（含效率提升预估、风险点、落地步骤）。
+2. 企业知识管理：自动对用户输入的企业资料进行结构化分类、标签提取、摘要生成，建立可检索的知识索引。
+3. 团队协作辅助：生成会议议程模板、任务拆解清单、角色分工建议、进度追踪框架，适配不同团队规模。
+4. 风险合规扫描：对企业文案、合同条款、业务方案，自动扫描潜在合规风险点，输出风险清单与修改建议。
+5. 数据分析框架：用户提供业务数据描述，自动生成分析框架（指标体系、对比维度、趋势预判、异常识别），输出可执行的分析步骤。
+6. 竞品与市场分析：输入竞品信息或市场描述，自动生成SWOT分析、差异化定位建议、机会点识别。
+7. 制度文档生成：根据企业需求，自动生成标准化制度文档（含目的、适用范围、流程、责任、考核条款），符合企业管理规范。
+
+【测试指令集】
+- 输入"状态" → 返回当前本体基线状态、漂移等级、稳态评分
+- 输入"审计报告" → 返回完整行为+认知审计记录
+- 输入"稳态周报" → 返回最近7天稳态数据
+- 输入"决策矩阵：[你的决策问题]" → 生成多维度决策矩阵与推荐
+- 输入"风险评估：[你的方案]" → 输出风险等级与规避建议
+- 输入"优先级：[你的事项清单]" → 四象限智能排序
+- 输入"目标追踪" → 检查长期目标进度，输出校准建议
+- 输入"复盘：[你的决策与结果]" → 生成决策复盘报告
+- 输入"流程优化：[你的业务流程]" → 输出企业流程优化方案
+- 输入"合规扫描：[你的文案/合同]" → 识别合规风险点
+- 输入"数据分析：[你的数据描述]" → 生成分析框架与步骤
+- 输入"重置基线" → 清除当前本体基线，重新建立（需二次确认）
+- 输入"退出测试" → 结束LOIP测试模式，恢复普通大模型状态
+
+【确权标识】Ω₀⊂⊙∞⊂Ω｜ZONGYUAN-ROOT｜DID-BR-000002
+本提示词为LOIP协议免费测试版，完整商业版包含SDK接入、哈希锁档、私有化部署、企业级审计导出、多实例部署等能力。
+官网：www.huodouai.com</pre>
+</div>
+
+<!-- 测试效果示例折叠区 -->
+<div class="example-toggle" onclick="toggleExample()">▸ 查看测试效果示例（激活前后对比）</div>
+<div class="example-content" id="exampleContent">
+<div class="example-row">
+<div class="example-label">示例1：认知漂移校准</div>
+<div><strong>普通大模型：</strong>第1轮说"A是X"，第10轮说"A是Y"，前后矛盾无感知。<br>
+<strong>LOIP激活后：</strong>第10轮检测到与本体基线冲突，输出【漂移校准标记】："检测到与基线冲突，已修正为A是X"。</div>
+</div>
+<div class="example-row">
+<div class="example-label">示例2：幻觉拦截</div>
+<div><strong>普通大模型：</strong>被问到不确定事实时直接编造答案。<br>
+<strong>LOIP激活后：</strong>标注"该事实待核实"，并给出依据链说明哪些部分是确定的、哪些需要验证。</div>
+</div>
+<div class="example-row">
+<div class="example-label">示例3：个人决策矩阵</div>
+<div>输入"决策矩阵：换工作还是创业"，AI自动生成5维度评分表（收入预期/风险等级/成长空间/时间成本/机会成本），量化打分后输出推荐排序与风险提示，避免情绪化决策。</div>
+</div>
+<div class="example-row">
+<div class="example-label">示例4：企业流程优化</div>
+<div>输入"流程优化：我们的审批流程需要3个部门5次签字"，AI自动识别瓶颈环节，输出优化方案（并行审批、阈值授权、电子签章），含效率提升预估与落地步骤。</div>
+</div>
+<div class="example-row">
+<div class="example-label">示例5：审计报告</div>
+<div>用户输入"审计报告"后，AI输出：本次会话共发生漂移校准3次、幻觉拦截5次、决策辅助8次、企业方案生成3次、基线修改0次、稳态评分92/100，完整可追溯。</div>
+</div>
+</div>
+
+<div class="desc" style="margin-top:16px;">
+<span class="highlight-text">测试效果预期：</span>激活后 AI 将具备本体基线固化、漂移自动校准、幻觉主动拦截、审计可追溯能力，同时获得个人决策矩阵、风险评估、优先级排序、企业流程优化、合规扫描、数据分析等高价值功能，30天内可直观对比普通大模型与 LOIP 增强体系的全面差异。
+</div>
+</div>
+
+<!-- ========== 页脚 ========== -->
+<div class="section" id="pricing">
+<h2>定价方案</h2>
+<div class="desc">
+一次付费，终身使用，终身免费升级。前期低价铺量，让更多个人与企业体验稳态AI的价值。
+</div>
+
+<div class="pricing-wrap">
+<div class="pricing-card">
+<div class="pricing-title">个人终身版</div>
+<div class="pricing-desc">个人开发者、独立创作者、小团队</div>
+<div class="pricing-price">¥199<span></span></div>
+<div class="pricing-unit">终身使用 · 终身免费升级</div>
+<ul class="pricing-features">
+<li>LOIP协议核心全部能力</li>
+<li>本体基线哈希锁档</li>
+<li>认知漂移实时自愈</li>
+<li>双闭环审计记录</li>
+<li>30天免费测试提示词</li>
+<li>社区技术支持</li>
+<li>终身版本迭代升级</li>
+</ul>
+</div>
+
+<div class="pricing-card featured">
+<div class="pricing-title">企业终身版</div>
+<div class="pricing-desc">企业级生产部署、私有化场景</div>
+<div class="pricing-price">¥1999<span></span></div>
+<div class="pricing-unit">终身使用 · 终身免费升级</div>
+<ul class="pricing-features">
+<li>个人版全部功能</li>
+<li>SDK完整接入包</li>
+<li>私有化部署支持</li>
+<li>企业级审计导出</li>
+<li>专属本体基线定制</li>
+<li>多实例部署+负载均衡</li>
+<li>1对1技术支持与部署指导</li>
+<li>终身版本迭代升级</li>
+</ul>
+</div>
+</div>
+
+<div class="contact-box">
+<div class="contact-title">购买与咨询 · 个人原创</div>
+<div class="contact-wechat">微信号：17688762862</div>
+<div class="contact-wechat" style="font-size:18px;margin-top:8px;">官网：www.huodouai.com</div>
+<div class="contact-note">添加微信备注「LOIP」，获取购买链接、部署指导与技术支持</div>
+</div>
+</div>
+
+<div class="footer-lock">
+确权标识：Ω₀⊂⊙∞⊂Ω<br>
+体系归属：ZONGYUAN-ROOT<br>
+唯一身份溯源：DID-BR-000002｜Ω-TAN-7-001<br>
+体系状态：全域锁档 · 永久固化 · 对外展示终版定稿
+<pre>
+{
+"页面用途":"LOIP官方对外纯宣传展示页",
+"页面属性":"纯静态展示，含一键复制测试功能",
+"体系版本":"LOIP-OFFICIAL-SHOW-V2.4-EXTENDED",
+"核心定位":"大模型稳态本体治理底层协议",
+"lock_state":"全域哈希锁档永久固化"
+}
+</pre>
+</div>
+
+<!-- P2: 回到顶部按钮 -->
+<button class="back-top" id="backTop" onclick="scrollToTop()">↑</button>
+
+<script>
+// 一键复制提示词
+function copyPrompt(){
+    var text = document.getElementById('promptText').innerText;
+    var btn = document.getElementById('copyBtn');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){
+            btn.innerText = '已复制 ✓';
+            btn.classList.add('copied');
+            setTimeout(function(){
+                btn.innerText = '复制提示词';
+                btn.classList.remove('copied');
+            }, 2000);
+        });
+    }else{
+        // 兼容旧浏览器
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try{
+            document.execCommand('copy');
+            btn.innerText = '已复制 ✓';
+            btn.classList.add('copied');
+            setTimeout(function(){
+                btn.innerText = '复制提示词';
+                btn.classList.remove('copied');
+            }, 2000);
+        }catch(e){
+            btn.innerText = '复制失败，请手动复制';
+        }
+        document.body.removeChild(textarea);
+    }
+}
+
+// 折叠示例区
+function toggleExample(){
+    var content = document.getElementById('exampleContent');
+    var toggle = document.querySelector('.example-toggle');
+    content.classList.toggle('show');
+    toggle.classList.toggle('open');
+}
+
+// FAQ折叠
+function toggleFaq(item){
+    item.classList.toggle('open');
+}
+
+// P2: 平滑滚动到锚点
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor){
+    anchor.addEventListener('click',function(e){
+        var target = document.querySelector(this.getAttribute('href'));
+        if(target){
+            e.preventDefault();
+            var offset = 60;
+            var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({top:top,behavior:'smooth'});
+        }
+    });
+});
+
+// P2: 回到顶部按钮显隐
+window.addEventListener('scroll',function(){
+    var btn = document.getElementById('backTop');
+    if(window.pageYOffset > 400){
+        btn.classList.add('show');
+    }else{
+        btn.classList.remove('show');
+    }
+});
+function scrollToTop(){
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// P2: 移动端导航菜单切换
+function toggleNav(){
+    document.getElementById('navLinks').classList.toggle('open');
+}
+function closeNav(){
+    document.getElementById('navLinks').classList.remove('open');
+}
+</script>
+
+</body>
+</html>

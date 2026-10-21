@@ -11,7 +11,7 @@
 # ============================================================
 
 set -u
-COLD_STORE="${COLD_STORE:-/home/user/Doubao/chats/38418284746129666}"
+COLD_STORE="${COLD_STORE:-/opt/ZONGYUAN-ROOT}"
 PKG="$COLD_STORE/03_INFRA/deploy_pkg"
 REGISTRY="$PKG/hook_registry.json"
 LOG="/var/log/hook_autostart.log"

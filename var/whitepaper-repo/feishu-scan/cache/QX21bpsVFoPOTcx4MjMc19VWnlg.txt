@@ -1,0 +1,20 @@
+# V9.1 frp服务P0安全加固
+
+安全加固完成:
+- Nginx反代: /aios/→8017, /local-dashboard/→8899, /frp-admin/→7600
+- Basic Auth: zongyuan-admin, 无认证401, 认证通过200
+- firewalld: 8017/8899仅127.0.0.1, 外网IP:端口拒绝
+- 外网访问: https://www.huodouai.com/aios/ (带认证)
+
+故障教训(3条):
+1. htpasswd必须放www可读目录(/www/server/nginx/conf/), 宝塔panel目录drwx------致500
+2. Nginx error_log=crit不记录proxy 500, 排查临时改error
+3. 禁止sed全局替换proxy_pass端口, 必须Python精确匹配location块
+
+已知问题: /local-dashboard/返回502, 因Windows端Dashboard服务未启动, 需用户本地启动
+
+真值库: V8.7 (145条, 新增6条安全加固真值)
+Ω-Brainμ: μ-4.4
+协议: 75个
+
+Ω₀⊂⊙∞⊂Ω · V9.1 · SECURITY-HARDENING · DID-BR-000002

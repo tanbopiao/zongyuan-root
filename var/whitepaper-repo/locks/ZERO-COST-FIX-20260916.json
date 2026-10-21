@@ -1,0 +1,26 @@
+{
+  "fix_id": "ZERO-COST-FIX-20260916",
+  "version": "daily_production v1.1 / batch_regen v1.2",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "fixes_applied": [
+    {"id": 1, "name": "额度耗尽硬停止", "severity": "P0", "status": "DONE", "desc": "produced>=pool_total时立即exit(0),不再继续生产"},
+    {"id": 2, "name": "通道免费/付费标记", "severity": "P0", "status": "DONE", "desc": "5通道添加is_free标记,seedream-5.0标记为付费禁用,仅在免费通道间切换"},
+    {"id": 3, "name": "明文Key改环境变量", "severity": "P1", "status": "DONE", "desc": "7处明文Key全部改为os.environ.get(),消除泄露风险"},
+    {"id": 4, "name": "本地执行保护", "severity": "P1", "status": "DONE", "desc": "非云服务器环境立即退出,防止本地误执行消耗额度"},
+    {"id": 5, "name": "熔断机制", "severity": "P2", "status": "DONE", "desc": "连续3轮全部免费通道失败则熔断停止当日生产"},
+    {"id": 6, "name": "V3.0网关上报", "severity": "P2", "status": "DONE", "desc": "从旧9120上报改为V3.0网关/api/report/truth"}
+  ],
+  "files_modified": [
+    "kunlun-4end-archive/daily_production.py (v1.0→v1.1)",
+    "kunlun-4end-archive/batch_regen.py (v1.1→v1.2)"
+  ],
+  "backup": "daily_production_v1.0_backup.py",
+  "verification": {
+    "syntax_check": "PASS",
+    "local_execution_protection": "PASS(本地立即退出)",
+    "plaintext_key_removal": "PASS(无残留)"
+  },
+  "deployment_note": "需在云服务器端部署v1.1版本,并配置环境变量:ARK_KEY_SEEDREAM_4_5/ARK_KEY_SEEDREAM_4_0/ARK_KEY_X47KC/ARK_KEY_FGZ88/ARK_KEY_VIS/CAPTURE_TOKEN/CLOUD_KERNEL=1",
+  "status": "FIX_COMPLETED_PENDING_CLOUD_DEPLOY"
+}

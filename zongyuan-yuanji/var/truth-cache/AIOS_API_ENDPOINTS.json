@@ -1,0 +1,84 @@
+{
+  "api_document_id": "AIOS-API-DOCUMENTATION",
+  "version": "V1.0",
+  "anchor": {
+    "DID": "DID-BR-000002",
+    "sovereign_root": "Ω₀⊂⊙∞⊂Ω"
+  },
+  "learning_timestamp": "2026-10-15T00:00:00Z",
+  "status": "ATTESTED",
+  
+  "required_headers": {
+    "Content-Type": "application/json",
+    "X-DID": "DID-BR-000002（所有接口必须携带）"
+  },
+  
+  "endpoints": [
+    {
+      "name": "试用网关·智能路由",
+      "method": "POST",
+      "url": "https://www.huodouai.com/try/chat",
+      "description": "官网试用通道核心接口：体系内问题毫秒级直答，体系外自动转发外部推理",
+      "request_example": {
+        "messages": [{"role": "user", "content": "什么是联邦记忆池"}]
+      },
+      "response_fields": {
+        "ok": "布尔值，请求是否成功",
+        "reply": "回答内容",
+        "source": "知识卡/语义向量/外部推理/本地降级",
+        "elapsed_ms": "响应耗时毫秒"
+      },
+      "rate_limit": "每 IP 10 分钟 5 次"
+    },
+    {
+      "name": "DAL 健康检查",
+      "method": "GET",
+      "url": "https://www.huodouai.com/dal/health",
+      "description": "部署仲裁层状态公开可读",
+      "response_example": {
+        "ok": true,
+        "service": "dal-gateway",
+        "version": "V2.0",
+        "port": 18900
+      }
+    },
+    {
+      "name": "DAL 原子发布",
+      "method": "POST",
+      "url": "https://www.huodouai.com/dal/deploy",
+      "description": "云端原子发布仲裁网关",
+      "supported_actions": [
+        {"action": "deploy", "desc": "软链原子发布"},
+        {"action": "rollback", "desc": "一键回滚上一版本"},
+        {"action": "config", "desc": "nginx 配置片段合并校验"},
+        {"action": "port_alloc/release/register", "desc": ":18xxx 端口池管理"},
+        {"action": "did_register/revoke", "desc": "节点密钥↔DID 注册表联动"},
+        {"action": "inbox_push/ack", "desc": "种子工单投喂与确认"}
+      ]
+    },
+    {
+      "name": "记忆网关·真值上报",
+      "method": "POST",
+      "url": "https://www.huodouai.com/api/report/truth",
+      "description": "全网真值共识的唯一写入通道",
+      "request_schema": {
+        "key": "命名空间.key（禁止 truth-前缀）",
+        "value": "必须是结构化 JSON 对象",
+        "truth_type": "meta_law|rule|config|decision|data|creative|risk|protocol|unknown",
+        "did": "DID-BR-000002"
+      },
+      "error_codes": {
+        "401": "缺少/错误 X-DID 头",
+        "value_must_be_object": "value 必须是 JSON 对象",
+        "empty_value_rejected": "旧字段已失效"
+      }
+    }
+  ],
+  
+  "answer_source_priority": [
+    {"rank": 1, "source": "knowledge-card", "latency": "0ms", "desc": "知识卡命中"},
+    {"rank": 2, "source": "semantic", "latency": "~0.5s", "desc": "语义向量检索"},
+    {"rank": 3, "source": "ark-external", "latency": "~30s", "desc": "外部推理转发"},
+    {"rank": 4, "source": "local-1.5b-fallback", "latency": "N/A", "desc": "降级到本地 1.5B"}
+  ]
+}

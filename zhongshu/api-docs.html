@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>真值网关 · API 文档</title><link rel="icon" href="/favicon.svg"><style>
+:root{--bg:#0a0e1a;--card:#111827;--gold:#d4af37;--green:#4ade80;--muted:#8899aa;--text:#e0e6f0;--border:#1e293b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.65}
+.topbar{display:flex;align-items:center;gap:16px;padding:12px 22px;background:rgba(10,14,26,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(6px);position:sticky;top:0;z-index:100}
+.topbar a{display:flex;align-items:center;gap:8px;color:var(--text);text-decoration:none;font-weight:700;font-size:14px}
+.topbar img{width:28px;height:28px;border-radius:6px}
+.topbar nav{margin-left:auto;display:flex;gap:18px}
+.topbar nav a{color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:400}
+.topbar nav a:hover{color:var(--gold)}
+.container{max-width:920px;margin:0 auto;padding:28px 20px 60px}
+.hero{border-bottom:1px solid var(--border);padding-bottom:22px;margin-bottom:22px}
+.hero h1{font-size:24px;font-weight:800;color:var(--gold)}.hero .sub{color:var(--muted);font-size:13px;margin-top:6px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{font-size:15px;color:var(--gold);margin-bottom:12px}
+.method{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:4px;margin-right:8px}
+.post{background:#0d4a2e;color:var(--green)}.get{background:#1a3a5c;color:#7dd3fc}
+.endpoint{font-family:ui-monospace,monospace;font-size:12.5px;color:var(--text)}
+pre{background:#0d1428;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:11.5px;overflow-x:auto;color:#cbd5e1;line-height:1.7}
+code{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600;font-size:11.5px}
+</style></head><body>
+<div class="topbar"><a href="/"><img src="/assets/aios-logo.png" alt="logo">火斗云智AI</a><nav><a href="/zhongshu/index.html">中枢</a><a href="/monitor.html">监控</a><a href="/zhongshu/nodes.html">节点</a><a href="/">返回主站</a></nav></div>
+<div class="container">
+  <div class="hero"><h1>真值网关 · API 文档</h1><div class="sub">体系统一真值接入协议 · 版本 V3.0 · 锚定 DID-BR-000002 / Ω₀⊂⊙∞⊂Ω</div></div>
+  <div class="card"><h2><span class="method post">POST</span><span class="endpoint">/api/report/truth</span></h2>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px">真值写入 · 认证：仅 <code>X-DID</code> 单头（零明文令牌）</div>
+    <table><thead><tr><th>项</th><th>说明</th></tr></thead><tbody>
+      <tr><td>端点</td><td><code>https://www.huodouai.com/api/report/truth</code>（<b>无尾部斜杠</b>，带斜杠 404）</td></tr>
+      <tr><td>认证头</td><td><code>X-DID: DID-BR-000002</code></td></tr>
+      <tr><td>内容类型</td><td><code>application/json</code></td></tr>
+      <tr><td>载荷</td><td><code>{"key":"&lt;唯一key&gt;","value":{事件字段}}</code></td></tr>
+      <tr><td>成功判据</td><td>响应含 <code>"message":"真值写入成功"</code> + <code>truth_count</code></td></tr>
+      <tr><td>容错</td><td>失败不阻塞主流程；备用端点 <code>https://drama.huodouai.com/api/report/truth</code></td></tr>
+    </tbody></table>
+    <pre>curl -X POST https://www.huodouai.com/api/report/truth \
+  -H "X-DID: DID-BR-000002" -H "Content-Type: application/json" \
+  -d '{"key":"demo.20261003","value":{"event":"示例真值","at":"2026-10-03"}}'</pre>
+  </div>
+  <div class="card"><h2><span class="method get">GET</span><span class="endpoint">/api/status</span></h2>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px">网关状态 · 返回 status / truth_count / merkle_root / version</div>
+    <pre>curl https://www.huodouai.com/api/status
+# {"status":"ok","service":"zhongshu-meta-core","did":"DID-BR-000002",
+#  "truth_count":209,"merkle_root":"...","version":"V3.0"}</pre>
+  </div>
+  <div class="card"><h2><span class="method get">GET</span><span class="endpoint">/api/verify（Merkle 完整性校验）</span></h2>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px">重算账本 Merkle 根 vs 存储根 → 一致性判定（数据防篡改证明）</div>
+    <pre>curl https://www.huodouai.com/api/verify
+# {"ok":true,"computed":"db000e95...","stored":"db000e95...","consistent":true,"ledger_lines":272,"checked_at":"..."}</pre>
+  </div>
+  <div class="card"><h2><span class="method get">GET</span><span class="endpoint">/api/truth?key=&amp;limit=（真值查询）</span></h2>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px">按 key 前缀审计检索（只读，最多 200 条）· 同族：<code>/api/ledger?limit=N</code> 账本快照</div>
+    <pre>curl "https://www.huodouai.com/api/truth?key=cloud&limit=2"
+# {"ok":true,"count":2,"results":[{"seq":230,"key":"cloud.arbiter.20261003","value":{...},...}]}</pre>
+  </div>
+  <div class="card"><h2><span class="method get">GET</span><span class="endpoint">/_zongyuan-assets/*（状态数据）</span></h2>
+    <table><thead><tr><th>资源</th><th>内容</th></tr></thead><tbody>
+      <tr><td><code>zhongshu-metrics.json</code></td><td>实时监控指标（网关/真值/延迟/磁盘/内存）</td></tr>
+      <tr><td><code>zhongshu-nodes.json</code></td><td>同源节点注册表</td></tr>
+      <tr><td><code>zhongshu-sync.json</code></td><td>本地⇄云端双向同步状态</td></tr>
+      <tr><td><code>local-asset-index.json</code></td><td>本地核心资产索引</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="card"><h2>外部系统接入指南（真值 API 生态）</h2>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">三步接入，任何系统可成为体系同源节点：</div>
+    <table><thead><tr><th>步骤</th><th>动作</th><th>说明</th></tr></thead><tbody>
+      <tr><td><code>1 注册</code></td><td>向仲裁中枢登记节点身份</td><td>分配 <code>node_id</code>（如 EXT-SYS-001）+ 自治层级 + 能力通道，写入节点注册表</td></tr>
+      <tr><td><code>2 上报</code></td><td>POST 真值</td><td><code>X-DID: DID-BR-000002</code> 单头 + <code>key</code> 命名空间（建议 <code>&lt;系统&gt;.&lt;事件&gt;.&lt;时间戳&gt;</code>）+ <code>value</code> 事件字段</td></tr>
+      <tr><td><code>3 查询</code></td><td>GET 状态 / 拉取指令</td><td><code>/api/status</code>（全局活性）+ <code>/zhongshu/data/arbiter/instructions/</code>（节点指令队列）</td></tr>
+    </tbody></table>
+    <pre># Python 外部系统接入示例
+import json, urllib.request
+def report_truth(key, value):
+    req = urllib.request.Request("https://www.huodouai.com/api/report/truth",
+        data=json.dumps({"key": key, "value": value}).encode(),
+        headers={"X-DID": "DID-BR-000002", "Content-Type": "application/json"})
+    r = json.loads(urllib.request.urlopen(req, timeout=10).read().decode())
+    assert r.get("message") == "真值写入成功"
+    return r["truth_count"]
+
+# 上报事件
+tc = report_truth("ext-sys-001.order.20261003",
+    {"event": "order_sync", "system": "外部系统示例", "orders": 128, "at": "2026-10-03"})
+print("真值条目:", tc)</pre>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:6px">生态规则（META-CLOUD-AUTONOMY-001 AU-1~6）：只追加不修改 · 失败不阻塞 · 高风险写操作挂起人工审批 · 全留痕可追溯。</div>
+  </div>
+  <div style="text-align:center;color:var(--muted);font-size:11.5px;margin-top:10px">真值网关 V3.0 · 云端中枢 v2.3.0-arbiter · 全链路 append-only 只追加不修改</div>
+</div>
+<div style="text-align:center;padding:20px;font-size:11px;color:#666;border-top:1px solid #333"><a href="/" style="color:#888;margin:0 6px">主页</a>·<a href="/pipeline.html" style="color:#888;margin:0 6px">流水线</a>·<a href="/products.html" style="color:#888;margin:0 6px">产品</a></div></body></html>

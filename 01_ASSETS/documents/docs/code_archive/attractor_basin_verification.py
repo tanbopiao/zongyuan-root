@@ -502,7 +502,7 @@ def main():
     print(f"\n实验时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # 创建结果目录
-    results_dir = "/home/user/Doubao/chats/38439832899843586/high_dim_anchor/results"
+    results_dir = "/opt/ZONGYUAN-ROOT/high_dim_anchor/results"
     os.makedirs(results_dir, exist_ok=True)
     
     # 生成多个合成数据集

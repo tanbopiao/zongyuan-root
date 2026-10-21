@@ -1,0 +1,57 @@
+# 墨池晕染发布配置 (InkPool Release) — 依《墨池晕染发布流程说明文档》第六节落地
+# 真实执行钩子(*_cmd)为空时对应步骤按 dry-run 模拟；--real 模式下为空则该步骤按“已通过”记录并在日志注明。
+
+build:
+  base_image: "registry.example.com/base:java17-v3.2"
+  concurrency: 4
+  cache_enabled: true
+  coverage_floor: 75.0
+  checkout_ref: "HEAD"        # 阶段一·取砚：与发布工单绑定的 ref（真实模式校验 commit hash）
+  build_cmd: ""               # 例: "make release"（碎砚事件的执行点）
+  unit_test_cmd: ""           # 例: "pytest -q"
+  coverage_cmd: ""            # 输出覆盖率数值（stdout 浮点），空则跳过 coverage_floor 校验并留痕
+  artifact_path: ""           # 构建产物路径（文件或目录），指纹据此计算；空则以 config+ref 指纹代替
+
+anchor:
+  node_selection: "least_loaded"   # 择纸：负载最低且最近一次发布成功
+  health_probe: "/health"
+  health_timeout: "30s"
+  smoke_script: "release/inkpool/scripts/smoke_test.sh"
+  deploy_cmd: ""              # 例: "deploy.sh {node} {fingerprint}"
+  probe_cmd: ""               # 例: "curl -fsS http://{node}:8080/health"
+
+bleed:
+  gradients: [1, 5, 20, 50, 100]
+  bleed_window: "10m"         # 渗流生效窗口（观色采集时长）
+  metrics:
+    error_rate_threshold: 0.005      # 功能层 <0.5%
+    p99_latency_ratio: 1.2           # 性能层 <120% 基准
+    resource_usage_threshold: 80     # 资源层 <80%
+    kbi_fluctuation_limit: 0.03      # 业务层 ±3%
+  metrics_cmd: ""             # 输出 JSON: {"error_rate":..,"p99_ratio":..,"resource_percent":..,"kbi_delta":..}
+
+revert:
+  timeout: "5m"               # 清水置换必须在此时间内完成
+  auto_escalate: true
+  escalate_level: "P1"
+  cut_cmd: ""                 # 断流
+  purge_cmd: ""               # 涤墨
+  restore_cmd: ""             # 换水
+
+delivery:
+  archive_backend: "s3://release-archive/ink-pool/"
+  retention_days: 90
+
+# 第五节状态机超时阈值
+timeouts:
+  GRINDING: "30m"
+  ANCHORING: "15m"
+  BLEEDING: "60m"
+  SEALING: "10m"
+  REVERTING: "5m"
+
+# 阶段二·择纸节点池（真实模式选择依据；dry-run 直接读取）
+nodes:
+  - {id: "stg-node-a", load: 12, last_release_ok: true}
+  - {id: "stg-node-b", load: 37, last_release_ok: true}
+  - {id: "stg-node-c", load: 55, last_release_ok: false}

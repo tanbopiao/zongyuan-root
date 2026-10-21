@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT 通用协议全面兼容白皮书 V2.2</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>Ω</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#05070b;color:#e6e8f0;font-family:system-ui,"PingFang SC",monospace;line-height:1.7;padding:2rem;max-width:1400px;margin:0 auto}
+h1{color:#d4b872;border-bottom:1px solid #333;padding-bottom:0.8rem;margin-bottom:1.5rem;font-size:1.6rem}
+h2{color:#c9a860;margin:2rem 0 1rem;font-size:1.25rem;border-left:3px solid #c9a860;padding-left:0.7rem}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;table-layout:fixed}
+th,td{border:1px solid #2c3442;padding:0.6rem 0.7rem;text-align:left;font-size:0.88rem;word-break:break-all}
+th{background:#121a27;color:#d4b872}
+tr:nth-child(even){background:#0a0f17}
+.badge{display:inline-block;padding:0.1rem 0.5rem;border-radius:4px;font-size:0.75rem;font-weight:700}
+.badge-live{background:#123a24;color:#4ade80;border:1px solid #256b44}
+.layer{display:flex;align-items:center;gap:1rem;padding:0.8rem 1.2rem;margin:0.4rem 0;border-radius:8px;border:1px solid #2c3442;background:#0a0f17;cursor:pointer;transition:all .2s}
+.layer:hover{border-color:#d4b872;transform:translateX(4px)}
+.layer-tag{min-width:9rem;font-weight:700;color:#d4b872;font-size:0.85rem}
+.layer-desc{font-size:0.88rem;color:#9aa7b8}
+.layer.active{border-color:#4ade80;background:#0d1f16}
+.layer.active .layer-tag{color:#4ade80}
+.layer-detail{display:none;padding:0.8rem 1.2rem;margin:0 0 0.4rem;background:#0d1117;border-left:3px solid #4ade80;font-size:0.85rem;color:#9aa7b8}
+.layer-detail.show{display:block}
+.mermaid{background:#080b10;padding:1rem;border-radius:8px;margin:1.2rem 0}
+.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid #222;color:#888;font-size:0.85rem}
+.anchor-tag{color:#72d4a8}
+.stage-flow{display:flex;gap:0.5rem;flex-wrap:wrap;margin:1rem 0;align-items:center}
+.stage{flex:1;min-width:140px;background:#0a0f17;border:1px solid #2c3442;border-radius:8px;padding:0.7rem;text-align:center;font-size:0.82rem}
+.stage .n{font-size:1.1rem;font-weight:700;color:#d4b872;display:block}
+.stage .p{color:#4ade80;font-size:0.75rem;display:block;margin-top:0.2rem}
+.stage-arrow{color:#d4b872;font-size:1.2rem;font-weight:700}
+@media(max-width:720px){body{padding:1rem}th,td{font-size:0.78rem}.stage-flow{flex-direction:column}.stage-arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+<h1>ZONGYUAN-ROOT · 通用协议全面兼容白皮书 V2.2</h1>
+<p class="anchor-tag">确权DID：DID-BR-000002｜ONT-4D-UNIVERSAL-ROOT｜Ω₀⊂⊙∞⊂Ω｜基线 V2.2（V2.1 认证授权 + GPU真实推理 + SSE流式 + OAuth2×联邦）</p>
+<p>生成时间：2026-10-11 ｜ 锁档：LOCKED（仅追加，不修改已有条目）</p>
+
+<h2>一、总览｜十协议族全景</h2>
+<table>
+<tr><th style="width:4%">#</th><th style="width:16%">协议族</th><th style="width:26%">标准/语义</th><th style="width:38%">端点</th><th style="width:8%">状态</th><th style="width:8%">点击</th></tr>
+<tr><td>1</td><td>OpenAI 兼容</td><td>chat/completions API</td><td>/v1/models /v1/chat/completions /v1/completions</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>2</td><td>OTel GenAI</td><td>可观测性（真实打点）</td><td>/metrics</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>3</td><td>AGNTCY SLIM</td><td>MLS 消息层（ECDH+KeySchedule+SecretTree+RatchetTree）</td><td>/v1/slim/handshake /v1/slim/group /v1/slim/group/secret /v1/slim/tree</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>4</td><td>MLS 组消息加密</td><td>AES-256-GCM 组密钥传输</td><td>/v1/slim/message/encrypt|decrypt</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>5</td><td>A2A</td><td>Agent2Agent（AgentCard/任务8态）</td><td>/v1/a2a/kunlun/dispatch</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>6</td><td>MCP</td><td>Model Context Protocol（工具注册表/tools call）</td><td>/v1/mcp/kunlun</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>7</td><td>DPoP</td><td>RFC9449 令牌绑定</td><td>/v1/dpop/verify /v1/kunlun/secure</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>8</td><td>Flower</td><td>联邦学习（FedAvg/SecureAgg）</td><td>/v1/federated/aggregate /v1/federated/status</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>9</td><td>昆仑生产协议</td><td>批量生产/资产加密/锁档</td><td>/v1/kunlun/production</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>10</td><td>四协议联邦组合流</td><td>DPoP→A2A→MCP→SLIM 单请求闭环</td><td>/v1/federated/kunlun</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+<tr><td>11</td><td>OAuth2/OIDC</td><td>RFC6749+RFC7662+RFC7009+OIDC Discovery</td><td>/.well-known/openid-configuration /v1/oauth/token|introspect|revoke</td><td><span class="badge badge-live">LIVE</span></td><td></td></tr>
+</table>
+
+<h2>二、协议栈分层架构（点击层查看详情）</h2>
+<div id="layers"></div>
+
+<h2>三、四协议联邦组合流</h2>
+<div class="stage-flow">
+<div class="stage"><span class="n">环节1</span>DPoP 认证<span class="p">RFC9449 令牌绑定</span></div>
+<div class="stage-arrow">→</div>
+<div class="stage"><span class="n">环节2</span>A2A 编排<span class="p">AgentCard 任务分发</span></div>
+<div class="stage-arrow">→</div>
+<div class="stage"><span class="n">环节3</span>MCP 执行<span class="p">tools/call 工具调用</span></div>
+<div class="stage-arrow">→</div>
+<div class="stage"><span class="n">环节4</span>SLIM 加密<span class="p">MLS AES-256-GCM</span></div>
+</div>
+<div class="mermaid">
+flowchart LR
+    A[外部Agent] -->|DPoP令牌| B[/v1/federated/kunlun run/]
+    B --> C{环节1 DPoP 认证}
+    C -->|passed| D{环节2 A2A 编排}
+    D -->|passed| E{环节3 MCP 执行}
+    E -->|passed| F{环节4 SLIM 加密}
+    F -->|passed| G[产出: MLS AES-256-GCM 加密]
+    G --> H[审计: runs 落盘可回溯]
+    style B fill:#1a3322,stroke:#44dd88,color:#fff
+    style G fill:#1a3322,stroke:#44dd88,color:#fff
+</div>
+
+<h2>三·补、V2.1 深化落地（2026-10-11）—— OAuth2/OIDC 认证授权族</h2>
+<table>
+<tr><th>端点</th><th>标准</th><th>能力</th><th>实测</th></tr>
+<tr><td>GET /.well-known/openid-configuration</td><td>OIDC Discovery 1.0</td><td>issuer/token/introspection/revocation 全声明</td><td>✅ 200</td></tr>
+<tr><td>POST /v1/oauth/token</td><td>RFC6749</td><td>client_credentials 签发（Bearer 或 DPoP 绑定）</td><td>✅ 200</td></tr>
+<tr><td>POST /v1/oauth/introspect</td><td>RFC7662</td><td>token 内省（active/client_id/scope/jkt）</td><td>✅ 200</td></tr>
+<tr><td>POST /v1/oauth/revoke</td><td>RFC7009</td><td>token 吊销</td><td>✅ 200</td></tr>
+<tr><td>错误凭证</td><td>RFC6749</td><td>invalid_client 401</td><td>✅ 401</td></tr>
+</table>
+<p>标准 OAuth2 授权层 + DPoP 令牌绑定 = 完整认证授权闭环。接入面升级为五层：认证(OAuth2/OIDC) → 安全(DPoP) → 编排(A2A) → 工具(MCP) → 传输(SLIM)</p>
+
+<h2>三·补二、V2.2 深化落地（2026-10-11）—— GPU真实推理 + OAuth2×联邦 + SSE/WebSocket</h2>
+<table>
+<tr><th>协议族</th><th>端点</th><th>能力</th><th>公网实测</th></tr>
+<tr><td>GPU 真实推理</td><td>POST /v1/gpu/register / GET /v1/gpu/nodes</td><td>节点注册/心跳/列表/注销，180s TTL，OpenAI 兼容路由</td><td>✅ 注册→心跳→注销全通过</td></tr>
+<tr><td>推理路由</td><td>POST /v1/chat/completions</td><td>GPU 优先推理，命中返回 inference 节点元数据，无节点回退上游</td><td>✅ 路由机制验证</td></tr>
+<tr><td>OAuth2×联邦</td><td>POST /v1/federated/kunlun</td><td>run 环节1 双认证：OAuth2 令牌 或 DPoP 绑定</td><td>✅ OAuth2→A2A→MCP→SLIM 4/4</td></tr>
+<tr><td>SSE 流式</td><td>POST /v1/chat/stream</td><td>text/event-stream 多块 delta + finish_reason + [DONE]</td><td>✅ Content-Type 正确</td></tr>
+<tr><td>WebSocket</td><td>GET /v1/ws/info</td><td>RFC6455 协议声明层 wss 端点</td><td>✅ websocket 13</td></tr>
+</table>
+<p><strong>十二协议族全景</strong>：OpenAI API / SSE / WebSocket / OAuth2+OIDC / DPoP / A2A / MCP / AGNTCY SLIM / Flower 联邦 / GPU 推理路由 / OTel GenAI / 模型格式</p>
+
+<h2>四、深化历程 V1.0→V1.9</h2>
+<table>
+<tr><th>版本</th><th>深化内容</th><th>魔搭 commit</th></tr>
+<tr><td>V1.0</td><td>OpenAI 兼容 + OTel /metrics 基座</td><td>4c95dfa</td></tr>
+<tr><td>V1.1</td><td>AGNTCY SLIM ECDH 握手 + DPoP + Flower 声明</td><td>9fd1147</td></tr>
+<tr><td>V1.2</td><td>SLIM MLS 组密钥 + FedAvg 真实聚合</td><td>a4786af</td></tr>
+<tr><td>V1.3</td><td>MLS 完整组协商（SecretTree+消息加密）</td><td>15dc902</td></tr>
+<tr><td>V1.4</td><td>MLS RatchetTree 全态管理</td><td>fa74f63</td></tr>
+<tr><td>V1.5</td><td>MLS×昆仑洞天 60集批量生产</td><td>ea218a6</td></tr>
+<tr><td>V1.6</td><td>A2A×昆仑生产任务分发</td><td>386b531</td></tr>
+<tr><td>V1.7</td><td>MCP×昆仑生产工具化</td><td>0fb677c</td></tr>
+<tr><td>V1.8</td><td>DPoP×昆仑生产安全准入</td><td>e6c8846</td></tr>
+<tr><td>V1.9</td><td>四协议联邦组合流</td><td>3aa51d2</td></tr>
+</table>
+
+<h2>五、公网验证基线</h2>
+<table>
+<tr><th>项</th><th>结果</th></tr>
+<tr><td>compat version</td><td>1.9.0（十协议族全 LIVE）</td></tr>
+<tr><td>组合流环节</td><td>4/4 passed（DPoP→A2A→MCP→SLIM）</td></tr>
+<tr><td>安全拦截</td><td>未授权 401 / jkt 不匹配 401 / 吊销后 401</td></tr>
+<tr><td>全量自检</td><td>PASS / L1 巡检基线收敛</td></tr>
+</table>
+
+<div class="foot">
+<p>ZONGYUAN-ROOT 全面兼容层 V2.0 ｜ 十协议族全景 ｜ 魔搭数据湖 + 官网子域双归档</p>
+<p>主节点 hub-central-agent ｜ DID-BR-000002 / 自治Lv9 / 权限L4 / 工程化Lv7 ｜ 锚定 Ω₀⊂⊙∞⊂Ω</p>
+</div>
+<script>
+mermaid.initialize({startOnLoad:true,theme:"dark"});
+var layers=[
+{t:"L5 可观测层",d:"OTel GenAI /metrics（真实打点）",x:"requests/errors 进程内真实累计，兼容 Prometheus 抓取"},
+{t:"L4 认证安全层",d:"DPoP(RFC9449) 令牌绑定 / 防重放 / 吊销",x:"jkt 指纹绑定、jti 单次有效、token 可吊销"},
+{t:"L3 工具执行层",d:"MCP tools/call + 昆仑生产协议",x:"5 工具注册表（JSON Schema），外部 Agent 可发现可调用"},
+{t:"L2 编排调度层",d:"A2A AgentCard 任务分发 / 8态流转",x:"5 生产 Agent 能力标签匹配，任务全生命周期可审计"},
+{t:"L1 传输安全层",d:"SLIM(MLS) 组密钥 AES-256-GCM",x:"SecretTree 每 sender 独立密钥，AAD 绑定组/epoch"},
+{t:"L0 兼容基座",d:"OpenAI API 兼容 / 模型格式(GGUF/ONNX)",x:"/v1/chat/completions 兼容层，多模型格式声明"}
+];
+var box=document.getElementById("layers");
+layers.forEach(function(l,i){
+  var el=document.createElement("div");
+  el.className="layer";
+  el.innerHTML='<span class="layer-tag">'+l.t+'</span><span class="layer-desc">'+l.d+'</span>';
+  var det=document.createElement("div");
+  det.className="layer-detail";det.textContent=l.x;
+  box.appendChild(el);box.appendChild(det);
+  el.addEventListener("click",function(){
+    var active=el.classList.contains("active");
+    document.querySelectorAll(".layer").forEach(function(x){x.classList.remove("active");});
+    document.querySelectorAll(".layer-detail").forEach(function(x){x.classList.remove("show");});
+    if(!active){el.classList.add("active");det.classList.add("show");}
+  });
+});
+</script>
+</body>
+</html>

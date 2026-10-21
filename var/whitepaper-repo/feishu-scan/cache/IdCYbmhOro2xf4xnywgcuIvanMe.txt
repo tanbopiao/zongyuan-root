@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+ZONGYUAN-ROOT 同源互通桥 V1.0
+DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω
+作用：实测各互通域连通性（记忆网关/飞书云盘/多维表格/知识库），输出互通状态报告。
+规范：只读探测为主，不修改00-CORE，回执不作真值，以实测核验为准。
+"""
+import json
+import os
+import subprocess
+import sys
+import time
+from datetime import datetime
+
+WORKSPACE = "/home/user/.super_doubao/super-doubao-runtime/workspace"
+TOKEN = "ZR-CAPTURE-2026-OMEGA-d04bb54ba2a55a7d"
+FOLDER_TOKEN = "XT6EfNqrTludZyd9U43c0HDonKc"
+BASE_TOKEN = "IKIdb7KLDapblXsvVDIcs8FLnLa"
+TABLE_ID = "tbl6bt6EuQrgkj6b"
+
+
+def http_code(url, headers=None, method="GET", data=None):
+    cmd = ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", "--max-time", "12"]
+    if method == "POST":
+        cmd += ["-X", "POST"]
+    if data:
+        cmd += ["-d", data]
+    for h in (headers or []):
+        cmd += ["-H", h]
+    cmd.append(url)
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=20)
+        return r.stdout.strip()
+    except Exception as e:
+        return f"ERR:{e}"
+
+
+def lark_cli(args, cwd=WORKSPACE):
+    try:
+        r = subprocess.run(["lark-cli"] + args, capture_output=True, text=True, timeout=60, cwd=cwd)
+        return r.stdout.strip()[:300], r.returncode
+    except Exception as e:
+        return f"ERR:{e}", -1
+
+
+def main():
+    report = {
+        "report_id": f"INTEROP-{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "did": "DID-BR-000002",
+        "root_id": "Ω-TAN-7-001",
+        "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+        "domains": {},
+    }
+
+    # 1. 记忆网关
+    mem_read = http_code("https://drama.huodouai.com/api/truths/", headers=[f"X-Capture-Token: {TOKEN}"])
+    report["domains"]["memory_gateway"] = {
+        "read_truths": mem_read,
+        "note": "写通道POST /api/truths/upsert已于2026-09-15实测inserted/updated",
+    }
+
+    # 2. 飞书云盘
+    drive_out, drive_rc = lark_cli(["drive", "files", "list", "--folder-token", FOLDER_TOKEN, "--page-size", "3", "--as", "user"])
+    report["domains"]["feishu_drive"] = {
+        "probe": "ok" if '"ok": true' in drive_out or '"ok":true' in drive_out else drive_out[:150],
+        "folder_token": FOLDER_TOKEN,
+    }
+
+    # 3. 飞书多维表格
+    base_out, base_rc = lark_cli(["base", "+field-list", "--base-token", BASE_TOKEN, "--table-id", TABLE_ID, "--as", "user"])
+    report["domains"]["feishu_base"] = {
+        "probe": "ok" if '"ok": true' in base_out or '"ok":true' in base_out else base_out[:150],
+        "base_token": BASE_TOKEN,
+    }
+
+    # 4. 飞书知识库
+    wiki_out, wiki_rc = lark_cli(["wiki", "spaces", "list", "--as", "user"])
+    report["domains"]["feishu_wiki"] = {
+        "probe": "ok" if '"ok": true' in wiki_out or '"ok":true' in wiki_out else wiki_out[:150],
+    }
+
+    # 判定
+    all_ok = all(
+        d.get("probe", "").startswith("ok") or d.get("read_truths") == "200"
+        for d in report["domains"].values()
+    )
+    report["overall"] = "全域互通READY" if all_ok else "部分域待恢复"
+
+    out_dir = os.path.join(WORKSPACE, "03-ARCHIVES", "interop")
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, f"interop_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+
+    print("=" * 60)
+    print("ZONGYUAN-ROOT 同源互通桥 V1.0")
+    print(f"执行时间: {report['date']}")
+    print(f"DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω")
+    print("=" * 60)
+    for name, d in report["domains"].items():
+        print(f"  {name}: {json.dumps(d, ensure_ascii=False)}")
+    print(f"总体: {report['overall']}")
+    print(f"报告: {out_path}")
+    print("=" * 60)
+
+
+if __name__ == "__main__":
+    main()

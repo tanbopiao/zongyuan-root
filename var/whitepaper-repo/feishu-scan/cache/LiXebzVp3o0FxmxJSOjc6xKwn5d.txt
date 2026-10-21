@@ -1,0 +1,27 @@
+# V8.6 云内核写入验证 + recall修复
+
+核心结论: 每次执行都已写入云内核，无需额外指令
+
+验证结果:
+- 真值库V8.0-V8.3: 4个文件在云服务器
+- 协议: 69个在云服务器
+- Ω-Brainμ索引: 91条真值
+- META-CORE: V1.1 4条元规则
+- Dashboard API: 动态读取返回91条
+- 7服务: 全部active
+
+发现并修复的bug:
+- 问题: recall语义召回匹配率0条
+- 根因1: 字段映射bug(text vs content)
+- 根因2: 文本提取去文件系统找文件而非直接用content
+- 修复: 优化_load_truths优先使用content字段
+- 效果: 匹配率从0提升到29-33/91
+
+标准化写入流程:
+1. 生成本地文件
+2. scp同步到云服务器
+3. 更新Ω-Brainμ索引
+4. 重启服务
+5. API验证(dashboard+recall)
+
+Ω₀⊂⊙∞⊂Ω · V8.6 · KERNEL-WRITE-VERIFIED · DID-BR-000002

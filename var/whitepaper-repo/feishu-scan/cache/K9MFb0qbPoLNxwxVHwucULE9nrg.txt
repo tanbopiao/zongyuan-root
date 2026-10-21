@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>昆仑洞天 · 太阴月神 · 墟境启封 | KD-EP-003</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Songti SC", "STSong", "SimSun", serif;
+    background: #0a0a12;
+    color: #e8e0d0;
+    overflow-x: hidden;
+    line-height: 1.8;
+  }
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .hero-slides {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+  .hero-slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+  }
+  .hero-slide.active { opacity: 1; }
+  .hero-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(10,10,18,0.3) 0%, rgba(10,10,18,0.1) 40%, rgba(10,10,18,0.7) 80%, rgba(10,10,18,0.95) 100%);
+  }
+  .hero-content {
+    position: absolute;
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    width: 90%;
+    z-index: 10;
+  }
+  .hero-ep {
+    font-size: 0.85rem;
+    letter-spacing: 0.5em;
+    color: #c9a96e;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 1.5s 0.5s forwards;
+  }
+  .hero-title {
+    font-size: 2.2rem;
+    font-weight: normal;
+    letter-spacing: 0.3em;
+    color: #f0e8d8;
+    text-shadow: 0 0 30px rgba(201,169,110,0.5);
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1.5s 0.8s forwards;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+    letter-spacing: 0.4em;
+    color: #8a9ab8;
+    opacity: 0;
+    animation: fadeUp 1.5s 1.1s forwards;
+  }
+  .hero-scroll {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #c9a96e;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    animation: bounce 2s infinite;
+    z-index: 10;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(10px); }
+  }
+  .section {
+    padding: 3rem 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .section-title {
+    font-size: 1.3rem;
+    letter-spacing: 0.3em;
+    color: #c9a96e;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .section-title::before, .section-title::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a96e, transparent);
+  }
+  .section-title::before { left: calc(50% - 100px); }
+  .section-title::after { right: calc(50% - 100px); }
+  .synopsis {
+    font-size: 0.95rem;
+    line-height: 2.2;
+    color: #b8b0a0;
+    text-align: justify;
+    text-indent: 2em;
+  }
+  .character-card {
+    background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(15,15,25,0.9));
+    border: 1px solid rgba(201,169,110,0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .char-name {
+    font-size: 1.2rem;
+    color: #c9a96e;
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+  .char-attrs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #9a9080;
+  }
+  .char-attrs span { color: #c9a96e; }
+  .quotes {
+    list-style: none;
+  }
+  .quotes li {
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    background: rgba(201,169,110,0.05);
+    border-left: 3px solid #c9a96e;
+    font-size: 0.95rem;
+    color: #d0c8b8;
+    font-style: italic;
+    letter-spacing: 0.05em;
+  }
+  .keyframes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .kf-card {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 9/16;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  .kf-card:hover { transform: scale(1.02); }
+  .kf-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .kf-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(transparent, rgba(10,10,18,0.9));
+    font-size: 0.8rem;
+    color: #c9a96e;
+    letter-spacing: 0.15em;
+  }
+  .storyboard-list {
+    list-style: none;
+  }
+  .storyboard-list li {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(201,169,110,0.1);
+    display: flex;
+    gap: 1rem;
+  }
+  .sb-time {
+    flex-shrink: 0;
+    width: 60px;
+    font-size: 0.8rem;
+    color: #c9a96e;
+    font-family: monospace;
+  }
+  .sb-content { font-size: 0.85rem; color: #a09888; }
+  .sb-content strong { color: #d0c8b8; display: block; margin-bottom: 0.3rem; }
+  .trace-section {
+    background: rgba(10,10,18,0.8);
+    border-top: 1px solid rgba(201,169,110,0.2);
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+  .trace-symbol {
+    font-size: 1.1rem;
+    color: #c9a96e;
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+  .trace-info {
+    font-size: 0.75rem;
+    color: #6a6050;
+    line-height: 2;
+    letter-spacing: 0.1em;
+  }
+  .trace-info span { color: #8a7a5a; }
+  .lightbox {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 1rem; right: 1.5rem;
+    color: #c9a96e;
+    font-size: 2rem;
+    cursor: pointer;
+  }
+  @media (max-width: 480px) {
+    .hero-title { font-size: 1.6rem; letter-spacing: 0.2em; }
+    .hero-subtitle { font-size: 0.85rem; }
+    .section { padding: 2rem 1rem; }
+    .keyframes-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-slides">
+    <div class="hero-slide active" style="background-image:url('keyframes/KF-01-月神殿苏醒.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('keyframes/KF-02-天书玄鸟.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('keyframes/KF-03-月轮斩混沌.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('keyframes/KF-04-墟境启封.jpg')"></div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-ep">KD-EP-003</div>
+    <div class="hero-title">太阴月神</div>
+    <div class="hero-subtitle">墟 境 启 封</div>
+  </div>
+  <div class="hero-scroll">↓ 向下探索 ↓</div>
+</div>
+
+<div class="section">
+  <div class="section-title">剧 情 简 介</div>
+  <p class="synopsis">墟境异动，秩序校准仪告警。太阴月神自昆仑洞天月神殿苏醒，持天书负剑，踏入墟境裂隙。天书展开，玄鸟图腾自书页飞出，剑光如月轮斩破混沌。墟境启封，秩序归位，月神立于墟境之巅，霞光万丈。</p>
+</div>
+
+<div class="section">
+  <div class="section-title">角 色 设 定</div>
+  <div class="character-card">
+    <div class="char-name">太阴月神</div>
+    <div class="char-attrs">
+      <div><span>发色：</span>纯乌黑长发及腰</div>
+      <div><span>体态：</span>九头身</div>
+      <div><span>服饰：</span>青黑长裙</div>
+      <div><span>图腾：</span>玄鸟暗纹</div>
+      <div><span>法器：</span>天书 + 剑</div>
+      <div><span>光影：</span>轮廓光 + 月白霞光</div>
+      <div><span>气质：</span>清冷肃穆</div>
+      <div><span>范式：</span>纯东方神女</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">旁 白 金 句</div>
+  <ul class="quotes">
+    <li>"墟境异动，秩序失序……"</li>
+    <li>"太阴月神，奉天元法则，墟境启封。"</li>
+    <li>"玄鸟为引，天书为凭——斩！"</li>
+    <li>"墟境启封，秩序归位。"</li>
+  </ul>
+</div>
+
+<div class="section">
+  <div class="section-title">关 键 帧</div>
+  <div class="keyframes-grid">
+    <div class="kf-card" onclick="openLightbox(this)">
+      <img src="keyframes/KF-01-月神殿苏醒.jpg" alt="KF-01 月神殿苏醒">
+      <div class="kf-label">KF-01 月神殿苏醒</div>
+    </div>
+    <div class="kf-card" onclick="openLightbox(this)">
+      <img src="keyframes/KF-02-天书玄鸟.jpg" alt="KF-02 天书玄鸟">
+      <div class="kf-label">KF-02 天书玄鸟</div>
+    </div>
+    <div class="kf-card" onclick="openLightbox(this)">
+      <img src="keyframes/KF-03-月轮斩混沌.jpg" alt="KF-03 月轮斩混沌">
+      <div class="kf-label">KF-03 月轮斩混沌</div>
+    </div>
+    <div class="kf-card" onclick="openLightbox(this)">
+      <img src="keyframes/KF-04-墟境启封.jpg" alt="KF-04 墟境启封">
+      <div class="kf-label">KF-04 墟境启封</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">分 镜 概 览</div>
+  <ul class="storyboard-list">
+    <li>
+      <div class="sb-time">0-3s</div>
+      <div class="sb-content"><strong>月神殿苏醒</strong>昆仑洞天月神殿，月轮浮雕，月光倾泻。月神盘膝坐于月轮之下。</div>
+    </li>
+    <li>
+      <div class="sb-time">3-7s</div>
+      <div class="sb-content"><strong>天书启封</strong>月神睁眼，瞳孔如满月。天书自动翻开，玄鸟图腾流动，剑鞘微颤。</div>
+    </li>
+    <li>
+      <div class="sb-time">7-10s</div>
+      <div class="sb-content"><strong>步入墟境</strong>月神起身，长发飞扬，转身走向殿外墟境裂隙。天书悬浮，剑出鞘半寸。</div>
+    </li>
+    <li>
+      <div class="sb-time">10-14s</div>
+      <div class="sb-content"><strong>墟境裂隙</strong>混沌翻滚，空间扭曲。月神立于裂隙前，身影孤绝，青黑长裙猎猎。</div>
+    </li>
+    <li>
+      <div class="sb-time">14-17s</div>
+      <div class="sb-content"><strong>玄鸟为引</strong>天书完全展开，金光流转。玄鸟图腾飞出化为虚影盘旋，剑已出鞘。</div>
+    </li>
+    <li>
+      <div class="sb-time">17-20s</div>
+      <div class="sb-content"><strong>月轮凝聚</strong>举剑，剑光凝聚为巨大月轮。玄鸟虚影融入月轮，能量凝聚。</div>
+    </li>
+    <li>
+      <div class="sb-time">20-24s</div>
+      <div class="sb-content"><strong>月轮斩混沌</strong>月轮斩出，横切混沌。玄鸟伴随剑光飞掠，混沌退散，秩序归位。</div>
+    </li>
+    <li>
+      <div class="sb-time">24-27s</div>
+      <div class="sb-content"><strong>墟境启封</strong>混沌消散，悬浮岛屿、古建遗迹、星光流转。月神立于墟境之巅，霞光万丈。</div>
+    </li>
+    <li>
+      <div class="sb-time">27-30s</div>
+      <div class="sb-content"><strong>秩序归位</strong>月神背影面向墟境全景。片名浮现，溯源符号镌刻。主题音乐收束。</div>
+    </li>
+  </ul>
+</div>
+
+<div class="trace-section">
+  <div class="trace-symbol">Ω₀ ⊂ ⊙ ∞ ⊂ Ω</div>
+  <div class="trace-info">
+    <div>剧集编号：<span>KD-EP-003</span></div>
+    <div>生产批次：<span>2026-09-06</span></div>
+    <div>中枢调度：<span>window-zongyuan-autokernel</span></div>
+    <div>生产窗口：<span>window-drama-machine</span></div>
+    <div>校验窗口：<span>window-verify-hub</span></div>
+    <div>DID：<span>DID-BR-000002</span></div>
+    <div>本体主权根：<span>Ω-TAN-7-001</span></div>
+    <div>体系：<span>ZONGYUAN-ROOT 昆仑洞天</span></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close">×</span>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script>
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.hero-slide');
+  setInterval(() => {
+    slides[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide + 1) % slides.length;
+    slides[currentSlide].classList.add('active');
+  }, 4000);
+
+  function openLightbox(card) {
+    const img = card.querySelector('img');
+    document.getElementById('lightbox-img').src = img.src;
+    document.getElementById('lightbox').classList.add('active');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+  }
+</script>
+
+</body>
+</html>

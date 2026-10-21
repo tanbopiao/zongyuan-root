@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "identity": "user",
+  "data": {
+    "content": "# 中枢交互机制协议 V1.0｜GATEWAY-INTERACTION\n归档节点：ZONGYUAN-ROOT｜DID-BR-000002｜Ω₀⊂⊙∞⊂Ω\n版本：V1.0-LOCK｜2026-09-13｜基于实测（2026-09-13 20:24）\n\n## 一、实测可用交互通道（7类）\n1. **握手探测**：`GET /api/health` → 200 healthy｜门户 `:9120` → 200\n2. **真值读取**：`GET /api/gateway/truths?level=internal|public` → 200（列表）｜`GET /api/gateway/truth/{key}` → 200（单条）\n3. **真值上报**：`POST /api/gateway/report` → 200（写通道，truth_type 规范）\n4. **节点注册**：`POST /api/gateway/node/register` → 200（注册/刷新节点身份，返回节点专属 token）\n5. **事件通知**：`POST /api/gateway/notify` → 200（排队事件，**推送飞书**，返回 event_id）\n6. **资产上传**：`POST /api/upload` → 200（媒体白名单：png/jpg/jpeg/webp/mp4/mov/gif）\n7. **任务读取**：`GET /api/task/list` → 200（短剧生产任务表，只读）\n\n## 二、双向交互模型\n- 节点 → 中枢：report（上报真值）/ register（身份）/ notify（事件通知）/ upload（资产）\n- 中枢 → 节点：truths（基线下发，拉取式）/ notify→飞书（推送式）/ task/list（任务可见）\n\n## 三、本节点注册状态（实测）\n- node_id：local-dev-001｜DID：DID-BR-000002\n- 注册时间：2026-09-13T17:55:43+08:00｜累计上报：**165 条**\n- 节点专属 token：`0265b6eabd8b37d7a4d495c88262a47c2cccebcee1d2edf1f8c43e6d16d87c11`（经 register 返回，非网关全局 Token）\n\n## 四、通知链路实测回执\n- 事件：EVT-20260913202454-3｜queued:true｜feishu: event_received\n- 结论：节点可向飞书通道推送事件，中枢队列已接收\n\n## 五、缺失与建议\n- 缺失：任务分发/认领（task/pull 404）、审批回流（approve 404）、双向即时会话端点\n- 建议：后续可用 notify 作为中枢→节点主动通知通道；register 每会话刷新身份\n\n## 六、红线\n1. 节点专属 token 与全局 Token 分离，各自保管，禁止混用泄露\n2. notify 仅发事件级消息，不承载敏感正文\n3. 新端点使用前必须实测（回执不作真值）\n\n---\nΩ₀⊂⊙∞⊂Ω｜DID-BR-000002｜GATEWAY-INTERACTION V1.0｜LOCKED\n",
+    "file_name": "GATEWAY-INTERACTION-V1.0.md",
+    "file_token": "AzKmbo1BBom3kJx1qCAce9i1nCh",
+    "size_bytes": 2247
+  }
+}

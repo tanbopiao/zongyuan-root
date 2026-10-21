@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+ZONGYUAN-ROOT 守卫运行器 V1.0
+DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω
+作用：一键执行双层守卫(深度守卫+完整性守卫)，输出持久化守卫总报告。
+由 auto_init.py 上电自启链调用，实现本地实例环境深度固化持久化。
+退出码：0=双层健康，1=任一守卫告警
+"""
+import json
+import os
+import subprocess
+import sys
+from datetime import datetime
+
+WORKSPACE = "/home/user/.super_doubao/super-doubao-runtime/workspace"
+GUARDS = [
+    ("depth_guard", "04-TOOLS/scripts/depth_guard.py", "目录结构深度"),
+    ("integrity_guard", "04-TOOLS/scripts/integrity_guard.py", "资产真值完整性"),
+]
+GUARD_MANIFEST = "06-CONFIGS/guard-manifest.json"
+
+
+def self_check():
+    """守卫自保护：校验 guard-manifest.json 中固化文件哈希，防守卫被篡改/静默失效"""
+    mpath = os.path.join(WORKSPACE, GUARD_MANIFEST)
+    if not os.path.exists(mpath):
+        return {"ok": False, "detail": "guard-manifest.json 缺失"}
+    import hashlib
+    baseline = json.load(open(mpath, encoding="utf-8"))["files"]
+    tampered = []
+    for f, h in baseline.items():
+        fp = os.path.join(WORKSPACE, f)
+        if not os.path.exists(fp):
+            tampered.append({"file": f, "issue": "missing"})
+            continue
+        cur = hashlib.sha256(open(fp, "rb").read()).hexdigest()
+        if cur != h:
+            tampered.append({"file": f, "baseline": h[:16], "actual": cur[:16]})
+    return {"ok": len(tampered) == 0, "tampered": tampered, "checked": len(baseline)}
+
+
+
+def run_guard(name, script, dimension):
+    try:
+        r = subprocess.run(
+            [sys.executable, os.path.join(WORKSPACE, script)],
+            capture_output=True, text=True, timeout=180, cwd=WORKSPACE)
+        lines = [l for l in r.stdout.splitlines() if l.strip()]
+        return {
+            "name": name,
+            "dimension": dimension,
+            "exit_code": r.returncode,
+            "healthy": r.returncode == 0,
+            "output_tail": lines[-6:] if lines else r.stderr[-300:],
+        }
+    except Exception as e:
+        return {"name": name, "dimension": dimension, "exit_code": -1,
+                "healthy": False, "output_tail": [f"ERR:{e}"]}
+
+
+def main():
+    # 第0步：守卫自保护校验
+    sc = self_check()
+    results = [run_guard(*g) for g in GUARDS]
+    all_ok = all(r["healthy"] for r in results) and sc["ok"]
+
+    report = {
+        "report_id": f"GUARD-PERSIST-{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "did": "DID-BR-000002",
+        "root_id": "Ω-TAN-7-001",
+        "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+        "persist_mode": "local_instance_boot_chain",
+        "self_check": sc,
+        "guards": results,
+        "overall": "双层守卫健康" if all_ok else "守卫告警",
+    }
+
+    out_dir = os.path.join(WORKSPACE, "03-ARCHIVES", "guard-persist")
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, f"guard_persist_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+
+    print("=" * 56)
+    print("ZONGYUAN-ROOT 守卫运行器 V1.1(本地实例持久化+自保护)")
+    print(f"执行时间: {report['date']}")
+    print(f"DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω")
+    print("=" * 56)
+    sc_status = "自保护基线正常" if sc["ok"] else "自保护基线异常!"
+    print(f"  [{sc_status}] 校验文件={sc['checked']}")
+    for t in sc.get("tampered", []):
+        print(f"      篡改: {t}")
+    for r in results:
+        status = "健康" if r["healthy"] else "告警"
+        print(f"  [{status}] {r['name']}({r['dimension']}) 退出码={r['exit_code']}")
+        for l in r["output_tail"][-3:]:
+            print(f"      {l.strip()}")
+    print(f"总体: {report['overall']}")
+    print(f"报告: {out_path}")
+    print("=" * 56)
+    return 0 if all_ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -12,7 +12,7 @@ DID = "DID-BR-000002"
 TRACE_MARK = "Ω₀⊂⊙∞⊂Ω"
 ARCHIVE_ROOT = "ZONGYUAN-ROOT"
 GENESIS_ROOT = "0" * 64
-WORKSPACE = "/home/user/Doubao/chats/38438061087569666"
+WORKSPACE = "/opt/ZONGYUAN-ROOT"
 SKILLS = "/home/user/.doubao/agent_mode/workspace/.user_skills"
 
 def sha256_string(s):

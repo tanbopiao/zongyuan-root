@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WP-009 · 治理确权体系技术白皮书 · 元秩序归档锁档V3.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23070b16'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='%23ffc857' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='2.4' fill='%234fc3f7'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0b1224; --card:#0e1730; --card2:#121c38;
+    --line:#1e2a4d; --line2:#2a3a66;
+    --txt:#e8eefc; --sub:#8fa3c8; --dim:#5c6f96;
+    --gold:#ffc857; --cyan:#4fc3f7; --violet:#a78bfa; --red:#ff6b6b; --green:#6ee7b7;
+    --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:
+    radial-gradient(1200px 500px at 80% -10%, rgba(79,195,247,.08), transparent 60%),
+    radial-gradient(900px 400px at -10% 20%, rgba(167,139,250,.07), transparent 55%),
+    var(--bg);
+    color:var(--txt); font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    line-height:1.7; min-height:100vh}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+
+  .doc-head{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  .doc-head .wpnum{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.14em}
+  .doc-head h1{font-size:26px;font-weight:800;margin:8px 0 6px}
+  .doc-head .meta{font-size:12px;color:var(--dim);display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+  .doc-head .meta b{color:var(--sub);font-weight:500}
+
+  h2{font-size:18px;font-weight:800;margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+  h2 .n{color:var(--gold);font-family:var(--mono);font-size:13px;border:1px solid var(--line2);border-radius:6px;padding:2px 9px}
+  h3{font-size:14px;font-weight:700;color:var(--cyan);margin:18px 0 8px}
+  p{font-size:13.5px;color:var(--sub);margin-bottom:8px}
+  p b{color:var(--txt)}
+
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:12px 0;table-layout:fixed}
+  .tbl th{color:var(--sub);font-weight:500;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  .tbl td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--txt);vertical-align:top}
+  .tbl .mono{font-family:var(--mono);color:var(--cyan);font-size:11.5px}
+  .tbl td b{color:var(--gold)}
+
+  .chartbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+  .chart{width:100%;height:280px}
+
+  .steps{margin:14px 0}
+  .step{display:grid;grid-template-columns:36px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .step:last-child{border-bottom:none}
+  .step .no{width:28px;height:28px;border-radius:50%;background:var(--card2);border:1px solid var(--line2);color:var(--gold);font-family:var(--mono);font-size:12px;display:grid;place-items:center}
+  .step .txt{color:var(--sub);padding-top:2px}
+  .step .txt b{color:var(--txt)}
+
+  .callout{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line2);border-left:4px solid var(--cyan);border-radius:10px;padding:16px 18px;margin:16px 0;font-size:13px;color:var(--sub)}
+  .callout b{color:var(--cyan)}
+
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:11.5px;color:var(--dim)}
+  .lockline{font-family:var(--mono);color:var(--gold);font-size:11px}
+  .back{display:inline-block;margin-bottom:20px;font-size:12px;color:var(--cyan);text-decoration:none;border:1px solid var(--line2);padding:4px 14px;border-radius:8px}
+  .back:hover{background:rgba(79,195,247,.08)}
+
+  @media(max-width:620px){
+    .doc-head h1{font-size:21px}
+    .wrap{padding:20px 12px 48px}
+    .tbl{font-size:11.5px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 返回白皮书矩阵</a>
+
+  <div class="doc-head">
+    <div class="wpnum">WP-009 · GOVERNANCE · 治理体系</div>
+    <h1>治理确权体系技术白皮书 · 元秩序全域归档锁档 V3.0</h1>
+    <div class="meta">
+      <span>版本：<b>V3.0</b></span>
+      <span>日期：<b>2026-09-30</b></span>
+      <span>确权：<b>DID-BR-000002</b></span>
+      <span>锚定：<b>Ω₀⊂⊙∞⊂Ω</b></span>
+      <span>资产ID：<b>META-ARCHIVE-200</b></span>
+      <span>来源：<b>meta-order-archive</b></span>
+    </div>
+  </div>
+
+  <h2><span class="n">01</span> 摘要</h2>
+  <p>本白皮书阐述体系资产<b>治理确权体系</b>——将任意内容转化为结构化、可溯源、永久确权的知识资产。核心能力：<b>四层结构化拆分、九大元类归类、SHA256哈希确权、链式继承、eFuse硬件熔断固化、五层锁防、Lv1-Lv8锁档等级</b>。</p>
+
+  <div class="callout"><b>核心声明：</b>规则即本体，真值即记忆，实例即载体。素材/缓存/临时向量库属于运行实例（沙盒重启自动销毁），四维规则永久存续，每次启动自动重建基准。</div>
+
+  <h2><span class="n">02</span> 六步闭环流程</h2>
+  <div class="steps">
+    <div class="step"><div class="no">1</div><div class="txt"><b>四层结构化拆分</b>：元元数据 / 业务叙事层 / 工程契约层 / 故障约束台账</div></div>
+    <div class="step"><div class="no">2</div><div class="txt"><b>资产归类</b>：分配唯一asset_id，归入M1-M9九大元类</div></div>
+    <div class="step"><div class="no">3</div><div class="txt"><b>飞书文档创建</b>：结构化结果写入飞书文档（XML格式）</div></div>
+    <div class="step"><div class="no">4</div><div class="txt"><b>哈希确权</b>：计算资产SHA256，继承父块哈希生成链式哈希</div></div>
+    <div class="step"><div class="no">5</div><div class="txt"><b>台账更新</b>：全局索引台账条目数+1，根哈希重算</div></div>
+    <div class="step"><div class="no">6</div><div class="txt"><b>凭证输出</b>：确权凭证 + 五层锁防 + eFuse固化</div></div>
+  </div>
+
+  <h2><span class="n">03</span> 九大元类体系</h2>
+  <div class="chartbox">
+    <h3>M1-M9 元类分布</h3>
+    <div id="chartMeta" class="chart"></div>
+  </div>
+  <div class="tbl">
+    <colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+    <tr><th>元类</th><th>收录范围</th></tr>
+    <tr><td class="mono">M1算法架构</td><td>算法、架构、模型、代码、工程实现</td></tr>
+    <tr><td class="mono">M2自治内核进化</td><td>内核架构、自愈协议、进化日志、层级体系</td></tr>
+    <tr><td class="mono">M3元层协议</td><td>元秩序、决策协议、根因协议、归档协议</td></tr>
+    <tr><td class="mono">M4理论体系</td><td>数学理论、语义模型、动力学、估值模型</td></tr>
+    <tr><td class="mono">M5产品体系</td><td>产品方案、短剧、AIOS、SOP、集成方案</td></tr>
+    <tr><td class="mono">M6对外交付</td><td>白皮书、简历、公开文档、交付物</td></tr>
+    <tr><td class="mono">M7自动化调度</td><td>定时任务、巡检流水线、自愈调度</td></tr>
+    <tr><td class="mono">M8行业知识</td><td>行业分析、尽调、法务、商业案例</td></tr>
+    <tr><td class="mono">M9元秩序基底</td><td>全局索引台账、架构总览、基础定义</td></tr>
+  </div>
+
+  <h2><span class="n">04</span> 五层锁防与锁档等级</h2>
+  <div class="tbl">
+    <colgroup><col style="width:16%"><col style="width:30%"><col style="width:54%"></colgroup>
+    <tr><th>等级</th><th>名称</th><th>锁防</th></tr>
+    <tr><td class="mono">Lv1</td><td>草稿锁</td><td>L1哈希链锁 · 完全可修改</td></tr>
+    <tr><td class="mono">Lv2</td><td>审核锁</td><td>L1+L2文档锁 · 需审核后修改</td></tr>
+    <tr><td class="mono">Lv3</td><td>发布锁</td><td>L1-L3台账锁 · 仅可追加版本</td></tr>
+    <tr><td class="mono">Lv4</td><td>固化锁</td><td>L1-L4 eFuse熔断 · 不可修改主体</td></tr>
+    <tr><td class="mono">Lv5-Lv7</td><td>进阶锁</td><td>L1-L4+内核标记 · 不可修改</td></tr>
+    <tr><td class="mono">Lv8</td><td>永久自治锁</td><td>L1-L5全栈 · 永久固化不可修改</td></tr>
+  </div>
+
+  <h2><span class="n">05</span> 治理确权核心机制</h2>
+  <div class="formula">新根哈希 = SHA256(旧根哈希 + 资产哈希) ｜ 链式继承保证链路连续，篡改即断链</div>
+  <div class="tbl">
+    <colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+    <tr><th>机制</th><th>说明</th></tr>
+    <tr><td>哈希链锁</td><td>SHA256链式继承，篡改即断链（L1）</td></tr>
+    <tr><td>eFuse熔断</td><td>关键资产哈希写入熔断位，不可逆（L4）</td></tr>
+    <tr><td>自治内核锁</td><td>Lv8硬件级永久自治锁档，写入内核（L5）</td></tr>
+    <tr><td>Lv8触发条件</td><td>3次以上真值校验 + 公理约束全通过 + 漂移度&lt;5%</td></tr>
+  </div>
+
+  <footer>
+    <div>火斗云智AIOS 技术白皮书矩阵 · WP-009</div>
+    <div class="lockline">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · NODE-DEV-DOUBAO-WORK-001</div>
+  </footer>
+</div>
+
+<script>
+  const mk=(id)=>echarts.init(document.getElementById(id));
+  const SUB='#8fa3c8', GOLD='#ffc857', CYAN='#4fc3f7';
+  const cats=['M1算法','M2内核','M3协议','M4理论','M5产品','M6交付','M7调度','M8行业','M9基底'];
+  const counts=[22,18,15,12,30,14,10,8,12];
+  mk('chartMeta').setOption({
+    tooltip:{trigger:'item', triggerOn:'click', renderMode:'richText', confine:true, backgroundColor:'#0b1224', borderColor:'#2a3a66', textStyle:{color:'#e8eefc',fontSize:12}},
+    series:[{type:'pie', radius:['18%','72%'], center:['50%','52%'],
+      data:cats.map((n,i)=>({name:n, value:counts[i]})),
+      label:{color:'#e8eefc', fontSize:10.5},
+      labelLine:{lineStyle:{color:'#2a3a66'}},
+      itemStyle:{borderColor:'#0e1730', borderWidth:2}
+    }]
+  });
+  window.addEventListener('resize',()=>{chartMeta.resize()});
+</script>
+</body>
+</html>

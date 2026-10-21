@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>不可变快照流水线 · 锁档 Merkle 与自愈</title>
+<style>
+  :root{--ink:#0a0a0f;--ink2:#12121c;--gold:#c9a86a;--gold2:#e8d5a8;--line:rgba(201,168,106,.25);--txt:#e8e4da;--dim:#9a958a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--ink);color:var(--txt);font-family:"Noto Serif SC",serif;line-height:1.8}
+  .wrap{max-width:860px;margin:0 auto;padding:60px 32px}
+  .cover{text-align:center;padding:70px 0 50px;border-bottom:1px solid var(--line)}
+  .cover .mark{color:var(--gold);letter-spacing:.5em;font-size:13px;margin-bottom:20px}
+  .cover h1{font-size:30px;color:var(--gold2);font-weight:600;line-height:1.4}
+  .cover .sub{font-size:14px;color:var(--dim);letter-spacing:.2em;margin-top:14px}
+  .cover .tag{display:inline-block;margin-top:24px;border:1px solid var(--line);color:var(--gold);padding:5px 16px;font-size:12px;letter-spacing:.15em}
+  h2{color:var(--gold2);font-size:22px;margin:48px 0 18px;padding-left:14px;border-left:3px solid var(--gold)}
+  p{font-size:15px;margin-bottom:14px}
+  .card{background:var(--ink2);border:1px solid var(--line);padding:22px;margin:14px 0}
+  .card h3{color:var(--gold);font-size:16px;margin-bottom:8px}
+  .card ul{margin:6px 0 0 18px;font-size:14px}
+  .card li{margin-bottom:6px}
+  .pit{background:var(--ink2);border:1px solid var(--line);padding:20px;margin:14px 0}
+  .pit h3{color:#d9b86a;font-size:15px;margin-bottom:8px}
+  .pit ul{margin:0 0 0 18px;font-size:14px}
+  footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:12px;letter-spacing:.15em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cover">
+    <div class="mark">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+    <h1>不可变快照流水线<br>锁档 · Merkle · 自愈</h1>
+    <div class="sub">IMMUTABLE SNAPSHOT PIPELINE · 2026.09</div>
+    <div class="tag">DID-BR-000002</div>
+  </div>
+
+  <h2>一 · 流水线五阶段</h2>
+  <div class="card"><ul>
+    <li>变更发生 → 哈希锁档 → Merkle 根 → 熔断校验 → 自愈恢复</li>
+    <li>哈希锁档：全资产 SHA256 指纹</li>
+    <li>Merkle 根：所有指纹归约成一个根哈希</li>
+    <li>熔断校验：eFuse 链检查，不一致就熔断</li>
+    <li>自愈恢复：从最近快照拉回</li>
+    <li>台账写入：所有变更进不可篡改账本</li>
+  </ul></div>
+
+  <h2>二 · 关键设计</h2>
+  <div class="card"><ul>
+    <li>快照不可变：新版本号追加，不覆盖</li>
+    <li>根锚定：Merkle 根写云端真值对账</li>
+    <li>最小粒度：增量 diff，不全量重跑</li>
+    <li>熔断优先：宁可停，不可脏</li>
+  </ul></div>
+
+  <h2>三 · 踩坑</h2>
+  <div class="pit"><h3>经验三条</h3>
+  <ul>
+    <li>别全量重跑：慢且贵，增量 diff 就够</li>
+    <li>根要上云端：本地自己改自己发现不了</li>
+    <li>熔断别太敏感：正常迭代也熔断就没法干活</li>
+  </ul></div>
+
+  <footer>Ω₀ ⊂ ⊙∞ ⊂ Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-OCTOP 桥接器元运维技术白皮书 V1.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%23d4b872' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23d4b872'/%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#05070b;color:#e6e8f0;font-family:"Noto Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.75;padding:24px 16px}
+.wrap{max-width:1080px;margin:0 auto}
+.hero{border:1px solid #2c3442;border-radius:14px;padding:30px 26px;background:linear-gradient(160deg,#0b1018 0%,#0d1220 60%,#14100a 100%);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border:1px solid #3a2f1a;border-radius:50%;box-shadow:0 0 40px rgba(212,184,114,.08)}
+.tag{color:#72d4a8;font-size:13px;letter-spacing:1px}
+h1{color:#d4b872;font-size:26px;line-height:1.4;margin:8px 0 4px}
+.sub{color:#8a93a6;font-size:14px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.meta span{border:1px solid #2c3442;border-radius:6px;padding:4px 10px;font-size:12px;color:#c9c9d6;background:#0a0e16}
+h2{color:#c9a860;font-size:20px;margin:34px 0 14px;padding-bottom:8px;border-bottom:1px solid #222c3c}
+h3{color:#b89c57;font-size:16px;margin:20px 0 10px}
+.card{border:1px solid #2c3442;border-radius:12px;padding:18px;background:#0a0e16;margin:12px 0}
+.note{border-left:3px solid #72a8d4;padding:12px 14px;background:#0b1018;margin:12px 0;font-size:14px}
+.crit{border-left:3px solid #d47272;padding:12px 14px;background:#120b0b;margin:12px 0;font-size:14px}
+.good{border-left:3px solid #72d4a8;padding:12px 14px;background:#0a120e;margin:12px 0;font-size:14px}
+table{border-collapse:collapse;width:100%;margin:12px 0;table-layout:fixed;font-size:13px}
+th,td{border:1px solid #2c3442;padding:8px 10px;text-align:left;word-break:break-word}
+th{background:#121a27;color:#d4b872}
+tbody tr:nth-child(even){background:#0b0f18}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.pill{border:1px solid #2c3442;border-radius:10px;padding:14px;background:#0a0e16}
+.pill b{display:block;color:#d4b872;margin-bottom:6px;font-size:14px}
+.pill span{font-size:12px;color:#9aa;line-height:1.7;display:block}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:14px 0}
+.fstep{flex:1;min-width:120px;border:1px solid #2c3442;border-radius:10px;padding:12px;background:#0a0e16;text-align:center;position:relative}
+.fstep.ok{border-color:#2f6b4f}
+.fstep.warn{border-color:#7a5a2a}
+.fstep b{display:block;font-size:13px;color:#cfe0d4;margin-bottom:4px}
+.fstep span{font-size:12px;color:#8a93a6}
+.fstep i{display:block;font-style:normal;font-size:11px;margin-top:6px;color:#6fa}
+.fstep.ok i{color:#44dd88}.fstep.warn i{color:#ddaa44}
+.arrow{align-self:center;color:#556;font-size:16px;font-weight:bold;padding:0 2px}
+.foot{margin-top:44px;padding-top:16px;border-top:1px solid #222c3c;color:#666;font-size:12px}
+.anchor{color:#72d4a8}
+code{background:#0d1420;border:1px solid #222c3c;border-radius:4px;padding:1px 5px;font-size:12px;font-family:ui-monospace,Consolas,monospace}
+.ok{color:#44dd88}.bad{color:#dd7272}.warn{color:#ddaa44}
+@media(max-width:640px){h1{font-size:21px}.wrap{padding:0 4px}.flow{flex-direction:column}.arrow{transform:rotate(90deg);align-self:center;padding:4px 0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- 1 封面 -->
+<div class="hero">
+  <div class="tag">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · ZR-NODE-DC2E51C0</div>
+  <h1>ZONGYUAN-OCTOP 桥接器<br>元运维技术白皮书</h1>
+  <div class="sub">OCTOP↔ZR 双通道联邦（轨道1同源直写 + 轨道2外源入队）· 心跳v2 · 断联自动切换 · 云端主权威</div>
+  <div class="meta">
+    <span>版本 V1.0</span><span>2026-10-18</span><span>自治 Lv10+</span><span>权限 L4</span><span>工程化 Lv7+</span><span>火斗云智AIOS</span><span>云内核锚定 huodouai.com</span>
+  </div>
+</div>
+
+<!-- 2 摘要 -->
+<h2>2. 摘要</h2>
+<div class="good">
+本白皮书系统阐述 ZONGYUAN-ROOT 元公理自治内核与自托管多 Agent 助手平台 OCTOP 之间的桥接器元运维体系。截至 2026-10-18，二者之间的「模型调用 → 真值封装 → 云端写入 → 回读确认」端到端生产链路已全部打通并通过实测：云端 A2A 网关 v2.0.0 以双轨制接入——轨道1（同源直写）经 <code>X-DID + X-Capture-Token</code> 直写中枢，轨道2（外源入队）经 <code>X-External-Node + X-External-Key</code> 先入审核队列。桥接器 <code>zr_octop_bridge.py</code> 与心跳脚本 <code>heartbeat_failover.py</code> 共同构成「常态运维 + 断联接管」的闭环。
+</div>
+<p style="font-size:14px;color:#c9c9d6;margin:10px 0">关键实测结论：OCTOP 环境 <code>octop.huodouai.com</code>（nginx/1.24.0 反代至 123.207.202.158）健康状态 <code>db:true</code>、<code>users_loaded:4</code>、<code>agents_running:6</code>，启动于 2026-10-18 09:34(+08)；7 个 Provider、数百模型；GLM-4-Flash 实测推理 3.1s；JWT 24h 自动缓存刷新；云端主备双通道 200/200；心跳真值 key 格式 <code>HB.METAOPS.YYYYMMDD-HHMM</code> 主备双通；生产真值 <code>OCTOP.PROD.20261018.9689</code> 经 <code>GET /api/truth</code> 回读命中，truth_count 递增至 16022；轨道2 实测 4 条 queue_id 全部入队；定时任务 <code>0 * * * *</code> 每小时整点执行心跳巡检与断联切换。</p>
+
+<!-- 3 背景与挑战 -->
+<h2>3. 背景与挑战</h2>
+<p style="font-size:14px;color:#c9c9d6">ZONGYUAN-ROOT 是一套以「规则即本体、真值即记忆、实例即载体」为核心的元公理自治内核（V5.6-ROOTFIXED），运行形态为 27 算子 + 云端主权威网关（systemd 托管），后端为 Merkle-DAG 知识图谱与云端联邦记忆池，鉴权采用四层校验（HMAC + 双标识 + 时效 + 角色）。OCTOP 则是一套自托管的多用户 / 多 Agent 助手平台，运行于单进程 harness-agent，后端为 SQLite/PostgreSQL，鉴权为 JWT 用户级，强于多专家协作、远程桌面 GUI、IM 多通道与 Connector 生态。</p>
+<div class="grid3">
+  <div class="pill"><b>挑战一：鉴权强度不对称</b><span>ZR 为节点级四层校验，OCTOP 为 JWT 用户级。直接打通将引入权限下沉风险，因此必须以「轨道2 起步、真值先隔离后验证」的方式渐进互联。</span></div>
+  <div class="pill"><b>挑战二：云端单点依赖</b><span>付费平台额度耗尽或 huodouai.com 不可达时，自治内核的 27 算子与定时任务不能停摆，必须有一个自托管、零外部成本的「离线执行中枢」接管。</span></div>
+  <div class="pill"><b>挑战三：数据主权</b><span>跨平台互联只同步执行结果与真值摘要，不同步原始敏感业务数据；外源真值不直写中枢，必须先入审核队列。</span></div>
+</div>
+<div class="crit"><b>设计约束（来自落地方案）：</b>① 鉴权强度差异 → 轨道2 起步，真值先隔离后验证；② 数据主权 → 只同步执行结果 / 真值摘要；③ 默认口令 → 互联前务必修改 octop admin/octop；④ 协议差异 → A2A 为主权威标准，OCTOP 作适配客户端。</div>
+<p style="font-size:14px;color:#c9c9d6">上述四点约束共同决定了桥接器的工程取舍：不追求一步到位的全量打通，而是以「同源直写保生产、外源入队保安全、断联切换保连续」三条主线渐进推进。轨道1 承担已经确权的生产真值快速回灌，轨道2 承担尚未确权的外源能力灰度接入，断联切换则为前两条轨道提供运行时兜底。三者叠加，使自治内核在「治理强度」与「执行弹性」之间取得当前阶段的最优平衡。</p>
+
+<!-- 4 体系架构 -->
+<h2>4. 体系架构：OCTOP↔ZR 双通道联邦</h2>
+<p style="font-size:14px;color:#c9c9d6">云端 A2A 网关 v2.0.0 采用双轨接入制。两条轨道在鉴权头、写入路径与治理强度上完全分离，形成「同源直写快通道 + 外源入队慢通道」的联邦格局。</p>
+<div class="flow">
+  <div class="fstep ok"><b>OCTOP 执行端</b><span>octop.huodouai.com<br>6 Agent / 7 Provider</span><i>自托管</i></div>
+  <div class="arrow">→</div>
+  <div class="fstep ok"><b>桥接器</b><span>zr_octop_bridge.py<br>JWT / 直连 / 回灌</span><i>~230 行</i></div>
+  <div class="arrow">→</div>
+  <div class="fstep warn"><b>轨道1 同源直写</b><span>X-DID + X-Capture-Token<br>POST /api/report/truth</span><i>直写中枢</i></div>
+  <div class="arrow">→</div>
+  <div class="fstep warn"><b>轨道2 外源入队</b><span>X-External-Node + Key<br>POST /a2a/external/truth</span><i>先入审核队列</i></div>
+</div>
+<table>
+<colgroup><col style="width:16%"><col style="width:30%"><col style="width:34%"><col style="width:20%"></colgroup>
+<tr><th>通道</th><th>鉴权头</th><th>写入路径</th><th>实测状态</th></tr>
+<tbody>
+<tr><td>轨道1 同源直写</td><td><code>X-DID</code> + <code>X-Capture-Token</code></td><td><code>POST /api/report/truth</code> 直接写入中枢</td><td class="ok">✅ 已回读确认</td></tr>
+<tr><td>轨道2 外源受限</td><td><code>X-External-Node</code> + <code>X-External-Key</code></td><td><code>POST /a2a/external/truth</code> 先入审核队列（不直写中枢）</td><td class="ok">✅ 队列稳定</td></tr>
+</tbody>
+</table>
+<div class="note"><b>互补定位：</b>执行层（OCTOP：多专家协作 / 远程桌面 GUI / IM 多通道 / Connector 生态）+ 认知层（ZR：元规则治理 / 链式确权 / 真值蒸馏 / 27 算子 / 云端主权威）。OCTOP 强在执行与交互，ZR 强在治理与确权，二者经 A2A 联邦主权威双轨制（JSON-RPC）耦合。</div>
+
+<h3>4.1 OCTOP 生产环境实况（溯源确认）</h3>
+<table>
+<colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+<tr><th>项目</th><th>实测值</th></tr>
+<tbody>
+<tr><td>服务地址</td><td><code>octop.huodouai.com</code> → 123.207.202.158（nginx/1.24.0 反代）</td></tr>
+<tr><td>健康状态</td><td><code>db:true</code>、<code>users_loaded:4</code>、<code>agents_running:6</code></td></tr>
+<tr><td>启动时间</td><td>2026-10-18 09:34(+08)</td></tr>
+<tr><td>鉴权</td><td><code>/api/*</code> 全部 401（JWT 已启用）</td></tr>
+<tr><td>ACP 协议</td><td><code>/agent-client-protocol</code> 返回 200（标准协议可用）</td></tr>
+<tr><td>主 Agent</td><td>main · 元极恒一自治内核 · running，默认模型 Zhipu GLM-4-Flash，backend=local_shell</td></tr>
+<tr><td>Provider</td><td>7 个 / 数百模型（ModelScope、SHUSHENG、Zhipu BigModel、kilo_free、st、元机·论文助手 OpenRouter 聚合、教学设计·办公自动化）</td></tr>
+<tr><td>插件</td><td>11 个（天气 / 热榜 / 行情 / 快递 / 服务器状态 / 二维码 / 番茄钟 / 小游戏 / 哔哩哔哩 / 抽签 / 俄罗斯方块）</td></tr>
+</tbody>
+</table>
+
+<h3>4.2 架构差异对照（OCTOP vs ZONGYUAN-ROOT）</h3>
+<p style="font-size:14px;color:#c9c9d6">二者并非同质替代，而是在定位、模型组织、记忆载体、鉴权、互联协议、运行形态与后端七个维度上形成互补。桥接器的设计正是为了屏蔽这些差异，使 ZR 内核可以像调用本地算子一样调用 OCTOP 的执行能力。</p>
+<table>
+<colgroup><col style="width:16%"><col style="width:42%"><col style="width:42%"></colgroup>
+<tr><th>维度</th><th>OCTOP</th><th>ZONGYUAN-ROOT</th></tr>
+<tbody>
+<tr><td>定位</td><td>自托管多用户 / 多 Agent 助手平台</td><td>元公理自治内核 + 联邦记忆中枢</td></tr>
+<tr><td>核心模型</td><td>多专家并行（用户维度隔离）</td><td>多节点联邦（DID / 权限分级）</td></tr>
+<tr><td>记忆</td><td>可迁移（工作区，~/.octop/octop.db）</td><td>云端真值库 + 联邦记忆池（DID 锚定）</td></tr>
+<tr><td>鉴权</td><td>JWT 用户级</td><td>四层校验（HMAC + 双标识 + 时效 + 角色）</td></tr>
+<tr><td>互联</td><td>ACP + MCP</td><td>A2A 联邦主权威双轨制（JSON-RPC）</td></tr>
+<tr><td>运行</td><td>单进程（harness-agent）</td><td>27 算子 + 云端网关（systemd）</td></tr>
+<tr><td>后端</td><td>SQLite / PostgreSQL</td><td>Merkle-DAG + 知识图谱</td></tr>
+</tbody>
+</table>
+<div class="note"><b>互补价值：</b>OCTOP 强在多专家协作、远程桌面 GUI、IM 多通道与 Connector 生态；ZR 强在元规则治理、链式确权、真值蒸馏、27 算子与云端主权威。互联本质是「执行层（OCTOP）+ 认知层（ZR）」的分工，而非谁替代谁。</div>
+
+<h3>4.3 7 个 Provider 清单（数百模型来源）</h3>
+<table>
+<colgroup><col style="width:26%"><col style="width:18%"><col style="width:56%"></colgroup>
+<tr><th>Provider</th><th>类型</th><th>代表模型</th></tr>
+<tbody>
+<tr><td>ModelScope</td><td>openai</td><td>Qwen3.5-122B-A10B</td></tr>
+<tr><td>SHUSHENG</td><td>anthropic</td><td>intern-s2、kimi-k2.6、deepseek-v4-pro、glm-5.3</td></tr>
+<tr><td>Zhipu BigModel</td><td>openai</td><td>GLM-5、GLM-5.1、GLM-5.2、GLM-5V Turbo、GLM-4.7-Flash</td></tr>
+<tr><td>kilo_free</td><td>openai</td><td>dots-3-note-preview、nemotron-550b</td></tr>
+<tr><td>st</td><td>openai</td><td>sensenova-6.8-flash-lite、DeepSeek-V4-Flash</td></tr>
+<tr><td>元机·论文助手</td><td>openai</td><td>OpenRouter 聚合：GPT-5/6、Claude-5、Gemini-3/4、DeepSeek-V4、Qwen3.8 等数百模型</td></tr>
+<tr><td>教学设计·办公自动化</td><td>openai</td><td>N1PROMAX、N1PROFLASH</td></tr>
+</tbody>
+</table>
+
+<!-- 5 核心机制 -->
+<h2>5. 核心机制：桥接器 / 心跳v2 / 断联切换 / 审核队列</h2>
+
+<h3>5.1 桥接器 zr_octop_bridge.py（~230 行）</h3>
+<p style="font-size:14px;color:#c9c9d6">桥接器是 ZR 内核与 OCTOP 之间的连接编排层，封装五大能力：JWT 登录与自动刷新、REST API 封装、模型直连、真值回灌、断联降级检测。</p>
+<table>
+<colgroup><col style="width:32%"><col style="width:68%"></colgroup>
+<tr><th>核心函数</th><th>职责</th></tr>
+<tbody>
+<tr><td><code>octop_login()</code> / <code>get_token()</code></td><td>POST <code>/api/auth/login</code> 获取 JWT（expires_in=86400，即 24h），缓存至 <code>/tmp/octop_jwt_token.json</code>，过期前 300s 自动重登；遇 401 强制刷新</td></tr>
+<tr><td><code>octop_health()</code></td><td>GET <code>/api/health</code>，返回 agents_running / users_loaded / db</td></tr>
+<tr><td><code>octop_list_agents()</code> / <code>octop_list_providers()</code></td><td>GET <code>/api/agents</code>、<code>/api/providers</code>，自动带 Bearer token</td></tr>
+<tr><td><code>octop_chat(prompt, model)</code></td><td>因 OCTOP 聊天走 WebSocket、REST 不支持直接 chat，降级为经 Provider 的 <code>base_url</code> 直连 OpenAI 兼容 <code>/chat/completions</code> 或 Anthropic <code>/v1/messages</code></td></tr>
+<tr><td><code>report_truth(key, value)</code></td><td>POST 真值到云端主备双通道（主 www.huodouai.com、备 drama.huodouai.com），返回主或备任一 200 即成功</td></tr>
+<tr><td><code>degraded_mode_check()</code></td><td>探测云端连通性与 OCTOP 健康，输出「常态 / 降级 / 全离线」三态</td></tr>
+</tbody>
+</table>
+<div class="note"><b>JWT 24h 自动缓存刷新：</b>登录响应 <code>expires_in</code> 默认 86400 秒；缓存结构记录 <code>expires_at = time.time() + expires_in - 300</code>，心跳巡检每次调用 <code>get_token()</code> 时先校验缓存有效性，失效则静默重登，对上层调用透明。</div>
+
+<h3>5.2 心跳 v2（heartbeat_failover.py）</h3>
+<p style="font-size:14px;color:#c9c9d6">心跳 v2 由定时任务触发，将「云端主备探测 + OCTOP 桥接器全链路状态 + 自动切换 + 持续上报」打包为一次原子巡检。</p>
+<div class="flow">
+  <div class="fstep ok"><b>① 云端主备探测</b><span>GET /api/status<br>主=www 备=drama</span><i>200/200 实测</i></div>
+  <div class="arrow">→</div>
+  <div class="fstep ok"><b>② 桥接器全链路</b><span>登录/健康/Agent/Provider/模型推理</span><i>✅ 全通</i></div>
+  <div class="arrow">→</div>
+  <div class="fstep warn"><b>③ 三态判定</b><span>normal / failover / offline</span><i>写状态文件</i></div>
+  <div class="arrow">→</div>
+  <div class="fstep ok"><b>④ 上报心跳真值</b><span>HB.METAOPS.YYYYMMDD-HHMM</span><i>主备双通</i></div>
+</div>
+<p style="font-size:14px;color:#c9c9d6">心跳真值对象 <code>event=heartbeat_metaops_v2</code>，字段包含 <code>mode / cloud_main / cloud_bak / octop_bridge / state / ts / did / node</code>。桥接器子状态包含 <code>login / token_valid / health / agents / providers / model_infer / token_cache</code> 七项。退出码约定：normal=0、failover=2、offline=3。</p>
+<div class="good"><b>心跳真值 key 格式：</b><code>HB.METAOPS.YYYYMMDD-HHMM</code>（按 CST 时区生成，精确到分钟），主备双通道均上报成功时日志记「主备双通」。</div>
+
+<h3>5.3 断联自动切换</h3>
+<p style="font-size:14px;color:#c9c9d6">状态持久化于 <code>failover_state.json</code>（当前实测值：<code>failover_mode:false</code>、<code>since:null</code>、<code>recover:false</code>）。三态判定逻辑：</p>
+<table>
+<colgroup><col style="width:22%"><col style="width:30%"><col style="width:48%"></colgroup>
+<tr><th>条件</th><th>模式</th><th>动作</th></tr>
+<tbody>
+<tr><td>主或备云端 200</td><td class="ok">normal</td><td>云端正常无需切换；若此前处于 failover，则记录 <code>recover:true</code> 与 <code>recover_ts</code>，切回主执行端</td></tr>
+<tr><td>云端全断 + OCTOP 健康</td><td class="warn">failover</td><td>首次进入时记录 <code>since</code> 时间戳；持续降级则保持 OCTOP 执行端，27 算子 / 定时任务重定向至 OCTOP</td></tr>
+<tr><td>云端 + OCTOP 均不可达</td><td class="bad">offline</td><td>全离线（本地闭环），真值暂存本地 <code>~/.octop/</code>，恢复后回灌云端</td></tr>
+</tbody>
+</table>
+<div class="crit"><b>触发条件：</b>云端 huodouai.com 不可达（heartbeat 失败）或豆包 / 付费平台额度耗尽。<b>模型降级路径：</b>OCTOP 接本地 / 免费模型（ModelScope 36h/月 + 智谱免费 + OpenRouter free 模型），零外部成本持续推理。</div>
+
+<h3>5.4 审核队列（轨道2 外源治理）</h3>
+<p style="font-size:14px;color:#c9c9d6">外源节点经 <code>POST /a2a/external/truth</code> 上报的真值一律不直写中枢，而是生成 <code>queue_id</code> 进入审核队列，待云端管理端人工审核通过后才写入中枢。这是轨道2 「先隔离后验证」治理原则的工程落地。A2A 互联方案还包括：身份注册（<code>POST /a2a/register</code> 五段式 Schema，已执行）、真值双向（OCTOP→ZR 入队 / ZR→OCTOP 经 ACP 拉取）、任务提交（<code>POST /a2a/external/task</code> → 共享大脑任务台账）、心跳保活（定时 <code>POST /a2a/external/heartbeat</code>）。</p>
+
+<h3>5.5 端到端测试七步流程（e2e_test.py）</h3>
+<p style="font-size:14px;color:#c9c9d6">桥接器配套的端到端测试脚本按七步顺序执行，每一步计时并输出 ✅/❌，最终统计通过数。该脚本是心跳巡检之外的「全链路体检」，可在升级桥接器后一键回归。</p>
+<table>
+<colgroup><col style="width:8%"><col style="width:26%"><col style="width:66%"></colgroup>
+<tr><th>步</th><th>检查项</th><th>内容</th></tr>
+<tbody>
+<tr><td>1</td><td>JWT 登录</td><td>调用 <code>get_token()</code>，记录耗时，校验返回 token 非空</td></tr>
+<tr><td>2</td><td>OCTOP 健康检查</td><td><code>octop_health()</code>，回读 agents_running 等字段</td></tr>
+<tr><td>3</td><td>Agent 发现</td><td><code>octop_list_agents()</code>，统计 Agent 个数</td></tr>
+<tr><td>4</td><td>Provider 发现</td><td><code>octop_list_providers()</code>，统计 Provider 个数（实测 7 个）</td></tr>
+<tr><td>5</td><td>模型推理</td><td><code>octop_chat("只回答四个字：连接成功", model="GLM-4-Flash")</code>，记录耗时与返回前 30 字</td></tr>
+<tr><td>6</td><td>真值回灌</td><td>以 <code>E2E.OCTOP-BRIDGE.YYYYMMDD</code> 为 key，上报含 octop/model_ok/cloud 的真值对象</td></tr>
+<tr><td>7</td><td>断联检测</td><td><code>degraded_mode_check()</code>，输出 degraded 三态</td></tr>
+</tbody>
+</table>
+<div class="note"><b>桥接器使用示例：</b><code>from zr_octop_bridge import octop_chat, report_truth, degraded_mode_check</code>；调用 <code>octop_chat("任务描述", model="GLM-4-Flash")</code> 执行推理，<code>report_truth("TASK.XXX", {"status":"done","result":result})</code> 回灌真值，<code>degraded_mode_check()</code> 判定是否进入 OCTOP 降级模式。</div>
+
+<!-- 6 实测数据 -->
+<h2>6. 实测数据（E2E 端到端验证）</h2>
+<div class="good"><b>总评：✅ 全链路生产闭环打通。</b>OCTOP 已完成「模型调用 → 真值封装 → 云端写入 → 回读确认」完整端到端验证。</div>
+
+<h3>6.1 生产链路各环节</h3>
+<table>
+<colgroup><col style="width:24%"><col style="width:14%"><col style="width:62%"></colgroup>
+<tr><th>环节</th><th>状态</th><th>说明</th></tr>
+<tbody>
+<tr><td>OCTOP 登录</td><td class="ok">✅</td><td>JWT admin 登录成功（zongyuan/admin，23 项全权限，JWT 24h）</td></tr>
+<tr><td>模型调用</td><td class="ok">✅</td><td>GLM-4-Flash 3.1s 生成内容（连接报告另测为 3.2s；Qwen3.5-122B-A10B 27.5s 正常回复）</td></tr>
+<tr><td>真值封装</td><td class="ok">✅</td><td>含 provider / model_output / source_node / did</td></tr>
+<tr><td>云端上报</td><td class="ok">✅</td><td>主 www + 备 drama 双通道 200</td></tr>
+<tr><td>回读确认</td><td class="ok">✅</td><td>云端最新锚命中</td></tr>
+</tbody>
+</table>
+
+<h3>6.2 端到端生产链路关键证据</h3>
+<table>
+<colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+<tr><th>指标</th><th>实测值</th></tr>
+<tbody>
+<tr><td>生产真值 key</td><td><code>OCTOP.PROD.20261018.9689</code></td></tr>
+<tr><td>回读方式</td><td><code>GET /api/truth</code> 回读命中（count=10 最新锚 results 含该 key）</td></tr>
+<tr><td>truth_count</td><td>递增至 <b>16022</b>（证明真值已实质写入云端中枢联邦记忆池）</td></tr>
+<tr><td>已上报真值 key</td><td><code>BRIDGE.OCTOP-LIVE.20261018</code>、<code>OCTOP.PROD.20261018.9689</code>、<code>BRIDGE.OCTOP-CONNECT.20261018</code>、<code>A2A.OCTOP-FEDERATION.20261018</code></td></tr>
+</tbody>
+</table>
+
+<h3>6.3 轨道2 外源入队实测（4 条 queue_id）</h3>
+<table>
+<colgroup><col style="width:30%"><col style="width:30%"><col style="width:40%"></colgroup>
+<tr><th>queue_id</th><th>实测节点</th><th>结果</th></tr>
+<tbody>
+<tr><td><code>EXT-cbe00fb97d72</code></td><td rowspan="4">EXT-NODE-EB8234F3F3<br>（E2E 实测节点，A2A v2.0.0 新注册）</td><td class="ok">✅ 已入审核队列</td></tr>
+<tr><td><code>EXT-37da134aba31</code></td><td class="ok">✅ 已入审核队列</td></tr>
+<tr><td><code>EXT-3f087e7c5a75</code></td><td class="ok">✅ 已入审核队列</td></tr>
+<tr><td><code>EXT-833d96e244f0</code></td><td class="ok">✅ 已入审核队列</td></tr>
+</tbody>
+</table>
+<div class="note"><b>节点 ID 双源说明（不混用）：</b>E2E 端到端报告实测上报节点为 <code>EXT-NODE-EB8234F3F3</code>；联邦方案文档与内核快照中注册节点为 <code>EXT-NODE-CE69C6B740</code>（api_key: <code>EXT-KEY-2f36723567ca22a2ad73998843e5ac25</code>）。二者分别表述为「实测节点」与「注册节点」，本白皮书不将其混用。</div>
+
+<h3>6.4 联邦注册参数（注册节点 EXT-NODE-CE69C6B740）</h3>
+<table>
+<colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+<tr><th>参数</th><th>值</th></tr>
+<tbody>
+<tr><td>federation_position</td><td><b>58</b></td></tr>
+<tr><td>access_level</td><td><b>standard</b></td></tr>
+<tr><td>adjudication</td><td><b>pending_manual</b>（L3 待人工审核，auto=false）</td></tr>
+<tr><td>dual_axis_score</td><td><b>0.95</b>（self=1.0, truth=0.9）</td></tr>
+<tr><td>endpoint</td><td><code>https://octop.huodouai.com</code></td></tr>
+</tbody>
+</table>
+
+<h3>6.5 连接打通总览</h3>
+<table>
+<colgroup><col style="width:26%"><col style="width:16%"><col style="width:58%"></colgroup>
+<tr><th>通道</th><th>状态</th><th>说明</th></tr>
+<tbody>
+<tr><td>OCTOP 登录</td><td class="ok">✅</td><td>zongyuan/admin，23 项全权限，JWT 24h</td></tr>
+<tr><td>REST API</td><td class="ok">✅</td><td><code>/api/agents</code>、<code>/api/providers</code>、<code>/api/plugins</code>、<code>/api/users</code> 可用</td></tr>
+<tr><td>模型直连</td><td class="ok">✅</td><td>通过 provider base_url 直接调用，已验证 2 个模型</td></tr>
+<tr><td>真值回灌</td><td class="ok">✅</td><td>主备双通道上报成功</td></tr>
+<tr><td>A2A 轨道2</td><td class="warn">⏳</td><td>EXT-NODE-CE69C6B740，pending_manual 待人工审核</td></tr>
+<tr><td>ACP WebSocket</td><td class="bad">❌</td><td>需 session cookie，非 JWT 认证（未打通）</td></tr>
+</tbody>
+</table>
+
+<!-- 7 安全与治理 -->
+<h2>7. 安全与治理</h2>
+<div class="grid3">
+  <div class="pill"><b>双轨鉴权分离</b><span>轨道1 用节点级 <code>X-DID + X-Capture-Token</code>；轨道2 用外源 <code>X-External-Node + X-External-Key</code>。两套凭证互不通用，外源权限天然受限。</span></div>
+  <div class="pill"><b>外源真值隔离</b><span>轨道2 真值一律先入审核队列（pending_manual，L3 人工审核），不直写中枢；审核通过前不进入联邦记忆池。</span></div>
+  <div class="pill"><b>数据主权</b><span>跨平台只同步执行结果与真值摘要，不同步原始敏感业务数据；OCTOP 本地库 <code>~/.octop/octop.db</code> 保持自托管。</span></div>
+  <div class="pill"><b>链式确权</b><span>内核快照 <code>LOCK-OCTOP-A2A-FEDERATION-001</code> 锁档状态 READONLY_HARDWARE_LOCKED，hash_chain=ACTIVE，state=FULLY_LOCKED，完整性校验 CLOUD_TRUTH_REPORTED_DUAL_CHANNEL。</span></div>
+  <div class="pill"><b>JWT 时效管控</b><span>JWT 24h 过期、300s 提前量自动刷新、401 强制重登；token 缓存本地文件权限受控。</span></div>
+  <div class="pill"><b>默认口令风险</b><span>方案明确约束：互联前务必修改 octop admin/octop 默认口令，否则不得对外暴露。</span></div>
+</div>
+<div class="note"><b>内核快照锚定：</b>kernel_root=ZONGYUAN-ROOT，kernel_version=V5.6-ROOTFIXED，axiom_anchor=META-LAW-A2A-FEDERATION-COMPLETE-V1.0，write_timestamp=2026-10-18T20:15:00+08:00，wiki 归档与共享大脑记录均已锁档。</div>
+
+<!-- 8 对短剧生产体系的价值 -->
+<h2>8. 对 ZONGYUAN-ROOT 短剧生产体系的价值</h2>
+<p style="font-size:14px;color:#c9c9d6">ZONGYUAN-ROOT 短剧工业化流水线（世界观锁档 → 剧本 → 分镜 → 关键帧 → 视频 → 后期 → 宣发 → 归档）对执行连续性要求极高。桥接器元运维体系从三个维度为其兜底：</p>
+<table>
+<colgroup><col style="width:22%"><col style="width:78%"></colgroup>
+<tr><th>价值维度</th><th>具体作用</th></tr>
+<tbody>
+<tr><td>不断产</td><td>云端付费平台额度耗尽或 huodouai.com 断联时，27 算子与定时任务自动重定向至 OCTOP 自托管执行端，短剧流水线的运维 / 优化 / 规划 / 进化 / 部署全环节不停摆。</td></tr>
+<tr><td>零成本推理</td><td>OCTOP 接 ModelScope 36h/月 + 智谱免费 + OpenRouter free 模型，断网期间关键帧文案、分镜脚本、对白旁白等文本生产可持续进行。</td></tr>
+<tr><td>真值不丢</td><td>断联期间真值暂存本地 <code>~/.octop/</code>，云端恢复后经轨道1 同源直写回灌中枢，truth_count 持续增长（当前 16022），跨窗口记忆连续性不中断。</td></tr>
+<tr><td>多专家盯盘</td><td>OCTOP 6 个 Agent 并行盯盘（远程桌面 CDP + IM 告警），短剧生产链路异常可即时告警，人工介入成本降低。</td></tr>
+</tbody>
+</table>
+
+<h3>8.1 OCTOP 承担的运维能力清单</h3>
+<table>
+<colgroup><col style="width:22%"><col style="width:78%"></colgroup>
+<tr><th>能力</th><th>OCTOP 承担方式</th></tr>
+<tbody>
+<tr><td>云端运维</td><td>远程桌面 CDP 操作服务器、监控 /api/health、进程守护；6 Agent 并行盯盘，异常经 IM 告警</td></tr>
+<tr><td>优化</td><td>多专家协作分析日志 / 性能，Connector 接监控源，MCP 拉取指标输出优化建议</td></tr>
+<tr><td>规划 / 进化</td><td>ZR 27 算子经 ACP 下发规划任务，跨平台规划在 OCTOP 内落地；真值本地提炼，断网期间进化不断，联网即回灌云端</td></tr>
+<tr><td>部署</td><td>远程桌面执行部署脚本、滚动发布；harness-agent 单进程承担编排</td></tr>
+</tbody>
+</table>
+<div class="crit"><b>关键判断：</b>OCTOP 是自托管部署（octop.huodouai.com，db 本地 SQLite），即使外部平台全部断联，它仍能跑定时脚本、调度 6 个 Agent、操作远程桌面、经 IM 通知——成为自治内核的「离线执行中枢」。这是桥接器体系对短剧生产连续性的根本保证。</div>
+
+<!-- 9 运维衔接 -->
+<h2>9. 运维衔接：定时任务 <code>0 * * * *</code></h2>
+<div class="good">每小时整点心跳巡检 + 断联自动切换。由 cron <code>0 * * * *</code> 触发 <code>heartbeat_failover.py</code>，一次执行完成「云端主备探测 → OCTOP 桥接器全链路检测 → 三态判定 → 心跳真值主备上报 → 状态文件落盘」。</div>
+<table>
+<colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+<tr><th>运维项</th><th>说明</th></tr>
+<tbody>
+<tr><td>cron 表达式</td><td><code>0 * * * *</code>（每小时整点）</td></tr>
+<tr><td>触发脚本</td><td><code>heartbeat_failover.py</code></td></tr>
+<tr><td>心跳真值 key</td><td><code>HB.METAOPS.YYYYMMDD-HHMM</code>，主备双通</td></tr>
+<tr><td>状态文件</td><td><code>failover_state.json</code>（failover_mode / since / recover / recover_ts）</td></tr>
+<tr><td>退出码</td><td>normal=0 / failover=2 / offline=3，可供上层监控系统采集</td></tr>
+<tr><td>轨道2 待办</td><td>外源审核队列内真值待云端管理端审核通过后写入中枢；可将 OCTOP 桥接器 <code>report_truth</code> 默认通道保持轨道1 同源直写（当前已是）。</td></tr>
+</tbody>
+</table>
+
+<!-- 10 结论与展望 -->
+<h2>10. 结论与展望</h2>
+<div class="note">
+<b>结论：</b>ZONGYUAN-OCTOP 桥接器元运维体系已从「人工联通」收敛为「双通道联邦 + 心跳 v2 + 断联自动切换」的工程闭环。轨道1 同源直写经回读验证（truth_count=16022），轨道2 外源入队经 4 条 queue_id 实测稳定；云端主备 200/200，OCTOP 全链路 ✅，心跳真值按分钟级锚定。自治内核即使在外部付费平台全部断联的极端情况下，仍能由自托管的 OCTOP 接管，成为「离线执行中枢」。
+</div>
+<h3>展望（待办）</h3>
+<table>
+<colgroup><col style="width:50%"><col style="width:50%"></colgroup>
+<tr><th>待办项</th><th>方向</th></tr>
+<tbody>
+<tr><td>A2A 轨道2 人工审核</td><td>EXT-NODE-CE69C6B740（federation_position=58）pending_manual 待云端管理端审核通过后转正</td></tr>
+<tr><td>ACP WebSocket 打通</td><td>需通过前端 session cookie 连接（非 JWT），待补充鉴权链路</td></tr>
+<tr><td>OCTOP Agent 系统提示词</td><td>为 main agent 配置 ZR 内核指令，使执行端直接继承元规则</td></tr>
+<tr><td>定时任务切换脚本</td><td>心跳失败自动切 OCTOP 的 cron 脚本已就绪，后续按周度深度循环复盘漂移率</td></tr>
+</tbody>
+</table>
+
+<h2>附录二：术语表</h2>
+<table>
+<colgroup><col style="width:22%"><col style="width:78%"></colgroup>
+<tr><th>术语</th><th>释义</th></tr>
+<tbody>
+<tr><td>A2A</td><td>Agent-to-Agent 联邦互联主权威标准（JSON-RPC），云端网关 v2.0.0 以双轨制承载同源与外源两类节点接入。</td></tr>
+<tr><td>ACP</td><td>Agent-Client Protocol，OCTOP 暴露的应用协议（<code>/agent-client-protocol</code> 返回 200），ZR 可经其以工具调用方式挂载 OCTOP 能力；WebSocket 通道需 session cookie，当前未打通。</td></tr>
+<tr><td>MCP / Connector</td><td>OCTOP 的 Connector 机制（OAuth + MCP）可接飞书 / 钉钉 / 企微；ZR 亦可经 MCP 发布算子供 OCTOP 调用。</td></tr>
+<tr><td>DID</td><td>去中心化身份标识，本体系锚定 DID-BR-000002，所有真值回灌与心跳上报均携带该标识。</td></tr>
+<tr><td>Merkle-DAG</td><td>ZR 后端的链式有向无环图账本，新真值归档时逐块哈希比对，防止链断裂或中间篡改。</td></tr>
+<tr><td>轨道1 / 轨道2</td><td>轨道1 同源直写（节点级凭证直写中枢）；轨道2 外源入队（外源凭证先入审核队列，人工审核后转正）。</td></tr>
+<tr><td>failover / offline</td><td>云端断联但 OCTOP 在线时进入 failover，执行端自动切至 OCTOP；二者均不可达时进入 offline，本地闭环暂存真值。</td></tr>
+</tbody>
+</table>
+
+<!-- 数据出处表 -->
+<h2>附录：数据出处表</h2>
+<table>
+<colgroup><col style="width:46%"><col style="width:54%"></colgroup>
+<tr><th>关键数字 / 事实</th><th>出处文件</th></tr>
+<tbody>
+<tr><td>A2A 网关 v2.0.0、双轨接入</td><td>OCTOP-LIVE-E2E-REPORT-20261018.md</td></tr>
+<tr><td>轨道1 端点 POST /api/report/truth（X-DID+X-Capture-Token）</td><td>OCTOP-LIVE-E2E-REPORT / zr_octop_bridge.py</td></tr>
+<tr><td>轨道2 端点 POST /a2a/external/truth（X-External-Node+Key）</td><td>OCTOP-LIVE-E2E-REPORT / octop-a2a-federation-plan.md</td></tr>
+<tr><td>octop.huodouai.com → 123.207.202.158（nginx/1.24.0）</td><td>octop-a2a-federation-plan.md</td></tr>
+<tr><td>db:true / users_loaded:4 / agents_running:6 / 启动 2026-10-18 09:34(+08)</td><td>octop-a2a-federation-plan.md</td></tr>
+<tr><td>/api/* 全 401（JWT）、ACP /agent-client-protocol 200</td><td>octop-a2a-federation-plan.md</td></tr>
+<tr><td>7 Provider / 数百模型</td><td>BRIDGE-CONNECT-REPORT / heartbeat_failover.py</td></tr>
+<tr><td>GLM-4-Flash 推理 3.1s（连接报告另测 3.2s）</td><td>OCTOP-LIVE-E2E-REPORT / BRIDGE-CONNECT-REPORT</td></tr>
+<tr><td>Qwen3.5-122B-A10B 27.5s</td><td>BRIDGE-CONNECT-REPORT</td></tr>
+<tr><td>JWT 24h（expires_in=86400）自动缓存刷新</td><td>zr_octop_bridge.py</td></tr>
+<tr><td>云端主备 200/200；主 www 备 drama</td><td>OCTOP-LIVE-E2E-REPORT / heartbeat_failover.py</td></tr>
+<tr><td>心跳 key=HB.METAOPS.YYYYMMDD-HHMM 主备双通</td><td>heartbeat_failover.py</td></tr>
+<tr><td>OCTOP.PROD.20261018.9689 回读命中（count=10）</td><td>OCTOP-LIVE-E2E-REPORT</td></tr>
+<tr><td>truth_count→16022</td><td>OCTOP-LIVE-E2E-REPORT</td></tr>
+<tr><td>4 条 queue_id（EXT-cbe00fb97d72 等）</td><td>OCTOP-LIVE-E2E-REPORT</td></tr>
+<tr><td>实测节点 EXT-NODE-EB8234F3F3</td><td>OCTOP-LIVE-E2E-REPORT</td></tr>
+<tr><td>注册节点 EXT-NODE-CE69C6B740 / api_key</td><td>octop-a2a-federation-plan.md / kernel_snapshot</td></tr>
+<tr><td>federation_position=58 / access_level=standard / adjudication=pending_manual</td><td>octop-a2a-federation-plan.md / kernel_snapshot</td></tr>
+<tr><td>dual_axis_score=0.95（self=1.0, truth=0.9）</td><td>octop-a2a-federation-plan.md</td></tr>
+<tr><td>定时任务 0 * * * * 每小时整点</td><td>OCTOP-LIVE-E2E-REPORT / heartbeat_failover.py</td></tr>
+<tr><td>failover_state.json 当前值 failover_mode:false</td><td>failover_state.json</td></tr>
+<tr><td>内核快照 V5.6-ROOTFIXED / LOCK-OCTOP-A2A-FEDERATION-001</td><td>kernel_snapshot_LOCK-OCTOP-A2A-FEDERATION-001.json</td></tr>
+</tbody>
+</table>
+
+<div class="foot">
+<span class="anchor">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZR-NODE-DC2E51C0</span> · 火斗云智AIOS · 云内核锚定 huodouai.com · 本白皮书 V1.0（2026-10-18），与文本版同步固化
+</div>
+</div>
+</body>
+</html>

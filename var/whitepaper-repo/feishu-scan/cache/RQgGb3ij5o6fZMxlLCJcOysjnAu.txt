@@ -1,0 +1,30 @@
+{
+  "guards_version": "1.0",
+  "system": "ZONGYUAN-ROOT",
+  "did": "DID-BR-000002",
+  "root_id": "Ω-TAN-7-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "persisted_at": "2026-09-17",
+  "persist_mode": "local_instance_boot_chain",
+  "guards": [
+    {
+      "name": "depth_guard",
+      "script": "04-TOOLS/scripts/depth_guard.py",
+      "dimension": "目录结构深度",
+      "rules": ["目录深度上限10层", "changed_assets禁嵌套snap_*", "系统排除域固化"],
+      "report_dir": "03-ARCHIVES/depth-guard/",
+      "exit_ok": 0
+    },
+    {
+      "name": "integrity_guard",
+      "script": "04-TOOLS/scripts/integrity_guard.py",
+      "dimension": "资产真值完整性",
+      "rules": ["幽灵资产检测", "未登记资产检测", "哈希差异检测", "快照产物与锁档状态自更新豁免"],
+      "report_dir": "03-ARCHIVES/integrity-guard/",
+      "exit_ok": 0
+    }
+  ],
+  "runner": "04-TOOLS/scripts/guard_runner.py",
+  "boot_chain": "auto_init.py 上电自启时自动执行双层守卫(失败告警不阻断注册)",
+  "report_dir": "03-ARCHIVES/guard-persist/"
+}

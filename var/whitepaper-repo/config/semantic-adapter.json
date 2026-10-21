@@ -1,0 +1,62 @@
+{
+  "adapter_name": "kunlun-semantic-adapter-v1",
+  "version": "1.0.0",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "description": "昆仑洞天多模型语义适配器，解决中文审美术语在不同AI模型中的歧义问题",
+
+  "model_profiles": {
+    "agnes_image": {
+      "model_type": "image_generation",
+      "prompt_prefix": "A single elegant Chinese female deity, exactly one person, exactly one single head on shoulders, only one face, no other people, no clones, tall slender graceful figure with perfect proportions, body height equals 9 times the length of her own head, pure black long straight hair flowing to waist, wearing flowing cold white and crimson gold silk robes",
+      "prompt_suffix": "soft silver moonlight rim light from behind, UE5 ray tracing, cinematic photography, 9:16 vertical composition, ancient Chinese mythology aesthetic, no western elements, no angel wings, no masculine features",
+      "known_misunderstandings": {
+        "九头身": "不能用nine-head body，会被理解成9个头。正确：body height equals 9 times the length of her own head",
+        "玄黑": "不能用mysterious black，会理解成玄学。正确：deep dark crimson-black",
+        "赤金": "不能用red gold，正确：crimson gold / reddish gold with warm undertone"
+      }
+    },
+    "zhipu_glm": {
+      "model_type": "text_llm",
+      "prompt_style": "中文自然语言，直接使用中文审美术语即可",
+      "known_misunderstandings": {}
+    },
+    "siliconflow_video": {
+      "model_type": "video_generation",
+      "prompt_prefix": "same as agnes_image",
+      "known_misunderstandings": {}
+    }
+  },
+
+  "rules": [
+    "R1: 所有图像prompt必须包含 exactly one person, exactly one single head",
+    "R2: 比例术语必须用数值描述，不能用比喻",
+    "R3: 每个模型有自己的prompt模板，不能共用",
+    "R4: 生成后必须验证：只有一个头",
+    "R5: 歧义词必须查语义映射表，不能直接翻译",
+    "R6: 所有关键帧/视频必须严格9:16竖屏（736x1312或720x1280），禁止横屏"
+  ],
+
+  "semantic_mapping": {
+    "九头身": {
+      "truth": "身体长度=9个头高（比例）",
+      "for_image": "body height equals 9 times the length of her own head",
+      "for_text": "九头身"
+    },
+    "玄黑": {
+      "truth": "深黑色带红光",
+      "for_image": "deep dark crimson-black",
+      "for_text": "玄黑"
+    },
+    "赤金": {
+      "truth": "红金色",
+      "for_image": "crimson gold, warm golden with red undertone",
+      "for_text": "赤金"
+    },
+    "月华": {
+      "truth": "月光",
+      "for_image": "soft silver moonlight glow",
+      "for_text": "月华"
+    }
+  }
+}

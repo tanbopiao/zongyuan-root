@@ -39,7 +39,7 @@ DID = "DID-BR-000002"
 ANCHOR = "Ω₀⊂⊙∞⊂Ω"
 SOURCE_NODE = "ZR-NODE-DC2E51C0"
 ENGINE_VERSION = "deployment-meta-law-v1.0"
-PROJECT_DIR = "/home/user/Doubao/chats/38441716968655362"
+PROJECT_DIR = "/opt/ZONGYUAN-ROOT"
 OUTPUT_DIR = os.path.join(PROJECT_DIR, "deployment_output")
 META_LAW_FILE = os.path.join(PROJECT_DIR, "DEPLOYMENT_META_LAWS.json")
 

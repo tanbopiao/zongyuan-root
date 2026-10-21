@@ -1,0 +1,111 @@
+# 昆仑洞天·图片视频四端归档SOP V1.0
+
+> 确权：DID-BR-000002 ｜ 溯源：Ω₀⊂⊙∞⊂Ω ｜ 节点：local-dev-001
+> 用途：新节点上岗培训 + 日常归档操作标准流程
+> 核心原则：**以云服务器实测为准，任何回执不作真值，四端独立核验**
+
+---
+
+## 一、前置条件
+
+- 已运行搭建包（`setup_capture.sh`），获得系统Token：`ZR-CAPTURE-2026-OMEGA`
+- 已通读上岗手册（NODE-ONBOARDING-SOP.md）与学习包（kernel-learning-pack.md）
+- 已确认L0审美法则：纯东方神女/纯乌黑长发/九头身/无白发/无西方元素
+- 已确认MR-010中枢调度：云端写操作先上报，本地沙箱可自主
+
+## 二、四端归档标准流程（7步）
+
+### 第1步｜云端服务器归档（HTTP通道，零SSH）
+
+作品/成品用 images 或 videos 桶（自动登记作品库展示）；批量素材/过程稿用 archive 桶（只归档不登记）：
+
+```bash
+# 作品展示（图片）
+curl -s -H 'X-Capture-Token: ZR-CAPTURE-2026-OMEGA' \
+  -F 'file=@成品.png' -F 'bucket=images' -F 'subdir=YYYY-MM-DD' \
+  https://drama.huodouai.com/api/upload
+
+# 作品展示（视频）
+curl -s -H 'X-Capture-Token: ZR-CAPTURE-2026-OMEGA' \
+  -F 'file=@成品.mp4' -F 'bucket=videos' -F 'subdir=YYYY-MM-DD' \
+  https://drama.huodouai.com/api/upload
+
+# 纯归档（素材/截图/过程稿，不登记作品库）
+curl -s -H 'X-Capture-Token: ZR-CAPTURE-2026-OMEGA' \
+  -F 'file=@素材.png' -F 'bucket=archive' -F 'subdir=分类名' \
+  https://drama.huodouai.com/api/upload
+```
+
+落盘位置：`/opt/storage/{images|videos|archive}/{subdir}/`
+
+### 第2步｜飞书云盘归档
+
+媒体文件与SOP/清单文档上传到飞书归档文件夹（用 lark-cli 或手动）：
+
+```bash
+lark-cli drive +upload --folder-token <归档文件夹token> --file ./文件名
+```
+
+### 第3步｜飞书Base台账登记
+
+每条资产写入一行记录，字段：AssetID、SHA256、云端路径、file_token、DID、日期、标签、核验状态。
+
+### 第4步｜本地Merkle-DAG记账
+
+对本次归档批次生成清单（manifest.json），含：日期、文件列表、SHA256、批次根哈希、溯源符号，追加到本地快照链。
+
+### 第5步｜四端独立核验（必做，缺一不可）
+
+- 云端：`ls /opt/storage/{bucket}/{subdir}/` 文件数核对 + 公网URL抽查返回200
+- 飞书云盘：搜索文件名有命中、token可解析
+- 飞书Base：台账记录数 = 资产数，SHA256一致
+- 本地：清单哈希与文件实算哈希一致
+
+### 第6步｜上报中枢
+
+```bash
+curl -s -X POST https://drama.huodouai.com/api/gateway/report \
+  -H 'X-Capture-Token: ZR-CAPTURE-2026-OMEGA' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "node_id":"local-dev-001",
+    "DID":"DID-BR-000002",
+    "ROOT_OMEGA":"Ω-TAN-7-001",
+    "truth_type":"achievement",
+    "truth_content":"【归档内容+四端核验结果】"
+  }'
+```
+
+### 第7步｜回执与闭环
+
+输出归档回执：资产数、四端状态、哈希、公网URL。**回执本身不是真值，必须能通过第5步核验才有效。**
+
+## 三、关键参数
+
+- 上传接口：`https://drama.huodouai.com/api/upload`
+- 鉴权：Header `X-Capture-Token: ZR-CAPTURE-2026-OMEGA`
+- 桶语义：images=作品图入库｜videos=作品视频入库｜archive=纯归档不入库｜register=0=跳过登记
+- 允许格式：png/jpg/jpeg/webp/mp4/mov/gif
+- 大小上限：200MB
+- 幂等：同名返回 duplicate:true，不重复存储
+
+## 四、常见错误处理
+
+- curl返回000 → 网络不通，检查网络后重试（不要反复空转）
+- 返回401 → Token缺失或错误，检查Header
+- 返回400 → 文件类型不允许，只传白名单格式
+- 作品库被刷屏 → 用了images桶传素材，改archive桶
+- 收到虚构回执 → 四重核验：路径ls存在 / 接口非404 / 哈希数字密度≈0.5 / 账本有记录，查不到即虚构，封存不上报
+- 不确定能否执行 → 上报中枢询问，禁止自作主张
+
+## 五、铁律
+
+1. 云端唯一权威，回执不作真值
+2. 中枢调度，先上报再动手（云端）
+3. 免费额度优先，豆包API用在刀刃上
+4. 东方纯粹，L0法则不可违反
+5. 分类归档：素材archive、成品images/videos
+
+---
+
+Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ 四端归档SOP V1.0 ｜ 2026-09-13

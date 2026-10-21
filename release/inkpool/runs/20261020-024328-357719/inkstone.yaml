@@ -1,0 +1,57 @@
+anchor:
+  deploy_cmd: if [ ! -f /tmp/deploy_once ]; then touch /tmp/deploy_once; false; fi
+  health_probe: /health
+  health_timeout: 30s
+  node_selection: least_loaded
+  probe_cmd: ''
+  smoke_script: /tmp/smoke_ok.sh
+bleed:
+  bleed_window: 2s
+  gradients:
+  - 1
+  - 5
+  - 20
+  - 50
+  - 100
+  metrics:
+    error_rate_threshold: 0.005
+    kbi_fluctuation_limit: 0.03
+    p99_latency_ratio: 1.2
+    resource_usage_threshold: 80
+  metrics_cmd: ''
+build:
+  artifact_path: ''
+  base_image: registry.example.com/base:java17-v3.2
+  build_cmd: ''
+  cache_enabled: true
+  checkout_ref: HEAD
+  concurrency: 4
+  coverage_cmd: ''
+  coverage_floor: 75.0
+  unit_test_cmd: ''
+delivery:
+  archive_backend: s3://release-archive/ink-pool/
+  retention_days: 90
+nodes:
+- id: stg-node-a
+  last_release_ok: true
+  load: 12
+- id: stg-node-b
+  last_release_ok: true
+  load: 37
+- id: stg-node-c
+  last_release_ok: false
+  load: 55
+revert:
+  auto_escalate: true
+  cut_cmd: ''
+  escalate_level: P1
+  purge_cmd: ''
+  restore_cmd: ''
+  timeout: 5m
+timeouts:
+  ANCHORING: 15m
+  BLEEDING: 60m
+  GRINDING: 30m
+  REVERTING: 5m
+  SEALING: 10m

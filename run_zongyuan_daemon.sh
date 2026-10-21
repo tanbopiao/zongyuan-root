@@ -3,7 +3,7 @@
 # 独立supervisord，不依赖/不侵入系统supervisord
 # V2进化: 崩溃自愈+stale socket检测+强制重启+进程存活校验(E-001)
 # V3进化: 释放托管端口残留进程(根治api-server FATAL/端口占用冲突)
-DIR="/home/user/Doubao/chats/38418284746129666"
+DIR="/opt/ZONGYUAN-ROOT"
 CFG="$DIR/supervisord.zongyuan.conf"
 SOCK="$DIR/run/zongyuan-supervisor.sock"
 PIDF="$DIR/run/zongyuan-supervisord.pid"

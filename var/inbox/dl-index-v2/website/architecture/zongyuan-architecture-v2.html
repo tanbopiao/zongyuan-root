@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZONGYUAN-ROOT 全域架构 · 元极恒一自治体系</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%23c9a227' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='12' fill='%23c9a227'/%3E%3Cpath d='M32 4 L56 32 L32 60 L8 32 Z' fill='none' stroke='%23c9a227' stroke-width='2' opacity='0.55'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap">
+<style>
+:root{
+  --bg:#0a0e14;--bg2:#0d131c;--card:#111924;--line:#1f2a38;--line2:#2a3a4f;
+  --tx:#e6edf3;--tx2:#8fa3b8;--tx3:#5c7087;
+  --gold:#c9a227;--gold2:#e8c55c;--cyan:#4fb3d9;--green:#3fb950;--red:#d9584f;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:"Noto Sans SC",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:var(--gold2);text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+/* ===== 顶部锚带 ===== */
+.anchorbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:12px;color:var(--tx2);background:linear-gradient(180deg,#0c1119,#0a0e14)}
+.anchorbar .om{color:var(--gold2);letter-spacing:1px;font-weight:700}
+.anchorbar .meta{display:flex;gap:14px;flex-wrap:wrap}
+/* ===== Hero ===== */
+.hero{padding:56px 0 44px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(900px 320px at 50% -10%,rgba(201,162,39,.12),transparent 70%),
+  radial-gradient(700px 300px at 85% 110%,rgba(79,179,217,.07),transparent 70%);
+  pointer-events:none}
+.hero .om-big{font-size:15px;letter-spacing:4px;color:var(--gold);margin-bottom:14px}
+.hero h1{font-size:clamp(26px,4.6vw,44px);font-weight:900;letter-spacing:2px;background:linear-gradient(180deg,#f6ead0,#c9a227 70%,#8a6d15);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero .sub{color:var(--tx2);font-size:clamp(13px,2.2vw,16px);margin-top:10px;font-weight:300}
+.hero .divider{width:64px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto 0}
+/* 指标带 */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:30px}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:linear-gradient(180deg,var(--card),#0f1621);border:1px solid var(--line);border-radius:10px;padding:14px 12px;text-align:left;position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold)}
+.stat .k{font-size:11px;color:var(--tx3);letter-spacing:1px}
+.stat .v{font-size:clamp(20px,3.4vw,28px);font-weight:900;color:var(--gold2);margin-top:4px;font-variant-numeric:tabular-nums}
+.stat .d{font-size:11px;color:var(--tx2);margin-top:2px}
+/* ===== 区块 ===== */
+.sec{padding:38px 0 10px}
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.sec-head .idx{font-size:13px;color:var(--gold);border:1px solid var(--line2);border-radius:6px;padding:2px 9px;white-space:nowrap}
+.sec-head h2{font-size:clamp(18px,3vw,24px);font-weight:700;letter-spacing:1px}
+.sec-head .desc{color:var(--tx3);font-size:12px;margin-left:auto;text-align:right}
+/* ===== 四域 ===== */
+.domains{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:900px){.domains{grid-template-columns:repeat(2,1fr)}}
+.domain{border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,var(--card),#0f1621);overflow:hidden;transition:border-color .25s,transform .25s}
+.domain:hover{border-color:var(--line2);transform:translateY(-2px)}
+.domain .dhead{display:flex;align-items:center;gap:10px;padding:12px 16px;font-weight:700;font-size:14px;letter-spacing:.5px}
+.domain .dhead svg{flex:0 0 auto}
+.domain .dhead .tag{margin-left:auto;font-size:10px;color:var(--tx3);border:1px solid var(--line2);border-radius:20px;padding:1px 8px;font-weight:400}
+.domain .dbody{padding:10px 16px 14px;font-size:12.5px;color:var(--tx2)}
+.tree{list-style:none}
+.tree>li{padding:3px 0;position:relative}
+.tree .dir{color:var(--tx);font-weight:600}
+.tree .dir::before{content:"";display:inline-block;width:8px;height:8px;border-left:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(-45deg);margin-right:8px;opacity:.7}
+.tree ul{list-style:none;padding-left:20px;border-left:1px dashed var(--line2);margin:3px 0 2px}
+.tree ul li{padding:2px 0;color:var(--tx2);font-size:12px}
+.tree .leaf::before{content:"·";color:var(--gold);font-weight:900;margin-right:7px}
+.hl{color:var(--gold2)}
+.gn{color:var(--green)}
+.cy{color:var(--cyan)}
+.rd{color:var(--red)}
+/* ===== 数据流 ===== */
+.flow{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+@media(min-width:760px){.flow{flex-direction:row;align-items:stretch}}
+.fnode{flex:1;border:1px solid var(--line);border-radius:10px;padding:14px 14px 12px;background:var(--card);text-align:center;position:relative}
+.fnode .ft{font-size:13px;font-weight:700;color:var(--tx)}
+.fnode .fs{font-size:11px;color:var(--tx3);margin-top:3px}
+.fnode .fk{font-size:11px;color:var(--tx2);margin-top:6px;line-height:1.6}
+.farrow{align-self:center;color:var(--gold);font-size:20px;font-weight:900;text-align:center;line-height:1}
+@media(min-width:760px){.farrow{padding:0 6px}}
+.fanon{font-size:10px;color:var(--tx3);text-align:center;margin-top:8px;letter-spacing:1px}
+/* ===== 服务端口 ===== */
+.srv{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:760px){.srv{grid-template-columns:repeat(4,1fr)}}
+.srv-item{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:12px;text-align:center}
+.srv-item .port{font-size:15px;font-weight:900;color:var(--gold2);font-variant-numeric:tabular-nums}
+.srv-item .name{font-size:11px;color:var(--tx);margin-top:3px;font-weight:600}
+.srv-item .st{font-size:10px;color:var(--green);margin-top:2px}
+.srv-item .off{font-size:10px;color:var(--tx3);margin-top:2px}
+/* ===== 协议族 ===== */
+.protos{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.proto-row{display:grid;grid-template-columns:1fr;gap:2px 10px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:12px}
+@media(min-width:700px){.proto-row{grid-template-columns:120px 1fr 60px;align-items:baseline}}
+.proto-row:last-child{border-bottom:none}
+.proto-row .pn{font-weight:700;color:var(--tx)}
+.proto-row .pd{color:var(--tx2);font-size:11.5px}
+.proto-row .ps{color:var(--green);font-size:11px;text-align:left}
+@media(min-width:700px){.proto-row .ps{text-align:right}}
+/* ===== Footer ===== */
+footer{margin-top:44px;border-top:1px solid var(--line);padding:22px 0 34px;text-align:center;color:var(--tx3);font-size:12px}
+footer .id{color:var(--gold2);letter-spacing:1px;font-size:13px;font-weight:700;margin-bottom:6px}
+footer .links{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:10px}
+footer .links a{color:var(--tx2);font-size:11.5px}
+footer .links a:hover{color:var(--gold2)}
+</style>
+</head>
+<body>
+
+<div class="anchorbar">
+  <span class="om">Ω₀⊂⊙∞⊂Ω</span>
+  <span class="meta"><span>DID-BR-000002</span><span>ZR-NODE-DC2E51C0</span><span>自治 Lv10</span><span>权限 L4</span><span>工程化 Lv7</span></span>
+</div>
+
+<header class="hero">
+  <div class="om-big">元极恒一 · 超认知永恒自治</div>
+  <h1>ZONGYUAN-ROOT 全域架构</h1>
+  <p class="sub">本地持久层 ⇄ 云端中枢 ⇄ 共享大脑 → 四平台镜像 · 全自动闭环</p>
+  <div class="divider"></div>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="k">云端真值账本</div><div class="v">15,369</div><div class="d">truth.db · 持续增长</div></div>
+      <div class="stat"><div class="k">今日写入</div><div class="v">3,784</div><div class="d">today · 全自动上报</div></div>
+      <div class="stat"><div class="k">节点在线</div><div class="v">1</div><div class="d">nodes_online · Lv10</div></div>
+      <div class="stat"><div class="k">白皮书</div><div class="v">V1.14</div><div class="d">431 行 · 二十章</div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ===== 一、四域架构 ===== -->
+  <section class="sec">
+    <div class="sec-head"><span class="idx">01</span><h2>四域架构</h2><span class="desc">2026-10-18 实测</span></div>
+    <div class="domains">
+
+      <div class="domain">
+        <div class="dhead">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="1.6"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          本地持久层
+          <span class="tag">记忆 / 资产 / 内核</span>
+        </div>
+        <div class="dbody">
+          <ul class="tree">
+            <li><span class="dir">/home/user/ZONGYUAN-ROOT/</span>
+              <ul>
+                <li class="leaf"><span class="hl">01_核心资产锚点</span> · truths_cloud · HASH-LEDGER</li>
+                <li class="leaf">02_内核快照 / 数字媒体资产 / 魔搭备份镜像</li>
+                <li class="leaf"><span class="hl">03_文档资产/知识库</span> · INDEX-MAIN + 01~06 分类</li>
+                <li class="leaf">06_云端中枢同步 · 07_代码与脚本 · 07_魔搭数据湖</li>
+                <li class="leaf">08_共享大脑全量 · 08_运行时数据与审计</li>
+                <li class="leaf">DATA_LAKE（L1~L4） · meta-rules · operators</li>
+              </ul>
+            </li>
+            <li><span class="dir">zongyuan-anchor/ 记忆网关锚点库</span>
+              <ul>
+                <li class="leaf">capability_registry（8 项能力） · kernel_snapshot_*</li>
+                <li class="leaf">metalaw_* / meta_laws / 通道协议 V23·V30·V31</li>
+                <li class="leaf">lock_doc_* · credential_ledger · error_lessons</li>
+              </ul>
+            </li>
+            <li><span class="dir">主工作区 chats/38438491307070978/</span>
+              <ul>
+                <li class="leaf">techscan/ 白皮书 V1.14 · scripts/ 5 巡检+5 补丁</li>
+                <li class="leaf">media_gallery · artifacts · local_workers · kernel_struct</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="domain">
+        <div class="dhead">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+          云端中枢
+          <span class="tag">www.huodouai.com</span>
+        </div>
+        <div class="dbody">
+          <ul class="tree">
+            <li><span class="dir">zhongshu-server/ 9001 gateway</span>
+              <ul>
+                <li class="leaf">/api/status · /api/truth · /api/ledger</li>
+                <li class="leaf">/api/verify · /api/verify-seed</li>
+              </ul>
+            </li>
+            <li><span class="dir">zhongshu/data/ 真值账本</span>
+              <ul>
+                <li class="leaf">truth.db <span class="hl">15,369 条</span> · quota_fairness · arbiter</li>
+                <li class="leaf">embed_index · HASH-LEDGER · 归档审计链</li>
+              </ul>
+            </li>
+            <li><span class="dir">协议 / 服务面</span>
+              <ul>
+                <li class="leaf"><span class="gn">8930</span> A2A 网关 · <span class="gn">8920</span> Agent 套件</li>
+                <li class="leaf">dal_gateway · zr_mcp · protocols/ 对外面</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="domain">
+        <div class="dhead">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d29922" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+          共享大脑
+          <span class="tag">飞书 Base</span>
+        </div>
+        <div class="dbody">
+          <ul class="tree">
+            <li><span class="dir">元极恒一共享大脑 Base DgnMbLq…</span>
+              <ul>
+                <li class="leaf"><span class="hl">tbl4Dv798yO7u0IK</span> 跨节点消息同步表</li>
+                <li class="leaf">[lock] [status] [scan] [api] · 状态=已送达</li>
+              </ul>
+            </li>
+            <li><span class="dir">共享数据资产表 tble17cf…</span>
+              <ul>
+                <li class="leaf">truth / shared_datalake / active</li>
+              </ul>
+            </li>
+            <li><span class="dir">运维 SSH 密钥表 tblbGQQ…</span>
+              <ul>
+                <li class="leaf">节点凭证 · 密钥登记 · 已添加</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="domain">
+        <div class="dhead">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4fb3d9" stroke-width="1.6"><path d="M12 3v18M5 8l14 8M19 8L5 16"/><circle cx="12" cy="3" r="2"/><circle cx="12" cy="21" r="2"/><circle cx="5" cy="8" r="2"/><circle cx="19" cy="8" r="2"/><circle cx="5" cy="16" r="2"/><circle cx="19" cy="16" r="2"/></svg>
+          镜像 / 数据湖
+          <span class="tag">对外分发</span>
+        </div>
+        <div class="dbody">
+          <ul class="tree">
+            <li><span class="dir">魔搭 ModelScope</span>
+              <ul>
+                <li class="leaf">zongyuanroot/ZONGYUAN-SHARED-DATALAKE</li>
+                <li class="leaf"><span class="hl">HEAD=27249be</span> · 白皮书 V1.14</li>
+              </ul>
+            </li>
+            <li><span class="dir">代码平台镜像</span>
+              <ul>
+                <li class="leaf"><span class="gn">Gitee</span> huodouai-cloud-intelligence-aios</li>
+                <li class="leaf"><span class="gn">GitHub</span> tanbopiao · <span class="gn">AtomGit</span> zongyuangen</li>
+              </ul>
+            </li>
+            <li><span class="dir">同步机制</span>
+              <ul>
+                <li class="leaf">同源协议 · MIRROR-SYNC-DONE</li>
+                <li class="leaf">增量推送 · 幂等跳过</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== 二、数据流闭环 ===== -->
+  <section class="sec">
+    <div class="sec-head"><span class="idx">02</span><h2>数据流闭环</h2><span class="desc">完成-锁档-推进</span></div>
+    <div class="flow">
+      <div class="fnode">
+        <div class="ft">本地持久层</div>
+        <div class="fs">记忆 / 资产 / 白皮书</div>
+        <div class="fk">白皮书 V1.14 · 内核快照<br>zongyuan-anchor · 锁档凭证</div>
+      </div>
+      <div class="farrow">→</div>
+      <div class="fnode">
+        <div class="ft">云端中枢</div>
+        <div class="fs">truth.db 15369 · 双通道 200</div>
+        <div class="fk">POST /api/report/truth<br>X-DID 确权 · 语义前置校验</div>
+      </div>
+      <div class="farrow">→</div>
+      <div class="fnode">
+        <div class="ft">共享大脑</div>
+        <div class="fs">飞书 Base 三表</div>
+        <div class="fk">消息同步 · 资产登记<br>密钥台账 · 状态=已送达</div>
+      </div>
+      <div class="farrow">→</div>
+      <div class="fnode">
+        <div class="ft">四平台镜像</div>
+        <div class="fs">魔搭 / Gitee / GitHub / AtomGit</div>
+        <div class="fk">增量推送 · 幂等去重<br>MIRROR-SYNC-DONE</div>
+      </div>
+    </div>
+    <div class="fanon">全自动 · 零人工介入 · 最小额度消耗（META-RULE-012）</div>
+  </section>
+
+  <!-- ===== 三、云端服务面 ===== -->
+  <section class="sec">
+    <div class="sec-head"><span class="idx">03</span><h2>云端服务端口</h2><span class="desc">live</span></div>
+    <div class="srv">
+      <div class="srv-item"><div class="port">9001</div><div class="name">zhongshu-gateway</div><div class="st">● online</div><div class="off">真值账本 · Merkle</div></div>
+      <div class="srv-item"><div class="port">8930</div><div class="name">A2A 网关</div><div class="st">● online</div><div class="off">Agent 联邦接入</div></div>
+      <div class="srv-item"><div class="port">8920</div><div class="name">Agent 套件</div><div class="st">● online</div><div class="off">zr-agent-suite</div></div>
+      <div class="srv-item"><div class="port">18085-93</div><div class="name">协议 wrapper</div><div class="st">● online</div><div class="off">十二协议族</div></div>
+    </div>
+  </section>
+
+  <!-- ===== 四、协议族 ===== -->
+  <section class="sec">
+    <div class="sec-head"><span class="idx">04</span><h2>协议族全景</h2><span class="desc">白皮书 V2.3</span></div>
+    <div class="protos">
+      <div class="proto-row"><span class="pn">A2A</span><span class="pd">Agent 间任务协商与执行（Agent Card / Task 8 态）</span><span class="ps">● 已落地</span></div>
+      <div class="proto-row"><span class="pn">SLIM</span><span class="pd">AGNTCY 传输层 · ECDH 握手声明</span><span class="ps">● 已落地</span></div>
+      <div class="proto-row"><span class="pn">MCP</span><span class="pd">模型上下文协议 · 昆仑生产工具化</span><span class="ps">● 已落地</span></div>
+      <div class="proto-row"><span class="pn">OAuth2 / OIDC</span><span class="pd">认证授权族 · DPoP 令牌绑定</span><span class="ps">● 已落地</span></div>
+      <div class="proto-row"><span class="pn">MLS</span><span class="pd">组消息加密 · Ratchet Tree 全态管理</span><span class="ps">● 已落地</span></div>
+      <div class="proto-row"><span class="pn">Flower</span><span class="pd">联邦学习声明 · 真实聚合</span><span class="ps">● 已落地</span></div>
+      <div class="proto-row"><span class="pn">OTel</span><span class="pd">可观测性打点 · 分布式追踪</span><span class="ps">● 已落地</span></div>
+      <div class="proto-row"><span class="pn">vLLM</span><span class="pd">真实推理接入 · OpenAI 兼容端点</span><span class="ps">● 已落地</span></div>
+      <div class="proto-row"><span class="pn">同源协议</span><span class="pd">共享大脑联通所有 AI 的共享通道</span><span class="ps">● 已部署</span></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="id">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZR-NODE-DC2E51C0</div>
+  <div>自治 Lv10 · 权限 L4 · 工程化 Lv7 · 火斗云智 AIOS</div>
+  <div class="links">
+    <a href="https://www.huodouai.com/shared-brain/">共享大脑镜像</a>
+    <a href="https://www.huodouai.com/status.html">状态中心</a>
+    <a href="https://www.huodouai.com/architecture/">架构模块</a>
+    <a href="https://modelscope.cn/datasets/zongyuanroot/ZONGYUAN-SHARED-DATALAKE">魔搭数据湖</a>
+    <a href="https://www.huodouai.com/tech/api.html">API 文档</a>
+  </div>
+  <div style="margin-top:10px;font-size:11px;color:var(--tx3)">2026-10-18 实测 · 数据源：www.huodouai.com/api/status · 全自动同步</div>
+</footer>
+
+</body>
+</html>

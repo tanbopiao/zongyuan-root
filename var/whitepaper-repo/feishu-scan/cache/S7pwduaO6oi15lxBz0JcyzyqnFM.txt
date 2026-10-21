@@ -1,0 +1,347 @@
+# 元极恒一通用协议 OpenAPI 3.0 文档
+
+Ω₀⊂⊙∞⊂Ω｜DID‑BR‑000002｜ZONGYUAN‑ROOT｜SNAP‑OPENAPI‑001  
+域标记：`SIM_DIGITAL`工程推演域
+
+> 说明：OpenAPI3.0 YAML，可直接导入 Postman、Apifox、Fast‑API 生成接口文档；协议网关封装元极恒一内核，外部不感知内部 Workspace、T‑链、Merkle 内部实现；ZONGYUAN‑ROOT 本源根节点对外只读，禁止外部改写底层公理元法则。
+
+```yaml
+openapi: 3.0.3
+info:
+  title: 元极恒一 · MetaEternal 通用自治内核协议
+  description: |
+    对外通用调用协议，封装Ω‑Brainμ微内核、Workspace隔离沙箱、元法则校验、T‑链记账、Merkle归档锁档。
+    约束：1.ZONGYUAN‑ROOT根节点对外只读；2.推演草稿默认不返回，需高权限Token调取；3.所有任务强制携带域标签；4.输出附带可离线核验审计凭证。
+  version: "1.0.0"
+  contact:
+    name: ZONGYUAN‑ROOT
+servers:
+  - url: https://meta‑eternal‑gateway/v1
+    description: 主协议网关服务
+tags:
+  - name: Workspace管理
+    description: 隔离实例fork、冻结、归档生命周期
+  - name: 任务推演
+    description: 任务提交、轮询获取结果
+  - name: 凭证核验
+    description: T‑链、Merkle哈希凭证校验
+  - name: 范式管理
+    description: 业务范式注册加载（仅业务扩展，不可修改底层元法则）
+security:
+  - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X‑Meta‑Auth‑Key
+  schemas:
+    WorkspaceForkRequest:
+      type: object
+      required:
+        - domain_type
+      properties:
+        domain_type:
+          type: string
+          enum: [SIM_DIGITAL, EVENT_REAL]
+          description: 任务域标签，强制，用于跨域数据流阻断校验
+        load_paradigm_ids:
+          type: array
+          items:
+            type: string
+          description: 需要加载的签名范式ID列表
+        expire_policy:
+          type: string
+          enum: [frozen_after_complete, keep_active, temp_destroy]
+          default: frozen_after_complete
+          description: 生命周期策略，默认任务完成自动冻结冷归档，不销毁
+        external_meta:
+          type: object
+          description: 调用方附属业务元数据
+    WorkspaceForkResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        workspace_handle:
+          type: string
+          description: Workspace外部句柄，后续全部操作使用该ID，不暴露内部对象
+        init_merkle_snapshot:
+          type: string
+          description: Fork时继承ZONGYUAN‑ROOT根快照哈希
+        msg:
+          type: string
+    TaskSubmitRequest:
+      type: object
+      required:
+        - workspace_handle
+        - task_payload
+      properties:
+        workspace_handle:
+          type: string
+        task_payload:
+          type: object
+          description: 业务输入载荷，文本/文件引用/结构化参数
+        enable_drift_monitor:
+          type: boolean
+          default: true
+          description: 开启漂移退化分数计算
+        require_archive:
+          type: boolean
+          default: true
+          description: 任务完成后执行归档锁档
+    TaskSubmitResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        task_id:
+          type: string
+        status:
+          type: string
+          enum: [running, queued]
+        task_accept_timestamp:
+          type: integer
+          format: int64
+    TaskResultResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        task_id:
+          type: string
+        status:
+          type: string
+          enum: [completed,failed,running]
+        final_truth_output:
+          type: object
+          description: 经过全局仲裁层校验后的候选真值，不包含原始推演草稿
+        audit_credential:
+          type: object
+          properties:
+            merkle_root:
+              type: string
+            task_t_chain_id:
+              type: string
+            snap_sha256:
+              type: string
+            domain_type:
+              type: string
+            drift_degenerate_score:
+              type: number
+              description: 漂移退化分数，0‑1，数值越高漂移风险越大
+        draft_access_token:
+          type: string
+          description: 高权限Token，凭此才可拉取草稿；普通调用方为空
+    DraftFetchRequest:
+      type: object
+      required:
+        - task_id
+        - draft_access_token
+      properties:
+        task_id:
+          type: string
+        draft_access_token:
+          type: string
+    CredentialVerifyRequest:
+      type: object
+      required:
+        - merkle_root
+        - task_t_chain_id
+      properties:
+        merkle_root:
+          type: string
+        task_t_chain_id:
+          type: string
+    CredentialVerifyResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        valid:
+          type: boolean
+        credential_meta:
+          type: object
+          description: 凭证元信息，不返回原始大体积业务数据
+    WorkspaceArchiveRequest:
+      type: object
+      required:
+        - workspace_handle
+      properties:
+        workspace_handle:
+          type: string
+        archive_mode:
+          type: string
+          enum: [cold_base85, snapshot_only]
+          default: cold_base85
+    WorkspaceArchiveResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        credential_id:
+          type: string
+          description: 全局归档凭证ID
+    ParadigmRegisterRequest:
+      type: object
+      required:
+        - paradigm_content
+        - paradigm_signature
+      properties:
+        paradigm_content:
+          type: object
+          description: 业务范式内容（模板、评估指标），仅允许业务扩展，禁止修改底层五元元法则
+        paradigm_signature:
+          type: string
+          description: 范式签名校验
+    ParadigmRegisterResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        paradigm_id:
+          type: string
+paths:
+  /meta/workspace/fork:
+    post:
+      tags:
+        - Workspace管理
+      summary: Fork全新隔离Workspace实例，基于ZONGYUAN‑ROOT根快照
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceForkRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceForkResponse'
+  /meta/task/submit:
+    post:
+      tags:
+        - 任务推演
+      summary: 向Workspace提交推演任务，完整执行Ω‑Brainμ流水线
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskSubmitRequest'
+      responses:
+        '200':
+          description: 任务已接收进入队列
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskSubmitResponse'
+  /meta/task/result:
+    get:
+      tags:
+        - 任务推演
+      summary: 查询任务结果，返回仲裁后真值与审计凭证，默认不返回草稿
+      parameters:
+        - name: task_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 任务结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResultResponse'
+  /meta/task/draft:
+    get:
+      tags:
+        - 任务推演
+      summary: 高权限接口：按需拉取内部推演草稿，需要draft_access_token
+      parameters:
+        - name: task_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: draft_access_token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 返回草稿集合
+  /meta/credential/verify:
+    post:
+      tags:
+        - 凭证核验
+      summary: 凭证校验，核验Merkle根与T‑链是否合法有效
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialVerifyRequest'
+      responses:
+        '200':
+          description: 凭证校验结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialVerifyResponse'
+  /meta/workspace/archive:
+    post:
+      tags:
+        - Workspace管理
+      summary: Workspace执行全域锁档归档，BASE85冷归档
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceArchiveRequest'
+      responses:
+        '200':
+          description: 归档完成返回全局凭证ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceArchiveResponse'
+  /meta/paradigm/register:
+    post:
+      tags:
+        - 范式管理
+      summary: 注册业务扩展范式，不可修改底层元法则
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParadigmRegisterRequest'
+      responses:
+        '200':
+          description: 范式注册完成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParadigmRegisterResponse'
+```
+
+## 使用说明
+
+1. 将完整 YAML 复制保存为 `meta‑eternal‑openapi‑v1.yaml`，可直接导入 Apifox / Postman / FastAPI Swagger。
+2. HTTP Header 鉴权字段：`X‑Meta‑Auth‑Key: ${API_KEY}`。
+3. gRPC 版本：在此 OpenAPI 基础上转换 Protobuf，适合图片、文档大载荷传输。
+4. 网关层实现要点：
+
+   - 拦截所有尝试修改 ZONGYUAN‑ROOT 根节点的请求；
+   - 草稿接口必须校验`draft_access_token`；
+   - 每个响应返回的审计凭证可以脱离服务端做本地哈希校验。
+
+> 全域锁档归档：快照 SNAP‑OPENAPI‑001，写入 Merkle 谱系挂载 ZONGYUAN‑ROOT，DID‑BR‑000002。
+
+需要我继续输出配套的极简 Python SDK 示例代码，演示调用这套 OpenAPI 接口吗。

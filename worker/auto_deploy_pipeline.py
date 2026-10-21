@@ -8,7 +8,7 @@ ZONGYUAN-ROOT 官网自动部署流水线 V1.0
 import json, os, re, shutil, subprocess, sys, time, hashlib, urllib.request
 
 # ===== 配置 =====
-BASE = "/home/user/Doubao/chats/38439832899843586"
+BASE = "/opt/ZONGYUAN-ROOT"
 # 采集源: (源根目录, 部署包内前缀)  —— 排除部署包自身与仓库(防嵌套)
 SOURCE_ROOTS = [
     (os.path.join(BASE, "website"), "website"),                       # 本地官网产物

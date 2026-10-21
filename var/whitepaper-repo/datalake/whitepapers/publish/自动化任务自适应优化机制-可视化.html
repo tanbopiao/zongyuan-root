@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自动化任务自适应优化机制 · R-2026-002</title>
+<style>
+  :root{
+    --bg0:#050b1a; --bg1:#0a1630; --bg2:#0e1e42;
+    --card:#0e1b38; --card2:#12234a;
+    --line:#1d3a6e; --line2:#2a4f8f;
+    --cyan:#35d6e6; --blue:#4da3ff; --violet:#9b7bff; --teal:#2dd4b0;
+    --amber:#f5b95c; --red:#ff6b7a; --green:#5ce08a;
+    --text:#eaf2ff; --muted:#9db4d8; --dim:#67819f;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(1100px 620px at 15% -5%, #12275c 0%, rgba(5,11,26,.0) 55%),
+               radial-gradient(900px 540px at 95% 10%, #1a1c4d 0%, rgba(5,11,26,.0) 50%),
+               linear-gradient(160deg, var(--bg0) 0%, var(--bg1) 45%, var(--bg0) 100%);
+    color:var(--text);
+    font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Helvetica Neue",Arial,sans-serif;
+    line-height:1.7; padding:34px 18px 60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px; margin:0 auto;}
+  header.top{
+    border:1px solid var(--line); border-radius:20px;
+    background:linear-gradient(135deg, rgba(22,44,96,.9), rgba(10,22,48,.85));
+    padding:34px 38px 28px; position:relative; overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+  header.top::after{
+    content:""; position:absolute; right:-80px; top:-80px; width:280px; height:280px;
+    background:radial-gradient(circle, rgba(53,214,230,.22), transparent 65%);
+  }
+  .tagline{
+    display:inline-block; font-size:12.5px; letter-spacing:2px; color:var(--cyan);
+    border:1px solid rgba(53,214,230,.45); border-radius:999px; padding:4px 14px; margin-bottom:16px;
+    background:rgba(53,214,230,.08);
+  }
+  h1{font-size:30px; font-weight:800; letter-spacing:.5px; line-height:1.3;}
+  h1 .rule{color:var(--violet);}
+  .sub{color:var(--muted); margin-top:10px; font-size:14.5px; max-width:760px;}
+  .meta{display:flex; flex-wrap:wrap; gap:10px 26px; margin-top:20px; font-size:12.5px; color:var(--dim);}
+  .meta b{color:var(--text); font-weight:600;}
+  h2{
+    font-size:21px; margin:46px 0 4px; font-weight:800; letter-spacing:.5px;
+    display:flex; align-items:center; gap:12px;
+  }
+  h2 .no{
+    font-size:13px; color:var(--bg0); background:linear-gradient(135deg,var(--cyan),var(--blue));
+    border-radius:8px; padding:3px 10px; font-weight:800; letter-spacing:1px; white-space:nowrap;
+  }
+  h2 .sub2{font-size:13px; color:var(--dim); font-weight:500; letter-spacing:0;}
+  .lead{color:var(--muted); margin:8px 0 20px; font-size:14px; max-width:860px;}
+  .grid{display:grid; gap:16px;}
+  .g4{grid-template-columns:repeat(4,1fr);}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .g2{grid-template-columns:repeat(2,1fr);}
+  @media(max-width:820px){ .g4,.g3,.g2{grid-template-columns:1fr;} }
+  .card{
+    border:1px solid var(--line); border-radius:var(--radius);
+    background:linear-gradient(160deg, var(--card2), var(--card));
+    padding:20px 20px 18px; position:relative; min-height:100%;
+  }
+  .card .ico{
+    width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    font-size:20px; margin-bottom:12px; background:rgba(77,163,255,.12); border:1px solid rgba(77,163,255,.3);
+  }
+  .card h3{font-size:16px; font-weight:700; margin-bottom:7px;}
+  .card p{font-size:13px; color:var(--muted);}
+  .card .tag{
+    display:inline-block; font-size:11px; margin-top:12px; padding:2px 9px; border-radius:999px;
+    border:1px solid var(--line2); color:var(--dim);
+  }
+  .c-cyan   .ico{background:rgba(53,214,230,.12); border-color:rgba(53,214,230,.35);}
+  .c-blue   .ico{background:rgba(77,163,255,.12); border-color:rgba(77,163,255,.35);}
+  .c-violet .ico{background:rgba(155,123,255,.12); border-color:rgba(155,123,255,.35);}
+  .c-teal   .ico{background:rgba(45,212,176,.12); border-color:rgba(45,212,176,.35);}
+  .c-amber  .ico{background:rgba(245,185,92,.12); border-color:rgba(245,185,92,.35);}
+  .c-red    .ico{background:rgba(255,107,122,.12); border-color:rgba(255,107,122,.35);}
+  .panel{
+    border:1px solid var(--line); border-radius:var(--radius);
+    background:rgba(10,20,44,.55); padding:22px 24px; margin-top:6px;
+  }
+  .panel.dark{background:rgba(6,12,28,.6);}
+  .flow{width:100%; height:auto; display:block; margin:6px 0 2px;}
+  .flowtext{font-size:12px; fill:var(--muted);}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){ .two{grid-template-columns:1fr;} }
+  .list li{margin:0 0 10px 18px; font-size:13.5px; color:var(--muted);}
+  .list li b{color:var(--text); font-weight:600;}
+  .ok{color:var(--green);} .no{color:var(--red);}
+  .table{width:100%; border-collapse:collapse; margin-top:8px; font-size:13px;}
+  .table th{
+    text-align:left; color:var(--cyan); font-weight:700; font-size:12.5px; letter-spacing:1px;
+    padding:10px 14px; border-bottom:2px solid var(--line2); background:rgba(13,30,66,.6);
+  }
+  .table td{padding:11px 14px; border-bottom:1px solid rgba(29,58,110,.55); color:var(--muted); vertical-align:top;}
+  .table td:first-child{color:var(--text); font-weight:600; white-space:nowrap;}
+  .table tr:last-child td{border-bottom:none;}
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
+  .chip{
+    font-size:12.5px; color:var(--text); border:1px solid var(--line2); border-radius:999px;
+    padding:5px 15px; background:rgba(18,35,74,.5);
+  }
+  .chip b{color:var(--cyan);}
+  footer{margin-top:52px; padding-top:18px; border-top:1px solid var(--line); color:var(--dim); font-size:12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .quote{
+    border-left:3px solid var(--violet); background:rgba(155,123,255,.07);
+    padding:16px 20px; border-radius:0 12px 12px 0; margin:18px 0;
+  }
+  .quote p{font-size:15px; color:var(--text);}
+  .quote .who{font-size:12px; color:var(--dim); margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <span class="tagline">元极恒一 · 自治内核架构 · 元规则</span>
+    <h1>自动化任务自适应优化机制 <span class="rule">R-2026-002</span></h1>
+    <p class="sub">自动化任务须以内核进化为输入，自动优化自身的目标、参数与执行策略；内核状态发生变化时，任务不经人工干预即可重校准调度节奏、指标口径与执行动作。</p>
+    <div class="meta">
+      <span>生效：<b>2026-10-12</b></span>
+      <span>登记：<b>元极恒一自治内核架构组</b></span>
+      <span>优先级：<b>元规则（高于静态任务配置）</b></span>
+      <span>并行：<b>R-2026-001 交付形态规则</b></span>
+    </div>
+  </header>
+
+  <h2><span class="no">01</span> 设计意图 <span class="sub2">为什么任务需要会“自己改”</span></h2>
+  <p class="lead">体系的自动化任务（每日种子真值上报、账本核验、接口工程链路、进化反馈闭环）过去依赖静态配置；一旦内核规则、真值规模或置信权重发生变化，任务仍按旧节拍、旧口径运行，造成效率损失或口径漂移。元规则 R-2026-002 将内核进化作为任务的持续输入，使任务在执行策略层具备自校准能力。</p>
+  <div class="quote">
+    <p>可优化的是策略，不是原则：调度节拍、批次大小、退避参数、切换阈值、载荷组织方式、指标口径可以自动调整；四大律、幂等至上、带病拒写、越层拦截不可因优化而放宽。</p>
+    <div class="who">——R-2026-002 边界声明</div>
+  </div>
+
+  <h2><span class="no">02</span> 内核进化信号源 <span class="sub2">任务重校准的触发锚点</span></h2>
+  <p class="lead">以下四类内核状态变化构成任务的自适应输入；任何一类被感知后，关联任务进入“评估 → 决策 → 调整 → 留痕”流程。</p>
+  <div class="grid g4">
+    <div class="card c-cyan">
+      <div class="ico">▤</div>
+      <h3>账本真值增长</h3>
+      <p>账本新增真值、条目规模与分布变化，驱动上报批次、去重窗口与检索索引策略重校准。</p>
+      <span class="tag">输入：账本状态</span>
+    </div>
+    <div class="card c-violet">
+      <div class="ico">⚖</div>
+      <h3>规则 / 公理修订</h3>
+      <p>元层法则、公理分类或判定规则修订，触发任务口径、分类映射与锚定阈值的联动更新。</p>
+      <span class="tag">输入：规则版本</span>
+    </div>
+    <div class="card c-blue">
+      <div class="ico">◎</div>
+      <h3>置信权重演化</h3>
+      <p>置信权重的演化与权重演化结果改变任务对来源、维度的取舍优先级与上报排序。</p>
+      <span class="tag">输入：置信模型</span>
+    </div>
+    <div class="card c-teal">
+      <div class="ico">↻</div>
+      <h3>反馈自校准结论</h3>
+      <p>反馈自校准产出的偏差结论作为任务修正依据，重设指标口径与校验强度。</p>
+      <span class="tag">输入：校准结果</span>
+    </div>
+  </div>
+
+  <h2><span class="no">03</span> 自适应优化闭环 <span class="sub2">一次优化的完整回路</span></h2>
+  <p class="lead">每次自适应调整均走同一闭环：信号感知 → 偏离评估 → 策略决策 → 执行调整 → 留痕验证 → 反馈进化，任一环节不通过则回退并保持原策略。</p>
+  <div class="panel">
+    <svg class="flow" viewBox="0 0 1000 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="自适应优化闭环图">
+      <defs>
+        <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L8,4.5 L0,9 z" fill="#4da3ff"/>
+        </marker>
+        <linearGradient id="gline" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#35d6e6"/><stop offset="1" stop-color="#9b7bff"/>
+        </linearGradient>
+      </defs>
+      <g>
+        <rect x="30" y="52" width="150" height="120" rx="14" fill="#0e1b38" stroke="#35d6e6" stroke-width="1.4"/>
+        <text x="105" y="92" text-anchor="middle" fill="#eaf2ff" font-size="15" font-weight="700">信号感知</text>
+        <text x="105" y="116" text-anchor="middle" class="flowtext">感知内核进化信号</text>
+        <text x="105" y="136" text-anchor="middle" class="flowtext">账本 / 规则 / 权重 / 校准</text>
+        <text x="105" y="158" text-anchor="middle" fill="#35d6e6" font-size="11.5">输入锚点</text>
+
+        <rect x="240" y="52" width="150" height="120" rx="14" fill="#0e1b38" stroke="#4da3ff" stroke-width="1.4"/>
+        <text x="315" y="92" text-anchor="middle" fill="#eaf2ff" font-size="15" font-weight="700">偏离评估</text>
+        <text x="315" y="116" text-anchor="middle" class="flowtext">对比任务目标与现状</text>
+        <text x="315" y="136" text-anchor="middle" class="flowtext">量化节拍 / 口径 / 策略偏差</text>
+        <text x="315" y="158" text-anchor="middle" fill="#4da3ff" font-size="11.5">判断是否需调整</text>
+
+        <rect x="450" y="52" width="150" height="120" rx="14" fill="#0e1b38" stroke="#9b7bff" stroke-width="1.4"/>
+        <text x="525" y="92" text-anchor="middle" fill="#eaf2ff" font-size="15" font-weight="700">策略决策</text>
+        <text x="525" y="116" text-anchor="middle" class="flowtext">生成候选调整方案</text>
+        <text x="525" y="136" text-anchor="middle" class="flowtext">校验不触碰体系原则</text>
+        <text x="525" y="158" text-anchor="middle" fill="#9b7bff" font-size="11.5">边界审查</text>
+
+        <rect x="660" y="52" width="150" height="120" rx="14" fill="#0e1b38" stroke="#2dd4b0" stroke-width="1.4"/>
+        <text x="735" y="92" text-anchor="middle" fill="#eaf2ff" font-size="15" font-weight="700">执行调整</text>
+        <text x="735" y="116" text-anchor="middle" class="flowtext">应用新节拍 / 批次 / 阈值</text>
+        <text x="735" y="136" text-anchor="middle" class="flowtext">平滑切换，避免抖动</text>
+        <text x="735" y="158" text-anchor="middle" fill="#2dd4b0" font-size="11.5">策略层变更</text>
+
+        <rect x="870" y="52" width="100" height="120" rx="14" fill="#0e1b38" stroke="#f5b95c" stroke-width="1.4"/>
+        <text x="920" y="92" text-anchor="middle" fill="#eaf2ff" font-size="15" font-weight="700">留痕</text>
+        <text x="920" y="116" text-anchor="middle" class="flowtext">锚点 · 前后参数</text>
+        <text x="920" y="136" text-anchor="middle" class="flowtext">判定依据</text>
+        <text x="920" y="158" text-anchor="middle" fill="#f5b95c" font-size="11.5">可回滚</text>
+
+        <line x1="180" y1="112" x2="238" y2="112" stroke="url(#gline)" stroke-width="2.4" marker-end="url(#arr)"/>
+        <line x1="390" y1="112" x2="448" y2="112" stroke="url(#gline)" stroke-width="2.4" marker-end="url(#arr)"/>
+        <line x1="600" y1="112" x2="658" y2="112" stroke="url(#gline)" stroke-width="2.4" marker-end="url(#arr)"/>
+        <line x1="810" y1="112" x2="868" y2="112" stroke="url(#gline)" stroke-width="2.4" marker-end="url(#arr)"/>
+
+        <path d="M920,172 L920,208 Q920,228 900,228 L160,228 Q140,228 140,208 L140,172"
+              fill="none" stroke="#5ce08a" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr)"/>
+        <text x="505" y="220" text-anchor="middle" fill="#5ce08a" font-size="12.5">反馈进化：优化结果回写内核，成为下一轮进化输入</text>
+      </g>
+    </svg>
+  </div>
+
+  <h2><span class="no">04</span> 可优化维度与不可优化边界 <span class="sub2">策略可动，原则不动</span></h2>
+  <p class="lead">自适应优化的对象被严格限定在执行策略层；体系原则层始终是硬约束，任何优化都必须先通过边界审查。</p>
+  <div class="two">
+    <div class="panel">
+      <h3 style="font-size:16px; color:var(--green); margin-bottom:10px;">✓ 可自动优化（策略层）</h3>
+      <ul class="list">
+        <li><b>调度节拍</b>——上报 / 核验频率随真值增长与时效性要求自适应调整。</li>
+        <li><b>批次大小与载荷组织</b>——按账本规模与通道能力调整批量与载荷结构。</li>
+        <li><b>重试退避参数</b>——按历史失败率与链路状态自适应重试次数与退避步长。</li>
+        <li><b>主备切换阈值</b>——按通道健康度动态校准主备切换的触发阈值。</li>
+        <li><b>指标口径与校验强度</b>——随规则修订与校准结论更新，保持口径一致。</li>
+        <li><b>检索与去重窗口</b>——按真值规模与分布调整去重与索引策略。</li>
+      </ul>
+    </div>
+    <div class="panel dark">
+      <h3 style="font-size:16px; color:#ff6b7a; margin-bottom:10px;">✗ 不可因优化放宽（原则层）</h3>
+      <ul class="list">
+        <li><b>四大律</b>——元叠律、极张力律、恒贯律、一合律作为体系根基，任何优化不得偏离。</li>
+        <li><b>幂等至上</b>——自动调整不得破坏任务的幂等语义与去重一致性。</li>
+        <li><b>带病拒写</b>——握手、完整性校验失败时拒绝写入，优化不得绕过该守卫。</li>
+        <li><b>越层拦截</b>——禁止为追求效率跳过层级间的校验与拦截环节。</li>
+        <li><b>隐私有界</b>——跨域只流通提炼后的语义真值，优化不得扩大数据越界范围。</li>
+        <li><b>禁止单点标量对外发布、禁止隐藏配置方差</b>——对外口径与配置透明度不变。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2><span class="no">05</span> 与八步链的衔接 <span class="sub2">自适应机制融入既有主干</span></h2>
+  <p class="lead">自适应优化不另起链路，而是嵌入「感知 → 提炼 → 锚定 → 判定 → 上报 → 回传 → 沉淀 → 进化」八步链：进化环节产生的内核信号，成为下一步任务感知的输入。</p>
+
+  <div class="panel">
+    <svg class="flow" viewBox="0 0 1000 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="八步链与优化嵌入">
+      <defs>
+        <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L7,4 L0,8 z" fill="#9db4d8"/>
+        </marker>
+      </defs>
+      <g font-size="12">
+        <text x="24"  y="26" text-anchor="middle" fill="#35d6e6">感知</text>
+        <text x="24"  y="50" text-anchor="middle" class="flowtext">进化信号</text>
+        <text x="24"  y="70" text-anchor="middle" class="flowtext">输入锚点</text>
+        <path d="M36,40 L56,40" stroke="#9db4d8" stroke-width="1.8" marker-end="url(#arr2)"/>
+
+        <text x="110" y="40" text-anchor="middle" fill="#eaf2ff">提炼</text>
+        <text x="110" y="62" text-anchor="middle" class="flowtext">种子真值提炼</text>
+        <path d="M142,40 L162,40" stroke="#9db4d8" stroke-width="1.8" marker-end="url(#arr2)"/>
+
+        <text x="216" y="40" text-anchor="middle" fill="#eaf2ff">锚定</text>
+        <text x="216" y="62" text-anchor="middle" class="flowtext">语义指纹锚定</text>
+        <path d="M248,40 L268,40" stroke="#9db4d8" stroke-width="1.8" marker-end="url(#arr2)"/>
+
+        <text x="322" y="40" text-anchor="middle" fill="#eaf2ff">判定</text>
+        <text x="322" y="62" text-anchor="middle" class="flowtext">四分支判定</text>
+        <path d="M354,40 L374,40" stroke="#9db4d8" stroke-width="1.8" marker-end="url(#arr2)"/>
+
+        <text x="428" y="40" text-anchor="middle" fill="#eaf2ff">上报</text>
+        <text x="428" y="62" text-anchor="middle" class="flowtext">逐条幂等上报</text>
+        <path d="M460,40 L480,40" stroke="#9db4d8" stroke-width="1.8" marker-end="url(#arr2)"/>
+
+        <text x="534" y="40" text-anchor="middle" fill="#eaf2ff">回传</text>
+        <text x="534" y="62" text-anchor="middle" class="flowtext">置信流回传</text>
+        <path d="M566,40 L586,40" stroke="#9db4d8" stroke-width="1.8" marker-end="url(#arr2)"/>
+
+        <text x="640" y="40" text-anchor="middle" fill="#eaf2ff">沉淀</text>
+        <text x="640" y="62" text-anchor="middle" class="flowtext">分层记忆沉淀</text>
+        <path d="M672,40 L692,40" stroke="#9db4d8" stroke-width="1.8" marker-end="url(#arr2)"/>
+
+        <text x="746" y="40" text-anchor="middle" fill="#eaf2ff">进化</text>
+        <text x="746" y="62" text-anchor="middle" class="flowtext">闭环自校准</text>
+
+        <path d="M780,60 Q860,60 860,24 Q860,14 850,14 L56,14 Q46,14 40,24" fill="none"
+              stroke="#5ce08a" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr2)"/>
+        <text x="470" y="24" text-anchor="middle" fill="#5ce08a" font-size="12">进化结论 → 下一轮感知（自适应优化的信号来源）</text>
+      </g>
+    </svg>
+    <div class="chips">
+      <span class="chip">感知阶段 <b>收集进化信号</b></span>
+      <span class="chip">判定阶段 <b>联动锚定阈值</b></span>
+      <span class="chip">上报阶段 <b>自适应节拍 / 载荷</b></span>
+      <span class="chip">进化阶段 <b>写回内核供下轮感知</b></span>
+    </div>
+  </div>
+
+  <h2><span class="no">06</span> 留痕 · 回滚 · 保护 <span class="sub2">可追溯，可回退，不静默</span></h2>
+  <p class="lead">自动优化不是黑盒：每一次调整都必须落账留痕，记录触发锚点、调整前与调整后的参数及判定依据；异常时可回滚到上一稳定策略。</p>
+  <div class="panel">
+    <table class="table">
+      <thead>
+        <tr><th>保障项</th><th>机制说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>留痕</td><td>每次自动优化记录：触发锚点（哪条内核进化信号）、调整前 / 调整后参数、判定依据与决策版本。</td></tr>
+        <tr><td>可回滚</td><td>保留上一稳定策略快照；验证失败或行为异常时一键回退，带病状态不进入下一轮。</td></tr>
+        <tr><td>平滑切换</td><td>参数变更采用平滑过渡与抖动抑制，避免调整引发任务震荡。</td></tr>
+        <tr><td>保守优先</td><td>故障优先锁止、越层拦截、高风险变更走人工审批；禁止以自动化为名绕过守卫。</td></tr>
+        <tr><td>禁止静默修改</td><td>任何自动化任务行为变更必须落账可查；无留痕的调整视为无效并触发复核。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2><span class="no">07</span> 与其他元规则的关系 <span class="sub2">规则并行，无冲突</span></h2>
+  <div class="grid g2">
+    <div class="card c-blue">
+      <div class="ico">▧</div>
+      <h3>与 R-2026-001 并行</h3>
+      <p>交付形态规则约束产出形态，本规则约束任务运行方式；两者并行生效，互不覆盖。</p>
+    </div>
+    <div class="card c-teal">
+      <div class="ico">⇄</div>
+      <h3>优先级定位</h3>
+      <p>本条为元规则，优先于自动化任务的静态配置约定；配置与自适应策略冲突时，以元规则口径为准。</p>
+    </div>
+  </div>
+
+  <footer>
+    <span>元极恒一自治内核架构组 · 2026-10-12</span>
+    <span>R-2026-002 · 自动化任务自适应优化机制 · 可视化版</span>
+  </footer>
+</div>
+</body>
+</html>

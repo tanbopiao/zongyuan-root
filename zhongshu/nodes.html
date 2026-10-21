@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>云端中枢 · 同源节点</title><link rel="icon" href="/favicon.svg"><style>
+:root{--bg:#0a0e1a;--card:#111827;--gold:#d4af37;--green:#4ade80;--red:#f87171;--muted:#8899aa;--text:#e0e6f0;--border:#1e293b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6}
+.topbar{display:flex;align-items:center;gap:16px;padding:12px 22px;background:rgba(10,14,26,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(6px);position:sticky;top:0;z-index:100}
+.topbar a{display:flex;align-items:center;gap:8px;color:var(--text);text-decoration:none;font-weight:700;font-size:14px}
+.topbar img{width:28px;height:28px;border-radius:6px}
+.topbar nav{margin-left:auto;display:flex;gap:18px}
+.topbar nav a{color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:400}
+.topbar nav a:hover{color:var(--gold)}
+.container{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+.hero{text-align:center;padding:26px 0;border-bottom:1px solid var(--border);margin-bottom:24px}
+.hero h1{font-size:24px;font-weight:800;color:var(--gold)}.hero .sub{color:var(--muted);font-size:13px;margin-top:6px}
+.nodes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:24px}
+.ncard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.ncard .name{font-weight:700;font-size:14.5px}
+.ncard .id{color:var(--muted);font-size:11px;margin-top:2px;word-break:break-all}
+.ncard .lv{display:inline-block;margin-top:10px;font-size:11px;color:#0a0e1a;background:var(--gold);padding:2px 10px;border-radius:12px;font-weight:700}
+.ncard .st{margin-top:10px;font-size:12px}.ncard .st.ok{color:var(--green)}.ncard .st.bad{color:var(--red)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.section h2{font-size:15px;color:var(--gold);margin-bottom:14px}
+.sync{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;padding:8px 0}
+.sync .node{background:#0d1428;border:1px solid var(--border);border-radius:10px;padding:12px 18px;text-align:center}
+.sync .node .n{font-size:12px;color:var(--muted)}.sync .node .v{font-size:17px;font-weight:800;color:var(--gold)}
+.sync .arrow{color:var(--muted);font-size:20px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600;font-size:11.5px;letter-spacing:.4px}
+td code{color:var(--gold);font-size:11.5px;background:#0d1428;padding:2px 6px;border-radius:4px}
+.pill{display:inline-block;font-size:11px;color:var(--muted);border:1px solid var(--border);padding:3px 12px;border-radius:16px;margin:0 4px}
+@media(max-width:640px){.nodes{grid-template-columns:1fr}}
+</style></head><body>
+<div class="topbar"><a href="/"><img src="/assets/aios-logo.png" alt="logo">火斗云智AI</a><nav><a href="/gallery/rose/">作品库</a><a href="/zongyuan-whitepaper.html">白皮书</a><a href="/cloud-hub-architecture.html">云端架构</a><a href="/monitor.html">监控</a><a href="/zhongshu/api-docs.html">API</a><a href="/">返回主站</a></nav></div>
+<div class="container">
+  <div class="hero"><h1>同源节点 · 仲裁网络</h1><div class="sub">跨节点注册 / 评级转译 / 指令下发 / 冲突消解 · 锚定 DID-BR-000002</div></div>
+  <div class="nodes" id="ncards">加载中…</div>
+  <div class="section"><h2>双向同步链路</h2><div class="sync">
+    <div class="node"><div class="n">本地沙箱</div><div class="v" id="lf">--</div><div class="n">资产文件</div></div>
+    <div class="arrow">⇄</div>
+    <div class="node"><div class="n">云端中枢</div><div class="v" id="tc">--</div><div class="n">真值条目</div></div>
+    <div class="arrow">⇄</div>
+    <div class="node"><div class="n">指令队列</div><div class="v" id="iq">--</div><div class="n">待办/审批</div></div>
+  </div><div class="status-line" id="sline" style="text-align:center;color:var(--muted);font-size:12px;margin-top:8px"></div></div>
+  <div class="section"><h2>评级转译映射（L15 ↔ L6）</h2>
+    <table><thead><tr><th>外部标准 L1-L15</th><th>体系标准 L1-L6</th><th>语义</th></tr></thead><tbody>
+      <tr><td><code>L15-L11</code></td><td><code>L1</code></td><td>根锚 / 全域自主</td></tr>
+      <tr><td><code>L10-L6</code></td><td><code>L2</code></td><td>内核代理 / 规则内自治</td></tr>
+      <tr><td><code>L5-L3</code></td><td><code>L3</code></td><td>会话执行代理</td></tr>
+      <tr><td><code>L2-L1</code></td><td><code>L4-L6</code></td><td>工具层 / 任务层</td></tr>
+    </tbody></table>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:8px">仲裁规则：先语义转译对齐，再按层级比较；层级高者拥有最高指纹权限，低者降级；同级取时间戳新者；无法消解 → 人工介入。</div>
+  </div>
+  <div style="text-align:center"><span class="pill">跨节点仲裁 v2.3.0</span><span class="pill">META-RATING-MAP-001</span><span class="pill">Ω₀⊂⊙∞⊂Ω</span></div>
+</div>
+<script>
+(function(){try{
+  fetch('/_zongyuan-assets/zhongshu-sync.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+    var el=document.getElementById('ncards'),html='';
+    (d.nodes||[]).forEach(function(n){
+      var lv=(n.level||'').toUpperCase().indexOf('L1')===0?'L1':(n.level||'').toUpperCase();
+      html+='<div class="ncard"><div class="name">'+n.name+'</div><div class="id">'+n.id+'</div><span class="lv">'+lv+'</span><div class="st '+(n.status==='active'?'ok':'bad')+'">'+(n.status==='active'?'● 在线':'○ 离线')+'</div></div>';
+    });
+    el.innerHTML=html||'暂无节点';
+    document.getElementById('lf').textContent=d.local?d.local.files:'--';
+    document.getElementById('tc').textContent=d.cloud?d.cloud.truth_count:'--';
+    document.getElementById('sline').textContent='最近同步 '+d.ts+' · 方向: '+d.direction+' · 状态 '+d.status;
+  }).catch(function(e){document.getElementById('ncards').innerHTML='无法连接节点源';});
+  fetch('/zhongshu/data/arbiter/instructions/queue-20261003.jsonl',{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){document.getElementById('iq').textContent=t.trim()?t.trim().split('\n').length:0}).catch(function(){document.getElementById('iq').textContent='--'});
+}catch(e){}})();
+</script>
+<div style="text-align:center;padding:20px;font-size:11px;color:#666;border-top:1px solid #333"><a href="/" style="color:#888;margin:0 6px">主页</a>·<a href="/pipeline.html" style="color:#888;margin:0 6px">流水线</a>·<a href="/products.html" style="color:#888;margin:0 6px">产品</a></div></body></html>

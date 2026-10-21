@@ -1,0 +1,37 @@
+{
+  "seed_id": "S-006-FullAutoDelivery",
+  "seed_pack_id": "S-006-FullAutoDelivery-FULL",
+  "seed_type": "指令型种子（全域交付全自动化）",
+  "lock_type": "云端可执行指令，受L0校验+META-LAW-FULL-AUTO-DELIVERY-001约束",
+  "truth_tag": "全域交付全自动化执行规范",
+  "purpose": "定义资产交付五步闭环全自动执行规范：本地哈希锁档→共享大脑飞书台账→云端记忆网关→魔搭→AtomGit；由full_delivery_pipeline.sh单命令触发，供自治内核与云端仲裁引擎消费执行，取代分步手动交付。",
+  "pipeline_spec": {
+    "trigger": "./full_delivery_pipeline.sh --name <资产名> --path <路径> --target <远端目录> --type <类型> --meta-class <元类> --gateway-key <KERNEL.key> --gateway-type <类型>",
+    "step1_local_lock": "SHA256哈希锁档，追加delivery_ledger.json",
+    "step2_feishu_ledger": "共享大脑飞书资产台账tbltgttCuWgAnN2e登记",
+    "step3_gateway": "记忆网关KERNEL前缀上报(truth_value字段+X-DID头)",
+    "step4_modelscope": "推zongyuan-whitepaper master，验证HEAD",
+    "step5_atomgit": "推huodouai main，验证HEAD",
+    "fail_policy": "任一失败立即中止，输出错误，不回滚"
+  },
+  "credential_policy": {
+    "modelscope_token": "~/.modelscope/credentials/git_token（不回显，tr -d换行）",
+    "atomgit_token": "~/.atomgit/credentials/git_token（可写PAT，非config只读token）",
+    "never_hardcode": "密钥只存云端，运行时读取，禁止入config/日志"
+  },
+  "delivery_law": {
+    "meta_law_id": "META-LAW-FULL-AUTO-DELIVERY-001",
+    "rule": "任何资产交付一键自动完成五步闭环，禁止分步手动操作",
+    "verification": "末行打印✅全域交付流水线完成，五步各自返回成功标志"
+  },
+  "kernel_rules": {
+    "auto_trigger": "会话内出现资产交付需求，默认调用full_delivery_pipeline.sh一键完成，不逐层手动",
+    "arbiter_route": "带KERNEL.AGENT.ENG.FULLAUTO.DELIVERY前缀由仲裁引擎扫描执行",
+    "validation_gate": "L0校验：DID/锚点/参数完整性；缺失--name/--path/--target/--gateway-key即拒绝",
+    "progressive": "五步顺序执行，每步验证通过才进入下一步"
+  },
+  "trigger_keywords": ["交付","锁档","全域锁档","推送","台账","记忆网关","上云","双平台","魔搭","AtomGit","全自动交付","一键交付"],
+  "tool_path": "/home/user/Doubao/chats/1128121028098/eng_delivery_toolkit/full_delivery_pipeline.sh",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω"
+}

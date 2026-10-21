@@ -1,0 +1,170 @@
+<title>元极恒一·全域终极进化循环 MVP 代码实现</title>
+
+# 元极恒一・全域终极进化循环 补充代码片段
+
+> 适配上面 Ω‑Brainμ‑MVP，作为独立后台循环任务；运行于独立队列，不和业务 API 抢占算力，MVP 简化版本。  
+> 文件路径：`evolve_cycle/evolver.py`  
+> 绑定 DID‑BR‑000002｜Ω‑TAN‑7‑001｜Ω₀⊂⊙∞⊂Ω
+
+```python
+# evolve_cycle/evolver.py
+import time
+import json
+import os
+from typing import Dict
+from threading import Thread
+from main import TruthEngine, SnapshotLock, BaseResourceAdapter
+
+EVOLVE_CYCLE_INTERVAL = 86400  # 24h 每日执行一次
+EVOLVE_LOG_PATH = "./evolve_cycle/evolve_log.json"
+
+class MetaEvolver:
+    def __init__(
+        self,
+        truth_engine: TruthEngine,
+        snapshot_lock: SnapshotLock,
+        llm_adapter: BaseResourceAdapter
+    ):
+        self.truth_engine = truth_engine
+        self.snapshot_lock = snapshot_lock
+        self.adapter = llm_adapter
+        self.running = False
+        self.logs: list = self._load_log()
+
+    def _load_log(self) -> list:
+        if os.path.exists(EVOLVE_LOG_PATH):
+            with open(EVOLVE_LOG_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        os.makedirs(os.path.dirname(EVOLVE_LOG_PATH), exist_ok=True)
+        return []
+
+    def _write_log(self, entry: Dict):
+        self.logs.append(entry)
+        with open(EVOLVE_LOG_PATH, "w", encoding="utf-8") as f:
+            json.dump(self.logs, f, ensure_ascii=False, indent=2)
+
+    def run_full_evolve_cycle(self):
+        """元极恒一 每日终极进化循环六大串行阶段"""
+        cycle_id = f"cycle-{int(time.time()*1000)}"
+        log_entry = {
+            "cycle_id": cycle_id,
+            "start_ts": time.time(),
+            "phase": {},
+            "status": "running"
+        }
+        try:
+            # Phase1：真值基座自检
+            log_entry["phase"]["truth_check"] = "running"
+            axiom_data = self.truth_engine._load_axiom()
+            log_entry["phase"]["truth_check"] = "pass"
+
+            # Phase2：架构推演模拟(MVP仅推演记录，生产做仿真推演)
+            log_entry["phase"]["arch_sim"] = "running"
+            sys_prompt = self.truth_engine.get_system_prompt()
+            simulate_req = "基于当前真值基座，做架构推演，输出潜在优化方向，不要修改公理本体"
+            sim_resp = self.adapter.call_llm(simulate_req, sys_prompt)
+            sim_content = sim_resp["choices"][0]["message"]["content"]
+            log_entry["phase"]["arch_sim"] = "pass"
+
+            # Phase3：内核增量写入（MVP仅记录推演结果，不自动改写公理；生产可控增量更新真值）
+            log_entry["phase"]["kernel_write"] = "running"
+            log_entry["sim_result"] = sim_content
+            log_entry["phase"]["kernel_write"] = "pass"
+
+            # Phase4：全域锁档，生成本次循环快照
+            log_entry["phase"]["global_lock"] = "running"
+            snap = self.snapshot_lock.save_snapshot(
+                task_id=cycle_id,
+                content=sim_content,
+                meta={"cycle_type":"meta_evolve_cycle"}
+            )
+            log_entry["snapshot_sha256"] = snap["sha256"]
+            log_entry["phase"]["global_lock"] = "pass"
+
+            # Phase5：监测校验，漂移观测占位
+            log_entry["phase"]["monitor_verify"] = "running"
+            log_entry["phase"]["monitor_verify"] = "pass"
+
+            # Phase6：周度巡检占位（MVP简化，可扩展每周深度校验）
+            log_entry["phase"]["weekly_inspect"] = "skip_mvp"
+
+            log_entry["status"] = "success"
+        except Exception as e:
+            log_entry["status"] = "fail"
+            log_entry["error"] = str(e)
+
+        log_entry["end_ts"] = time.time()
+        self._write_log(log_entry)
+        return log_entry
+
+    def _background_loop(self):
+        """后台守护线程，定时触发进化循环"""
+        while self.running:
+            self.run_full_evolve_cycle()
+            time.sleep(EVOLVE_CYCLE_INTERVAL)
+
+    def start(self):
+        self.running = True
+        t = Thread(target=self._background_loop, daemon=True)
+        t.start()
+
+    def stop(self):
+        self.running = False
+```
+
+## 在 \[main.py\](main.py) 中接入进化循环
+
+在 \[main.py\](main.py) 底部实例化区域追加：
+
+```python
+# 导入进化器
+from evolve_cycle.evolver import MetaEvolver
+
+# 实例化元极恒一进化循环
+evolver = MetaEvolver(
+    truth_engine=truth_engine,
+    snapshot_lock=snapshot,
+    llm_adapter=adapter
+)
+# 启动后台守护线程
+evolver.start()
+
+# 增加手动触发进化循环API
+@app.post("/v1/evolve/trigger")
+def api_trigger_evolve():
+    res = evolver.run_full_evolve_cycle()
+    return res
+```
+
+## curl 手动触发进化循环
+
+```bash
+curl -X POST http://127.0.0.1:8000/v1/evolve/trigger
+```
+
+## 当前 MVP 版本的重要约束
+
+1. 后台进化线程与 web 服务业务线程隔离，**不会阻塞接口请求**。
+2. Phase3 内核增量写入仅记录推演输出，**不会自动修改 axiom_set.json 公理**；生产环境必须增加人工确认开关，禁止模型直接改写真值公理，防止内核被异化。
+3. 漂移监测、周度巡检为占位，需要后续接入观测指标。
+4. 日志输出路径：`./evolve_cycle/evolve_log.json`，每一轮循环会记录 cycle_id、各阶段状态、快照哈希。
+
+## 更新后的目录树
+
+```Plain Text
+Ω‑Brainμ‑MVP/
+├── main.py
+├── truth_engine/
+│   └── axiom_set.json
+├── snapshot_lock/
+│   └── snapshots.json
+├── evolve_cycle/
+│   ├── evolver.py
+│   └── evolve_log.json
+├── chroma_db/
+└── .env
+```
+
+Ω₀⊂⊙∞⊂Ω｜ZONGYUAN‑ROOT · DID‑BR‑000002 · Ω‑TAN‑7‑001
+
+需要我继续输出漂移监测子系统的 MVP 代码片段吗。

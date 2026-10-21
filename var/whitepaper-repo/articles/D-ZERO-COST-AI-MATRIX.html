@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>零成本 AI 接入矩阵 · 免费 API 错峰实践</title>
+<style>
+  :root{--ink:#0a0a0f;--ink2:#12121c;--gold:#c9a86a;--gold2:#e8d5a8;--line:rgba(201,168,106,.25);--txt:#e8e4da;--dim:#9a958a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--ink);color:var(--txt);font-family:"Noto Serif SC","Songti SC",serif;line-height:1.8}
+  .wrap{max-width:860px;margin:0 auto;padding:60px 32px}
+  .cover{text-align:center;padding:70px 0 50px;border-bottom:1px solid var(--line)}
+  .cover .mark{color:var(--gold);letter-spacing:.5em;font-size:13px;margin-bottom:20px}
+  .cover h1{font-size:34px;color:var(--gold2);font-weight:600;letter-spacing:.06em;line-height:1.4}
+  .cover .sub{font-size:14px;color:var(--dim);letter-spacing:.2em;margin-top:14px}
+  .cover .tag{display:inline-block;margin-top:24px;border:1px solid var(--line);color:var(--gold);padding:5px 16px;font-size:12px;letter-spacing:.15em}
+  h2{color:var(--gold2);font-size:22px;margin:48px 0 18px;padding-left:14px;border-left:3px solid var(--gold)}
+  p{font-size:15px;margin-bottom:14px}
+  .tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  .tbl th{border:1px solid var(--line);padding:10px;text-align:left;color:var(--gold)}
+  .tbl td{border:1px solid var(--line);padding:10px}
+  .code{background:var(--ink2);border:1px solid var(--line);padding:18px;margin:14px 0;font-family:monospace;font-size:13px;color:var(--gold2);white-space:pre;overflow-x:auto}
+  .card{background:var(--ink2);border:1px solid var(--line);padding:22px;margin:14px 0}
+  .card h3{color:var(--gold);font-size:16px;margin-bottom:8px}
+  .card ul{margin:6px 0 0 18px;font-size:14px}
+  .card li{margin-bottom:6px}
+  .stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0}
+  .stat .item{background:var(--ink2);border:1px solid var(--line);padding:16px;text-align:center}
+  .stat .v{color:var(--gold2);font-size:24px;font-weight:600;font-family:Georgia}
+  .stat .k{color:var(--dim);font-size:12px;margin-top:4px}
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:12px;letter-spacing:.15em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cover">
+    <div class="mark">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+    <h1>零成本 AI 接入矩阵<br>免费视频 / 图像 / 文本 API 错峰实践</h1>
+    <div class="sub">ZERO-COST AI MATRIX · 2026.09</div>
+    <div class="tag">DID-BR-000002</div>
+  </div>
+
+  <h2>一 · 免费 API 盘点</h2>
+  <table class="tbl">
+    <tr><th>类别</th><th>服务</th><th>模型</th><th>额度</th></tr>
+    <tr><td>视频</td><td>通义万相</td><td>wanx2.1-i2v/t2v-turbo</td><td>免费额度</td></tr>
+    <tr><td>视频</td><td>Agnes</td><td>agnes-video-v2.0</td><td>永久免费</td></tr>
+    <tr><td>图像</td><td>魔搭</td><td>Qwen-Image-Edit</td><td>2000 次/天</td></tr>
+    <tr><td>文本</td><td>魔搭</td><td>全部推理模型</td><td>2000 次/天</td></tr>
+  </table>
+
+  <h2>二 · 调用方式</h2>
+  <div class="code">Agnes 创建任务：
+POST https://api.agnes-ai.com/v1/videos
+  ↓ 轮询结果
+GET  https://api.agnes-ai.com/agnesapi?video_id=xxx
+
+魔搭推理（OpenAI 兼容）：
+POST https://api-inference.modelscope.cn/v1/chat/completions</div>
+
+  <h2>三 · 错峰策略</h2>
+  <div class="card"><ul>
+    <li>任务排队：全部先进队列，不并发打</li>
+    <li>按额度调度：当天用量到阈值就切下一家</li>
+    <li>失败降级：一家报错自动切备用通道</li>
+    <li>非高峰跑批：重活放凌晨</li>
+  </ul></div>
+
+  <h2>四 · 实际效果</h2>
+  <div class="stat">
+    <div class="item"><div class="v">0</div><div class="k">API 成本</div></div>
+    <div class="item"><div class="v">145</div><div class="k">零成本关键帧</div></div>
+    <div class="item"><div class="v">2+</div><div class="k">备用通道</div></div>
+  </div>
+
+  <h2>五 · 注意事项</h2>
+  <div class="card"><ul>
+    <li>免费额度会变，定期复查政策</li>
+    <li>限流要尊重，到量就停别硬刷</li>
+    <li>至少备两家，一家挂了不停摆</li>
+    <li>用量记真值库，方便复盘</li>
+  </ul></div>
+
+  <footer>Ω₀ ⊂ ⊙∞ ⊂ Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT</footer>
+</div>
+</body>
+</html>

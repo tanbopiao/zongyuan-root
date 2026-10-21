@@ -135,7 +135,7 @@ def extract_video_url(share_url, timeout=30):
             result['title'] = page.title()
             
             # 截图保存用于调试
-            page.screenshot(path='/home/user/Doubao/chats/38439832899843586/video_page_screenshot.png', full_page=True)
+            page.screenshot(path='/opt/ZONGYUAN-ROOT/video_page_screenshot.png', full_page=True)
             print(f"  页面截图已保存: video_page_screenshot.png")
             
             if result['video_url']:
@@ -168,7 +168,7 @@ if __name__ == '__main__':
     result = extract_video_url(share_url)
     
     # 保存结果到JSON
-    output_path = '/home/user/Doubao/chats/38439832899843586/video_extract_result.json'
+    output_path = '/opt/ZONGYUAN-ROOT/video_extract_result.json'
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     print(f"\n结果已保存: {output_path}")

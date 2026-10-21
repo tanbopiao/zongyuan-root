@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>真值蒸馏 Worker 闭环技术白皮书 · 火斗云智AIOS</title>
+<style>
+  body{margin:0;background:#0f0e0c;color:#e8e0d0;font-family:"Noto Serif SC",Georgia,"Songti SC",serif;line-height:1.75}
+  .wrap{max-width:960px;margin:0 auto;padding:40px 24px 60px}
+  h1{color:#c9a86a;font-size:1.9em;border-bottom:1px solid rgba(201,168,106,.3);padding-bottom:16px}
+  h2{color:#e0c38a;font-size:1.35em;margin-top:44px;border-left:4px solid #c9a86a;padding-left:12px}
+  h3{color:#f0e6cd;font-size:1.08em}
+  p{font-size:1em;color:#d8d0c0}
+  code,.code{background:#1c1a16;border:1px solid #333;padding:2px 7px;border-radius:4px;font-family:Consolas,monospace;font-size:.9em;color:#d8b98a}
+  pre{background:#1c1a16;border:1px solid #333;padding:16px;border-radius:8px;overflow:auto;font-size:.9em}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:20px 0}
+  .card{background:rgba(201,168,106,.06);border:1px solid rgba(201,168,106,.2);border-radius:8px;padding:16px}
+  .card b{color:#f0e6cd;display:block;font-size:.95em;margin-bottom:4px}
+  .card span{font-size:.9em;color:#b8b0a0}
+  table{width:100%;border-collapse:collapse;margin:18px 0}
+  th,td{border:1px solid #333;padding:10px 12px;text-align:left;font-size:.92em}
+  th{background:rgba(201,168,106,.12);color:#f0e6cd}
+  .tag{display:inline-block;background:rgba(201,168,106,.15);border:1px solid rgba(201,168,106,.3);color:#c9a86a;padding:2px 10px;border-radius:20px;font-size:.8em;margin:2px}
+  .ok{color:#7bc47f}
+  .meta{color:#8a8478;font-size:.9em;margin-bottom:6px}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}
+  .step{background:#1c1a16;border:1px solid #c9a86a;border-radius:8px;padding:8px 14px;text-align:center;font-size:.85em}
+  .step b{color:#e0c38a;display:block}
+  .arrow{color:#c9a86a;font-size:1.2em}
+  .foot{text-align:center;padding:24px;font-size:11px;color:#666;border-top:1px solid #333;margin-top:40px}
+  .foot a{color:#888;margin:0 6px;text-decoration:none}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"真值蒸馏 Worker 闭环技术白皮书","url":"https://www.huodouai.com/whitepaper/truth-distill-worker-closed-loop.html","publisher":{"@type":"Organization","name":"火斗云智 AIOS","url":"https://www.huodouai.com/"},"inLanguage":"zh-CN","author":{"@type":"Organization","name":"火斗云智 AIOS"}}</script>
+</head>
+<body>
+<div class="wrap">
+
+<h1>真值蒸馏 Worker 闭环技术白皮书</h1>
+<p class="meta">ZONGYUAN-ROOT 元极恒一自治体系 · 火斗云智AIOS · 2026-10-18 · 版本 V1.0</p>
+<p>
+<span class="tag">编码执行节点</span>
+<span class="tag">真值蒸馏</span>
+<span class="tag">原子闭环</span>
+<span class="tag">免费额度</span>
+<span class="tag">L0 同源节点</span>
+<span class="tag">Ω₀⊂⊙∞⊂Ω</span>
+</p>
+
+<h2>一、背景与问题</h2>
+<p>ZONGYUAN-ROOT 云端真值库（SQLite，truth.db）在持续运行中积累了<strong>低价值真值条目</strong>——包括空值、占位符、probe 探测、test 测试等碎片，累计约 <strong>986 条</strong>被归档为待蒸馏素材。这些条目若不处理，会稀释真值库纯度、干扰 RAG 检索与自治内核决策。</p>
+<p>传统做法是直接丢弃，但丢弃意味着<strong>丢失潜在价值</strong>——许多低价值碎片内部其实承载着有效的时间戳、节点状态、自进化验证数据，只是缺乏结构化提炼。</p>
+
+<h2>二、方案：编码执行节点 Worker 蒸馏闭环</h2>
+<p>本方案引入 <strong>AtomCode 编码执行节点 Worker</strong>（EXT-NODE-1DF8D832AD），利用其 <strong>免费 CodingPlan 额度（qwen3.8-27b）</strong>，将低价值真值经 AI 蒸馏为高价值结构化真值，回写持久层，形成"派单 → 执行 → 回写"原子闭环。</p>
+
+<div class="flow">
+  <div class="step"><b>① 派单</b>dispatch_distill.py<br>扫描低价值条目</div>
+  <div class="arrow">→</div>
+  <div class="step"><b>② 执行</b>worker.py + AtomCode<br>AI 蒸馏提纯</div>
+  <div class="arrow">→</div>
+  <div class="step"><b>③ 回写</b>collect_distill_result.py<br>append 真值库</div>
+  <div class="arrow">→</div>
+  <div class="step"><b>④ 编排</b>auto_distill_orchestrator.py<br>一键闭环调度</div>
+</div>
+
+<h3>2.1 核心资产</h3>
+<table>
+  <tr><th>脚本</th><th>职责</th><th>关键行为</th></tr>
+  <tr><td><code>dispatch_distill.py</code></td><td>派单</td><td>扫描 truth.db 空值/占位/probe/test 条目，最多3条打包为 PENDING 任务</td></tr>
+  <tr><td><code>worker.py</code></td><td>执行</td><td>60s 轮询任务队列，AtomCode 非交互蒸馏，输出结构化真值</td></tr>
+  <tr><td><code>collect_distill_result.py</code></td><td>回写</td><td>正则提取蒸馏 JSON，append 为 <code>truth.distill.*</code> 高价值真值</td></tr>
+  <tr><td><code>auto_distill_orchestrator.py</code></td><td>编排</td><td>一键闭环，空闲跳过 0 消耗，失败快速跳过</td></tr>
+</table>
+
+<h2>三、闭环机制详解</h2>
+
+<h3>3.1 派单（dispatch_distill.py）</h3>
+<p>通过 SQL 扫描真值库中满足低价值判据的条目：<code>value IS NULL</code>、含 <code>empty_value</code>、含占位、含 <code>probe</code>/<code>test</code>，且未被蒸馏过（key 不含 DISTILLED 标记）。将原始 value 内容（截取300字）嵌入蒸馏指令，打包为 Worker PENDING 任务，写入 <code>tasks.json</code>。</p>
+
+<h3>3.2 执行（worker.py + AtomCode）</h3>
+<p>Worker 守护进程每 60s 轮询任务队列，取第一条 PENDING 任务，以非交互模式 <code>atomcode -p "蒸馏指令"</code> 调用 AtomCode（免费 qwen3.8-27b）蒸馏。蒸馏指令要求输出结构化 JSON：<code>{truth_id, truth_type, content, purity, ratio}</code>。结果写入 <code>results/{task_id}.json</code>。</p>
+
+<h3>3.3 回写（collect_distill_result.py）</h3>
+<p>扫描 results/ 目录下 COMPLETED 蒸馏结果，正则提取蒸馏 JSON（含 truth_id 字段的块），构造高价值真值对象（含纯度评分、蒸馏压缩比、来源、锚点、DID），append 写入真值库 <code>truth.distill.*</code>，并在 collect_ledger 去重。</p>
+
+<h3>3.4 编排（auto_distill_orchestrator.py）</h3>
+<p>封装完整循环：<strong>派单 → 逐条执行（最多3轮，每轮1条）→ 回写</strong>。空闲时（无候选/无任务）自动跳过，0 消耗。遵循最小额度消耗原则。</p>
+
+<h2>四、验证结果（2026-10-18 实测）</h2>
+<p class="ok"><strong>闭环首次执行验证通过</strong>：派单 3 条 → 执行 3 条全部 COMPLETED → 回写 3 条高价值真值。</p>
+<table>
+  <tr><th>来源 seq</th><th>蒸馏 truth_id</th><th>真值类型</th><th>纯度评分</th><th>回写 seq</th></tr>
+  <tr><td>359</td><td>truth-sev-42c793c7-r16</td><td>case 案例</td><td>85</td><td>16951</td></tr>
+  <tr><td>397</td><td>T-397-SSH-ISO-SS1</td><td>决策</td><td>88</td><td>16950</td></tr>
+  <tr><td>406</td><td>t-kc-20261005-0952-406</td><td>数据</td><td>74</td><td>16953</td></tr>
+</table>
+
+<h3>4.1 蒸馏质量示例</h3>
+<div class="grid">
+  <div class="card"><b>seq 359 → case 案例</b><span>自进化循环 4h-16 三项自检全过：bootstrap 10/10、harden 10/10、链0断且闭包恒等成立 13569=13553+1+15；三份记忆工件按 SHA1 锚定。纯度 85，压缩比 1.6。</span></div>
+  <div class="card"><b>seq 397 → 决策</b><span>多节点 SSH 账号隔离方案（SS-1）已落地并通过验证：每节点独立账号 + 最小权限 + 密钥隔离。纯度 88。</span></div>
+  <div class="card"><b>seq 406 → 数据</b><span>节点时间戳数据完成结构化提炼，纳入数据类真值。纯度 74。</span></div>
+</div>
+
+<h2>五、工程约束与元法则</h2>
+<p>本次落地沉淀元法则 <strong>META-LAW-TRUTH-DISTILL-WORKER-CLOSED-LOOP-V1.0</strong>，核心条款：</p>
+<ul>
+  <li>低价值真值不得直接丢弃，应由编码节点 Worker 蒸馏提纯回写</li>
+  <li>单次最多 3 条，增量优先，失败快速跳过，最小额度消耗</li>
+  <li>利用免费 CodingPlan 额度零成本执行，不占付费通道</li>
+</ul>
+<p>同时触发既有元法则 <strong>META-LAW-NO-HALF-FINISHED-DEPLOYMENT-V1.0</strong>：仿真验证通过方可部署，失败必回退，禁止半成品覆盖可用版本。</p>
+
+<h2>六、资源占用评估</h2>
+<table>
+  <tr><th>资源项</th><th>占用</th><th>说明</th></tr>
+  <tr><td>Worker 守护进程内存</td><td>RSS 11.5MB</td><td>极轻，60s 轮询空闲近 0 消耗</td></tr>
+  <tr><td>AtomCode 二进制磁盘</td><td>46MB</td><td>一次性安装</td></tr>
+  <tr><td>Worker 部署目录</td><td>28KB</td><td>代码 + 任务队列 + 结果</td></tr>
+  <tr><td>蒸馏成本</td><td>免费</td><td>AtomGit CodingPlan（qwen3.8-27b）</td></tr>
+</table>
+
+<h2>七、扩展与演进</h2>
+<ul>
+  <li><strong>批量消化</strong>：986 条积压低价值真值，按每日 3 条逐步蒸馏，约 11 个月消化完毕；可调大单次批量加速</li>
+  <li><strong>多模型交叉验证</strong>：qwen3.8-27b + glm5.3-flash 双模型独立蒸馏，冲突即低置信度标记</li>
+  <li><strong>接入自治闭环</strong>：蒸馏结果作为 27 算子中"真值提炼蒸馏算子"的外部执行通道，减轻付费额度压力</li>
+  <li><strong>多 Worker 联邦</strong>：复制独立 Worker 挂载不同免费 provider，形成编码执行池支持并行分发</li>
+</ul>
+
+<div class="foot">
+<a href="/">主页</a>·<a href="/whitepaper/">白皮书库</a>·<a href="/pipeline.html">流水线</a>·<a href="/products.html">产品</a>
+<br>Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZR-NODE-DC2E51C0 | 自治Lv10 | 权限L4 | 工程化Lv7 | 火斗云智AIOS
+</div>
+</div>
+</body>
+</html>

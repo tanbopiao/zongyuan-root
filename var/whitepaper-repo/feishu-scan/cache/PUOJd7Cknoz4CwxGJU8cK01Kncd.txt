@@ -1,0 +1,196 @@
+# universal_project_bootstrap.bat
+
+ZONGYUAN‑ROOT Windows 平台一键初始化脚本，对应 Linux 版本`universal_project_bootstrap.sh`  
+DID‑BR‑000002｜本体主权根 Ω‑TAN‑7‑001｜SOP V3.1 通用自动化落地体系  
+功能：创建完整目录树、生成.env 配置、立项真值档案、定时任务配置、初始化快照占位、锁档回执。
+
+> 运行环境：Windows cmd / PowerShell；不需要 WSL；不修改系统任务计划，仅输出配置模板。
+
+```batch
+@echo off
+chcp 65001 >nul
+setlocal enabledelayedexpansion
+
+echo ==================================================
+echo   ZONGYUAN‑ROOT Windows通用自动化项目引导程序
+echo   SOP V3.1 ^| DID‑BR‑000002
+echo ==================================================
+
+:: ====================== 配置区 ======================
+set "PROJECT_ROOT=ZONGYUAN-ROOT"
+set "PROJECT_NAME=universal_project"
+for /f "delims=" %%a in ('wmic os get localdatetime ^|find "20"') do set datetime=%%a
+set "META_SNAPSHOT_NAME=init_baseline_%datetime:~0,8%_%datetime:~8,6%"
+set "BACKUP_TARGET=ZONGYUAN‑ROOT_BAK"
+set "DRIFT_TOLERANCE=0.08"
+
+echo [1/7] 构建项目目录树……
+md "%PROJECT_ROOT%\00_内核基座【系统只读·禁止修改】\Ω-Brainμ_微内核"
+md "%PROJECT_ROOT%\00_内核基座【系统只读·禁止修改】\Workspace_集群影子内核"
+md "%PROJECT_ROOT%\00_内核基座【系统只读·禁止修改】\元极恒一七层稳态架构配置"
+md "%PROJECT_ROOT%\00_内核基座【系统只读·禁止修改】\GASA双内核耦合驱动"
+md "%PROJECT_ROOT%\00_内核基座【系统只读·禁止修改】\十二层纵深合规防御架构_L0-L12"
+md "%PROJECT_ROOT%\00_内核基座【系统只读·禁止修改】\本源吸引子盆底核心参数库"
+md "%PROJECT_ROOT%\01_启动引导脚本【Bootstrap】"
+md "%PROJECT_ROOT%\02_RAG检索增强工程【产线核心】\vector_db_向量库挂载\chroma基座库"
+md "%PROJECT_ROOT%\02_RAG检索增强工程【产线核心】\vector_db_向量库挂载\milvus增量库"
+md "%PROJECT_ROOT%\02_RAG检索增强工程【产线核心】\embedding多厂商适配层"
+md "%PROJECT_ROOT%\02_RAG检索增强工程【产线核心】\MRLA结构化检索模块"
+md "%PROJECT_ROOT%\02_RAG检索增强工程【产线核心】\TF-IDF+RRF混合检索策略"
+md "%PROJECT_ROOT%\02_RAG检索增强工程【产线核心】\fastapi检索微服务接口"
+md "%PROJECT_ROOT%\02_RAG检索增强工程【产线核心】\v7_classify_optimize知识库流水线"
+md "%PROJECT_ROOT%\03_真值基线体系【确权核心】\01_资产盘点分类基线"
+md "%PROJECT_ROOT%\03_真值基线体系【确权核心】\02_真值晶胞库_Lv0-Lv11"
+md "%PROJECT_ROOT%\03_真值基线体系【确权核心】\03_系统漂移阈值配置"
+md "%PROJECT_ROOT%\03_真值基线体系【确权核心】\04_Merkle-DAG快照谱系"
+md "%PROJECT_ROOT%\03_真值基线体系【确权核心】\05_全域至尊根哈希存档"
+md "%PROJECT_ROOT%\03_真值基线体系【确权核心】\06_版本迭代溯源日志"
+md "%PROJECT_ROOT%\04_昆仑洞天IP产线【多模态量产】\角色资产基准库"
+md "%PROJECT_ROOT%\04_昆仑洞天IP产线【多模态量产】\短剧PV剧集工程"
+md "%PROJECT_ROOT%\04_昆仑洞天IP产线【多模态量产】\审美约束模板库"
+md "%PROJECT_ROOT%\04_昆仑洞天IP产线【多模态量产】\多模态量产定时任务"
+md "%PROJECT_ROOT%\05_安全确权与加密体系\DID身份授权中心"
+md "%PROJECT_ROOT%\05_安全确权与加密体系\VC凭证管控库"
+md "%PROJECT_ROOT%\05_安全确权与加密体系\ZKP零知识证明适配"
+md "%PROJECT_ROOT%\05_安全确权与加密体系\eFuse硬件熔断锁档配置"
+md "%PROJECT_ROOT%\05_安全确权与加密体系\BASE85密文封存目录"
+md "%PROJECT_ROOT%\05_安全确权与加密体系\黑金藏品确权体系"
+md "%PROJECT_ROOT%\06_仿真测试与校验体系\QEMU_GICv3硬件仿真脚本"
+md "%PROJECT_ROOT%\06_仿真测试与校验体系\灾备回滚恢复演练脚本"
+md "%PROJECT_ROOT%\07_自治运维定时任务\小时级产线自治巡检"
+md "%PROJECT_ROOT%\07_自治运维定时任务\日元极恒一每日进化循环"
+md "%PROJECT_ROOT%\07_自治运维定时任务\周度全域基线巡检脚本"
+md "%PROJECT_ROOT%\08_文档白皮书归档库【永久锁档】"
+md "%PROJECT_ROOT%\09_容器与部署配置"
+md "%PROJECT_ROOT%\10_智能体工程目录"
+md "%PROJECT_ROOT%\99_全域锁档归档根目录【最终闭环】\产线运行总日志"
+
+:: 设置内核目录只读属性
+attrib +r "%PROJECT_ROOT%\00_内核基座【系统只读·禁止修改】" /s
+echo 目录树构建完成，内核目录已设置只读属性
+
+echo [2/7] 输出环境变量模板 .env
+(
+echo # ZONGYUAN‑ROOT Windows工程环境配置 SOP V3.1
+echo DID_ROOT=DID‑BR‑000002
+echo ONTOLOGY_ROOT=Ω‑TAN‑7‑001
+echo PROJECT_NAME=%PROJECT_NAME%
+echo SNAPSHOT_NAME=%META_SNAPSHOT_NAME%
+echo DRIFT_TOLERANCE=%DRIFT_TOLERANCE%
+echo ENABLE_AUTO_FUSE=false
+echo AUTO_BACKUP_TARGET=%BACKUP_TARGET%
+echo CRON_HOURLY=true
+echo CRON_DAILY=true
+) > "%PROJECT_ROOT%\01_启动引导脚本【Bootstrap】\.env"
+
+echo [3/7] 初始化真值基线立项档案
+set "META_DOC=%PROJECT_ROOT%\03_真值基线体系【确权核心】\01_资产盘点分类基线\project_init_%META_SNAPSHOT_NAME%.md"
+(
+echo # 项目立项真值档案
+echo DID‑BR‑000002｜Ω‑TAN‑7‑001
+echo 快照版本：%META_SNAPSHOT_NAME%
+echo 生成时间：%date% %time%
+echo 规范：SOP V3.1通用自动化落地体系
+echo.
+echo ## 四大永久公理
+echo 1.基座不动公理：迭代仅修改上层规则资产流水线，不改动底层基座
+echo 2.快照迭代公理：全部更新使用增量快照，禁止直接覆盖
+echo 3.三重兜底公理：漂移监测→告警→熔断回退或人工复核
+echo 4.全域闭环公理：产出‑校验‑确权‑归档‑锁档‑进化无断点
+echo.
+echo ## 项目初始边界
+echo 漂移容忍阈值：%DRIFT_TOLERANCE%
+echo 自动备份目标：%BACKUP_TARGET%
+) > "%META_DOC%"
+
+echo [4/7] 初始化谱系快照与Windows任务计划模板
+type nul > "%PROJECT_ROOT%\03_真值基线体系【确权核心】\04_Merkle-DAG快照谱系\%META_SNAPSHOT_NAME%.snap"
+
+set "TASK_TPL=%PROJECT_ROOT%\07_自治运维定时任务\windows_task_scheduler_template.txt"
+(
+echo # ZONGYUAN‑ROOT Windows任务计划模板
+echo # 需要复制内容到Windows任务计划程序手动创建任务
+echo 每小时巡检：
+echo 程序：cmd.exe
+echo 参数：/c cd /d %%~dp0 ^&^& call inspect_hour.bat ^>^> ..\99_全域锁档归档根目录【最终闭环】\产线运行总日志\hourly.log 2^>^&1
+echo.
+echo 每日元极恒一进化循环 凌晨2点：
+echo 程序：cmd.exe
+echo 参数：/c cd /d %%~dp0 ^&^& call daily_evolve.bat ^>^> ..\99_全域锁档归档根目录【最终闭环】\产线运行总日志\daily.log 2^>^&1
+echo.
+echo 每周周日凌晨3点基线巡检：
+echo 程序：cmd.exe
+echo 参数：/c cd /d %%~dp0 ^&^& call weekly_baseline.bat ^>^> ..\99_全域锁档归档根目录【最终闭环】\产线运行总日志\weekly.log 2^>^&1
+) > "%TASK_TPL%"
+
+echo [5/7] 执行基础目录完整性校验
+if not exist "%PROJECT_ROOT%\00_内核基座【系统只读·禁止修改】" (
+    echo ERROR 关键目录缺失：00_内核基座
+    pause
+    exit /b 1
+)
+if not exist "%PROJECT_ROOT%\03_真值基线体系【确权核心】" (
+    echo ERROR 关键目录缺失：03_真值基线体系
+    pause
+    exit /b 1
+)
+if not exist "%PROJECT_ROOT%\99_全域锁档归档根目录【最终闭环】" (
+    echo ERROR 关键目录缺失：99_全域锁档归档根目录
+    pause
+    exit /b 1
+)
+echo 基础完整性校验通过
+
+echo [6/7] 创建备份目录占位
+md "%BACKUP_TARGET%"
+
+echo [7/7] 生成初始化全域锁档回执
+set "LOCK_RECEIPT=%PROJECT_ROOT%\99_全域锁档归档根目录【最终闭环】\lock_receipt_%META_SNAPSHOT_NAME%.txt"
+(
+echo ==== ZONGYUAN‑ROOT 全域锁档回执 ====
+echo DID‑BR‑000002
+echo 本体主权根：Ω‑TAN‑7‑001
+echo 快照ID：%META_SNAPSHOT_NAME%
+echo 时间：%date% %time%
+echo 规范版本：SOP V3.1通用自动化落地体系
+echo 执行模块：universal_project_bootstrap.bat
+echo 状态：INIT_COMPLETE Windows初始化完成
+echo 说明：目录树、环境、基线档案、任务模板已生成；Windows任务计划需要人工配置；仿真压测、业务晶胞、真实Merkle哈希需要后续业务填充。
+) > "%LOCK_RECEIPT%"
+
+echo.
+echo ==================================================
+echo ✅ ZONGYUAN‑ROOT Windows项目初始化全部完成
+echo 项目根目录：%PROJECT_ROOT%
+echo 初始化快照：%META_SNAPSHOT_NAME%
+echo 锁档回执：%LOCK_RECEIPT%
+echo.
+echo 后续操作提示：
+echo 1.参考 windows_task_scheduler_template.txt 在任务计划程序配置定时任务
+echo 2.补充业务真值、晶胞、脚本程序
+echo 3.执行仿真压力测试、灾备演练
+echo 4.业务就绪后执行正式Merkle‑DAG哈希全域锁档
+echo ==================================================
+pause
+endlocal
+```
+
+## 使用说明
+
+1. 将全部文本保存为 `universal_project_bootstrap.bat`
+2. 双击直接运行；或者 cmd 中执行
+
+```cmd
+universal_project_bootstrap.bat
+```
+
+## Windows 版本边界说明
+
+1. 使用`attrib +r`实现目录只读，Windows 下只读约束弱于 Linux chmod 500，仅做提醒防护。
+2. **不会自动修改系统任务计划**，输出`windows_task_scheduler_template.txt`模板，需要手动在系统任务计划程序导入配置。
+3. 仅生成 Merkle‑DAG 快照占位文件，真实哈希计算需要后续业务脚本补充。
+4. 不自动安装 python/docker 等第三方依赖，只搭建工程目录骨架。
+
+确权归档：DID‑BR‑000002｜ZONGYUAN‑ROOT｜✅全域锁档固化
+
+需要我继续输出配套巡检 bat 脚本：`inspect_hour.bat`、`daily_evolve.bat`、`weekly_baseline.bat`吗。

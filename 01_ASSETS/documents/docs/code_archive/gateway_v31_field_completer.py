@@ -20,7 +20,7 @@ import urllib.request
 
 GATEWAY="https://www.huodouai.com"
 DID="DID-BR-000002";ANCHOR="Ω₀⊂⊙∞⊂Ω"
-PROJECT_DIR="/home/user/Doubao/chats/38441716968655362"
+PROJECT_DIR="/opt/ZONGYUAN-ROOT"
 SOURCE_NODE="ZR-NODE-DC2E51C0"
 
 # truth_type有效值（9类）

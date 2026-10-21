@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WP-003 · 自治内核技术白皮书 · 27算子十层拓扑</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23070b16'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='%23ffc857' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='2.4' fill='%234fc3f7'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0b1224; --card:#0e1730; --card2:#121c38;
+    --line:#1e2a4d; --line2:#2a3a66;
+    --txt:#e8eefc; --sub:#8fa3c8; --dim:#5c6f96;
+    --gold:#ffc857; --cyan:#4fc3f7; --violet:#a78bfa; --red:#ff6b6b; --green:#6ee7b7;
+    --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:
+    radial-gradient(1200px 500px at 80% -10%, rgba(79,195,247,.08), transparent 60%),
+    radial-gradient(900px 400px at -10% 20%, rgba(167,139,250,.07), transparent 55%),
+    var(--bg);
+    color:var(--txt); font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    line-height:1.7; min-height:100vh}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+
+  .doc-head{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  .doc-head .wpnum{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.14em}
+  .doc-head h1{font-size:26px;font-weight:800;margin:8px 0 6px}
+  .doc-head .meta{font-size:12px;color:var(--dim);display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+  .doc-head .meta b{color:var(--sub);font-weight:500}
+
+  h2{font-size:18px;font-weight:800;margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+  h2 .n{color:var(--gold);font-family:var(--mono);font-size:13px;border:1px solid var(--line2);border-radius:6px;padding:2px 9px}
+  h3{font-size:14px;font-weight:700;color:var(--cyan);margin:18px 0 8px}
+  p{font-size:13.5px;color:var(--sub);margin-bottom:8px}
+  p b{color:var(--txt)}
+
+  .chartbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+  .chart{width:100%;height:340px}
+
+  .layers{margin:14px 0}
+  .layer{background:var(--card);border:1px solid var(--line);border-left:3px solid;border-radius:10px;padding:13px 16px;margin-bottom:8px}
+  .layer .head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .layer .lvl{font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .layer .name{font-size:14px;font-weight:700}
+  .layer .ops{font-size:12px;color:var(--sub);line-height:1.8}
+  .layer .ops b{color:var(--txt)}
+
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:12px 0;table-layout:fixed}
+  .tbl th{color:var(--sub);font-weight:500;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  .tbl td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--txt);vertical-align:top}
+  .tbl .mono{font-family:var(--mono);color:var(--cyan);font-size:11.5px}
+  .tbl td b{color:var(--gold)}
+
+  .callout{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line2);border-left:4px solid var(--cyan);border-radius:10px;padding:16px 18px;margin:16px 0;font-size:13px;color:var(--sub)}
+  .callout b{color:var(--cyan)}
+
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:11.5px;color:var(--dim)}
+  .lockline{font-family:var(--mono);color:var(--gold);font-size:11px}
+  .back{display:inline-block;margin-bottom:20px;font-size:12px;color:var(--cyan);text-decoration:none;border:1px solid var(--line2);padding:4px 14px;border-radius:8px}
+  .back:hover{background:rgba(79,195,247,.08)}
+
+  @media(max-width:620px){
+    .doc-head h1{font-size:21px}
+    .wrap{padding:20px 12px 48px}
+    .tbl{font-size:11.5px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 返回白皮书矩阵</a>
+
+  <div class="doc-head">
+    <div class="wpnum">WP-003 · AUTONOMY KERNEL · 硬核技术</div>
+    <h1>自治内核技术白皮书 · 27算子十层依赖拓扑</h1>
+    <div class="meta">
+      <span>版本：<b>V1.0</b></span>
+      <span>日期：<b>2026-09-30</b></span>
+      <span>确权：<b>DID-BR-000002</b></span>
+      <span>锚定：<b>Ω₀⊂⊙∞⊂Ω</b></span>
+      <span>内核：<b>ZONGYUAN-ROOT V5.6-ROOTFIXED</b></span>
+    </div>
+  </div>
+
+  <h2><span class="n">01</span> 摘要</h2>
+  <p>本白皮书阐述ZONGYUAN-ROOT自治内核的<b>27大算子十层依赖拓扑</b>体系。从真值过滤到业务实体约束，十层算子按严格依赖顺序执行，上游输出作为下游输入，形成从真值蒸馏→流形度量→知识图谱→因果推理→适配器流转→结构化归档→对账治理→安全确权→决策护盾→实体约束的完整自治链。</p>
+
+  <div class="callout"><b>核心机制：</b>高消耗算子（SM-BS映射/真值蒸馏/CTE适配器/法律意见书）每日执行轻量模式，深度完整模式留待周度深度循环；CTE三适配器形成 C→T→E→C 闭环预激活。</div>
+
+  <h2><span class="n">02</span> 十层拓扑总览</h2>
+  <div class="chartbox">
+    <h3>27算子十层依赖拓扑</h3>
+    <div id="chartTopo" class="chart"></div>
+  </div>
+
+  <h2><span class="n">03</span> 分层算子明细</h2>
+  <div class="layers">
+    <div class="layer" style="border-left-color:#4fc3f7">
+      <div class="head"><span class="lvl">L1</span><span class="name">真值过滤与深度蒸馏</span></div>
+      <div class="ops"><b>1.P4真值对账</b>：粗对账区分客观事实/推演猜想/主观观点，过滤无来源碎片 · <b>2.P7外部锚定</b>：外部事实源交叉锚定，抑制统计幻觉 · <b>3.真值提炼蒸馏</b>：多轮交叉验证+来源锚定+逻辑一致性+冲突消解，输出纯度评分(0-100)+压缩比</div>
+    </div>
+    <div class="layer" style="border-left-color:#a78bfa">
+      <div class="head"><span class="lvl">L2</span><span class="name">流形度量与SM-BS稳态映射</span></div>
+      <div class="ops"><b>4.黎曼流形度量</b>：度量概念流形距离，识别逻辑断层 · <b>5.SM-BS双向稳态映射</b>：语义↔流形坐标双向映射，度量张量保距，检测映射漂移 · <b>6.漂移巡检量化</b>：全资产库漂移率+方向向量+Top-N高漂移（>5%黄/>10%橙/>20%红）</div>
+    </div>
+    <div class="layer" style="border-left-color:#6ee7b7">
+      <div class="head"><span class="lvl">L3</span><span class="name">知识图谱秩序化重建</span></div>
+      <div class="ops"><b>7.实体关系抽取</b>：实体+关系构建三元组 · <b>8.知识图谱补全</b>：链接预测+孤立节点识别+密度连通指标 · <b>9.跨文档实体链接</b>：别名/缩写归一为全局唯一ID，检测属性冲突</div>
+    </div>
+    <div class="layer" style="border-left-color:#ffc857">
+      <div class="head"><span class="lvl">L4</span><span class="name">因果级推理</span></div>
+      <div class="ops"><b>10.因果链溯源回溯</b>：反向回溯完整因果链，识别关键节点/旁路/汇聚点 · <b>11.奇点概率预测</b>：黑天鹅节点/临界点/相变阈值，蓝黄橙红四级预警 · <b>12.因果干预模拟</b>：do-calculus干预，反事实推理</div>
+    </div>
+    <div class="layer" style="border-left-color:#ff6b6b">
+      <div class="head"><span class="lvl">L5</span><span class="name">CTE三位一体适配器流转</span></div>
+      <div class="ops"><b>13.CausalToTruth</b>：因果输出→真值格式（因果边→真值条目，奇点概率→置信度）· <b>14.TruthToEvolution</b>：真值→进化信号（纯度→适应度Φ，漂移→进化压力）· <b>15.EvolutionToCausal</b>：策略→do-calculus干预变量（进化域待唤醒，预激活）</div>
+    </div>
+    <div class="layer" style="border-left-color:#3b82f6">
+      <div class="head"><span class="lvl">L6</span><span class="name">结构化归档深化</span></div>
+      <div class="ops"><b>16.四层结构化拆分</b>：L1元数据/Merkle哈希 + L2内容 + L3关系 + L4真值 · <b>17.九大元类归类</b>：公理/定理/方法/数据/案例/决策/创意/风险/协议 · <b>18.Merkle-DAG主链追加</b>：哈希追加校验链完整性</div>
+    </div>
+    <div class="layer" style="border-left-color:#14b8a6">
+      <div class="head"><span class="lvl">L7</span><span class="name">资产对账治理</span></div>
+      <div class="ops"><b>19.飞书资源↔M9账本双向溯源对账</b>：哈希比对识别修改/删除/新增，检测人为编辑真值漂移</div>
+    </div>
+    <div class="layer" style="border-left-color:#f97316">
+      <div class="head"><span class="lvl">L8</span><span class="name">安全确权</span></div>
+      <div class="ops"><b>20.eFuse熔断触发</b>：严重矛盾/篡改风险→局部分支隔离，不销毁数据 · <b>21.ZKP零知识隐私校验</b>：不暴露敏感数据完成账本完整性核验</div>
+    </div>
+    <div class="layer" style="border-left-color:#a3e635">
+      <div class="head"><span class="lvl">L9</span><span class="name">决策与法律护盾</span></div>
+      <div class="ops"><b>22.方案生成评估</b>：≥3套方案，三维稳态评估（利益40%/风险35%/成本25%）· <b>23.风险识别分级</b>：法律/财务/运营/声誉/技术/合规六类，概率×影响分级 · <b>24.法律意见书生成</b>：结构化意见书+法条引用</div>
+    </div>
+    <div class="layer" style="border-left-color:#5c6f96">
+      <div class="head"><span class="lvl">L10</span><span class="name">业务实体约束</span></div>
+      <div class="ops"><b>25.Lv6多主体文明仿真约束</b>：角色锚点防漂移，快照写MDAG · <b>26.角色元规则隔离校验</b>：杜绝武器形变/人设崩坏/属性泄露 · <b>27.关键帧一致性算子</b>：9:16电影级国风角色多轮生成不漂移</div>
+    </div>
+  </div>
+
+  <h2><span class="n">04</span> 执行要求</h2>
+  <div class="tbl">
+    <colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tr><th>约束项</th><th>规则</th></tr>
+    <tr><td>依赖顺序</td><td>严格按十层拓扑顺序执行，上游输出作为下游输入</td></tr>
+    <tr><td>高消耗算子</td><td>每日轻量模式，周度深度完整循环</td></tr>
+    <tr><td>CTE闭环</td><td>C→T→E→C 预激活，进化域唤醒后完全闭环</td></tr>
+    <tr><td>稳态决策</td><td>利益40% / 风险35% / 成本25%</td></tr>
+    <tr><td>锁档</td><td>三层锁档：云盘归档 / 知识库节点 / 内核快照</td></tr>
+  </div>
+
+  <footer>
+    <div>火斗云智AIOS 技术白皮书矩阵 · WP-003</div>
+    <div class="lockline">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · NODE-DEV-DOUBAO-WORK-001</div>
+  </footer>
+</div>
+
+<script>
+  const mk=(id)=>echarts.init(document.getElementById(id));
+  const COLORS=['#4fc3f7','#a78bfa','#6ee7b7','#ffc857','#ff6b6b','#3b82f6','#14b8a6','#f97316','#a3e635','#5c6f96'];
+  const L=['L1 真值过滤蒸馏','L2 流形度量映射','L3 知识图谱重建','L4 因果级推理','L5 CTE适配器流转','L6 结构化归档','L7 资产对账治理','L8 安全确权','L9 决策法律护盾','L10 业务实体约束'];
+  const OPS=['P4对账·P7锚定·蒸馏','黎曼度量·SM-BS映射·漂移','实体抽取·图谱补全·实体链接','因果溯源·奇点预测·干预','C2T·T2E·E2C','四层拆分·九元类·Merkle','飞书↔账本对账','eFuse熔断·ZKP校验','方案评估·风险分级·法律意见','仿真约束·角色隔离·帧一致性'];
+  mk('chartTopo').setOption({
+    tooltip:{trigger:'item', triggerOn:'click', renderMode:'richText', confine:true, backgroundColor:'#0b1224', borderColor:'#2a3a66', textStyle:{color:'#e8eefc',fontSize:12}},
+    series:[{type:'sunburst',
+      radius:['12%','92%'], center:['50%','50%'],
+      sort:null,
+      label:{color:'#e8eefc', fontSize:10.5},
+      levels:[
+        {r0:'12%', r:'38%', itemStyle:{borderColor:'#0e1730',borderWidth:2}, label:{fontSize:11, fontWeight:'bold'}},
+        {r0:'38%', r:'65%', label:{fontSize:10}},
+        {r0:'65%', r:'92%', label:{fontSize:9, rotate:0}}
+      ],
+      data: L.map((n,i)=>({name:n, itemStyle:{color:COLORS[i]}, children:OPS[i].split('·').map(o=>({name:o, value:10, itemStyle:{color:COLORS[i], opacity:.55}}))}))
+    }]
+  });
+  window.addEventListener('resize',()=>{chartTopo.resize()});
+</script>
+</body>
+</html>

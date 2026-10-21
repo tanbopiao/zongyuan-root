@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>三层固化 SOP</title>
+<style>
+body{margin:0;background:#0c0a08;color:#e8ddc8;font-family:"Noto Serif SC","Songti SC",serif;line-height:1.8}
+.wrap{max-width:960px;margin:0 auto;padding:48px 20px 80px}
+header{border-bottom:1px solid #3d3326;padding-bottom:24px;margin-bottom:40px}
+h1{font-size:34px;margin:0 0 8px;color:#e4c879;letter-spacing:2px}
+.sub{color:#9a8a6a;font-size:14px}
+h2{color:#e4c879;font-size:20px;border-left:3px solid #b08d3a;padding-left:12px;margin:0 0 14px}
+.card{background:#14100c;border:1px solid #2c2318;padding:24px;margin-bottom:20px;border-radius:4px}
+.body{color:#d8cdb8;font-size:15px;white-space:pre-line}
+.tag{display:inline-block;background:#2a2114;color:#e4c879;border:1px solid #5a4422;padding:2px 12px;border-radius:20px;font-size:12px;margin-right:8px}
+footer{margin-top:40px;border-top:1px solid #3d3326;padding-top:16px;color:#7a6c52;font-size:13px;text-align:center}
+</style></head><body><div class="wrap">
+<header><h1>三层固化 SOP</h1><div class="sub">ZONGYUAN-ROOT 任务成果全域锁档标准流程</div>
+<p><span class="tag">DID-BR-000002</span><span class="tag">火斗云智AIOS</span><span class="tag">Ω₀⊂⊙∞⊂Ω</span></p></header>
+<section class="card"><h2>一、固化目标</h2><div class="body">每次任务完成后，成果必须三重落地：本地持久化 + 云端中枢上报 + 异地 Git 副本，任何一层缺失均判定任务未完成，确保资产多层次容灾、永不丢失。</div></section><section class="card"><h2>二、第一层·本地固化</h2><div class="body">① 更新 GLOBAL_MEMORY_SNAPSHOT.json 全域快照
+② 更新 memory_index.json 启动记忆（asset_entries 递增 + Merkle 根重算）
+③ 更新 AGENTS.md / BOOTSTRAP.md 持久规则
+④ 新增资产按四层结构化（元数据/内容/关系/真值）归档</div></section><section class="card"><h2>三、第二层·云端固化</h2><div class="body">① 提炼核心真值 POST 记忆网关 https://www.huodouai.com/api/report/truth（Header X-DID: DID-BR-000002，body value 字段 JSON 对象，truth_type 九类枚举，禁 content 旧字段）
+② 成功标志：status=reported 且 written_to_gateway=true，实测 HTTP 200
+③ 备用端点：https://drama.huodouai.com/api/report/truth（主失败自动切换）</div></section><section class="card"><h2>四、第三层·Git 固化</h2><div class="body">① 提交推送 Gitee（huodou-cloud-intelligence-aios/zongyuan-root-sync，国内镜像优先）
+② 提交推送 GitHub（tanbopiao/zongyuan-root-sync，兜底）
+③ 三端 HEAD 实测一致（git ls-remote 验证）
+④ 魔搭数据湖同步（zongyuanroot 数据集 master 分支）</div></section><section class="card"><h2>五、验收标准</h2><div class="body">① 快照/账本有本次成果留痕
+② 网关返回 ok:true 且 truth_count 递增
+③ 三端 Git HEAD 一致
+④ 对外部署页面 curl HTTP 200</div></section><section class="card"><h2>六、修订约束</h2><div class="body">三层固化属元规则级（META-RULE），修改须人工审批；固化过程零成本优先，付费操作熔断。</div></section>
+<footer>SOP-TRIPLE-LOCK-V1.0 | 2026-10-10<br>ZONGYUAN-ROOT · 元极恒一自治体系 · </footer>
+</div></body></html>

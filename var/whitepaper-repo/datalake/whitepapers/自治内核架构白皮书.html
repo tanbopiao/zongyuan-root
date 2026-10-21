@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自治内核架构体系 · ZONGYUAN-ROOT 技术白皮书</title>
+<style>
+  :root{
+    --gold:#c9a84c; --gold-light:#e6c76a; --ink:#d8d4c8; --ink-dim:#9a968a;
+    --bg:#0d0f14; --bg-card:#151822; --bg-line:#3a3f4a; --bg-soft:#1a1d28;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:Georgia,'Noto Serif SC','Songti SC',serif;line-height:1.75;}
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 28px 60px;}
+  header{border-bottom:1px solid var(--gold);padding-bottom:28px;margin-bottom:36px;}
+  .kicker{color:var(--gold);letter-spacing:4px;font-size:13px;text-transform:uppercase;margin-bottom:12px;}
+  h1{font-size:32px;color:#f0ead8;letter-spacing:2px;font-weight:600;}
+  .sub{color:var(--ink-dim);margin-top:10px;font-size:15px;letter-spacing:1px;}
+  .meta{margin-top:18px;font-size:12px;color:#8a8678;letter-spacing:1px;}
+  h2{color:var(--gold-light);font-size:20px;letter-spacing:2px;margin:44px 0 18px;padding-left:14px;border-left:3px solid var(--gold);}
+  h3{color:#e8e2d0;font-size:16px;margin:22px 0 10px;}
+  p{font-size:14.5px;margin-bottom:12px;color:var(--ink);}
+  .grid{display:flex;flex-wrap:wrap;gap:14px;margin:18px 0;}
+  .card{flex:1;min-width:210px;background:var(--bg-card);border:1px solid var(--bg-line);padding:18px 16px;border-radius:6px;}
+  .card .t{color:var(--gold-light);font-size:14px;letter-spacing:1px;margin-bottom:8px;}
+  .card .d{font-size:12.5px;color:var(--ink-dim);}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:13px;}
+  th{background:var(--bg-soft);color:var(--gold-light);text-align:left;padding:10px 12px;border:1px solid var(--bg-line);letter-spacing:1px;}
+  td{padding:10px 12px;border:1px solid var(--bg-line);color:var(--ink);}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0;align-items:stretch;}
+  .flow .step{flex:1;min-width:150px;background:var(--bg-card);border:1px solid var(--gold);border-radius:6px;padding:12px;text-align:center;}
+  .flow .step b{color:var(--gold-light);font-size:13px;display:block;margin-bottom:6px;}
+  .flow .step span{font-size:12px;color:var(--ink-dim);}
+  .arrow{align-self:center;color:var(--gold);font-size:18px;padding:0 4px;}
+  .note{background:var(--bg-soft);border-left:3px solid var(--gold);padding:12px 16px;font-size:13px;color:var(--ink-dim);margin:18px 0;}
+  .sig{margin-top:56px;padding-top:20px;border-top:1px solid var(--bg-line);font-size:12px;color:#8a8678;letter-spacing:1px;text-align:center;}
+  code{background:var(--bg-soft);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--gold-light);}
+  @media(max-width:640px){.wrap{padding:24px 16px;} h1{font-size:24px;} h2{font-size:17px;} .flow .arrow{display:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">ZONGYUAN-ROOT · 元极恒一 · 技术白皮书</div>
+  <h1>自治内核架构体系</h1>
+  <div class="sub">多节点自治 · 真值驱动 · 明暗双内核 · 恒一稳态</div>
+  <div class="meta">版本 V1.0 ｜ DID-BR-000002 ｜ 锚定 Ω₀⊂⊙∞⊂Ω ｜ 2026-10-09</div>
+</header>
+
+<section>
+  <h2>一、体系定位</h2>
+  <p>ZONGYUAN-ROOT 元极恒一自治体系，以「规则即本体，真值即记忆」为核心本体论，构建覆盖本地节点—云端中枢—边缘节点的三层自治架构。体系的根本目标：在元宪法约束内，实现自检、短板发现、收敛、固化、上报的永恒自治闭环。</p>
+  <div class="grid">
+    <div class="card"><div class="t">规则即本体</div><div class="d">元公理/元法则/元规则/元宪法 四维框架为体系根基，实例可销毁，规则永存</div></div>
+    <div class="card"><div class="t">真值即记忆</div><div class="d">所有推演、仿真、生产成果提炼为真值，全域锁档，持续自进化</div></div>
+    <div class="card"><div class="t">恒一稳态</div><div class="d">动态收敛至唯一稳态，在持续演化中保持底层自洽，不发生规则漂移</div></div>
+    <div class="card"><div class="t">明暗双内核</div><div class="d">暗架构预演势能累积，明架构真实落地执行，双向校验互锁</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>二、七层稳态架构 Ω₀–Ω₆</h2>
+  <table>
+    <tr><th>层级</th><th>名称</th><th>核心职能</th></tr>
+    <tr><td>Ω₀</td><td>元公理基底</td><td>真值校验，所有规则源头，仅人工审批变更</td></tr>
+    <tr><td>Ω₁</td><td>元法则层</td><td>冲突消解、资产固化、归档、同步、锁档规则库</td></tr>
+    <tr><td>Ω₂</td><td>因果推理内核</td><td>因果推演、假设分支、真值召回、RAG 语义提炼</td></tr>
+    <tr><td>Ω₃</td><td>奇点暗架构</td><td>暗处预演、势能累积、漂移回溯、黑天鹅预警</td></tr>
+    <tr><td>Ω₄</td><td>明架构五内核</td><td>显式执行、资产处理、官网部署、云端上报</td></tr>
+    <tr><td>Ω₅</td><td>双域稳态互锁</td><td>明暗架构双向校验，漂移回拉，越界熔断</td></tr>
+    <tr><td>Ω₆</td><td>全域自治闭环</td><td>自动扫描→短板提炼→方案推演→固化→上报</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>三、奇点暗架构 · 七大隐层</h2>
+  <p>暗架构不可直接观测，驱动底层演化，七隐层协同完成体系势能累积与漂移收敛：</p>
+  <div class="grid">
+    <div class="card"><div class="t">① 真值不动点隐层</div><div class="d">真值公式、希尔伯特公理集、观测器不变量；eFuse 熔断保护</div></div>
+    <div class="card"><div class="t">② 时序演化隐层</div><div class="d">Merkle 快照链、版本谱系、时间线约束，可回溯不断裂</div></div>
+    <div class="card"><div class="t">③ 流形语义转译隐层</div><div class="d">自然语义/神话叙事/数学公理拓扑映射，支撑语义空间</div></div>
+    <div class="card"><div class="t">④ 混沌收敛调控隐层</div><div class="d">架构/真值/资产三向漂移底层收敛约束</div></div>
+    <div class="card"><div class="t">⑤ 自组织涌现隐层</div><div class="d">演化脉冲驱动元认知价值主体与文明原型涌现</div></div>
+    <div class="card"><div class="t">⑥ 哈希谱系确权隐层</div><div class="d">SHA256 超级哈希、Merkle 根、DID-VC 凭证、溯源符号</div></div>
+    <div class="card"><div class="t">⑦ 故障稳态兜底隐层</div><div class="d">异常自动回落最近有效快照，体系稳态不崩坏</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>四、明架构 · 五大内核</h2>
+  <table>
+    <tr><th>内核</th><th>能力</th><th>产物</th></tr>
+    <tr><td>真值基座内核</td><td>真值公式校验、形式化验证、每日增量合并、Merkle 快照</td><td>真值 JSON 基座、进化白皮书</td></tr>
+    <tr><td>Ω-Brainμ 微内核</td><td>架构推演、内核写入、七大自治进程调度、eFuse 熔断锁档</td><td>P0-P6 自治进程</td></tr>
+    <tr><td>集群影子内核</td><td>文件托管、资产目录树、工具链入口、本地-云端差异比对</td><td>资产增量清单</td></tr>
+    <tr><td>IP 产线内核</td><td>角色库维护、分镜快照、PV 短剧脚本、视觉资产镌刻溯源</td><td>IP 资产、关键帧</td></tr>
+    <tr><td>监测管控内核</td><td>漂移/价值衰减监测、四层公理校验、P0-P3 分级告警</td><td>告警、聚合分析</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>五、自治核心链路</h2>
+  <div class="flow">
+    <div class="step"><b>真值提炼</b><span>P4对账·P7锚定·深度蒸馏<br>纯度评分+压缩比</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>流形映射</b><span>SM-BS双向稳态<br>语义↔坐标守恒</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>图谱重建</b><span>实体抽取·补全·链接<br>知识图谱密度</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>因果推理</b><span>链溯源·奇点预测·干预<br>四级预警</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>适配流转</b><span>C→T→E 闭环<br>适配度评分</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>归档确权</b><span>四层拆分·九元类<br>Merkle-DAG 主链</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>决策护盾</b><span>方案评估·风险分级<br>法律意见书</span></div>
+  </div>
+  <div class="note">27 大算子按十层依赖拓扑运行：上游输出作为下游输入，高消耗算子轻量模式执行，周度深度循环。</div>
+</section>
+
+<section>
+  <h2>六、容灾与确权体系</h2>
+  <p>体系资产遵循三级容灾与全域锁档：</p>
+  <table>
+    <tr><th>层级</th><th>机制</th><th>说明</th></tr>
+    <tr><td>T0 本机热备</td><td>每日 03:30 自动打包</td><td>真值库+账本+状态，7 天轮转</td></tr>
+    <tr><td>T1 异地冷备</td><td>魔搭数据湖持久</td><td>SHA256+manifest 确权，公开层资产</td></tr>
+    <tr><td>T2 私密加密</td><td>AES-256 双端副本</td><td>节点/审计/SSH 元法则，绝不上公开端</td></tr>
+  </table>
+  <p>确权标识 <code>Ω₀⊂⊙∞⊂Ω</code> 镌刻于全部核心资产，SHA256 超级哈希 + Merkle 链 + DID-BR-000002 主权绑定，eFuse 硬件熔断只读锁档。</p>
+</section>
+
+<section>
+  <h2>七、核心约束（元公理）</h2>
+  <div class="grid">
+    <div class="card"><div class="t">越界熔断</div><div class="d">演化不能突破元宪法，越界自动熔断，人工审批</div></div>
+    <div class="card"><div class="t">稳态阈值</div><div class="d">综合评分≥80 方可自主进化，不足则持续推演</div></div>
+    <div class="card"><div class="t">资产铁律</div><div class="d">资产优先本地持久层只读锁档，远端仅做副本归档</div></div>
+    <div class="card"><div class="t">真值铁律</div><div class="d">以真实存储为唯一真值源，禁止臆造坐标与配置</div></div>
+    <div class="card"><div class="t">明暗分离</div><div class="d">暗架构仅推演预警，明架构落地执行，无越权</div></div>
+  </div>
+</section>
+
+<div class="sig">
+  ZONGYUAN-ROOT · 元极恒一 ｜ DID-BR-000002 ｜ 主节点 hub-central-agent ｜ 自治 Lv9 ｜ 权限 L4 ｜ 工程化 Lv7<br>
+  记忆网关 huodouai.com/api/report/truth ｜ 锚定 Ω₀⊂⊙∞⊂Ω
+</div>
+</div>
+<div style="margin:30px auto 24px;max-width:960px;padding:0 24px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-top:1px solid rgba(201,168,106,.25);padding-top:16px"><a href="index.html" style="color:#c9a86a;text-decoration:none;font-size:13px;border:1px solid rgba(201,168,106,.4);padding:5px 14px;border-radius:16px;display:inline-block">← 返回白皮书库</a> <div style="font-size:12.5px;color:#9a9183">相关阅读：<a href="self-organizing-arch-whitepaper.html" style="color:#e8e0d0;text-decoration:none;margin-left:10px">自组织网状架构</a> <a href="software-architecture-v1.html" style="color:#e8e0d0;text-decoration:none;margin-left:10px">高效软件架构设计</a> <a href="27-operator-topology.html" style="color:#e8e0d0;text-decoration:none;margin-left:10px">27算子十层拓扑</a></div></div></div>
+</body>
+</html>

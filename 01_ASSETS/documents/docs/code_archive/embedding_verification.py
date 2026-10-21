@@ -442,7 +442,7 @@ if __name__ == '__main__':
         print(f"    计算时间: {r['computation_time']:.2f}s")
     
     # 保存
-    output_path = "/home/user/Doubao/chats/38439832899843586/high_dim_anchor/stage2/results/embedding_verification_results.json"
+    output_path = "/opt/ZONGYUAN-ROOT/high_dim_anchor/stage2/results/embedding_verification_results.json"
     verifier.save(output_path)
     print(f"\n✅ 结果已保存: {output_path}")
     print("\n✅ 模块4测试通过！")

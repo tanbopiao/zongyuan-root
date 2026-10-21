@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WP-006 · 数据湖持久层技术白皮书 · V2.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23070b16'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='%23ffc857' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='2.4' fill='%234fc3f7'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0b1224; --card:#0e1730; --card2:#121c38;
+    --line:#1e2a4d; --line2:#2a3a66;
+    --txt:#e8eefc; --sub:#8fa3c8; --dim:#5c6f96;
+    --gold:#ffc857; --cyan:#4fc3f7; --violet:#a78bfa; --red:#ff6b6b; --green:#6ee7b7;
+    --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:
+    radial-gradient(1200px 500px at 80% -10%, rgba(79,195,247,.08), transparent 60%),
+    radial-gradient(900px 400px at -10% 20%, rgba(167,139,250,.07), transparent 55%),
+    var(--bg);
+    color:var(--txt); font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    line-height:1.7; min-height:100vh}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+
+  .doc-head{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  .doc-head .wpnum{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.14em}
+  .doc-head h1{font-size:26px;font-weight:800;margin:8px 0 6px}
+  .doc-head .meta{font-size:12px;color:var(--dim);display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+  .doc-head .meta b{color:var(--sub);font-weight:500}
+
+  h2{font-size:18px;font-weight:800;margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+  h2 .n{color:var(--gold);font-family:var(--mono);font-size:13px;border:1px solid var(--line2);border-radius:6px;padding:2px 9px}
+  h3{font-size:14px;font-weight:700;color:var(--cyan);margin:18px 0 8px}
+  p{font-size:13.5px;color:var(--sub);margin-bottom:8px}
+  p b{color:var(--txt)}
+
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:12px 0;table-layout:fixed}
+  .tbl th{color:var(--sub);font-weight:500;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  .tbl td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--txt);vertical-align:top}
+  .tbl .mono{font-family:var(--mono);color:var(--cyan);font-size:11.5px}
+  .tbl td b{color:var(--gold)}
+
+  .chartbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+  .chart{width:100%;height:300px}
+
+  .callout{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line2);border-left:4px solid var(--cyan);border-radius:10px;padding:16px 18px;margin:16px 0;font-size:13px;color:var(--sub)}
+  .callout b{color:var(--cyan)}
+
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:11.5px;color:var(--dim)}
+  .lockline{font-family:var(--mono);color:var(--gold);font-size:11px}
+  .back{display:inline-block;margin-bottom:20px;font-size:12px;color:var(--cyan);text-decoration:none;border:1px solid var(--line2);padding:4px 14px;border-radius:8px}
+  .back:hover{background:rgba(79,195,247,.08)}
+
+  @media(max-width:620px){
+    .doc-head h1{font-size:21px}
+    .wrap{padding:20px 12px 48px}
+    .tbl{font-size:11.5px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 返回白皮书矩阵</a>
+
+  <div class="doc-head">
+    <div class="wpnum">WP-006 · DATA LAKE · 工程实现</div>
+    <h1>数据湖持久层技术白皮书 · V2.0</h1>
+    <div class="meta">
+      <span>版本：<b>V2.0</b></span>
+      <span>日期：<b>2026-09-30</b></span>
+      <span>确权：<b>DID-BR-000002</b></span>
+      <span>锚定：<b>Ω₀⊂⊙∞⊂Ω</b></span>
+      <span>绑定：<b>BINDING-LAKE-ACCOUNT-001</b></span>
+      <span>路径：<b>DATA-LAKE-PERSIST/</b></span>
+    </div>
+  </div>
+
+  <h2><span class="n">01</span> 摘要</h2>
+  <p>本白皮书阐述体系资产<b>本地持久化数据湖</b>工程实现——将本地持久层与账号持久层永久绑定固化，全部资产按业务域分类归档。核心能力：<b>全量登记、SHA256指纹确权、Merkle账本、自动归档钩子、双副本同步、定时巡检</b>。</p>
+
+  <div class="callout"><b>核心声明：</b>素材/缓存/临时向量库属于运行实例（沙盒重启自动销毁），四维规则与数据湖资产永久存续，每次启动自动重建基准并加载数据湖。</div>
+
+  <h2><span class="n">02</span> 数据湖架构</h2>
+  <div class="chartbox">
+    <h3>11业务域资产分布（2954文件 · 1993.9MB）</h3>
+    <div id="chartLake" class="chart"></div>
+  </div>
+
+  <h2><span class="n">03</span> 业务域分类规则</h2>
+  <div class="tbl">
+    <colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+    <tr><th>业务域</th><th>路径规则 / 内容</th></tr>
+    <tr><td class="mono">kunlun-drama</td><td>1128121028098 等会话目录 → 昆仑洞天短剧资产</td></tr>
+    <tr><td class="mono">kunlun-media-archive</td><td>media_archive / 05_ARCHIVE → 媒体归档库</td></tr>
+    <tr><td class="mono">zongyuan-gallery</td><td>media-gallery → 体系媒体画廊</td></tr>
+    <tr><td class="mono">zongyuan-assets</td><td>01_ASSETS / 01_核心资产 → 核心资产</td></tr>
+    <tr><td class="mono">zongyuan-projects</td><td>04_PROJECTS / 04_媒体资产 → 项目资产</td></tr>
+    <tr><td class="mono">doubao-assets</td><td>Doubao/ASSETS → 豆包资产</td></tr>
+    <tr><td class="mono">kernel-archive</td><td>.zongyuan_root → 内核归档</td></tr>
+    <tr><td class="mono">zongyuan-root</td><td>ZONGYUAN-ROOT → 体系根资产</td></tr>
+    <tr><td class="mono">misc</td><td>未匹配 → 待归类（已细分至1项）</td></tr>
+  </div>
+
+  <h2><span class="n">04</span> 确权与账本</h2>
+  <div class="tbl">
+    <colgroup><col style="width:42%"><col style="width:58%"></colgroup>
+    <tr><th>项目</th><th>值</th></tr>
+    <tr><td>账本根哈希</td><td class="mono">DE3897EB35F312ED...</td></tr>
+    <tr><td>账号持久层 root_hash</td><td class="mono">965C182CD6D10A...</td></tr>
+    <tr><td>媒体三层锁档</td><td>22项 · 根哈希 7F27B490...</td></tr>
+    <tr><td>锁档策略</td><td>账本/凭证 RO-444 只读 · 登记层 644 活文档</td></tr>
+    <tr><td>双副本</td><td>Gitee + GitHub 文本内核同步</td></tr>
+    <tr><td>定时巡检</td><td>每小时自动归档（cron 0 * * * *）</td></tr>
+  </div>
+
+  <h2><span class="n">05</span> 自动归档钩子</h2>
+  <div class="formula">--add 单资产登记 / --refresh 全量重扫 / --text-add 文本内核登记 / --text-refresh 文本扫描</div>
+  <p>钩子 v1.0 支持媒体与文本双轨登记，classify() 自动映射业务域，>50MB 不计算 sha256，增量写入 MANIFEST 与 REGISTRY。</p>
+
+  <footer>
+    <div>火斗云智AIOS 技术白皮书矩阵 · WP-006</div>
+    <div class="lockline">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · NODE-DEV-DOUBAO-WORK-001</div>
+  </footer>
+</div>
+
+<script>
+  const mk=(id)=>echarts.init(document.getElementById(id));
+  const SUB='#8fa3c8', GOLD='#ffc857', CYAN='#4fc3f7';
+  const doms=['kunlun-drama','zongyuan-session-assets','kunlun-media-archive','zongyuan-gallery','zongyuan-assets','doubao-assets','agent-runtime','kernel-archive','zongyuan-projects','zongyuan-root','misc'];
+  const files=[1096,989,455,151,78,57,51,36,32,8,1];
+  mk('chartLake').setOption({
+    tooltip:{trigger:'axis', triggerOn:'click', renderMode:'richText', confine:true, backgroundColor:'#0b1224', borderColor:'#2a3a66', textStyle:{color:'#e8eefc',fontSize:12}},
+    grid:{left:8,right:30,top:20,bottom:8,containLabel:true},
+    xAxis:{type:'value', splitLine:{lineStyle:{color:'#182242'}}, axisLabel:{color:SUB,fontSize:10}},
+    yAxis:{type:'category', inverse:true, data:doms, axisLabel:{color:SUB,fontSize:10.5}},
+    series:[{type:'bar', data:files, barWidth:13,
+      itemStyle:{color:new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#1e3a5f'},{offset:1,color:CYAN}]),borderRadius:[0,6,6,0]},
+      label:{show:true,position:'right',color:'#e8eefc',fontSize:10.5,fontFamily:'monospace'}}]
+  });
+  window.addEventListener('resize',()=>{chartLake.resize()});
+</script>
+</body>
+</html>

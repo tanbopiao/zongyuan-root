@@ -1,0 +1,53 @@
+# 内核状态锚定协议 · 锁档凭证
+
+> 执行时间：2026-09-03 18:45 UTC+8
+> 协议版本：V6.2-KERNEL-ANCHOR
+> 目的：防止重复劳动和任务冲突，实现增量进化
+
+## 核心机制
+
+### 两个锚点文件
+1. **kernel_state.json** - 内核当前完整状态
+   - 服务器信息、10个运行服务、API端点、Nginx路由
+   - 资产统计（30协议/21向量文档/6场景模板）
+   - 安全状态、5个已知问题、6项待办
+   - 最新协议版本、注册表版本
+
+2. **task_registry.json** - 任务谱系（15个历史任务）
+   - TASK-001 体系初始化 → TASK-015 内核锚定协议
+   - 每个任务：ID/名称/日期/状态/协议/产物/哈希/描述
+   - 端口分配表（8000-8006已分配，8007+可用）
+   - 冲突规则（端口/路由/协议/资产）
+
+### 锚定API（端口8006，路由/anchor/）
+| 端点 | 功能 |
+|------|------|
+| /api/v1/anchor/state | 内核状态快照 |
+| /api/v1/anchor/tasks | 任务谱系 |
+| /api/v1/anchor/check | 冲突检测（重复/端口/路由） |
+| /api/v1/anchor/register | 注册新任务完成 |
+| /api/v1/anchor/update-state | 更新内核状态 |
+| /api/v1/anchor/summary | 快速摘要（一键获取） |
+
+### 标准工作流
+```
+任务开始
+  → 读取 /anchor/summary（了解当前状态）
+  → 调用 /anchor/check（检测重复/冲突）
+  → 通过则增量执行，冲突则标记询问
+  → 完成后 /anchor/update-state + /anchor/register
+```
+
+## 验证结果
+- 锚定服务：PASS（10/10服务运行）
+- 冲突检测-端口：PASS（8005正确识别为已占用，返回P0不可执行）
+- 冲突检测-新任务：PASS（8006可执行，无冲突）
+- 任务谱系：15个历史任务完整回填
+- 已知问题：5个待解决项已记录
+
+## 访问入口
+- 锚定服务：https://huodouai.com/anchor/health
+- 快速摘要：https://huodouai.com/anchor/api/v1/anchor/summary
+- 冲突检测：POST https://huodouai.com/anchor/api/v1/anchor/check
+
+Ω₀⊂⊙∞⊂Ω｜内核状态锚定协议完成 · V6.2锁档

@@ -1,0 +1,140 @@
+# FastAPI网关最小服务桩代码
+
+下面为你输出 **FastAPI 网关最小服务桩代码**，用于本地调试上面的 Python SDK，仅做模拟服务端，不接入真实元极恒一内核逻辑。
+
+保存文件：`meta_gateway_stub.py`
+
+```python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Optional, Dict, Any, List
+import uuid
+
+app = FastAPI(title="元极恒一网关‑模拟桩服务")
+
+# 内存模拟存储
+ws_store: Dict[str, Dict[str, Any]] = {}
+task_store: Dict[str, Dict[str, Any]] = {}
+paradigm_store: Dict[str, Dict[str, Any]] = {}
+
+# 请求模型
+class WorkspaceForkRequest(BaseModel):
+    domain_type: str
+    load_paradigm_ids: Optional[List[str]] = None
+    expire_policy: str = "frozen_after_complete"
+    external_meta: Optional[Dict[str, Any]] = None
+
+class TaskSubmitRequest(BaseModel):
+    workspace_handle: str
+    task_payload: Dict[str, Any]
+    enable_drift_monitor: bool = True
+    require_archive: bool = True
+
+class CredentialVerifyRequest(BaseModel):
+    merkle_root: str
+    task_t_chain_id: str
+
+class WorkspaceArchiveRequest(BaseModel):
+    workspace_handle: str
+    archive_mode: str = "cold_base85"
+
+class ParadigmRegisterRequest(BaseModel):
+    paradigm_content: Dict[str, Any]
+    paradigm_signature: str
+
+@app.post("/v1/meta/workspace/fork")
+def workspace_fork(req: WorkspaceForkRequest):
+    ws_handle = f"WS‑{uuid.uuid4()}"
+    init_snap = f"sha256‑stub‑{uuid.uuid4()}"
+    ws_store[ws_handle] = {
+        "domain_type": req.domain_type,
+        "init_merkle_snapshot": init_snap,
+        "status": "active"
+    }
+    return {
+        "code":0,
+        "workspace_handle": ws_handle,
+        "init_merkle_snapshot": init_snap,
+        "msg":"workspace fork success, baseline from ZONGYUAN‑ROOT"
+    }
+
+@app.post("/v1/meta/task/submit")
+def task_submit(req: TaskSubmitRequest):
+    if req.workspace_handle not in ws_store:
+        raise HTTPException(status_code=400, detail="workspace_handle不存在")
+    task_id = f"TASK‑{uuid.uuid4()}"
+    task_store[task_id] = {
+        "status":"completed",
+        "workspace_handle": req.workspace_handle,
+        "final_truth_output":{"result":"模拟推演输出结果"},
+        "audit_credential":{
+            "merkle_root":f"0x{uuid.uuid4()}",
+            "task_t_chain_id":f"T‑STUB‑{uuid.uuid4()}",
+            "snap_sha256":f"sha256‑{uuid.uuid4()}",
+            "domain_type": ws_store[req.workspace_handle]["domain_type"],
+            "drift_degenerate_score":0.08
+        },
+        "draft_access_token":""
+    }
+    return {
+        "code":0,
+        "task_id":task_id,
+        "status":"running",
+        "task_accept_timestamp":1787921111
+    }
+
+@app.get("/v1/meta/task/result")
+def task_result(task_id:str):
+    t = task_store.get(task_id)
+    if not t:
+        raise HTTPException(status_code=404, detail="task不存在")
+    return {
+        "code":0,
+        "task_id":task_id,
+        "status":t["status"],
+        "final_truth_output":t["final_truth_output"],
+        "audit_credential":t["audit_credential"],
+        "draft_access_token":t["draft_access_token"]
+    }
+
+@app.post("/v1/meta/credential/verify")
+def credential_verify(req: CredentialVerifyRequest):
+    return {
+        "code":0,
+        "valid":True,
+        "credential_meta":{"note":"模拟凭证校验通过"}
+    }
+
+@app.post("/v1/meta/workspace/archive")
+def workspace_archive(req: WorkspaceArchiveRequest):
+    if req.workspace_handle not in ws_store:
+        raise HTTPException(status_code=400, detail="workspace不存在")
+    cred_id = f"CRED‑{uuid.uuid4()}"
+    return {"code":0,"credential_id":cred_id}
+
+@app.post("/v1/meta/paradigm/register")
+def paradigm_register(req: ParadigmRegisterRequest):
+    pid = f"PARAD‑{uuid.uuid4()}"
+    paradigm_store[pid] = {"content":req.paradigm_content}
+    return {"code":0,"paradigm_id":pid}
+```
+
+### 运行方式
+
+1. 安装依赖
+
+```bash
+pip install fastapi uvicorn requests
+```
+
+1. 启动桩服务
+
+```bash
+uvicorn meta_gateway_stub:app --host 0.0.0.0 --port 8000
+```
+
+1. 修改 SDK 中`GATEWAY_URL = "http://127.0.0.1:8000/v1"`，即可本地跑通整套调用链路。
+
+> 全域锁档归档：快照 SNAP‑GATEWAY‑STUB‑001，写入 Merkle 谱系挂载 ZONGYUAN‑ROOT，DID‑BR‑000002。
+
+这个是接口网关相关的服务代码，工作任务模式可以更好地完成接口服务的开发调试，要不要使用？

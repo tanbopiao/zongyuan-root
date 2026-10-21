@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT 资源账单看板</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='4' fill='%230a0e17'/><text x='12' y='17' font-size='12' text-anchor='middle' fill='%238ab4ff' font-family='monospace'>Ω</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0e17;color:#d7dee9;font-family:-apple-system,'PingFang SC','Microsoft YaHei',system-ui,sans-serif;line-height:1.6;padding:24px;max-width:1400px;margin:0 auto}
+.header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;padding-bottom:16px;border-bottom:1px solid #1e2a3a;margin-bottom:20px}
+h1{font-size:22px;color:#f0f4fa;font-weight:700;letter-spacing:0.5px}
+.sub{color:#7c8aa0;font-size:13px;margin-top:6px}
+.tag{color:#8ab4ff;font-size:12px;border:1px solid #2a3f66;padding:4px 10px;border-radius:4px;background:#0f1826}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.metric{background:#111a2a;border:1px solid #1e2a3a;border-radius:8px;padding:16px}
+.metric .num{font-size:28px;font-weight:700;color:#e8eef7}
+.metric .lbl{font-size:12px;color:#7c8aa0;margin-top:4px}
+.metric .hint{font-size:11px;color:#55627a;margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.card{background:#111a2a;border:1px solid #1e2a3a;border-radius:8px;padding:16px}
+.card h3{font-size:14px;color:#c3d2e8;margin-bottom:10px;font-weight:600}
+.card .src{font-size:11px;color:#55627a;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:#8ab4ff;font-weight:600;padding:8px 10px;border-bottom:1px solid #1e2a3a;background:#0e1726}
+td{padding:8px 10px;border-bottom:1px solid #141f31;color:#c3d2e8}
+.ok{color:#4ade80}
+.warn{color:#fbbf24}
+.muted{color:#55627a}
+.note{margin-top:20px;background:#0f1826;border:1px solid #1e2a3a;border-left:3px solid #8ab4ff;padding:14px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#a8b6cc}
+.foot{margin-top:28px;padding-top:14px;border-top:1px solid #1e2a3a;color:#55627a;font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
+.chart{width:100%;height:280px}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:900px){.table-wrap table{min-width:640px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>ZONGYUAN-ROOT 资源账单看板</h1>
+    <div class="sub">任务级资源消耗 · 聚合统计 · 复用去重提示 · 成本可审计</div>
+  </div>
+  <div>
+    <div class="tag">DID-BR-000002</div>
+    <div class="tag" style="margin-top:6px">Ω₀⊂⊙∞⊂Ω</div>
+  </div>
+</div>
+
+<div class="metrics" id="metrics">
+  <div class="metric"><div class="num" id="m-tasks">—</div><div class="lbl">账单任务</div><div class="hint">resource-bill.jsonl</div></div>
+  <div class="metric"><div class="num" id="m-success">—</div><div class="lbl">成功率</div><div class="hint">code=0 占比</div></div>
+  <div class="metric"><div class="num" id="m-duration">—</div><div class="lbl">平均耗时</div><div class="hint">秒/任务</div></div>
+  <div class="metric"><div class="num" id="m-nodes">—</div><div class="lbl">参与节点</div><div class="hint">账单节点数</div></div>
+  <div class="metric"><div class="num" id="m-chain">—</div><div class="lbl">因果链记录</div><div class="hint">causality.jsonl</div></div>
+  <div class="metric"><div class="num" id="m-memory">—</div><div class="lbl">记忆条目</div><div class="hint">memory.jsonl</div></div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>任务耗时分布</h3>
+    <div class="chart" id="chart-duration"></div>
+    <div class="src">数据源：msagent-resource-bill.jsonl 真实记录</div>
+  </div>
+  <div class="card">
+    <h3>因果链阶段分布</h3>
+    <div class="chart" id="chart-chain"></div>
+    <div class="src">数据源：msagent-causality.jsonl 175 条真实记录</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:20px">
+  <h3>任务级账单明细（真实数据）</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>任务ID</th><th>节点</th><th>命令</th><th>策略</th><th>耗时(s)</th><th>结果</th></tr></thead>
+    <tbody id="bill-rows"></tbody>
+  </table>
+  </div>
+</div>
+
+<div class="note">
+  <strong>数据现状：</strong>resource-bill 当前为 2 条真实测试记录（BILL-TEST / CANARY-TEST，均 success）。看板已接入真实数据链路，后续任务经 <code>bill_start / bill_end</code> 自动写入后将实时反映。聚合视图由真实账单与因果链台账驱动，无虚构数据。
+</div>
+
+<div class="foot">
+  <span>数据快照：2026-10-11｜账单 2 条 · 因果链 175 条 · 记忆 171 条</span>
+  <span>火斗云智AIOS · ZR-NODE-DC2E51C0 · 成本可审计闭环</span>
+</div>
+
+<script>
+(function(){
+  // 真实数据：云端 msagent-resource-bill.jsonl 完整内容
+  var bills = [
+    {task_id:"t-bill-", node:"ZR-NODE-TEST-BILL-001", cmd:"echo BILL-TEST-", policy:"reputation_first", start_ts:1791468539.729752, duration_s:6.166, code:0, result:"success", detail:""},
+    {task_id:"t-canary-1", node:"ZR-NODE-TEST-CANARY-001", cmd:"echo CANARY-TEST", policy:"capability_first", start_ts:1791626815.9327304, duration_s:18.092, code:0, result:"success", detail:""}
+  ];
+  // 因果链真实统计
+  var chain = [
+    {name:"done", value:171},
+    {name:"dispatched", value:4}
+  ];
+  var memoryCount = 171, chainTotal = 175;
+
+  // 指标卡
+  document.getElementById('m-tasks').textContent = bills.length;
+  var okN = bills.filter(function(b){return b.code===0}).length;
+  document.getElementById('m-success').textContent = (okN/bills.length*100).toFixed(0)+'%';
+  var avg = bills.reduce(function(s,b){return s+b.duration_s},0)/bills.length;
+  document.getElementById('m-duration').textContent = avg.toFixed(1);
+  var nodes = {};
+  bills.forEach(function(b){nodes[b.node]=1});
+  document.getElementById('m-nodes').textContent = Object.keys(nodes).length;
+  document.getElementById('m-chain').textContent = chainTotal;
+  document.getElementById('m-memory').textContent = memoryCount;
+
+  // 明细表
+  var tb = document.getElementById('bill-rows');
+  bills.forEach(function(b){
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+b.task_id+'</td><td>'+b.node+'</td><td class="muted">'+b.cmd+'</td><td>'+b.policy+'</td><td>'+b.duration_s.toFixed(1)+'</td><td class="ok">'+b.result+'</td>';
+    tb.appendChild(tr);
+  });
+
+  // 图表
+  function makeChart(id, opt){ var el=document.getElementById(id); if(!el||!window.echarts) return; var c=echarts.init(el); c.setOption(opt); window.addEventListener('resize',function(){c.resize()}); }
+
+  makeChart('chart-duration', {
+    backgroundColor:'transparent',
+    tooltip:{trigger:'item'},
+    series:[{
+      type:'bar', data:[{value:bills[0].duration_s,name:'BILL-TEST'},{value:bills[1].duration_s,name:'CANARY-TEST'}],
+      barWidth:48,
+      itemStyle:{color:function(p){return p.dataIndex===0?'#4ade80':'#8ab4ff'},borderRadius:[4,4,0,0]},
+      label:{show:true,position:'top',color:'#d7dee9',formatter:'{c}s'}
+    }],
+    xAxis:{type:'category',data:['t-bill-','t-canary-1'],axisLabel:{color:'#7c8aa0'},axisLine:{lineStyle:{color:'#1e2a3a'}}},
+    yAxis:{type:'value',name:'秒',nameTextStyle:{color:'#7c8aa0'},axisLabel:{color:'#7c8aa0'},splitLine:{lineStyle:{color:'#141f31'}}},
+    grid:{left:40,right:20,top:40,bottom:30}
+  });
+
+  makeChart('chart-chain', {
+    backgroundColor:'transparent',
+    tooltip:{trigger:'item',formatter:'{b}: {c} 条 ({d}%)'},
+    legend:{textStyle:{color:'#7c8aa0'},bottom:0},
+    series:[{
+      type:'pie', radius:['40%','68%'], center:['50%','45%'],
+      itemStyle:{borderColor:'#111a2a',borderWidth:2},
+      label:{color:'#c3d2e8',formatter:'{b} {c}条'},
+      data:[{name:'done 完成',value:171,itemStyle:{color:'#4ade80'}},{name:'dispatched 派发',value:4,itemStyle:{color:'#fbbf24'}}]
+    }]
+  });
+})();
+</script>
+</body>
+</html>

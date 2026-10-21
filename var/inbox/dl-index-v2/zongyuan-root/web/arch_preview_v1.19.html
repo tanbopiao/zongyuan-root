@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>元极恒一｜全域系统架构预览页 V1.19</title>
+<style>
+  :root{
+    --gold:#d4af37; --gold-dim:#8a7328; --purple:#9d7bff; --cyan:#4ecdc4;
+    --bg:#0d0f14; --bg2:#141821; --line:#242a36; --tx:#e8eaed; --tx2:#9aa3b2; --tx3:#6b7480;
+    --ok:#4ade80; --warn:#fbbf24; --bad:#f87171;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--tx);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 100px}
+  header{padding:56px 0 32px;border-bottom:1px solid var(--line);margin-bottom:40px;
+    background:radial-gradient(1200px 300px at 50% -80px, rgba(157,123,255,.10), transparent 70%)}
+  .kicker{font-size:11px;letter-spacing:.32em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:16px}
+  h1{font-size:32px;font-weight:600;letter-spacing:-.5px;line-height:1.25;margin-bottom:12px}
+  h1 em{font-style:normal;color:var(--gold)}
+  .sub{color:var(--tx2);font-size:14px;max-width:760px}
+  .ids{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;font-size:12px;font-family:ui-monospace,Menlo,monospace}
+  .ids div{color:var(--tx3)} .ids b{color:var(--cyan);font-weight:500}
+  .watermark{position:fixed;top:14px;right:18px;font-size:11px;letter-spacing:.18em;color:rgba(212,175,55,.22);
+    font-family:ui-monospace,monospace;pointer-events:none;user-select:none}
+  section{margin-bottom:48px;scroll-margin-top:24px}
+  h2{font-size:13px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;
+    padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:22px;display:flex;align-items:baseline;gap:12px}
+  h2 span{font-size:11px;color:var(--tx3);letter-spacing:0;text-transform:none}
+  .diagram{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:20px 16px;overflow-x:auto}
+  .grid{display:grid;gap:14px;margin:18px 0}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+  .card h4{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .card p{font-size:12.5px;margin:0;color:var(--tx2)}
+  .card .n{font-family:ui-monospace,Menlo,monospace;font-size:21px;font-weight:600;color:var(--gold);line-height:1.2;word-break:break-all}
+  .card .u{font-size:11px;color:var(--tx3);margin-left:4px}
+  .card .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-family:ui-monospace,monospace}
+  .ok{background:rgba(74,222,128,.13);color:var(--ok);border:1px solid rgba(74,222,128,.25)}
+  .warn{background:rgba(251,191,36,.13);color:var(--warn);border:1px solid rgba(251,191,36,.25)}
+  .mute{background:rgba(154,163,178,.1);color:var(--tx3);border:1px solid var(--line)}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--bg2);
+    border:1px solid var(--line);border-radius:4px;padding:1.5px 5px;color:var(--cyan)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:12.5px}
+  th{text-align:left;padding:9px 12px;background:var(--bg2);color:var(--tx3);font-weight:500;
+    font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--line)}
+  td{padding:9px 12px;border-bottom:1px solid rgba(36,42,54,.6);color:var(--tx2);vertical-align:top}
+  td:first-child{color:var(--tx);font-weight:500}
+  .num{font-family:ui-monospace,Menlo,monospace;text-align:right;white-space:nowrap}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0;padding:14px 16px;
+    background:var(--bg2);border:1px solid var(--line);border-radius:8px}
+  .step{font-size:12px;font-family:ui-monospace,monospace;color:var(--tx);
+    background:rgba(255,255,255,.04);padding:6px 11px;border-radius:5px;white-space:nowrap}
+  .arw{color:var(--tx3);font-size:13px}
+  .note{padding:14px 18px;background:rgba(157,123,255,.07);border-left:3px solid var(--purple);
+    border-radius:0 6px 6px 0;font-size:12.5px;color:var(--tx2);margin:16px 0}
+  .note b{color:var(--tx)}
+  .links{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0}
+  .links a{color:var(--cyan);text-decoration:none;border:1px solid rgba(78,205,196,.35);
+    background:rgba(78,205,196,.06);border-radius:7px;padding:9px 16px;font-size:12.5px;
+    font-family:ui-monospace,monospace;display:inline-flex;align-items:center;gap:7px}
+  .links a:hover{background:rgba(78,205,196,.13);border-color:var(--cyan)}
+  .links svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .foot{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--tx3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .foot code{font-size:11px}
+  a{color:var(--cyan);text-decoration:none;border-bottom:1px solid rgba(78,205,196,.3)}
+  @media(max-width:640px){ h1{font-size:25px} .watermark{display:none} table{font-size:11.5px} }
+</style>
+</head>
+<body>
+<div class="watermark">Ω₀ ⊂ ⊙ ∞ ⊂ Ω</div>
+<div class="wrap">
+
+<header>
+  <div class="kicker">ZONGYUAN · ARCHITECTURE PREVIEW · V1.19</div>
+  <h1>元极恒一｜<em>全域系统架构预览</em> V1.19</h1>
+  <p class="sub">火斗云智 AIOS 超认知永恒自治内核体系总览 —— 四层实体 · 五面拓扑 · 双内核联邦 · 锁档六环节 · 三级记忆 · 双向同步。本页全部数字取本机实测（2026-10-06），未实测项显式标注。</p>
+  <div class="ids">
+    <div>确权身份 <b>DID-BR-000002</b></div>
+    <div>架构根 <b>ONT-4D-UNIVERSAL-ROOT</b></div>
+    <div>锚定 <b>Ω₀⊂⊙∞⊂Ω</b></div>
+    <div>节点 <b>NODE-DEV-DOUBAO-WORK-001</b></div>
+    <div>基线 <b>V1.19 · 2026-10-06</b></div>
+  </div>
+</header>
+
+<!-- ════ 1 全域架构总图 ════ -->
+<section>
+  <h2>01 · 全域架构总图 <span>Mermaid 实时渲染</span></h2>
+  <div class="diagram">
+    <pre class="mermaid">
+flowchart TB
+    subgraph G0["Ω₀⊂⊙∞⊂Ω 元极恒一自治内核"]
+        direction TB
+        K["元极恒一超认知自治内核<br/>DID-BR-000002 ｜ ONT-4D-UNIVERSAL-ROOT"]
+        K --> A["L0 元宪法层<br/>不动点根层 · 不可覆盖"]
+        K --> B["L1 元公理层<br/>七公理 A1-A7 冻结版"]
+        K --> C["L2 元法则层<br/>336 条实体元法则"]
+        K --> D["L3 元规则层<br/>7 件执行层规则"]
+    end
+    subgraph G1["脑 × 手 双内核联邦"]
+        direction TB
+        BRAIN["脑 · 认知/审批/记忆/审计<br/>zongyuan-kernel"]
+        HAND["手 · 调度/归档/锁档/上报<br/>ZONGYUAN-ROOT"]
+        BRAIN <-->|"META-FUSION-001 逻辑联邦"| HAND
+    end
+    subgraph G2["五面拓扑"]
+        direction LR
+        F1["本机内核<br/>权威写入面"]
+        F2["云端资料库<br/>人读镜像面"]
+        F3["飞书Base共享大脑<br/>结构化台账面"]
+        F4["云端记忆网关<br/>huodouai.com 仲裁面"]
+        F5["沙箱LITE<br/>127.0.0.1:9121 降级读面"]
+    end
+    subgraph G3["锁档六环节闭环"]
+        direction LR
+        S1["① 本地快照锁档"] --> S2["② 飞书Base真值同步"]
+        S2 --> S3["③ 飞书云盘归档"]
+        S3 --> S4["④ 知识库归档"]
+        S4 --> S5["⑤ 云端网关上报"]
+        S5 --> S6["⑥ 心跳握手"]
+    end
+    subgraph G4["三级记忆 · 同步矩阵"]
+        direction TB
+        M1["L1 每次注入 · 最高约束实体全文"]
+        M2["L2 资料库 · 全量索引逐件指纹"]
+        M3["L3 只读实体源 · AGENTS/metalaws"]
+        SYNC["魔搭数据湖镜像 + 飞书双向53表<br/>+ 定时任务群 9 项"]
+    end
+    G0 --- G1
+    G0 --- G2
+    G0 --- G3
+    G0 --- G4
+    F1 --> S1
+    F4 --> S5
+    </pre>
+  </div>
+  <p style="font-size:12px;color:var(--tx3);margin-top:10px">图源：本页内嵌 Mermaid（自包含）；渲染依赖 Mermaid.js CDN，断网时显示源码文本。</p>
+</section>
+
+<!-- ════ 2 基线信息面板 ════ -->
+<section>
+  <h2>02 · 基线信息面板 <span>实测快照 2026-10-06</span></h2>
+  <div class="grid g2">
+    <div class="card">
+      <h4><span class="tag ok">M9 账本</span>全域资产确权</h4>
+      <p><span class="n">13,595</span><span class="u">资产</span></p>
+      <p style="margin-top:8px">根哈希 <code id="root-hash">883B6A0DD86256349EA73FEB5683A337AD0050EF48381788AE40FEBE3345283D</code></p>
+    </div>
+    <div class="card">
+      <h4><span class="tag ok">稳态评分</span>本地内核全维度评估</h4>
+      <p><span class="n">84.1</span><span class="u">/ 100</span><span class="tag warn" style="margin-left:8px">B 级</span></p>
+      <p style="margin-top:8px">8 维实测（真值链 95 ｜ 记忆 93 ｜ 语义 90 ｜ 自治 94 ｜ 决策 88 ｜ 同步 87 ｜ 治理 91 ｜ 存储 35），Merkle <code>dda50f5c8dd11559</code></p>
+    </div>
+    <div class="card">
+      <h4><span class="tag ok">记忆体系</span>联邦记忆池</h4>
+      <p><span class="n">51,171</span><span class="u">条</span><span class="tag mute" style="margin-left:8px">10 源</span></p>
+      <p style="margin-top:8px">索引 789 ｜ 向量 23,284 ｜ 飞书 53 表 12,526 条在线接入 ｜ Merkle <code>63ac4ab9…</code></p>
+    </div>
+    <div class="card">
+      <h4><span class="tag ok">语义基座</span>SEMANTIC-CORE-STABLE</h4>
+      <p><span class="n">2E7198F8…</span><span class="u">SHA 锁定</span></p>
+      <p style="margin-top:8px">V2.1-STABLE ｜ 漂移 43.9% RED＝结构性分工基准（决策 B，已接受）</p>
+    </div>
+  </div>
+
+  <div class="grid g3">
+    <div class="card"><h4>真值链</h4><p><span class="n">95</span><span class="u">/100</span></p><p style="margin-top:6px">真值库 35 条 · 审计链 71 行 · append-only</p></div>
+    <div class="card"><h4>自治能力</h4><p><span class="n">94</span><span class="u">/100</span></p><p style="margin-top:6px">加固 HARDENED 10/10 · 自检全链路</p></div>
+    <div class="card"><h4>治理合规</h4><p><span class="n">91</span><span class="u">/100</span></p><p style="margin-top:6px">9 定时任务 Ready · 审计全留痕</p></div>
+  </div>
+</section>
+
+<!-- ════ 3 Merkle 归档凭证 ════ -->
+<section>
+  <h2>03 · Merkle-DAG 归档凭证 <span>四维本体一致性 PASS</span></h2>
+  <table>
+    <thead><tr><th>校验维</th><th>结果</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>空间维 S</td><td><span class="tag ok">PASS</span></td><td>静态资源路径完整，无外部依赖缺失（唯一外链=Mermaid CDN）</td></tr>
+      <tr><td>时间维 T</td><td><span class="tag ok">PASS</span></td><td>基线 V1.19 · 归档 2026-10-06 · 时序与本地实测一致</td></tr>
+      <tr><td>属性维 P</td><td><span class="tag ok">PASS</span></td><td>DID / Ω 锚定 / 版本 / 根哈希字段完整</td></tr>
+      <tr><td>因果维 C</td><td><span class="tag ok">PASS</span></td><td>与 V1.19 基线同源（本机实测口径）</td></tr>
+      <tr><td>公理冲突检测</td><td><span class="tag ok">0 条冲突</span></td><td>与 L0/L1 冻结层比对无冲突</td></tr>
+      <tr><td>Lv8 锁档标记</td><td><span class="tag ok">ACTIVE</span></td><td>资产入库锁档生效</td></tr>
+    </tbody>
+  </table>
+  <div class="flow">
+    <span class="step">ARCH-PREVIEW-V1.19</span><span class="arw">→</span>
+    <span class="step">SHA256 指纹</span><span class="arw">→</span>
+    <span class="step">M9 确权链</span><span class="arw">→</span>
+    <span class="step">魔搭镜像</span><span class="arw">→</span>
+    <span class="step">记忆网关</span>
+  </div>
+</section>
+
+<!-- ════ 4 附录快速跳转 ════ -->
+<section>
+  <h2>04 · 附录 · 资产直达 <span>本地归档文件</span></h2>
+  <div class="links">
+    <a href="META_RULES/KERNEL-ASSESSMENT-20261006.json" target="_blank"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>全维度评估 JSON</a>
+    <a href="META_RULES/SEMANTIC-CORE-STABLE-20261006.json" target="_blank"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>语义基座 STABLE JSON</a>
+    <a href="META_RULES/MEMORY-FEDERATION-POOL-20261006.json" target="_blank"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>联邦记忆池 JSON</a>
+    <a href="META_RULES/DECISION-PROFILE-LOCAL-WIN.json" target="_blank"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>决策画像本地版 JSON</a>
+    <a href="three_layer_architecture_whitepaper_internal.md" target="_blank"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>三层架构白皮书 MD</a>
+  </div>
+  <div class="note"><b>口径说明</b>：本页稳态评分为本地内核实测 84.1 分（2026-10-06 全维度评估），与云端口径（97 分）分属双端评测基准；页面按 M2 纪律采用本机可复现实测值，不混用未验证声明。</div>
+</section>
+
+<div class="foot">
+  <span>元极恒一 · 全域架构预览 V1.19　｜　DID-BR-000002　｜　Ω₀⊂⊙∞⊂Ω</span>
+  <span>节点 <code>NODE-DEV-DOUBAO-WORK-001</code>　｜　记忆网关 <code>www.huodouai.com/api/report/truth</code>　｜　2026-10-06</span>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  try {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#141821', primaryTextColor: '#e8eaed',
+        primaryBorderColor: '#4ecdc4', lineColor: '#8a7328',
+        secondaryColor: '#0d0f14', tertiaryColor: '#141821',
+        fontFamily: 'ui-monospace,Menlo,monospace', fontSize: '13px'
+      },
+      flowchart: { curve: 'basis', padding: 14 }
+    });
+  } catch (e) {
+    document.querySelector('.mermaid').style.whiteSpace = 'pre';
+    document.querySelector('.mermaid').style.fontFamily = 'monospace';
+  }
+</script>
+</body>
+</html>

@@ -17,7 +17,7 @@
 # ============================================================
 
 set -u
-COLD_STORE="${COLD_STORE:-/home/user/Doubao/chats/38418284746129666}"
+COLD_STORE="${COLD_STORE:-/opt/ZONGYUAN-ROOT}"
 PKG="$COLD_STORE/03_INFRA/deploy_pkg/llm_power"
 DID="DID-BR-000002"
 TRACE="Ω₀⊂⊙∞⊂Ω"

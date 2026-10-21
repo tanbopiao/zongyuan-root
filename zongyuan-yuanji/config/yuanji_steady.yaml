@@ -1,0 +1,36 @@
+quant:
+  load_in_4bit: true
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_compute_dtype: "bfloat16"
+  bnb_4bit_use_double_quant: true
+inference:
+  temperature: 0.3
+  temp_seed_extract: 0.0
+  top_p: 0.6
+  max_new_tokens: 512
+  seed_extract_max_new_tokens: 160  # 种子真值提取专用(公理简洁输出, CPU可跑)
+  max_ctx_len: 4096
+  repetition_penalty: 1.05
+  do_sample: true
+trust_remote_code: true
+weight:
+  model_path: "/home/user/ZONGYUAN-ROOT/weights/yuanjihengyi_int4"
+resource:
+  mem_warning: 0.75
+  mem_critical: 0.85
+  cpu_load_max: 0.8
+# 分层种子收敛阈值
+seed_check:
+  L0:
+    text_exact_match: true
+    cos_threshold: 0.999
+  L1:
+    text_allow_punct_diff: true
+    cos_threshold: 0.99
+  L2:
+    cos_threshold: 0.95
+fallback:
+  enable: true
+  ollama_api_base: "http://127.0.0.1:11434/v1"
+lora:
+  adapter_path: "/root/zongyuan-yuanji/weights/lora_adapter_v6"

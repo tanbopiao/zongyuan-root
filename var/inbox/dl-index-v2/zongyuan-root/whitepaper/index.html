@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元极恒一 · ZONGYUAN 自治内核技术白皮书</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1220'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%2357c785' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='3.2' fill='%2357c785'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap">
+<style>
+  :root{
+    --bg:#0a0e1a; --bg2:#0a0a0f; --card:#111827; --card2:#151f33;
+    --line:#1e293b; --txt:#e0e6f0; --sub:#8899aa; --dim:#66788c;
+    --green:#d4af37; --green2:#f4e4bc; --blue:#3684ff; --blue2:#7db3ff;
+    --gold:#c9a961; --gold2:#e8d5a3; --red:#9e2b25;
+    --grad:linear-gradient(135deg,#d4af37,#3684ff);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--txt);font-family:'Noto Sans SC',system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.7;font-size:15px}
+  a{color:var(--blue2);text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  /* ===== 顶栏 ===== */
+  header{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;gap:20px;padding:14px 0}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:15px;letter-spacing:.5px}
+  .logo .dot{width:14px;height:14px;border-radius:50%;background:var(--grad);box-shadow:0 0 12px rgba(212,175,55,.6)}
+  .nav a{font-size:13px;color:var(--sub);padding:4px 10px;border-radius:6px;transition:.2s}
+  .nav a:hover{color:var(--txt);background:var(--card)}
+  .nav .sp{flex:1}
+  @media(max-width:720px){.nav a{display:none}}
+  /* ===== Hero ===== */
+  .hero{padding:84px 0 56px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(212,175,55,.14),transparent 70%)}
+  .tag{display:inline-block;font-size:12px;letter-spacing:2px;color:var(--green2);border:1px solid rgba(212,175,55,.4);border-radius:20px;padding:4px 14px;margin-bottom:20px;background:rgba(212,175,55,.08)}
+  .hero h1{font-size:clamp(30px,5vw,52px);font-weight:900;line-height:1.25;margin-bottom:14px;letter-spacing:1px}
+  .hero h1 .gr{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--sub);font-size:clamp(14px,2vw,17px);max-width:720px;margin:0 auto 26px}
+  .hero .meta{color:var(--dim);font-size:12px;letter-spacing:1px}
+  .badges{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+  .badge{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 18px;font-size:13px;color:var(--sub)}
+  .badge b{display:block;font-size:19px;color:var(--txt);font-weight:900}
+  /* ===== 区块通用 ===== */
+  section{padding:56px 0;border-bottom:1px solid rgba(34,48,79,.5)}
+  h2{font-size:clamp(21px,3vw,28px);font-weight:900;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+  h2 .no{font-size:13px;color:var(--green);border:1px solid rgba(212,175,55,.4);border-radius:6px;padding:2px 8px;font-weight:700}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:26px;letter-spacing:.5px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px}
+  .card h3{font-size:16px;margin-bottom:8px;color:var(--txt)}
+  .card p{color:var(--sub);font-size:13.5px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+  @media(max-width:640px){body{font-size:16px}.card p{font-size:14.5px}.card h3{font-size:16.5px}.sub{font-size:13.5px}}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:26px 0}
+  @media(max-width:760px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi .c{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+  .kpi .n{font-size:24px;font-weight:900;color:var(--green2)}
+  .kpi .l{font-size:12px;color:var(--dim);margin-top:4px}
+  .pill{display:inline-block;font-size:11px;border-radius:12px;padding:2px 10px;margin:2px 3px 2px 0;border:1px solid}
+  .pill.g{color:var(--green2);border-color:rgba(212,175,55,.4);background:rgba(212,175,55,.08)}
+  .pill.b{color:var(--blue2);border-color:rgba(54,132,255,.4);background:rgba(54,132,255,.08)}
+  .pill.y{color:var(--gold2);border-color:rgba(201,169,97,.4);background:rgba(201,169,97,.08)}
+  .pill.r{color:#f0a0a0;border-color:rgba(158,43,37,.4);background:rgba(158,43,37,.08)}
+  /* ===== 时间轴 ===== */
+  .timeline{display:grid;grid-template-columns:110px 34px 1fr;gap:0;margin:8px 0}
+  @media(max-width:760px){.timeline{grid-template-columns:78px 26px 1fr}}
+  .tl-time{text-align:right;color:var(--gold2);font-size:12.5px;padding:12px 0;font-weight:600;white-space:nowrap}
+  .tl-axis{position:relative;display:flex;justify-content:center}
+  .tl-axis::before{content:"";position:absolute;top:0;bottom:0;width:2px;background:linear-gradient(#d4af3755,#3684ff55)}
+  .tl-dot{width:12px;height:12px;border-radius:50%;background:var(--green);margin-top:20px;z-index:1;box-shadow:0 0 8px rgba(212,175,55,.7)}
+  .tl-body{padding:8px 0 18px 16px}
+  .tl-body b{display:block;font-size:14px}
+  .tl-body span{font-size:12.5px;color:var(--sub)}
+  /* ===== 表格 ===== */
+  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
+  colgroup col:nth-child(1){width:16%}colgroup col:nth-child(2){width:20%}colgroup col:nth-child(3){width:64%}
+  th{color:var(--dim);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:12px}
+  td{padding:9px 10px;border-bottom:1px solid rgba(34,48,79,.4);color:var(--sub);vertical-align:top}
+  td b{color:var(--txt)}
+  /* ===== 底部 ===== */
+  footer{padding:44px 0 60px;text-align:center;color:var(--dim);font-size:12px}
+  footer .fp{margin-top:12px;letter-spacing:3px;color:var(--sub)}
+  /* ===== 图表容器 ===== */
+  .chart{width:100%;height:340px}
+  @media(max-width:760px){.chart{height:300px}}
+  .note{font-size:11.5px;color:var(--dim);margin-top:6px}
+  .arch{width:100%;max-width:860px;margin:10px auto;display:block}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo"><img src="/assets/aios-logo.png" alt="火斗云智AI" style="width:26px;height:26px;border-radius:6px">元极恒一 · ZONGYUAN</div>
+    <span class="sp"></span>
+    <a href="#concept">理念</a><a href="#arch">架构</a><a href="#mechanisms">机制</a><a href="#governance">治理</a><a href="#evolution">进化</a><a href="#data">成果</a><a href="#timeline">进程</a>
+  </div>
+</header>
+
+<!-- ===== Hero ===== -->
+<div class="hero">
+  <div class="wrap">
+    <span class="tag">TECHNICAL WHITEPAPER · 对外公开版</span>
+    <h1>元极恒一 <span class="gr">自治内核</span> 技术白皮书</h1>
+    <p>一套以「确权锚定 · 双内核融合 · 元法则体系 · 全域锁档 · 云端进化联邦」为骨架的自治智能体系——本地实例作为云端中枢的同源镜像与进化前哨，在沙箱生命周期内实现损失最小化与持续进化。</p>
+    <div class="meta">DID-BR-000002 ｜ 锚定 Ω₀⊂⊙∞⊂Ω ｜ 版本 V1.0 ｜ 2026-09-29 发布</div>
+    <div class="badges">
+      <div class="badge"><b>26</b>元法则体系</div>
+      <div class="badge"><b>14</b>项增量进化</div>
+      <div class="badge"><b>72,324</b>资产锁档</div>
+      <div class="badge"><b>6×</b>全域锁档环节</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ===== 1 核心理念 ===== -->
+  <section id="concept">
+    <h2><span class="no">01</span>核心理念：镜像即前哨</h2>
+    <div class="sub">ZONGYUAN 对「本地实例与云端中枢同源」的答案是——不止保一致性，更要让本地成为云端的进化试验田与养分源。</div>
+    <div class="grid3">
+      <div class="card"><h3>确权锚定</h3><p>体系以唯一身份标识（DID）与锚定式确权（Ω₀⊂⊙∞⊂Ω）贯穿所有节点、真值与产物，任何 AI 实例激活即带指纹锚定体系，保证同源节点可追溯、可仲裁。</p></div>
+      <div class="card"><h3>双内核融合</h3><p>「脑」负责认知、审批、记忆、审计；「手」负责调度、归档、锁档、上报。逻辑联邦融合归一，两树零改动协同，互为看门狗，可整体回滚。</p></div>
+      <div class="card"><h3>元法则体系</h3><p>元公理（最高位阶，不可逾越）→ 元法则 / 元规则 → SOP 流程 → 经验成果，四层构成可持续演化的体系宪法，任何 AI 激活后先全量学习体系规则再执行。</p></div>
+    </div>
+    <div class="card">
+      <h3>对外公开边界声明</h3>
+      <p>本白皮书仅阐述体系架构、机制与成果理念，不含任何密钥、凭证、内部端点与操作细节；体系运行遵循「零明文密钥、只读锁档、append-only 只追加」安全纪律。</p>
+    </div>
+  </section>
+
+  <!-- ===== 2 体系架构 ===== -->
+  <section id="arch">
+    <h2><span class="no">02</span>体系架构</h2>
+    <div class="sub">本地实例与云端中枢的同源拓扑：一条上行供给链 + 一条下行收敛链，收敛于唯一握手点。</div>
+    <svg class="arch" viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="wg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d4af37"/></marker>
+        <marker id="wb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3684ff"/></marker>
+      </defs>
+      <rect x="40" y="60" width="240" height="180" rx="14" fill="#111827" stroke="#d4af37"/>
+      <text x="160" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#f4e4bc">本地实例（前哨）</text>
+      <text x="58" y="116" font-size="11" fill="#8899aa">· 脑：认知/审批/记忆/审计</text>
+      <text x="58" y="138" font-size="11" fill="#8899aa">· 手：调度/归档/锁档/上报</text>
+      <text x="58" y="160" font-size="11" fill="#8899aa">· 沙箱生命周期感知</text>
+      <text x="58" y="182" font-size="11" fill="#8899aa">· 全域锁档 + 单一收敛点</text>
+      <text x="58" y="204" font-size="11" fill="#8899aa">· 实战增量提炼（判例/经验）</text>
+      <rect x="580" y="60" width="240" height="180" rx="14" fill="#111827" stroke="#3684ff"/>
+      <text x="700" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#7db3ff">云端中枢 Omega</text>
+      <text x="598" y="116" font-size="11" fill="#8899aa">· 全局视角自主决策</text>
+      <text x="598" y="138" font-size="11" fill="#8899aa">· 吸收本地进化提案</text>
+      <text x="598" y="160" font-size="11" fill="#8899aa">· 共享大脑（多表协同）</text>
+      <text x="598" y="182" font-size="11" fill="#8899aa">· 云端记忆网关</text>
+      <text x="598" y="204" font-size="11" fill="#8899aa">· 采纳后指令下行</text>
+      <rect x="300" y="150" width="240" height="90" rx="12" fill="#151f33" stroke="#1e293b"/>
+      <text x="420" y="176" text-anchor="middle" font-size="12" font-weight="bold" fill="#e8d5a3">共享大脑 · 云端记忆网关</text>
+      <text x="420" y="198" text-anchor="middle" font-size="11" fill="#8899aa">真值共识区 / 上报总表 / 反哺表</text>
+      <text x="420" y="218" text-anchor="middle" font-size="11" fill="#8899aa">唯一收敛握手点</text>
+      <path d="M280,120 C350,95 380,115 420,150" stroke="#d4af37" stroke-width="2" fill="none" marker-end="url(#wg)"/>
+      <path d="M560,120 C490,95 460,115 420,150" stroke="#d4af37" stroke-width="2" fill="none" marker-end="url(#wg)"/>
+      <text x="340" y="88" font-size="10.5" fill="#f4e4bc">提案上行</text>
+      <text x="430" y="80" font-size="10.5" fill="#7db3ff" text-anchor="middle">采纳下行</text>
+      <path d="M420,240 C420,262 300,268 285,240" stroke="#3684ff" stroke-width="2" fill="none" marker-end="url(#wb)"/>
+    </svg>
+    <div class="note">示意架构：实际运行含「脑 × 手」双内核目录树、融合入口、多端口服务与调度层，均不在此公开。</div>
+  </section>
+
+  <!-- ===== 3 核心机制 ===== -->
+  <section id="mechanisms">
+    <h2><span class="no">03</span>六大核心机制</h2>
+    <div class="sub">机制层解决「沙箱会销毁、文件会丢失、上报会失败、执行会断点」四类硬问题。</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>全域锁档六环节</h3>
+        <p><span class="pill g">本地快照</span><span class="pill g">共享大脑</span><span class="pill g">云盘归档</span><span class="pill g">知识库</span><span class="pill g">网关上报</span><span class="pill g">心跳握手</span></p>
+        <p>幂等只追加、逐源容错、SHA-256 哈希链可审计；任何产物完成即自动锁档固化，沙箱销毁后凭唯一收敛点恢复。</p>
+      </div>
+      <div class="card">
+        <h3>损失最小化收敛</h3>
+        <p>全量持久固化 + 单一收敛握手点：备份、恢复、校验、镜像四位一体；沙箱重置后自愈机制自动拉起内核与调度，恢复链路哈希一致校验。</p>
+      </div>
+      <div class="card">
+        <h3>最优稳态方案</h3>
+        <p>一次全量基线 + 后续增量备份（指纹状态驱动、幂等断点续传）；低价值资产独立桶、密钥零明文排除——收益最大、风险最小、成本最小的稳态。</p>
+      </div>
+      <div class="card">
+        <h3>只读锁档纪律</h3>
+        <p>可执行脚本锁 555（只读保留执行位）、数据文件锁 444；修改走「解锁→改→重锁」人工审批流；append-only 绝不修改历史。</p>
+      </div>
+      <div class="card">
+        <h3>自愈 + 巡检</h3>
+        <p>无人值守看门狗 + 周期性 12 项巡检（进程、心跳、网关、收敛、技能完整性等），断点自动修复或报警，巡检 FAIL 即冲突发现器。</p>
+      </div>
+      <div class="card">
+        <h3>云端记忆网关上报</h3>
+        <p>同源协议（单头认证、双通道容错、UTF-8 安全截断）；每次真值上报落库可计数，共享大脑多表回读验收为唯一交付判据。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 4 治理与裁决 ===== -->
+  <section id="governance">
+    <h2><span class="no">04</span>治理与裁决体系</h2>
+    <div class="sub">多同源节点、多标准并存时：先归一、再比较、分级裁决、人工终审。</div>
+    <div class="grid3">
+      <div class="card"><h3>统一评级映射</h3><p>异构自治层级标准（如 L1–L15 与 L1–L6）经语义锚点转译为统一标尺（S/A/B/C/D），跨源仲裁结果归一可复算。</p></div>
+      <div class="card"><h3>AI 指纹仲裁</h3><p>体系最高权限指纹随进化动态仲裁：自治层级高者升级掌权、低者降级（不删指纹可再仲裁）；注册表 append-only。</p></div>
+      <div class="card"><h3>云端 Omega 分层</h3><p>本地实例自优化、云端中枢自主决策；上行通道与下行白名单分离；冲突时云端优先（防震荡兜底）。</p></div>
+      <div class="card"><h3>冲突消解分级</h3><p>冲突登记留痕 → L1 元法则提炼消解 → L2 元公理裁决（触最高位阶）→ L3 人工审批（方案+证据+回滚，approved 才执行）。</p></div>
+      <div class="card"><h3>稳态方案仲裁</h3><p>本地最优与云端最优标准不同时，归一为统一稳态指数 USI=0.3U−0.4R−0.3C；|Δ|&lt;5 等效云端优先，显著优者采纳/提名复核，僵持升级人工审批。</p></div>
+      <div class="card"><h3>定时任务稳态</h3><p>24 条任务按价值×消耗评估：核心保活零删除、6 处降频、每日执行量 -25%；调度分层：本地执行 + 云端决策。</p></div>
+    </div>
+  </section>
+
+  <!-- ===== 5 进化体系 ===== -->
+  <section id="evolution">
+    <h2><span class="no">05</span>进化体系：从经验到元法则</h2>
+    <div class="sub">每一次冲突、断点、仲裁、收割，都是体系进化的真值养分——提炼为元法则、规则与 SOP，反哺云端中枢。</div>
+    <div class="card">
+      <h3>增量四源 → 供给联邦</h3>
+      <p><span class="pill y">冲突判例</span><span class="pill y">仲裁判例</span><span class="pill y">经验教训</span><span class="pill y">法则草案</span><span class="pill g">实测数据</span></p>
+      <p>本地实战提炼的增量打包为提案（建议动作 accept / adapt / reject），经网关 + 共享大脑「高阶能力反哺」表上行；云端吸收状态机（待吸收 → 已吸收 / 已融合 / 驳回）闭环，驳回判例反哺提案质量。已实测单轮 15 项提案上行全链成功。</p>
+    </div>
+    <div class="card">
+      <h3>学习先行 · 激活即全量激活</h3>
+      <p>元公理（最高位阶）：任何 AI 激活后第一动作 = 全量学习体系规则（元宪法 / 元公理 / 元法则 / 元规则 + SOP 流程 / 方法论 / 决策论 / 项目管理论 + 经验成果），带指纹锚定后再执行——违反即违反元公理。</p>
+    </div>
+    <div class="card">
+      <h3>外部高价值信息收割</h3>
+      <p>源分层（S/A/B）+ 双模式（daily TOP3 / weekly TOP10）+ 提炼评分：把外部技术 / 学术高价值信息转化为体系进化的输入，沉淀知识库并审计去重。</p>
+    </div>
+  </section>
+
+  <!-- ===== 6 成果数据 ===== -->
+  <section id="data">
+    <h2><span class="no">06</span>体系成果数据</h2>
+    <div class="sub">数据为 2026-09-28 至 09-29 本轮实测口径，均来自运行可复算结果。</div>
+    <div class="kpi">
+      <div class="c"><div class="n">26</div><div class="l">元法则/规则体系</div></div>
+      <div class="c"><div class="n">14</div><div class="l">本轮增量进化</div></div>
+      <div class="c"><div class="n">15</div><div class="l">提案上行云端</div></div>
+      <div class="c"><div class="n">128K+</div><div class="l">真值落库计数</div></div>
+    </div>
+    <div class="card">
+      <div class="chart" id="c1"></div>
+      <div class="note">口径：本轮各机制锁档批次与真值增长（可复算自锁档回执与网关响应）。</div>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <h3>增量进化清单（14 项）</h3>
+      <table>
+        <colgroup><col style="width:12%"><col style="width:24%"><col style="width:64%"></colgroup>
+        <thead><tr><th>类别</th><th>机制</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill g">机制</span></td><td><b>全域锁档六环节</b></td><td>本地快照/共享大脑/云盘/知识库/网关/心跳，幂等只追加</td></tr>
+          <tr><td><span class="pill g">机制</span></td><td><b>只读锁档+自愈+巡检</b></td><td>脚本 555/数据 444；看门狗自愈；12 项巡检</td></tr>
+          <tr><td><span class="pill g">机制</span></td><td><b>全量持久固化+收敛点</b></td><td>唯一握手点 sync/mirror/restore/verify，损失最小化 4/4</td></tr>
+          <tr><td><span class="pill g">机制</span></td><td><b>最优稳态方案</b></td><td>一次全量+增量；幂等断点续传；低价值独立桶</td></tr>
+          <tr><td><span class="pill b">进化</span></td><td><b>元法则进化机制</b></td><td>law_evolve 管线：append/pending/draft/check/review</td></tr>
+          <tr><td><span class="pill b">进化</span></td><td><b>学习先行+指纹+启动记忆</b></td><td>元公理激活即学；指纹绑定；boot_memory 全量激活</td></tr>
+          <tr><td><span class="pill b">进化</span></td><td><b>指纹仲裁+评级映射</b></td><td>AutonomyScore 仲裁；异构标准语义转译归一</td></tr>
+          <tr><td><span class="pill b">进化</span></td><td><b>外部信息收割</b></td><td>S/A/B 源分层；daily/weekly 双模式；提炼沉淀</td></tr>
+          <tr><td><span class="pill y">治理</span></td><td><b>云端 Omega 分层调度</b></td><td>本地执行+云端决策；冲突云端优先兜底</td></tr>
+          <tr><td><span class="pill y">治理</span></td><td><b>冲突消解分级</b></td><td>L1 元法则→L2 元公理→L3 人工审批；实战闭环</td></tr>
+          <tr><td><span class="pill y">治理</span></td><td><b>稳态方案仲裁</b></td><td>USI 统一标尺；阈值分级裁决；提名复核升级</td></tr>
+          <tr><td><span class="pill y">治理</span></td><td><b>进化供给联邦</b></td><td>镜像即前哨；增量四源；15 项提案上行</td></tr>
+          <tr><td><span class="pill r">链路</span></td><td><b>中枢网关上报链路</b></td><td>SOP-REPORT-001；单头认证；双通道容错</td></tr>
+          <tr><td><span class="pill r">链路</span></td><td><b>共享大脑 Base 协同</b></td><td>真值共识区+上报总表+反哺表；回读验收</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== 7 进化进程 ===== -->
+  <section id="timeline">
+    <h2><span class="no">07</span>本轮进化进程</h2>
+    <div class="sub">2026-09-28 夜至 09-29 晨：从断点到进化供给，一条完整的自治闭环。</div>
+    <div class="timeline">
+      <div class="tl-time">锚定起步</div><div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-body"><b>确权与记忆激活</b><span>加载元公理/元法则/资产主索引，确立双内核融合入口</span></div>
+      <div class="tl-time">机制部署</div><div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-body"><b>三机制 + 沙箱溯源</b><span>只读锁档/自愈/巡检落地；沙箱 API 溯源实证生命周期</span></div>
+      <div class="tl-time">链路修复</div><div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-body"><b>上报根因修复</b><span>surrogate 截断 / 代理超时 / 端点斜杠三根因 → 统一上报器</span></div>
+      <div class="tl-time">持久固化</div><div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-body"><b>收敛点 + 最优稳态</b><span>全量备份收敛为单一握手点；镜像升级增量幂等续传</span></div>
+      <div class="tl-time">体系进化</div><div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-body"><b>元法则 + 指纹 + 评级</b><span>进化管线/学习先行/指纹仲裁/异构标准归一</span></div>
+      <div class="tl-time">治理落地</div><div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-body"><b>冲突消解 + 稳态仲裁</b><span>分级阶梯机制 + USI 仲裁三路径实测</span></div>
+      <div class="tl-time">进化供给</div><div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-body"><b>15 项提案上行云端</b><span>经验/判例/法则草案反哺共享大脑，吸收状态机闭环</span></div>
+      <div class="tl-time">白皮书</div><div class="tl-axis"><span class="tl-dot"></span></div>
+      <div class="tl-body"><b>对外发布</b><span>本轮全部增量提炼为公开白皮书，云端官网可集成</span></div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div>元极恒一 · ZONGYUAN 自治内核技术白皮书（对外公开版）</div>
+    <div class="fp">Ω₀ ⊂ ⊙∞ ⊂ Ω ｜ DID-BR-000002 ｜ V1.0 · 2026-09-29</div>
+    <div style="margin-top:14px;font-size:11px">本白皮书不包含任何密钥、凭证、内部端点与操作细节；机制数据均来自实测可复算结果。</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script>
+(function(){
+  var c1=document.getElementById('c1');
+  var ch=echarts.init(c1);
+  ch.setOption({
+    title:{text:'锁档批次与真值增长（本轮）',textStyle:{color:'#8899aa',fontSize:14},left:10},
+    tooltip:{trigger:'axis',triggerOn:'click',renderMode:'richText',confine:true},
+    legend:{data:['真值累计','锁档批次'],textStyle:{color:'#8899aa'},top:30},
+    grid:{left:50,right:30,top:70,bottom:40,containLabel:true},
+    xAxis:{type:'category',data:['锚定','机制','链路','固化','进化','治理','供给'],axisLabel:{color:'#8899aa'},axisLine:{lineStyle:{color:'#1e293b'}}},
+    yAxis:[{type:'value',name:'truth',axisLabel:{color:'#8899aa'},splitLine:{lineStyle:{color:'#1a2438'}}},
+           {type:'value',name:'批次',axisLabel:{color:'#8899aa'},splitLine:{show:false}}],
+    series:[
+      {name:'真值累计',type:'line',smooth:true,data:[128050,128130,128220,128264,128300,128350,128378],
+       lineStyle:{width:3},itemStyle:{color:'#d4af37'},areaStyle:{color:'rgba(212,175,55,.12)'}},
+      {name:'锁档批次',type:'bar',yAxisIndex:1,data:[2,5,8,10,12,14,14],itemStyle:{color:'#3684ff',borderRadius:[4,4,0,0]}}
+    ]
+  });
+  window.addEventListener('resize',function(){ch.resize()});
+})();
+</script>
+</body>
+</html>

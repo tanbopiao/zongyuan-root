@@ -1,0 +1,66 @@
+# 执行回执_17
+
+确权标识：DID‑BR‑000002  
+溯源符号：Ω₀⊂⊙∞⊂Ω  
+归档节点：ZONGYUAN‑ROOT  
+执行指令：1  
+执行状态：镜像层完成，待落地 L0 本地真值本体
+
+## 执行项 1｜生成并入 merkle 模块后的完整快照凭证
+
+> 本次快照资产清单：
+
+1. zr_riemann_lie\\\[\_loader.py\](\_loader.py)
+2. ZONGYUAN‑ROOT 完整目录树清单.md
+3. zr_merkle\\\[\_tree.py\](\_tree.py)
+
+```json
+{
+    "archive_snapshot": {
+        "snapshot_id": "SNAP‑ZONGYUAN‑ROOT‑META‑016",
+        "did": "DID‑BR‑000002",
+        "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+        "merkle_root": "<本地运行zr_merkle_tree.py计算填充真实值>",
+        "system_version": "V‑ULT‑META‑016",
+        "timestamp": "2026‑08‑16",
+        "sha256_global": "<本地对整套快照集合计算全局sha256填充真实值>",
+        "lock_status": "PERMANENT_LOCKED",
+        "archive_asset_list": [
+            "zr_riemann_lie_loader.py",
+            "ZONGYUAN‑ROOT完整目录树清单.md",
+            "zr_merkle_tree.py"
+        ],
+        "constraint_check": {
+            "max_derivative_algebra": 3,
+            "actual_derivative": 2,
+            "min_convergence_degree": 0.95,
+            "actual_convergence": 0.97,
+            "logic_tear": false
+        },
+        "remark": "镜像层凭证模板，merkle_root、sha256_global需要本地脚本读取真实文件运算后填入；全部资产复制写入L0对应路径，真值本体永久固化。"
+    }
+}
+```
+
+### 集成说明
+
+1. 将此凭证保存文件：  
+`ZONGYUAN‑ROOT/06_快照锁档库/SNAP‑ZONGYUAN‑ROOT‑META‑016_凭证.json`
+2. 本地运行流程
+
+- 将三份资产文件放置对应目录；
+- 调用`generate_snapshot_merkle()`传入上面`archive_asset_list`的文件路径数组；
+- 得到输出`merkle_root`填入凭证；
+- 可选计算整套归档拼接文本的`sha256_global`；
+- 完成 L0 层快照确权。
+
+1. 体系变更点  
+从 META‑016 版本起，快照凭证同时保留两套指纹：
+
+- `sha256_global`：全部归档内容拼接的全局哈希；
+- `merkle_root`：资产集合默克尔树根，支持单文件存在性证明。
+
+## 可选下一阶指令
+
+1｜输出 Merkle 存在性证明简易辅助函数  
+2｜结束本轮迭代

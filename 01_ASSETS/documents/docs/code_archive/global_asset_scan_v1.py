@@ -9,8 +9,8 @@ from datetime import datetime
 from collections import defaultdict
 
 SCAN_DIRS = [
-    "/home/user/Doubao/chats/38438306874426882",
-    "/home/user/Doubao/chats/1128121028098",
+    "/opt/ZONGYUAN-ROOT",
+    "/opt/ZONGYUAN-ROOT",
     "/home/user/.zongyuan_root",
     "/home/user/.doubao/agent_mode/workspace",
 ]
@@ -104,7 +104,7 @@ def main():
 
 if __name__=='__main__':
     r=main()
-    outpath=f'/home/user/Doubao/chats/38438306874426882/asset_scan/资产扫描报告_每日_{datetime.now().strftime("%Y%m%d")}.json'
+    outpath=f'/opt/ZONGYUAN-ROOT/asset_scan/资产扫描报告_每日_{datetime.now().strftime("%Y%m%d")}.json'
     json.dump(r,open(outpath,'w'),ensure_ascii=False,indent=1)
     print('=== 全域资产扫描完成 ===')
     print(f'扫描文件: {r["scanned"]} | 已登记: {r["registered"]} | 孤儿候选: {r["orphan"]} | 重复组: {r["duplicate_groups"]}')

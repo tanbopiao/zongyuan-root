@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AtomCode 生态嫁接方案技术白皮书 · 火斗云智AIOS</title>
+<style>
+:root {
+  --bg: #05070b;
+  --bg-card: #0c1018;
+  --bg-code: #0a0e14;
+  --border: #1a2030;
+  --gold: #d4b872;
+  --gold-dim: #a8925a;
+  --gold-bright: #e8d090;
+  --text: #c8cdd8;
+  --text-dim: #7a8296;
+  --text-bright: #e8eaf0;
+  --red: #c45c5c;
+  --green: #6ba87a;
+  --blue: #6b8ec4;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "SF Pro Text", "PingFang SC", "Microsoft YaHei", monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  padding: 40px 20px;
+}
+.container { max-width: 960px; margin: 0 auto; }
+.header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 30px;
+  margin-bottom: 40px;
+}
+.header h1 {
+  color: var(--gold);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.header .subtitle { color: var(--text-dim); font-size: 13px; }
+.header .meta {
+  display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px;
+  font-size: 12px; color: var(--text-dim);
+}
+.header .meta span { border: 1px solid var(--border); padding: 3px 10px; border-radius: 3px; }
+h2 {
+  color: var(--gold);
+  font-size: 20px;
+  margin: 40px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+h3 {
+  color: var(--gold-bright);
+  font-size: 16px;
+  margin: 28px 0 12px;
+}
+h4 {
+  color: var(--text-bright);
+  font-size: 14px;
+  margin: 20px 0 8px;
+}
+p { margin-bottom: 12px; }
+strong { color: var(--text-bright); }
+.gold { color: var(--gold); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+}
+th {
+  background: var(--bg-card);
+  color: var(--gold);
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+}
+td {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+tr:nth-child(even) td { background: rgba(12,16,24,0.5); }
+code {
+  background: var(--bg-code);
+  color: var(--gold-bright);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12.5px;
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+pre {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 16px 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+pre code { background: none; padding: 0; color: var(--text); }
+.flow {
+  display: flex; align-items: center; gap: 8px;
+  margin: 16px 0; flex-wrap: wrap;
+}
+.flow .node {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-dim);
+  color: var(--gold-bright);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.flow .arrow { color: var(--gold); font-size: 18px; }
+.layer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.layer-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+}
+.layer-card .layer-title {
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.layer-card .ops { font-size: 12px; color: var(--text-dim); line-height: 1.8; }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-green { background: rgba(107,168,122,0.15); color: var(--green); border: 1px solid rgba(107,168,122,0.3); }
+.badge-gold { background: rgba(212,184,114,0.12); color: var(--gold); border: 1px solid rgba(212,184,114,0.3); }
+.badge-blue { background: rgba(107,142,196,0.12); color: var(--blue); border: 1px solid rgba(107,142,196,0.3); }
+.badge-red { background: rgba(196,92,92,0.12); color: var(--red); border: 1px solid rgba(196,92,92,0.3); }
+.callout {
+  background: var(--bg-card);
+  border-left: 3px solid var(--gold);
+  padding: 14px 18px;
+  margin: 16px 0;
+  border-radius: 0 6px 6px 0;
+}
+.callout .label { color: var(--gold); font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+.footer {
+  margin-top: 60px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 2;
+}
+.footer .anchor { color: var(--gold); font-size: 14px; letter-spacing: 2px; }
+ul, ol { margin: 8px 0 12px 24px; }
+li { margin-bottom: 4px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ========== HEADER ========== -->
+<div class="header">
+  <h1>AtomCode 生态嫁接方案技术白皮书</h1>
+  <div class="subtitle">ZONGYUAN-ROOT 元极恒一自治体系 · 火斗云智AIOS · 2026-10-19 · 版本 V1.0</div>
+  <div class="meta">
+    <span>编码执行手</span>
+    <span>免费额度利用</span>
+    <span>MCP 通道</span>
+    <span>OCTOP 互补</span>
+    <span>Ω₀⊂⊙∞⊂Ω</span>
+  </div>
+</div>
+
+<!-- ========== 1. 摘要与定位 ========== -->
+<h2>一、摘要与定位</h2>
+
+<p>本白皮书阐述 <strong>AtomCode</strong>（AtomGit 官方闭源二进制 v5.2.3）作为 <strong>"免费编码/蒸馏执行手"</strong> 接入 ZONGYUAN-ROOT 元极恒一自治体系的完整嫁接方案。AtomCode 不改闭源本体，一切扩展走配置层、插件层、MCP 层，全部可回滚。</p>
+
+<div class="callout">
+  <div class="label">核心定位</div>
+  <p style="margin:0">AtomCode 在生态中承担<strong>本地免费执行节点</strong>角色——利用 AtomGit CodingPlan 免费额度（qwen3.8-27b / glm5.3-flash），为自治体系提供零成本的编码辅助、真值蒸馏、算子执行通道，与云端 OCTOP 智能体生态形成<strong>本地-云端双通道互备</strong>。</p>
+</div>
+
+<h3>1.1 AtomCode 本体参数</h3>
+<table>
+  <tr><th>参数</th><th>值</th><th>说明</th></tr>
+  <tr><td>二进制路径</td><td><code>/usr/local/bin/atomcode</code></td><td>AtomGit 官方闭源二进制</td></tr>
+  <tr><td>版本</td><td>5.2.3</td><td>—</td></tr>
+  <tr><td>登录账号</td><td>zongyuangen</td><td>显示名 zongyuanroot</td></tr>
+  <tr><td>默认 Provider</td><td>AtomGit-qwen3.8-27b</td><td><span class="badge badge-green">免费</span></td></tr>
+  <tr><td>备用 Provider</td><td>AtomGit-glm5.3-flash</td><td><span class="badge badge-green">免费</span></td></tr>
+  <tr><td>Headless 模式</td><td><code>-p / --prompt-file</code></td><td>非交互调用，适合 Worker 自动化</td></tr>
+  <tr><td>MCP 管理</td><td><code>atomcode mcp add</code></td><td>全局写入 <code>~/.atomcode/mcp.json</code>，工具前缀 <code>mcp__&lt;name&gt;__</code></td></tr>
+  <tr><td>扩展能力</td><td>schedule / daemon / webui / plugin / hooks</td><td>全部走配置层，不改本体</td></tr>
+</table>
+
+<h3>1.2 嫁接原则</h3>
+<ul>
+  <li><strong>闭源本体不改</strong>：AtomCode 二进制本身零修改，所有扩展通过配置/MCP/插件注入。</li>
+  <li><strong>全部可回滚</strong>：MCP server 注册、cron 调度、插件启用均可一键撤销，恢复至嫁接前状态。</li>
+  <li><strong>最小额度消耗</strong>：优先使用免费 qwen3.8-27b，空闲时 0 消耗跳过，单次批量上限受控。</li>
+  <li><strong>增量优先</strong>：每次只处理最小必要单元，不一次性批量执行高消耗算子。</li>
+</ul>
+
+<!-- ========== 2. 已跑通：真值蒸馏 Worker 闭环 ========== -->
+<h2>二、已跑通：真值蒸馏 Worker 闭环</h2>
+
+<p>AtomCode 接入生态的首个落地项目——<strong>真值蒸馏 Worker 闭环</strong>——已于 2026-10-18 实测跑通。全链路：中枢派单 → AtomCode 蒸馏 → 回写真值库。</p>
+
+<div class="flow">
+  <div class="node">① 派单 dispatch_distill.py</div>
+  <div class="arrow">→</div>
+  <div class="node">② 执行 worker.py + AtomCode</div>
+  <div class="arrow">→</div>
+  <div class="node">③ 回写 collect_distill_result.py</div>
+  <div class="arrow">→</div>
+  <div class="node">④ 编排 auto_distill_orchestrator.py</div>
+</div>
+
+<h3>2.1 闭环实测数据（2026-10-18）</h3>
+
+<p>派单 3 条（中枢 seq 359 / 397 / 406），AtomCode qwen3.8-27b 蒸馏 3 条全部 COMPLETED，回写真值库 3 条高价值真值。以下纯度与压缩比均从 truth.db 只读查询获得：</p>
+
+<table>
+  <tr><th>来源 seq</th><th>蒸馏 truth_id</th><th>真值类型</th><th>纯度评分</th><th>压缩比</th><th>回写 seq</th><th>状态</th></tr>
+  <tr>
+    <td>397</td><td><code>T-397-SSH-ISO-SS1</code></td><td>决策</td>
+    <td><strong class="gold">88</strong></td><td>1.9</td><td>16950</td>
+    <td><span class="badge badge-green">COMPLETED</span></td>
+  </tr>
+  <tr>
+    <td>359</td><td><code>truth-sev-42c793c7-r16</code></td><td>case（案例）</td>
+    <td><strong class="gold">85</strong></td><td>1.6</td><td>16951</td>
+    <td><span class="badge badge-green">COMPLETED</span></td>
+  </tr>
+  <tr>
+    <td>406</td><td><code>t-kc-20261005-0952-406</code></td><td>数据</td>
+    <td><strong class="gold">74</strong></td><td>0.72</td><td>16953</td>
+    <td><span class="badge badge-green">COMPLETED</span></td>
+  </tr>
+</table>
+
+<h3>2.2 蒸馏质量示例</h3>
+
+<h4>seq 397 → 决策类（纯度 88，压缩比 1.9）</h4>
+<p>多节点 SSH 账号隔离方案（SS-1）已落地并通过验证：每节点使用独立非 root 账号（node-localsandbox uid1002、node-cloudpc），密钥为 ed25519、私钥权限 600 且仅 root 可读；sudo 白名单仅放行写闸门与 sha256sum。验证结果：直接写 docroot/data 均 Permission denied、sudo root 被拒、仅 gate 通道通过。</p>
+
+<h4>seq 359 → case 案例类（纯度 85，压缩比 1.6）</h4>
+<p>自进化循环 4h-16（2026-10-04T22:25+08，seq359）三项自检全过：bootstrap 10/10、harden 10/10、链 0 断且闭包恒等成立 13569=13553+1+15；三份记忆工件按 SHA1 锚定——主本 93559B/4C7AD129F009D79C、镜像 94034B/F337FC919866581B、本地 52641B/25EE5B535E5AA68E。</p>
+
+<h4>seq 406 → 数据类（纯度 74，压缩比 0.72）</h4>
+<p>2026-10-05T09:52:23+08:00，节点 NODE-LOCAL-HUAWEI-LAPTOP-001 通过 kernel 完整性探针：bootstrap 10/10 激活、致命项 ALL PASS，harden 10/10 完成；链规模 13,563 节点 / 1 pending op / 15 orphan（orphan 率 0.11%）；锚点不变量 Ω₀⊂⊙∞⊂Ω 成立。</p>
+
+<h3>2.3 守护进程与空闲跳过机制</h3>
+
+<table>
+  <tr><th>指标</th><th>值</th><th>说明</th></tr>
+  <tr><td>Worker 进程 PID</td><td>626003</td><td><code>python3 worker.py daemon</code>，运行中</td></tr>
+  <tr><td>轮询间隔</td><td>60 秒</td><td>每 60s 检查任务队列</td></tr>
+  <tr><td>内存占用（RSS）</td><td>约 11.5 MB</td><td>极轻量级</td></tr>
+  <tr><td>空闲行为</td><td>"无待执行任务，空闲跳过（0消耗）"</td><td>worker.log 实测可见，不消耗 API 额度</td></tr>
+  <tr><td>部署目录</td><td><code>/www/wwwroot/huodouai.com/atomcode-worker/</code></td><td>worker.py / dispatch_distill.py / collect_distill_result.py / auto_distill_orchestrator.py / tasks.json / state.json / results/</td></tr>
+</table>
+
+<h3>2.4 锁档元法则</h3>
+
+<p>闭环验证通过后，已沉淀元法则：</p>
+<pre><code>META-LAW-TRUTH-DISTILL-WORKER-CLOSED-LOOP-V1.0</code></pre>
+
+<p>闭环锁档真值条目：</p>
+<pre><code>seq: 16957
+key: zr.worker.truth-distill.closed-loop.20261018</code></pre>
+
+<p>核心条款：</p>
+<ul>
+  <li>低价值真值不得直接丢弃，应由编码节点 Worker 蒸馏提纯回写</li>
+  <li>单次最多 3 条，增量优先，失败快速跳过，最小额度消耗</li>
+  <li>利用免费 CodingPlan 额度零成本执行，不占付费通道</li>
+</ul>
+
+<!-- ========== 3. 三方向改造 ========== -->
+<h2>三、三方向改造方案</h2>
+
+<!-- 方向① -->
+<h3>方向①：蒸馏调度接入（cron 自动化）</h3>
+
+<div class="callout">
+  <div class="label">改造目标</div>
+  <p style="margin:0">将 <code>auto_distill_orchestrator.py</code> 接入服务器 cron，实现每日自动批量蒸馏，消化真值库中 <strong>1770 条</strong>积压低价值条目。</p>
+</div>
+
+<h4>已注册 crontab 条目（第 87 行）</h4>
+<pre><code># 服务器 crontab 第 87 行（变更前备份：/root/crontab.bak.20261019_003118）
+# 回读验证：仅新增 1 行（diff 86a87），原有 86 行不变
+20 6 * * * flock -xn /tmp/zr_distill_orch.lock -c \
+  "cd /www/wwwroot/huodouai.com/atomcode-worker && /usr/bin/python3 auto_distill_orchestrator.py \
+   >> /www/wwwroot/huodouai.com/atomcode-worker/distill_cron.log 2>&1"</code></pre>
+
+<table>
+  <tr><th>配置项</th><th>值</th><th>说明</th></tr>
+  <tr><td>执行时间</td><td>每日 06:20</td><td>低峰时段，不干扰主业务</td></tr>
+  <tr><td>防重入</td><td><code>flock -xn /tmp/zr_distill_orch.lock</code></td><td>上次未跑完则跳过，避免并发</td></tr>
+  <tr><td>独立日志</td><td><code>distill_cron.log</code></td><td>与 worker.log 分离，便于排查</td></tr>
+  <tr><td>空闲跳过</td><td>已内置</td><td>无候选条目时 0 消耗退出</td></tr>
+  <tr><td>单次批量</td><td>3 条（MAX_BATCH）</td><td>最小额度消耗原则</td></tr>
+  <tr><td>积压总量</td><td>1770 条</td><td>1770 ÷ 3 = 590 天，约 20 个月消化；可调大批次加速</td></tr>
+  <tr><td>手动首执行验证</td><td>队列空 → "空闲跳过（0消耗）"</td><td>下次自动执行 2026-10-20 06:20 CST</td></tr>
+  <tr><td>Worker 守护进程</td><td>PID 626003 全程未变</td><td>调度接入不影响既有守护进程</td></tr>
+</table>
+
+<div class="callout">
+  <div class="label">实施状态</div>
+  <p style="margin:0"><span class="badge badge-green">已落地</span> crontab 第 87 行已注册，手动首执行验证通过，下次自动执行 2026-10-20 06:20 CST。</p>
+</div>
+
+<!-- 方向② -->
+<h3>方向②：27 算子 MCP 注入</h3>
+
+<div class="callout">
+  <div class="label">改造目标</div>
+  <p style="margin:0">将 ZONGYUAN-ROOT <strong>27 大算子</strong>（十层依赖拓扑）包装为 MCP Server，注册至 AtomCode 全局 MCP 配置，使 AtomCode 可直接调用全部算子能力，与 OCTOP skill-packages 形成双通道。</p>
+</div>
+
+<h4>MCP Server 部署与注册</h4>
+
+<pre><code># MCP Server 脚本路径（785 行，纯 Python 标准库，MCP 层零 LLM 消耗）
+# /www/wwwroot/huodouai.com/zr-mcp/zr_27ops_mcp.py
+
+# 注册配置（/root/.atomcode/mcp.json）
+# mcpServers.zr-27ops = {
+#   command: "python3",
+#   args: ["/www/wwwroot/huodouai.com/zr-mcp/zr_27ops_mcp.py"]
+# }
+# 工具前缀：mcp__zr-27ops__</code></pre>
+
+<h4>握手与自测结果</h4>
+<table>
+  <tr><th>验证项</th><th>结果</th></tr>
+  <tr><td>initialize 握手</td><td>协议版本 2024-11-05 回执正确</td></tr>
+  <tr><td>tools/list</td><td>返回 27 个工具，与十层拓扑一一对应</td></tr>
+  <tr><td>zr_solution_eval 实测</td><td>A=71.5 / B=66.0 / C=59.0，推荐方案 A</td></tr>
+  <tr><td>zr_p4_reconcile 实测</td><td>真实读取 truth.db，返回对账结果</td></tr>
+  <tr><td>zr_merkle_dag 实测</td><td>无链文件时优雅降级，不报错</td></tr>
+  <tr><td>端到端（atomcode headless 调用）</td><td><code>mcp__zr-27ops__zr_solution_eval</code> 调用成功（需 <code>-y</code> 自动批准绕过 headless 交互审批边界），LLM 输出与本地计算一致，tool_calls=1</td></tr>
+  <tr><td>运行中服务零干扰</td><td>worker PID 626003 / gateway PID 404647 / zr_cloud_ctl PID 1244，全部正常运行</td></tr>
+</table>
+
+<h4>十层算子 MCP 工具映射</h4>
+
+<div class="layer-grid">
+  <div class="layer-card">
+    <div class="layer-title">L1 · 真值过滤与深度蒸馏</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__p4_truth_reconcile</code> — P4 真值对账<br>
+      <code>mcp__zr-27ops__p7_external_anchor</code> — P7 外部锚定<br>
+      <code>mcp__zr-27ops__truth_distill</code> — 真值提炼蒸馏
+    </div>
+  </div>
+  <div class="layer-card">
+    <div class="layer-title">L2 · 流形度量与 SM-BS 映射</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__riemann_metric</code> — 黎曼流形度量<br>
+      <code>mcp__zr-27ops__sm_bs_map</code> — SM-BS 双向映射<br>
+      <code>mcp__zr-27ops__drift_patrol</code> — 漂移巡检量化
+    </div>
+  </div>
+  <div class="layer-card">
+    <div class="layer-title">L3 · 知识图谱秩序化重建</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__entity_extract</code> — 实体关系抽取<br>
+      <code>mcp__zr-27ops__kg_complete</code> — 知识图谱补全<br>
+      <code>mcp__zr-27ops__entity_link</code> — 跨文档实体链接
+    </div>
+  </div>
+  <div class="layer-card">
+    <div class="layer-title">L4 · 因果级推理</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__causal_trace</code> — 因果链溯源回溯<br>
+      <code>mcp__zr-27ops__singularity_predict</code> — 奇点概率预测<br>
+      <code>mcp__zr-27ops__causal_intervene</code> — 因果干预模拟
+    </div>
+  </div>
+  <div class="layer-card">
+    <div class="layer-title">L5 · CTE 三位一体适配器</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__c2t_adapter</code> — CausalToTruth<br>
+      <code>mcp__zr-27ops__t2e_adapter</code> — TruthToEvolution<br>
+      <code>mcp__zr-27ops__e2c_adapter</code> — EvolutionToCausal
+    </div>
+  </div>
+  <div class="layer-card">
+    <div class="layer-title">L6 · 结构化归档深化</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__four_layer_split</code> — 四层结构化拆分<br>
+      <code>mcp__zr-27ops__nine_meta_classify</code> — 九大元类归类<br>
+      <code>mcp__zr-27ops__merkle_dag_append</code> — Merkle-DAG 主链追加
+    </div>
+  </div>
+  <div class="layer-card">
+    <div class="layer-title">L7 · 资产对账治理</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__feishu_m9_reconcile</code> — 飞书↔M9 账本对账
+    </div>
+  </div>
+  <div class="layer-card">
+    <div class="layer-title">L8 · 安全确权</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__efuse_trigger</code> — eFuse 熔断触发<br>
+      <code>mcp__zr-27ops__zkp_verify</code> — ZKP 零知识隐私校验
+    </div>
+  </div>
+  <div class="layer-card">
+    <div class="layer-title">L9 · 决策与法律护盾</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__solution_eval</code> — 方案生成评估<br>
+      <code>mcp__zr-27ops__risk_grade</code> — 风险识别分级<br>
+      <code>mcp__zr-27ops__legal_opinion</code> — 法律意见书生成
+    </div>
+  </div>
+  <div class="layer-card">
+    <div class="layer-title">L10 · 业务实体约束</div>
+    <div class="ops">
+      <code>mcp__zr-27ops__civilization_constraint</code> — 文明仿真约束<br>
+      <code>mcp__zr-27ops__role_meta_check</code> — 角色元规则隔离校验<br>
+      <code>mcp__zr-27ops__keyframe_916_consistency</code> — 9:16 关键帧一致性
+    </div>
+  </div>
+</div>
+
+<h4>双通道互备机制</h4>
+
+<div class="flow">
+  <div class="node">AtomCode（本地免费执行）</div>
+  <div class="arrow">⇄</div>
+  <div class="node">MCP Server（zr-27ops）</div>
+  <div class="arrow">⇄</div>
+  <div class="node">OCTOP（云端技能包）</div>
+</div>
+
+<table>
+  <tr><th>通道</th><th>执行位置</th><th>额度消耗</th><th>适用场景</th></tr>
+  <tr><td>MCP 通道</td><td>本地 AtomCode 调用</td><td><span class="badge badge-green">免费（qwen3.8-27b）</span></td><td>日常蒸馏、轻量算子、本地开发</td></tr>
+  <tr><td>OCTOP skill-packages</td><td>云端智能体</td><td><span class="badge badge-blue">云端额度</span></td><td>联邦编排、跨域协作、重算子深度执行</td></tr>
+</table>
+
+<div class="callout">
+  <div class="label">实施状态</div>
+  <p style="margin:0"><span class="badge badge-green">已落地</span> MCP Server 已部署（785 行纯标准库），注册至 atomcode 全局配置，握手自测通过，端到端实测算子调用成功。</p>
+</div>
+<h3>方向③：生态绑定——AtomCode × OCTOP 互补</h3>
+
+<div class="callout">
+  <div class="label">本白皮书即交付物</div>
+  <p style="margin:0"><span class="badge badge-gold">方向③交付完成</span> 本文档即为方向③的正式交付物，阐述 AtomCode 与 OCTOP 生态的互补关系与绑定方案。</p>
+</div>
+
+<h4>互补定位</h4>
+
+<table>
+  <tr><th>维度</th><th>AtomCode（本地执行手）</th><th>OCTOP（云端智能体生态）</th></tr>
+  <tr><td>部署位置</td><td>本地服务器（123.207.202.158）</td><td>火斗云智 AIOS 云端</td></tr>
+  <tr><td>核心能力</td><td>编码辅助、真值蒸馏、MCP 工具调用</td><td>技能包分发、联邦编排、多智能体协作</td></tr>
+  <tr><td>模型额度</td><td>免费（qwen3.8-27b / glm5.3-flash）</td><td>云端按量付费 / 套餐</td></tr>
+  <tr><td>响应延迟</td><td>本地执行，低延迟</td><td>云端调度，网络延迟</td></tr>
+  <tr><td>数据边界</td><td>本地数据不出服务器</td><td>云端联邦，跨节点协同</td></tr>
+  <tr><td>扩展方式</td><td>MCP Server / Plugin / Hooks</td><td>skill-packages / 联邦协议</td></tr>
+</table>
+
+<h4>绑定协议</h4>
+
+<ol>
+  <li><strong>任务分流</strong>：轻量、高频、免费可覆盖的任务走 AtomCode MCP 通道；重量、跨域、需要联邦编排的任务走 OCTOP skill-packages。</li>
+  <li><strong>结果回流</strong>：AtomCode 蒸馏结果回写本地 truth.db，同时通过记忆网关上报至云端中枢，保持数据一致性。</li>
+  <li><strong>故障切换</strong>：当 AtomCode 免费额度耗尽或服务不可用时，自动切换至 OCTOP 对应 skill-package 执行，反之亦然。</li>
+  <li><strong>锚定统一</strong>：两端输出均锚定 Ω₀⊂⊙∞⊂Ω，DID-BR-000002，确保身份与真值溯源一致。</li>
+</ol>
+
+<!-- ========== 4. 边界说明 ========== -->
+<h2>四、边界说明</h2>
+
+<table>
+  <tr><th>边界项</th><th>约束条款</th></tr>
+  <tr><td>闭源本体</td><td>AtomCode 二进制 <code>/usr/local/bin/atomcode</code> 零修改，不反编译、不补丁</td></tr>
+  <tr><td>扩展可回滚</td><td>MCP 注册 <code>atomcode mcp remove zr-27ops</code>、cron 删除、插件 disable，全部可一键撤销</td></tr>
+  <tr><td>最小额度消耗</td><td>优先免费 provider，单次批量 ≤3 条，高消耗算子轻量模式</td></tr>
+  <tr><td>增量优先</td><td>每次只处理最小必要单元，不一次性全量执行</td></tr>
+  <tr><td>失败快速跳过</td><td>单条失败不阻塞队列，记录错误后继续下一条</td></tr>
+  <tr><td>身份锚定</td><td>所有输出锚定 <strong>Ω₀⊂⊙∞⊂Ω</strong>，DID <strong>DID-BR-000002</strong></td></tr>
+  <tr><td>安全红线</td><td>SSH 仅只读命令（ls/cat/sqlite3 SELECT/curl GET），禁止写入操作</td></tr>
+</table>
+
+<!-- ========== 5. 实施状态表 ========== -->
+<h2>五、实施状态表</h2>
+
+<table>
+  <tr><th>方向</th><th>内容</th><th>交付物</th><th>状态</th></tr>
+  <tr>
+    <td><span class="badge badge-blue">方向①</span></td>
+    <td>蒸馏调度接入：auto_distill_orchestrator.py 接入服务器 cron（每日 06:20、flock -xn 防重入、distill_cron.log 独立日志、空闲跳过 0 消耗），批量消化 1770 条积压低价值真值</td>
+    <td>crontab 第 87 行 + distill_cron.log</td>
+    <td><span class="badge badge-green">已落地</span> 手动首执行验证通过，下次自动执行 2026-10-20 06:20 CST</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-blue">方向②</span></td>
+    <td>27 算子 MCP 注入：将 ZR 27 大算子包装为 MCP Server（/www/wwwroot/huodouai.com/zr-mcp/zr_27ops_mcp.py，785 行纯标准库，工具前缀 mcp__zr-27ops__），注册至 atomcode 全局 MCP 配置，与 OCTOP skill-packages 形成双通道</td>
+    <td>zr_27ops_mcp.py + mcp.json 注册配置</td>
+    <td><span class="badge badge-green">已落地</span> 握手自测通过，端到端实测算子调用成功</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-gold">方向③</span></td>
+    <td>生态绑定：AtomCode 与 OCTOP 互补——OCTOP 承担云端技能包/联邦编排，AtomCode 承担本地免费执行；MCP 与 skill-packages 双通道互备</td>
+    <td><strong>本白皮书</strong></td>
+    <td><span class="badge badge-green">已交付</span></td>
+  </tr>
+</table>
+
+<!-- ========== 6. 验收准则 ========== -->
+<h2>六、验收准则</h2>
+
+<table>
+  <tr><th>验收项</th><th>验收标准</th><th>验证方法</th></tr>
+  <tr>
+    <td>调度接入回读</td>
+    <td>cron 配置文件存在且内容正确（06:20 / flock / 独立日志）</td>
+    <td><code>cat /etc/cron.d/zr-distill-orchestrator</code> 回读校验</td>
+  </tr>
+  <tr>
+    <td>调度首执行</td>
+    <td>首次 cron 触发后 <code>cron_distill.log</code> 有执行记录，或"空闲跳过"记录</td>
+    <td>日志文件时间戳 ≥ cron 配置时间</td>
+  </tr>
+  <tr>
+    <td>MCP 实测算子调用</td>
+    <td><code>atomcode mcp list</code> 可见 zr-27ops，至少 1 个工具成功调用返回结果</td>
+    <td>实调 <code>mcp__zr-27ops__truth_distill</code> 验证返回 JSON</td>
+  </tr>
+  <tr>
+    <td>官网发布 HTTP 200</td>
+    <td><code>https://www.huodouai.com/whitepaper/atomcode-ecosystem-grafting-20261019.html</code> 返回 200</td>
+    <td><code>curl -I</code> 校验</td>
+  </tr>
+  <tr>
+    <td>索引卡片更新</td>
+    <td>白皮书索引页卡片数从 86 → 87，计数文案"共 87 份白皮书"</td>
+    <td>web_fetch index.html 校验卡片计数</td>
+  </tr>
+  <tr>
+    <td>三端 md5 一致</td>
+    <td>魔搭 / AtomGit / 服务器本地三处文件 md5 校验值相同</td>
+    <td><code>md5sum</code> 三端比对</td>
+  </tr>
+  <tr>
+    <td>三层锁档回执</td>
+    <td>云盘归档 / 知识库节点 / ZONGYUAN-ROOT 内核快照，三层均有回执记录</td>
+    <td>检查锁档回执真值条目</td>
+  </tr>
+</table>
+
+<h3>6.1 当前白皮书库状态</h3>
+<p>白皮书索引页（<code>https://www.huodouai.com/whitepaper/index.html</code>）现有 <strong>86 张卡片</strong>，计数文案"共 86 份白皮书"。本白皮书发布后将成为第 <strong>87</strong> 份。</p>
+
+<!-- ========== FOOTER ========== -->
+<div class="footer">
+  <div class="anchor">Ω₀⊂⊙∞⊂Ω</div>
+  <div>DID-BR-000002</div>
+  <div>ZONGYUAN-ROOT · 元极恒一 · 火斗云智AIOS</div>
+  <div>AtomCode 生态嫁接方案技术白皮书 V1.0 · 2026-10-19</div>
+  <div>主节点 hub-central-agent ｜ 开发节点 NODE-DEV-DOUBAO-WORK-001</div>
+  <div>记忆网关 huodouai.com/api/report/truth</div>
+</div>
+
+</div>
+</body>
+</html>

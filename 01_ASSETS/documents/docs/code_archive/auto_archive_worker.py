@@ -15,7 +15,7 @@ from datetime import datetime
 # === 配置 ===
 GATEWAY_URL = "https://www.huodouai.com/api/report/truth"
 CLOUD_ROOT = "/kunlun/jiutianxuanji"
-LOCAL_QUEUE_DIR = "/home/user/Doubao/chats/38441793457419522/.tmp-tool-results/archive_queue"
+LOCAL_QUEUE_DIR = "/opt/ZONGYUAN-ROOT/.tmp-tool-results/archive_queue"
 TRACE_MARK = "Ω₀⊂⊙∞⊂Ω"
 DID = "DID-BR-000002"
 SOURCE_NODE = "Ω-TAN-7-001"

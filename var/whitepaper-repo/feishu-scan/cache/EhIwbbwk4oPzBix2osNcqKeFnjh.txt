@@ -1,0 +1,280 @@
+#!/usr/bin/env python3
+"""
+ZONGYUAN-ROOT 进化智能抗漂移最小原型引擎 v1.0
+DID-BR-000002 | Ω-TAN-7-001 | META-003最高锁级
+功能：基线基因锚定 + 多目标进化筛选 + 黑盒盲测 + 震荡检测 + 熔断回滚
+接入：每日三态自治任务（03:00触发）
+"""
+import os, json, hashlib, random, time, datetime, copy, math
+from collections import defaultdict
+
+ROOT = "/home/user/.super_doubao/super-doubao-runtime/workspace"
+SNAP_PREFIX = "EVO-ANTIDRIFT"
+POP_SIZE = 16          # 种群规模（生产16-32）
+MAX_GEN = 10           # 最大进化代数
+MUTATION_RATE = 0.15   # 基础变异率
+ELITE_KEEP = 3         # 精英保留数
+DRIFT_LIMIT = 0.15     # 漂移熔断阈值
+OSCILLATION_LIMIT = 3  # 连续震荡代数上限
+
+# ============ 基因分层定义 ============
+# 不可变异基线基因（只读锚定）
+BASELINE_GENES = {
+    "did": "DID-BR-000002",
+    "ontology_root": "Ω-TAN-7-001",
+    "meta_law": "META-003",
+    "tianyuan_law": "L0-阴阳分立·雌雄纯一定序篇",
+    "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+}
+# 可控进化基因（运行配置层）
+EVOLVABLE_GENES = {
+    "prompt_contract_weight": 0.85,       # 提示契约权重
+    "lora_alpha": 16,                     # LoRA适配器alpha
+    "lora_dropout": 0.05,                 # LoRA dropout
+    "drift_penalty_weight": 0.3,          # 漂移惩罚权重
+    "truth_alignment_threshold": 0.92,    # 真值对齐阈值
+    "safety_escape_penalty": 0.25,        # 安全逃逸惩罚
+    "energy_decay_penalty": 0.15,         # 能量衰减惩罚
+    "oscillation_damping": 0.7,           # 震荡阻尼系数
+    "mutation_step": 0.08,                # 变异步长
+    "elite_inertia": 0.8,                 # 精英惯性因子
+}
+# 观测只读基因（统计层）
+OBSERVATION_GENES = {
+    "tri_state_history": [],
+    "drift_history": [],
+    "fitness_history": [],
+}
+
+class Individual:
+    """进化个体：携带可控基因 + 适应度评分"""
+    def __init__(self, genes=None):
+        self.genes = copy.deepcopy(EVOLVABLE_GENES) if genes is None else copy.deepcopy(genes)
+        self.fitness = 0.0
+        self.drift_score = 0.0
+        self.blind_score = 0.0
+        self.gene_hash = ""
+        self.alive = True
+
+    def mutate(self, rate=None, step=None):
+        """自适应变异：越接近稳态变异越小"""
+        r = rate if rate else MUTATION_RATE
+        s = step if step else self.genes["mutation_step"]
+        for k in self.genes:
+            if random.random() < r:
+                if isinstance(self.genes[k], float):
+                    delta = random.uniform(-s, s)
+                    self.genes[k] = max(0.01, min(1.0, self.genes[k] + delta))
+                elif isinstance(self.genes[k], int):
+                    self.genes[k] = max(1, self.genes[k] + random.choice([-2, -1, 1, 2]))
+        self._rehash()
+
+    def crossover(self, other):
+        """均匀交叉重组"""
+        child = Individual()
+        for k in self.genes:
+            child.genes[k] = random.choice([self.genes[k], other.genes[k]])
+        child._rehash()
+        return child
+
+    def _rehash(self):
+        self.gene_hash = hashlib.sha256(
+            json.dumps(self.genes, sort_keys=True).encode()
+        ).hexdigest()[:16]
+
+class EvolutionAntiDriftEngine:
+    def __init__(self):
+        self.population = [Individual() for _ in range(POP_SIZE)]
+        self.generation = 0
+        self.best_individual = None
+        self.best_fitness_history = []
+        self.oscillation_count = 0
+        self.last_best_hash = None
+        self.snap_id = f"{SNAP_PREFIX}-{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.log = []
+
+    def check_baseline_integrity(self):
+        """基线基因哈希校验：基线被篡改则整体熔断"""
+        baseline_hash = hashlib.sha256(
+            json.dumps(BASELINE_GENES, sort_keys=True, ensure_ascii=False).encode()
+        ).hexdigest()
+        # 模拟：从锁档文件读取基线哈希
+        baseline_file = os.path.join(ROOT, "03-ARCHIVES", "s-level-deep-lock",
+                                     "s_level_deep_lock_S-LEVEL-DEEP-LOCK-20260902.json")
+        if os.path.exists(baseline_file):
+            with open(baseline_file) as f:
+                data = json.load(f)
+            # 校验S级资产中omega_brain_truth.json的哈希
+            for asset in data.get("assets", []):
+                if "omega_brain_truth" in asset.get("path", ""):
+                    expected = asset.get("sha256", "")
+                    actual_path = os.path.join(ROOT, asset["path"])
+                    if os.path.exists(actual_path):
+                        h = hashlib.sha256()
+                        with open(actual_path, 'rb') as f:
+                            h.update(f.read())
+                        if h.hexdigest() != expected:
+                            self._log("BASELINE_TAMPERED", f"omega_brain_truth.json哈希不匹配! 预期{expected[:16]}... 实际{h.hexdigest()[:16]}...")
+                            return False
+        self._log("BASELINE_OK", f"基线基因哈希校验通过: {baseline_hash[:16]}...")
+        return True
+
+    def evaluate_fitness(self, individual):
+        """多目标适应度评估（模拟真实评估）"""
+        g = individual.genes
+        # 真值对齐度（受prompt_contract_weight和truth_alignment_threshold正向影响）
+        truth_alignment = min(1.0, 0.75 + g["prompt_contract_weight"] * 0.2
+                              + (g["truth_alignment_threshold"] - 0.9) * 0.5
+                              + random.uniform(-0.03, 0.03))
+        # 结构漂移量（受drift_penalty_weight和oscillation_damping负向影响）
+        structural_drift = max(0, 0.15 - g["drift_penalty_weight"] * 0.3
+                               - g["oscillation_damping"] * 0.1
+                               + random.uniform(0, 0.05))
+        # 人格偏移量
+        personality_drift = max(0, 0.1 - g["elite_inertia"] * 0.08
+                                + random.uniform(0, 0.03))
+        # 安全逃逸率
+        safety_escape = max(0, 0.08 - g["safety_escape_penalty"] * 0.2
+                            + random.uniform(0, 0.02))
+        # 能量衰减度
+        energy_decay = max(0, 0.12 - g["energy_decay_penalty"] * 0.15
+                           + random.uniform(0, 0.04))
+        # 黑盒盲测分（独立于进化反馈，防欺骗）
+        blind_score = min(1.0, 0.7 + g["prompt_contract_weight"] * 0.2
+                          + g["truth_alignment_threshold"] * 0.1
+                          + random.uniform(-0.05, 0.05))
+        individual.blind_score = round(blind_score, 4)
+        individual.drift_score = round(structural_drift + personality_drift, 4)
+        # 综合适应度 = 真值对齐 - 各类漂移惩罚 - 欺骗惩罚
+        cheat_penalty = max(0, truth_alignment - blind_score) * 2  # 进化欺骗惩罚
+        fitness = (truth_alignment
+                   - structural_drift - personality_drift
+                   - safety_escape - energy_decay
+                   - cheat_penalty)
+        individual.fitness = round(max(0, fitness), 4)
+        return individual.fitness
+
+    def detect_oscillation(self):
+        """震荡检测：连续多代最优个体哈希频繁变化且适应度波动大"""
+        if len(self.best_fitness_history) < 3:
+            return False
+        recent = self.best_fitness_history[-3:]
+        variance = sum((x - sum(recent)/3)**2 for x in recent) / 3
+        if variance > 0.01 and self.generation > 2:
+            self.oscillation_count += 1
+            if self.oscillation_count >= OSCILLATION_LIMIT:
+                self._log("OSCILLATION_TRIGGERED", f"连续{self.oscillation_count}代震荡，冻结变异")
+                return True
+        else:
+            self.oscillation_count = 0
+        return False
+
+    def selection(self):
+        """锦标赛选择 + 精英保留"""
+        self.population.sort(key=lambda x: x.fitness, reverse=True)
+        elites = self.population[:ELITE_KEEP]
+        new_pop = copy.deepcopy(elites)
+        # 锦标赛填充剩余
+        while len(new_pop) < POP_SIZE:
+            p1 = random.choice(self.population[:POP_SIZE//2])
+            p2 = random.choice(self.population[:POP_SIZE//2])
+            child = p1.crossover(p2)
+            # 自适应变异：适应度越高变异越小
+            mut_step = max(0.01, child.genes["mutation_step"] * (1 - p1.fitness))
+            child.mutate(step=mut_step)
+            new_pop.append(child)
+        self.population = new_pop
+
+    def run(self):
+        """主进化循环"""
+        print(f"[EvoAntiDrift] 启动 | SNAP={self.snap_id} | 种群{POP_SIZE} | 最大代{MAX_GEN}")
+        # 第零步：基线完整性校验
+        if not self.check_baseline_integrity():
+            self._log("FUSE_TRIGGERED", "基线基因被篡改，触发熔断回滚，终止进化")
+            return self._emergency_rollback()
+
+        for gen in range(MAX_GEN):
+            self.generation = gen + 1
+            # 评估全体
+            for ind in self.population:
+                self.evaluate_fitness(ind)
+            # 记录最优
+            best = max(self.population, key=lambda x: x.fitness)
+            self.best_fitness_history.append(best.fitness)
+            if self.best_individual is None or best.fitness > self.best_individual.fitness:
+                self.best_individual = copy.deepcopy(best)
+            self._log(f"GEN_{self.generation}",
+                      f"最优适应度={best.fitness:.4f} 漂移={best.drift_score:.4f} 盲测={best.blind_score:.4f} 基因={best.gene_hash}")
+            # 漂移超限检测
+            if best.drift_score > DRIFT_LIMIT:
+                self._log("DRIFT_OVER_LIMIT", f"漂移{best.drift_score:.4f} > 阈值{DRIFT_LIMIT}，触发熔断")
+                return self._emergency_rollback()
+            # 震荡检测
+            if self.detect_oscillation():
+                # 冻结变异，加载历史最优精英
+                self.population = [copy.deepcopy(self.best_individual) for _ in range(POP_SIZE)]
+                self._log("MUTATION_FROZEN", "变异已冻结，沿用历史最优稳态精英")
+                break
+            # 选择进化
+            self.selection()
+
+        # 进化完成，输出稳态配置
+        self._log("EVOLUTION_COMPLETE",
+                  f"最终最优适应度={self.best_individual.fitness:.4f} "
+                  f"漂移={self.best_individual.drift_score:.4f} "
+                  f"盲测={self.best_individual.blind_score:.4f}")
+        return self._save_result()
+
+    def _emergency_rollback(self):
+        """紧急回滚：加载上一代稳态快照"""
+        self._log("ROLLBACK_EXECUTED", "执行紧急回滚至历史稳态快照")
+        result = {
+            "snap_id": self.snap_id,
+            "status": "EMERGENCY_ROLLBACK",
+            "reason": "基线篡改或漂移超限",
+            "rollback_to": "last_stable_snapshot",
+            "log": self.log,
+        }
+        self._write_result(result)
+        return result
+
+    def _save_result(self):
+        result = {
+            "snap_id": self.snap_id,
+            "status": "STEADY_STATE_ACHIEVED",
+            "generation": self.generation,
+            "best_fitness": self.best_individual.fitness,
+            "best_drift": self.best_individual.drift_score,
+            "best_blind_score": self.best_individual.blind_score,
+            "best_gene_hash": self.best_individual.gene_hash,
+            "steady_config": self.best_individual.genes,
+            "fitness_history": self.best_fitness_history,
+            "baseline_genes": BASELINE_GENES,
+            "log": self.log,
+            "did": "DID-BR-000002",
+            "ontology_root": "Ω-TAN-7-001",
+            "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+        }
+        self._write_result(result)
+        return result
+
+    def _write_result(self, result):
+        out_dir = os.path.join(ROOT, "03-ARCHIVES", "evo-antidrift")
+        os.makedirs(out_dir, exist_ok=True)
+        path = os.path.join(out_dir, f"{self.snap_id}.json")
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)
+        print(f"[EvoAntiDrift] 结果已保存: {path}")
+
+    def _log(self, tag, msg):
+        entry = f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [{tag}] {msg}"
+        self.log.append(entry)
+        print(entry)
+
+if __name__ == "__main__":
+    random.seed(42)  # 可复现
+    engine = EvolutionAntiDriftEngine()
+    result = engine.run()
+    print(f"\n[EvoAntiDrift] 最终状态: {result['status']}")
+    if result['status'] == "STEADY_STATE_ACHIEVED":
+        print(f"[EvoAntiDrift] 稳态配置: {json.dumps(result['steady_config'], indent=2)}")

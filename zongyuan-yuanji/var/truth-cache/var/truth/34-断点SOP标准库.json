@@ -1,0 +1,238 @@
+{
+  "table": "断点SOP标准库",
+  "table_id": "tblo4AuP00Dz7yx9",
+  "fields": [
+    "断点编号",
+    "断点描述",
+    "严重程度",
+    "错误现象",
+    "根因",
+    "状态",
+    "标准解法"
+  ],
+  "records": [
+    [
+      "BP-001",
+      "Agnes免费API批量提交限流",
+      [
+        "高"
+      ],
+      "rate_limit_exceeded，批量提交只成功1个",
+      "免费用户每日配额限制",
+      [
+        "已解决"
+      ],
+      "桥接器V3.1限流感知，每轮只提交1个，遇到429自动停"
+    ],
+    [
+      "BP-002",
+      "中文文件名nginx 500",
+      [
+        "高"
+      ],
+      "浏览器打开视频返回500 Internal Server Error",
+      "nginx对中文文件名URL编码处理有问题",
+      [
+        "已解决"
+      ],
+      "所有视频文件用英文文件名，用task_id命名"
+    ],
+    [
+      "BP-003",
+      "API返回状态大小写不匹配",
+      [
+        "高"
+      ],
+      "Agnes返回SUCCESS大写，代码判断succeeded小写，导致轮询死循环",
+      "不同API返回格式不统一",
+      [
+        "已解决"
+      ],
+      "统一转大写后比较 s.upper() in [SUCCESS,COMPLETED]"
+    ],
+    [
+      "BP-004",
+      "桥接器把系统日志当prompt",
+      [
+        "高"
+      ],
+      "生成4:3横屏错误视频，内容是技术日志",
+      "V1没做prompt校验",
+      [
+        "已解决"
+      ],
+      "V3加prompt校验：少于15字/技术关键词自动过滤"
+    ],
+    [
+      "BP-005",
+      "默认生成4:3横屏",
+      [
+        "中"
+      ],
+      "视频不是竖屏",
+      "API默认横屏",
+      [
+        "已解决"
+      ],
+      "prompt里强制写9:16竖屏，参数传ratio"
+    ],
+    [
+      "BP-006",
+      "SSH authorized_keys被锁",
+      [
+        "中"
+      ],
+      "Operation not permitted",
+      "chattr +i immutable保护",
+      [
+        "已解决"
+      ],
+      "chattr -i解锁→加公钥→chattr +i重新锁"
+    ],
+    [
+      "BP-007",
+      "记忆网关字段名错误",
+      [
+        "致命"
+      ],
+      "上报成功但value落库为空",
+      "用了content而不是truth_value",
+      [
+        "已解决"
+      ],
+      "统一用truth_value字段"
+    ],
+    [
+      "BP-008",
+      "Qwen-Image魔搭API取不到图",
+      [
+        "高"
+      ],
+      "POST返回task_id SUCCEED，但GET查结果404",
+      "异步任务模式端点不对",
+      [
+        "监控中"
+      ],
+      "改为GPU实例本地下载模型跑"
+    ],
+    [
+      "BP-009",
+      "GPU实例临时不常驻",
+      [
+        "中"
+      ],
+      "用完即销毁",
+      "魔搭100小时免费实例",
+      [
+        "监控中"
+      ],
+      "79小时内用完，重要成果及时归档到云端"
+    ],
+    [
+      "BP-010",
+      "systemd Type=oneshot和--daemon冲突",
+      [
+        "中"
+      ],
+      "服务启动超时failed",
+      "oneshot等命令退出，但守护进程不退出",
+      [
+        "已解决"
+      ],
+      "改成Type=simple"
+    ],
+    [
+      "BP-011",
+      "腾讯云COS已禁用",
+      [
+        "低"
+      ],
+      "不要用COS",
+      "用户明确指令",
+      [
+        "已解决"
+      ],
+      "统一归档到云端本地磁盘"
+    ],
+    [
+      "BP-012",
+      "飞书跨租户审批不可用",
+      [
+        "低"
+      ],
+      "审批只在本租户内",
+      "飞书平台限制",
+      [
+        "已解决"
+      ],
+      "不依赖跨租户审批，用飞书群通知人工确认"
+    ],
+    [
+      "BP-013",
+      "ntfy GPU agent不响应命令",
+      [
+        "中"
+      ],
+      "发了ntfy消息但GPU不执行",
+      "agent脚本只处理特定格式",
+      [
+        "监控中"
+      ],
+      "用heartbeat确认在线，命令格式要匹配agent脚本"
+    ],
+    [
+      "BP-014",
+      "Agnes免费模型出外国人脸",
+      [
+        "高"
+      ],
+      "生成的人物是西方面孔",
+      "免费模型训练数据偏西方",
+      [
+        "监控中"
+      ],
+      "用GPU跑Qwen-Image国产模型"
+    ],
+    [
+      "BP-015",
+      "文件权限导致nginx 403/500",
+      [
+        "中"
+      ],
+      "视频文件复制过去打不开",
+      "文件owner是root，nginx是www",
+      [
+        "已解决"
+      ],
+      "chown www:www + chmod 644"
+    ],
+    [
+      "BP-016",
+      "备网关TLS证书主体名不匹配被误判为不可达",
+      [
+        "高"
+      ],
+      "curl https://drama.huodouai.com/api/status 返回 code=000，schannel: SNI or certificate check failed: SEC_E_WRONG_PRINCIPAL (0x80090322)；加 -k 忽略证书后返回 200，证明服务存活",
+      "备网关返回证书的主体名与主机名 drama.huodouai.com 不匹配（复用主域名证书），客户端严格校验直接失败。Python urllib 会把该错误包装为 URLError(reason=SSLCertVerificationError)，只捕获 SSLCertVerificationError 抓不到，被笼统记为 DOWN",
+      [
+        "已解决"
+      ],
+      "认知态不得笼统记 DOWN：①捕获 URLError 后解 reason 判定是否 TLS 类故障；②用 check_hostname=False + verify_mode=CERT_NONE 做二次宽松探测，仅用于判定存活、不宣称链路可信；③服务活但鉴证异常记 DEGRADED 且 detail 带 TLS principal_mismatch，既不得记 OK 也不得记 DOWN。已在元认知层 http_probe 实现"
+    ],
+    [
+      "BP-017",
+      "自愈重启等待窗口不足致服务被误判启动失败",
+      [
+        "中"
+      ],
+      "breakpoint_sop.restart_own_service 拉起 autonomy_engine 后等待 20s 端口仍不通，判 FAILED；实际进程正常，约 20s 才完成监听",
+      "引擎 __main__ 先起 serve_forever 再跑首拍 tick_once()，首拍含全域 HTTP 探测（含外网网关超时等待），冷启动到端口可连实测约 20s，等待窗口恰好卡在边界",
+      [
+        "已解决"
+      ],
+      "等待窗口由 20s 放宽到 45s；并加幂等前置检查——端口已可达则直接返回 no restart needed，不重复拉起，避免端口抢占与进程堆叠"
+    ]
+  ],
+  "record_count": 17,
+  "synced_at": "2026-10-06T08:40:43+0800"
+}

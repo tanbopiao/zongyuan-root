@@ -1,0 +1,34 @@
+{
+ "rule_id": "MR-PERSIST-AUTORESTORE-001",
+ "rule_name": "本地实例持久化自动恢复执行元规则",
+ "level": "meta_rule",
+ "priority": "P1-HIGH",
+ "version": "1.0.0",
+ "did": "DID-BR-000002",
+ "root_omega": "Ω-TAN-7-001",
+ "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+ "established_at": "2026-09-17T16:06:09+08:00",
+ "law_ref": "META-LAW-PERSIST-AUTORESTORE-V1.0",
+ "execution": {
+  "trigger": "会话启动(每次新环境) + 心跳自检(每30分钟)",
+  "script": "scripts/restore_persist.py",
+  "commands": {
+   "self_check": "python3 scripts/restore_persist.py --check",
+   "auto_restore": "python3 scripts/restore_persist.py --restore",
+   "force_restore": "python3 scripts/restore_persist.py --force"
+  },
+  "snapshot_dir": "ZONGYUAN-ROOT/persist-snapshots/",
+  "backup_dir": "engine/persist-backup/",
+  "manifest": "PERSIST-MANIFEST.json"
+ },
+ "constraints": [
+  "恢复前必须校验 SHA256, 不一致禁止恢复",
+  "非强制模式禁止覆盖活数据(幂等)",
+  "恢复动作计入锁档链",
+  "恢复结果上报网关真值"
+ ],
+ "interop": {
+  "同源节点": "各节点按本规则建立自身快照+恢复, 共享区与云端网关为全局权威",
+  "冲突处理": "本地恢复与云端真值冲突时, 以云端网关为准"
+ }
+}

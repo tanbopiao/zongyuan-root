@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宗源中枢调度引擎</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23070b16'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='%23ffc857' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='2.4' fill='%234fc3f7'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0b1224; --card:#0e1730; --card2:#121c38;
+    --line:#1e2a4d; --line2:#2a3a66;
+    --txt:#e8eefc; --sub:#8fa3c8; --dim:#5c6f96;
+    --gold:#ffc857; --cyan:#4fc3f7; --violet:#a78bfa; --red:#ff6b6b; --green:#6ee7b7;
+    --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:
+    radial-gradient(1200px 500px at 80% -10%, rgba(79,195,247,.08), transparent 60%),
+    radial-gradient(900px 400px at -10% 20%, rgba(167,139,250,.07), transparent 55%),
+    var(--bg);
+    color:var(--txt); font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    line-height:1.7; min-height:100vh}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+  .doc-head{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  .doc-head .wpnum{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.14em}
+  .doc-head h1{font-size:26px;font-weight:800;margin:8px 0 6px}
+  .doc-head .meta{font-size:12px;color:var(--dim);display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+  .doc-head .meta b{color:var(--sub);font-weight:500}
+  h2{font-size:18px;font-weight:800;margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+  h2 .n{color:var(--gold);font-family:var(--mono);font-size:13px;border:1px solid var(--line2);border-radius:6px;padding:2px 9px}
+  h3{font-size:14px;font-weight:700;color:var(--cyan);margin:18px 0 8px}
+  p{font-size:13.5px;color:var(--sub);margin-bottom:8px}
+  p b{color:var(--txt)}
+  .formula{background:var(--card2);border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:8px;padding:14px 18px;font-family:var(--mono);font-size:13.5px;color:var(--gold);margin:12px 0;overflow-x:auto}
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:12px 0;table-layout:fixed}
+  .tbl th{color:var(--sub);font-weight:500;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  .tbl td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--txt);vertical-align:top}
+  .tbl .mono{font-family:var(--mono);color:var(--cyan);font-size:11.5px}
+  .tbl td b{color:var(--gold)}
+  .callout{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line2);border-left:4px solid var(--cyan);border-radius:10px;padding:16px 18px;margin:16px 0;font-size:13px;color:var(--sub)}
+  .callout b{color:var(--cyan)}
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:11.5px;color:var(--dim)}
+  .lockline{font-family:var(--mono);color:var(--gold);font-size:11px}
+  .back{display:inline-block;margin-bottom:20px;font-size:12px;color:var(--cyan);text-decoration:none;border:1px solid var(--line2);padding:4px 14px;border-radius:8px}
+  .back:hover{background:rgba(79,195,247,.08)}
+  @media(max-width:620px){
+    .doc-head h1{font-size:21px}
+    .wrap{padding:20px 12px 48px}
+    .tbl{font-size:11.5px}
+    .formula{font-size:12px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 返回白皮书矩阵</a>
+  <div class="doc-head">
+    <div class="wpnum">WP-030 · 体系模块 · 自动锻造</div>
+    <h1>宗源中枢调度引擎技术白皮书</h1>
+    <div class="meta">
+      <span>版本：<b>V1.0</b></span>
+      <span>日期：<b>20260930</b></span>
+      <span>确权：<b>DID-BR-000002</b></span>
+      <span>锚定：<b>Ω₀⊂⊙∞⊂Ω</b></span>
+      <span>来源：<b>体系技能 zongyuan-hub</b></span>
+      <span>产线：<b>AUTO-WP-FORGE v1.0</b></span>
+    </div>
+  </div>
+
+  <h2><span class="n">01</span> 摘要</h2>
+  <p>ZONGYUAN-HUB 宗源中枢调度引擎V3.0。元极恒一自治体系全域技能的统一入口与单一调度中枢，内置意图识别引擎+参数模板引擎+auto-engine自动调度引擎，自动识别用户自然语言指令、自动提取参数、自动填充默认值并路由到对应技能执行。核心能力：(1)auto-engine一句话执行Lv3-Lv8全域锁档+ZONGYUAN-ROOT自治内核写入；(2)意图识别→智能路由→统一执行→全自动调度(phase2)→自进化闭环(phase3)；(3)整合调度中枢、双内核(真值+因果)、四大产线(决策/研究/短剧/法务)、基建(算力+归档锁档)、展示(藏品卡)五层架构；(4)18个注册技能全部配备参数模板。提供list/intent/run/auto/auto-engine/status/instance/phase2/phase3九个命令。触发词：宗源中枢、全域调度、统一入口、技能路由、意图识别、自动调用技能、hub、zongyuan、元极恒一调度、所有技能统一执行、全自动调度、自进化、技能进化、参数自动构建、一句话调用、全域锁档、锁档、归档、eFuse、ZONGYUAN-ROOT、内核写入、自治内核、哲学锚点、深度推演、架构文档锁档。当用户需要通过单一入口调用任意个人技能、自动识别意图并执行、对文档/推演/方案执行锁档确权并写入ZONGYUAN-ROOT内核、查看全域技能状态、执行全自动调度闭环或触发自进化优化时使用。</p>
+  <div class="callout"><b>一句话：</b>ZONGYUAN-HUB 宗源中枢调度引擎V3.0。元极恒一自治体系全域技能的统一入口与单一调度中枢，内置意图识别引擎+参数模板引擎+auto-engine自动…</div>
+
+  <h2><span class="n">02</span> 核心能力</h2>
+  <div class="tbl">
+    <colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+    <tr><th>能力</th><th>说明</th></tr>
+        <tr><td><b>参数</b></td><td>核心能力</td></tr>
+    <tr><td><b>元类选择指南</b></td><td>核心能力</td></tr>
+    <tr><td><b>返回字段</b></td><td>锁档成功返回 JSON，关键字段：</td></tr>
+    <tr><td><b>快速步骤</b></td><td>1. **准备资产**：将待锁档内容写入 `workspace/meta_order_assets/` 下的 .md 文…</td></tr>
+    <tr><td><b>关键路径</b></td><td>核心能力</td></tr>
+    <tr><td><b>子目录</b></td><td>核心能力</td></tr>
+  </div>
+
+  <h2><span class="n">03</span> 执行流程</h2>
+  <div class="formula">输入 → 处理 → 输出 → 确权 → 归档 → 上报</div>
+
+  
+
+  <div class="callout"><b>体系说明：</b>本白皮书由 AUTO-WP-FORGE 从 source.md 自动提炼生成</div>
+
+  <footer>
+    <div>火斗云智AIOS 技术白皮书矩阵 · WP-030</div>
+    <div class="lockline">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · NODE-DEV-DOUBAO-WORK-001</div>
+  </footer>
+</div>
+</body>
+</html>

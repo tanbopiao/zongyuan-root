@@ -2,7 +2,7 @@
 # 生成元法则全集Markdown文档
 import json
 
-with open("/home/user/Doubao/chats/38437458338949122/core_metalaws.json") as f:
+with open("/opt/ZONGYUAN-ROOT/core_metalaws.json") as f:
     data = json.load(f)
 
 metalaws = data["metalaws"]
@@ -74,7 +74,7 @@ md.append("")
 md.append("Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 元极恒一超认知永恒自治体系")
 
 output = "\n".join(md)
-with open("/home/user/Doubao/chats/38437458338949122/元法则全集.md", "w") as f:
+with open("/opt/ZONGYUAN-ROOT/元法则全集.md", "w") as f:
     f.write(output)
 
 print("元法则全集已生成:", len(output), "字符")

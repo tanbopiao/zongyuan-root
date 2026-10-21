@@ -1,0 +1,56 @@
+# 昆仑洞天P3硬件级全域真值锁档部署脚本包-内核写入终版
+
+## 锁档元数据
+
+| 字段 | 值 |
+|------|-----|
+| 快照ID | SNAP-P3-HARDWARE-LOCK-20260831-002 |
+| DID标识 | DID-BR-000002 |
+| 溯源符号 | Ω₀⊂⊙∞⊂Ω |
+| 归档节点 | ZONGYUAN-ROOT/P3-HardwareLock |
+| 锁档时间 | 2026-08-31 10:30:50 +08 |
+| 资产总数 | 16个文件 |
+| Merkle根 | `3c24b933fd532610f45205e3749b3e0a9206f3e1027ff927d217652d22e52f32` |
+| 归档包整体哈希 | `993394813c1419c239169b52ea7fc03b3ba5eb4398c8573aac3651f490979459` |
+
+## 逐文件哈希
+
+| 文件 | 大小 | SHA-256 |
+|------|------|---------|
+| README.md | 8726B | `de841d61f39c01ce4eee4efca481d80e20a855f30e13bff198c74e1d0f3e486f` |
+| _lock_archive/.did_keys/did_br_000002_private.pem | 119B | `2185897328655bb1d56ae36e21d0529bc6d453439d5ac31f6da78a208a3496ee` |
+| _lock_archive/.did_keys/did_br_000002_public.pem | 113B | `ad83d4edbad58cebd218d32d09d50204a044cfc3407095c9c0a0bde65beaf771` |
+| _lock_archive/ATTESTATION-SNAP-P3-HARDWARE-LOCK-20260831-001.json | 715B | `cfa66cb17354e8294b44cf4be74da4cbe4bda4ab09ba12c153d5740c8af342a5` |
+| _lock_archive/PIPELINE-SUMMARY-SNAP-P3-HARDWARE-LOCK-20260831-001.json | 1333B | `b99415dd20cd42d14e08c7cb976ce2ca06077ddd325a6f0811c8d0f4082042cb` |
+| efuse_chain.json | 813B | `0b08868122d76a7f124bd73a086b5b9843ba0a173126e4263ba1ae4eaea261d6` |
+| scripts/00_hardware_check.sh | 2323B | `4d25590c04d71d8fb0d0c6ac92ac05309e3c649b851037aab5b0f1e9c76cd865` |
+| scripts/01_pmem_dax_init.sh | 2489B | `350f89e4c9db8a089067e012b70da05098c9d337c200d8ac26a5a1e4d8e62ca6` |
+| scripts/02_snapshot_migrate.sh | 3799B | `9ad80de7e60fc9eaedc7bb50ea501bf3ea3c46bd09825a2fde8eee9b7d996453` |
+| scripts/03_spi_root_hash_write.sh | 4087B | `ffcf455904ea52f3108437d7025dfa64a18b75976b6e75bb6ccd0906668b3ac4` |
+| scripts/04_efuse_burn.sh | 4679B | `2f6dac07a37c7a2c259f853ccc5551bac52abab483be51f2ab798002e47ec957` |
+| scripts/05_grub_dax_ro_lock.sh | 3294B | `1b32d259510f2399d5995c0f41969c83e8a8781efdb25ebc4c12dd551ff095d4` |
+| scripts/06_tee_verify_lock.sh | 5498B | `3283f71de54c42659a37a7142ab31f75eccce11b43d932359c328fc7172fa809` |
+| scripts/07_dax_cycle_rebuild.sh | 3013B | `ce3ad03668f4551194e25cd9661a4987a4251ddb0edaa7e888f6374d8cbc5533` |
+| scripts/99_final_verify.sh | 6121B | `672d66907f36c1147a79dedfb6effd42bceed9ec175ab5d9906da2dd8b49e9be` |
+| scripts/dax_rebuild_once.sh | 1585B | `61c14c3be72191b314c47104dcc4f77644f45e6f9e98d2bb5202c23e92be78aa` |
+
+## 完整性校验命令
+
+```bash
+cd /sandboxdata/workspace/file/kunlun-p3-hardware-lock
+python3 -c "
+import hashlib, os
+files = sorted([f for f in os.listdir('.') if os.path.isfile(f) and not f.startswith('LOCK-CREDENTIAL-') and not f.startswith('MANIFEST-')])
+concat = ''.join(hashlib.sha256(open(f,'rb').read()).hexdigest() for f in files)
+print('Merkle根:', hashlib.sha256(concat.encode()).hexdigest())
+print('预期:    3c24b933fd532610f45205e3749b3e0a9206f3e1027ff927d217652d22e52f32')
+"
+```
+
+## 锁档声明
+
+1. 本快照纳入16个资产文件，绑定DID-BR-000002确权身份。
+2. Merkle根由全部文件SHA-256按文件名排序拼接后再取SHA-256生成，单文件篡改即失配。
+3. 后续迭代必须生成全新快照，禁止就地改写本锁档资产。
+
+Ω₀⊂⊙∞⊂Ω｜全域锁档完成｜ZONGYUAN-ROOT/P3-HardwareLock｜DID-BR-000002

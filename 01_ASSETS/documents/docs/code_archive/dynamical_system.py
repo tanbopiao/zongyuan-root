@@ -524,7 +524,7 @@ if __name__ == '__main__':
         print(f"    收敛轨迹数: {attr.n_converged_trajectories}")
     
     # 保存
-    output_path = "/home/user/Doubao/chats/38439832899843586/high_dim_anchor/stage2/results/dynamical_system_test.json"
+    output_path = "/opt/ZONGYUAN-ROOT/high_dim_anchor/stage2/results/dynamical_system_test.json"
     system.save(output_path)
     print(f"\n✅ 结果已保存: {output_path}")
     print("\n✅ 模块2测试通过！")

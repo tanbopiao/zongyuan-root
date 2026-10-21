@@ -33,7 +33,7 @@ if '--batch' in sys.argv:
 BASE = Path('/home/user/ZONGYUAN-ROOT')
 SEED_DIR = BASE / 'config' / 'wp-seed'                      # 种子素材目录
 STATE_FILE = BASE / 'data' / 'wp_state.json'                # 生成状态台账
-REPO_DIR = Path('/home/user/Doubao/chats/38441716968655362/.tmp-zongyuan-whitepaper')  # 魔搭仓库本地镜像
+REPO_DIR = Path('/opt/ZONGYUAN-ROOT/var/whitepaper-repo')  # 魔搭仓库本地镜像
 REPO_SUBDIR = 'datalake/whitepapers/whitepaper-matrix'     # 仓库内白皮书矩阵目录
 TOKEN_FILE = Path.home() / '.modelscope' / 'credentials' / 'git_token'
 GATEWAY = 'https://www.huodouai.com/api/report/truth'

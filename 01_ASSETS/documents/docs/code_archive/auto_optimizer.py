@@ -5,11 +5,11 @@ import os
 from datetime import datetime
 from collections import Counter
 
-OUTPUT_DIR = "/home/user/Doubao/chats/38439832899843586/auto_optimization"
+OUTPUT_DIR = "/opt/ZONGYUAN-ROOT/auto_optimization"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # 读取自动化运行日志
-log_dir = "/home/user/Doubao/chats/38439832899843586/auto_logs"
+log_dir = "/opt/ZONGYUAN-ROOT/auto_logs"
 logs = []
 if os.path.exists(log_dir):
     for f in os.listdir(log_dir):

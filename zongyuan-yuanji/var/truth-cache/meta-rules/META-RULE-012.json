@@ -1,0 +1,15 @@
+{
+  "law_id": "META-RULE-012",
+  "name": "定时任务配额稳态保护元规则",
+  "level": "P0",
+  "version": "v1.0",
+  "description": "本机定时任务/worker并发必须受稳态配额约束，防止算力过载与配额争抢导致系统失稳",
+  "clauses": [
+    {"id": "MR12-1", "text": "本机最大 worker 并发上限 MAX_WORKER_COUNT=4，任何时刻运行中 worker 数量不得超过该值"},
+    {"id": "MR12-2", "text": "并发达到上限时禁止新增 worker，节点心跳标记 quota_full 并写入消息台账，任务保留待下轮"},
+    {"id": "MR12-3", "text": "超时任务必须自动回收（V1.4 超时回收规则），回收后释放容器配额，配额释放前不得再入队"},
+    {"id": "MR12-4", "text": "定时任务必须携带全局互斥锁，同一节点同一任务禁止并发执行"}
+  ],
+  "scope": "worker_auto_deploy_timer / hook_trigger_worker / task_timeout_recycle",
+  "DID": "DID-BR-000002"
+}

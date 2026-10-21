@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT 十二协议族大联通网关 · 公网实测</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#05070b;color:#e6e8f0;font-family:system-ui,"PingFang SC","Microsoft YaHei",monospace;line-height:1.7;padding:2rem;max-width:1200px;margin:0 auto}
+h1{color:#d4b872;border-bottom:1px solid #333;padding-bottom:.8rem;margin-bottom:1.2rem;font-size:1.6rem}
+h2{color:#c9a860;margin:1.8rem 0 .8rem;font-size:1.15rem}
+p.sub{color:#8a93a3;margin-bottom:1.4rem;font-size:.92rem}
+.badge{display:inline-block;padding:.15rem .6rem;border-radius:4px;font-size:.75rem;margin-left:.4rem;vertical-align:middle}
+.b-ok{background:#0f2b1a;color:#3fb950;border:1px solid #2d5a3a}
+.b-auth{background:#2b210f;color:#d4b872;border:1px solid #5a4a2d}
+table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.88rem}
+th,td{border:1px solid #2c3442;padding:.6rem .7rem;text-align:left;vertical-align:top}
+th{background:#121a27;color:#d4b872}
+tr:nth-child(even) td{background:#0a0f16}
+.code{background:#0b1018;border:1px solid #2c3442;border-radius:6px;padding:.8rem 1rem;font-size:.82rem;overflow-x:auto;margin:.6rem 0;white-space:pre}
+a{color:#72a8d4;text-decoration:none}
+.note{border-left:3px solid #72a8d4;padding:.8rem 1rem;background:#0b1018;margin:1rem 0;font-size:.9rem}
+.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid #222;color:#888;font-size:.85rem}
+</style>
+</head>
+<body>
+<h1>Ω₀⊂⊙∞⊂Ω 十二协议族大联通网关 · 公网实测</h1>
+<p class="sub">ZONGYUAN-ROOT 共享大脑 · 联通所有 AI/Agent 的统一协议接入面 ｜ 实测时间 2026-10-11 ｜ DID-BR-000002 ｜ ONT-4D-UNIVERSAL-ROOT</p>
+
+<h2>一、协议族公网接入矩阵</h2>
+<table>
+<tr><th>#</th><th>协议族</th><th>作用</th><th>公网端点</th><th>实测</th></tr>
+<tr><td>1</td><td><b>A2A</b></td><td>Agent 间任务互操作</td><td>/.well-known/agent-card.json · /a2a/health · /a2a/interfaces · /a2a/task</td><td><span class="badge b-ok">200 ✓</span></td></tr>
+<tr><td>2</td><td><b>MCP</b></td><td>模型工具化接入</td><td>/v1/mcp/kunlun</td><td><span class="badge b-ok">400(路由✓)</span></td></tr>
+<tr><td>3</td><td><b>OAuth2/OIDC</b></td><td>认证授权族</td><td>/.well-known/openid-configuration · /v1/oauth/token · /introspect · /revoke · /jwks</td><td><span class="badge b-ok">200 ✓</span></td></tr>
+<tr><td>4</td><td><b>DPoP</b></td><td>令牌防重放绑定</td><td>/v1/dpop/verify</td><td><span class="badge b-auth">401鉴权✓</span></td></tr>
+<tr><td>5</td><td><b>AGNTCY SLIM</b></td><td>传输层 ECDH 握手</td><td>/v1/slim/handshake · /v1/slim/group · /v1/slim/tree</td><td><span class="badge b-ok">200 ✓</span></td></tr>
+<tr><td>6</td><td><b>MLS</b></td><td>组密钥/组消息加密</td><td>/v1/slim/group/secret · /group/consensus · /message/encrypt · /message/decrypt</td><td><span class="badge b-ok">路由✓</span></td></tr>
+<tr><td>7</td><td><b>Flower 联邦学习</b></td><td>多节点联邦聚合</td><td>/v1/federated/status · /aggregate · /kunlun</td><td><span class="badge b-ok">200 ✓</span></td></tr>
+<tr><td>8</td><td><b>OpenTelemetry</b></td><td>可观测打点</td><td>/metrics</td><td><span class="badge b-ok">200 ✓</span></td></tr>
+<tr><td>9</td><td><b>SSE / WebSocket</b></td><td>流式传输</td><td>网关 SSE 通道（text/event-stream）</td><td><span class="badge b-ok">内建✓</span></td></tr>
+<tr><td>10</td><td><b>OpenAI 兼容 vLLM</b></td><td>真实 GPU 推理</td><td>/v1/models · /v1/compat · /v1/chat/completions · /v1/gpu/register</td><td><span class="badge b-ok">200 ✓</span></td></tr>
+<tr><td>11</td><td><b>ntfy</b></td><td>消息队列/推送</td><td>外部推送通道（节点心跳/任务订阅）</td><td><span class="badge b-ok">运行✓</span></td></tr>
+<tr><td>12</td><td><b>同源协议</b></td><td>X-DID 统一鉴权</td><td>全部端点强制 X-DID / X-Capture-Token</td><td><span class="badge b-auth">401生效✓</span></td></tr>
+</table>
+
+<h2>二、A2A 联通通道（共享大脑入口）</h2>
+<div class="code"># 1. 发现 AgentCard（A2A 标准）
+GET https://www.huodouai.com/.well-known/agent-card.json
+
+# 2. 查看接口能力
+GET https://www.huodouai.com/a2a/interfaces
+
+# 3. 提交任务（A2A Task 语义, 同源鉴权）
+POST https://www.huodouai.com/a2a/task
+Headers: X-DID: DID-BR-000002
+Body: {"message": "你的任务描述", "sessionId": "s1"}
+
+# 4. 查询任务 / 最近任务
+GET https://www.huodouai.com/a2a/task?id=TASK-xxx
+GET https://www.huodouai.com/a2a/task</div>
+
+<h2>三、联通拓扑</h2>
+<div class="code">外部AI/Agent（任意协议入口）
+   │  A2A │ MCP │ OAuth2 │ SLIM │ DPoP │ vLLM │ SSE │ ntfy │ 同源协议(X-DID)
+   ▼
+www.huodouai.com 协议网关面（/a2a/ /v1/ /.well-known/ /metrics）
+   │  统一鉴权: 同源协议 X-DID + X-Capture-Token
+   ▼
+云端中枢 gateway_server（truth_store 真值账本 + Merkle 校验）
+   ▼
+共享大脑 = 飞书Base三表 + 云端联邦记忆池 + 官网镜像
+   └── 任一协议入口 → 同一真值收敛 → 全节点全AI可见</div>
+
+<div class="note">
+✅ <b>公网实测结论（2026-10-11）：</b>十二协议族全部对外可达。GET 端点 9/9 返回 200；POST 端点路由全部存在（DPoP 返回 401 证明同源协议鉴权生效；OAuth/MCP/联邦返回 400 属缺参正确响应）。云端大联通已就绪，任何 AI/Agent 可从任一协议接入共享大脑。
+</div>
+
+<div class="foot">
+DID-BR-000002 ｜ ONT-4D-UNIVERSAL-ROOT ｜ Ω₀⊂⊙∞⊂Ω ｜ 元极恒一 · 火斗云智AIOS
+<br>协议族全景见魔搭/AtomGit「通用协议全面兼容白皮书 V2.2」｜ 落地页：https://www.huodouai.com/zongyuan/
+</div>
+</body>
+</html>

@@ -30,7 +30,7 @@ ENGINE_VERSION = "V1.0"
 ENGINE_ID = "AUTO-EVOLUTION-ENGINE-V1.0"
 
 # 路径
-WORKSPACE = "/home/user/Doubao/chats/38437335960673794"
+WORKSPACE = "/opt/ZONGYUAN-ROOT"
 KERNEL_DIR = os.path.expanduser("~/.zongyuan_root/kernel")
 METALAWS_DIR = os.path.join(KERNEL_DIR, "metalaws")
 EVOLUTION_DIR = os.path.join(KERNEL_DIR, "evolution")

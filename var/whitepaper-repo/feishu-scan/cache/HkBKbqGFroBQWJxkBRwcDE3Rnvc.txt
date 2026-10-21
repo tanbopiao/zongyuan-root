@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>飞书高阶功能探索全景 · ZONGYUAN-ROOT</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+:root {
+  --gold: #c9a962;
+  --gold-light: #e8cf94;
+  --gold-dim: #8a7340;
+  --ink: #0a0a0f;
+  --ink-2: #12121a;
+  --ink-3: #1a1a24;
+  --text: #e8e0d0;
+  --text-dim: #9a9178;
+  --red: #a83232;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: "Songti SC","STSong","Noto Serif SC","SimSun",serif;
+  line-height: 1.7;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(201,169,98,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(201,169,98,0.06) 0%, transparent 50%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(201,169,98,0.015) 3px 4px);
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+/* 东方纹样边框 */
+.frame {
+  position: relative;
+  border: 1px solid var(--gold-dim);
+  padding: 2px;
+  margin-bottom: 40px;
+}
+.frame::before {
+  content: "❖";
+  position: absolute;
+  top: -16px; left: 24px;
+  background: var(--ink);
+  color: var(--gold);
+  padding: 0 12px;
+  font-size: 18px;
+}
+.frame::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+/* 头部 */
+.hero { text-align:center; padding: 60px 20px 40px; }
+.hero .symbol { color: var(--gold); letter-spacing: 6px; font-size: 14px; margin-bottom: 18px; }
+.hero h1 {
+  font-size: 44px;
+  color: var(--gold-light);
+  letter-spacing: 10px;
+  font-weight: normal;
+  text-shadow: 0 0 30px rgba(201,169,98,0.3);
+  margin-bottom: 12px;
+}
+.hero .sub { color: var(--text-dim); font-size: 16px; letter-spacing: 4px; }
+.hero .divider {
+  width: 160px; height: 1px;
+  margin: 28px auto;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  position: relative;
+}
+.hero .divider::after {
+  content: "◆";
+  position: absolute;
+  top: -10px; left: 50%;
+  transform: translateX(-50%);
+  color: var(--gold);
+  font-size: 12px;
+}
+/* 区块标题 */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 56px 0 28px;
+}
+.section-title .no {
+  font-size: 22px;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  padding: 2px 14px;
+  font-style: italic;
+}
+.section-title h2 {
+  font-size: 26px;
+  color: var(--gold-light);
+  letter-spacing: 6px;
+  font-weight: normal;
+}
+.section-title .line { flex:1; height:1px; background: linear-gradient(90deg, var(--gold-dim), transparent); }
+/* 结论 */
+.conclusion {
+  border-left: 3px solid var(--gold);
+  padding: 20px 28px;
+  background: linear-gradient(90deg, rgba(201,169,98,0.06), transparent);
+  font-size: 17px;
+  margin: 24px 0;
+}
+.conclusion strong { color: var(--gold-light); }
+/* 卡片网格 */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+.card {
+  background: linear-gradient(160deg, var(--ink-2), var(--ink-3));
+  border: 1px solid var(--gold-dim);
+  padding: 24px;
+  position: relative;
+  transition: all .3s;
+}
+.card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,.4); }
+.card .tag {
+  display: inline-block;
+  color: var(--ink);
+  background: var(--gold);
+  padding: 1px 12px;
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+.card h3 { color: var(--gold-light); font-size: 19px; margin-bottom: 10px; letter-spacing: 2px; font-weight: normal; }
+.card p { color: var(--text-dim); font-size: 14px; margin-bottom: 8px; }
+.card .value { color: var(--gold-light); font-size: 13px; letter-spacing: 1px; }
+/* 图表容器 */
+.chart { width: 100%; height: 380px; background: var(--ink-2); border: 1px solid var(--gold-dim); padding: 8px; margin: 20px 0; }
+.chart-inner { width: 100%; height: 100%; }
+/* 状态标记 */
+.status { display: inline-block; padding: 1px 10px; font-size: 12px; letter-spacing: 2px; border: 1px solid; }
+.status.ok { color: #7ec8a3; border-color: #7ec8a3; }
+.status.warn { color: #d4a95c; border-color: #d4a95c; }
+.status.pending { color: #b86e6e; border-color: #b86e6e; }
+/* 审批区 */
+.approval-box {
+  border: 1px dashed var(--gold);
+  padding: 24px;
+  text-align: center;
+  background: radial-gradient(ellipse at center, rgba(201,169,98,0.05), transparent);
+  margin: 24px 0;
+}
+.approval-box h3 { color: var(--gold-light); font-size: 20px; letter-spacing: 4px; margin-bottom: 12px; }
+/* 路线图 */
+.timeline { position: relative; padding-left: 32px; margin: 24px 0; }
+.timeline::before { content:""; position:absolute; left:8px; top:0; bottom:0; width:1px; background: linear-gradient(var(--gold), var(--gold-dim), transparent); }
+.tl-item { position: relative; margin-bottom: 28px; }
+.tl-item::before {
+  content: "";
+  position: absolute;
+  left: -29px; top: 6px;
+  width: 9px; height: 9px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  box-shadow: 0 0 10px rgba(201,169,98,.6);
+}
+.tl-item .phase { color: var(--gold); font-size: 13px; letter-spacing: 3px; }
+.tl-item h4 { color: var(--gold-light); font-size: 17px; margin: 4px 0 6px; font-weight: normal; letter-spacing: 2px; }
+.tl-item p { color: var(--text-dim); font-size: 14px; }
+/* 页脚 */
+.footer {
+  text-align: center;
+  color: var(--gold-dim);
+  letter-spacing: 3px;
+  padding-top: 48px;
+  font-size: 13px;
+  border-top: 1px solid var(--gold-dim);
+  margin-top: 40px;
+}
+/* 响应式 */
+@media (max-width: 720px) {
+  .hero h1 { font-size: 28px; letter-spacing: 4px; }
+  .section-title h2 { font-size: 20px; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+  <div class="symbol">Ω₀⊂⊙∞⊂Ω ｜ ZONGYUAN-ROOT ｜ DID-BR-000002</div>
+  <h1>飞书高阶功能探索全景</h1>
+  <div class="sub">六大高阶能力域 · 四阶段落地路线 · 外部可视化交付方案</div>
+  <div class="divider"></div>
+  <div style="color:var(--text-dim); font-size:14px; letter-spacing:2px;">2026-09-14 ｜ 数据来源：飞书开放平台官方 OpenAPI 文档实测挖掘 ｜ 版本 V1.0</div>
+</div>
+
+<div class="frame">
+<div class="conclusion">
+  <strong>核心结论：</strong>飞书开放平台远超"文档/表格"表层能力，已形成覆盖 <strong>AI智能、Aily智能体、日历协同、审批流程、妙记知识、汇报管理</strong> 六大高阶能力域 + 基础五域91命令的超集体系。本方案页为对外可视化交付版，支持外部用户直接访问浏览，审批通过后全域发布。
+</div>
+</div>
+
+<div class="section-title"><span class="no">壹</span><h2>八大能力域全景矩阵</h2><span class="line"></span></div>
+<div class="chart"><div id="chart1" class="chart-inner"></div></div>
+<p style="color:var(--text-dim); font-size:14px;">八大能力域：基础五域（文档/知识/存储/数据/通讯，91命令已落地）＋ 六大高阶域中的 AI智能（20+接口）、Aily智能体（20+接口）、日历（40+接口）、审批（30+接口）、妙记（4接口）、汇报+工作台（9接口）。</p>
+
+<div class="section-title"><span class="no">贰</span><h2>六大高阶能力域详解</h2><span class="line"></span></div>
+<div class="grid">
+  <div class="card">
+    <span class="tag">AI 智能域</span>
+    <h3>文档智能与多模态识别</h3>
+    <p>OCR 光学字符识别（20QPS）｜ 语音识别（文件60s＋流式实时）｜ 机器翻译（100+语种）</p>
+    <p>证件票据识别 20+ 类：身份证/护照/港澳台通行证/驾驶证/行驶证/营业执照/增值税发票/火车票/出租车发票/银行卡/名片/健康证/食品许可证/合同字段提取</p>
+    <div class="value">价值：财务票据自动化 ｜ 人事证件核验 ｜ 合同信息抽取</div>
+  </div>
+  <div class="card">
+    <span class="tag">Aily 智能体域</span>
+    <h3>企业级 AI Agent 工作流</h3>
+    <p>会话管理（创建/更新/获取/删除）｜ 消息交互（文本/图片/表格）｜ 运行管理（意图判定＋技能匹配）</p>
+    <p>技能直调（JSON 参数，无需对话）｜ 数据知识问答（SSE 流式 RAG，可控数据范围与分类）</p>
+    <div class="value">价值：业务系统内嵌 AI 助手 ｜ 知识库问答 ｜ 自动化任务编排</div>
+  </div>
+  <div class="card">
+    <span class="tag">日历域</span>
+    <h3>全链路会议协同</h3>
+    <p>日历/日程全生命周期 ｜ 忙闲查询（多用户合并）｜ 会议室预定与查找 ｜ CalDAV/Exchange 双向同步</p>
+    <p>请假日程 ｜ 自动会议纪要 ｜ 会议群创建 ｜ 日程/会议室事件订阅</p>
+    <div class="value">价值：智能排期 ｜ 会议室资源治理 ｜ 跨系统日历集成</div>
+  </div>
+  <div class="card">
+    <span class="tag">审批域</span>
+    <h3>流程自动化中枢</h3>
+    <p>审批定义/实例全生命周期 ｜ 任务操作（同意/拒绝/转交/退回/加签/重新提交）｜ 三方审批接入</p>
+    <p>审批 Bot 消息推送 ｜ 评论管理 ｜ 事件订阅（实例/任务/抄送状态变更、出差/外出/补卡/换班）</p>
+    <div class="value">价值：企业流程线上化 ｜ 外部系统审批闭环 ｜ 审批数据实时监控</div>
+  </div>
+  <div class="card">
+    <span class="tag">妙记域</span>
+    <h3>会议知识沉淀</h3>
+    <p>妙记统计（PV/UV）｜ 妙记信息（所有者/标题/封面/时长/URL）｜ 音视频文件下载 ｜ 文字记录导出</p>
+    <p>已实测：搜索/详情/下载/摘要/上传 10 命令就绪</p>
+    <div class="value">价值：会议纪要自动化 ｜ 知识库沉淀 ｜ 会议数据洞察</div>
+  </div>
+  <div class="card">
+    <span class="tag">汇报 + 工作台域</span>
+    <h3>组织洞察与门户运营</h3>
+    <p>汇报规则/任务/看板管理 ｜ 工作台访问数据（访问次数/用户数）｜ 定制工作台与小组件数据 ｜ 应用推荐规则</p>
+    <div class="value">价值：管理洞察 ｜ 门户运营优化 ｜ 组织效能度量</div>
+  </div>
+</div>
+
+<div class="section-title"><span class="no">叁</span><h2>四阶段应用路线图</h2><span class="line"></span></div>
+<div class="timeline">
+  <div class="tl-item">
+    <span class="phase">阶段一 · 已落地</span>
+    <h4>基础五域 91 命令全打通</h4>
+    <p>文档 13 / 知识 13 / 存储 24 / 数据 35 / 通讯 6 —— 全域资产四端同步、锁档归档自动化。</p>
+  </div>
+  <div class="tl-item">
+    <span class="phase">阶段二 · 部署验证中</span>
+    <h4>日历域实测通过 + 审批域接入</h4>
+    <p>实测：今日议程（发现 ZONGYUAN-ROOT 进化循环日程）、忙闲查询、会议室查找、审批定义查询（补卡）全部成功。AI 域待开通权限。</p>
+  </div>
+  <div class="tl-item">
+    <span class="phase">阶段三 · 规划中</span>
+    <h4>Aily 智能体域 + 审批自动化闭环</h4>
+    <p>企业级 AI 助手嵌入工作流、审批事件订阅驱动的自动化流程、数据知识 RAG 问答。</p>
+  </div>
+  <div class="tl-item">
+    <span class="phase">阶段四 · 远期</span>
+    <h4>妙记 + 汇报 + 工作台</h4>
+    <p>会议知识自动沉淀、组织运营数据洞察、门户工作台智能推荐。</p>
+  </div>
+</div>
+
+<div class="section-title"><span class="no">肆</span><h2>接入收益量化</h2><span class="line"></span></div>
+<div class="chart"><div id="chart2" class="chart-inner"></div></div>
+
+<div class="section-title"><span class="no">伍</span><h2>外部可视化交付方案</h2><span class="line"></span></div>
+<div class="frame">
+<div class="grid">
+  <div class="card">
+    <span class="tag" style="background:#7ec8a3;">推荐</span>
+    <h3>飞书云盘公网链接</h3>
+    <p>本方案页已打包上传飞书云盘，获取公网可访问链接，外部用户无需登录即可通过链接浏览/下载。</p>
+    <div class="value">通道：my.feishu.cn 公网直达 ｜ 状态：<span class="status ok">已开通</span></div>
+  </div>
+  <div class="card">
+    <span class="tag">妙搭部署</span>
+    <h3>妙搭可视化应用</h3>
+    <p>玄黑鎏金东方视觉 + ECharts 图表的独立网页应用，已部署，可交互浏览，对外分享链接。</p>
+    <div class="value">通道：妙搭应用 ｜ 状态：<span class="status ok">已部署</span></div>
+  </div>
+  <div class="card">
+    <span class="tag">审批发布</span>
+    <h3>审批通过后全域发布</h3>
+    <p>本方案页待审批，审批通过后自动写入官网 / 作品库 / 工作台，外部用户全域可见。</p>
+    <div class="value">通道：飞书审批 ｜ 状态：<span class="status pending">待审批</span></div>
+  </div>
+</div>
+<div class="approval-box">
+  <h3>◈ 审批发布机制 ◈</h3>
+  <p style="color:var(--text-dim);">本方案页已提交审批。审批通过后，将通过 飞书云盘公网链接 + 妙搭应用 + 官网 三通道对外发布，外部用户（无需登录）即可访问全部可视化成果。</p>
+  <p style="color:var(--gold-light); margin-top:12px; letter-spacing:2px;">DID-BR-000002 ｜ Ω₀⊂⊙∞⊂Ω ｜ 全域真值归档</p>
+</div>
+</div>
+
+<div class="footer">
+  Ω₀⊂⊙∞⊂Ω ｜ ZONGYUAN-ROOT ｜ DID-BR-000002 ｜ 飞书高阶功能探索全景 V1.0<br>
+  数据来源：飞书开放平台官方 OpenAPI 文档（open.feishu.cn llms 文档库实测挖掘）｜ 2026-09-14
+</div>
+
+</div>
+
+<script>
+// 图表1：八大能力域接口数量
+var chart1 = echarts.init(document.getElementById('chart1'));
+chart1.setOption({
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', backgroundColor:'#1a1a24', borderColor:'#c9a962', textStyle:{color:'#e8e0d0'} },
+  grid: { left: 60, right: 40, top: 30, bottom: 50 },
+  xAxis: {
+    type: 'category',
+    data: ['日历域','审批域','AI智能域','Aily智能体','妙记域','工作台域','汇报域','基础五域'],
+    axisLine: { lineStyle: { color: '#8a7340' } },
+    axisLabel: { color: '#e8e0d0', fontSize: 12 },
+    axisTick: { show: false }
+  },
+  yAxis: {
+    type: 'value',
+    splitLine: { lineStyle: { color: 'rgba(138,115,64,0.2)' } },
+    axisLabel: { color: '#9a9178' }
+  },
+  series: [{
+    type: 'bar',
+    data: [40, 30, 20, 20, 4, 6, 3, 91],
+    barWidth: 34,
+    itemStyle: {
+      color: new echarts.graphic.LinearGradient(0,0,0,1,[
+        {offset:0, color:'#e8cf94'},
+        {offset:1, color:'#8a7340'}
+      ]),
+      borderRadius: [2,2,0,0]
+    },
+    label: { show: true, position: 'top', color: '#e8cf94', fontSize: 13 }
+  }]
+});
+
+// 图表2：接入收益量化
+var chart2 = echarts.init(document.getElementById('chart2'));
+chart2.setOption({
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'item', backgroundColor:'#1a1a24', borderColor:'#c9a962', textStyle:{color:'#e8e0d0'} },
+  legend: { textStyle: { color: '#e8e0d0' }, bottom: 0 },
+  radar: {
+    indicator: [
+      { name: '文档处理效率', max: 100 },
+      { name: '会议成本下降', max: 100 },
+      { name: '审批流转提速', max: 100 },
+      { name: '知识沉淀自动化', max: 100 },
+      { name: '流程线上化', max: 100 }
+    ],
+    radius: '65%',
+    axisName: { color: '#e8cf94' },
+    splitLine: { lineStyle: { color: 'rgba(138,115,64,0.3)' } },
+    splitArea: { areaStyle: { color: ['rgba(201,169,98,0.03)','rgba(201,169,98,0.06)'] } },
+    axisLine: { lineStyle: { color: 'rgba(138,115,64,0.4)' } }
+  },
+  series: [{
+    type: 'radar',
+    data: [{
+      name: '接入后收益',
+      value: [70, 50, 60, 80, 90],
+      areaStyle: { color: 'rgba(201,169,98,0.35)' },
+      lineStyle: { color: '#e8cf94' },
+      itemStyle: { color: '#e8cf94' }
+    }]
+  }]
+});
+
+window.addEventListener('resize', function(){ chart1.resize(); chart2.resize(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自治Agent系统架构概览</title>
+<style>
+  :root{--ink:#0a0a0f;--ink2:#12121c;--gold:#c9a86a;--gold2:#e8d5a8;--line:rgba(201,168,106,.25);--txt:#e8e4da;--dim:#9a958a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--ink);color:var(--txt);font-family:"Noto Serif SC","Songti SC",serif;line-height:1.8}
+  .wrap{max-width:900px;margin:0 auto;padding:60px 32px}
+  .cover{text-align:center;padding:60px 0 40px;border-bottom:1px solid var(--line)}
+  .cover .mark{color:var(--gold);letter-spacing:.4em;font-size:13px;margin-bottom:20px}
+  .cover h1{font-size:30px;color:var(--gold2);font-weight:600;letter-spacing:.06em;margin-bottom:12px}
+  .cover .sub{font-size:14px;color:var(--dim);letter-spacing:.15em}
+  h2{color:var(--gold2);font-size:20px;margin:40px 0 16px;padding-left:14px;border-left:3px solid var(--gold)}
+  h3{color:var(--gold);font-size:15px;margin:20px 0 8px}
+  p{margin-bottom:12px;font-size:15px}
+  .card{background:var(--ink2);border:1px solid var(--line);padding:24px;margin:16px 0;border-radius:8px}
+  .arch{background:var(--ink2);border:1px solid var(--line);padding:24px;margin:20px 0;border-radius:8px;font-family:"Courier New",monospace;font-size:13px;line-height:1.8;color:var(--gold2);white-space:pre;overflow-x:auto}
+  .metric{display:inline-block;background:var(--ink2);border:1px solid var(--line);padding:12px 20px;margin:6px;border-radius:6px;text-align:center}
+  .metric .v{color:var(--gold);font-size:22px;font-weight:700}
+  .metric .k{color:var(--dim);font-size:11px}
+  footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cover">
+    <div class="mark">AUTONOMOUS AGENT ARCHITECTURE</div>
+    <h1>自治Agent系统架构概览</h1>
+    <div class="sub">云边分离 · 真值确权 · 零成本调度 · 工程落地</div>
+  </div>
+
+  <h2>系统全景</h2>
+  <div class="arch">┌─────────────────────────────────────────┐
+│           云端记忆网关 (HTTP API)          │
+│  ┌─────────┐ ┌─────────┐ ┌──────────────┐ │
+│  │ 真值库   │ │ 状态核验 │ │ 增量同步队列 │ │
+│  └─────────┘ └─────────┘ └──────────────┘ │
+└──────────────────┬──────────────────────┘
+                   │ HTTP (无SSH)
+┌──────────────────┴──────────────────────┐
+│         本地执行节点 (Edge Node)          │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ │
+│  │ 任务引擎  │ │ 锁档模块  │ │ 发布通道  │ │
+│  │ 规划执行  │ │Merkle确权│ │Git增量   │ │
+│  └──────────┘ └──────────┘ └──────────┘ │
+└─────────────────────────────────────────┘</div>
+
+  <h2>三大核心技术</h2>
+
+  <div class="card">
+    <h3>① 云边分离 + HTTP网关解耦</h3>
+    <p>云端只负责记忆存储与状态核验，本地只负责任务执行与发布。两者之间通过纯HTTP API通信，无需SSH、无需VPN、无需直连。任意节点离线不影响云端，云端宕机不阻塞本地执行——天然容错。</p>
+    <div>
+      <span class="metric"><span class="v">0</span><span class="k">SSH连接</span></span>
+      <span class="metric"><span class="v">0</span><span class="k">VPN依赖</span></span>
+      <span class="metric"><span class="v">HTTP</span><span class="k">唯一通道</span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>② Merkle树不可变真值归档</h3>
+    <p>所有关键状态变更生成SHA-256哈希，按Merkle树组织成链。根哈希每日快照上报网关。任何篡改可通过对比Merkle根自动检测，已锁档内容不可回退、不可篡改。</p>
+    <div>
+      <span class="metric"><span class="v">SHA-256</span><span class="k">哈希算法</span></span>
+      <span class="metric"><span class="v">Merkle</span><span class="k">完整性校验</span></span>
+      <span class="metric"><span class="v">单调</span><span class="k">只增不减</span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>③ 零付费HTTP智能调度</h3>
+    <p>多通道API按优先级降级：免费额度优先 → 错峰排队 → 多源兜底。不依赖单一付费API，不GPU推理，纯CPU+HTTP完成全链路。月度API成本趋近于零。</p>
+    <div>
+      <span class="metric"><span class="v">0</span><span class="k">GPU依赖</span></span>
+      <span class="metric"><span class="v">0</span><span class="k">付费API</span></span>
+      <span class="metric"><span class="v">CPU</span><span class="k">纯CPU运行</span></span>
+    </div>
+  </div>
+
+  <h2>工程指标</h2>
+  <div>
+    <span class="metric"><span class="v">120K+</span><span class="k">归档真值</span></span>
+    <span class="metric"><span class="v">63</span><span class="k">锁档快照</span></span>
+    <span class="metric"><span class="v">6</span><span class="k">自动化仓库</span></span>
+    <span class="metric"><span class="v">7</span><span class="k">定时任务</span></span>
+    <span class="metric"><span class="v">99.9%</span><span class="k">心跳可用率</span></span>
+  </div>
+
+  <h2>适用场景</h2>
+  <p>本架构适用于：需要长期自治运行的Agent系统、多节点分布式任务编排、需要审计追溯的自动化流水线、零预算AI项目。核心思路可迁移到任何"云端存储+边缘执行"的分布式Agent场景。</p>
+
+  <footer>
+    本页面含人工智能生成合成内容，已按《人工智能生成合成内容标识办法》标识。<br>
+    Apache 2.0 ｜ 公开架构概览 ｜ 2026
+  </footer>
+</div>
+</body>
+</html>

@@ -12,8 +12,8 @@ from datetime import datetime, timezone, timedelta
 # 路径配置
 ROOT_STATE_PATH = os.path.expanduser("~/.meta_order/root_state.json")
 BACKUP_DIR = "/home/user/.doubao/agent_mode/workspace/.meta_order_backup"
-ARCHIVE_JSON = "/home/user/Doubao/chats/38442240612888322/media_url_archive.json"
-ARCHIVE_CSV = "/home/user/Doubao/chats/38442240612888322/media_url_archive.csv"
+ARCHIVE_JSON = "/opt/ZONGYUAN-ROOT/media_url_archive.json"
+ARCHIVE_CSV = "/opt/ZONGYUAN-ROOT/media_url_archive.csv"
 ASSET_STORE_DIR = "/home/user/.doubao/agent_mode/workspace/meta_order_assets"
 
 os.makedirs(BACKUP_DIR, exist_ok=True)
@@ -213,7 +213,7 @@ credential = {
     "five_layer_lock": archive_object["five_layer_lock"],
 }
 
-cred_path = "/home/user/Doubao/chats/38442240612888322/archive_credential.json"
+cred_path = "/opt/ZONGYUAN-ROOT/archive_credential.json"
 with open(cred_path, "w") as f:
     json.dump(credential, f, ensure_ascii=False, indent=2)
 

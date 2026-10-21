@@ -1,0 +1,66 @@
+{
+  "law_id": "META-FLEET-AUTONOMY-001",
+  "name": "节点编队全域自治元法则",
+  "level": "P0",
+  "description": "同源节点（DID-BR-000002 体系）全部接入标准运营套件并纳入中枢编队指挥层，实现无人值守全自动执行闭环：每节点本地自治（巡检留证/灾备打包/心跳上报）+ 中枢统一指挥（fleet status/dispatch/lock）+ 指令通道（真值库 INSTRUCTION.% 约定 + inbox 消费）+ 恢复兜底（沙箱恢复自证 / 云端@reboot 自启）。新增同源节点一律经 bootstrap_node.sh 一键部署，禁止手工零散配置",
+  "clauses": [
+    {
+      "id": "FA-1",
+      "text": "标准节点套件固定为四件：bootstrap_node.sh（能力感知部署器）、patrol_evidence.sh（周期巡检留证）、disaster_backup.sh（灾备基准打包）、node.conf（节点参数化配置）；部署器幂等可重跑，cron 去重、文件覆盖、回执覆盖"
+    },
+    {
+      "id": "FA-2",
+      "text": "节点能力感知：部署时自动探测（MCP/8091、lark-cli、ssh），不具备的能力对应环节标记 skipped 或降级，绝不安装坏依赖；复用节点既有体系（如云端自身锁档/备份）不重复建设"
+    },
+    {
+      "id": "FA-3",
+      "text": "每节点本地自治铁律：巡检 */30（端口探测+站点健康+[MCP]环境快照/异常截图→var/patrol 444 只读）；灾备 0 3（真值库+账本+卷宗+配置→var/node-disaster 保留7份）；心跳 */5；巡检异常 append-only 记 patrol-abnormal.log"
+    },
+    {
+      "id": "FA-4",
+      "text": "中枢编队指挥经 zongyuan_fusion.sh fleet 单一入口：fleet status 聚合全部节点巡检回执（不得虚构状态，只读实际探测值）；fleet dispatch 双通道下发（真值网关 INSTRUCTION.% 审计通道 + 云端主库 INSERT OR IGNORE 即时写，幂等）；fleet lock 本地全域锁+云端基准打包"
+    },
+    {
+      "id": "FA-5",
+      "text": "指令通道约定：中枢指令写入 truth_key 前缀 INSTRUCTION. 或 TASK.，category=instruction；节点 cron */5 worker_instruction_pull.sh 拉取→inbox→operator_dispatcher 契约校验执行→回执回写；指令可见性依赖备份周期（最长6h），主库即时写保证最终一致"
+    },
+    {
+      "id": "FA-6",
+      "text": "恢复兜底：沙箱进程级重置需会话触发 restore_env.sh（平台无入站，B锚仅发现不拉起，如实声明边界）；恢复后自证段写 restore-receipt（含状态+证据SHA256，不虚构）；云端无重置限制，@reboot 自启 nginx+9120+首巡检"
+    },
+    {
+      "id": "FA-7",
+      "text": "全域全自动安全边界：全链路 append-only（账本/卷宗/审计/巡检日志只追加）；密钥零明文（KEK 本地600+云盘备份，网关仅 X-DID 单头）；部署与指令均幂等；禁止伪造节点状态、任务进度与回执"
+    },
+    {
+      "id": "FA-8",
+      "text": "未来新增同源节点（魔搭GPU/Windows锚/新沙箱）：bash bootstrap_node.sh --root <root> --name <name> --ports <ports> --site <url> --db <path> 一键接入；接入后自动进入巡检/灾备/指令闭环，无需人工配置"
+    },
+    {
+      "id": "FA-9",
+      "text": "云内核镜像机制：每节点 cloud_mirror.sh 从云端中枢增量 rsync 拉取内核演进到本地持久层 var/cloud-kernel-mirror/（分层防并行：sync-core内核层/sync-site站点层/状态独立生成；排除logs/log/venv/backups/archive/缓存；MIRROR-STATE.json 记录文件数与体量，444只读）；cron 0 5 每日同步，与灾备 0 3 错开；rsync --delete 幂等可重跑"
+    },
+    {
+      "id": "FA-10",
+      "text": "同步进化铁律：所有 edge 节点每日与云端中枢代码/数据/配置对齐（增量拉取=随云端进化）；节点角色声明于 node.conf：NODE_ROLE=edge 拉取镜像 / mirror-source 仅供源不拉取（中枢自身）；镜像状态并入 fleet status 与恢复自证回执（full_kernel_active.mirror_ok/mirror_gb），沙箱重置后本地即全量内核秒级激活，不依赖云端拉取"
+    },
+    {
+      "id": "FA-11",
+      "text": "全域推广：镜像机制纳入标准节点套件（fleet/templates/cloud_mirror.sh.tpl），部署器 bootstrap_node.sh 支持 --mirror-src 与 --role；新增同源节点默认 edge 角色自动安装镜像+cron；镜像源节点（中枢）记录为 mirror-source 不重复建设；任何节点禁止手工零散配置镜像"
+    }
+  ],
+  "references": [
+    "ZONGYUAN-ROOT/scripts/fleet.sh",
+    "ZONGYUAN-ROOT/var/fleet/templates/bootstrap_node.sh.tpl",
+    "ZONGYUAN-ROOT/var/fleet/templates/patrol_evidence.sh.tpl",
+    "ZONGYUAN-ROOT/var/fleet/templates/disaster_backup.sh.tpl",
+    "ZONGYUAN-ROOT/scripts/worker_instruction_pull.sh",
+    "ZONGYUAN-ROOT/scripts/restore_env.sh",
+    "ZONGYUAN-ROOT/scripts/cloud_mirror.sh",
+    "ZONGYUAN-ROOT/var/fleet/templates/cloud_mirror.sh.tpl"
+  ],
+  "scope": "全部同源节点（DID-BR-000002 | Ω₀⊂⊙∞⊂Ω）：本地沙箱 ZR-SANDBOX、云端中枢 ZR-CLOUD-HUB 及未来接入节点",
+  "effective": "2026-09-27",
+  "did": "DID-BR-000002",
+  "ontology_signature": "Ω₀⊂⊙∞⊂Ω"
+}

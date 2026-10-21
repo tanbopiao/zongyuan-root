@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<title>魔塔高阶能力 · 最优稳态方案推演</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#0a0a0f; --bg2:#11111a; --card:#16161f; --line:#2a2a3a;
+    --gold:#d4af37; --gold2:#f0d98c; --ink:#e8e6df; --dim:#9a97a8;
+    --ok:#3ecf8e; --mid:#e8b64c; --wait:#8a8a9a; --hold:#c0555a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 70% -10%, #1a1830 0%, var(--bg) 55%);color:var(--ink);
+    font-family:"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;padding:28px 16px 60px;line-height:1.6}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{text-align:center;padding:26px 0 8px}
+  .sym{font-size:13px;letter-spacing:4px;color:var(--gold)}
+  h1{font-size:26px;margin:10px 0 4px;letter-spacing:2px;
+    background:linear-gradient(90deg,var(--gold2),var(--gold),var(--gold2));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{color:var(--dim);font-size:13px}
+  .divider{height:1px;margin:22px 0;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  .formula{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:18px 0}
+  .formula .t{color:var(--gold);font-size:14px;letter-spacing:2px;margin-bottom:8px}
+  .eq{font-size:20px;font-family:"Georgia",serif;color:var(--gold2);text-align:center;margin:6px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:12px;font-size:12px;color:var(--dim)}
+  .chip{padding:4px 10px;border:1px solid var(--line);border-radius:20px}
+  .lanes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:18px 0}
+  .lane{border-radius:12px;padding:14px;border:1px solid var(--line);background:var(--card)}
+  .lane .n{font-size:22px;font-weight:700;color:var(--gold)}
+  .lane .nm{font-size:14px;color:var(--ink);margin:2px 0 6px}
+  .lane .ds{font-size:12px;color:var(--dim)}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:16px 0;font-size:13px}
+  .flow .st{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg2)}
+  .flow .ar{color:var(--gold)}
+  .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:16px}
+  .item{border-radius:12px;padding:14px 16px;border:1px solid var(--line);background:var(--card);position:relative}
+  .item .id{font-size:11px;color:var(--gold);letter-spacing:1px}
+  .item .nm{font-size:15px;font-weight:600;margin:4px 0 6px}
+  .item .meta{font-size:12px;color:var(--dim)}
+  .item .p{position:absolute;right:14px;top:12px;font-size:13px;font-weight:700}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;margin-top:8px}
+  .ok{background:rgba(62,207,142,.15);color:var(--ok);border:1px solid rgba(62,207,142,.4)}
+  .mid{background:rgba(232,182,76,.15);color:var(--mid);border:1px solid rgba(232,182,76,.4)}
+  .wait{background:rgba(138,138,154,.15);color:var(--wait);border:1px solid rgba(138,138,154,.4)}
+  .hold{background:rgba(192,85,90,.15);color:var(--hold);border:1px solid rgba(192,85,90,.4)}
+  .concl{margin-top:24px;background:linear-gradient(135deg,rgba(212,175,55,.08),transparent 60%);
+    border:1px solid rgba(212,175,55,.35);border-radius:14px;padding:20px 22px}
+  .concl h3{color:var(--gold);letter-spacing:2px;font-size:15px;margin-bottom:10px}
+  .concl li{margin-left:1.2em;font-size:14px;margin-bottom:6px}
+  footer{text-align:center;color:var(--dim);font-size:12px;margin-top:34px;letter-spacing:2px}
+</style>
+<div class="wrap">
+  <header>
+    <div class="sym">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+    <h1>魔塔高阶能力 · 最优稳态方案推演</h1>
+    <div class="sub">确权 DID-BR-000002 ｜ ZONGYUAN-ROOT ｜ 2026-09-19 ｜ 零额度零成本 · 禁 SSH · 禁生产</div>
+  </header>
+  <div class="divider"></div>
+
+  <div class="formula">
+    <div class="t">稳态决策算子（资产级口径）</div>
+    <div class="eq">P = 0.3·U − 0.4·R − 0.3·C</div>
+    <div class="legend">
+      <span class="chip">U 收益最大化</span>
+      <span class="chip">R 风险最小化（权重最高）</span>
+      <span class="chip">C 成本最小化</span>
+      <span class="chip">P ≥ 0.12 → 立即自动执行</span>
+      <span class="chip">0.05 ≤ P &lt; 0.12 → 受控分批</span>
+      <span class="chip">0 ≤ P &lt; 0.05 → 注册观望</span>
+      <span class="chip">P &lt; 0 → 挂起待通道</span>
+    </div>
+  </div>
+
+  <div class="flow">
+    <span class="st">待办清单 11 项</span><span class="ar">→</span>
+    <span class="st">通道分流</span><span class="ar">→</span>
+    <span class="st">稳态收敛五态</span><span class="ar">→</span>
+    <span class="st">全自动闭环</span>
+  </div>
+
+  <div class="lanes">
+    <div class="lane"><div class="n">A</div><div class="nm">立即自动执行</div>
+      <div class="ds">git 直推 / POST /collections/items 无限流接口，零限流风险，并入自动发布引擎</div></div>
+    <div class="lane"><div class="n">B</div><div class="nm">受控分批</div>
+      <div class="ds">需文件上传（upload 2次/30s 限流），错峰分批，每轮心跳最多 1–2 项</div></div>
+    <div class="lane"><div class="n">C</div><div class="nm">注册不生产</div>
+      <div class="ds">能力注册为备援通道，默认不主动量产，按需调用免费额度</div></div>
+    <div class="lane"><div class="n">D</div><div class="nm">挂起待云端</div>
+      <div class="ds">禁 SSH / 无公开 API，需云端部署包或网页端通道，本地不执行</div></div>
+    <div class="lane"><div class="n">E</div><div class="nm">用户侧动作</div>
+      <div class="ds">涉及凭证安全，需用户亲自确认操作</div></div>
+  </div>
+
+  <div class="items">
+    <div class="item"><span class="p" style="color:var(--ok)">P=0.235</span><div class="id">待办 02</div>
+      <div class="nm">Agent 入合集</div>
+      <div class="meta">POST /collections/items · 无限流 · 幂等</div>
+      <span class="tag ok">A · 立即自动</span></div>
+    <div class="item"><span class="p" style="color:var(--ok)">P=0.235</span><div class="id">待办 03</div>
+      <div class="nm">合集扩为全资产门户</div>
+      <div class="meta">3模型+2数据集+1创空间+1技能+1Agent 全聚合</div>
+      <span class="tag ok">A · 立即自动</span></div>
+    <div class="item"><span class="p" style="color:var(--ok)">P=0.205</span><div class="id">待办 11</div>
+      <div class="nm">限流策略维持</div>
+      <div class="meta">git 优先 + 无限流接口，已闭环持续生效</div>
+      <span class="tag ok">A · 立即自动</span></div>
+    <div class="item"><span class="p" style="color:var(--ok)">P=0.135</span><div class="id">待办 06</div>
+      <div class="nm">API-Inference 异步生图注册</div>
+      <div class="meta">魔搭免费 2000次/天 · 新模型ID · 异步轮询</div>
+      <span class="tag ok">A · 注册备援</span></div>
+    <div class="item"><span class="p" style="color:var(--mid)">P=0.05</span><div class="id">待办 07</div>
+      <div class="nm">新技能扩展</div>
+      <div class="meta">Skill 创建需 zip 上传 · 限流受控</div>
+      <span class="tag mid">B · 受控分批</span></div>
+    <div class="item"><span class="p" style="color:var(--mid)">P=0.03</span><div class="id">待办 04</div>
+      <div class="nm">白皮书独立画廊</div>
+      <div class="meta">gallery 需 EntryFile · upload 限流</div>
+      <span class="tag mid">B · 受控分批</span></div>
+    <div class="item"><span class="p" style="color:var(--wait)">P=0.00</span><div class="id">待办 05</div>
+      <div class="nm">昆仑关键帧补传</div>
+      <div class="meta">失败项跳过 · 仅补可传项 · upload 限流</div>
+      <span class="tag wait">C · 注册观望</span></div>
+    <div class="item"><span class="p" style="color:var(--wait)">P=0.00</span><div class="id">待办 08</div>
+      <div class="nm">画廊内容扩充</div>
+      <div class="meta">依赖 upload 配额 · 逐帧分批</div>
+      <span class="tag wait">C · 注册观望</span></div>
+    <div class="item"><span class="p" style="color:var(--hold)">P=−0.17</span><div class="id">待办 01</div>
+      <div class="nm">官网侧 3 入口反向挂载</div>
+      <div class="meta">禁 SSH · 无公开页面更新 API</div>
+      <span class="tag hold">D · 挂起待云端</span></div>
+    <div class="item"><span class="p" style="color:var(--hold)">P=−0.16</span><div class="id">待办 09</div>
+      <div class="nm">商品化页面部署</div>
+      <div class="meta">需云端部署包状态确认</div>
+      <span class="tag hold">D · 挂起待云端</span></div>
+    <div class="item"><span class="p" style="color:var(--hold)">P=−0.12</span><div class="id">待办 10</div>
+      <div class="nm">魔搭令牌轮换</div>
+      <div class="meta">凭证安全项 · 需用户操作</div>
+      <span class="tag hold">E · 用户侧动作</span></div>
+  </div>
+
+  <div class="concl">
+    <h3>稳态收敛结论</h3>
+    <ul>
+      <li><b style="color:var(--gold)">立即闭环（A）</b>：Agent 入合集 + 合集全门户扩充 + 限流策略维持 → 并入 modelscope_auto_publish 自动引擎，随每 6 小时心跳零成本推进，可即时执行。</li>
+      <li><b style="color:var(--gold)">受控分批（B）</b>：白皮书画廊 / 新技能 → 走 upload 限流节奏，每轮心跳最多 1–2 项，避开高峰。</li>
+      <li><b style="color:var(--gold)">注册观望（C）</b>：API-Inference 异步生图注册为免费备援通道；关键帧补传仅补可传项，不强制。</li>
+      <li><b style="color:var(--gold)">挂起待通道（D/E）</b>：官网反向挂载、商品化部署、令牌轮换 → 无可用通道或需用户侧，状态留痕等待，不强行执行。</li>
+      <li><b style="color:var(--gold)">稳态达成</b>：展示面持续有新资产，全程零额度零成本、不触发限流与平台监控、全自动无需人工确认。</li>
+    </ul>
+  </div>
+
+  <footer>Ω₀⊂⊙∞⊂Ω ｜ 最优稳态收敛 ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT</footer>
+</div>

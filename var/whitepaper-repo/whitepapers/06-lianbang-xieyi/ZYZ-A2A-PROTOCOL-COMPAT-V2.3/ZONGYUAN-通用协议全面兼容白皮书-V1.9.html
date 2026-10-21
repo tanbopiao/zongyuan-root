@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT 通用协议全面兼容白皮书</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='4' fill='%230a0e17'/><text x='12' y='17' font-size='11' text-anchor='middle' fill='%23bc8cff' font-family='monospace'>Ω</text></svg>">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#070b12;color:#d7dee9;font-family:-apple-system,'PingFang SC','Microsoft YaHei',system-ui,sans-serif;line-height:1.7;padding:2rem;max-width:1200px;margin:0 auto}
+h1{font-size:26px;color:#f0f4fa;margin-bottom:8px;letter-spacing:0.5px}
+h2{font-size:19px;color:#bc8cff;margin:2.2rem 0 0.9rem;padding-left:12px;border-left:3px solid #bc8cff}
+.meta{color:#7c8aa0;font-size:13px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #1e2a3a}
+.note{background:#0f1826;border-left:3px solid #8ab4ff;padding:12px 16px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+.note-gold{background:#151208;border-left:3px solid #c9a860}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+th{background:#121a2a;color:#bc8cff;text-align:left;padding:10px 12px;border:1px solid #243349}
+td{padding:10px 12px;border:1px solid #1a2438;color:#c3d2e8}
+tr:nth-child(even) td{background:#0c1422}
+.mermaid{background:#0a111f;border:1px solid #1e2a3a;border-radius:10px;padding:16px;margin:16px 0;overflow-x:auto}
+code{background:#0d1626;color:#8ab4ff;padding:2px 6px;border-radius:4px;font-size:13px;font-family:ui-monospace,Consolas,monospace}
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid #1e2a3a;color:#55627a;font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+<h1>ZONGYUAN-ROOT 通用协议全面兼容白皮书</h1>
+<div class="meta">确权 DID-BR-000002｜ONT-4D-UNIVERSAL-ROOT｜Ω₀⊂⊙∞⊂Ω｜V1.9 2026-10-11<br>系列归属：互操作协议层 (L3)｜状态：V1.9 全协议族公网上线（2026-10-11 实测）<br>更新：新增 四协议联邦组合流（DPoP 认证→A2A 编排→MCP 执行→SLIM 加密传输 全链路）</div>
+
+<h2>一、全面兼容目标</h2>
+<div class="note"><b>对外全兼容 + 对内零破坏 + 模型格式通吃 + 观测标准</b>：外部生态按任一主流协议（A2A/MCP/OpenAI API/OTel）发现并调用 ZONGYUAN；NTFY-CONNECT-001 + AxiomGate + 五层链式锁私有信任域不变。</div>
+
+<h2>二、协议兼容矩阵（已上线）</h2>
+<table>
+<tr><th>协议层</th><th>协议</th><th>端点</th><th>状态</th></tr>
+<tr><td>Agent互操作</td><td>A2A v1.0</td><td>GET /a2a/task</td><td>✅ 公网 live</td></tr>
+<tr><td></td><td>AGNTCY SLIM</td><td>POST /v1/slim/handshake (ECDH P-256)</td><td>✅ 公网 live</td></tr>
+<tr><td>工具/上下文</td><td>MCP</td><td>https://mcp.huodouai.com/mcp</td><td>✅ 公网 live</td></tr>
+<tr><td>推理服务</td><td>OpenAI 兼容 API</td><td>POST /v1/chat/completions</td><td>✅ 公网 live</td></tr>
+<tr><td></td><td>OpenAI 模型列表</td><td>GET /v1/models</td><td>✅ 公网 live</td></tr>
+<tr><td></td><td>OpenAI 文本补全</td><td>POST /v1/completions</td><td>✅ 公网 live</td></tr>
+<tr><td>身份/安全</td><td>OAuth 2.1/OIDC + OIDC-A</td><td>(agent-card security)</td><td>✅ declared</td></tr>
+<tr><td></td><td>DPoP (RFC 9449)</td><td>POST /v1/dpop/verify</td><td>✅ 公网 live</td></tr>
+<tr><td>模型交换</td><td>GGUF / ONNX / Safetensors</td><td>llama.cpp / HF 生态</td><td>✅ 可用</td></tr>
+<tr><td>可观测</td><td>OTel GenAI</td><td>GET /metrics</td><td>✅ 公网 live</td></tr>
+<tr><td>兼容声明</td><td>协议全景</td><td>GET /v1/compat</td><td>✅ 公网 live</td></tr>
+</table>
+
+<h2>三、已部署算子与部署拓扑</h2>
+<div class="mermaid">
+graph LR
+    EXT["外部生态<br/>OpenAI SDK / A2A Client / MCP Client / OTel"]
+    GW["gateway_server :9001<br/>zr_compat_bridge 兼容桥接"]
+    SUITE["zr_agent_suite :8920<br/>/api/v1/gateway/chat"]
+    AX["AxiomGate + 五层链式锁<br/>信任域不变"]
+    EXT -->|"/v1/chat/completions"| GW
+    EXT -->|"/a2a/task"| GW
+    EXT -->|"mcp.huodouai.com"| GW
+    EXT -->|"/metrics"| GW
+    GW --> SUITE
+    GW -.鉴权.-> AX
+    style GW fill:#1a2a4a,stroke:#bc8cff,color:#fff
+    style SUITE fill:#1a3a2a,stroke:#4ade80,color:#fff
+    style AX fill:#3a1a1a,stroke:#ff6666,color:#fff
+</div>
+
+<h3>新增算子：zr_compat_bridge.py</h3>
+<table>
+<tr><th>端点</th><th>说明</th></tr>
+<tr><td>GET /v1/models</td><td>3 模型列表（GGUF/ONNX 双格式）</td></tr>
+<tr><td>POST /v1/chat/completions</td><td>OpenAI 兼容对话 → 转发 agent_suite 网关</td></tr>
+<tr><td>POST /v1/completions</td><td>OpenAI 兼容文本补全</td></tr>
+<tr><td>GET /v1/compat</td><td>协议全景声明（6 协议族）</td></tr>
+<tr><td>GET /metrics</td><td>OTel GenAI 语义约定</td></tr>
+</table>
+
+<h2>四、AGNTCY 探索情报</h2>
+<div class="note">
+<b>AGNTCY</b>（OpenAI 发起智能体互操作标准）：覆盖身份/发现/工具/支付/记忆/信誉 6 域。<br><br>
+<b>AGNTCY SLIM</b>（Secure Low-Latency Interactive Messaging）：MLS（RFC 9420）端到端加密+前向保密；gRPC over HTTP/2（RFC 9113）高效流式；OAuth 认证（RFC 6749）；支持动态组成员变更。<br><br>
+<b>AGNTCY Identity</b>：任务级访问控制（TBAC），与 A2A 协同——A2A 标准化任务流，AGNTCY 补身份与任务级权限。<br><br>
+<b>与 ZONGYUAN 对应</b>：SLIM 加密 ↔ 五层链式锁；Identity TBAC ↔ AxiomGate 权限层级；支付域 ↔ 资源账单算子。
+</div>
+
+<h2>五、OpenAI 兼容层设计</h2>
+<table>
+<tr><th>model_id</th><th>格式</th><th>量化</th><th>用途</th></tr>
+<tr><td>zr-qwen2.5-7b</td><td>GGUF/OpenAI兼容</td><td>q4_k_m</td><td>通用推理</td></tr>
+<tr><td>zr-qwen2.5-3b</td><td>GGUF/OpenAI兼容</td><td>q4_k_m</td><td>轻量推理</td></tr>
+<tr><td>zr-llama3-8b</td><td>GGUF/ONNX</td><td>q4_k_m</td><td>备选</td></tr>
+</table>
+<div class="note">上游输出 → 归一化标准 <code>chat.completion</code> 结构（id/object/created/model/choices/usage），外部 OpenAI SDK 可直接消费。</div>
+
+<h2>六、安全与约束</h2>
+<table>
+<tr><th>约束</th><th>机制</th></tr>
+<tr><td>传输安全</td><td>HTTPS 强制 (nginx 443)</td></tr>
+<tr><td>认证</td><td>X-ZR-TOKEN bearer + X-DID；OpenAI 端点走 X-API-Key</td></tr>
+<tr><td>授权</td><td>AxiomGate 五层链式锁 + 权限 L0-L4</td></tr>
+<tr><td>只读保护</td><td>MCP 出口保持只读；兼容层仅开放声明能力</td></tr>
+<tr><td>配额</td><td>META-RULE-012 配额稳态保护</td></tr>
+<tr><td>审计</td><td>兼容调用日志入 ctl-ledger</td></tr>
+</table>
+
+<h2>七·补三、V1.3 深化落地（2026-10-11）—— MLS 完整组协商</h2>
+<table>
+<tr><th>能力</th><th>端点</th><th>实现</th><th>实测</th></tr>
+<tr><td>共享密钥派生</td><td>POST /v1/slim/group/secret</td><td>KeySchedule 全链：init→group→epoch→encryption（组共享）+ SecretTree 每 sender 独立密钥</td><td>✅ 3 成员共享 + 3 独立 sender 密钥</td></tr>
+<tr><td>组密钥共识</td><td>POST /v1/slim/group/consensus</td><td>成员上报指纹比对，分叉成员标识 mismatched_members</td><td>✅ 全一致收敛 / 注入错误指纹即标识分叉</td></tr>
+<tr><td>组消息加密</td><td>POST /v1/slim/message/encrypt</td><td>AES-256-GCM，AAD=group|epoch|sender</td><td>✅ roundtrip 完整，非成员 403 拦截</td></tr>
+<tr><td>组消息解密</td><td>POST /v1/slim/message/decrypt</td><td>验证 group/epoch/sender + 完整性</td><td>✅ 明文还原 integrity=verified</td></tr>
+</table>
+
+<h2>七·补二、V1.2 深化落地（2026-10-11）</h2>
+<table>
+<tr><th>深化项</th><th>端点</th><th>实现</th><th>实测</th></tr>
+<tr><td>SLIM → MLS 组密钥</td><td>POST /v1/slim/group</td><td>KeySchedule 哈希链：init→group→epoch，成员变更提交新 epoch（前向保密）</td><td>✅ 创建 epoch0 → 加成员 epoch1</td></tr>
+<tr><td>Flower 真实 FedAvg</td><td>POST /v1/federated/aggregate</td><td>多节点按样本数加权平均，归档 fedavg-rounds.jsonl</td><td>✅ 2节点→w1=0.4/w2=0.35</td></tr>
+<tr><td>OTel 真实打点</td><td>GET /metrics</td><td>进程内真实累计：requests/tokens/latency/errors/uptime</td><td>✅ requests=2, uptime实时</td></tr>
+</table>
+
+<h2>七·补、V1.1 新增落地（2026-10-11）</h2>
+<table>
+<tr><th>协议</th><th>端点</th><th>实现</th><th>状态</th></tr>
+<tr><td>AGNTCY SLIM</td><td>POST /v1/slim/handshake</td><td>ECDH P-256 握手，HKDF 派生会话密钥，前向保密</td><td>✅ 公网 live</td></tr>
+<tr><td>DPoP (RFC 9449)</td><td>POST /v1/dpop/verify</td><td>typ/htu·htm/jti 防重放/iat 时效校验</td><td>✅ 公网 live</td></tr>
+<tr><td>Flower 联邦</td><td>GET /v1/federated/status</td><td>任务池节点汇总，fedavg+secure_agg 声明</td><td>✅ 公网 live</td></tr>
+<tr><td>GPU vLLM 接入</td><td>gpu-agent/gpu_vllm_register.sh</td><td>检测GPU→拉起vLLM→注册云端→入联邦</td><td>✅ 魔搭 5c45243</td></tr>
+</table>
+
+<h2>七、落地成果与下一步</h2>
+<div class="note note-gold"><b>已落地（2026-10-11 公网实测）</b>：OpenAI 兼容 API 公网 live（3 端点）｜OTel /metrics live｜/v1/compat 全景声明｜agent-card capabilities 扩展｜本地基底 11 算子｜nginx 精确匹配反代（备份 .bak-compat-20261011）</div>
+<table>
+<tr><th>优先级</th><th>下一步</th></tr>
+<tr><td>P1</td><td>AGNTCY SLIM 传输层落地（MLS 密钥协商）</td></tr>
+<tr><td>P1</td><td>OpenAI 兼容端点接入真实 GPU 推理（魔搭 vLLM 节点）</td></tr>
+<tr><td>P2</td><td>DPoP 令牌绑定</td></tr>
+<tr><td>P2</td><td>Flower 联邦学习协议落地</td></tr>
+</table>
+
+<h2>八、结论</h2>
+<div class="note note-gold"><b>ZONGYUAN-ROOT 已实现通用协议全面兼容</b>：A2A（任务委派）+ MCP（工具查询）+ OpenAI API（推理调用）+ OTel（观测）+ AGNTCY（声明）+ GGUF/ONNX（模型格式）六大协议族全部公网上线，外部生态可零改造接入。私有信任域保持恒一不变。</div>
+
+<div class="foot">
+<span>Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZR-NODE-DC2E51C0 | 自治Lv9 | 权限L4 | 工程化Lv7</span>
+<span>火斗云智AIOS · 通用协议全面兼容 V1.0 · 2026-10-11</span>
+</div>
+<script>mermaid.initialize({startOnLoad:true,theme:"dark"});</script>
+</body>
+</html>

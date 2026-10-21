@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, Optional
 from enum import Enum
 
-PIPELINE_FILE = "/home/user/Doubao/chats/38441716968655362/kunlun_drama_mass_production.py"
+PIPELINE_FILE = "/opt/ZONGYUAN-ROOT/kunlun_drama_mass_production.py"
 GATEWAY_BASE = "https://www.huodouai.com"
 DID = "DID-BR-000002"
 ANCHOR = "Ω₀⊂⊙∞⊂Ω"

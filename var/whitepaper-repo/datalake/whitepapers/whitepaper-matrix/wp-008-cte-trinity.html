@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WP-008 · CTE三位一体闭环技术白皮书</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23070b16'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='%23ffc857' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='2.4' fill='%234fc3f7'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0b1224; --card:#0e1730; --card2:#121c38;
+    --line:#1e2a4d; --line2:#2a3a66;
+    --txt:#e8eefc; --sub:#8fa3c8; --dim:#5c6f96;
+    --gold:#ffc857; --cyan:#4fc3f7; --violet:#a78bfa; --red:#ff6b6b; --green:#6ee7b7;
+    --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:
+    radial-gradient(1200px 500px at 80% -10%, rgba(79,195,247,.08), transparent 60%),
+    radial-gradient(900px 400px at -10% 20%, rgba(167,139,250,.07), transparent 55%),
+    var(--bg);
+    color:var(--txt); font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    line-height:1.7; min-height:100vh}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+
+  .doc-head{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  .doc-head .wpnum{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.14em}
+  .doc-head h1{font-size:26px;font-weight:800;margin:8px 0 6px}
+  .doc-head .meta{font-size:12px;color:var(--dim);display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+  .doc-head .meta b{color:var(--sub);font-weight:500}
+
+  h2{font-size:18px;font-weight:800;margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+  h2 .n{color:var(--gold);font-family:var(--mono);font-size:13px;border:1px solid var(--line2);border-radius:6px;padding:2px 9px}
+  h3{font-size:14px;font-weight:700;color:var(--cyan);margin:18px 0 8px}
+  p{font-size:13.5px;color:var(--sub);margin-bottom:8px}
+  p b{color:var(--txt)}
+  .formula{background:var(--card2);border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:8px;padding:14px 18px;font-family:var(--mono);font-size:13.5px;color:var(--gold);margin:12px 0;overflow-x:auto}
+
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:12px 0;table-layout:fixed}
+  .tbl th{color:var(--sub);font-weight:500;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  .tbl td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--txt);vertical-align:top}
+  .tbl .mono{font-family:var(--mono);color:var(--cyan);font-size:11.5px}
+  .tbl td b{color:var(--gold)}
+
+  .chartbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+  .chart{width:100%;height:300px}
+
+  .callout{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line2);border-left:4px solid var(--cyan);border-radius:10px;padding:16px 18px;margin:16px 0;font-size:13px;color:var(--sub)}
+  .callout b{color:var(--cyan)}
+
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:11.5px;color:var(--dim)}
+  .lockline{font-family:var(--mono);color:var(--gold);font-size:11px}
+  .back{display:inline-block;margin-bottom:20px;font-size:12px;color:var(--cyan);text-decoration:none;border:1px solid var(--line2);padding:4px 14px;border-radius:8px}
+  .back:hover{background:rgba(79,195,247,.08)}
+
+  @media(max-width:620px){
+    .doc-head h1{font-size:21px}
+    .wrap{padding:20px 12px 48px}
+    .tbl{font-size:11.5px}
+    .formula{font-size:12px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 返回白皮书矩阵</a>
+
+  <div class="doc-head">
+    <div class="wpnum">WP-008 · CTE TRINITY · 独创架构</div>
+    <h1>CTE三位一体闭环技术白皮书 · 因果-真值-进化</h1>
+    <div class="meta">
+      <span>版本：<b>V1.0</b></span>
+      <span>日期：<b>2026-09-30</b></span>
+      <span>确权：<b>DID-BR-000002</b></span>
+      <span>锚定：<b>Ω₀⊂⊙∞⊂Ω</b></span>
+      <span>阶段：<b>ZONGYUAN-ROOT V4.0 阶段一</b></span>
+    </div>
+  </div>
+
+  <h2><span class="n">01</span> 摘要</h2>
+  <p>本白皮书阐述将<b>因果奇点内核(C)</b>、<b>真值引擎(T)</b>、<b>元学习自进化引擎(E)</b>从"并存独立"升级为<b>三位一体闭环</b>的独创架构。三大适配器+闭环反馈监控器实现 C→T→E→C 自洽迭代，以适应度Φ、融合度D_TC、闭环能量V(X)量化收敛状态。</p>
+
+  <div class="callout"><b>独创性声明：</b>传统AI系统各模块单向流水；CTE以适配器+反馈监控器形成自洽闭环，每次迭代自动提升融合度，直至收敛——这是ZONGYUAN-ROOT V4.0阶段一到阶段三（自洽智能体）的进化基石。</div>
+
+  <h2><span class="n">02</span> 核心架构</h2>
+  <div class="chartbox">
+    <h3>C→T→E→C 三位一体闭环</h3>
+    <div id="chartCTE" class="chart"></div>
+  </div>
+
+  <h2><span class="n">03</span> 四大组件</h2>
+  <div class="tbl">
+    <colgroup><col style="width:30%"><col style="width:26%"><col style="width:44%"></colgroup>
+    <tr><th>组件</th><th>方向</th><th>功能</th></tr>
+    <tr><td>CausalToTruthAdapter</td><td class="mono">C→T</td><td>因果推理结果→真值引擎输入文本</td></tr>
+    <tr><td>TruthToEvolutionAdapter</td><td class="mono">T→E</td><td>真值提炼结果→进化引擎参数配置</td></tr>
+    <tr><td>EvolutionToCausalAdapter</td><td class="mono">E→C</td><td>进化优化结果→因果内核参数反馈</td></tr>
+    <tr><td>TrinityFeedbackMonitor</td><td class="mono">监控</td><td>迭代监控/适应度/融合度/收敛检测</td></tr>
+  </div>
+
+  <h2><span class="n">04</span> 核心公式</h2>
+  <div class="formula">适应度 Φ = 0.25·P_C + 0.25·Q_T + 0.20·E_eff + 0.20·D_TC − 0.10·Cost</div>
+  <div class="formula">融合度 D_TC^(n+1) = min(1, D_TC^n + λ·(1−D_TC^n)·Q_T)</div>
+  <div class="formula">能量 V(X) = (Φ* − Φ) + (1 − D_TC) + ‖θ − θ*‖²</div>
+  <p><b>收敛条件：</b>|Φ_n−Φ_{n−1}| &lt; ε_Φ 且 |D_TC−1| &lt; ε_D 且连续5轮无改进。</p>
+
+  <h2><span class="n">05</span> 与27算子拓扑的联动</h2>
+  <div class="tbl">
+    <colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+    <tr><th>算子层</th><th>联动关系</th></tr>
+    <tr><td>L5 CTE适配器流转</td><td>算子13 CausalToTruth / 算子14 TruthToEvolution / 算子15 EvolutionToCausal</td></tr>
+    <tr><td>预激活闭环</td><td>C→T→E→C 预激活，待进化域算子唤醒后完全闭环</td></tr>
+    <tr><td>反馈监控</td><td>闭环能量V(X)实时监控，收敛后自动锁档</td></tr>
+  </div>
+
+  <footer>
+    <div>火斗云智AIOS 技术白皮书矩阵 · WP-008</div>
+    <div class="lockline">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · NODE-DEV-DOUBAO-WORK-001</div>
+  </footer>
+</div>
+
+<script>
+  const mk=(id)=>echarts.init(document.getElementById(id));
+  const SUB='#8fa3c8', GOLD='#ffc857', CYAN='#4fc3f7', VIOLET='#a78bfa', GREEN='#6ee7b7';
+  mk('chartCTE').setOption({
+    tooltip:{trigger:'item', triggerOn:'click', renderMode:'richText', confine:true, backgroundColor:'#0b1224', borderColor:'#2a3a66', textStyle:{color:'#e8eefc',fontSize:12}},
+    series:[{type:'graph', layout:'circular', circular:{rotateLabel:false},
+      data:[
+        {name:'C 因果奇点内核', symbolSize:64, itemStyle:{color:CYAN}},
+        {name:'T 真值引擎', symbolSize:64, itemStyle:{color:GOLD}},
+        {name:'E 元学习自进化', symbolSize:64, itemStyle:{color:VIOLET}},
+        {name:'反馈监控器', symbolSize:44, itemStyle:{color:GREEN}}
+      ],
+      links:[
+        {source:'C 因果奇点内核', target:'T 真值引擎', label:{show:true,formatter:'CausalToTruth',fontSize:10,color:'#8fa3c8'}},
+        {source:'T 真值引擎', target:'E 元学习自进化', label:{show:true,formatter:'TruthToEvolution',fontSize:10,color:'#8fa3c8'}},
+        {source:'E 元学习自进化', target:'C 因果奇点内核', label:{show:true,formatter:'EvolutionToCausal',fontSize:10,color:'#8fa3c8'}},
+        {source:'反馈监控器', target:'C 因果奇点内核'},
+        {source:'反馈监控器', target:'T 真值引擎'},
+        {source:'反馈监控器', target:'E 元学习自进化'}
+      ],
+      label:{position:'bottom',color:'#e8eefc',fontSize:11},
+      lineStyle:{color:'#2a3a66',width:2,curveness:.15},
+      emphasis:{focus:'adjacency',lineStyle:{width:4}}
+    }]
+  });
+  window.addEventListener('resize',()=>{chartCTE.resize()});
+</script>
+</body>
+</html>

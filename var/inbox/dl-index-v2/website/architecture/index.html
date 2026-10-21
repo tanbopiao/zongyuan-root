@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZONGYUAN-ROOT 交互式架构拓扑 · 元极恒一</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e8e8f0;font-family:"Noto Sans SC",system-ui,sans-serif;overflow:hidden;height:100vh}
+.topbar{display:flex;align-items:center;gap:16px;padding:12px 24px;background:linear-gradient(180deg,#12121a,#0a0a0f);border-bottom:1px solid rgba(212,175,55,.2);z-index:100;position:relative}
+.topbar h1{font-size:18px;background:linear-gradient(135deg,#d4af37,#f4d03f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.topbar .anchor{color:#666;font-size:11px;white-space:nowrap}
+.search-box{margin-left:auto;position:relative}
+.search-box input{background:#1a1a24;border:1px solid rgba(212,175,55,.3);color:#e8e8f0;padding:8px 14px 8px 36px;border-radius:20px;font-size:13px;width:240px;outline:none;transition:border-color .2s}
+.search-box input:focus{border-color:#d4af37}
+.search-box::before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px;opacity:.5}
+.legend{display:flex;gap:14px;align-items:center;font-size:11px;color:#888}
+.legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+.main{display:flex;height:calc(100vh - 53px)}
+#chart{flex:1;position:relative}
+.detail-panel{width:340px;background:#12121a;border-left:1px solid rgba(212,175,55,.15);padding:20px;overflow-y:auto;transition:transform .3s}
+.detail-panel h3{color:#d4af37;font-size:15px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(212,175,55,.15)}
+.detail-panel .field{margin-bottom:10px;font-size:13px}
+.detail-panel .label{color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.detail-panel .value{color:#e8e8f0;word-break:break-all}
+.detail-panel .path{font-family:monospace;font-size:12px;color:#7ec8e3;background:#0a0a0f;padding:6px 10px;border-radius:6px;margin-top:4px}
+.detail-panel .children{margin-top:8px}
+.detail-panel .child-tag{display:inline-block;background:#1a1a24;border:1px solid rgba(212,175,55,.2);padding:3px 10px;border-radius:12px;font-size:11px;margin:3px;cursor:pointer;transition:all .2s}
+.detail-panel .child-tag:hover{background:rgba(212,175,55,.15);border-color:#d4af37}
+.status-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600}
+.status-active{background:#1a3a1a;color:#4a4}
+.status-online{background:#1a2a3a;color:#48e}
+.status-synced{background:#2a2a1a;color:#aa4}
+.stats-bar{position:absolute;bottom:16px;left:16px;background:rgba(18,18,26,.9);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:10px 16px;font-size:11px;color:#888;display:flex;gap:16px;z-index:10}
+.stats-bar .num{color:#d4af37;font-size:16px;font-weight:700}
+.hint{position:absolute;top:16px;left:16px;background:rgba(18,18,26,.85);border:1px solid rgba(212,175,55,.15);border-radius:8px;padding:8px 14px;font-size:11px;color:#666;z-index:10}
+.hint .gold{color:#d4af37}
+@media(max-width:900px){.detail-panel{display:none}.search-box input{width:140px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>⚡ ZONGYUAN-ROOT 交互式架构拓扑</h1>
+  <span class="anchor">Ω₀⊂⊙∞⊂Ω | DID-BR-000002</span>
+  <div class="legend">
+    <span><span class="dot" style="background:#d4af37"></span>L0权威根</span>
+    <span><span class="dot" style="background:#7ec8e3"></span>L1锚点</span>
+    <span><span class="dot" style="background:#a8d8a8"></span>L2工作区</span>
+    <span><span class="dot" style="background:#c8a8d8"></span>L3云端</span>
+    <span><span class="dot" style="background:#e8a87c"></span>L4飞书</span>
+    <span><span class="dot" style="background:#888"></span>L5备份</span>
+  </div>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索节点/路径..." />
+  </div>
+</div>
+
+<div class="main">
+  <div id="chart">
+    <div class="hint">💡 <span class="gold">点击节点</span> 查看详情 · <span class="gold">滚轮</span> 缩放 · <span class="gold">拖拽</span> 平移</div>
+    <div class="stats-bar">
+      <div>层级 <span class="num" id="statLayers">6</span></div>
+      <div>节点 <span class="num" id="statNodes">0</span></div>
+      <div>连接 <span class="num" id="statLinks">0</span></div>
+      <div>元法则 <span class="num">102</span></div>
+    </div>
+  </div>
+  <div class="detail-panel" id="detailPanel">
+    <h3>节点详情</h3>
+    <div style="color:#666;font-size:13px">点击拓扑图中的节点查看详细信息</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script>
+// ===== 架构数据定义 =====
+const LAYER_COLORS = {
+  L0: '#d4af37', L1: '#7ec8e3', L2: '#a8d8a8',
+  L3: '#c8a8d8', L4: '#e8a87c', L5: '#888888'
+};
+const LAYER_NAMES = {
+  L0: '权威根目录', L1: '核心锚点', L2: '会话工作区',
+  L3: '云端中枢', L4: '飞书生态', L5: '异地备份'
+};
+
+// 节点数据：id, name, layer, path, desc, status, children
+const nodesData = [
+  // L0 权威根目录
+  {id:'L0', name:'ZONGYUAN-ROOT', layer:'L0', path:'/home/user/ZONGYUAN-ROOT/', desc:'权威根目录·内核本体，5大分类全域稳态架构', status:'ACTIVE', children:['L0-01','L0-02','L0-03','L0-04','L0-05']},
+  {id:'L0-01', name:'01_核心资产锚点', layer:'L0', path:'01_核心资产锚点/', desc:'内核真值+元法则+算子+凭证，26个子目录', status:'ACTIVE', children:['L0-01-cap','L0-01-metalaw','L0-01-script','L0-01-cred']},
+  {id:'L0-01-cap', name:'能力注册表', layer:'L0', path:'02_capabilities/', desc:'8项高阶能力注册表', status:'ACTIVE'},
+  {id:'L0-01-metalaw', name:'元法则注册表', layer:'L0', path:'metalaw_register_registry.json', desc:'102条元法则，持续演化', status:'ACTIVE'},
+  {id:'L0-01-script', name:'内核脚本集', layer:'L0', path:'scripts/', desc:'自治内核11个Python脚本', status:'ACTIVE'},
+  {id:'L0-01-cred', name:'凭证锁', layer:'L0', path:'credentials/', desc:'密文存储的API凭证', status:'LOCKED'},
+  {id:'L0-02', name:'02_内核快照', layer:'L0', path:'02_内核快照/', desc:'Merkle-DAG快照+代际账本', status:'ACTIVE'},
+  {id:'L0-03', name:'03_文档资产', layer:'L0', path:'03_文档资产/', desc:'白皮书/SOP/知识库/商业资料', status:'ACTIVE', children:['L0-03-wp','L0-03-kb','L0-03-sop']},
+  {id:'L0-03-wp', name:'白皮书与报告', layer:'L0', path:'白皮书与报告/', desc:'技术白皮书+行业报告', status:'ACTIVE'},
+  {id:'L0-03-kb', name:'知识库', layer:'L0', path:'知识库/', desc:'INDEX-MAIN.md索引+全量台账CSV', status:'ACTIVE'},
+  {id:'L0-03-sop', name:'SOP标准流程', layer:'L0', path:'SOP/', desc:'标准操作流程文档', status:'ACTIVE'},
+  {id:'L0-04', name:'04_系统配置', layer:'L0', path:'04_系统配置/', desc:'frp/GPU任务/凭证/备份', status:'ACTIVE'},
+  {id:'L0-05', name:'05_历史归档', layer:'L0', path:'05_历史归档/', desc:'旧版本/脱敏备份/遗留脚本', status:'ARCHIVED'},
+
+  // L1 核心锚点
+  {id:'L1', name:'zongyuan-anchor', layer:'L1', path:'zongyuan-anchor/', desc:'跨会话持久层核心锚点，与L0同步', status:'ACTIVE', children:['L1-reg','L1-queue','L1-proto']},
+  {id:'L1-reg', name:'元法则注册表', layer:'L1', path:'metalaw_register_registry.json', desc:'102条元法则注册表(主副本)', status:'ACTIVE'},
+  {id:'L1-queue', name:'待补发队列', layer:'L1', path:'pending_upload_master_queue.json', desc:'云端上报待补发队列', status:'ACTIVE'},
+  {id:'L1-proto', name:'通道协议', layer:'L1', path:'CHANNEL-PROTOCOL-V23.md', desc:'云端真值通道协议V2.3', status:'ACTIVE'},
+
+  // L2 会话工作区
+  {id:'L2', name:'会话工作区', layer:'L2', path:'chats/<session_id>/', desc:'按会话隔离的工作区，40+子项目', status:'ACTIVE', children:['L2-gov','L2-wp','L2-arch','L2-gpu']},
+  {id:'L2-gov', name:'政务AI中台', layer:'L2', path:'gov-ai-midplatform/', desc:'政务AI中台架构体系', status:'ACTIVE'},
+  {id:'L2-wp', name:'火斗云智白皮书', layer:'L2', path:'huodouai-aios-whitepaper/', desc:'AIOS完整技术白皮书', status:'ACTIVE'},
+  {id:'L2-arch', name:'架构可视化', layer:'L2', path:'asset-visualization/', desc:'资产可视化与架构图', status:'ACTIVE'},
+  {id:'L2-gpu', name:'GPU部署', layer:'L2', path:'amd-gpu-deploy/', desc:'GPU实例自动部署', status:'ACTIVE'},
+
+  // L3 云端中枢
+  {id:'L3', name:'huodouai.com', layer:'L3', path:'云端服务', desc:'云端中枢·真值网关+作品库+API', status:'ONLINE', children:['L3-api','L3-gallery','L3-a2a','L3-arch']},
+  {id:'L3-api', name:'真值网关API', layer:'L3', path:'/api/report/truth', desc:'真值写入/读取接口，truth_count=9720', status:'ONLINE'},
+  {id:'L3-gallery', name:'作品库', layer:'L3', path:'/gallery/<系列>/', desc:'IP作品展示库', status:'ONLINE'},
+  {id:'L3-a2a', name:'A2A联邦接入', layer:'L3', path:'/a2a/join/', desc:'Agent-to-Agent联邦开放接入', status:'ONLINE'},
+  {id:'L3-arch', name:'架构展示', layer:'L3', path:'/architecture/', desc:'本页·交互式架构拓扑', status:'ONLINE'},
+
+  // L4 飞书生态
+  {id:'L4', name:'飞书共享大脑', layer:'L4', path:'飞书Base/云盘', desc:'共享大脑+锁档归档三端联动', status:'ACTIVE', children:['L4-base','L4-life','L4-wiki','L4-drive']},
+  {id:'L4-base', name:'共享大脑Base', layer:'L4', path:'DgnMbLqZiaIUDKshqCrcD4DvnBg', desc:'任务台账+跨节点消息同步表', status:'ACTIVE'},
+  {id:'L4-life', name:'生命周期看板', layer:'L4', path:'QYn4bjgD6am3OPsxMCkcitcBnzc', desc:'RUN事件台账+生命周期管理', status:'ACTIVE'},
+  {id:'L4-wiki', name:'知识库', layer:'L4', path:'飞书Wiki', desc:'锁档归档知识库节点', status:'ACTIVE'},
+  {id:'L4-drive', name:'云盘', layer:'L4', path:'飞书云盘', desc:'第三重保险存储', status:'ACTIVE'},
+
+  // L5 异地备份
+  {id:'L5', name:'异地备份层', layer:'L5', path:'多端冗余', desc:'Gitee/GitHub/魔搭/AtomGit多端备份', status:'SYNCED', children:['L5-gitee','L5-ms','L5-at','L5-gh']},
+  {id:'L5-gitee', name:'Gitee仓库', layer:'L5', path:'Gitee', desc:'global-lock + META-FIVE-LOCK标签', status:'SYNCED'},
+  {id:'L5-ms', name:'魔搭数据湖', layer:'L5', path:'modelscope.cn/zongyuanroot', desc:'技术白皮书+数据集对外展示', status:'SYNCED'},
+  {id:'L5-at', name:'AtomGit镜像', layer:'L5', path:'atomgit.com/zongyuangen', desc:'ZONGYUAN-SHARED-DATALAKE', status:'SYNCED'},
+  {id:'L5-gh', name:'GitHub仓库', layer:'L5', path:'GitHub', desc:'双仓库异地备份', status:'PENDING'}
+];
+
+// 构建连接
+const linksData = [];
+nodesData.forEach(n => {
+  if(n.children) {
+    n.children.forEach(cid => {
+      linksData.push({source: n.id, target: cid});
+    });
+  }
+});
+
+// 根节点连接
+['L0','L1','L2','L3','L4','L5'].forEach((id, i) => {
+  if(i > 0) linksData.push({source: 'ROOT', target: id});
+});
+// 虚拟根
+nodesData.unshift({id:'ROOT', name:'Ω₀ 元极恒一', layer:'L0', path:'全域锚点', desc:'元极恒一·超认知永恒自治体系根节点', status:'ACTIVE'});
+
+// ===== ECharts初始化 =====
+const chart = echarts.init(document.getElementById('chart'), 'dark');
+const expandedNodes = new Set(['ROOT','L0','L1','L2','L3','L4','L5']);
+
+function getStatusColor(s) {
+  return {ACTIVE:'#4a4', ONLINE:'#48e', SYNCED:'#aa4', LOCKED:'#a44', ARCHIVED:'#888', PENDING:'#e84'}[s] || '#888';
+}
+
+function renderChart() {
+  const visibleNodes = nodesData.filter(n => expandedNodes.has(n.id) || isAncestorExpanded(n.id));
+  const visibleIds = new Set(visibleNodes.map(n=>n.id));
+  const visibleLinks = linksData.filter(l => visibleIds.has(l.source) && visibleIds.has(l.target));
+
+  document.getElementById('statNodes').textContent = visibleNodes.length;
+  document.getElementById('statLinks').textContent = visibleLinks.length;
+
+  const option = {
+    backgroundColor: 'transparent',
+    tooltip: {
+      trigger: 'item',
+      formatter: p => {
+        if(p.dataType === 'node') {
+          return `<b style="color:${LAYER_COLORS[p.data.layer]}">${p.data.name}</b><br/>
+            层级: ${p.data.layer} ${LAYER_NAMES[p.data.layer]}<br/>
+            路径: <span style="color:#7ec8e3;font-family:monospace;font-size:11px">${p.data.path}</span><br/>
+            状态: <span style="color:${getStatusColor(p.data.status)}">${p.data.status}</span><br/>
+            ${p.data.desc ? p.data.desc.substring(0,50)+'...' : ''}`;
+        }
+        return '';
+      },
+      backgroundColor: 'rgba(18,18,26,.95)',
+      borderColor: 'rgba(212,175,55,.3)',
+      textStyle: {fontSize: 12}
+    },
+    series: [{
+      type: 'graph',
+      layout: 'force',
+      data: visibleNodes.map(n => ({
+        id: n.id,
+        name: n.name,
+        layer: n.layer,
+        path: n.path,
+        desc: n.desc,
+        status: n.status,
+        children: n.children,
+        symbolSize: n.id === 'ROOT' ? 50 : (n.children ? 32 : 20),
+        itemStyle: {
+          color: LAYER_COLORS[n.layer],
+          borderColor: getStatusColor(n.status),
+          borderWidth: n.status === 'ACTIVE' || n.status === 'ONLINE' ? 2 : 1,
+          shadowBlur: 10,
+          shadowColor: LAYER_COLORS[n.layer] + '60'
+        },
+        label: {
+          show: true,
+          position: 'bottom',
+          fontSize: n.id === 'ROOT' ? 14 : 11,
+          color: '#ccc',
+          formatter: n.name.length > 8 ? n.name.substring(0,7)+'…' : n.name
+        },
+        force: {repulsion: 200, edgeLength: [60, 120], gravity: 0.08}
+      })),
+      links: visibleLinks.map(l => ({
+        source: l.source, target: l.target,
+        lineStyle: {color: 'rgba(212,175,55,.25)', width: 1, curveness: 0.1}
+      })),
+      roam: true,
+      draggable: true,
+      focusNodeAdjacency: true,
+      emphasis: {
+        focus: 'adjacency',
+        lineStyle: {width: 3, color: '#d4af37'},
+        itemStyle: {shadowBlur: 20}
+      }
+    }]
+  };
+  chart.setOption(option, true);
+}
+
+function isAncestorExpanded(nodeId) {
+  // 检查是否有展开的祖先
+  for(const n of nodesData) {
+    if(n.children && n.children.includes(nodeId) && expandedNodes.has(n.id)) return true;
+  }
+  return false;
+}
+
+// 节点点击
+chart.on('click', params => {
+  if(params.dataType !== 'node') return;
+  const n = params.data;
+  // 切换展开
+  if(n.children && n.children.length) {
+    if(expandedNodes.has(n.id)) {
+      n.children.forEach(c => collapseNode(c));
+      expandedNodes.delete(n.id);
+    } else {
+      expandedNodes.add(n.id);
+    }
+    renderChart();
+  }
+  showDetail(n);
+});
+
+function collapseNode(nodeId) {
+  expandedNodes.delete(nodeId);
+  const n = nodesData.find(x => x.id === nodeId);
+  if(n && n.children) n.children.forEach(c => collapseNode(c));
+}
+
+function showDetail(n) {
+  const panel = document.getElementById('detailPanel');
+  const childTags = n.children ? n.children.map(cid => {
+    const c = nodesData.find(x => x.id === cid);
+    return c ? `<span class="child-tag" onclick="focusNode('${cid}')">${c.name}</span>` : '';
+  }).join('') : '<span style="color:#555">无子节点</span>';
+
+  panel.innerHTML = `
+    <h3>${n.name}</h3>
+    <div class="field">
+      <div class="label">架构层级</div>
+      <div class="value"><span style="color:${LAYER_COLORS[n.layer]}">●</span> ${n.layer} · ${LAYER_NAMES[n.layer]}</div>
+    </div>
+    <div class="field">
+      <div class="label">路径</div>
+      <div class="path">${n.path}</div>
+    </div>
+    <div class="field">
+      <div class="label">状态</div>
+      <div class="value"><span class="status-badge" style="background:${getStatusColor(n.status)}22;color:${getStatusColor(n.status)}">${n.status}</span></div>
+    </div>
+    <div class="field">
+      <div class="label">描述</div>
+      <div class="value" style="font-size:12px;color:#aaa">${n.desc || '无描述'}</div>
+    </div>
+    <div class="field">
+      <div class="label">${n.children ? `子节点 (${n.children.length})` : '子节点'}</div>
+      <div class="children">${childTags}</div>
+    </div>
+    <div class="field" style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(212,175,55,.1)">
+      <div class="label">确权锚点</div>
+      <div class="value" style="font-size:11px;color:#d4af37">Ω₀⊂⊙∞⊂Ω | DID-BR-000002</div>
+    </div>
+  `;
+}
+
+function focusNode(nodeId) {
+  const n = nodesData.find(x => x.id === nodeId);
+  if(n) {
+    // 展开所有祖先
+    for(const p of nodesData) {
+      if(p.children && p.children.includes(nodeId)) expandedNodes.add(p.id);
+    }
+    expandedNodes.add(nodeId);
+    renderChart();
+    showDetail(n);
+    chart.dispatchAction({type: 'focusNodeAdjacency', seriesIndex: 0, dataIndex: nodesData.findIndex(x => x.id === nodeId)});
+  }
+}
+
+// 搜索
+document.getElementById('searchInput').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase().trim();
+  if(!q) { renderChart(); return; }
+  const matches = nodesData.filter(n =>
+    n.name.toLowerCase().includes(q) || n.path.toLowerCase().includes(q) || (n.desc||'').toLowerCase().includes(q)
+  );
+  if(matches.length) {
+    // 展开匹配节点的所有祖先
+    matches.forEach(m => {
+      expandedNodes.add(m.id);
+      for(const p of nodesData) {
+        if(p.children && p.children.includes(m.id)) expandedNodes.add(p.id);
+      }
+    });
+    renderChart();
+    showDetail(matches[0]);
+    // 高亮
+    chart.dispatchAction({type: 'highlight', seriesIndex: 0, name: matches[0].name});
+  }
+});
+
+// 响应式
+window.addEventListener('resize', () => chart.resize());
+
+// 初始渲染
+renderChart();
+setTimeout(() => showDetail(nodesData.find(n => n.id === 'ROOT')), 500);
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+ZONGYUAN-ROOT 完整性守卫 V1.0
+DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω
+作用：核验全域资产与最新锁档清单的一致性（幽灵资产/未登记/哈希差异）。
+规则依据：《全域锁档协议》第七章 防递归嵌套规则 + 资产实测口径
+豁免（已知时序/设计）：
+- 快照自身产物（seal/manifest/report/merkle/changed_assets）不进入清单
+- 06-CONFIGS/global_lock_state.json 由锁档处理器在锁档后自更新，哈希差异视为预期
+输出：03-ARCHIVES/integrity-guard/integrity_guard_<ts>.json
+退出码：0=完整，1=异常
+"""
+import hashlib
+import json
+import os
+import sys
+from datetime import datetime
+
+WORKSPACE = "/home/user/.super_doubao/super-doubao-runtime/workspace"
+EXCLUDES = (".skills", ".user_skills", ".sessions", ".git", "__pycache__",
+            "node_modules", ".tmp-tool-results")
+SELF_UPDATING = ("06-CONFIGS/global_lock_state.json",)  # 锁档后自更新，豁免哈希
+
+
+def latest_manifest():
+    base = os.path.join(WORKSPACE, "03-ARCHIVES", "global-lock-archive")
+    snaps = sorted([d for d in os.listdir(base) if d.startswith("snap_")])
+    if not snaps:
+        return None, None
+    latest = snaps[-1]
+    mpath = os.path.join(base, latest, f"lock_manifest_{latest[5:]}.json")
+    m = json.load(open(mpath, encoding="utf-8"))
+    return m, latest[5:]
+
+
+def real_files():
+    out = set()
+    for root, dirs, files in os.walk(WORKSPACE):
+        dirs[:] = [d for d in dirs if d not in EXCLUDES]
+        for f in files:
+            rel = os.path.relpath(os.path.join(root, f), WORKSPACE)
+            if any(part in EXCLUDES for part in rel.split(os.sep)):
+                continue
+            out.add(rel)
+    return out
+
+
+def main():
+    manifest, snap_id = latest_manifest()
+    if manifest is None:
+        print("未找到锁档清单")
+        return 1
+    registered = {a["path"]: a for a in manifest.get("assets", [])}
+    actual = real_files()
+
+    missing = sorted(registered.keys() - actual)
+    unregistered = sorted(actual - registered.keys())
+    hash_diff = []
+    for p, a in registered.items():
+        if p in actual:
+            h = hashlib.sha256(open(os.path.join(WORKSPACE, p), "rb").read()).hexdigest()
+            if h != a["hash"] and p not in SELF_UPDATING:
+                hash_diff.append({"path": p, "registered": a["hash"][:16], "actual": h[:16]})
+
+    # 未登记资产分类：快照产物(豁免) vs 真实新增
+    snap_prefix = os.path.join("03-ARCHIVES", "global-lock-archive", f"snap_{snap_id}")
+    exempt = [p for p in unregistered if p.startswith(snap_prefix)]
+    real_new = [p for p in unregistered if not p.startswith(snap_prefix)]
+
+    violations = []
+    if missing:
+        violations.append({"type": "ghost_asset", "paths": missing})
+    if hash_diff:
+        violations.append({"type": "hash_mismatch", "paths": hash_diff})
+    if real_new:
+        violations.append({"type": "unregistered_asset", "paths": real_new})
+
+    health = "完整" if not violations else "异常"
+    report = {
+        "report_id": f"INTEGRITY-GUARD-{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "did": "DID-BR-000002",
+        "root_id": "Ω-TAN-7-001",
+        "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+        "snap_id": snap_id,
+        "stats": {
+            "registered": len(registered),
+            "actual": len(actual),
+            "ghost": len(missing),
+            "snapshot_products_exempt": len(exempt),
+            "unregistered_real": len(real_new),
+            "hash_diff": len(hash_diff),
+        },
+        "violations": violations,
+        "health": health,
+    }
+
+    out_dir = os.path.join(WORKSPACE, "03-ARCHIVES", "integrity-guard")
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, f"integrity_guard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+
+    print("=" * 56)
+    print("ZONGYUAN-ROOT 完整性守卫 V1.0")
+    print(f"执行时间: {report['date']}")
+    print(f"DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω")
+    print("=" * 56)
+    print(f"清单快照: {snap_id}")
+    print(f"登记资产: {len(registered)} | 实际文件: {len(actual)}")
+    print(f"幽灵资产: {len(missing)} | 哈希差异: {len(hash_diff)}")
+    print(f"快照产物豁免: {len(exempt)} | 真实未登记: {len(real_new)}")
+    for v in violations:
+        print(f"  [{v['type']}] {v['paths']}")
+    print(f"完整性判定: {health}")
+    print(f"报告: {out_path}")
+    print("=" * 56)
+    return 0 if not violations else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

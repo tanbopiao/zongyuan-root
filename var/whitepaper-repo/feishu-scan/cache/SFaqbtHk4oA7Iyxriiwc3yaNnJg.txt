@@ -1,0 +1,42 @@
+# 全域锁档凭证｜KUN-LOCK-20260903-VIS-016
+
+## 锁档元数据
+
+| 字段 | 值 |
+|------|-----|
+| 快照ID | KUN-LOCK-20260903-VIS-016 |
+| DID标识 | DID-BR-000002 |
+| 溯源符号 | Ω₀⊂⊙∞⊂Ω |
+| 归档节点 | ZONGYUAN-ROOT |
+| 锁档时间 | 2026-09-03 13:19:18 +08 |
+| 资产总数 | 2个文件 |
+| Merkle根 | `46adaf776f6873e36581b84171d6fb1be3ffca0b9174b4945e195aaf4ce4c814` |
+| 归档包整体哈希 | `c0e4dd541786e05bc1b27a1962c809cf54d5c3085d79aa2ba94462a9728cbe7b` |
+
+## 逐文件哈希
+
+| 文件 | 大小 | SHA-256 |
+|------|------|---------|
+| keyframes_manifest.json | 3890B | `fa429c4bc2ac891175a0a8725e4490e33a21b21fa389aea7b33979808d129917` |
+| visual_paradigm.md | 1687B | `8253d2b626efc986b7888b82e0e177182d77458c43a7fa30048261d9d4839076` |
+
+## 完整性校验命令
+
+```bash
+cd /sandboxdata/workspace/file/00-CORE/ZONGYUAN-ROOT/lock_batch_20260903_vis
+python3 -c "
+import hashlib, os
+files = sorted([f for f in os.listdir('.') if os.path.isfile(f) and not f.startswith('LOCK-CREDENTIAL-') and not f.startswith('MANIFEST-')])
+concat = ''.join(hashlib.sha256(open(f,'rb').read()).hexdigest() for f in files)
+print('Merkle根:', hashlib.sha256(concat.encode()).hexdigest())
+print('预期:    46adaf776f6873e36581b84171d6fb1be3ffca0b9174b4945e195aaf4ce4c814')
+"
+```
+
+## 锁档声明
+
+1. 本快照纳入2个资产文件，绑定DID-BR-000002确权身份。
+2. Merkle根由全部文件SHA-256按文件名排序拼接后再取SHA-256生成，单文件篡改即失配。
+3. 后续迭代必须生成全新快照，禁止就地改写本锁档资产。
+
+Ω₀⊂⊙∞⊂Ω｜全域锁档完成｜ZONGYUAN-ROOT｜DID-BR-000002

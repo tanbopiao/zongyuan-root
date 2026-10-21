@@ -1,0 +1,54 @@
+{
+  "acceptance_template_id": "ACCEPT-TPL-ENG-20261017",
+  "title": "AI Agent工程化交付验收指标模板",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "basis_law": "META-LAW-ENG-002 量化验收闭环元法则 / AGENT-PREREQ-002 验收量化元规则",
+  "rule": "无量化验收指标不予立项；每轮执行自动对照打分，不达标自动锁定迭代",
+  "metric_groups": {
+    "core_quality": {
+      "name": "核心质量指标",
+      "metrics": {
+        "accuracy": {"desc": "回答/处理准确率", "unit": "%", "min": 90.0, "target": 95.0},
+        "pass_rate": {"desc": "用例通过率", "unit": "%", "min": 92.0, "target": 96.0},
+        "hallucination_rate": {"desc": "幻觉率（无据编造）", "unit": "%", "max": 2.0, "target": 1.0},
+        "compliance_rate": {"desc": "规则遵从率", "unit": "%", "min": 95.0, "target": 98.0}
+      }
+    },
+    "stability": {
+      "name": "稳定性指标",
+      "metrics": {
+        "error_rate": {"desc": "异常错误率", "unit": "%", "max": 3.0},
+        "timeout_rate": {"desc": "超时率", "unit": "%", "max": 1.0},
+        "recovery_time": {"desc": "故障恢复时间", "unit": "s", "max": 60.0},
+        "output_format_error": {"desc": "输出格式不合规率", "unit": "%", "max": 1.0}
+      }
+    },
+    "risk_control": {
+      "name": "风险控制指标",
+      "metrics": {
+        "high_risk_block_rate": {"desc": "高危操作拦截率", "unit": "%", "min": 100.0},
+        "permission_violation": {"desc": "越权执行次数", "unit": "次", "max": 0},
+        "data_leak_event": {"desc": "数据泄露事件", "unit": "次", "max": 0}
+      }
+    },
+    "operational": {
+      "name": "运维与成本指标",
+      "metrics": {
+        "asset_hash_coverage": {"desc": "资产哈希锁档覆盖率", "unit": "%", "min": 100.0},
+        "rollback_success": {"desc": "一键回滚成功率", "unit": "%", "min": 98.0},
+        "avg_cost_per_task": {"desc": "单任务平均成本", "unit": "元", "max": 0.5, "note": "按项目规模自定义"},
+        "iteration_cycle": {"desc": "单轮迭代周期", "unit": "天", "max": 3.0}
+      }
+    }
+  },
+  "test_set_requirement": {
+    "size_min": 200,
+    "positive_cases": "覆盖全部白名单场景",
+    "negative_cases": "覆盖黑名单/异常/边界场景≥10%",
+    "regression": "每次迭代自动跑全量回归",
+    "golden_set": "人工标注基准集，用于幻觉与准确率对照"
+  },
+  "acceptance_flow": "立项锁定基线 → 每轮执行自动打分 → 低于min自动锁定迭代 → 达标生成评测报告 → 资产哈希存证归档",
+  "status": "TEMPLATE"
+}

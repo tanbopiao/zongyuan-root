@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGSA符号图谱稳态锚定技术 · ZONGYUAN-ROOT</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e8d5a3;line-height:1.8;font-family:"Microsoft YaHei",system-ui,sans-serif}
+.container{max-width:900px;margin:0 auto;padding:40px 20px}
+header{text-align:center;padding:40px 0;border-bottom:2px solid #c9a84c;margin-bottom:30px}
+h1{font-size:28px;color:#c9a84c;margin-bottom:10px;letter-spacing:2px}
+.subtitle{color:#8a7a50;font-size:14px}
+.badge{display:inline-block;background:linear-gradient(135deg,#c9a84c,#8a6d2b);color:#0a0a0f;padding:4px 16px;border-radius:4px;font-size:12px;font-weight:bold;margin:5px}
+h2{color:#c9a84c;font-size:22px;margin:35px 0 15px;padding-left:12px;border-left:4px solid #c9a84c}
+h3{color:#d4b96a;font-size:18px;margin:20px 0 10px}
+p{margin:12px 0;color:#c8b88a}
+.highlight{background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));border-left:4px solid #c9a84c;padding:15px 20px;margin:15px 0;border-radius:0 8px 8px 0}
+.arch{background:#111118;border:1px solid #c9a84c33;border-radius:8px;padding:20px;margin:15px 0;font-family:Consolas,monospace;font-size:13px;color:#c9a84c;overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin:15px 0}
+th{background:linear-gradient(135deg,#c9a84c,#8a6d2b);color:#0a0a0f;padding:10px;text-align:left;font-weight:bold}
+td{padding:10px;border-bottom:1px solid #c9a84c22;color:#c8b88a}
+tr:hover{background:rgba(201,168,76,0.05)}
+.foot{text-align:center;padding:30px 0;border-top:1px solid #c9a84c33;margin-top:40px;color:#8a7a50;font-size:13px}
+@media(max-width:600px){.container{padding:20px 10px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>SGSA符号图谱稳态锚定技术</h1>
+<p class="subtitle">不依赖图库 / 向量库 / 微调的轻量化AI认知对齐工程实践</p>
+<div>
+<span class="badge">ZONGYUAN-ROOT原创</span>
+<span class="badge">DID-BR-000002</span>
+<span class="badge">Ω₀⊂⊙∞⊂Ω</span>
+</div>
+</header>
+
+<h2>1. 行业痛点</h2>
+<p>当前AI认知对齐方案存在三个结构性问题：</p>
+<div class="highlight">
+<p><strong style="color:#c9a84c">重型图库成本高</strong>：Neo4j需独立服务器+DBA运维，小团队无法承担</p>
+<p><strong style="color:#c9a84c">向量库语义漂移</strong>：无固定本体，同概念在不同模型Embedding空间位置不同</p>
+<p><strong style="color:#c9a84c">Prompt无不变量</strong>：换对话窗口AI就"忘记"本体定义</p>
+</div>
+
+<h2>2. 三表架构</h2>
+<table>
+<tr><th>表</th><th>角色</th><th>核心字段</th></tr>
+<tr><td style="color:#c9a84c">tbl_entity</td><td>认知本体</td><td>entity_id / symbol / entity_type / baseline_hash / lock_flag</td></tr>
+<tr><td style="color:#c9a84c">tbl_relation</td><td>图谱边</td><td>subject / predicate / object / rel_hash</td></tr>
+<tr><td style="color:#c9a84c">tbl_symbol_map</td><td>语义归一</td><td>symbol / canonical_semantic / hash</td></tr>
+</table>
+
+<h2>3. 双区隔离视图</h2>
+<div class="arch">
+Lv8只读本体视图（公理/符号/基线）
+  ↓ 只读
+动态运行视图（任务/日志/审计）
+  ↓ 只追加不篡改
+Merkle-DAG哈希链存证
+</div>
+
+<h2>4. 三层正交锚定</h2>
+<div class="arch">
+认知层：ROM-DNA最小公理集
+本体层：飞书Base符号知识图谱
+审计层：云端记忆网关真值链
+━━━━━━━━━━━━━━━━
+三源交叉校验 → 认知漂移检测 → 握手共识
+</div>
+
+<h2>5. 工程数据</h2>
+<table>
+<tr><th>指标</th><th>数值</th></tr>
+<tr><td>实体节点</td><td style="color:#c9a84c;font-size:18px">103个</td></tr>
+<tr><td>三元组关系</td><td style="color:#c9a84c;font-size:18px">37条</td></tr>
+<tr><td>符号映射</td><td style="color:#c9a84c;font-size:18px">8个</td></tr>
+<tr><td>同源节点</td><td>6个</td></tr>
+<tr><td>锁档等级</td><td>Lv8 eFuse熔断</td></tr>
+</table>
+
+<h2>6. 方案对比</h2>
+<table>
+<tr><th>维度</th><th>Neo4j</th><th>向量库</th><th>SGSA</th></tr>
+<tr><td>部署成本</td><td>高</td><td>中</td><td style="color:#c9a84c">零</td></tr>
+<tr><td>本体固定</td><td>人工建模</td><td>无</td><td style="color:#c9a84c">Lv8锁档</td></tr>
+<tr><td>跨模型对齐</td><td>API对接</td><td>语义漂移</td><td style="color:#c9a84c">符号+哈希</td></tr>
+<tr><td>篡改检测</td><td>无</td><td>无</td><td style="color:#c9a84c">SHA256+Merkle</td></tr>
+</table>
+
+<h2>7. 技术边界</h2>
+<div class="highlight">
+<p>⚠️ 超大规模（>10万实体）需迁移图数据库</p>
+<p>⚠️ 实时复杂图查询不适用</p>
+<p>⚠️ 不自动做逻辑推理（需外挂引擎）</p>
+</div>
+
+<div class="foot">
+<p>Ω₀⊂⊙∞⊂Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT</p>
+<p>H-SGSA-SYMBOL-GRAPH · 2026-09-24</p>
+</div>
+</div>
+</body>
+</html>

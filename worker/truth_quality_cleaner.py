@@ -13,7 +13,7 @@ ZONGYUAN-ROOT 真值质量自动清洗引擎 V1.0
 import json, os, glob, re, collections, subprocess, sys, time
 
 BASE_TOKEN = "DgnMbLqZiaIUDKshqCrcD4DvnBg"
-LAKE_DIR = "/home/user/Doubao/chats/38439832899843586/data_lake"
+LAKE_DIR = "/opt/ZONGYUAN-ROOT/data_lake"
 
 PLACEHOLDER = re.compile(r'(^\?+$|^N/?A$|^null$|^None$|^undefined$|^TBD$|^待补充$|^TODO$|^xxx$|^\.\.\.$|^\*+$|^\s*\?+\s*$)', re.I)
 

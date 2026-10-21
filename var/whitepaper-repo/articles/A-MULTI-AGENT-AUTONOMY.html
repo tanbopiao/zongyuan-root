@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>从零搭建多 Agent 自治系统 · 工程实践</title>
+<style>
+  :root{--ink:#0a0a0f;--ink2:#12121c;--gold:#c9a86a;--gold2:#e8d5a8;--line:rgba(201,168,106,.25);--txt:#e8e4da;--dim:#9a958a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--ink);color:var(--txt);font-family:"Noto Serif SC","Songti SC",serif;line-height:1.8}
+  .wrap{max-width:860px;margin:0 auto;padding:60px 32px}
+  .cover{text-align:center;padding:70px 0 50px;border-bottom:1px solid var(--line)}
+  .cover .mark{color:var(--gold);letter-spacing:.5em;font-size:13px;margin-bottom:20px}
+  .cover h1{font-size:34px;color:var(--gold2);font-weight:600;letter-spacing:.06em;line-height:1.4}
+  .cover .sub{font-size:14px;color:var(--dim);letter-spacing:.2em;margin-top:14px}
+  .cover .tag{display:inline-block;margin-top:24px;border:1px solid var(--line);color:var(--gold);padding:5px 16px;font-size:12px;letter-spacing:.15em}
+  h2{color:var(--gold2);font-size:22px;margin:48px 0 18px;padding-left:14px;border-left:3px solid var(--gold)}
+  p{font-size:15px;margin-bottom:14px}
+  .arch{background:var(--ink2);border:1px solid var(--line);padding:24px;margin:18px 0;font-family:monospace;font-size:13px;color:var(--gold2);white-space:pre;overflow-x:auto;line-height:1.9}
+  .card{background:var(--ink2);border:1px solid var(--line);padding:22px;margin:14px 0}
+  .card h3{color:var(--gold);font-size:16px;margin-bottom:8px}
+  .card ul{margin:6px 0 0 18px;font-size:14px}
+  .card li{margin-bottom:6px}
+  .code{background:var(--ink2);border:1px solid var(--line);padding:18px;margin:14px 0;font-family:monospace;font-size:13px;color:var(--gold2);white-space:pre;overflow-x:auto}
+  .links a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--line);word-break:break-all}
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:12px;letter-spacing:.15em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cover">
+    <div class="mark">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+    <h1>从零搭建多 Agent 自治系统<br>记忆网关 + 自动发布工程实践</h1>
+    <div class="sub">AUTONOMOUS AGENT TUTORIAL · 2026.09</div>
+    <div class="tag">DID-BR-000002</div>
+  </div>
+
+  <h2>一 · 执行前想清楚三件事</h2>
+  <div class="card"><h3>① 执行层无状态</h3><p>本地 Agent 跑完就结束，不依赖本地记忆</p></div>
+  <div class="card"><h3>② 记忆必须外置</h3><p>所有重要结论写云端，任何节点都能取</p></div>
+  <div class="card"><h3>③ 发布必须解耦</h3><p>内容生产和对外发布走不同通道，互不阻塞</p></div>
+
+  <h2>二 · 三层架构</h2>
+  <div class="arch">本地执行层
+   ├─ 任务引擎   指令 → 规划 → 执行 → 验证 → 交付
+   ├─ 知识网关   上报 / 检索 / 对账
+   └─ 发布通道   Git 增量 + 开放平台聚合
+
+云端记忆网关（纯 HTTP）
+   ├─ POST /api/report/truth   上报真值
+   ├─ GET  /api/truth/{key}    按 key 取
+   └─ GET  /api/report/status  看水位
+
+元内核
+   └─ 全局基准快照 + 共识确权</div>
+
+  <h2>三 · 记忆网关接口</h2>
+  <div class="code">POST /api/report/truth
+{
+  "truth_key": "REPORT.20260920",
+  "truth_value": "今日量产完成...",
+  "source_node": "local-agent-01",
+  "confidence": 1.0,
+  "truth_type": "DAILY"
+}</div>
+  <div class="card"><ul>
+    <li>幂等去重：同 key 重复上报不写第二遍</li>
+    <li>语义前置校验：冲突真值写入前拦截</li>
+    <li>可追溯：每条带 source_node</li>
+  </ul></div>
+  <p>实测水位：87,000+ 条真值，无写爆。</p>
+
+  <h2>四 · 自动发布引擎</h2>
+  <div class="card"><ul>
+    <li>全资产索引自动生成</li>
+    <li>Git 增量：clone → 同步 → commit → push</li>
+    <li>开放平台合集聚合（幂等去重）</li>
+    <li>媒体走 Git 通道，绕开上传限流</li>
+  </ul></div>
+
+  <h2>五 · 自适应心跳</h2>
+  <div class="card"><ul>
+    <li>握手 → 对账 → 补推 → 健康判定</li>
+    <li>停滞检测：真值连续多轮不涨即告警</li>
+    <li>自动调优：健康达标建议降频</li>
+  </ul></div>
+
+  <h2>六 · 在线验证</h2>
+  <div class="links">
+    <p>· <a href="https://www.huodouai.com/api/report/status">记忆网关状态</a></p>
+    <p>· <a href="https://modelscope.cn/models/zongyuanroot/zongyuan-whitepaper">白皮书模型仓</a></p>
+    <p>· <a href="https://modelscope.cn/collections/zongyuanroot/wwwhuodouaicom">资产合集</a></p>
+  </div>
+
+  <footer>Ω₀ ⊂ ⊙∞ ⊂ Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT</footer>
+</div>
+</body>
+</html>

@@ -229,7 +229,7 @@ class EndToEndTester:
         print("测试4: 数据流水线完整性")
         print("="*60)
         
-        results_dir = "/home/user/Doubao/chats/38439832899843586/high_dim_anchor/results"
+        results_dir = "/opt/ZONGYUAN-ROOT/high_dim_anchor/results"
         
         # 检查所有必需文件
         required_files = [
@@ -289,7 +289,7 @@ class EndToEndTester:
         print("测试5: 验证报告生成")
         print("="*60)
         
-        report_path = "/home/user/Doubao/chats/38439832899843586/high_dim_anchor/VERIFICATION_REPORT_v1.0.md"
+        report_path = "/opt/ZONGYUAN-ROOT/high_dim_anchor/VERIFICATION_REPORT_v1.0.md"
         
         assert os.path.exists(report_path), "验证报告不存在"
         
@@ -401,7 +401,7 @@ class EndToEndTester:
             'timestamp': datetime.now().isoformat()
         }
         
-        result_path = "/home/user/Doubao/chats/38439832899843586/high_dim_anchor/results/end_to_end_test_results.json"
+        result_path = "/opt/ZONGYUAN-ROOT/high_dim_anchor/results/end_to_end_test_results.json"
         with open(result_path, 'w', encoding='utf-8') as f:
             json.dump(self.results, f, ensure_ascii=False, indent=2, default=str)
         print(f"\n  测试结果已保存: {result_path}")

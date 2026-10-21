@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+ZONGYUAN-ROOT 能量激活器 V1.0
+DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω
+作用：扫描全域资产活跃度，识别低活跃资产，输出能量激活报告。
+规范：只读，不修改 00-CORE 内核基座，不删除任何资产。
+"""
+import os
+import json
+import time
+from datetime import datetime, timedelta
+
+WORKSPACE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+EXCLUDE_DIRS = {".skills", ".user_skills", ".sessions", ".git", "__pycache__", "node_modules", ".tmp-tool-results"}
+EXCLUDE_FILES = {".DS_Store", "Thumbs.db"}
+
+def scan_assets(root):
+    assets = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
+        for fn in filenames:
+            if fn in EXCLUDE_FILES:
+                continue
+            fp = os.path.join(dirpath, fn)
+            try:
+                st = os.stat(fp)
+                assets.append({
+                    "path": os.path.relpath(fp, root),
+                    "size": st.st_size,
+                    "mtime": st.st_mtime,
+                    "ctime": st.st_ctime,
+                })
+            except OSError:
+                continue
+    return assets
+
+def classify(path):
+    ext = os.path.splitext(path)[1].lower()
+    if ext in (".py", ".sh", ".js", ".ts", ".go", ".rs", ".java", ".c", ".cpp"):
+        return "code"
+    if ext in (".json", ".yaml", ".yml", ".toml", ".ini", ".conf", ".cfg", ".env"):
+        return "config"
+    if ext in (".csv", ".tsv", ".log", ".txt", ".dat"):
+        return "data"
+    if ext in (".md", ".docx", ".doc", ".pdf", ".html", ".rst"):
+        return "document"
+    if ext in (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp"):
+        return "image"
+    return "other"
+
+def main():
+    now = time.time()
+    d7 = now - 7 * 86400
+    d30 = now - 30 * 86400
+    assets = scan_assets(WORKSPACE)
+    total = len(assets)
+    if total == 0:
+        print("无资产可扫描")
+        return
+
+    recent_7d = [a for a in assets if a["mtime"] >= d7]
+    recent_30d = [a for a in assets if a["mtime"] >= d30]
+    processable = [a for a in assets if classify(a["path"]) in ("code", "config", "data")]
+    created_30d = [a for a in assets if a["ctime"] >= d30]
+
+    activity_7d_pct = len(recent_7d) / total * 100
+    activity_30d_pct = len(recent_30d) / total * 100
+    processable_pct = len(processable) / total * 100
+    growth_pct = len(created_30d) / total * 100
+
+    latest_mtime = max(a["mtime"] for a in assets)
+    latest_hours_ago = (now - latest_mtime) / 3600
+
+    # 低活跃资产：30日内未修改
+    low_active = sorted([a for a in assets if a["mtime"] < d30], key=lambda x: x["mtime"])
+
+    report = {
+        "report_id": f"ENERGY-{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "did": "DID-BR-000002",
+        "root_id": "Ω-TAN-7-001",
+        "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+        "workspace": WORKSPACE,
+        "summary": {
+            "total_assets": total,
+            "activity_7d_pct": round(activity_7d_pct, 1),
+            "activity_30d_pct": round(activity_30d_pct, 1),
+            "modified_7d": len(recent_7d),
+            "modified_30d": len(recent_30d),
+            "processable_count": len(processable),
+            "processable_pct": round(processable_pct, 1),
+            "created_30d": len(created_30d),
+            "growth_pct": round(growth_pct, 1),
+            "latest_modified_hours_ago": round(latest_hours_ago, 1),
+            "low_active_count": len(low_active),
+            "state": "ENERGY_ACTIVE" if activity_7d_pct >= 5 else "ENERGY_LOW",
+        },
+        "low_active_assets": [a["path"] for a in low_active[:50]],
+        "activation_suggestion": (
+            "需激活：更新登记、补充协议/工具资产、重跑三态"
+            if activity_7d_pct < 5 else "能量活性正常"
+        ),
+    }
+
+    out_dir = os.path.join(WORKSPACE, "03-ARCHIVES", "tri-state-processing")
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, f"energy_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=False, indent=2)
+
+    print("=" * 60)
+    print("ZONGYUAN-ROOT 能量激活器 V1.0")
+    print(f"执行时间: {report['date']}")
+    print(f"DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω")
+    print("=" * 60)
+    print(f"资产总数: {total}")
+    print(f"7日活跃: {len(recent_7d)} ({activity_7d_pct:.1f}%)")
+    print(f"30日活跃: {len(recent_30d)} ({activity_30d_pct:.1f}%)")
+    print(f"可处理资产: {len(processable)} ({processable_pct:.1f}%)")
+    print(f"30日新增: {len(created_30d)} ({growth_pct:.1f}%)")
+    print(f"最新修改: {latest_hours_ago:.1f}小时前")
+    print(f"低活跃资产: {len(low_active)}")
+    print(f"状态: {report['summary']['state']}")
+    print(f"建议: {report['activation_suggestion']}")
+    print(f"报告: {out_path}")
+    print("=" * 60)
+
+if __name__ == "__main__":
+    main()

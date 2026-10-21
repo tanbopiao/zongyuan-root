@@ -1,0 +1,25 @@
+* * * * * /home/user/ZONGYUAN-ROOT/scripts/worker_kernel.sh watchdog
+*/5 * * * * /home/user/ZONGYUAN-ROOT/scripts/worker_kernel.sh tick
+*/30 * * * * /home/user/ZONGYUAN-ROOT/scripts/worker_kernel.sh monitor
+30 3 * * * /home/user/ZONGYUAN-ROOT/scripts/worker_kernel.sh lock
+*/5 * * * * /home/user/ZONGYUAN-ROOT/scripts/zongyuan_fusion.sh heartbeat --report
+*/15 * * * * /usr/bin/python3 /home/user/ZONGYUAN-ROOT/tools/operator_dispatcher.py >> /var/log/zongyuan_cron_dispatcher.log 2>&1
+0 6 * * * /home/user/ZONGYUAN-ROOT/scripts/cognitive_daily.sh >> /home/user/ZONGYUAN-ROOT/logs/cognitive_daily.log 2>&1
+*/30 * * * * /home/user/ZONGYUAN-ROOT/scripts/worker_kernel.sh selfcheck
+@reboot /home/user/ZONGYUAN-ROOT/scripts/worker_kernel.sh boot
+@reboot /home/user/Doubao/chats/38412149511142658/zongyuan-kernel/scripts/kernel_launch.sh start
+*/10 * * * * bash /home/user/ZONGYUAN-ROOT/scripts/cloud_link.sh >> /home/user/ZONGYUAN-ROOT/logs/cloud_link.log 2>&1
+*/30 * * * * bash /home/user/ZONGYUAN-ROOT/scripts/cloud_pull.sh >> /home/user/ZONGYUAN-ROOT/logs/cloud_pull.log 2>&1
+*/10 * * * * bash /home/user/ZONGYUAN-ROOT/scripts/worker_instruction_pull.sh >> /home/user/ZONGYUAN-ROOT/logs/instruction_pull.log 2>&1
+0 4 * * * /usr/bin/python3 /home/user/ZONGYUAN-ROOT/scripts/feishu_mirror_sync.py >> /home/user/ZONGYUAN-ROOT/logs/feishu_mirror.log 2>&1
+*/10 * * * * bash /home/user/ZONGYUAN-ROOT/scripts/worker_ntfy.sh >> /home/user/ZONGYUAN-ROOT/logs/ntfy.log 2>&1
+*/5 * * * * bash /home/user/ZONGYUAN-ROOT/scripts/autonomy_guard.sh --quiet
+30 * * * * python3 /home/user/ZONGYUAN-ROOT/scripts/autonomy_patrol.py --report >> /home/user/ZONGYUAN-ROOT/logs/autonomy_patrol.log 2>&1
+0 * * * * bash /home/user/ZONGYUAN-ROOT/scripts/zongyuan_persist.sh sync --quiet >> /home/user/ZONGYUAN-ROOT/logs/persist_sync.log 2>&1
+0 3 * * * bash /home/user/ZONGYUAN-ROOT/scripts/zongyuan_persist.sh mirror --quiet >> /home/user/ZONGYUAN-ROOT/logs/persist_mirror.log 2>&1
+20 7 * * * python3 /home/user/ZONGYUAN-ROOT/scripts/knowledge_harvest.py --auto >> /home/user/ZONGYUAN-ROOT/logs/knowledge_harvest.log 2>&1
+*/30 * * * * bash /home/user/ZONGYUAN-ROOT/scripts/site_patrol.sh >> /home/user/ZONGYUAN-ROOT/logs/site_patrol.log 2>&1
+0 20 * * * bash /home/user/ZONGYUAN-ROOT/scripts/site_daily_summary.sh
+*/10 * * * * /home/user/ZONGYUAN-ROOT/scripts/local_decision.sh
+0 3 * * * /home/user/ZONGYUAN-ROOT/scripts/local_caps.sh
+*/30 * * * * /home/user/ZONGYUAN-ROOT/scripts/node_agent.sh

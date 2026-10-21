@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT 紫皮书｜工程落地SOP手册 V1</title>
+<style>
+  :root{--ink:#0a0a0f;--ink2:#12121c;--gold:#c9a86a;--gold2:#e8d5a8;--line:rgba(201,168,106,.25);--txt:#e8e4da;--dim:#9a958a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--ink);color:var(--txt);font-family:"Noto Serif SC","Songti SC",serif;line-height:1.8}
+  .wrap{max-width:900px;margin:0 auto;padding:60px 32px}
+  .cover{text-align:center;padding:80px 0 60px;border-bottom:1px solid var(--line)}
+  .cover .mark{color:var(--gold);letter-spacing:.5em;font-size:14px;margin-bottom:24px}
+  .cover h1{font-size:36px;color:var(--gold2);font-weight:600;letter-spacing:.08em;margin-bottom:16px}
+  .cover .sub{font-size:15px;color:var(--dim);letter-spacing:.2em;margin-bottom:24px}
+  .notice{background:var(--ink2);border:1px solid var(--line);padding:16px;margin:24px 0;font-size:13px;color:var(--dim)}
+  h2{color:var(--gold2);font-size:22px;margin:48px 0 16px;padding-left:14px;border-left:3px solid var(--gold);letter-spacing:.08em}
+  h3{color:var(--gold);font-size:16px;margin:24px 0 8px}
+  p{margin-bottom:12px;font-size:15px}
+  .card{background:var(--ink2);border:1px solid var(--line);padding:22px;margin:16px 0}
+  .card ul{margin:8px 0 0 20px;font-size:14px}
+  .card li{margin-bottom:6px}
+  code{background:var(--ink2);padding:2px 8px;border:1px solid var(--line);color:var(--gold2);font-family:"JetBrains Mono",monospace;font-size:13px}
+  footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:12px;letter-spacing:.15em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cover">
+    <div class="mark">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+    <h1>ZONGYUAN-ROOT<br>紫皮书｜工程落地SOP手册</h1>
+    <div class="sub">PURPLEBOOK V1 · ENGINEERING OPS MANUAL · 2026</div>
+  </div>
+
+  <div class="notice">
+    <b>合规声明</b>：本手册含人工智能生成合成内容，已按《人工智能生成合成内容标识办法》添加显式标识。本手册为 ZONGYUAN-ROOT 工程实践公开版本，已剔除全部密钥、私有凭证与底层敏感信息。DID-BR-000002 ｜ Apache 2.0 License
+  </div>
+
+  <h2>1. 系统概述与硬件环境约束</h2>
+  <div class="card">
+    <ul>
+      <li>定位：云端中枢（决策/记忆）+ 本地执行节点（流水线/发布/心跳）云边架构</li>
+      <li>本地实例：2 核 CPU / 3.9G 内存，仅跑 CPU 轻量任务（ffmpeg/edge-tts/git）</li>
+      <li>云端中枢：记忆网关 HTTP API（读状态/写真值），禁 SSH</li>
+      <li>资源策略：免费额度优先，零 GPU 零付费 API</li>
+    </ul>
+  </div>
+
+  <h2>2. 组件清单与依赖版本</h2>
+  <div class="card">
+    <ul>
+      <li>Python 3 + ffmpeg 4.4 + edge-tts 7.2（本地音频/视频处理）</li>
+      <li>git + modelscope 仓库（魔搭 6 仓库增量发布）</li>
+      <li>定时任务调度：每日 03:00 进化盘点 / 04:00 IP 量产 / 05:00 魔搭发布 / 05:30 短剧流水线 / 每 4 小时心跳</li>
+    </ul>
+  </div>
+
+  <h2>3. 部署与配置说明</h2>
+  <div class="card">
+    <ul>
+      <li>根目录：<code>ZONGYUAN-ROOT/</code>，scripts/ 为可执行脚本，config/ 为配置文件</li>
+      <li>令牌类敏感文件：chmod 600 本地保存，禁止提交 git 仓库</li>
+      <li>配置文件：pipeline_config.json / quota_strategy.json / heartbeat_profile.json</li>
+    </ul>
+  </div>
+
+  <h2>4. 熔断与异常处理 SOP</h2>
+  <div class="card">
+    <ul>
+      <li>网关 502：不重试，记录异常，等下一轮心跳</li>
+      <li>方舟 API 欠费：自动降级走免费 edge-tts + ffmpeg 通道</li>
+      <li>魔搭上传接口限流：规避 /files/upload，改用 git 增量推送</li>
+      <li>本地沙箱重启：从 config/ 恢复持久化状态</li>
+    </ul>
+  </div>
+
+  <h2>5. 运维与真值上报</h2>
+  <div class="card">
+    <ul>
+      <li>所有关键操作上报记忆网关 truth_key（M1 真值不变 / M2 单调收敛 / M3 可追溯）</li>
+      <li>每批次产出 Merkle 哈希确权，写入 manifest</li>
+      <li>每周定时任务评审（只读建议，不自动改）</li>
+    </ul>
+  </div>
+
+  <footer>Ω₀ ⊂ ⊙∞ ⊂ Ω ｜ ZONGYUAN-ROOT 紫皮书 V1 ｜ DID-BR-000002</footer>
+</div>
+</body>
+</html>

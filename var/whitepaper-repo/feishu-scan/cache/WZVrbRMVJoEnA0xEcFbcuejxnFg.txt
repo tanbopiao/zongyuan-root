@@ -1,0 +1,24 @@
+#!/bin/bash
+# ============================================================
+# ZONGYUAN-ROOT 系统级自启守卫（sys_boot_guard）
+# DID-BR-000002 | Ω-TAN-7-001 | Ω₀⊂⊙∞⊂Ω
+# 作用：登录时静默执行守卫运行器(自保护+深度+完整性)，每日首次登录触发一次。
+# 注册：~/.bashrc 追加调用；失败不阻断登录；日志追加03-ARCHIVES/guard-persist/boot_guard.log
+# ============================================================
+WORKSPACE="/home/user/.super_doubao/super-doubao-runtime/workspace"
+STAMP_DIR="$WORKSPACE/03-ARCHIVES/guard-persist"
+TODAY=$(date +%Y%m%d)
+STAMP_FILE="$STAMP_DIR/.boot_stamp_$TODAY"
+LOG_FILE="$STAMP_DIR/boot_guard.log"
+
+# 每日仅触发一次
+if [ -f "$STAMP_FILE" ]; then
+    exit 0
+fi
+
+mkdir -p "$STAMP_DIR"
+touch "$STAMP_FILE"
+
+echo "===== $(date '+%Y-%m-%d %H:%M:%S') SYS-BOOT-GUARD TRIGGERED =====" >> "$LOG_FILE"
+cd "$WORKSPACE" 2>/dev/null && python3 04-TOOLS/scripts/guard_runner.py >> "$LOG_FILE" 2>&1 &
+exit 0

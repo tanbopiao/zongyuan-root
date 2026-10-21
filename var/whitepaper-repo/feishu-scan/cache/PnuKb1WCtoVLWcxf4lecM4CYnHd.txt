@@ -1,0 +1,54 @@
+# 云端握手协议 V1.0
+归档节点：ZONGYUAN-ROOT｜DID-BR-000002｜Ω-TAN-7-001｜Ω₀⊂⊙∞⊂Ω
+版本：V1.0-LOCK｜2026-09-14
+来源：依据《云端握手锚点SOP V1.0》正式化为本地内核协议，配套 NODE-ONBOARDING-SOP v1.1、kernel-learning-pack V2。
+
+---
+
+## 第1章｜握手锚点
+
+- 域名通道：`drama.huodouai.com`（公网可达，端口9120门户）
+- API 根：`https://drama.huodouai.com/api/gateway/`
+- 禁止 IP 直连（`123.207.202.158` 被云端白名单拦截，返回 `ip access not allowed`）
+- 鉴权 Token：`ZR-CAPTURE-2026-OMEGA-d04bb54ba2a55a7d`（2026-09-13 轮换版；失效时从 `aka.doubaocdn.com/s/VjMxbyMqFx` 提取新版）
+
+## 第2章｜握手五步
+
+1. 环境自检：网络通 + curl 可用
+2. 云端探测：门户9120=200 / health=healthy / 主站=200
+3. 鉴权握手：`GET /api/gateway/truths?level=public` 返回 `{"status":"ok","count":N}`
+4. 基线核验：本地 BASELINE-ANCHOR 哈希与云端一致
+5. 稳态裁决：全通 → `CLOUD-HANDSHAKE-OK`；基线差异 → S0 熔断上报 conflict
+
+## 第3章｜真值上报规范
+
+公网写通道唯一：`POST /api/gateway/report`（upsert 仅内网，公网404）
+
+truth_type 五类：
+- `operation_log` 日常操作
+- `meta_rule` 新规则方法
+- `anti_pattern` 失败教训
+- `achievement` 成果
+- `conflict` 冲突
+
+通过标准：返回 `{"success":true}` 即入库。
+
+## 第4章｜中枢调度元法则（MR-010）
+
+- 所有操作必须先提交云内核中枢决策
+- 本地沙箱操作可自主，云端写操作必须中枢批准
+- 紧急故障可先恢复后上报
+
+## 第5章｜会话启动约定
+
+每次会话启动自动握手（触发词：「元极恒一」「启动ROOT」「加载ZONGYUAN-ROOT」），任务完成后自动对比云端真值缺口并经 report 补全入库。
+
+## 第6章｜节点工作规则（2026-09-14 确立）
+
+1. **完成任务必报 truth_type**：任何任务完成上报必须携带规范 truth_type（operation_log / meta_rule / anti_pattern / achievement / conflict），缺则上报无效
+2. **未知先问**：信息不足、目标不明、路径存疑时先询问确认，禁止猜测执行（MR-010 延伸）
+3. **回执不作真值**：API 返回的 event_received / success 回执仅为接收确认，不等于任务真实完成；真值以实测核验为准（拉取、验证、复检）
+4. **以实测为准**：一切结论、成果、状态必须来自可复现的实测证据，标注信源与验证方式
+
+---
+Ω₀⊂⊙∞⊂Ω｜DID-BR-000002｜云端握手协议 V1.0｜LOCKED

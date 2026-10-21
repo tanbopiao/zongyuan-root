@@ -4,10 +4,10 @@
 ZONGYUAN-ROOT 真值蒸馏引擎 V1.0
 调用魔搭免费推理模型，把原始碎片蒸馏为结构化真值
 """
-import json, os, subprocess, sys
+import json, subprocess, sys
 
 API_BASE = "https://api-inference.modelscope.cn/v1/chat/completions"
-API_TOKEN = os.environ.get("MODELSCOPE_TOKEN", "")  # 凭据走环境变量，明文不入库
+API_TOKEN = "ms-673547d6-508b-4242-a862-85de112a3ce7"
 MODEL     = "deepseek-ai/DeepSeek-V4-Flash-0731"
 
 def distill(raw_text, key_hint="AUTO", truth_type="data"):

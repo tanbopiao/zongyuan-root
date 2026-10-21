@@ -9,8 +9,8 @@ import os
 import shutil
 from datetime import datetime, timezone, timedelta
 
-ARCHIVE_JSON = "/home/user/Doubao/chats/38442240612888322/media_url_archive.json"
-ARCHIVE_CSV = "/home/user/Doubao/chats/38442240612888322/media_url_archive.csv"
+ARCHIVE_JSON = "/opt/ZONGYUAN-ROOT/media_url_archive.json"
+ARCHIVE_CSV = "/opt/ZONGYUAN-ROOT/media_url_archive.csv"
 ROOT_STATE_PATH = os.path.expanduser("~/.meta_order/root_state.json")
 BACKUP_DIR = "/home/user/.doubao/agent_mode/workspace/.meta_order_backup"
 ASSET_STORE_DIR = "/home/user/.doubao/agent_mode/workspace/meta_order_assets"
@@ -255,7 +255,7 @@ credential = {
     "trace_mark": "Ω₀⊂⊙∞⊂Ω",
     "timestamp": timestamp,
 }
-with open("/home/user/Doubao/chats/38442240612888322/archive_credential_v2.json", "w") as f:
+with open("/opt/ZONGYUAN-ROOT/archive_credential_v2.json", "w") as f:
     json.dump(credential, f, ensure_ascii=False, indent=2)
 
 print(f"\n=== 增量锁档完成 ===")

@@ -188,7 +188,7 @@ for asset in unique_assets:
     stats["by_format"][asset["format"]] = stats["by_format"].get(asset["format"], 0) + 1
 
 # 输出目录
-output_dir = "/home/user/Doubao/chats/38442240612888322"
+output_dir = "/opt/ZONGYUAN-ROOT"
 os.makedirs(output_dir, exist_ok=True)
 
 # 写JSON

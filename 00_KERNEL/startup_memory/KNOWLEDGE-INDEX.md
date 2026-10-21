@@ -78,19 +78,3 @@ L0 元宪法硬约束 → L1 真值记忆网关 → L2 任务决策工单拆解 
 | 钩子自启动恢复 | `00_KERNEL/metarules/META-RULE-HOOK-AUTOSTART-V1.0*` |
 | 数据湖持久索引 | `DATA-LAKE-PERSIST/03-index/MANIFEST-LAKE.json` |
 | 真值持久层 | `meta_truth/persist/` |
-
-## 8. 记忆子系统（Hindsight 融合种子真值 · 2026-10-19 纳入）
-
-| 项 | 值 |
-|---|---|
-| 种子真值 | `SEED-HINDSIGHT-MEM-V1.0`（immutable: true） |
-| 本地持久层 | `/workspace/evolution/persistent_layer/SEED-HINDSIGHT-MEM-V1.0.json` |
-| 种子 sha256 | `071709bfdca7a32417e0d9938e63d02673f42d10259490b2ec7093d6523bdc83` |
-| 云端确权 | key=`RULE.SEED.HINDSIGHT.MEM.V1.0` seq=19748（truth_type=rule） |
-| 账本区块 | `ledger/chain/BLK-1792412344-7d1d5c7c.json`（Merkle-DAG 链上） |
-| 四类记忆 | world_fact（L0元宪法，改需人工审批）/ experience / observation / mental_model |
-| 三算子 | Retain 写入 · Recall 检索 · Reflect 反思（元秩序收敛子任务） |
-| 隔离 | MemoryBank 按项目/Agent/用户隔离，禁跨 Bank 泄露 |
-| 约束 | 观察/心智模型更新不得突破 L0 元宪法；记忆资产全量入 Merkle-DAG |
-
-> 关联元规则：`META-MEMORY-HINDSIGHT-001~005`

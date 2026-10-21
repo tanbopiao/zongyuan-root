@@ -14,7 +14,7 @@ import sqlite3
 import subprocess
 from pathlib import Path
 
-BASE_DIR = Path("/home/user/Doubao/chats/1128121028098/yuanjihengyi-deploy")
+BASE_DIR = Path("/opt/ZONGYUAN-ROOT/yuanjihengyi-deploy")
 REPORT = {
     "timestamp": time.time(),
     "did": "DID-BR-000002",

@@ -1,0 +1,145 @@
+{
+  "adapter_name": "kunlun-semantic-adapter",
+  "version": "2.0.0",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "description": "昆仑洞天多模型语义转译基座V2，解决中文审美术语在不同AI模型中的歧义问题",
+
+  "global_rules": {
+    "orientation": "9:16 vertical only, no landscape",
+    "character": "single person, exactly one head on shoulders",
+    "hair": "pure black long straight hair to waist",
+    "style": "ancient Chinese mythology, no western elements",
+    "tone": "majestic and serene, no horror or decay"
+  },
+
+  "model_profiles": {
+    "agnes_image": {
+      "model_type": "image_generation",
+      "provider": "Agnes AI",
+      "endpoint": "https://apihub.agnes-ai.com/v1/images/generations",
+      "model_name": "agnes-image-2.1-flash",
+      "default_size": "736x1312",
+      "supports_negative_prompt": false,
+
+      "prompt_prefix": "A single elegant Chinese female deity, exactly one person, exactly one single head on shoulders, only one face, no other people, no clones, tall slender graceful figure with perfect proportions, body height equals 9 times the length of her own head, pure black long straight hair flowing to waist, wearing flowing cold white and crimson gold silk robes,",
+
+      "prompt_suffix": "soft silver moonlight rim light from behind, UE5 ray tracing, cinematic photography, 9:16 vertical composition, ancient Chinese mythology aesthetic, no western elements, no angel wings, no masculine features",
+
+      "known_pitfalls": {
+        "九头身": "Never use nine-head body. Use: body height equals 9 times the length of her own head",
+        "玄黑": "Never use mysterious black. Use: deep dark crimson-black",
+        "赤金": "Never use red gold. Use: crimson gold with warm undertone",
+        "神女": "Never use Greek goddess. Use: elegant Chinese female deity"
+      }
+    },
+
+    "tongyi_i2v": {
+      "model_type": "image_to_video",
+      "provider": "Alibaba Tongyi Wanxiang",
+      "endpoint": "https://ws-g5kub337vd1fxnl5.cn-beijing.maas.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis",
+      "model_name": "wanx2.1-i2v-turbo",
+      "default_resolution": "720P",
+      "default_duration": 5,
+      "supports_async": true,
+      "poll_interval_sec": 10,
+
+      "prompt_prefix": "single Chinese goddess, cinematic, slow motion,",
+      "prompt_suffix": "epic lighting, 9:16 vertical",
+
+      "known_pitfalls": {
+        "动作描述": "Use gentle motion descriptions, not fast action",
+        "镜头": "Use slow camera movement, no shake"
+      }
+    },
+
+    "tongyi_t2v": {
+      "model_type": "text_to_video",
+      "provider": "Alibaba Tongyi Wanxiang",
+      "model_name": "wanx2.1-t2v-turbo",
+      "default_resolution": "480P",
+      "default_duration": 5,
+
+      "prompt_prefix": "ancient Chinese mythology,",
+      "prompt_suffix": "cinematic, 9:16 vertical, epic lighting",
+
+      "known_pitfalls": {}
+    },
+
+    "zhipu_text": {
+      "model_type": "text_llm",
+      "provider": "Zhipu AI",
+      "endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+      "model_name": "glm-4-flash",
+      "free": true,
+
+      "prompt_style": "Chinese natural language, direct use of Chinese aesthetic terms",
+      "known_pitfalls": {}
+    }
+  },
+
+  "semantic_mapping": {
+    "九头身": {
+      "truth": "body height = 9 head lengths (proportion)",
+      "for_agnes_image": "body height equals 9 times the length of her own head",
+      "for_tongyi_i2v": "tall slender figure",
+      "for_zhipu_text": "九头身比例"
+    },
+    "玄黑": {
+      "truth": "deep black with red undertone",
+      "for_agnes_image": "deep dark crimson-black",
+      "for_tongyi_i2v": "dark crimson",
+      "for_zhipu_text": "玄黑色"
+    },
+    "赤金": {
+      "truth": "reddish gold",
+      "for_agnes_image": "crimson gold, warm golden with red undertone",
+      "for_tongyi_i2v": "crimson gold",
+      "for_zhipu_text": "赤金色"
+    },
+    "月华": {
+      "truth": "moonlight",
+      "for_agnes_image": "soft silver moonlight glow",
+      "for_tongyi_i2v": "silver moonlight",
+      "for_zhipu_text": "月华"
+    },
+    "神女": {
+      "truth": "Chinese goddess",
+      "for_agnes_image": "elegant Chinese female deity",
+      "for_tongyi_i2v": "Chinese goddess",
+      "for_zhipu_text": "神女"
+    },
+    "昆仑": {
+      "truth": "mythical Chinese mountain",
+      "for_agnes_image": "ancient Chinese mythical palace on mountain",
+      "for_tongyi_i2v": "ancient Chinese palace",
+      "for_zhipu_text": "昆仑"
+    }
+  },
+
+  "validation_rules": {
+    "image_validation": [
+      "must be 9:16 ratio (height/width ≈ 1.78)",
+      "must show exactly one person",
+      "must have pure black hair",
+      "no western elements"
+    ],
+    "video_validation": [
+      "must be 9:16 vertical",
+      "duration must match request"
+    ]
+  },
+
+  "rules_v2": [
+    "R1: All image prompts must include exactly one person, exactly one single head",
+    "R2: Proportion terms must use numerical description, not metaphor",
+    "R3: Each model has its own prompt template, cannot be shared",
+    "R4: After generation, must validate: one head only",
+    "R5: Ambiguous terms must look up semantic mapping table",
+    "R6: All keyframes/videos must be strictly 9:16 vertical",
+    "R7: Agnes does not support negative_prompt, all constraints in positive prompt",
+    "R8: Tongyi video is async, must poll task status",
+    "R9: Generated media must be downloaded to local server, not external URL",
+    "R10: All output must have trace symbol Ω₀⊂⊙∞⊂Ω"
+  ]
+}

@@ -15,7 +15,7 @@ from urllib import request
 CAPTURE_TOKEN = "ZR-CAPTURE-2026-OMEGA-d04bb54ba2a55a7d"
 NODE_ID = "sandbox-agent-001"
 DID = "DID-BR-000002"
-OUTPUT_DIR = "/home/user/Doubao/chats/38439832899843586/causal_reasoning"
+OUTPUT_DIR = "/opt/ZONGYUAN-ROOT/causal_reasoning"
 
 import os
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -341,7 +341,7 @@ def main():
     print("=" * 60)
     print()
     
-    kg_file = "/home/user/Doubao/chats/38439832899843586/knowledge_graph_auto/knowledge_graph_auto_v2.json"
+    kg_file = "/opt/ZONGYUAN-ROOT/knowledge_graph_auto/knowledge_graph_auto_v2.json"
     
     if not os.path.exists(kg_file):
         print(f"❌ 知识图谱文件不存在: {kg_file}")

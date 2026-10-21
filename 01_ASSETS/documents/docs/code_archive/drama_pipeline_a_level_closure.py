@@ -12,7 +12,7 @@ from dataclasses import dataclass,field
 from typing import List,Dict,Optional,Callable
 from enum import Enum
 
-PROJECT_DIR="/home/user/Doubao/chats/38441716968655362"
+PROJECT_DIR="/opt/ZONGYUAN-ROOT"
 DB_PATH=os.path.join(PROJECT_DIR,"drama_pipeline_state.db")
 DID="DID-BR-000002";ANCHOR="Ω₀⊂⊙∞⊂Ω"
 

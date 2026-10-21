@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESOURCE-BILLBOARD-001 · 算子级资源消耗看板</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='4' width='24' height='24' rx='4' fill='none' stroke='%2372a8d4' stroke-width='2'/%3E%3Cpath d='M8 20 L13 14 L18 17 L24 8' stroke='%2372d4a8' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(1200px 700px at 80% -10%,#0d1a2b 0%,#05070b 55%) fixed,#05070b;color:#e6e8f0;font-family:"Noto Sans SC",system-ui,sans-serif;line-height:1.6;padding:20px 16px}
+.wrap{max-width:1180px;margin:0 auto}
+.hero{border:1px solid #2a4a6a;border-radius:14px;padding:22px 24px;background:linear-gradient(160deg,#0a1520 0%,#0d1220 55%,#0a1520 100%)}
+.tag{color:#72a8d4;font-size:12px;letter-spacing:2px}
+h1{font-family:"Noto Serif SC",serif;color:#a8c8e0;font-size:22px;margin:6px 0 4px}
+.sub{color:#8898a8;font-size:13px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.meta span{border:1px solid #2a4a6a;border-radius:6px;padding:3px 10px;font-size:11px;color:#b8c8d8;background:#0a1520}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.card{background:var(--card,#0d1220);border:1px solid #2a4a6a;border-radius:10px;padding:14px;text-align:center}
+.card .num{font-family:"Noto Serif SC",serif;font-size:26px;font-weight:900}
+.card .lab{font-size:11px;color:#8898a8;margin-top:2px}
+.card.gold .num{color:#d4b872}
+.card.teal .num{color:#72d4a8}
+.card.blue .num{color:#72a8d4}
+.card.red .num{color:#e08888}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.chart-box{background:#0d1220;border:1px solid #2a4a6a;border-radius:10px;padding:14px}
+.chart-box h3{font-family:"Noto Serif SC",serif;color:#a8c8e0;font-size:14px;margin-bottom:8px}
+.chart{width:100%;height:280px}
+.chart-full{grid-column:1/-1}
+.input-area{background:#0d1220;border:1px solid #2a4a6a;border-radius:10px;padding:14px;margin:14px 0}
+.input-area label{display:block;font-size:12px;color:#8898a8;margin-bottom:6px}
+.input-area textarea{width:100%;height:80px;background:#0a0f18;border:1px solid #2a4a6a;border-radius:6px;color:#c8d0d8;font-size:11px;font-family:ui-monospace,Consolas,monospace;padding:8px;resize:vertical}
+.btn-row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+button{padding:8px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;min-height:36px;border:none;transition:.2s}
+.btn-gold{background:linear-gradient(135deg,#d4b872,#a8864a);color:#14100a}
+.btn-gold:hover{filter:brightness(1.1)}
+.btn-ghost{border:1px solid #2a4a6a;color:#72a8d4;background:rgba(10,21,32,.4)}
+.btn-ghost:hover{border-color:#72a8d4}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:11px;table-layout:fixed}
+th,td{border:1px solid #2a4a6a;padding:6px 8px;text-align:left;word-break:break-all}
+th{background:#0f1a27;color:#72a8d4}
+tbody tr:nth-child(even){background:#0a0f18}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid #1a2a3a;color:#666;font-size:11px;text-align:center;line-height:2}
+.anchor{color:#72a8d4}
+@media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero">
+  <div class="tag">RESOURCE-BILLBOARD-001 · META-RULE-018 落地</div>
+  <h1>算子级资源消耗与缓存命中率看板</h1>
+  <div class="sub">来源：WorkBuddy 情报转化 · 缓存命中=零消耗 · 每次调用可计量可追溯可优化</div>
+  <div class="meta"><span>节点 ZR-NODE-DC2E51C0</span><span>DID-BR-000002</span><span>ONT-4D-UNIVERSAL-ROOT</span><span>Ω₀⊂⊙∞⊂Ω</span></div>
+</div>
+
+<div class="cards" id="cards">
+  <div class="card blue"><div class="num" id="cCalls">0</div><div class="lab">总调用次数</div></div>
+  <div class="card teal"><div class="num" id="cHit">0%</div><div class="lab">缓存命中率</div></div>
+  <div class="card gold"><div class="num" id="cToken">0</div><div class="lab">总 Token 消耗</div></div>
+  <div class="card red"><div class="num" id="cOps">0</div><div class="lab">涉及算子数</div></div>
+</div>
+
+<div class="charts">
+  <div class="chart-box"><h3>算子 Token 消耗排行</h3><div class="chart" id="chartOp"></div></div>
+  <div class="chart-box"><h3>模型档位分布</h3><div class="chart" id="chartTier"></div></div>
+  <div class="chart-box chart-full"><h3>缓存命中率趋势（按日）</h3><div class="chart" id="chartTrend"></div></div>
+</div>
+
+<div class="input-area">
+  <label>粘贴 resource-bill.jsonl 内容（每行一条 JSON），点击"渲染账单"实时更新图表；或用"示例数据"演示：</label>
+  <textarea id="billInput" placeholder='{"ts":"2026-10-08T10:00:00+08:00","operator_id":"OP-XXX","model_tier":"free","token_in":100,"token_out":200,"cache_hit":false,...}'></textarea>
+  <div class="btn-row">
+    <button class="btn-gold" id="btnRender" type="button">渲染账单</button>
+    <button class="btn-ghost" id="btnDemo" type="button">加载示例数据</button>
+    <button class="btn-ghost" id="btnClear" type="button">清空</button>
+  </div>
+</div>
+
+<div class="chart-box" style="margin-top:14px">
+  <h3>账单明细（最近 20 条）</h3>
+  <div style="overflow-x:auto">
+    <table id="billTable">
+      <colgroup><col style="width:18%"><col style="width:22%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:20%"></colgroup>
+      <thead><tr><th>时间</th><th>算子ID</th><th>档位</th><th>Token入</th><th>Token出</th><th>缓存命中</th><th>耗时(ms)</th></tr></thead>
+      <tbody id="billBody"><tr><td colspan="7" style="text-align:center;color:#666">暂无数据</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="foot"><span class="anchor">Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | ZR-NODE-DC2E51C0</span> · 自治Lv10 | 权限L5 | 工程化Lv8 | 火斗云智AIOS</div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var charts = {};
+  function initCharts(){
+    try{
+      charts.op = echarts.init(document.getElementById('chartOp'),'dark');
+      charts.tier = echarts.init(document.getElementById('chartTier'),'dark');
+      charts.trend = echarts.init(document.getElementById('chartTrend'),'dark');
+      window.addEventListener('resize',function(){ for(var k in charts) charts[k].resize(); });
+    }catch(e){}
+  }
+
+  var DEMO = [
+    {ts:"2026-10-06T09:12:00+08:00",operator_id:"OP-VISTA-FRAME-001",model_tier:"free",token_in:0,token_out:0,cache_hit:false,duration_ms:12},
+    {ts:"2026-10-06T10:30:00+08:00",operator_id:"OP-LLM-GATEWAY",model_tier:"light",token_in:850,token_out:420,cache_hit:false,duration_ms:1200},
+    {ts:"2026-10-06T11:05:00+08:00",operator_id:"OP-LLM-GATEWAY",model_tier:"light",token_in:0,token_out:0,cache_hit:true,duration_ms:3},
+    {ts:"2026-10-06T14:22:00+08:00",operator_id:"OP-IMAGE-RENDER",model_tier:"standard",token_in:1200,token_out:80,cache_hit:false,duration_ms:8500},
+    {ts:"2026-10-07T08:40:00+08:00",operator_id:"OP-LLM-GATEWAY",model_tier:"light",token_in:0,token_out:0,cache_hit:true,duration_ms:2},
+    {ts:"2026-10-07T09:15:00+08:00",operator_id:"OP-LLM-GATEWAY",model_tier:"light",token_in:0,token_out:0,cache_hit:true,duration_ms:2},
+    {ts:"2026-10-07T10:00:00+08:00",operator_id:"OP-IMAGE-RENDER",model_tier:"standard",token_in:1500,token_out:90,cache_hit:false,duration_ms:9200},
+    {ts:"2026-10-07T15:30:00+08:00",operator_id:"OP-PREMIUM-ANALYZE",model_tier:"premium",token_in:3200,token_out:1800,cache_hit:false,duration_ms:15000},
+    {ts:"2026-10-08T08:00:00+08:00",operator_id:"OP-VISTA-FRAME-001",model_tier:"free",token_in:0,token_out:0,cache_hit:false,duration_ms:8},
+    {ts:"2026-10-08T09:20:00+08:00",operator_id:"OP-LLM-GATEWAY",model_tier:"light",token_in:0,token_out:0,cache_hit:true,duration_ms:2},
+    {ts:"2026-10-08T10:45:00+08:00",operator_id:"OP-LLM-GATEWAY",model_tier:"light",token_in:920,token_out:510,cache_hit:false,duration_ms:1100},
+    {ts:"2026-10-08T11:30:00+08:00",operator_id:"OP-IMAGE-RENDER",model_tier:"standard",token_in:0,token_out:0,cache_hit:true,duration_ms:5},
+    {ts:"2026-10-08T13:00:00+08:00",operator_id:"OP-PREMIUM-ANALYZE",model_tier:"premium",token_in:2800,token_out:1500,cache_hit:false,duration_ms:14200},
+    {ts:"2026-10-08T14:10:00+08:00",operator_id:"OP-LLM-GATEWAY",model_tier:"light",token_in:0,token_out:0,cache_hit:true,duration_ms:2},
+    {ts:"2026-10-08T15:00:00+08:00",operator_id:"OP-LLM-GATEWAY",model_tier:"light",token_in:0,token_out:0,cache_hit:true,duration_ms:2}
+  ];
+
+  function parseBill(text){
+    var rows=[];
+    if(!text) return rows;
+    var lines=text.split('\n');
+    for(var i=0;i<lines.length;i++){
+      var l=lines[i].trim();
+      if(!l) continue;
+      try{ rows.push(JSON.parse(l)); }catch(e){}
+    }
+    return rows;
+  }
+
+  function render(rows){
+    if(!rows||!rows.length){
+      document.getElementById('cCalls').textContent='0';
+      document.getElementById('cHit').textContent='0%';
+      document.getElementById('cToken').textContent='0';
+      document.getElementById('cOps').textContent='0';
+      document.getElementById('billBody').innerHTML='<tr><td colspan="7" style="text-align:center;color:#666">暂无数据</td></tr>';
+      if(charts.op){charts.op.clear();charts.tier.clear();charts.trend.clear();}
+      return;
+    }
+    var total=rows.length, hits=0, tokenIn=0, tokenOut=0;
+    var opMap={}, tierMap={}, dayMap={};
+    for(var i=0;i<rows.length;i++){
+      var r=rows[i];
+      if(r.cache_hit) hits++;
+      tokenIn+=(r.token_in||0); tokenOut+=(r.token_out||0);
+      var op=r.operator_id||'unknown';
+      opMap[op]=(opMap[op]||0)+(r.token_in||0)+(r.token_out||0);
+      var tier=r.model_tier||'unknown';
+      tierMap[tier]=(tierMap[tier]||0)+1;
+      var day=(r.ts||'').slice(0,10);
+      if(!dayMap[day]) dayMap[day]={calls:0,hits:0};
+      dayMap[day].calls++;
+      if(r.cache_hit) dayMap[day].hits++;
+    }
+    document.getElementById('cCalls').textContent=total;
+    document.getElementById('cHit').textContent=(hits/total*100).toFixed(1)+'%';
+    document.getElementById('cToken').textContent=(tokenIn+tokenOut).toLocaleString();
+    document.getElementById('cOps').textContent=Object.keys(opMap).length;
+
+    // 算子排行
+    var opArr=Object.keys(opMap).map(function(k){return {name:k,value:opMap[k]};}).sort(function(a,b){return b.value-a.value;});
+    if(charts.op){
+      charts.op.setOption({
+        grid:{left:120,right:20,top:10,bottom:20},
+        xAxis:{type:'value',axisLabel:{color:'#8898a8'}},
+        yAxis:{type:'category',data:opArr.map(function(o){return o.name;}),axisLabel:{color:'#a8c8e0',fontSize:10}},
+        series:[{type:'bar',data:opArr.map(function(o){return o.value;}),itemStyle:{color:'#72a8d4'},barWidth:'50%'}]
+      });
+    }
+    // 档位分布
+    var tierArr=Object.keys(tierMap).map(function(k){return {name:k,value:tierMap[k]};});
+    if(charts.tier){
+      charts.tier.setOption({
+        tooltip:{trigger:'item'},
+        legend:{bottom:0,textStyle:{color:'#8898a8',fontSize:10}},
+        series:[{type:'pie',radius:['40%','65%'],center:['50%','45%'],data:tierArr,
+          itemStyle:{borderColor:'#05070b',borderWidth:2},
+          label:{color:'#a8c8e0',fontSize:10}}]
+      });
+    }
+    // 命中率趋势
+    var days=Object.keys(dayMap).sort();
+    var rates=days.map(function(d){return (dayMap[d].hits/dayMap[d].calls*100).toFixed(1);});
+    if(charts.trend){
+      charts.trend.setOption({
+        grid:{left:50,right:30,top:20,bottom:30},
+        tooltip:{trigger:'axis'},
+        xAxis:{type:'category',data:days,axisLabel:{color:'#8898a8'}},
+        yAxis:{type:'value',max:100,axisLabel:{color:'#8898a8',formatter:'{value}%'}},
+        series:[{type:'line',data:rates,smooth:true,symbol:'circle',symbolSize:8,
+          lineStyle:{color:'#72d4a8',width:2},itemStyle:{color:'#72d4a8'},
+          areaStyle:{color:'rgba(114,212,168,0.15)'},
+          markLine:{data:[{yAxis:60,name:'告警线',lineStyle:{color:'#e08888',type:'dashed'},label:{formatter:'60%告警',color:'#e08888'}}]}}]
+      });
+    }
+    // 明细表
+    var tbody=document.getElementById('billBody');
+    var recent=rows.slice(-20).reverse();
+    tbody.innerHTML=recent.map(function(r){
+      return '<tr><td>'+(r.ts||'').slice(0,19).replace('T',' ')+'</td><td>'+(r.operator_id||'')+'</td><td>'+(r.model_tier||'')+'</td><td>'+(r.token_in||0)+'</td><td>'+(r.token_out||0)+'</td><td>'+(r.cache_hit?'是':'否')+'</td><td>'+(r.duration_ms||0)+'</td></tr>';
+    }).join('');
+  }
+
+  function bind(){
+    document.getElementById('btnRender').addEventListener('click',function(){
+      render(parseBill(document.getElementById('billInput').value));
+    });
+    document.getElementById('btnDemo').addEventListener('click',function(){
+      document.getElementById('billInput').value=DEMO.map(function(r){return JSON.stringify(r);}).join('\n');
+      render(DEMO);
+    });
+    document.getElementById('btnClear').addEventListener('click',function(){
+      document.getElementById('billInput').value='';
+      render([]);
+    });
+  }
+
+  try{
+    initCharts();
+    bind();
+    render(DEMO); // 默认加载示例数据
+  }catch(e){
+    document.getElementById('cCalls').textContent='ECharts加载失败';
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>火斗云智AIOS · 进化路线图</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0a0f'/%3E%3Cpath d='M32 14c-9 8-14 15-14 22a14 14 0 0 0 28 0c0-7-5-14-14-22z' fill='none' stroke='%23d4af37' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='36' r='5.5' fill='%23f4d03f'/%3E%3C/svg%3E">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a0f;color:#e8e8f0;line-height:1.7;overflow-x:hidden}
+.serif{font-family:'Noto Serif SC','Songti SC',serif}
+.wrap{max-width:820px;margin:0 auto;padding:34px 20px 60px}
+
+/* ===== 顶部 ===== */
+.head{text-align:center;margin-bottom:8px}
+.eyebrow{font-size:11px;color:#8b7355;letter-spacing:6px;margin-bottom:10px}
+h1{font-size:30px;font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,#d4af37,#f4d03f);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.sub{font-size:12px;color:#a0a0b8;letter-spacing:3px;margin-bottom:28px}
+.sub b{color:#d4af37;font-weight:600}
+
+/* ===== 状态条 ===== */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:34px}
+.stat{background:#12121a;border:1px solid rgba(212,175,55,.22);border-radius:10px;padding:12px 6px;text-align:center}
+.stat-num{font-size:22px;font-weight:700;color:#f4d03f;font-family:'Noto Serif SC',serif}
+.stat-label{font-size:10px;color:#8a8a9a;letter-spacing:2px;margin-top:2px}
+
+/* ===== 时间轴 ===== */
+.tl-title{font-size:15px;color:#e8e8f0;font-weight:700;letter-spacing:2px;margin:6px 0 20px;text-align:center}
+.tl-title span{color:#d4af37}
+.tl{position:relative;padding-left:34px}
+.tl::before{content:'';position:absolute;left:10px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,#2ecc71 0%,#f1c40f 25%,#e67e22 55%,#e74c3c 100%)}
+.phase{position:relative;margin-bottom:14px}
+.dot{position:absolute;left:-28px;top:6px;width:20px;height:20px;border-radius:50%;border:2.5px solid #0a0a0f;box-shadow:0 0 0 2px currentColor}
+.p-done .dot{background:#2ecc71;color:#2ecc71}
+.p-t1 .dot{background:#f1c40f;color:#f1c40f}
+.p-t2 .dot{background:#e67e22;color:#e67e22}
+.p-t3 .dot{background:#e74c3c;color:#e74c3c}
+.card{background:#12121a;border:1px solid rgba(212,175,55,.18);border-radius:10px;overflow:hidden}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;cursor:pointer;user-select:none;transition:background .2s}
+.card-h:hover{background:#171722}
+.ph-name{font-size:14px;font-weight:700;letter-spacing:1px}
+.ph-tag{font-size:10px;color:#8a8a9a;letter-spacing:2px;white-space:nowrap}
+.p-done .ph-name{color:#2ecc71}
+.p-t1 .ph-name{color:#f1c40f}
+.p-t2 .ph-name{color:#e67e22}
+.p-t3 .ph-name{color:#e74c3c}
+.ph-arrow{font-size:12px;color:#8a8a9a;transition:transform .25s}
+.phase.open .ph-arrow{transform:rotate(90deg)}
+.card-b{display:none;padding:0 16px 14px;border-top:1px dashed rgba(212,175,55,.15)}
+.phase.open .card-b{display:block}
+.items{margin-top:10px}
+.item{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.item:last-child{border-bottom:none}
+.ic{flex:0 0 18px;height:18px;border-radius:4px;font-size:10px;line-height:18px;text-align:center;color:#0a0a0f;font-weight:700;margin-top:3px}
+.ic.u{background:#2ecc71}.ic.r{background:#e74c3c}.ic.c{background:#f1c40f}
+.it{font-size:12.5px;color:#c8c8d8}
+.it b{color:#e8e8f0;font-weight:600}
+.meta{display:flex;gap:14px;margin-top:4px;font-size:10.5px;color:#8a8a9a}
+.meta span{letter-spacing:1px}
+.meta .u{color:#58d68d}.meta .r{color:#e08283}.meta .c{color:#f1c40f}
+
+/* ===== 推荐 ===== */
+.rec{margin-top:26px;background:linear-gradient(135deg,rgba(212,175,55,.12),transparent 60%);border:1px solid rgba(212,175,55,.3);border-radius:10px;padding:16px 18px}
+.rec-t{font-size:13px;font-weight:700;color:#d4af37;letter-spacing:2px;margin-bottom:8px}
+.rec p{font-size:12px;color:#c0c0d0;line-height:2}
+.rec b{color:#f4d03f}
+.foot{margin-top:22px;text-align:center;font-size:10.5px;color:#5a5a6a;letter-spacing:2px}
+
+/* ===== 移动端 ===== */
+@media(max-width:600px){
+  .wrap{padding:24px 14px 40px}
+  h1{font-size:23px;letter-spacing:2px}
+  .sub{font-size:10.5px;letter-spacing:2px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .tl{padding-left:26px}
+  .dot{left:-23px;width:18px;height:18px}
+  .card-h{padding:11px 12px}
+  .ph-tag{display:none}
+  .meta{flex-wrap:wrap;gap:8px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="eyebrow">Ω₀⊂⊙∞⊂Ω · ZONGYUAN-ROOT</div>
+    <h1>进化路线图</h1>
+    <div class="sub serif">EVOLUTION ROADMAP · <b>P = 0.3U − 0.4R − 0.3C</b> 收益最大 · 风险最小 · 成本最小</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">114,486</div><div class="stat-label">真值镜像</div></div>
+    <div class="stat"><div class="stat-num">71,756</div><div class="stat-label">锁档资产</div></div>
+    <div class="stat"><div class="stat-num">2</div><div class="stat-label">在线节点</div></div>
+    <div class="stat"><div class="stat-num">Lv8</div><div class="stat-label">自治层级</div></div>
+  </div>
+
+  <div class="tl-title">从 <span>规则自治</span> 到 <span>心智自治</span></div>
+
+  <div class="tl">
+
+    <div class="phase p-done open">
+      <div class="dot"></div>
+      <div class="card">
+        <div class="card-h" onclick="toggle(this)">
+          <div><span class="ph-name">已达成</span> <span class="ph-tag">2026-09-28 · BASE</span></div>
+          <span class="ph-arrow">›</span>
+        </div>
+        <div class="card-b">
+          <div class="items">
+            <div class="item"><div class="ic u">U</div><div class="it"><b>双内核融合归一</b>：脑（认知内核）× 手（执行内核），逻辑联邦 META-FUSION-001 零改动贯通<div class="meta"><span class="u">收益 高</span><span class="r">风险 低</span><span class="c">成本 已投</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>三层相变 + OPA 护栏</b>：逻辑态→算子态→执行态严格解耦，rego 越层即 LAYER_LOCK<div class="meta"><span class="u">收益 高</span><span class="r">风险 低</span><span class="c">成本 已投</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>公理自检双端巡检</b>：三大顶层公理 444 只读，本地 6h + 云端每小时，6/6 AXIOM_VALID<div class="meta"><span class="u">收益 高</span><span class="r">风险 低</span><span class="c">成本 已投</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>联邦进化闭环</b>：提案→评审→采纳→消费，实体文件人工审批，真值秒级分发<div class="meta"><span class="u">收益 高</span><span class="r">风险 低</span><span class="c">成本 已投</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>无人值守常驻</b>：supervisord 托管守护 + 重置自举协议 V1.0（light/full 双级恢复）<div class="meta"><span class="u">收益 高</span><span class="r">风险 低</span><span class="c">成本 已投</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>白皮书 V2.0 + 官网核心架构</b>：五处落档 + 首页架构区块上线，P0 优化（alt/OG/断点/降级/favicon）<div class="meta"><span class="u">收益 高</span><span class="r">风险 低</span><span class="c">成本 已投</span></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase p-t1">
+      <div class="dot"></div>
+      <div class="card">
+        <div class="card-h" onclick="toggle(this)">
+          <div><span class="ph-name">T1 低成本速赢</span> <span class="ph-tag">本周 · COST-WIN</span></div>
+          <span class="ph-arrow">›</span>
+        </div>
+        <div class="card-b">
+          <div class="items">
+            <div class="item"><div class="ic u">U</div><div class="it"><b>JSON-LD 结构化数据</b>：Organization / WebSite / CreativeWork schema，搜索引擎增强理解<div class="meta"><span class="u">收益 中</span><span class="r">风险 极低</span><span class="c">成本 0.5h</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>图片懒加载</b>：九角色区 IntersectionObserver 按需加载，首屏更快<div class="meta"><span class="u">收益 中</span><span class="r">风险 极低</span><span class="c">成本 0.5h</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>reduced-motion 适配</b>：低性能/护眼用户自动关闭粒子背景<div class="meta"><span class="u">收益 中</span><span class="r">风险 极低</span><span class="c">成本 0.3h</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>缓存策略优化</b>：no-cache → 短缓存 + ETag，回访提速<div class="meta"><span class="u">收益 中</span><span class="r">风险 低</span><span class="c">成本 0.5h</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>Lighthouse 性能基线</b>：首次跑分存档，建立后续对比基准<div class="meta"><span class="u">收益 中</span><span class="r">风险 极低</span><span class="c">成本 0.5h</span></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase p-t2">
+      <div class="dot"></div>
+      <div class="card">
+        <div class="card-h" onclick="toggle(this)">
+          <div><span class="ph-name">T2 中期体系</span> <span class="ph-tag">1-2周 · SYSTEM</span></div>
+          <span class="ph-arrow">›</span>
+        </div>
+        <div class="card-b">
+          <div class="items">
+            <div class="item"><div class="ic u">U</div><div class="it"><b>AIOS 实时能力上首页</b>：内核状态 / 节点心跳 / 巡检结果可视化，官网变活体系统窗口<div class="meta"><span class="u">收益 高</span><span class="r">风险 中</span><span class="c">成本 1d</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>交互式架构演示</b>：点击三层相变 / 联邦闭环 / 自举流程，动态揭示机制<div class="meta"><span class="u">收益 高</span><span class="r">风险 低</span><span class="c">成本 1d</span></div></div></div>
+            <div class="item"><div class="ic r">R</div><div class="it"><b>云端双库真值口径统一</b>：22,586 vs 113,138 分裂收敛为唯一权威<div class="meta"><span class="u">收益 高</span><span class="r">风险 高（数据权威）</span><span class="c">成本 0.5d</span></div></div></div>
+            <div class="item"><div class="ic r">R</div><div class="it"><b>SSH 三端口收敛</b>：22 / 2222 / 22222 收拢，减小攻击面<div class="meta"><span class="u">收益 中</span><span class="r">风险 高（运维面）</span><span class="c">成本 0.5d</span></div></div></div>
+            <div class="item"><div class="ic r">R</div><div class="it"><b>@reboot 自举跨重置实测</b>：验证沙箱重置后自举钩子是否真实保留<div class="meta"><span class="u">收益 中</span><span class="r">风险 中</span><span class="c">成本 0.5d</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>Ω-Brainμ 最小心智原型</b>：读账本复盘 → 产出演化提案，从规则自治跨向心智自治<div class="meta"><span class="u">收益 极高</span><span class="r">风险 中（算力/边界）</span><span class="c">成本 2-3d</span></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase p-t3">
+      <div class="dot"></div>
+      <div class="card">
+        <div class="card-h" onclick="toggle(this)">
+          <div><span class="ph-name">T3 战略演进</span> <span class="ph-tag">月度 · STRATEGY</span></div>
+          <span class="ph-arrow">›</span>
+        </div>
+        <div class="card-b">
+          <div class="items">
+            <div class="item"><div class="ic u">U</div><div class="it"><b>官网多语言</b>：EN 版对齐，扩大对外影响力<div class="meta"><span class="u">收益 中</span><span class="r">风险 低</span><span class="c">成本 1-2d</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>算力节点扩容</b>：向量检索 / 独立渲染 / LoRA 训练专用节点<div class="meta"><span class="u">收益 高</span><span class="r">风险 中</span><span class="c">成本 按需</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>联邦多节点共享</b>：真值 114K+ 全网归一，所有分身同步进化<div class="meta"><span class="u">收益 高</span><span class="r">风险 中</span><span class="c">成本 持续</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>作品库商业变现</b>：国风角色 IP → 授权 / 电商 / 定制链路<div class="meta"><span class="u">收益 高</span><span class="r">风险 中（合规）</span><span class="c">成本 0.5d</span></div></div></div>
+            <div class="item"><div class="ic u">U</div><div class="it"><b>性能预算 + CI 巡检</b>：Lighthouse 分数门槛，防止回退<div class="meta"><span class="u">收益 中</span><span class="r">风险 低</span><span class="c">成本 0.5d</span></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="rec">
+    <div class="rec-t">推荐优先策略</div>
+    <p><b>T1 全做</b>（半天 · 零风险 · SEO/性能/移动端三线齐升）→ <b>T2 的 AIOS 实时化 + 双库统一</b>（官网对外价值 + 云端治理收敛）→ <b>Ω-Brainμ 心智原型</b> 作 T2 收尾，完成「规则自治 → 心智自治」的关键一跃。</p>
+  </div>
+
+  <div class="foot">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 本地预览版 · 确认后上官网</div>
+
+</div>
+
+<script>
+function toggle(h){
+  var ph=h.parentElement;
+  ph.classList.toggle('open');
+}
+</script>
+</body>
+</html>

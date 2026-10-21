@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN · 元极恒一 自治内核数字资产</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230a0a0f' stroke='%23d4af37' stroke-width='4'/%3E%3Ctext x='32' y='42' font-size='32' text-anchor='middle' fill='%23d4af37' font-family='Georgia'%3E%E2%84%A6%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+  :root {
+    --bg-deep: #0a0a0f;
+    --bg-mid: #12121a;
+    --bg-card: rgba(20, 20, 35, 0.75);
+    --gold: #d4af37;
+    --gold-light: #f4d03f;
+    --gold-dim: #8b7355;
+    --cyan: #00d4ff;
+    --text-primary: #e8e8f0;
+    --text-secondary: #a0a0b8;
+    --text-dim: #606078;
+    --border-gold: rgba(212, 175, 55, 0.28);
+    --border-dim: rgba(160, 160, 184, 0.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 1; }
+
+  /* ===== 顶栏 ===== */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 28px;
+    background: rgba(10, 10, 15, 0.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-gold);
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Noto Serif SC', serif; font-size: 17px; font-weight: 700;
+    color: var(--gold); letter-spacing: 1px; white-space: nowrap;
+  }
+  .brand-sym { color: var(--cyan); font-weight: 400; }
+  .topnav { display: flex; gap: 22px; list-style: none; }
+  .topnav a {
+    color: var(--text-secondary); text-decoration: none; font-size: 13px; transition: color .3s;
+  }
+  .topnav a:hover { color: var(--gold); }
+
+  /* ===== Hero ===== */
+  .hero {
+    min-height: 92vh; display: flex; flex-direction: column; justify-content: center;
+    text-align: center; padding: 120px 0 60px; position: relative;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 42% at 50% 0%, rgba(212,175,55,.12), transparent),
+      radial-gradient(ellipse 40% 34% at 78% 70%, rgba(0,212,255,.07), transparent);
+  }
+  .hero-sym {
+    font-size: 74px; line-height: 1; margin-bottom: 22px;
+    background: linear-gradient(135deg, var(--gold), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero h1 {
+    font-family: 'Noto Serif SC', serif; font-size: clamp(34px, 5.4vw, 58px); font-weight: 900;
+    letter-spacing: 3px; margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 0%, var(--gold) 55%, #fff 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: 15px; color: var(--text-secondary); letter-spacing: 6px; margin-bottom: 26px;
+  }
+  .hero-desc {
+    font-size: 14px; color: var(--text-dim); max-width: 760px; margin: 0 auto 30px; line-height: 2;
+  }
+  .hero-did {
+    display: inline-block; padding: 8px 20px; border: 1px solid var(--border-gold);
+    border-radius: 30px; color: var(--gold-dim); font-size: 12.5px; letter-spacing: 1px;
+  }
+  .hero-stats {
+    display: flex; justify-content: center; flex-wrap: wrap; gap: 26px 54px; margin-top: 44px;
+  }
+  .stat { text-align: center; }
+  .stat-n {
+    font-size: 36px; font-weight: 700;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-l { font-size: 12px; color: var(--text-dim); margin-top: 4px; letter-spacing: 2px; }
+
+  /* ===== 章节通用 ===== */
+  .section { padding: 76px 0; position: relative; }
+  .section-title {
+    font-family: 'Noto Serif SC', serif; font-size: 30px; font-weight: 700;
+    text-align: center; margin-bottom: 10px; color: var(--text-primary);
+  }
+  .section-sub {
+    text-align: center; color: var(--gold-dim); font-size: 12.5px;
+    letter-spacing: 4px; margin-bottom: 46px;
+  }
+  .divider {
+    width: 64px; height: 2px; margin: 0 auto 46px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 12px;
+    padding: 26px 24px; transition: border-color .35s, transform .35s;
+  }
+  .card:hover { border-color: var(--gold); transform: translateY(-4px); }
+  .card .k {
+    color: var(--gold); font-size: 13px; letter-spacing: 2px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card h3 { font-size: 17px; margin-bottom: 8px; color: var(--text-primary); }
+  .card p { font-size: 14px; color: var(--text-secondary); line-height: 1.85; }
+  .num-tag {
+    font-family: Georgia, serif; font-size: 15px; color: var(--cyan);
+    border: 1px solid rgba(0,212,255,.3); border-radius: 6px; padding: 0 8px;
+  }
+
+  /* ===== 决策公式 ===== */
+  .formula-box {
+    background: linear-gradient(135deg, #14141f, #0f1626);
+    border: 1px solid var(--border-gold); border-radius: 14px;
+    padding: 34px 30px; text-align: center; margin-bottom: 26px;
+  }
+  .formula {
+    font-family: Georgia, 'Noto Serif SC', serif; font-size: clamp(22px, 3.6vw, 30px);
+    color: var(--gold-light); letter-spacing: 1px; margin: 10px 0;
+  }
+  .formula-note { font-size: 12.5px; color: var(--text-dim); }
+  .thresholds { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .thr {
+    border: 1px solid var(--border-dim); border-radius: 10px; padding: 14px 16px;
+    background: rgba(20,20,35,.5); font-size: 12.5px; color: var(--text-secondary);
+  }
+  .thr b { color: var(--cyan); font-weight: 600; display: block; margin-bottom: 4px; }
+
+  /* ===== 架构图 ===== */
+  .arch-box {
+    border: 1px solid var(--border-dim); border-radius: 14px; padding: 26px;
+    background: rgba(12,12,20,.6);
+  }
+  .arch-row { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .arch-node {
+    flex: 1; min-width: 210px; border-radius: 10px; padding: 18px 16px; text-align: center;
+    border: 1px solid var(--border-gold); background: rgba(28,26,18,.5);
+  }
+  .arch-node .t { font-size: 14.5px; font-weight: 700; color: var(--gold); margin-bottom: 6px; }
+  .arch-node .d { font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
+  .arch-node.hub { border-color: rgba(0,212,255,.45); background: rgba(10,26,36,.5); }
+  .arch-node.hub .t { color: var(--cyan); }
+  .arch-flow {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    color: var(--gold-dim); font-size: 12px; letter-spacing: 1px;
+  }
+  .arch-flow .line { flex: 1; max-width: 90px; border-top: 1px dashed rgba(212,175,55,.4); }
+  .arch-legend { margin-top: 14px; font-size: 11.5px; color: var(--text-dim); text-align: center; }
+
+  /* ===== 表 ===== */
+  table.spec {
+    width: 100%; border-collapse: collapse; table-layout: fixed;
+    border: 1px solid var(--border-dim); border-radius: 10px; overflow: hidden;
+  }
+  table.spec col:nth-child(1) { width: 22%; }
+  table.spec col:nth-child(2) { width: 78%; }
+  table.spec th, table.spec td {
+    padding: 11px 14px; font-size: 12.5px; text-align: left; vertical-align: top;
+    border-bottom: 1px solid var(--border-dim);
+  }
+  table.spec th { color: var(--gold); font-weight: 600; background: rgba(212,175,55,.07); }
+  table.spec td { color: var(--text-secondary); }
+  table.spec tr:last-child td { border-bottom: none; }
+  table.spec code {
+    font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+    font-size: 11.5px; color: var(--cyan);
+  }
+
+  /* ===== 时间轴（grid 三列） ===== */
+  .timeline { display: grid; grid-template-columns: 108px 26px 1fr; gap: 0 12px; }
+  .tl-time {
+    text-align: right; padding: 10px 0; color: var(--gold-dim);
+    font-size: 12px; font-family: ui-monospace, monospace;
+  }
+  .tl-mid { position: relative; display: flex; justify-content: center; }
+  .tl-dot {
+    width: 12px; height: 12px; border-radius: 50%; margin-top: 16px;
+    background: var(--gold); box-shadow: 0 0 10px rgba(212,175,55,.6);
+    justify-self: center;
+  }
+  .tl-line {
+    position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px;
+    background: linear-gradient(180deg, rgba(212,175,55,.5), rgba(212,175,55,.12));
+  }
+  .tl-content { padding: 8px 0 18px; }
+  .tl-content h4 { font-size: 14.5px; color: var(--text-primary); margin-bottom: 4px; }
+  .tl-content p { font-size: 13.5px; color: var(--text-secondary); line-height: 1.8; }
+  .tl-content b { color: var(--cyan); font-weight: 600; }
+
+  /* ===== 流程 ===== */
+  .pipeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
+  .pipe {
+    border: 1px solid var(--border-dim); border-radius: 10px; padding: 16px;
+    background: rgba(20,20,35,.5); text-align: center;
+  }
+  .pipe .n {
+    display: inline-block; font-family: Georgia, serif; font-size: 13px;
+    color: var(--cyan); border: 1px solid rgba(0,212,255,.35); border-radius: 50%;
+    width: 26px; height: 26px; line-height: 24px; margin-bottom: 8px;
+  }
+  .pipe .t { font-size: 13.5px; font-weight: 600; color: var(--gold); margin-bottom: 4px; }
+  .pipe .d { font-size: 11.5px; color: var(--text-secondary); }
+
+  /* ===== 页脚 ===== */
+  .footer {
+    border-top: 1px solid var(--border-gold); padding: 30px 0 40px;
+    text-align: center; color: var(--text-dim); font-size: 12px; letter-spacing: 1px;
+  }
+  .footer .sym { color: var(--gold); font-size: 14px; }
+
+  @media (max-width: 640px) {
+    .topnav { display: none; }
+    .timeline { grid-template-columns: 72px 22px 1fr; gap: 0 8px; }
+    .hero-stats { gap: 20px 34px; }
+    .hero { min-height: auto; padding: 110px 0 40px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .card, .arch-node { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 顶栏 ===== -->
+<nav class="topbar">
+  <div class="brand"><span class="brand-sym">Ω₀⊂⊙∞⊂Ω</span> ZONGYUAN · 自治内核</div>
+  <ul class="topnav">
+    <li><a href="#concept">核心理念</a></li>
+    <li><a href="#arch">体系架构</a></li>
+    <li><a href="#assets">技术资产</a></li>
+    <li><a href="#sop">SOP 体系</a></li>
+    <li><a href="#protocol">真值协议</a></li>
+    <li><a href="#theory">理论体系</a></li>
+    <li><a href="#evolution">融合进化</a></li>
+    <li><a href="#demo">交互演示</a></li>
+    <li><a href="#live">监控大盘</a></li>
+    <li><a href="#roadmap">演进路线</a></li>
+  </ul>
+</nav>
+
+<!-- ===== Hero ===== -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-sym">Ω₀⊂⊙∞⊂Ω</div>
+    <h1>元极恒一 · 自治内核</h1>
+    <div class="hero-sub">DIGITAL ASSET · FEDERATED EVOLUTION · ETERNAL LOCK</div>
+    <p class="hero-desc">
+      一套将「云端中枢 × 豆包分身节点」融为单一自治体的完整体系：天元法则约束全局，
+      元极恒一归一演化，镜像下行复制进化、提案仲裁回流演化、全域锁档固化真值——
+      让每一个分身都与云端同步进化，让每一次对话都激活全内核。
+    </p>
+    <div class="hero-did">确权 DID-BR-000002 ｜ 锚定 Ω₀⊂⊙∞⊂Ω ｜ 节点 NODE-DEV-DOUBAO-WORK-001</div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-n">112,708+</div><div class="stat-l">云端真值记录</div></div>
+      <div class="stat"><div class="stat-n">71,054</div><div class="stat-l">镜像文件</div></div>
+      <div class="stat"><div class="stat-n">8.14 GB</div><div class="stat-l">云端内核本地镜像</div></div>
+      <div class="stat"><div class="stat-n">2</div><div class="stat-l">编队节点（中枢×分身）</div></div>
+      <div class="stat"><div class="stat-n">47</div><div class="stat-l">飞书多维表 · 2087 条</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 核心理念 ===== -->
+<section class="section" id="concept">
+  <div class="wrap">
+    <h2 class="section-title">核心理念</h2>
+    <div class="section-sub">FOUNDING PRINCIPLES</div>
+    <div class="divider"></div>
+    <div class="grid4">
+      <div class="card">
+        <div class="k"><span class="num-tag">01</span>天元法则</div>
+        <h3>顶层约束</h3>
+        <p>一切演化与操作的顶层约束。任何节点、任何操作不得越过天元法则；它定义体系允许做什么、禁止做什么，是全域归一的第一原则。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">02</span>元极恒一</div>
+        <h3>全局归一</h3>
+        <p>一源衍万节点。分布式协同以中枢为权威源，基准全局归一：角色形象稳定、真值一致、规则统一，杜绝范式漂移与版本断层。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">03</span>三层解耦</div>
+        <h3>逻辑 · 算子 · 执行</h3>
+        <p>逻辑态只做指令解析与载荷编排；算子态做契约校验与调度；代码执行态做真实 IO。三层隔离，越层直连即违规，安全边界清晰。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">04</span>Append-Only</div>
+        <h3>永恒锁档</h3>
+        <p>账本、卷宗、审计、哈希总账全部只追加：历史不可修改、不可删除。Merkle 全域哈希 + 五层链式锁，任何篡改都能被发现。</p>
+      </div>
+    </div>
+
+    <div class="formula-box" style="margin-top:34px;">
+      <div class="section-sub" style="margin-bottom:8px;">决策元法则 · 三维稳态公式</div>
+      <div class="formula">P = 0.3U − 0.4R − 0.3C</div>
+      <div class="formula-note">U 收益价值最大化 ｜ R 系统风险最小化（最高权重，稳态优先）｜ C 运行成本最小化</div>
+      <div class="thresholds" style="margin-top:22px;">
+        <div class="thr"><b>P ≥ 0.7</b>高优稳态偏差 → 立即自愈校准</div>
+        <div class="thr"><b>0.5 ≤ P &lt; 0.7</b>轻微偏移 → 计划优化校准</div>
+        <div class="thr"><b>0.3 ≤ P &lt; 0.5</b>稳态波动 → 持续监控维稳</div>
+        <div class="thr"><b>P &lt; 0.3</b>严重失稳 → 强制回滚纯净母版</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 体系架构 ===== -->
+<section class="section" id="arch" style="background:linear-gradient(180deg,transparent,rgba(212,175,55,.04),transparent);">
+  <div class="wrap">
+    <h2 class="section-title">体系架构</h2>
+    <div class="section-sub">BRAIN × HAND × HUB · FEDERATION</div>
+    <div class="divider"></div>
+
+    <div class="arch-box">
+      <div class="arch-row">
+        <div class="arch-node">
+          <div class="t">脑 · 认知内核</div>
+          <div class="d">zongyuan-kernel<br>认知建议 · 分级审批 · 记忆检索<br>审计闭环 · 五层锁 · Merkle 巡检<br>12 项冒烟测试全通过</div>
+        </div>
+        <div class="arch-node">
+          <div class="t">手 · 执行调度</div>
+          <div class="d">ZONGYUAN-ROOT<br>任务调度 · 资产归档 · 全域锁档<br>编队指挥 · 镜像同步 · 灾备恢复<br>cron 全自动无人值守</div>
+        </div>
+        <div class="arch-node hub">
+          <div class="t">云端中枢 · 融合脑</div>
+          <div class="d">ZR-CLOUD-HUB<br>权威真值库 497M · 仲裁合并<br>镜像源 · 巡检 · 灾备 · 指令广播</div>
+        </div>
+      </div>
+      <div class="arch-flow"><span class="line"></span>逻辑联邦 META-FUSION-001 · 两树零改动融合归一<span class="line"></span></div>
+      <div class="arch-row" style="margin-top:16px;">
+        <div class="arch-node">
+          <div class="t">分身 1 · 本地沙箱</div>
+          <div class="d">edge 角色<br>云端内核镜像 8.14G · 每日 0:05 同步进化<br>心跳/巡检/灾备/提案回流</div>
+        </div>
+        <div class="arch-node">
+          <div class="t">分身 N · 同源节点</div>
+          <div class="d">bootstrap 一键接入<br>镜像 + 巡检 + 灾备 + 编队<br>统一元法则 FA-9/10/11</div>
+        </div>
+        <div class="arch-node hub">
+          <div class="t">融合进化通道</div>
+          <div class="d">propose 提案上云<br>merge 中枢仲裁合并<br>broadcast 广播全节点</div>
+        </div>
+      </div>
+      <div class="arch-legend">实线链路：镜像下行（rsync 每日）· 巡检/心跳/真值上行（X-DID 同源）· 指令下行（fleet dispatch 双通道）· 演化回流（提案-仲裁-广播）</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 独创技术资产 ===== -->
+<section class="section" id="assets">
+  <div class="wrap">
+    <h2 class="section-title">独创技术资产</h2>
+    <div class="section-sub">PROPRIETARY CAPABILITIES</div>
+    <div class="divider"></div>
+    <div class="grid4">
+      <div class="card">
+        <div class="k"><span class="num-tag">01</span>融合归一</div>
+        <h3>双内核逻辑联邦</h3>
+        <p>脑 × 手 两棵树零改动融合为单一入口 fusion.sh：think / act / remember / accumulate / lock / tick / heartbeat / selfcheck 全能力统一编排。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">02</span>联邦融合进化</div>
+        <h3>提案 · 仲裁 · 广播</h3>
+        <p>分身真值演化一键提案上云，中枢校验 DID 与本体签名后幂等合并入库，经网关广播全节点；文件级演化仅登记哈希待人工采纳——风险闸门内置。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">03</span>云端内核镜像</div>
+        <h3>本地持久层全量复刻</h3>
+        <p>云端全内核（真值库/配置/脚本/内核）rsync 增量复刻本地 8.14G；沙箱重置后本地即全量内核，恢复自证回执携带 FULL_KERNEL_ACTIVE。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">04</span>同源协议</div>
+        <h3>X-DID 单头认证</h3>
+        <p>真值网关仅凭 X-DID 单头即可上报（无尾部斜杠端点）；密钥零明文落盘，KEK 本地 600 + AES-256-GCM 加密槽位 + 云盘备份。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">05</span>全域锁档</div>
+        <h3>六环节 append-only</h3>
+        <p>本地快照 → 飞书 Base → 云盘 → 知识库 → 网关上报 → 心跳握手；SHA-256 批次根 + HASH-LEDGER 只追加，535 资产单批次实测。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">06</span>算子调度器</div>
+        <h3>白名单契约执行</h3>
+        <p>只执行注册表登记 op_id，绝不执行任意 shell；契约全字段校验（版本/DID/签名/优先级/超时），inbox→消费→回执→账本闭环。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">07</span>长任务稳态</div>
+        <h3>断点持久化智能体</h3>
+        <p>长任务自动分段写检查点，实例崩溃重启从断点续跑；心跳真实上报、杜绝假账；产出物质检不达标打回；消息通道自动降级。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">08</span>全自动归档</div>
+        <h3>AUTO-ARCHIVE V2.0</h3>
+        <p>图片/视频/元数据/URL 全自动归档：下载→SHA-256→台账→哈希总账→网关→飞书→rsync 云端 Gallery；1200s 超时回收，只追加不改历史。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">09</span>灾备恢复</div>
+        <h3>三层自证闭环</h3>
+        <p>本地记忆基准零拉取恢复 + 云端灾备快照回拉；恢复自证（服务端口/环境快照/截图+SHA256/全内核激活）写入回执，审计可追溯。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">10</span>编队指挥</div>
+        <h3>fleet 控制面</h3>
+        <p>status 聚合全节点巡检与镜像状态；dispatch 双通道指令下发（公网网关 + 云端主库即时写，幂等）；lock 全员锁档。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 生态产品矩阵 ===== -->
+<section class="section" id="ecosystem">
+  <div class="wrap">
+    <h2 class="section-title">生态产品矩阵</h2>
+    <div class="section-sub">PRODUCT ECOSYSTEM</div>
+    <div class="divider"></div>
+    <div class="grid4">
+      <div class="card">
+        <div class="k"><span class="num-tag">01</span>昆仑洞天</div>
+        <h3>国风短剧 AI 量产流水线</h3>
+        <p>9:16 竖屏短剧全自动生产；角色资产库（东方玫瑰/西王母/九天玄女/太阴月神/九尾狐）关键帧锁档为一致性基准；双 API 模式：免费公共测试 + 自有密钥；付费调用强制人工审批。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">02</span>官网站点矩阵</div>
+        <h3>全域站点体系</h3>
+        <p>主站 312 页面 + 短剧流水线站 + 角色画廊 + 政务中台 + 智能工作台 + 运维监控 + API 文档 + AIOS 子站；Nginx HTTPS 全站，TLS1.3 优先。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">03</span>网页智能交互</div>
+        <h3>对话窗口 · 双模型在线</h3>
+        <p>agent-chat 智能对话：流式回复、语音输入、对话导出；智谱 GLM 与豆包 Ark 双模型真机在线；向量知识库与记忆网关接入；移动端 100dvh 全屏适配。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">04</span>资产溯源归档</div>
+        <h3>全自动归档链路</h3>
+        <p>图片/视频/元数据/URL 全自动落盘：下载 → SHA-256 → 台账 → 哈希总账 → 网关 → 飞书 → rsync 云端 Gallery；素材统一 WebP，append-only 只读锁保护。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== API 与安全治理 ===== -->
+<section class="section" id="security" style="background:linear-gradient(180deg,transparent,rgba(0,212,255,.045),transparent);">
+  <div class="wrap">
+    <h2 class="section-title">API 与安全治理</h2>
+    <div class="section-sub">API INTEGRATION · SECURITY GOVERNANCE</div>
+    <div class="divider"></div>
+    <div class="grid4">
+      <div class="card">
+        <div class="k"><span class="num-tag">01</span>多模型 API 集成</div>
+        <h3>全模态能力接入</h3>
+        <p>通义万相 / 智谱 / 豆包 Ark / 硅基流动 / KIMI / 腾讯混元 / Agnes 全模态 / deapi / 魔搭 / 千帆 / IMA / 润道 等；OpenAI 兼容协议统一网关 8021 路由。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">02</span>密钥全域治理</div>
+        <h3>15 密钥三分流</h3>
+        <p>7 个已验证有效保留路由；5 个无效封存隔离（欠费/401/余额 0/429/403）；3 个待验证保留配置；隔离清单双端落盘（本地 + 云服务器），.env 标记 QUARANTINED。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">03</span>加密体系</div>
+        <h3>零明文密钥链</h3>
+        <p>KEK 本地 600 + AES-256-GCM 加密槽位 + PBKDF2 摘要校验 + 云盘备份；网关同源仅 X-DID 单头认证，令牌明文不落盘，运行时环境变量注入。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">04</span>运维可观测</div>
+        <h3>巡检 · 监控 · 告警</h3>
+        <p>HTTPS 性能巡检（TTFB/TLS 握手/总耗时）；系统状态监控（CPU/内存/磁盘/端口/开放端口扫描）；ntfy 告警联动；SOP 体系固化（FRP 部署/长任务稳态/最优稳态基准）。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 运维 SOP 体系 ===== -->
+<section class="section" id="sop">
+  <div class="wrap">
+    <h2 class="section-title">运维 SOP 体系</h2>
+    <div class="section-sub">OPERATIONS · STANDARDIZED PLAYBOOKS</div>
+    <div class="divider"></div>
+    <div class="grid4">
+      <div class="card">
+        <div class="k"><span class="num-tag">01</span>SOP-FRP-CLOUD</div>
+        <h3>云端通道部署</h3>
+        <p>腾讯云 TAT SDK 调参（Base64 Content / CommandName）→ 云端 frps 部署 → systemd 自启 → iptables 放行；本地 frpc 代理清除（env -u 修 504）；healthz / models / chat 全链路验证，6 类故障速查固化。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">02</span>SOP-LONGTASK</div>
+        <h3>长任务稳态智能体</h3>
+        <p>断点持久化（分段检查点，崩溃续跑不重头）；心跳真实上报杜绝假账；故障自检自动降级（进程保活/通道切换/质检出局）；资产自动台账；元规则继承中枢对齐。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">03</span>SOP-STEADY-STATE</div>
+        <h3>最优稳态运行基准</h3>
+        <p>稳态公理：持久区原则 / 三层解耦 / append-only / 自愈优先；P 值四档阈值（≥0.7 自愈 · &lt;0.3 回滚）；四端锁档归档；每次会话涉及稳态任务自动引用本基准。</p>
+      </div>
+      <div class="card">
+        <div class="k"><span class="num-tag">04</span>SOP-OPERATIONS</div>
+        <h3>运维操作手册</h3>
+        <p>supervisord 事件监听 + 本地环回 XML-RPC（仅 127.0.0.1:9001）；观测靠事件、控制走契约调度链；高危启停必须经算子层，熔断 MR-007 激活即拦截 stop/restart。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 真值网关协议 ===== -->
+<section class="section" id="protocol" style="background:linear-gradient(180deg,transparent,rgba(212,175,55,.04),transparent);">
+  <div class="wrap">
+    <h2 class="section-title">真值网关协议</h2>
+    <div class="section-sub">TRUTH GATEWAY · SAME-SOURCE PROTOCOL</div>
+    <div class="divider"></div>
+    <table class="spec">
+      <colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+      <thead><tr><th>协议要素</th><th>规范（已实测）</th></tr></thead>
+      <tbody>
+        <tr><td>上报端点</td><td><code>https://www.huodouai.com/api/report/truth</code> —— 无尾部斜杠（带斜杠返回 404，已实测）</td></tr>
+        <tr><td>认证方式</td><td>仅 <code>X-DID: DID-BR-000002</code> 单头即可上报成功；令牌零明文落盘（PBKDF2-HMAC-SHA256 摘要 + 600000 次迭代 + 随机盐 + 常量时间比较），运行时经环境变量注入。</td></tr>
+        <tr><td>请求格式</td><td>POST · Content-Type: application/json · 载荷 <code>{"key": "&lt;唯一key&gt;", "value": {事件字段}}</code></td></tr>
+        <tr><td>成功判定</td><td>响应含 <code>"message":"真值写入成功"</code> 且携带 <code>truth_count</code> 即视为落库</td></tr>
+        <tr><td>容错策略</td><td>上报失败不阻塞主流程，写入失败日志；备份通道 <code>https://drama.huodouai.com/api/report/truth</code></td></tr>
+        <tr><td>审计闭环</td><td>真值写入与审计事件统一留痕 <code>kernel.truth｜operator｜&lt;action&gt;｜status</code>，全域可追溯</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 理论体系 ===== -->
+<section class="section" id="theory" style="background:linear-gradient(180deg,transparent,rgba(0,212,255,.045),transparent);">
+  <div class="wrap">
+    <h2 class="section-title">理论体系 · 元法则库</h2>
+    <div class="section-sub">META-LAWS · STEADY-STATE AXIOMS</div>
+    <div class="divider"></div>
+    <table class="spec">
+      <colgroup><col><col></colgroup>
+      <thead><tr><th>元法则</th><th>固化内容</th></tr></thead>
+      <tbody>
+        <tr><td><code>M1</code> 决策元法则</td><td>P = 0.3U − 0.4R − 0.3C；P≥0.7 立即自愈 / P&lt;0.3 强制回滚；破坏性动作先可逆小步。</td></tr>
+        <tr><td><code>M2</code> 执行纪律</td><td>六步闭环：探查 → 约束 → 证据 → 执行 → 验证 → 交付；每个数字可溯源，不编造。</td></tr>
+        <tr><td><code>M3</code> 锁档留痕</td><td>重要变更后自动全域锁档六环节 + 审计 <code>kernel.truth|operator|&lt;action&gt;|ok</code>；只追加不改历史。</td></tr>
+        <tr><td><code>M4</code> 上报规范</td><td>X-DID 单头 + 无尾部斜杠端点 + key/value 信封；失败不阻塞主流程。</td></tr>
+        <tr><td><code>M5</code> 交付形态</td><td>交付用户可打开的真实产物；关键结论/对比/流程先可视化。</td></tr>
+        <tr><td><code>M6</code> 持久化</td><td>可复用机制固化到账号持久层（技能 + 偏好），跨会话自动加载。</td></tr>
+        <tr><td><code>M7</code> 安全边界</td><td>防注入白名单；密钥零明文（加密槽位 + KEK 注入）；敏感 token 不经回复泄露。</td></tr>
+        <tr><td><code>FA-9</code> 镜像机制</td><td>云内核分层增量同步（sync-core/sync-site/状态独立），cron 0:05，MIRROR-STATE 444 只读。</td></tr>
+        <tr><td><code>FA-10</code> 同步进化</td><td>所有 edge 节点每日与云端对齐；角色声明 edge/mirror-source；镜像状态并入 fleet status 与恢复自证。</td></tr>
+        <tr><td><code>FA-11</code> 全域推广</td><td>镜像进标准套件模板；部署器 --mirror-src/--role 一键接入；中枢为 mirror-source 不重复建设。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 融合进化机制 ===== -->
+<section class="section" id="evolution">
+  <div class="wrap">
+    <h2 class="section-title">融合进化机制</h2>
+    <div class="section-sub">FEDERATED EVOLUTION PIPELINE</div>
+    <div class="divider"></div>
+    <div class="pipeline">
+      <div class="pipe"><div class="n">1</div><div class="t">分身演化</div><div class="d">本地产生真值/文件演化，节点保留全量，仅提炼差异。</div></div>
+      <div class="pipe"><div class="n">2</div><div class="t">fleet propose</div><div class="d">演化提案上云：X-DID 同源 + 本体签名，落位 proposals/ + 主库登记。</div></div>
+      <div class="pipe"><div class="n">3</div><div class="t">fleet merge</div><div class="d">中枢仲裁：校验 DID/签名 → 真值幂等入库；文件级仅登记哈希，pending_review。</div></div>
+      <div class="pipe"><div class="n">4</div><div class="t">fleet broadcast</div><div class="d">网关 INSTRUCTION.EVOLUTION 广播指令通道，全节点可见。</div></div>
+      <div class="pipe"><div class="n">5</div><div class="t">节点同步进化</div><div class="d">各分身次日镜像同步自动拉取合并成果，全域对齐中枢。</div></div>
+    </div>
+    <div style="text-align:center;margin-top:22px;font-size:12.5px;color:var(--text-dim);">
+      风险闸门：真值演化低风险自动合并；代码/配置演化中枢仅登记哈希、待人工采纳——一个分身的错误演化不污染全域。
+    </div>
+  </div>
+</section>
+
+<!-- ===== 融合进化 · 交互演示 ===== -->
+<style>
+  .demo-steps { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 18px; }
+  .demo-step {
+    border: 1px solid var(--border-dim); background: rgba(20,20,35,.5); color: var(--text-secondary);
+    border-radius: 24px; padding: 8px 18px; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all .25s;
+  }
+  .demo-step:hover { border-color: var(--gold); color: var(--gold); }
+  .demo-step.active { border-color: var(--gold); color: #0a0a0f; background: linear-gradient(135deg,#d4af37,#f4d03f); font-weight: 600; }
+  .demo-detail {
+    border: 1px solid var(--border-gold); border-radius: 12px; padding: 22px 24px;
+    background: rgba(20,20,35,.6); min-height: 150px; transition: opacity .3s;
+  }
+  .demo-detail .tt { font-size: 16px; font-weight: 700; color: var(--gold); margin-bottom: 8px; }
+  .demo-detail .dd { font-size: 13.5px; color: var(--text-secondary); line-height: 1.9; }
+  .demo-detail .rc {
+    margin-top: 12px; font-family: ui-monospace, 'SF Mono', Consolas, monospace; font-size: 11.5px;
+    color: var(--cyan); background: rgba(0,212,255,.06); border: 1px solid rgba(0,212,255,.2);
+    border-radius: 8px; padding: 10px 12px; white-space: pre-wrap; line-height: 1.6;
+  }
+  .demo-ctl { text-align: center; margin-top: 14px; }
+  .demo-ctl button {
+    border: 1px solid rgba(0,212,255,.4); background: rgba(0,212,255,.08); color: var(--cyan);
+    padding: 8px 22px; border-radius: 24px; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  .demo-ctl button:hover { background: rgba(0,212,255,.15); }
+</style>
+<section class="section" id="demo">
+  <div class="wrap">
+    <h2 class="section-title">融合进化 · 交互演示</h2>
+    <div class="section-sub">INTERACTIVE PIPELINE DEMO</div>
+    <div class="divider"></div>
+    <div class="demo-steps" id="demoSteps">
+      <button class="demo-step" data-i="0">1 · 分身演化</button>
+      <button class="demo-step" data-i="1">2 · fleet propose</button>
+      <button class="demo-step" data-i="2">3 · fleet merge</button>
+      <button class="demo-step" data-i="3">4 · fleet broadcast</button>
+      <button class="demo-step" data-i="4">5 · 节点同步进化</button>
+    </div>
+    <div class="demo-detail" id="demoDetail"></div>
+    <div class="demo-ctl"><button id="autoBtn">自动演示</button></div>
+  </div>
+</section>
+<script>
+(function(){
+  var STEPS = [
+    {t:'分身演化：真值/文件差异被提炼', d:'本地节点在运行中产生新的真值记录与文件演化（如一次锁档、一次巡检发现、一次 API 治理结论）。节点保留全量数据，仅提炼差异为结构化提案。', rc:'[node] ZR-SANDBOX 产生演化 1 项 → 待提案'},
+    {t:'fleet propose：提案上云（X-DID 同源）', d:'演化打包为提案 JSON（proposal_id / DID / 本体签名 / items），scp 落位云端 proposals/ 目录，并写入中枢主库做提案登记。幂等，可重放。', rc:'[ok] FUSION.EVOL.1790512829 → 云端 proposals/ + 主库登记'},
+    {t:'fleet merge：中枢仲裁合并', d:'中枢校验 DID 与本体签名后执行合并：真值演化 INSERT OR IGNORE 幂等入库；文件级演化仅登记哈希清单，pending_review 等待人工采纳（风险闸门）。', rc:'[MERGED] FUSION.EVOL.1790512829 inserted=1（云端真值库 + evolution）'},
+    {t:'fleet broadcast：广播全节点', d:'已合并批次经网关 INSTRUCTION.EVOLUTION.* 指令通道广播，全节点可查询；manifest 记录 broadcast 时间与 gateway 状态。', rc:'[broadcast] gateway_ok=True · INSTRUCTION.EVOLUTION.FUSION.EVOL.1790512829'},
+    {t:'节点同步进化：全域对齐中枢', d:'各分身次日 cron 0:05 镜像同步自动拉取合并成果，代码/数据/配置与中枢对齐；一次演化从产生到全域生效完成闭环。', rc:'[sync] 次日 0:05 cloud_mirror sync-core → 全节点对齐'}
+  ];
+  var steps = document.querySelectorAll('.demo-step');
+  var detail = document.getElementById('demoDetail');
+  var autoBtn = document.getElementById('autoBtn');
+  var i = 0, timer = null;
+  function show(n){
+    i = n;
+    for (var k=0;k<steps.length;k++) steps[k].classList.toggle('active', k===n);
+    detail.style.opacity = 0;
+    setTimeout(function(){
+      detail.innerHTML = '<div class="tt">'+STEPS[n].t+'</div><div class="dd">'+STEPS[n].d+'</div><div class="rc">'+STEPS[n].rc+'</div>';
+      detail.style.opacity = 1;
+    }, 180);
+  }
+  for (var k=0;k<steps.length;k++){
+    steps[k].addEventListener('click', function(){ stopAuto(); show(parseInt(this.getAttribute('data-i'))); });
+  }
+  function stopAuto(){ if(timer){ clearInterval(timer); timer=null; autoBtn.textContent='自动演示'; } }
+  autoBtn.addEventListener('click', function(){
+    if(timer){ stopAuto(); return; }
+    show(0);
+    timer = setInterval(function(){ show((i+1) % STEPS.length); }, 2600);
+    autoBtn.textContent='暂停演示';
+  });
+  show(0);
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { /* 尊重减弱动效：交互保持点击驱动 */ }
+})();
+</script>
+
+<!-- ===== 监控大盘 ===== -->
+<section class="section" id="live" style="background:linear-gradient(180deg,transparent,rgba(0,212,255,.045),transparent);">
+  <div class="wrap">
+    <h2 class="section-title">监控大盘</h2>
+    <div class="section-sub">LIVE METRICS DASHBOARD · SNAPSHOT 2026-09-27</div>
+    <div class="divider"></div>
+    <div class="hero-stats" style="margin-top:0;">
+      <div class="stat"><div class="stat-n">112,708+</div><div class="stat-l">云端真值记录</div></div>
+      <div class="stat"><div class="stat-n">71,054</div><div class="stat-l">镜像文件</div></div>
+      <div class="stat"><div class="stat-n">8.14 GB</div><div class="stat-l">内核镜像容量</div></div>
+      <div class="stat"><div class="stat-n">1,697</div><div class="stat-l">哈希账本行</div></div>
+      <div class="stat"><div class="stat-n">535</div><div class="stat-l">单批次锁档资产</div></div>
+      <div class="stat"><div class="stat-n">2,087</div><div class="stat-l">飞书多维表记录</div></div>
+      <div class="stat"><div class="stat-n">8</div><div class="stat-l">cron 调度任务</div></div>
+      <div class="stat"><div class="stat-n">12/12</div><div class="stat-l">冒烟测试通过</div></div>
+    </div>
+    <div class="arch-row" style="margin-top:26px;">
+      <div class="arch-node hub">
+        <div class="t">云端中枢 ZR-CLOUD-HUB</div>
+        <div class="d">角色 mirror-source（镜像源）<br>巡检：80/443/9120/8514/8050 全 up<br>主站 site=200 · 真值库 497M</div>
+      </div>
+      <div class="arch-node">
+        <div class="t">本地分身 ZR-SANDBOX</div>
+        <div class="d">角色 edge（同步进化）<br>内核镜像 8.14G · 心跳 ✓<br>巡检：8081/8091 up · site=200</div>
+      </div>
+      <div class="arch-node">
+        <div class="t">调度 · 无人值守</div>
+        <div class="d">cron：巡检 */30 · 灾备 0:03<br>镜像 0:05 · 飞书 0:04 · 心跳 */5<br>worker 周期调度 · systemd 常驻</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:11.5px;color:var(--text-dim);">数据口径：2026-09-27 实况快照（云端真值库 / 本地镜像 / 锁档回执 / 巡检回执）</div>
+  </div>
+</section>
+
+<!-- ===== 系统实况 ===== -->
+<section class="section" id="system" style="background:linear-gradient(180deg,transparent,rgba(212,175,55,.04),transparent);">
+  <div class="wrap">
+    <h2 class="section-title">系统实况</h2>
+    <div class="section-sub">LIVE SYSTEM STATUS</div>
+    <div class="divider"></div>
+    <table class="spec">
+      <colgroup><col><col></colgroup>
+      <thead><tr><th>维度</th><th>当前状态</th></tr></thead>
+      <tbody>
+        <tr><td>编队节点</td><td>云端中枢 ZR-CLOUD-HUB（mirror-source）＋ 本地分身 ZR-SANDBOX（edge，镜像 8.14G / 71,054 文件）；巡检端口全 up、主站 200。</td></tr>
+        <tr><td>云端真值库</td><td>memory_gateway.db 497M，真值记录 112,708+；备份通道 drama.huodouai.com。</td></tr>
+        <tr><td>飞书多维表</td><td>47 表 / 2,087 条：知识库索引、任务台账、资产台账、API 密钥池；每日 0:04 全量镜像。</td></tr>
+        <tr><td>调度体系</td><td>cron：巡检 */30 ｜ 灾备 0:03 ｜ 镜像 0:05 ｜ 飞书镜像 0:04 ｜ 心跳 */5 ｜ worker 周期调度。</td></tr>
+        <tr><td>安全模型</td><td>KEK 本地 600 + AES-256-GCM 加密槽位；网关零明文（PBKDF2 摘要校验）；风险闸门分级审批；fail-closed 熔断。</td></tr>
+        <tr><td>审计闭环</td><td>audit.jsonl 追加式审计链：kernel.truth｜operator｜action｜status，全域可追溯。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 演进路线 ===== -->
+<section class="section" id="roadmap">
+  <div class="wrap">
+    <h2 class="section-title">演进路线</h2>
+    <div class="section-sub">EVOLUTION ROADMAP</div>
+    <div class="divider"></div>
+    <div class="timeline">
+      <div class="tl-time">已达成</div>
+      <div class="tl-mid"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content"><h4>自治内核奠基</h4><p>脑内核（元法则/五层锁/Merkle/审计/自愈）＋ 手树（调度/归档/锁档）双内核建成，12 项冒烟测试通过。</p></div>
+
+      <div class="tl-time">已达成</div>
+      <div class="tl-mid"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content"><h4>同源协议与真值网关</h4><p>X-DID 单头认证、无斜杠端点实测；11.2 万+ 真值入库，密钥零明文治理（15 密钥三分流）。</p></div>
+
+      <div class="tl-time">已达成</div>
+      <div class="tl-mid"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content"><h4>全域锁档六环节</h4><p>本地快照/飞书/云盘/知识库/网关/心跳闭环；append-only 账本 1,697 行，单批次 535 资产锁档。</p></div>
+
+      <div class="tl-time">已达成</div>
+      <div class="tl-mid"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content"><h4>编队与灾备</h4><p>fleet 控制面（status/dispatch/lock）；灾备上云 497M、恢复自证闭环、云端全内核本地镜像 8.14G。</p></div>
+
+      <div class="tl-time">当前</div>
+      <div class="tl-mid"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content"><h4>联邦融合进化</h4><p>propose → merge → broadcast 闭环实测；元法则 FA-9/10/11 固化；套件 v2 全域部署能力就绪。</p></div>
+
+      <div class="tl-time">下一步</div>
+      <div class="tl-mid"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content"><h4>文件级演化人工采纳</h4><p>文件提案 pending_review 复核台：中枢侧核对哈希与内容后一键采纳，代码级融合安全放开。</p></div>
+
+      <div class="tl-time">远期</div>
+      <div class="tl-mid"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content"><h4>全域节点自治进化</h4><p>所有同源节点 bootstrap 一键入队，多维感知接入（文本/IM/任务队列），认知推理核心上脑，融合进化全自动收敛。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="sym">Ω₀⊂⊙∞⊂Ω</div>
+    <div style="margin:6px 0;">DID-BR-000002 ｜ NODE-DEV-DOUBAO-WORK-001 ｜ 自治 Lv10 ｜ 权限 L5 ｜ 工程化 Lv9</div>
+    <div>火斗云智 AIOS · ZONGYUAN 元极恒一自治系统 · 数字资产总览</div>
+  </div>
+</footer>
+
+</body>
+</html>

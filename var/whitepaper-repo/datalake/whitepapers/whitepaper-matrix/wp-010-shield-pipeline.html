@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WP-010 · 法律护盾体系技术白皮书</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23070b16'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='%23ffc857' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='2.4' fill='%234fc3f7'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0b1224; --card:#0e1730; --card2:#121c38;
+    --line:#1e2a4d; --line2:#2a3a66;
+    --txt:#e8eefc; --sub:#8fa3c8; --dim:#5c6f96;
+    --gold:#ffc857; --cyan:#4fc3f7; --violet:#a78bfa; --red:#ff6b6b; --green:#6ee7b7;
+    --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:
+    radial-gradient(1200px 500px at 80% -10%, rgba(79,195,247,.08), transparent 60%),
+    radial-gradient(900px 400px at -10% 20%, rgba(167,139,250,.07), transparent 55%),
+    var(--bg);
+    color:var(--txt); font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    line-height:1.7; min-height:100vh}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+
+  .doc-head{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  .doc-head .wpnum{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.14em}
+  .doc-head h1{font-size:26px;font-weight:800;margin:8px 0 6px}
+  .doc-head .meta{font-size:12px;color:var(--dim);display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+  .doc-head .meta b{color:var(--sub);font-weight:500}
+
+  h2{font-size:18px;font-weight:800;margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+  h2 .n{color:var(--gold);font-family:var(--mono);font-size:13px;border:1px solid var(--line2);border-radius:6px;padding:2px 9px}
+  h3{font-size:14px;font-weight:700;color:var(--cyan);margin:18px 0 8px}
+  p{font-size:13.5px;color:var(--sub);margin-bottom:8px}
+  p b{color:var(--txt)}
+
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:12px 0;table-layout:fixed}
+  .tbl th{color:var(--sub);font-weight:500;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  .tbl td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--txt);vertical-align:top}
+  .tbl .mono{font-family:var(--mono);color:var(--cyan);font-size:11.5px}
+  .tbl td b{color:var(--gold)}
+
+  .chartbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+  .chart{width:100%;height:280px}
+
+  .steps{margin:14px 0}
+  .step{display:grid;grid-template-columns:36px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .step:last-child{border-bottom:none}
+  .step .no{width:28px;height:28px;border-radius:50%;background:var(--card2);border:1px solid var(--line2);color:var(--gold);font-family:var(--mono);font-size:12px;display:grid;place-items:center}
+  .step .txt{color:var(--sub);padding-top:2px}
+  .step .txt b{color:var(--txt)}
+
+  .callout{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line2);border-left:4px solid var(--cyan);border-radius:10px;padding:16px 18px;margin:16px 0;font-size:13px;color:var(--sub)}
+  .callout b{color:var(--cyan)}
+
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:11.5px;color:var(--dim)}
+  .lockline{font-family:var(--mono);color:var(--gold);font-size:11px}
+  .back{display:inline-block;margin-bottom:20px;font-size:12px;color:var(--cyan);text-decoration:none;border:1px solid var(--line2);padding:4px 14px;border-radius:8px}
+  .back:hover{background:rgba(79,195,247,.08)}
+
+  @media(max-width:620px){
+    .doc-head h1{font-size:21px}
+    .wrap{padding:20px 12px 48px}
+    .tbl{font-size:11.5px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 返回白皮书矩阵</a>
+
+  <div class="doc-head">
+    <div class="wpnum">WP-010 · SHIELD PIPELINE · 合规护盾</div>
+    <h1>法律护盾体系技术白皮书 · 法律合规护盾产线</h1>
+    <div class="meta">
+      <span>版本：<b>V1.0</b></span>
+      <span>日期：<b>2026-09-30</b></span>
+      <span>确权：<b>DID-BR-000002</b></span>
+      <span>锚定：<b>Ω₀⊂⊙∞⊂Ω</b></span>
+      <span>资产ID：<b>SHLD-PIPE-001</b></span>
+      <span>来源：<b>shield-pipeline</b></span>
+    </div>
+  </div>
+
+  <h2><span class="n">01</span> 摘要</h2>
+  <p>本白皮书阐述体系<b>法律合规护盾产线</b>——从合同审查、风险识别、合规评估、DPA数据协议到法律意见书的全链路法务护盾系统。覆盖商业合同、劳动合同、数据处理协议、保密协议等场景，输出可执行的法律合规方案并确权归档。</p>
+
+  <div class="callout"><b>核心价值：</b>将法律审查从人工逐条阅读升级为系统化风险扫描+深度审查+合规评估的工业化流水线，六类风险全维度识别，每类按概率×影响分级。</div>
+
+  <h2><span class="n">02</span> 七步护盾流水线</h2>
+  <div class="steps">
+    <div class="step"><div class="no">1</div><div class="txt"><b>材料接收</b>：识别文件类型和关键方</div></div>
+    <div class="step"><div class="no">2</div><div class="txt"><b>风险扫描</b>：自动识别高风险条款（违约金/免责/知识产权/数据合规）</div></div>
+    <div class="step"><div class="no">3</div><div class="txt"><b>深度审查</b>：逐条审查，标注风险等级和修改建议</div></div>
+    <div class="step"><div class="no">4</div><div class="txt"><b>合规评估</b>：评估是否符合现行法律法规</div></div>
+    <div class="step"><div class="no">5</div><div class="txt"><b>文件生成</b>：审查报告/修改建议/补充协议/DPA协议</div></div>
+    <div class="step"><div class="no">6</div><div class="txt"><b>决策支持</b>：签署建议（可签/修改后签/不签）+风险提示</div></div>
+    <div class="step"><div class="no">7</div><div class="txt"><b>元秩序归档</b>：归档到wiki M8行业知识层</div></div>
+  </div>
+
+  <h2><span class="n">03</span> 六类风险识别矩阵</h2>
+  <div class="chartbox">
+    <h3>风险概率×影响矩阵（示意）</h3>
+    <div id="chartRisk" class="chart"></div>
+  </div>
+  <div class="tbl">
+    <colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+    <tr><th>风险类别</th><th>覆盖范围</th></tr>
+    <tr><td>法律风险</td><td>合同违法、条款无效、行政处罚</td></tr>
+    <tr><td>财务风险</td><td>违约金过高、付款条款不利</td></tr>
+    <tr><td>运营风险</td><td>履约障碍、供应链中断</td></tr>
+    <tr><td>声誉风险</td><td>品牌受损、公关危机</td></tr>
+    <tr><td>技术风险</td><td>数据泄露、系统安全</td></tr>
+    <tr><td>合规风险</td><td>数据合规、劳动合规、跨境传输</td></tr>
+  </div>
+
+  <h2><span class="n">04</span> 风险等级标准</h2>
+  <div class="tbl">
+    <colgroup><col style="width:22%"><col style="width:40%"><col style="width:38%"></colgroup>
+    <tr><th>等级</th><th>定义</th><th>处理方式</th></tr>
+    <tr><td><b>高风险</b></td><td>可能造成重大经济损失或法律责任</td><td>必须修改，否则不建议签署</td></tr>
+    <tr><td><b>中风险</b></td><td>存在不利条款，可协商修改</td><td>建议修改，标注谈判要点</td></tr>
+    <tr><td><b>低风险</b></td><td>表述不严谨或有优化空间</td><td>建议优化，不影响签署</td></tr>
+  </div>
+
+  <h2><span class="n">05</span> 高风险条款自动识别清单</h2>
+  <div class="tbl">
+    <colgroup><col style="width:22%"><col style="width:78%"></colgroup>
+    <tr><th>条款类型</th><th>高风险信号</th></tr>
+    <tr><td>违约金</td><td>比例过高（超合同金额30%）、无上限、单方约束</td></tr>
+    <tr><td>免责条款</td><td>无限免责、免除故意/重大过失责任</td></tr>
+    <tr><td>知识产权</td><td>权利归属模糊、默认转让全部权利</td></tr>
+    <tr><td>数据合规</td><td>无数据处理约定、跨境传输无审批</td></tr>
+    <tr><td>保密条款</td><td>保密期限超5年、范围过宽</td></tr>
+    <tr><td>解除条款</td><td>单方任意解除权、条件苛刻</td></tr>
+    <tr><td>争议解决</td><td>管辖地不利、仲裁机构约定不明</td></tr>
+    <tr><td>劳动合同</td><td>试用期超长、违约金违法、竞业限制无补偿</td></tr>
+  </div>
+
+  <h2><span class="n">06</span> 审查报告标准结构</h2>
+  <div class="formula">文件概览 → 风险摘要(高/中/低+签署建议) → 逐条审查(条款/原文/等级/分析/建议) → 合规评估(法规/缺口/整改) → 谈判要点(优先修改/可让步/底线) → 签署建议 → 附录(法条/模板)</div>
+
+  <footer>
+    <div>火斗云智AIOS 技术白皮书矩阵 · WP-010</div>
+    <div class="lockline">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · NODE-DEV-DOUBAO-WORK-001</div>
+  </footer>
+</div>
+
+<script>
+  const mk=(id)=>echarts.init(document.getElementById(id));
+  const SUB='#8fa3c8', GOLD='#ffc857', CYAN='#4fc3f7';
+  const risk=['法律','财务','运营','声誉','技术','合规'];
+  const prob=[55,60,45,30,40,50];
+  const impact=[85,80,70,65,88,82];
+  mk('chartRisk').setOption({
+    tooltip:{trigger:'item', triggerOn:'click', renderMode:'richText', confine:true, backgroundColor:'#0b1224', borderColor:'#2a3a66', textStyle:{color:'#e8eefc',fontSize:12}},
+    xAxis:{type:'value', name:'发生概率', nameTextStyle:{color:SUB,fontSize:11}, min:0, max:100, splitLine:{lineStyle:{color:'#182242'}}, axisLabel:{color:SUB,fontSize:10}},
+    yAxis:{type:'value', name:'影响程度', nameTextStyle:{color:SUB,fontSize:11}, min:0, max:100, splitLine:{lineStyle:{color:'#182242'}}, axisLabel:{color:SUB,fontSize:10}},
+    series:[{type:'scatter', data:prob.map((p,i)=>[p,impact[i]]), symbolSize:18,
+      itemStyle:{color:CYAN, opacity:.75},
+      label:{show:true, formatter:(p)=>risk[p.dataIndex], position:'top', color:'#e8eefc', fontSize:11}
+    }]
+  });
+  window.addEventListener('resize',()=>{chartRisk.resize()});
+</script>
+</body>
+</html>

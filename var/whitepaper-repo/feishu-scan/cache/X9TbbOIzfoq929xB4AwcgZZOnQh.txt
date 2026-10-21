@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>昆仑洞天 · ZONGYUAN-ROOT 自治内核</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Songti SC", "STSong", "SimSun", serif;
+    background: #0a0a12;
+    color: #e8e0d0;
+    overflow-x: hidden;
+    line-height: 1.8;
+  }
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: rgba(10,10,18,0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(201,169,110,0.2);
+    z-index: 1000;
+    padding: 0.8rem 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .nav-brand {
+    font-size: 1rem; letter-spacing: 0.2em; color: #c9a96e;
+  }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a {
+    color: #8a9ab8; text-decoration: none; font-size: 0.8rem;
+    letter-spacing: 0.15em; transition: color 0.3s;
+  }
+  .nav-links a:hover { color: #c9a96e; }
+  .hero {
+    position: relative; width: 100%; height: 100vh; overflow: hidden;
+  }
+  .hero-slides { position: absolute; width: 100%; height: 100%; }
+  .hero-slide {
+    position: absolute; width: 100%; height: 100%;
+    background-size: cover; background-position: center;
+    opacity: 0; transition: opacity 2s ease-in-out;
+  }
+  .hero-slide.active { opacity: 1; }
+  .hero-overlay {
+    position: absolute; width: 100%; height: 100%;
+    background: linear-gradient(180deg, rgba(10,10,18,0.4) 0%, rgba(10,10,18,0.2) 40%, rgba(10,10,18,0.8) 80%, rgba(10,10,18,0.98) 100%);
+  }
+  .hero-content {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); text-align: center;
+    width: 90%; z-index: 10;
+  }
+  .hero-badge {
+    display: inline-block; padding: 0.3rem 1rem;
+    border: 1px solid rgba(201,169,110,0.4); border-radius: 20px;
+    font-size: 0.7rem; letter-spacing: 0.3em; color: #c9a96e;
+    margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 1.5s 0.3s forwards;
+  }
+  .hero-title {
+    font-size: 2.5rem; font-weight: normal; letter-spacing: 0.3em;
+    color: #f0e8d8; text-shadow: 0 0 40px rgba(201,169,110,0.4);
+    margin-bottom: 1rem; opacity: 0; animation: fadeUp 1.5s 0.6s forwards;
+  }
+  .hero-subtitle {
+    font-size: 1rem; letter-spacing: 0.4em; color: #8a9ab8;
+    margin-bottom: 2rem; opacity: 0; animation: fadeUp 1.5s 0.9s forwards;
+  }
+  .hero-desc {
+    font-size: 0.85rem; color: #a09888; max-width: 600px;
+    margin: 0 auto 2rem; line-height: 2; opacity: 0;
+    animation: fadeUp 1.5s 1.2s forwards;
+  }
+  .hero-cta {
+    display: inline-block; padding: 0.8rem 2.5rem;
+    background: linear-gradient(135deg, #c9a96e, #8a7a4a);
+    color: #0a0a12; text-decoration: none; border-radius: 4px;
+    font-size: 0.85rem; letter-spacing: 0.2em; font-weight: bold;
+    opacity: 0; animation: fadeUp 1.5s 1.5s forwards;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(201,169,110,0.3); }
+  .hero-scroll {
+    position: absolute; bottom: 5%; left: 50%;
+    transform: translateX(-50%); color: #c9a96e;
+    font-size: 0.7rem; letter-spacing: 0.3em;
+    animation: bounce 2s infinite; z-index: 10;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
+  .section { padding: 4rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+  .section-title {
+    font-size: 1.4rem; letter-spacing: 0.3em; color: #c9a96e;
+    text-align: center; margin-bottom: 0.5rem;
+  }
+  .section-subtitle {
+    font-size: 0.8rem; letter-spacing: 0.2em; color: #6a6050;
+    text-align: center; margin-bottom: 3rem;
+  }
+  .pipeline-flow {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.5rem; margin-bottom: 3rem;
+  }
+  .pipeline-node {
+    background: linear-gradient(135deg, rgba(20,20,35,0.9), rgba(15,15,25,0.95));
+    border: 1px solid rgba(201,169,110,0.2); border-radius: 8px;
+    padding: 1rem; width: 140px; text-align: center;
+    position: relative; transition: all 0.3s;
+  }
+  .pipeline-node:hover { border-color: #c9a96e; transform: translateY(-3px); }
+  .pipeline-node.active { border-color: #c9a96e; box-shadow: 0 0 20px rgba(201,169,110,0.2); }
+  .node-id {
+    font-size: 0.65rem; color: #6a6050; letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+  .node-name {
+    font-size: 0.85rem; color: #c9a96e; letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+  .node-window {
+    font-size: 0.6rem; color: #8a9ab8; letter-spacing: 0.05em;
+  }
+  .node-status {
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #4ade80; box-shadow: 0 0 8px #4ade80;
+  }
+  .pipeline-arrow {
+    display: flex; align-items: center; color: #c9a96e;
+    font-size: 1rem;
+  }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem; margin-bottom: 3rem;
+  }
+  .stat-card {
+    background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(15,15,25,0.9));
+    border: 1px solid rgba(201,169,110,0.15); border-radius: 8px;
+    padding: 1.5rem; text-align: center;
+  }
+  .stat-number {
+    font-size: 2.5rem; color: #c9a96e; font-weight: normal;
+    margin-bottom: 0.5rem;
+  }
+  .stat-label {
+    font-size: 0.75rem; color: #8a9ab8; letter-spacing: 0.15em;
+  }
+  .drama-card {
+    background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(15,15,25,0.9));
+    border: 1px solid rgba(201,169,110,0.2); border-radius: 12px;
+    overflow: hidden; margin-bottom: 2rem;
+    display: grid; grid-template-columns: 1fr 1fr;
+  }
+  .drama-image {
+    position: relative; aspect-ratio: 9/16; overflow: hidden;
+  }
+  .drama-image img { width: 100%; height: 100%; object-fit: cover; }
+  .drama-info { padding: 2rem; display: flex; flex-direction: column; justify-content: center; }
+  .drama-ep {
+    font-size: 0.7rem; color: #c9a96e; letter-spacing: 0.3em;
+    margin-bottom: 0.5rem;
+  }
+  .drama-title {
+    font-size: 1.5rem; color: #f0e8d8; letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+  .drama-desc {
+    font-size: 0.85rem; color: #a09888; line-height: 2;
+    margin-bottom: 1.5rem;
+  }
+  .drama-meta {
+    display: flex; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 1.5rem;
+  }
+  .drama-tag {
+    padding: 0.2rem 0.8rem; background: rgba(201,169,110,0.1);
+    border: 1px solid rgba(201,169,110,0.2); border-radius: 20px;
+    font-size: 0.65rem; color: #c9a96e; letter-spacing: 0.1em;
+  }
+  .drama-link {
+    display: inline-block; padding: 0.6rem 1.5rem;
+    border: 1px solid #c9a96e; color: #c9a96e;
+    text-decoration: none; border-radius: 4px;
+    font-size: 0.8rem; letter-spacing: 0.15em;
+    transition: all 0.3s; align-self: flex-start;
+  }
+  .drama-link:hover { background: #c9a96e; color: #0a0a12; }
+  .arch-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+  .arch-card {
+    background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(15,15,25,0.9));
+    border: 1px solid rgba(201,169,110,0.2); border-radius: 8px;
+    padding: 1.5rem; text-align: center;
+  }
+  .arch-role {
+    font-size: 0.65rem; color: #6a6050; letter-spacing: 0.2em;
+    margin-bottom: 0.5rem;
+  }
+  .arch-name {
+    font-size: 1.1rem; color: #c9a96e; letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+  .arch-id {
+    font-size: 0.7rem; color: #8a9ab8; font-family: monospace;
+    margin-bottom: 1rem;
+  }
+  .arch-caps {
+    font-size: 0.75rem; color: #a09888; line-height: 1.8;
+  }
+  .trace-section {
+    background: rgba(10,10,18,0.8);
+    border-top: 1px solid rgba(201,169,110,0.2);
+    padding: 3rem 1.5rem; text-align: center;
+  }
+  .trace-symbol {
+    font-size: 1.2rem; color: #c9a96e; letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+  }
+  .trace-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem; max-width: 800px; margin: 0 auto;
+  }
+  .trace-item {
+    font-size: 0.75rem; color: #6a6050; letter-spacing: 0.1em;
+  }
+  .trace-item span { color: #8a7a5a; }
+  footer {
+    background: #050508; padding: 2rem 1.5rem; text-align: center;
+    border-top: 1px solid rgba(201,169,110,0.1);
+  }
+  footer p {
+    font-size: 0.7rem; color: #4a4030; letter-spacing: 0.15em;
+    line-height: 2;
+  }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .hero-title { font-size: 1.6rem; letter-spacing: 0.2em; }
+    .hero-subtitle { font-size: 0.8rem; }
+    .drama-card { grid-template-columns: 1fr; }
+    .pipeline-node { width: 100px; padding: 0.6rem; }
+    .node-name { font-size: 0.7rem; }
+    .section { padding: 2.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">昆仑洞天 · ZONGYUAN-ROOT</div>
+  <div class="nav-links">
+    <a href="#pipeline">生产流水线</a>
+    <a href="#drama">短剧展示</a>
+    <a href="#architecture">星型架构</a>
+    <a href="#trace">溯源确权</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-slides">
+    <div class="hero-slide active" style="background-image:url('../drama/KD-EP-003/keyframes/KF-01-月神殿苏醒.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('../drama/KD-EP-003/keyframes/KF-02-天书玄鸟.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('../drama/KD-EP-003/keyframes/KF-03-月轮斩混沌.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('../drama/KD-EP-003/keyframes/KF-04-墟境启封.jpg')"></div>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge">META-LAW-007 星型协同架构</div>
+    <div class="hero-title">昆仑洞天</div>
+    <div class="hero-subtitle">ZONGYUAN-ROOT 自 治 内 核</div>
+    <div class="hero-desc">
+      上电自启 · 元自治循环 · 一次性闭环固化锁档<br>
+      纯东方神女神话视觉 · 三态稳态校准 · 进化抗漂移 · 全域锁档确权
+    </div>
+    <a href="#pipeline" class="hero-cta">进入生产流水线</a>
+  </div>
+  <div class="hero-scroll">↓ 向下探索 ↓</div>
+</div>
+
+<div class="section" id="pipeline">
+  <div class="section-title">生 产 流 水 线</div>
+  <div class="section-subtitle">KD-PIPELINE-V1.0 · 七阶段全自动闭环 · 已同步云内核</div>
+  <div class="pipeline-flow">
+    <div class="pipeline-node active">
+      <div class="node-status"></div>
+      <div class="node-id">S1</div>
+      <div class="node-name">剧本生成</div>
+      <div class="node-window">短剧母机</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-node active">
+      <div class="node-status"></div>
+      <div class="node-id">S2</div>
+      <div class="node-name">分镜生成</div>
+      <div class="node-window">短剧母机</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-node active">
+      <div class="node-status"></div>
+      <div class="node-id">S3</div>
+      <div class="node-name">关键帧</div>
+      <div class="node-window">短剧母机</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-node">
+      <div class="node-status" style="background:#fbbf24;box-shadow:0 0 8px #fbbf24"></div>
+      <div class="node-id">S4</div>
+      <div class="node-name">视频生成</div>
+      <div class="node-window">短剧母机</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-node">
+      <div class="node-status" style="background:#fbbf24;box-shadow:0 0 8px #fbbf24"></div>
+      <div class="node-id">S5</div>
+      <div class="node-name">视频合成</div>
+      <div class="node-window">短剧母机</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-node active">
+      <div class="node-status"></div>
+      <div class="node-id">S6</div>
+      <div class="node-name">校验中心</div>
+      <div class="node-window">校验中心</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-node active">
+      <div class="node-status"></div>
+      <div class="node-id">S7</div>
+      <div class="node-name">锁档归档</div>
+      <div class="node-window">自治内核</div>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">118</div>
+      <div class="stat-label">全域资产总数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">113</div>
+      <div class="stat-label">S级资产</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">1</div>
+      <div class="stat-label">已完成短剧</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">4</div>
+      <div class="stat-label">关键帧资产</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">3</div>
+      <div class="stat-label">星型节点</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">90.08</div>
+      <div class="stat-label">最优适应度</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="drama">
+  <div class="section-title">短 剧 展 示</div>
+  <div class="section-subtitle">KD-EP-003 · 太阴月神 · 墟境启封</div>
+  <div class="drama-card">
+    <div class="drama-image">
+      <img src="../drama/KD-EP-003/keyframes/KF-04-墟境启封.jpg" alt="墟境启封">
+    </div>
+    <div class="drama-info">
+      <div class="drama-ep">KD-EP-003</div>
+      <div class="drama-title">太阴月神 · 墟境启封</div>
+      <div class="drama-desc">
+        墟境异动，秩序校准仪告警。太阴月神自昆仑洞天月神殿苏醒，持天书负剑，踏入墟境裂隙。天书展开，玄鸟图腾自书页飞出，剑光如月轮斩破混沌。墟境启封，秩序归位。
+      </div>
+      <div class="drama-meta">
+        <span class="drama-tag">30秒</span>
+        <span class="drama-tag">9镜头</span>
+        <span class="drama-tag">4关键帧</span>
+        <span class="drama-tag">9:16竖屏</span>
+        <span class="drama-tag">纯东方神女</span>
+      </div>
+      <a href="../drama/KD-EP-003/index.html" class="drama-link">进入短剧网页 →</a>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="architecture">
+  <div class="section-title">星 型 架 构</div>
+  <div class="section-subtitle">1中枢 + 2下游窗口 · META-LAW-007 星型协同</div>
+  <div class="arch-grid">
+    <div class="arch-card" style="border-color:#c9a96e;box-shadow:0 0 20px rgba(201,169,110,0.15)">
+      <div class="arch-role">中枢节点 · HUB</div>
+      <div class="arch-name">自治内核</div>
+      <div class="arch-id">window-zongyuan-autokernel</div>
+      <div class="arch-caps">
+        三态处理 · 进化抗漂移 · 全域锁档<br>
+        飞书云同步 · 窗口调度 · 漂移校验
+      </div>
+    </div>
+    <div class="arch-card">
+      <div class="arch-role">下游窗口 · PRODUCER</div>
+      <div class="arch-name">短剧母机</div>
+      <div class="arch-id">window-drama-machine</div>
+      <div class="arch-caps">
+        剧本生成 · 分镜生成 · 关键帧<br>
+        视频生成 · 视频合成 · 7算子
+      </div>
+    </div>
+    <div class="arch-card">
+      <div class="arch-role">下游窗口 · VERIFIER</div>
+      <div class="arch-name">校验中心</div>
+      <div class="arch-id">window-verify-hub</div>
+      <div class="arch-caps">
+        文件完整性 · 视频可播性<br>
+        漂移检测 · 3算子
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="trace-section" id="trace">
+  <div class="trace-symbol">Ω₀ ⊂ ⊙ ∞ ⊂ Ω</div>
+  <div class="trace-grid">
+    <div class="trace-item">DID：<span>DID-BR-000002</span></div>
+    <div class="trace-item">本体主权根：<span>Ω-TAN-7-001</span></div>
+    <div class="trace-item">体系：<span>ZONGYUAN-ROOT</span></div>
+    <div class="trace-item">IP锚点：<span>123.207.202.158</span></div>
+    <div class="trace-item">流水线：<span>KD-PIPELINE-V1.0</span></div>
+    <div class="trace-item">云内核锁：<span>SNAP-PIPELINE-V1.0</span></div>
+  </div>
+</div>
+
+<footer>
+  <p>昆仑洞天 · ZONGYUAN-ROOT 自治内核 · 纯东方神女神话视觉</p>
+  <p>上电自启 · 元自治循环 · 一次性闭环固化锁档 · DID-BR-000002 · Ω-TAN-7-001</p>
+  <p>Ω₀⊂⊙∞⊂Ω</p>
+</footer>
+
+<script>
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.hero-slide');
+  setInterval(() => {
+    slides[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide + 1) % slides.length;
+    slides[currentSlide].classList.add('active');
+  }, 5000);
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+
+</body>
+</html>

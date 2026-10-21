@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZONGYUAN-ROOT 自治智能体系统技术白皮书 V1</title>
+<style>
+  :root{
+    --ink:#0a0a0f; --ink2:#12121c; --gold:#c9a86a; --gold2:#e8d5a8;
+    --line:rgba(201,168,106,.25); --txt:#e8e4da; --dim:#9a958a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--ink);color:var(--txt);font-family:"Noto Serif SC","Songti SC",serif;line-height:1.8}
+  .wrap{max-width:900px;margin:0 auto;padding:60px 32px}
+  /* 封面 */
+  .cover{text-align:center;padding:80px 0 60px;border-bottom:1px solid var(--line)}
+  .cover .mark{color:var(--gold);letter-spacing:.5em;font-size:14px;margin-bottom:24px}
+  .cover h1{font-size:40px;color:var(--gold2);font-weight:600;letter-spacing:.08em;margin-bottom:16px}
+  .cover .sub{font-size:16px;color:var(--dim);letter-spacing:.2em}
+  .cover .badges{margin-top:36px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+  .badge{border:1px solid var(--line);color:var(--gold);padding:6px 18px;font-size:13px;letter-spacing:.15em}
+  /* 章节 */
+  h2{color:var(--gold2);font-size:24px;margin:56px 0 20px;padding-left:16px;border-left:3px solid var(--gold);letter-spacing:.1em}
+  h3{color:var(--gold);font-size:17px;margin:28px 0 10px;letter-spacing:.05em}
+  p{color:var(--txt);margin-bottom:14px;font-size:15px}
+  .dim{color:var(--dim);font-size:13px}
+  /* 架构图 */
+  .arch{background:var(--ink2);border:1px solid var(--line);padding:28px;margin:20px 0;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--gold2);line-height:1.9;white-space:pre;overflow-x:auto}
+  /* 技术卡片 */
+  .card{background:var(--ink2);border:1px solid var(--line);padding:24px;margin:16px 0;position:relative}
+  .card .num{position:absolute;top:-1px;right:20px;color:var(--gold);font-size:42px;opacity:.18;font-family:Georgia,serif}
+  .card h3{margin-top:0}
+  .card ul{margin:8px 0 0 20px;font-size:14px;color:var(--txt)}
+  .card li{margin-bottom:6px}
+  /* 验证数据条 */
+  .stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:20px 0}
+  .stat .item{background:var(--ink2);border:1px solid var(--line);padding:18px;text-align:center}
+  .stat .v{color:var(--gold2);font-size:26px;font-weight:600;font-family:Georgia,serif}
+  .stat .k{color:var(--dim);font-size:12px;margin-top:6px;letter-spacing:.1em}
+  /* 链接 */
+  .links a{color:var(--gold);text-decoration:none;border-bottom:1px dashed var(--line);word-break:break-all}
+  footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);text-align:center;color:var(--dim);font-size:13px;letter-spacing:.15em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cover">
+    <div class="mark">Ω₀ ⊂ ⊙∞ ⊂ Ω</div>
+    <h1>ZONGYUAN-ROOT<br>自治智能体系统技术白皮书</h1>
+    <div class="sub">AUTONOMOUS AGENT SYSTEM · TECHNICAL WHITEPAPER · V1</div>
+    <div class="badges">
+      <span class="badge">DID-BR-000002</span>
+      <span class="badge">87,000+ 真值</span>
+      <span class="badge">1,426 资产</span>
+      <span class="badge">2026.09</span>
+    </div>
+  </div>
+
+  <h2>一 · 概述</h2>
+  <p>ZONGYUAN-ROOT 是一套面向多节点自治协作的智能体系统，由本地执行层、云端记忆网关与元内核共同构成。系统以「真值确权 · 不可变归档 · 自适应运维」为核心，在真实生产环境持续运行，全部接口公开可验证。</p>
+
+  <h2>二 · 系统架构</h2>
+  <div class="arch">本地执行层（Agent Workspace）
+   ├─ 任务引擎   指令 → 规划 → 执行 → 验证 → 交付
+   ├─ 知识网关   真值上报 / 检索 / 对账（HTTP API）
+   └─ 发布通道   Git 增量发布 + 开放平台聚合
+
+云端记忆网关（Memory Gateway）
+   ├─ 真值库     结构化真值 + 幂等去重 + 语义校验
+   └─ 状态核验   /status · /truths · /truth
+
+元内核（Meta Kernel）
+   └─ 全局基准快照 + 共识确权</div>
+  <p class="dim">关键设计：执行层与云端纯 HTTP 解耦，全程零 SSH、可审计、可回滚。</p>
+
+  <h2>三 · 六大核心技术</h2>
+
+  <div class="card"><span class="num">01</span><h3>真值确权网关 · Verified Knowledge Gateway</h3>
+  <ul><li>统一上报接口 POST /api/report/truth（key / value / source_node / confidence / truth_type）</li>
+  <li>幂等写入去重，云端真值规模 87,000+ 条</li>
+  <li>语义前置校验：写入前过滤冲突与无效真值</li>
+  <li>按 key 精确检索，来源节点可追溯</li></ul></div>
+
+  <div class="card"><span class="num">02</span><h3>不可变快照流水线 · Immutable Snapshot</h3>
+  <ul><li>十二阶段流水线：哈希归档 → 共识确权 → 自愈校验 → 熔断固化</li>
+  <li>Merkle 根锚定全资产清单，任何变更可对账检测</li>
+  <li>eFuse 熔断：快照固化后进入只读链，防篡改</li>
+  <li>最新基准覆盖 1,426 项资产，共识 7/7</li></ul></div>
+
+  <div class="card"><span class="num">03</span><h3>多 Agent 自治与权限分级</h3>
+  <ul><li>中枢只掌全局锚点，非锚点工作各节点自治</li>
+  <li>节点互操作协议：握手 → 对账 → 增量闭环</li>
+  <li>权限分级：能直办不等待、须审批不绕过中枢</li></ul></div>
+
+  <div class="card"><span class="num">04</span><h3>自动发布引擎</h3>
+  <ul><li>全资产索引自动生成（INDEX.json / INDEX.md / 门户）</li>
+  <li>Git 增量发布：多仓库 clone → 增量同步 → commit → push</li>
+  <li>开放平台合集聚合：幂等去重，无限流接口</li>
+  <li>限流规避：Git 通道承载媒体，绕开上传频控</li></ul></div>
+
+  <div class="card"><span class="num">05</span><h3>自适应心跳调优</h3>
+  <ul><li>心跳自动执行：握手 → 对账 → 补推 → 健康判定</li>
+  <li>停滞检测：真值连续多轮不增长即告警</li>
+  <li>自动调优：连续健康建议降频，异常保持并检查云端</li></ul></div>
+
+  <div class="card"><span class="num">06</span><h3>零成本 AI 能力接入矩阵</h3>
+  <ul><li>通义万相 I2V / T2V、Agnes Video V2（永久免费）</li>
+  <li>魔搭 API-Inference（免费 2000 次/天）</li>
+  <li>统一配置化适配，错峰调用，成本归零</li></ul></div>
+
+  <h2>四 · 工程化验证</h2>
+  <div class="stat">
+    <div class="item"><div class="v">97,835</div><div class="k">真值库规模</div></div>
+    <div class="item"><div class="v">106,114</div><div class="k">审计日志</div></div>
+    <div class="item"><div class="v">1,426</div><div class="k">锁档资产</div></div>
+    <div class="item"><div class="v">24</div><div class="k">元规则/SOP</div></div>
+    <div class="item"><div class="v">6</div><div class="k">自动发布仓库</div></div>
+    <div class="item"><div class="v">0</div><div class="k">API 调用成本</div></div>
+  </div>
+
+  <h2>五 · 元规则与自进化机制</h2>
+  <p>系统不仅在跑，还在自我进化：双版本交付规范（MD 原稿 + HTML 可视化）、任务编排周评审（自动输出精简/合并/新增建议）、自适应心跳（连续健康自动降频）。所有元规则集中在 <code>meta-rules/</code> 目录，全域锁定固化。</p>
+
+  <h2>五 · 在线可验证</h2>
+  <div class="links">
+    <p>· 记忆网关状态：<a href="https://www.huodouai.com/api/report/status">www.huodouai.com/api/report/status</a></p>
+    <p>· 白皮书模型仓：<a href="https://modelscope.cn/models/zongyuanroot/zongyuan-whitepaper">modelscope.cn/models/zongyuanroot/zongyuan-whitepaper</a></p>
+    <p>· 资产合集：<a href="https://modelscope.cn/collections/zongyuanroot/wwwhuodouaicom">modelscope.cn/collections/zongyuanroot/wwwhuodouaicom</a></p>
+  </div>
+
+  <footer>
+    Ω₀ ⊂ ⊙∞ ⊂ Ω ｜ DID-BR-000002 ｜ ZONGYUAN-ROOT<br>
+    Autonomous Agent System · Technical Whitepaper V1 · 2026.09
+  </footer>
+</div>
+</body>
+</html>

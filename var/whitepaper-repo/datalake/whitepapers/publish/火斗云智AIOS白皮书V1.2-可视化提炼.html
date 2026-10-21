@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火斗云智AIOS技术白皮书 V1.2 · 可视化提炼</title>
+<style>
+  :root{
+    --bg0:#050b1a; --bg1:#0a1630; --bg2:#0e1e42;
+    --card:#0e1b38; --card2:#12234a;
+    --line:#1d3a6e; --line2:#2a4f8f;
+    --cyan:#35d6e6; --blue:#4da3ff; --violet:#9b7bff; --teal:#2dd4b0;
+    --amber:#f5b95c; --red:#ff6b7a; --green:#5ce08a;
+    --text:#eaf2ff; --muted:#9db4d8; --dim:#67819f;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:radial-gradient(1100px 620px at 15% -5%, #12275c 0%, rgba(5,11,26,.0) 55%),
+               radial-gradient(900px 540px at 95% 10%, #1a1c4d 0%, rgba(5,11,26,.0) 50%),
+               linear-gradient(160deg, var(--bg0) 0%, var(--bg1) 45%, var(--bg0) 100%);
+    color:var(--text);
+    font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Helvetica Neue",Arial,sans-serif;
+    line-height:1.7; padding:34px 18px 60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px; margin:0 auto;}
+  header.top{
+    border:1px solid var(--line); border-radius:20px;
+    background:linear-gradient(135deg, rgba(22,44,96,.9), rgba(10,22,48,.85));
+    padding:34px 38px 28px; position:relative; overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+  header.top::after{
+    content:""; position:absolute; right:-80px; top:-80px; width:280px; height:280px;
+    background:radial-gradient(circle, rgba(53,214,230,.22), transparent 65%);
+  }
+  .tagline{
+    display:inline-block; font-size:12.5px; letter-spacing:2px; color:var(--cyan);
+    border:1px solid rgba(53,214,230,.45); border-radius:999px; padding:4px 14px; margin-bottom:16px;
+    background:rgba(53,214,230,.08);
+  }
+  h1{font-size:29px; font-weight:800; letter-spacing:.5px; line-height:1.3;}
+  h1 .rule{color:var(--violet);}
+  .sub{color:var(--muted); margin-top:10px; font-size:14.5px; max-width:800px;}
+  .meta{display:flex; flex-wrap:wrap; gap:10px 26px; margin-top:20px; font-size:12.5px; color:var(--dim);}
+  .meta b{color:var(--text); font-weight:600;}
+  h2{
+    font-size:21px; margin:46px 0 4px; font-weight:800; letter-spacing:.5px;
+    display:flex; align-items:center; gap:12px;
+  }
+  h2 .no{
+    font-size:13px; color:var(--bg0); background:linear-gradient(135deg,var(--cyan),var(--blue));
+    border-radius:8px; padding:3px 10px; font-weight:800; letter-spacing:1px; white-space:nowrap;
+  }
+  h2 .sub2{font-size:13px; color:var(--dim); font-weight:500; letter-spacing:0;}
+  .lead{color:var(--muted); margin:8px 0 20px; font-size:14px; max-width:900px;}
+  .grid{display:grid; gap:16px;}
+  .g4{grid-template-columns:repeat(4,1fr);}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .g2{grid-template-columns:repeat(2,1fr);}
+  @media(max-width:820px){ .g4,.g3,.g2{grid-template-columns:1fr;} }
+  .card{
+    border:1px solid var(--line); border-radius:var(--radius);
+    background:linear-gradient(160deg, var(--card2), var(--card));
+    padding:20px 20px 18px; position:relative; min-height:100%;
+  }
+  .card .ico{
+    width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    font-size:20px; margin-bottom:12px; background:rgba(77,163,255,.12); border:1px solid rgba(77,163,255,.3);
+  }
+  .card h3{font-size:16px; font-weight:700; margin-bottom:7px;}
+  .card p{font-size:13px; color:var(--muted);}
+  .card .tag{
+    display:inline-block; font-size:11px; margin-top:12px; padding:2px 9px; border-radius:999px;
+    border:1px solid var(--line2); color:var(--dim);
+  }
+  .c-cyan   .ico{background:rgba(53,214,230,.12); border-color:rgba(53,214,230,.35);}
+  .c-blue   .ico{background:rgba(77,163,255,.12); border-color:rgba(77,163,255,.35);}
+  .c-violet .ico{background:rgba(155,123,255,.12); border-color:rgba(155,123,255,.35);}
+  .c-teal   .ico{background:rgba(45,212,176,.12); border-color:rgba(45,212,176,.35);}
+  .c-amber  .ico{background:rgba(245,185,92,.12); border-color:rgba(245,185,92,.35);}
+  .c-red    .ico{background:rgba(255,107,122,.12); border-color:rgba(255,107,122,.35);}
+  .panel{
+    border:1px solid var(--line); border-radius:var(--radius);
+    background:rgba(10,20,44,.55); padding:22px 24px; margin-top:6px;
+  }
+  .panel.dark{background:rgba(6,12,28,.6);}
+  .flow{width:100%; height:auto; display:block; margin:6px 0 2px;}
+  .flowtext{font-size:12px; fill:var(--muted);}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){ .two{grid-template-columns:1fr;} }
+  .list li{margin:0 0 10px 18px; font-size:13.5px; color:var(--muted);}
+  .list li b{color:var(--text); font-weight:600;}
+  .ok{color:var(--green);} .no{color:var(--red);}
+  .table{width:100%; border-collapse:collapse; margin-top:8px; font-size:13px;}
+  .table th{
+    text-align:left; color:var(--cyan); font-weight:700; font-size:12.5px; letter-spacing:1px;
+    padding:10px 14px; border-bottom:2px solid var(--line2); background:rgba(13,30,66,.6);
+  }
+  .table td{padding:11px 14px; border-bottom:1px solid rgba(29,58,110,.55); color:var(--muted); vertical-align:top;}
+  .table td:first-child{color:var(--text); font-weight:600; white-space:nowrap;}
+  .table tr:last-child td{border-bottom:none;}
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
+  .chip{
+    font-size:12.5px; color:var(--text); border:1px solid var(--line2); border-radius:999px;
+    padding:5px 15px; background:rgba(18,35,74,.5);
+  }
+  .chip b{color:var(--cyan);}
+  footer{margin-top:52px; padding-top:18px; border-top:1px solid var(--line); color:var(--dim); font-size:12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .quote{
+    border-left:3px solid var(--violet); background:rgba(155,123,255,.07);
+    padding:16px 20px; border-radius:0 12px 12px 0; margin:18px 0;
+  }
+  .quote p{font-size:15px; color:var(--text);}
+  .quote .who{font-size:12px; color:var(--dim); margin-top:8px;}
+  .steps{display:grid; gap:12px;}
+  .step{
+    display:flex; gap:14px; align-items:flex-start;
+    border:1px solid var(--line); border-radius:12px; padding:14px 18px;
+    background:rgba(11,22,48,.6);
+  }
+  .step .n{
+    flex:none; width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:13.5px; color:var(--bg0);
+    background:linear-gradient(135deg,var(--cyan),var(--blue));
+  }
+  .step h4{font-size:14.5px; font-weight:700; margin-bottom:2px;}
+  .step p{font-size:12.5px; color:var(--muted);}
+  @media print{
+    body{background:#060d1c; padding:10px;}
+    .wrap{max-width:100%;}
+    header.top{box-shadow:none;}
+    h2{break-after:avoid;}
+    .card,.panel,.step{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <span class="tagline">元极恒一 · ZONGYUAN-ROOT 自治内核 · AI 工程子系统</span>
+    <h1>火斗云智AIOS <span class="rule">V1.2</span></h1>
+    <p class="sub">自治式异构算力大模型微调托管体系技术白皮书——工单驱动的无人值守微调闭环：跨异构算力调度、资产哈希锁档、双源持久容灾、业务记忆持续沉淀。</p>
+    <div class="meta">
+      <span>文档标识：<b>DID-BR-000002</b></span>
+      <span>状态：<b>LO基线锁档 · 业务层可增量迭代</b></span>
+      <span>定位：<b>工程化闭环系统</b></span>
+      <span>验证：<b>腾讯云Linux GPU + Windows WSL2 双环境</b></span>
+    </div>
+  </header>
+
+  <h2><span class="no">01</span> 系统定位 <span class="sub2">要解决的问题与设计纲领</span></h2>
+  <p class="lead">本系统属于元极恒一 ZONGYUAN-ROOT 自治内核下的 AI 工程子系统，目标是把碎片化的模型微调工程，改造成全链路无人值守、资产可追溯、知识可持续沉淀的标准化流水线平台。</p>
+  <div class="grid g4">
+    <div class="card c-cyan">
+      <div class="ico">⚙</div>
+      <h3>全链路无人值守</h3>
+      <p>工单驱动自治状态机调度，从数据质检到归档全程自动流转，不依赖人工值守。</p>
+    </div>
+    <div class="card c-blue">
+      <div class="ico">⇄</div>
+      <h3>跨异构算力</h3>
+      <p>Linux 云 GPU 与 Windows WSL2 工作站统一接入，一套工单协议跨环境调度。</p>
+    </div>
+    <div class="card c-violet">
+      <div class="ico">▤</div>
+      <h3>资产可追溯</h3>
+      <p>模型、数据、日志、报告永久归档，SHA256 哈希锁档，全链路溯源。</p>
+    </div>
+    <div class="card c-teal">
+      <div class="ico">☷</div>
+      <h3>知识持续沉淀</h3>
+      <p>双源持久化：真值资产入魔搭，业务知识与迭代记录入飞书记忆池。</p>
+    </div>
+  </div>
+  <div class="quote">
+    <p>设计核心原则：风险最小 ＞ 成本最小 ＞ 收益最大。</p>
+    <div class="who">——系统设计纲领</div>
+  </div>
+  <div class="chips">
+    <span class="chip">7B / 13B / 34B 参数</span>
+    <span class="chip">LoRA / QLoRA 轻量化微调</span>
+    <span class="chip">豆包 Agent 生态接入</span>
+  </div>
+
+  <h2><span class="no">02</span> 行业痛点 <span class="sub2">六类典型工程问题</span></h2>
+  <p class="lead">当前行业大模型微调工程普遍采用碎片化人工运维模式，存在六类高发痛点；本系统以自治闭环架构逐一回应。</p>
+  <div class="grid g3">
+    <div class="card c-red">
+      <div class="ico">✕</div>
+      <h3>流程碎片化</h3>
+      <p>清洗、转换、训练、评估、归档多为人工分步操作，易漏步骤、参数错配、重复劳动。</p>
+    </div>
+    <div class="card c-red">
+      <div class="ico">✕</div>
+      <h3>算力环境割裂</h3>
+      <p>Linux 云 GPU 与 Windows WSL2 脚本、权限、资源管理不兼容，缺统一协议跨节点调度。</p>
+    </div>
+    <div class="card c-red">
+      <div class="ico">✕</div>
+      <h3>资产无版本治理</h3>
+      <p>LoRA 权重、数据集、日志零散存放、无快照；出错宕机易丢失成果，缺一键回滚。</p>
+    </div>
+    <div class="card c-red">
+      <div class="ico">✕</div>
+      <h3>业务知识不沉淀</h3>
+      <p>样本、测试用例、验收标准散落文档与聊天记录，新训练重复整理，历史经验无法复用。</p>
+    </div>
+    <div class="card c-red">
+      <div class="ico">✕</div>
+      <h3>故障依赖人工</h3>
+      <p>显存溢出、GPU 高温、网络中断、脏数据等异常缺少自动处理，中断即失败。</p>
+    </div>
+    <div class="card c-red">
+      <div class="ico">✕</div>
+      <h3>验收主观化</h3>
+      <p>缺少标准化自动化评测链路，效果依赖主观判断，迭代难以量化对比。</p>
+    </div>
+  </div>
+
+  <h2><span class="no">03</span> 总体架构 <span class="sub2">五层正交闭环 · 四层驱动</span></h2>
+  <p class="lead">整体采用五层正交闭环架构；元宪法 → 元公理 → 元法则 → 元规则四层驱动约束所有模块运行，遵循 META-ISO-051 内外隔离铁律。</p>
+  <div class="panel">
+    <svg class="flow" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="火斗云智AIOS五层架构图">
+      <defs>
+        <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L8,4.5 L0,9 z" fill="#4da3ff"/>
+        </marker>
+        <marker id="arrg" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L8,4.5 L0,9 z" fill="#5ce08a"/>
+        </marker>
+      </defs>
+      <g>
+        <!-- 层标签 -->
+        <text x="40" y="70" text-anchor="end" fill="#35d6e6" font-size="13" font-weight="700">上层</text>
+        <text x="40" y="150" text-anchor="end" fill="#4da3ff" font-size="13" font-weight="700">调度层</text>
+        <text x="40" y="230" text-anchor="end" fill="#9b7bff" font-size="13" font-weight="700">通信层</text>
+        <text x="40" y="345" text-anchor="end" fill="#2dd4b0" font-size="13" font-weight="700">算力执行层</text>
+        <text x="40" y="500" text-anchor="end" fill="#f5b95c" font-size="13" font-weight="700">持久层</text>
+
+        <!-- 1 上层 -->
+        <rect x="310" y="30" width="330" height="80" rx="14" fill="#0e1b38" stroke="#35d6e6" stroke-width="1.4"/>
+        <text x="475" y="62" text-anchor="middle" fill="#eaf2ff" font-size="16" font-weight="700">任务编排入口</text>
+        <text x="475" y="86" text-anchor="middle" class="flowtext">豆包 Agent 生成结构化训练工单（JSON）</text>
+
+        <!-- 2 调度层 -->
+        <rect x="310" y="130" width="330" height="80" rx="14" fill="#0e1b38" stroke="#4da3ff" stroke-width="1.4"/>
+        <text x="475" y="162" text-anchor="middle" fill="#eaf2ff" font-size="16" font-weight="700">云端智能任务中枢</text>
+        <text x="475" y="186" text-anchor="middle" class="flowtext">自治状态机：解析 / 算力评估 / 调度 / 异常仲裁</text>
+
+        <!-- 3 通信层 -->
+        <rect x="310" y="230" width="330" height="80" rx="14" fill="#0e1b38" stroke="#9b7bff" stroke-width="1.4"/>
+        <text x="475" y="262" text-anchor="middle" fill="#eaf2ff" font-size="16" font-weight="700">安全可信通信网关</text>
+        <text x="475" y="286" text-anchor="middle" class="flowtext">SSH 底层 + 工单审计 + 受限指令拦截 + 指纹校验</text>
+
+        <!-- 4 算力执行层 -->
+        <rect x="120" y="350" width="300" height="90" rx="14" fill="#0e1b38" stroke="#2dd4b0" stroke-width="1.4"/>
+        <text x="270" y="382" text-anchor="middle" fill="#eaf2ff" font-size="15" font-weight="700">Linux GPU 算力节点</text>
+        <text x="270" y="406" text-anchor="middle" class="flowtext">原生 CUDA · 硬件熔断守护</text>
+        <text x="270" y="426" text-anchor="middle" class="flowtext">7B / 13B / 34B 高强度长周期</text>
+
+        <rect x="560" y="350" width="300" height="90" rx="14" fill="#0e1b38" stroke="#2dd4b0" stroke-width="1.4"/>
+        <text x="710" y="382" text-anchor="middle" fill="#eaf2ff" font-size="15" font-weight="700">Windows WSL2 算力节点</text>
+        <text x="710" y="406" text-anchor="middle" class="flowtext">GPU 直通 · 抑制桌面抢资源进程</text>
+        <text x="710" y="426" text-anchor="middle" class="flowtext">轻量迭代场景</text>
+
+        <!-- 训练流水线横条 -->
+        <rect x="220" y="460" width="540" height="56" rx="12" fill="#0f2147" stroke="#5ce08a" stroke-width="1.2" stroke-dasharray="6 4"/>
+        <text x="490" y="482" text-anchor="middle" fill="#5ce08a" font-size="13.5" font-weight="700">端到端训练流水线</text>
+        <text x="490" y="503" text-anchor="middle" class="flowtext">数据预处理 → 微调 → 断点保存 → 三级自动评测 → 哈希固化</text>
+
+        <!-- 5 持久层 -->
+        <rect x="120" y="540" width="300" height="52" rx="12" fill="#0e1b38" stroke="#f5b95c" stroke-width="1.4"/>
+        <text x="270" y="563" text-anchor="middle" fill="#eaf2ff" font-size="14.5" font-weight="700">魔搭 ModelScope 持久层</text>
+        <text x="270" y="583" text-anchor="middle" class="flowtext">模型 / 数据集 / 日志快照 · SHA256 锁档</text>
+
+        <rect x="560" y="540" width="300" height="52" rx="12" fill="#0e1b38" stroke="#f5b95c" stroke-width="1.4"/>
+        <text x="710" y="563" text-anchor="middle" fill="#eaf2ff" font-size="14.5" font-weight="700">飞书 Base 联榜记忆池</text>
+        <text x="710" y="583" text-anchor="middle" class="flowtext">业务知识库 + 迭代工单台账 · 双向同步</text>
+
+        <!-- 连线 -->
+        <line x1="475" y1="110" x2="475" y2="128" stroke="#4da3ff" stroke-width="2.2" marker-end="url(#arr)"/>
+        <line x1="475" y1="210" x2="475" y2="228" stroke="#4da3ff" stroke-width="2.2" marker-end="url(#arr)"/>
+        <line x1="350" y1="310" x2="270" y2="348" stroke="#2dd4b0" stroke-width="2.2" marker-end="url(#arr)"/>
+        <line x1="600" y1="310" x2="710" y2="348" stroke="#2dd4b0" stroke-width="2.2" marker-end="url(#arr)"/>
+        <line x1="270" y1="440" x2="270" y2="458" stroke="#5ce08a" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="710" y1="440" x2="710" y2="458" stroke="#5ce08a" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="380" y1="516" x2="270" y2="538" stroke="#f5b95c" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="600" y1="516" x2="710" y2="538" stroke="#f5b95c" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- 反馈环 -->
+        <path d="M920,566 L940,566 L940,150 Q940,128 918,128 L642,128"
+              fill="none" stroke="#5ce08a" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrg)"/>
+        <text x="958" y="360" text-anchor="middle" fill="#5ce08a" font-size="12" transform="rotate(90,958,360)">反馈闭环：资产 / 知识回传中枢</text>
+
+        <!-- 四层驱动 -->
+        <rect x="30" y="520" width="78" height="72" rx="10" fill="#12234a" stroke="#9b7bff" stroke-width="1.2"/>
+        <text x="69" y="546" text-anchor="middle" fill="#9b7bff" font-size="11.5" font-weight="700">四层驱动</text>
+        <text x="69" y="566" text-anchor="middle" class="flowtext">宪法→公理</text>
+        <text x="69" y="582" text-anchor="middle" class="flowtext">→法则→规则</text>
+      </g>
+    </svg>
+  </div>
+
+  <h2><span class="no">04</span> 分层模块 <span class="sub2">五层核心机制</span></h2>
+  <p class="lead">五层架构各司其职：中枢层调度自治、通信层安全可信、执行层对接异构算力、流水线自动训练评测、持久层双源容灾。</p>
+
+  <div class="panel">
+    <h3 style="font-size:15.5px; color:var(--cyan); margin-bottom:4px;">4.1 云端智能任务中枢层 · 工单驱动自治状态机</h3>
+    <p class="lead" style="margin:4px 0 14px;">接收结构化训练工单，解析训练目标、数据集路径、模型超参数与业务验收阈值，驱动全流程流转。</p>
+    <div class="grid g3">
+      <div class="card c-cyan">
+        <h3>分阶段强校验</h3>
+        <p>任务拆分为多子阶段，前序校验失败直接阻断，避免无效算力消耗。</p>
+      </div>
+      <div class="card c-cyan">
+        <h3>资源预估算子</h3>
+        <p>预估显存需求与训练耗时，提前判断算力是否充足，防止空跑失败。</p>
+      </div>
+      <div class="card c-cyan">
+        <h3>故障分类仲裁</h3>
+        <p>区分可重试故障（网络抖动、资源抢占）与不可恢复故障（数据损坏、参数非法），可重试自动断点续训。</p>
+      </div>
+      <div class="card c-cyan">
+        <h3>算力负载调度</h3>
+        <p>多任务排队，按节点 GPU 负载与显存占用动态分配，资源有序复用。</p>
+      </div>
+      <div class="card c-cyan">
+        <h3>全局心跳监控</h3>
+        <p>持续采集远端节点硬件指标，实时感知节点在线状态。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:15.5px; color:var(--violet); margin-bottom:4px;">4.2 安全远程可信通信层 · SSH + 受限指令网关</h3>
+    <p class="lead" style="margin:4px 0 14px;">底层 SSH 公钥免密通信，上层叠加受限指令网关，遵循 META-ISO-051 内外隔离铁律。</p>
+    <div class="grid g2">
+      <div class="card c-violet">
+        <h3>工单绑定审计日志</h3>
+        <p>所有下发指令绑定唯一工单 ID，每条执行动作留存不可篡改审计记录。</p>
+      </div>
+      <div class="card c-violet">
+        <h3>高危指令语义拦截</h3>
+        <p>即使 SSH 密钥泄露，删除、磁盘格式化、跨目录越权读取等高危操作直接拦截，防止节点被恶意操控。</p>
+      </div>
+      <div class="card c-violet">
+        <h3>双向指纹校验</h3>
+        <p>节点回传的硬件指标、训练日志携带校验指纹，防止数据篡改、结果伪造。</p>
+      </div>
+      <div class="card c-violet">
+        <h3>长连接心跳仲裁</h3>
+        <p>节点离线自动暂停训练并保存断点，避免算力空耗，恢复后可续训。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:15.5px; color:var(--teal); margin-bottom:4px;">4.3 异构算力节点管理层 · 一套工单协议</h3>
+    <p class="lead" style="margin:4px 0 14px;">统一指标采集协议，硬件数据标准化上报到任务中枢；节点守护程序负责本地资源自保。</p>
+    <div class="two">
+      <div class="card c-teal">
+        <h3>Linux 云 GPU 节点</h3>
+        <p>原生 CUDA 环境，适合 7B/13B/34B 高强度、长周期微调；内置硬件熔断守护进程，GPU 温度、显存、负载超标时自动暂停并保存断点。</p>
+      </div>
+      <div class="card c-teal">
+        <h3>Windows 工作站节点（WSL2 GPU 直通）</h3>
+        <p>面向轻量迭代；自动识别并抑制抢占 GPU 的桌面后台进程，解决桌面环境资源争抢；自动适配 WSL2 路径与权限差异。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-size:15.5px; color:var(--green); margin-bottom:4px;">4.4 端到端训练与效果验证流水线 · 四大自研算子 + 三级评测</h3>
+    <p class="lead" style="margin:4px 0 14px;">流水线全自动化串联：数据集预处理 → 模型量化加载 → LoRA/QLoRA 微调 → 断点持久化保存 → 三级自动评测 → 生成验收报告 → 资产哈希固化归档。</p>
+    <div class="grid g4">
+      <div class="card c-blue">
+        <h3>数据质量筛查</h3>
+        <p>自动识别样本冲突、重复、格式异常、标注矛盾与脏数据，分级标记并过滤，提升微调稳定性。</p>
+      </div>
+      <div class="card c-blue">
+        <h3>自适应超参调优</h3>
+        <p>基于验证集 Loss 曲线动态调整学习率、batch size，不依赖固定静态参数，动态收敛。</p>
+      </div>
+      <div class="card c-blue">
+        <h3>业务场景自动评测</h3>
+        <p>区分事实错误、幻觉、风格不匹配等缺陷，按业务测试集自动计算通过率，匹配验收阈值。</p>
+      </div>
+      <div class="card c-blue">
+        <h3>资产哈希固化</h3>
+        <p>权重、数据集、日志、报告自动生成 SHA256 指纹写入资产台账，防篡改、可溯源。</p>
+      </div>
+    </div>
+    <div class="steps" style="margin-top:14px;">
+      <div class="step"><span class="n">1</span><div><h4>机器客观指标评测</h4><p>损失收敛度、准确率、幻觉检出率、过拟合风险检测。</p></div></div>
+      <div class="step"><span class="n">2</span><div><h4>业务测试集批量推理</h4><p>基于客户业务样例批量自动化测试，统计任务通过率。</p></div></div>
+      <div class="step"><span class="n">3</span><div><h4>人工抽样复核</h4><p>消除自动化评测误判，保证业务场景真实可用。</p></div></div>
+    </div>
+  </div>
+
+  <div class="panel dark">
+    <h3 style="font-size:15.5px; color:var(--amber); margin-bottom:4px;">4.5 持久化容灾与联榜记忆池层 · 核心创新模块</h3>
+    <p class="lead" style="margin:4px 0 14px;">双源持久化架构：分离模型资产存储与业务知识存储，支持版本快照与熔断回滚。</p>
+    <div class="two">
+      <div class="card c-amber">
+        <h3>魔搭 ModelScope 持久层</h3>
+        <p>数据集、LoRA 权重、训练日志、验收报告每轮迭代后自动推送；独立版本快照 + SHA256 哈希锁档；严重异常触发熔断，一键回滚至历史稳定版本；历史版本只读锁档，仅新增版本不覆盖。</p>
+      </div>
+      <div class="card c-amber">
+        <h3>飞书 Base 联榜记忆池</h3>
+        <p>结构化存储业务知识库、训练样本、工单需求、验收标准、历次迭代记录与缺陷台账；业务知识分层归档锁档；沉淀记忆可检索、可直接复用于下一轮微调。</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+      <span class="chip">双向联动 <b>资产版本更新 → 同步台账</b></span>
+      <span class="chip">双向联动 <b>业务资料更新 → 下一轮训练输入</b></span>
+      <span class="chip">一处变更，两端同步</span>
+    </div>
+  </div>
+
+  <h2><span class="no">05</span> 全链路执行流程 <span class="sub2">八步闭环</span></h2>
+  <p class="lead">业务全流程以结构化工单为基线，从需求对齐到结果闭环全部自动流转、逐级校验。</p>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><div><h4>需求对齐与验收基线锁定</h4><p>确定训练目标、业务测试数据集、模型验收通过率阈值，形成结构化工单基线。</p></div></div>
+    <div class="step"><span class="n">2</span><div><h4>任务编排</h4><p>豆包 Agent 生成标准化 JSON 工单，提交云端任务中枢。</p></div></div>
+    <div class="step"><span class="n">3</span><div><h4>工单校验与算力调度</h4><p>中枢校验工单合法性、评估算力资源，经安全通信网关下发至目标算力节点。</p></div></div>
+    <div class="step"><span class="n">4</span><div><h4>节点初始化与数据预处理</h4><p>硬件自检、锁定 GPU 资源；自动执行数据清洗、格式标准化、训练集/验证集拆分。</p></div></div>
+    <div class="step"><span class="n">5</span><div><h4>模型微调训练</h4><p>启动 LoRA/QLoRA 轻量化微调，周期保存断点，硬件指标实时上报中枢。</p></div></div>
+    <div class="step"><span class="n">6</span><div><h4>三级自动化效果评测</h4><p>训练完成自动执行评测流水线，生成量化验收报告。</p></div></div>
+    <div class="step"><span class="n">7</span><div><h4>资产归档与记忆池同步</h4><p>模型资产推送魔搭锁档；同步更新飞书联榜记忆池，记录全部资料与结果，生成版本快照。</p></div></div>
+    <div class="step"><span class="n">8</span><div><h4>结果闭环</h4><p>评测报告、版本凭证回传任务中枢，本次迭代闭环，等待下一轮训练工单。</p></div></div>
+  </div>
+
+  <h2><span class="no">06</span> 元规则体系 <span class="sub2">LO 元法则节选</span></h2>
+  <p class="lead">系统由 ZONGYUAN-ROOT 元极恒一自治内核驱动：L0 层真值固化、只读锁档；业务层规则支持增量迭代。所有 L0 核心真值写入真值库，Merkle-DAG 链记录版本变更，支持全局溯源。</p>
+  <div class="grid g3">
+    <div class="card c-violet">
+      <h3>HASH 锁档规则</h3>
+      <p>元法则、核心真值、模型资产变更后生成 SHA256 指纹并锁档，seq 递增；历史内容不可篡改，校验失败触发告警，不突破 META-ISO-051 边界。</p>
+    </div>
+    <div class="card c-violet">
+      <h3>双锚定规则</h3>
+      <p>云端真值库 + 飞书共享大脑双锚定；云端为主权威源，飞书为镜像备份；不一致以云端为准并触发差异告警。</p>
+    </div>
+    <div class="card c-violet">
+      <h3>五层链式锁</h3>
+      <p>元宪法、元公理、元法则、元规则、业务工单逐层校验，任一层失败即阻断任务执行。</p>
+    </div>
+    <div class="card c-violet">
+      <h3>版本熔断回滚</h3>
+      <p>新版本资产验证失败自动熔断，锁定异常版本，可回滚至历史稳定快照。</p>
+    </div>
+    <div class="card c-violet">
+      <h3>记忆网关强制对齐</h3>
+      <p>每次迭代完成，记忆池与资产台账必须完成双向同步对齐，保证全域认知一致。</p>
+    </div>
+  </div>
+
+  <h2><span class="no">07</span> 核心能力矩阵 <span class="sub2">九项能力</span></h2>
+  <div class="panel">
+    <table class="table">
+      <thead>
+        <tr><th style="width:190px;">能力项</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>轻量化微调</td><td>支持 7B/13B/34B 大模型 LoRA/QLoRA 微调，行业私有知识植入、模型风格定向定制。</td></tr>
+        <tr><td>异构算力统一调度</td><td>Linux 云 GPU、Windows WSL2 工作站统一接入，一套工单协议跨环境调度。</td></tr>
+        <tr><td>自动化数据治理</td><td>数据集自动清洗、脏样本识别、训练/验证集自动划分。</td></tr>
+        <tr><td>训练故障保护</td><td>断点保存、硬件高温/显存溢出自动熔断、异常暂停任务。</td></tr>
+        <tr><td>自动化量化评测</td><td>三级评测体系，自动生成量化验收报告。</td></tr>
+        <tr><td>模型资产版本治理</td><td>魔搭持久层快照、哈希锁档、历史版本永久保存、一键回滚。</td></tr>
+        <tr><td>业务记忆持久沉淀</td><td>飞书 Base 联榜记忆池，业务资料、迭代记录结构化归档，知识可复用。</td></tr>
+        <tr><td>安全审计隔离</td><td>受限指令网关、工单全链路审计、高危操作拦截、SSH 通信指纹校验。</td></tr>
+        <tr><td>自治任务调度</td><td>工单状态机驱动，资源预评估、排队调度、故障自动仲裁。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2><span class="no">08</span> 安全与治理 <span class="sub2">隔离 · 分层 · 只读 · 分级 · 稳态</span></h2>
+  <div class="grid g3">
+    <div class="card c-teal">
+      <h3>内外隔离铁律</h3>
+      <p>META-ISO-051：内外网、算力节点、记忆网关严格边界隔离；禁止人工直接侵入云端内核，仅允许种子式迭代进化。</p>
+    </div>
+    <div class="card c-teal">
+      <h3>权限分层</h3>
+      <p>不同节点、不同工单分配最小必要权限；SSH 密钥托管至飞书台账，访问需权限校验。</p>
+    </div>
+    <div class="card c-teal">
+      <h3>资产只读保护</h3>
+      <p>已锁档的历史模型版本、记忆台账不可覆盖，仅追加新增记录，永不删除资产，仅分类归档备份。</p>
+    </div>
+    <div class="card c-teal">
+      <h3>风险分级</h3>
+      <p>按风险评分划分四轨道自动化发布状态机，高风险操作（批量删除、全量覆盖）强制审批。</p>
+    </div>
+    <div class="card c-teal">
+      <h3>配额稳态保护</h3>
+      <p>API 额度不足时系统进入只读空转模式，不发起新训练任务，避免中断损坏资产。</p>
+    </div>
+  </div>
+
+  <h2><span class="no">09</span> 落地边界 <span class="sub2">约束与适用说明</span></h2>
+  <div class="panel">
+    <ul class="list">
+      <li><b>场景定位</b>——轻量化 LoRA/QLoRA 微调场景，不支持大模型从零完整预训练。</li>
+      <li><b>效果边界</b>——模型效果上限取决于原始数据集质量与样本覆盖范围，系统仅负责工程流程自动化。</li>
+      <li><b>资产边界</b>——调度内核、工单状态机、评测算子、跨平台记忆联动引擎属自研核心资产；交付产物为模型权重、训练报告与归档快照凭证，底层调度内核源码不开放。</li>
+      <li><b>生态组件</b>——豆包 Agent、飞书多维表格、魔搭 ModelScope 为第三方配套生态组件，作为接入层工具。</li>
+      <li><b>节点分工</b>——Windows WSL2 适合轻量迭代；高强度长时间训练优先使用 Linux 云 GPU 节点。</li>
+    </ul>
+  </div>
+
+  <h2><span class="no">10</span> 验收与性能 <span class="sub2">五条基准 · 参考指标</span></h2>
+  <div class="two">
+    <div class="panel">
+      <h3 style="font-size:15px; color:var(--green); margin-bottom:10px;">验收基准</h3>
+      <ul class="list">
+        <li><b>任务流水线</b>——工单提交后自动流转，无人工干预完成「数据处理 → 训练 → 评测 → 归档」全链路。</li>
+        <li><b>异常处理</b>——GPU 高温、显存溢出、网络中断自动暂停并保存断点，不丢失中间成果。</li>
+        <li><b>资产校验</b>——每次迭代生成唯一 SHA256 哈希存至魔搭，文件校验通过。</li>
+        <li><b>记忆同步</b>——迭代完成后飞书记忆台账自动更新，业务记录完整。</li>
+        <li><b>版本回滚</b>——可选择历史快照，一键恢复模型资产与配套业务数据集。</li>
+      </ul>
+    </div>
+    <div class="panel dark">
+      <h3 style="font-size:15px; color:var(--amber); margin-bottom:10px;">性能参考指标</h3>
+      <ul class="list">
+        <li><b>7B 单轮微调</b>——自动完成数据质检、训练、评测全流程。</li>
+        <li><b>状态机响应</b>——任务状态机响应时延百毫秒级。</li>
+        <li><b>资产归档</b>——训练结束后自动异步同步至魔搭持久层。</li>
+        <li><b>审计留存</b>——日志与审计记录永久写入台账，可检索。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2><span class="no">11</span> 迭代路线图 <span class="sub2">六项规划</span></h2>
+  <div class="grid g3">
+    <div class="card c-blue">
+      <h3>多分支并行管理</h3>
+      <p>支持 A/B 模型并行训练、自动对比评测。</p>
+    </div>
+    <div class="card c-blue">
+      <h3>记忆池知识图谱</h3>
+      <p>自动构建知识图谱，增强业务语义检索，优化样本自动选取。</p>
+    </div>
+    <div class="card c-blue">
+      <h3>弹性算力池扩容</h3>
+      <p>接入更多异构 GPU 节点，实现动态扩缩容。</p>
+    </div>
+    <div class="card c-blue">
+      <h3>Web 可视化控制台</h3>
+      <p>实时展示训练曲线、硬件监控、资产版本树、记忆池台账。</p>
+    </div>
+    <div class="card c-blue">
+      <h3>语义漂移检测</h3>
+      <p>引入黎曼流形语义漂移检测算子，监控模型迭代语义偏移。</p>
+    </div>
+    <div class="card c-blue">
+      <h3>告警体系增强</h3>
+      <p>优化 ntfy 消息队列告警体系，完善多渠道异常通知。</p>
+    </div>
+  </div>
+
+  <h2><span class="no">12</span> 总结 <span class="sub2">解决什么 · 怎么落地</span></h2>
+  <div class="quote">
+    <p>本体系将传统碎片化的 AI 微调工程改造为工单驱动、无人值守的自治闭环系统：解决算力环境不统一、资产版本不可追溯、业务知识难以沉淀、故障依赖人工值守四大工程痛点；依靠「云端任务中枢 + 安全通信网关 + 异构算力集群 + 自动训练评测流水线 + 魔搭与飞书 Base 双源持久容灾」五层架构，实现模型资产永久归档与业务知识持续沉淀。</p>
+    <div class="who">——白皮书结语</div>
+  </div>
+  <div class="chips">
+    <span class="chip">已在 <b>Linux 云服务器 + Windows 本地工作站</b> 双环境落地验证</span>
+    <span class="chip">适用 <b>企业私有知识库、行业垂类大模型</b> 持续迭代训练</span>
+    <span class="chip">文档标识 <b>DID-BR-000002</b> · 哈希锁档回执 CONFIRMED</span>
+  </div>
+
+  <footer>
+    <span>元极恒一 · 火斗云智AIOS 技术白皮书 V1.2 · 可视化提炼版</span>
+    <span>DID-BR-000002 · LO 基线锁档</span>
+  </footer>
+</div>
+</body>
+</html>

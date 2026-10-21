@@ -8,7 +8,7 @@ ZONGYUAN-ROOT 自治内核 · DID-BR-000002 · Ω₀⊂⊙∞⊂Ω
 """
 import os, sys, json, glob, time, hashlib, argparse, urllib.request
 
-PRJ = os.environ.get("ZR_PRJ") or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PRJ = "/opt/ZONGYUAN-ROOT"
 DID = "DID-BR-000002"
 TRACE = "Ω₀⊂⊙∞⊂Ω"
 VERSION = "BATCH-REPORT-V1.0"

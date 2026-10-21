@@ -41,12 +41,11 @@ class Node:
 
 
 def default_nodes():
-    """默认六节点联邦拓扑（对齐 ZONGYUAN-ROOT 真实节点布局，含 P2 主备节点）"""
+    """默认五节点联邦拓扑（对齐 ZONGYUAN-ROOT 真实节点布局）"""
     return [
         Node("hub-central-agent", "hub",   4, 1),
         Node("node-cloud-worker", "worker", 3, 2),
         Node("node-gpu-edge",     "gpu",   2, 3),
         Node("node-edge-sync",    "edge",  2, 4),
         Node("node-dev-doubao",   "worker", 3, 2),
-        Node("NODE-DEV-CODEARTS-001", "backup", 4, 2),  # P2 联邦备节点（主备切换演练成员）
     ]

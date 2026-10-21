@@ -172,7 +172,7 @@ def main():
     ap.add_argument('--text-add', help='登记单个文本内核资产')
     ap.add_argument('--text-refresh', action='store_true', help='全量扫描文本内核新增差异')
     ap.add_argument('--dry-run', action='store_true', help='预览不写入')
-    ap.add_argument('--roots', nargs='*', default=['/home/user/Doubao/chats', '/home/user/ZONGYUAN-ROOT'],
+    ap.add_argument('--roots', nargs='*', default=['/opt/ZONGYUAN-ROOT', '/home/user/ZONGYUAN-ROOT'],
                     help='refresh扫描根')
     args = ap.parse_args()
 

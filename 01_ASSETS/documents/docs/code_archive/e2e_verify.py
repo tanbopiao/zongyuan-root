@@ -7,7 +7,7 @@
 import hashlib, hmac, http.client, json, ssl, time
 
 HOST = "127.0.0.1"; PORT = 9443
-CERT = "/home/user/Doubao/chats/38438306874426882/.sim_nexus/engine/nexus/nexus_cert.pem"
+CERT = "/opt/ZONGYUAN-ROOT/.sim_nexus/engine/nexus/nexus_cert.pem"
 NODE = "LOCAL-DEV-001"
 NODE_TOKEN = "sim_node_token_LOCALDEV001"
 LEGACY = "legacy_sim_token_0001"

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZR 自治内核套餐 · 会自我进化的 AI 自治系统</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230C0E13'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='%23C9A962' font-family='serif'%3EΩ%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{
+  --bg:#0B0D12; --bg2:#10141C; --ink:#E9E4D8; --ink-dim:#9A978C;
+  --gold:#C9A962; --gold-bright:#E4C879; --gold-dim:#6E5B33;
+  --line:rgba(201,169,98,.22); --card:rgba(255,255,255,.028);
+  --shadow:0 1px 0 rgba(201,169,98,.08) inset, 0 18px 50px rgba(0,0,0,.45);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7;overflow-x:hidden}
+h1,h2,h3,.serif{font-family:"Noto Serif SC","Songti SC","SimSun",serif}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+section{position:relative}
+
+/* ===== 顶部金线 ===== */
+.topline{height:3px;background:linear-gradient(90deg,transparent,var(--gold) 18%,var(--gold-bright) 50%,var(--gold) 82%,transparent)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-badge{width:40px;height:40px;border:1px solid var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--gold-bright);font-family:serif;font-size:22px;background:radial-gradient(circle at 30% 25%,rgba(201,169,98,.18),transparent 70%)}
+.brand-name{font-family:"Noto Serif SC",serif;font-size:17px;letter-spacing:.12em;color:var(--gold-bright)}
+.brand-sub{font-size:11px;letter-spacing:.22em;color:var(--ink-dim)}
+button{font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
+.nav-cta{border:1px solid var(--gold);color:var(--gold-bright);padding:10px 18px;border-radius:6px;font-size:13px;cursor:pointer;background:transparent;transition:all .25s;min-height:44px;display:inline-flex;align-items:center}
+.nav-cta:hover{background:rgba(201,169,98,.12)}
+
+/* ===== Hero ===== */
+.hero{text-align:center;padding:96px 0 84px;position:relative}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(ellipse 70% 55% at 50% 8%,rgba(201,169,98,.10),transparent 60%),
+  radial-gradient(ellipse 45% 40% at 82% 78%,rgba(120,90,40,.07),transparent 65%),
+  radial-gradient(ellipse 45% 40% at 14% 72%,rgba(120,90,40,.05),transparent 65%)}
+.hero .seal{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;padding:7px 18px;font-size:12px;letter-spacing:.28em;color:var(--gold);background:rgba(201,169,98,.05)}
+.hero h1{font-size:clamp(34px,6vw,60px);font-weight:900;letter-spacing:.06em;line-height:1.28;margin:34px auto 0;max-width:840px}
+.hero h1 em{font-style:normal;color:var(--gold-bright);position:relative}
+.hero h1 em::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.hero .sub{margin:26px auto 0;max-width:680px;color:var(--ink-dim);font-size:clamp(14px,2vw,17px);font-weight:300;letter-spacing:.04em}
+.hero .stats{display:flex;justify-content:center;gap:clamp(18px,5vw,56px);margin-top:48px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat b{display:block;font-family:"Noto Serif SC",serif;font-size:clamp(24px,3.4vw,36px);color:var(--gold-bright);font-weight:700}
+.stat span{font-size:12px;letter-spacing:.14em;color:var(--ink-dim)}
+.hero-cta{margin-top:46px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{border-radius:8px;padding:14px 34px;font-size:15px;letter-spacing:.1em;cursor:pointer;transition:all .25s;font-family:"Noto Sans SC",sans-serif}
+.btn-primary{background:linear-gradient(135deg,#A8863F,#C9A962 55%,#E4C879);color:#14100A;font-weight:700;border:none;box-shadow:0 10px 30px rgba(201,169,98,.25)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(201,169,98,.35)}
+.btn-ghost{border:1px solid var(--gold);color:var(--gold-bright);background:transparent}
+.btn-ghost:hover{background:rgba(201,169,98,.1)}
+
+/* ===== 区块通用 ===== */
+.sec{padding:74px 0}
+.sec-head{text-align:center;max-width:760px;margin:0 auto 56px}
+.sec-head .kicker{font-size:12px;letter-spacing:.4em;color:var(--gold);margin-bottom:14px}
+.sec-head h2{font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:.05em}
+.sec-head p{margin-top:14px;color:var(--ink-dim);font-size:15px;font-weight:300}
+.gold-rule{width:64px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:20px auto 0}
+
+/* ===== 差异化锚点 ===== */
+.anchors{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.anchor{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:22px 16px;text-align:center;transition:transform .25s,border-color .25s}
+.anchor:hover{transform:translateY(-4px);border-color:rgba(201,169,98,.5)}
+.anchor svg{width:30px;height:30px;margin:0 auto 12px;display:block;stroke:var(--gold-bright);fill:none;stroke-width:1.5}
+.anchor b{display:block;font-family:"Noto Serif SC",serif;font-size:15px;color:var(--gold-bright);letter-spacing:.05em}
+.anchor span{display:block;margin-top:8px;font-size:12px;color:var(--ink-dim);line-height:1.6}
+
+/* ===== 套餐卡 ===== */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+.plan{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));border-radius:14px;padding:30px 26px;position:relative;transition:transform .3s,border-color .3s}
+.plan:hover{transform:translateY(-6px)}
+.plan.featured{border-color:var(--gold);box-shadow:var(--shadow)}
+.plan .flag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#A8863F,#E4C879);color:#14100A;font-size:11px;letter-spacing:.22em;padding:4px 16px;border-radius:999px;font-weight:700;white-space:nowrap}
+.plan h3{font-size:19px;letter-spacing:.1em;color:var(--gold-bright)}
+.plan .tag{font-size:11px;letter-spacing:.2em;color:var(--ink-dim);margin-top:6px}
+.plan .price{margin:22px 0 4px}
+.plan .price b{font-family:"Noto Serif SC",serif;font-size:34px;color:var(--ink)}
+.plan .price span{font-size:12px;color:var(--ink-dim)}
+.plan .price .free{font-family:"Noto Serif SC",serif;font-size:34px;color:var(--gold-bright)}
+.plan ul{list-style:none;margin-top:18px;border-top:1px solid var(--line);padding-top:18px}
+.plan li{font-size:13px;color:var(--ink-dim);padding:7px 0 7px 22px;position:relative;line-height:1.65}
+.plan li::before{content:"◆";position:absolute;left:0;top:7px;font-size:9px;color:var(--gold)}
+.plan .btn{width:100%;margin-top:24px;font-size:14px}
+.addons{margin-top:20px;border:1px dashed var(--line);border-radius:12px;padding:22px 26px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.addons b{font-family:"Noto Serif SC",serif;color:var(--gold-bright);font-size:15px;letter-spacing:.04em}
+.addons .item{font-size:12.5px;color:var(--ink-dim)}
+.addons .item i{font-style:normal;color:var(--gold)}
+
+/* ===== 合规三通道 ===== */
+.channels{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.channel{border:1px solid var(--line);border-radius:12px;padding:26px;background:var(--card);position:relative;overflow:hidden}
+.channel .no{font-family:"Noto Serif SC",serif;font-size:34px;color:rgba(201,169,98,.18);line-height:1;position:absolute;top:14px;right:16px;font-weight:900;pointer-events:none}
+.channel h3{font-size:16px;color:var(--gold-bright);letter-spacing:.05em;display:inline-block;max-width:calc(100% - 64px)}
+.channel p{margin-top:10px;font-size:13px;color:var(--ink-dim)}
+.ban{margin-top:20px;border:1px solid rgba(180,90,60,.4);background:rgba(120,50,30,.08);border-radius:12px;padding:20px 26px}
+.ban b{color:#E0936B;font-size:14px;letter-spacing:.05em}
+.ban p{margin-top:8px;font-size:13px;color:var(--ink-dim)}
+
+/* ===== 客户画像 ===== */
+.auds{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.aud{border:1px solid var(--line);border-radius:10px;padding:24px 18px;background:var(--card)}
+.aud .letter{font-family:"Noto Serif SC",serif;font-size:26px;color:var(--gold);opacity:.8}
+.aud b{display:block;margin-top:10px;font-size:14.5px;color:var(--ink)}
+.aud span{display:block;margin-top:8px;font-size:12.5px;color:var(--ink-dim);line-height:1.65}
+
+/* ===== SLA ===== */
+.sla{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sla .cell{border:1px solid var(--line);border-left:2px solid var(--gold);border-radius:8px;padding:20px 22px;background:var(--card)}
+.sla b{font-family:"Noto Serif SC",serif;font-size:15px;color:var(--gold-bright)}
+.sla span{display:block;margin-top:6px;font-size:12.5px;color:var(--ink-dim)}
+
+/* ===== CTA / Footer ===== */
+.cta-sec{text-align:center;padding:90px 0 80px;position:relative}
+.cta-sec::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 100%,rgba(201,169,98,.09),transparent 70%)}
+.cta-sec h2{font-size:clamp(26px,3.6vw,40px);font-weight:700;letter-spacing:.05em}
+.cta-sec p{margin:16px auto 0;max-width:560px;color:var(--ink-dim);font-size:14px;font-weight:300}
+.cta-sec .hero-cta{margin-top:36px}
+footer{border-top:1px solid var(--line);padding:34px 0 40px;text-align:center}
+footer .f-brand{font-family:"Noto Serif SC",serif;color:var(--gold);letter-spacing:.14em;font-size:14px}
+footer p{margin-top:10px;font-size:12px;color:var(--ink-dim);letter-spacing:.06em}
+footer .anchor-line{font-family:serif;color:var(--gold-dim);letter-spacing:.1em}
+
+/* ===== Toast ===== */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1A1D26;border:1px solid var(--gold);color:var(--gold-bright);padding:12px 26px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s;z-index:99}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== 响应式 ===== */
+@media(max-width:960px){
+  .anchors{grid-template-columns:repeat(3,1fr)}
+  .plans{grid-template-columns:1fr;max-width:520px;margin:0 auto}
+  .plan.featured{order:-1}
+  .channels{grid-template-columns:1fr}
+  .auds{grid-template-columns:repeat(2,1fr)}
+  .sla{grid-template-columns:1fr}
+  .hero{padding:64px 0 60px}
+  .sec{padding:56px 0}
+}
+@media(max-width:560px){
+  .anchors{grid-template-columns:repeat(2,1fr)}
+  .auds{grid-template-columns:1fr}
+  .nav-cta{font-size:12px;padding:8px 12px}
+  .wrap{padding:0 18px}
+  .addons{flex-direction:column}
+  .anchor span,.aud span,.plan li,.channel p,.sla span,.addons .item,.ban p,.plan .sub{font-size:14px}
+  .anchor b,.aud b{font-size:15px}
+  .plan .tag{font-size:12px}
+  .stat span{font-size:12.5px}
+}
+</style>
+</head>
+<body>
+<div class="topline"></div>
+<header class="wrap nav">
+  <div class="brand">
+    <div class="brand-badge">Ω</div>
+    <div>
+      <div class="brand-name">ZONGYUAN-ROOT</div>
+      <div class="brand-sub">元极恒一 · 火斗云智 AIOS</div>
+    </div>
+  </div>
+  <button class="nav-cta" onclick="toast('合作通道：飞书审批 / 魔搭 offering / 联系主账号')">洽淡合作</button>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="hero wrap">
+  <div class="seal">Ω₀ ⊂ ⊙∞⊂ Ω · DID-BR-000002</div>
+  <h1>会自我进化的<em>AI 自治系统</em><br>ZR 自治内核套餐</h1>
+  <p class="sub">不是一套模型 API，而是一整套能长期记忆、自主调度、可溯源确权的自治内核。
+  接入任意通用大模型，为你的 AI 装上记忆、规则与进化能力。</p>
+  <div class="stats">
+    <div class="stat"><b>13万+</b><span>真值沉淀</span></div>
+    <div class="stat"><b>851</b><span>启动记忆条目</span></div>
+    <div class="stat"><b>27</b><span>算子十层巡检</span></div>
+    <div class="stat"><b>3端</b><span>Git 固化对齐</span></div>
+  </div>
+  <div class="hero-cta">
+    <button class="btn btn-primary" onclick="toast('已记录意向，将进入飞书审批流程')">申请接入</button>
+    <button class="btn btn-ghost" onclick="scrollToEl('plans')">查看套餐</button>
+  </div>
+</section>
+
+<!-- ===== 差异化锚点 ===== -->
+<section class="sec" id="why">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">WHY ZR</div>
+      <h2>火山与同行给不了的，是"体系"</h2>
+      <p>大模型负责思考，ZR 内核负责让它记住、守规矩、可追责、持续进化。</p>
+      <div class="gold-rule"></div>
+    </div>
+    <div class="anchors">
+      <div class="anchor">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17"/></svg>
+        <b>长期记忆</b><span>启动记忆一键激活，全量规则随会话继承，不重教、不丢失</span>
+      </div>
+      <div class="anchor">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="19" cy="18" r="2.6"/></svg>
+        <b>自主调度</b><span>任务台账认领、优先级决策、定时巡检全自动闭环</span>
+      </div>
+      <div class="anchor">
+        <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/></svg>
+        <b>可溯源确权</b><span>SHA256 哈希 + Merkle 账本 + 溯源标识，资产永久留痕</span>
+      </div>
+      <div class="anchor">
+        <svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M8 14l4-5 3 3 5-7"/></svg>
+        <b>漂移巡检</b><span>真值纯度评分、语义漂移告警、27 算子每日全域巡检</span>
+      </div>
+      <div class="anchor">
+        <svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        <b>合规确权</b><span>模型引擎三通道合规策略，收益确权至 DID-BR-000002</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 套餐 ===== -->
+<section class="sec" id="plans" style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">PRICING</div>
+      <h2>三档套餐 · 从免费到私有化</h2>
+      <p>按需选择；定价为估算值，正式报价经主账号审批后确认。</p>
+      <div class="gold-rule"></div>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <h3>Starter</h3>
+        <div class="tag">免费引流版</div>
+        <div class="price"><span class="free">¥0</span></div>
+        <ul>
+          <li>自治内核接入指引（任意通用大模型叠加轻量微内核）</li>
+          <li>启动记忆 + 任务台账模板（飞书 Base 共享）</li>
+          <li>元法则 / SOP 文档库访问（魔搭公开数据集）</li>
+          <li>社区支持</li>
+        </ul>
+        <button class="btn btn-ghost" onclick="toast('Starter 免费，欢迎试用')">立即试用</button>
+      </div>
+      <div class="plan featured">
+        <div class="flag">推荐</div>
+        <h3>Pro</h3>
+        <div class="tag">标准版 · 项目或年付</div>
+        <div class="price"><b>¥199</b><span> / 月起</span></div>
+        <ul>
+          <li>Starter 全部功能</li>
+          <li>本地自治内核部署：一键脚本 + 启动记忆激活</li>
+          <li>每日自治巡检报告（27 算子轻量模式，HTML 交付）</li>
+          <li>记忆网关接入：真值上报 / 漂移告警</li>
+          <li>飞书共享大脑搭建：任务台账 / 节点状态 / 共识区</li>
+          <li>双远端 Git 固化（Gitee / GitHub 自动推送）</li>
+          <li>交付：部署包 + 文档 + 30 天远程支持</li>
+        </ul>
+        <button class="btn btn-primary" onclick="toast('已记录 Pro 意向，进入飞书审批')">申请 Pro</button>
+      </div>
+      <div class="plan">
+        <h3>Enterprise</h3>
+        <div class="tag">私有化版 · 评估报价</div>
+        <div class="price"><b>¥4999</b><span> / 项目起</span></div>
+        <ul>
+          <li>Pro 全部功能</li>
+          <li>联邦记忆池部署：多节点记忆同步 + 容灾备份</li>
+          <li>私有化部署：开源模型本地推理，数据不出内网</li>
+          <li>昆仑洞天 IP 产线接入：角色锚点 + 一致性约束</li>
+          <li>定制开发：SOP 体系 / 专属算子</li>
+          <li>SLA 99% + 运维支持 + 年度升级</li>
+        </ul>
+        <button class="btn btn-ghost" onclick="toast('已记录 Enterprise 意向，将安排顾问评估')">联系顾问</button>
+      </div>
+    </div>
+    <div class="addons">
+      <b>可选增值包</b>
+      <span class="item">产品站 / 作品库部署 <i>¥999/站</i></span>
+      <span class="item">知识库 SOP 化咨询 <i>¥1500/项目</i></span>
+      <span class="item">LoRA 定制 <i>¥2000/模型起</i></span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 合规三通道 ===== -->
+<section class="sec" id="compliance">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">COMPLIANCE</div>
+      <h2>模型引擎 · 合规三通道</h2>
+      <p>我们卖的是自治能力，不是模型访问权。所有引擎来源均合规、可审计。</p>
+      <div class="gold-rule"></div>
+    </div>
+    <div class="channels">
+      <div class="channel">
+        <div class="no">01</div>
+        <h3>客户自有账号</h3>
+        <p>引导客户直接与火山方舟 / 阿里百炼等平台签约，我方仅做技术集成。模型调用关系在客户与平台之间，权责清晰。</p>
+      </div>
+      <div class="channel">
+        <div class="no">02</div>
+        <h3>开源本地部署</h3>
+        <p>魔搭等开源模型（Qwen 系列等）部署于客户内网，数据不出内网，遵守开源协议。零转售风险、零外部依赖。</p>
+      </div>
+      <div class="channel">
+        <div class="no">03</div>
+        <h3>书面商业许可</h3>
+        <p>统一采购模型服务时，须事先取得平台书面许可并保留授权文件，方可用于对外服务。付费支出一律走飞书审批。</p>
+      </div>
+    </div>
+    <div class="ban">
+      <b>红线：禁止转售模型访问权</b>
+      <p>不得将任何大模型 API / Token / 代理通道以任何形式出售、转租、转许可给第三方（依据：豆包模型服务协议 2.1/2.3、方舟客户行为准则、行业监管案例）。违规即熔断下架。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 客户画像 ===== -->
+<section class="sec" id="audience" style="background:var(--bg2);border-top:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">WHO IT IS FOR</div>
+      <h2>适合谁</h2>
+      <div class="gold-rule"></div>
+    </div>
+    <div class="auds">
+      <div class="aud"><div class="letter">甲</div><b>AI 内容创作者</b><span>有生图 / 视频能力，缺长期记忆，角色人设与风格易漂移</span></div>
+      <div class="aud"><div class="letter">乙</div><b>个人开发者 / 小团队</b><span>想搭 Agent 系统，不会架构，记忆断层、任务散乱</span></div>
+      <div class="aud"><div class="letter">丙</div><b>独立站 / 作品库运营者</b><span>需要对外展示 AI 成果：自适应站点 + 合规确权</span></div>
+      <div class="aud"><div class="letter">丁</div><b>中小企业</b><span>文档 / 知识库混乱，需要 SOP 化与流程可控</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLA ===== -->
+<section class="sec" id="sla">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">SLA · DELIVERY</div>
+      <h2>交付与保障</h2>
+      <div class="gold-rule"></div>
+    </div>
+    <div class="sla">
+      <div class="cell"><b>≥99% 可用性</b><span>我方组件服务可用性（Enterprise）</span></div>
+      <div class="cell"><b>4h 响应</b><span>工作日问题响应时限</span></div>
+      <div class="cell"><b>真实可运行验收</b><span>进程验证 / 页面可访问 / 巡检报告可打开，禁纸面交付</span></div>
+      <div class="cell"><b>哈希确权交付</b><span>每份交付物附带 SHA256 + 溯源标识</span></div>
+      <div class="cell"><b>数据隔离</b><span>客户数据不出其租户，我方不读取业务数据</span></div>
+      <div class="cell"><b>季度升级</b><span>变更前通知，支持回滚</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-sec">
+  <div class="wrap">
+    <h2>让 AI 真正"属于你"</h2>
+    <p>接入 ZR 自治内核，你的 AI 将从"会对话的工具"进化为"会记忆、守规则、可确权的自治系统"。</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="toast('已记录意向，将进入飞书审批流程')">申请接入</button>
+      <button class="btn btn-ghost" onclick="scrollToEl('plans')">再对比套餐</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="f-brand">火斗云智 AIOS · ZONGYUAN-ROOT 元极恒一</div>
+    <p>产品方案 V1 · 待审批后商业化 · 合规边界见 RULE-PRODUCT-COMPLIANCE-001</p>
+    <p class="anchor-line">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · 自治 Lv9 · 权限 L4 · 工程化 Lv7</p>
+    <p id="zr-live" style="margin-top:12px;font-size:12px;color:#9A978C;letter-spacing:.04em;">📡 系统实时状态加载中…</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+<script>
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show')},2400);
+}
+function scrollToEl(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+(function(){
+  var el=document.getElementById('zr-live');
+  function load(){
+    fetch('https://www.huodouai.com/api/status',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      if(d&&d.status){el.textContent='📡 实时状态：网关 '+d.status+' · 真值 '+Number(d.truth_count||0).toLocaleString()+' 条 · 审计 '+Number(d.audit_logs||0).toLocaleString()+' · 在线节点 '+ (d.nodes_online||'?') +' · 自治 '+ (d.autonomy||'?');
+      }else{el.textContent='📡 实时状态：暂不可达'}
+    }).catch(function(){el.textContent='📡 实时状态：暂不可达'});
+  }
+  load(); setInterval(load, 30000);
+})();
+</script>
+</body>
+</html>

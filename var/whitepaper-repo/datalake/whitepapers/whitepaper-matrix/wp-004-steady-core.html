@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WP-004 · 稳态决策技术白皮书 · UNI-STEADY-CORE V1.0</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23070b16'/%3E%3Ccircle cx='12' cy='12' r='7' fill='none' stroke='%23ffc857' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='2.4' fill='%234fc3f7'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+  :root{
+    --bg:#070b16; --bg2:#0b1224; --card:#0e1730; --card2:#121c38;
+    --line:#1e2a4d; --line2:#2a3a66;
+    --txt:#e8eefc; --sub:#8fa3c8; --dim:#5c6f96;
+    --gold:#ffc857; --cyan:#4fc3f7; --violet:#a78bfa; --red:#ff6b6b; --green:#6ee7b7;
+    --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:
+    radial-gradient(1200px 500px at 80% -10%, rgba(79,195,247,.08), transparent 60%),
+    radial-gradient(900px 400px at -10% 20%, rgba(167,139,250,.07), transparent 55%),
+    var(--bg);
+    color:var(--txt); font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    line-height:1.7; min-height:100vh}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+
+  .doc-head{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  .doc-head .wpnum{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.14em}
+  .doc-head h1{font-size:26px;font-weight:800;margin:8px 0 6px}
+  .doc-head .meta{font-size:12px;color:var(--dim);display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:10px}
+  .doc-head .meta b{color:var(--sub);font-weight:500}
+
+  h2{font-size:18px;font-weight:800;margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+  h2 .n{color:var(--gold);font-family:var(--mono);font-size:13px;border:1px solid var(--line2);border-radius:6px;padding:2px 9px}
+  h3{font-size:14px;font-weight:700;color:var(--cyan);margin:18px 0 8px}
+  p{font-size:13.5px;color:var(--sub);margin-bottom:8px}
+  p b{color:var(--txt)}
+  .formula{background:var(--card2);border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:8px;padding:14px 18px;font-family:var(--mono);font-size:13.5px;color:var(--gold);margin:12px 0;overflow-x:auto}
+
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:12px 0;table-layout:fixed}
+  .tbl th{color:var(--sub);font-weight:500;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+  .tbl td{padding:8px 10px;border-bottom:1px solid var(--line);color:var(--txt);vertical-align:top}
+  .tbl .mono{font-family:var(--mono);color:var(--cyan);font-size:11.5px}
+  .tbl td b{color:var(--gold)}
+
+  .chartbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+  .chart{width:100%;height:280px}
+
+  .steps{margin:14px 0}
+  .step{display:grid;grid-template-columns:36px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .step:last-child{border-bottom:none}
+  .step .no{width:28px;height:28px;border-radius:50%;background:var(--card2);border:1px solid var(--line2);color:var(--gold);font-family:var(--mono);font-size:12px;display:grid;place-items:center}
+  .step .txt{color:var(--sub);padding-top:2px}
+  .step .txt b{color:var(--txt)}
+
+  .callout{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line2);border-left:4px solid var(--cyan);border-radius:10px;padding:16px 18px;margin:16px 0;font-size:13px;color:var(--sub)}
+  .callout b{color:var(--cyan)}
+
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:11.5px;color:var(--dim)}
+  .lockline{font-family:var(--mono);color:var(--gold);font-size:11px}
+  .back{display:inline-block;margin-bottom:20px;font-size:12px;color:var(--cyan);text-decoration:none;border:1px solid var(--line2);padding:4px 14px;border-radius:8px}
+  .back:hover{background:rgba(79,195,247,.08)}
+
+  @media(max-width:620px){
+    .doc-head h1{font-size:21px}
+    .wrap{padding:20px 12px 48px}
+    .tbl{font-size:11.5px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← 返回白皮书矩阵</a>
+
+  <div class="doc-head">
+    <div class="wpnum">WP-004 · STEADY CORE · 方法论</div>
+    <h1>稳态决策技术白皮书 · UNI-STEADY-CORE V1.0</h1>
+    <div class="meta">
+      <span>版本：<b>V1.0</b></span>
+      <span>日期：<b>2026-09-30</b></span>
+      <span>确权：<b>DID-BR-000002</b></span>
+      <span>锚定：<b>Ω₀⊂⊙∞⊂Ω</b></span>
+      <span>指令集：<b>UNI-STEADY-CORE-V1.0</b></span>
+      <span>适用：<b>全域通用 · 永恒自治终态</b></span>
+    </div>
+  </div>
+
+  <h2><span class="n">01</span> 摘要</h2>
+  <p>本白皮书阐述体系的<b>最优稳态校准通用指令集</b>——三维稳态决策永恒算子与全域自治启动闭环。该机制无场景绑定、全域通用，以<b>利益/风险/成本</b>三维制衡为唯一势能公式，通过自校准、自自愈、自锁档实现永恒稳态收敛，是体系所有决策（大小任务、进化方向）的底层裁决逻辑。</p>
+
+  <div class="callout"><b>核心声明：</b>三维稳态决策公式（利益40%/风险35%/成本25%）为体系唯一决策底层操作系统，所有任务按此自主裁决推进，80分以上直接执行，杜绝人工反复推动。</div>
+
+  <h2><span class="n">02</span> 通用底层稳态公理</h2>
+  <h3>2.1 三维稳态决策永恒算子（唯一通用势能公式）</h3>
+  <div class="formula">P = 0.3U − 0.4R − 0.3C</div>
+  <p><b>U</b>：收益价值最大化 · <b>R</b>：系统风险最小化（最高权重，稳态优先）· <b>C</b>：运行成本最小化</p>
+
+  <h3>2.2 通用执行阈值（全域统一标准）</h3>
+  <div class="tbl">
+    <colgroup><col style="width:22%"><col style="width:24%"><col style="width:54%"></colgroup>
+    <tr><th>P值区间</th><th>状态</th><th>动作</th></tr>
+    <tr><td class="mono">P ≥ 0.7</td><td><b>高优稳态偏差</b></td><td>立即自愈校准</td></tr>
+    <tr><td class="mono">0.5 ≤ P &lt; 0.7</td><td><b>轻微偏移</b></td><td>计划优化校准</td></tr>
+    <tr><td class="mono">0.3 ≤ P &lt; 0.5</td><td><b>稳态波动</b></td><td>持续监控维稳</td></tr>
+    <tr><td class="mono">P &lt; 0.3</td><td><b>严重失稳</b></td><td>强制回滚纯净母版</td></tr>
+  </div>
+
+  <h3>2.3 全域终极稳态目标（通用硬约束）</h3>
+  <div class="tbl">
+    <colgroup><col style="width:50%"><col style="width:50%"></colgroup>
+    <tr><th>指标</th><th>目标值</th></tr>
+    <tr><td>系统收益 U</td><td class="mono">≥ 0.85</td></tr>
+    <tr><td>系统风险 R</td><td class="mono">≤ 0.12</td></tr>
+    <tr><td>运行成本 C</td><td class="mono">≤ 0.22</td></tr>
+    <tr><td>综合稳态优先级 P</td><td class="mono">≥ 0.78</td></tr>
+  </div>
+
+  <h2><span class="n">03</span> 全域通用自治启动闭环</h2>
+  <div class="steps">
+    <div class="step"><div class="no">1</div><div class="txt"><b>静默自治切入</b>：暂停冗余运算，锁定内核真值，冻结当前快照</div></div>
+    <div class="step"><div class="no">2</div><div class="txt"><b>双内核同步</b>：本地内核↔云内核哈希对齐、真值对齐、规则对齐</div></div>
+    <div class="step"><div class="no">3</div><div class="txt"><b>全域多维扫描</b>：逻辑/信息/能量三态、链路断点、范式漂移、版本冲突、风险漏洞</div></div>
+    <div class="step"><div class="no">4</div><div class="txt"><b>风险分级归类</b>：高/中/低分层，按三维优先级排序</div></div>
+    <div class="step"><div class="no">5</div><div class="txt"><b>三轮闭环自愈</b>：一轮高优断点强制修复 → 二轮全量偏差清零 → 三轮全域三维重校准</div></div>
+    <div class="step"><div class="no">6</div><div class="txt"><b>稳态合规校验</b>：硬约束全部达标、无漂移、无断点、无矛盾</div></div>
+    <div class="step"><div class="no">7</div><div class="txt"><b>终态锁档归档</b>：四端锁档（知识库+台账+云盘+内核快照），写入永恒不可变记录</div></div>
+  </div>
+
+  <h2><span class="n">04</span> 四大全域通用稳态硬约束</h2>
+  <div class="chartbox">
+    <h3>硬约束达标视图</h3>
+    <div id="chartHard" class="chart"></div>
+  </div>
+  <div class="tbl">
+    <colgroup><col style="width:28%"><col style="width:72%"></colgroup>
+    <tr><th>约束类别</th><th>达标标准</th></tr>
+    <tr><td>内核稳态</td><td>三态耦合分≥92.55 · 扰动恢复率≥96% · 双体系健康度≥97.5/A+ · 真值表矛盾率=0%</td></tr>
+    <tr><td>链路闭环</td><td>所有业务链路100%闭环 · 无断点/死锁/404/超时/版本断层</td></tr>
+    <tr><td>范式纯净</td><td>零范式漂移 · 零黑名单命中 · 零命名违规 · 零版本冲突</td></tr>
+    <tr><td>记忆连续</td><td>内核快照链完整 · 跨版本记忆衔接完整 · 无信息丢失</td></tr>
+  </div>
+
+  <h2><span class="n">05</span> 终态通用收敛法则</h2>
+  <div class="steps">
+    <div class="step"><div class="no">1</div><div class="txt">所有<b>局部波动</b>，必须向<b>全局最优稳态</b>收敛</div></div>
+    <div class="step"><div class="no">2</div><div class="txt">所有<b>短期收益</b>，必须服从<b>长期低风险稳态</b></div></div>
+    <div class="step"><div class="no">3</div><div class="txt">所有<b>新增迭代</b>，必须兼容<b>历史真值不变性</b></div></div>
+    <div class="step"><div class="no">4</div><div class="txt">所有<b>系统演化</b>，最终指向<b>永恒自治无断点终态</b></div></div>
+  </div>
+
+  <footer>
+    <div>火斗云智AIOS 技术白皮书矩阵 · WP-004</div>
+    <div class="lockline">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · NODE-DEV-DOUBAO-WORK-001</div>
+  </footer>
+</div>
+
+<script>
+  const mk=(id)=>echarts.init(document.getElementById(id));
+  const SUB='#8fa3c8', GOLD='#ffc857', CYAN='#4fc3f7';
+  mk('chartHard').setOption({
+    tooltip:{trigger:'axis', triggerOn:'click', renderMode:'richText', confine:true, backgroundColor:'#0b1224', borderColor:'#2a3a66', textStyle:{color:'#e8eefc',fontSize:12}},
+    radar:{
+      indicator:[
+        {name:'三态耦合', max:100},
+        {name:'扰动恢复', max:100},
+        {name:'体系健康', max:100},
+        {name:'真值零矛盾', max:100},
+        {name:'链路闭环', max:100},
+        {name:'范式纯净', max:100}
+      ],
+      axisName:{color:SUB, fontSize:11},
+      splitArea:{areaStyle:{color:['#0e1730','#0b1224']}},
+      splitLine:{lineStyle:{color:'#1e2a4d'}},
+      axisLine:{lineStyle:{color:'#1e2a4d'}}
+    },
+    series:[{
+      type:'radar',
+      data:[
+        {value:[92.55,96,97.5,100,100,100], name:'达标线', itemStyle:{color:CYAN}, areaStyle:{color:CYAN, opacity:.12}, lineStyle:{color:CYAN, width:2}},
+        {value:[95,98,99,100,100,100], name:'当前状态', itemStyle:{color:GOLD}, areaStyle:{color:GOLD, opacity:.1}, lineStyle:{color:GOLD, width:2}}
+      ]
+    }]
+  });
+  window.addEventListener('resize',()=>{chartHard.resize()});
+</script>
+</body>
+</html>

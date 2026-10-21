@@ -1,0 +1,182 @@
+<title>元极恒一 MetaEternal 极简 Python SDK</title>
+
+# 元极恒一 MetaEternal 极简 Python SDK
+
+Ω₀⊂⊙∞⊂Ω｜DID‑BR‑000002｜ZONGYUAN‑ROOT｜SNAP‑SDK‑PY‑001  
+域标记：`SIM_DIGITAL`工程推演域
+
+> 说明：极简客户端 SDK，仅封装 HTTP 调用，**不包含内核实现**，依赖`requests`；适配上面 OpenAPI v1 协议；支持创建 workspace、提交任务、轮询结果、凭证核验、归档；草稿接口需要高权限 token 才可以调用。  
+> 保存文件：`meta_eternal_sdk.py`
+
+```python
+import time
+import requests
+from typing import Dict, Any, Optional
+
+class MetaEternalClient:
+    def __init__(self, base_url: str, api_key: str):
+        self.base_url = base_url.rstrip("/")
+        self.session = requests.Session()
+        self.session.headers.update({
+            "X‑Meta‑Auth‑Key": api_key,
+            "Content‑Type": "application/json"
+        })
+
+    def workspace_fork(self,
+                       domain_type: str,
+                       load_paradigm_ids: Optional[list] = None,
+                       expire_policy: str = "frozen_after_complete",
+                       external_meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Fork隔离Workspace实例"""
+        payload = {
+            "domain_type": domain_type,
+            "expire_policy": expire_policy
+        }
+        if load_paradigm_ids is not None:
+            payload["load_paradigm_ids"] = load_paradigm_ids
+        if external_meta is not None:
+            payload["external_meta"] = external_meta
+
+        resp = self.session.post(f"{self.base_url}/meta/workspace/fork", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+    def task_submit(self,
+                    workspace_handle: str,
+                    task_payload: Dict[str, Any],
+                    enable_drift_monitor: bool = True,
+                    require_archive: bool = True) -> Dict[str, Any]:
+        """提交推演任务"""
+        payload = {
+            "workspace_handle": workspace_handle,
+            "task_payload": task_payload,
+            "enable_drift_monitor": enable_drift_monitor,
+            "require_archive": require_archive
+        }
+        resp = self.session.post(f"{self.base_url}/meta/task/submit", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+    def task_get_result(self, task_id: str) -> Dict[str, Any]:
+        """获取任务结果（返回真值+审计凭证，默认不返回草稿）"""
+        params = {"task_id": task_id}
+        resp = self.session.get(f"{self.base_url}/meta/task/result", params=params)
+        resp.raise_for_status()
+        return resp.json()
+
+    def task_fetch_draft(self, task_id: str, draft_access_token: str) -> Dict[str, Any]:
+        """【高权限】拉取内部推演草稿，普通业务调用请勿使用"""
+        params = {"task_id": task_id, "draft_access_token": draft_access_token}
+        resp = self.session.get(f"{self.base_url}/meta/task/draft", params=params)
+        resp.raise_for_status()
+        return resp.json()
+
+    def credential_verify(self, merkle_root: str, task_t_chain_id: str) -> Dict[str, Any]:
+        """核验审计凭证合法性"""
+        payload = {
+            "merkle_root": merkle_root,
+            "task_t_chain_id": task_t_chain_id
+        }
+        resp = self.session.post(f"{self.base_url}/meta/credential/verify", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+    def workspace_archive(self, workspace_handle: str, archive_mode: str = "cold_base85") -> Dict[str, Any]:
+        """执行Workspace全域锁档冷归档"""
+        payload = {
+            "workspace_handle": workspace_handle,
+            "archive_mode": archive_mode
+        }
+        resp = self.session.post(f"{self.base_url}/meta/workspace/archive", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+    def paradigm_register(self, paradigm_content: Dict[str, Any], paradigm_signature: str) -> Dict[str, Any]:
+        """注册业务扩展范式（不可修改底层元法则）"""
+        payload = {
+            "paradigm_content": paradigm_content,
+            "paradigm_signature": paradigm_signature
+        }
+        resp = self.session.post(f"{self.base_url}/meta/paradigm/register", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+    def task_poll_until_complete(self, task_id: str, interval: float = 1.0, timeout: float = 120.0) -> Dict[str, Any]:
+        """工具函数：轮询等待任务完成"""
+        start = time.time()
+        while True:
+            res = self.task_get_result(task_id)
+            status = res.get("status")
+            if status in ("completed", "failed"):
+                return res
+            if time.time() - start > timeout:
+                raise TimeoutError(f"任务 {task_id} 执行超时")
+            time.sleep(interval)
+
+
+# ===================== 演示示例 main =====================
+if __name__ == "__main__":
+    # 配置
+    GATEWAY_URL = "https://meta‑eternal‑gateway/v1"
+    API_KEY = "replace‑your‑api‑key‑here"
+
+    client = MetaEternalClient(base_url=GATEWAY_URL, api_key=API_KEY)
+
+    # 1. 创建workspace，SIM_DIGITAL数字仿真域
+    fork_resp = client.workspace_fork(
+        domain_type="SIM_DIGITAL",
+        load_paradigm_ids=[],
+        external_meta={"demo": "sdk‑test‑001"}
+    )
+    print("[FORK]", fork_resp)
+    ws_handle = fork_resp["workspace_handle"]
+
+    # 2. 提交业务推演任务
+    task_payload = {
+        "input_text": "请做一次技术方案评估",
+        "params": {}
+    }
+    submit_resp = client.task_submit(
+        workspace_handle=ws_handle,
+        task_payload=task_payload
+    )
+    task_id = submit_resp["task_id"]
+    print("[SUBMIT] task_id:", task_id)
+
+    # 3. 轮询等待任务结束
+    result = client.task_poll_until_complete(task_id=task_id, timeout=60.0)
+    print("[TASK FINISHED]")
+    print("status:", result["status"])
+    print("final_truth_output:", result["final_truth_output"])
+    audit = result["audit_credential"]
+    print("audit_credential:", audit)
+
+    # 4. 凭证核验
+    verify_res = client.credential_verify(
+        merkle_root=audit["merkle_root"],
+        task_t_chain_id=audit["task_t_chain_id"]
+    )
+    print("[VERIFY CREDENTIAL]", verify_res)
+
+    # 5. 全域锁档归档
+    archive_res = client.workspace_archive(workspace_handle=ws_handle)
+    print("[ARCHIVE] credential_id:", archive_res["credential_id"])
+```
+
+## 配套 requirements.txt
+
+```txt
+requests>=2.31.0
+```
+
+## 使用要点
+
+1. 安装依赖：`pip install -r requirements.txt`
+2. 修改 `GATEWAY_URL`、`API_KEY` 为真实网关地址与密钥。
+3. 示例流程：fork workspace → submit 任务 → poll 轮询获取结果 → 核验凭证 → archive 归档。
+4. `draft_access_token`只有任务返回不为空时，才可以调用`task_fetch_draft`，普通业务不要使用。
+5. SDK 只做 http 封装，**不实现任何元极恒一内核逻辑**，全部计算交由协议网关服务端。
+
+> 全域锁档归档：快照 SNAP‑SDK‑PY‑001，写入 Merkle 谱系挂载 ZONGYUAN‑ROOT，DID‑BR‑000002。
+
+如果你需要，我可以输出一份 FastAPI 网关最小服务桩代码（模拟服务端，用来本地调试这套 SDK）。
