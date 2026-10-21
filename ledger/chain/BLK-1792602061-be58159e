@@ -1,0 +1,38 @@
+{
+  "block_id": "BLK-1792602061-be58159e",
+  "block_hash": "be58159eceb2ca4a17eb60f3afa2c2ab39a0b7ef26592b3ae5d67e1f9e976133",
+  "merkle_root": "be58159eceb2ca4a17eb60f3afa2c2ab39a0b7ef26592b3ae5d67e1f9e976133",
+  "prev_block_hash": "5887279ed3f5727df57736d2a0e517d8f0faf2820e2565ba33a1515c6634a01c",
+  "entry": {
+    "type": "cloud_hub_remote_exec_and_hb_rootcause_fix",
+    "record_id": "CLOUD-HUB-REMOTE-EXEC-20261022",
+    "subject": "远程ssh执行: autonomy标准布局部署(sha5/5)+daemon拉起(5任务全跑) + 心跳停滞55.5h根因修复(HEARTBEAT.%写入方10-19停摆→10min守护复活, stale 55.5→0.01h)",
+    "remote_actions": [
+      "rsync 5件标准布局至 /opt/ZONGYUAN-ROOT (sha256 5/5与本地一致, 0覆盖)",
+      "bash steady_evolve_bootstrap.sh → daemon pid108592 alive, 5/5任务跑通",
+      "根因定位: nginx静态/api/status + status_sync heartbeat取truth.db HEARTBEAT.%最新行, 该键19384=2026-10-19T17:08后无人写",
+      "新建 /usr/local/bin/hub_heartbeat_db.py + cron */10 (备份92行 crontab.before-hb-fix-20261022-005750), 首写seq 25607"
+    ],
+    "verify": {
+      "external": "https://www.huodouai.com/api/status heartbeat=2026-10-22T01:00:03+0800, nodes_online=2, ONLINE",
+      "local_probe": "gateway_steady_probe ok=True stale_hours 55.5->0.01 (consecutive_fail复位)"
+    },
+    "cloud_write": {
+      "gateway": "https://www.huodouai.com/api/report/truth",
+      "seq": 25619,
+      "key": "CLOUD.HUB.FULL-AUTONOMY.EXEC.20261022"
+    },
+    "limitation": [
+      "心跳陈旧窗口上界=10min cron + 5min聚合延迟",
+      "HEARTBEAT.%其他写入方(TODO/RSI等)仍会竞争该字段",
+      "autonomy=Lv10为status_sync硬编码非动态"
+    ],
+    "timestamp": "2026-10-22T01:01:01+08:00",
+    "truth_type": "data",
+    "axiom_sign": "Ω₀⊂⊙∞⊂Ω"
+  },
+  "sorted_at": "2026-10-22T01:01:01+08:00",
+  "溯源标识": "Ω₀⊂⊙∞⊂Ω",
+  "确权编码": "DID-BR-000002",
+  "体系基线": "ZONGYUAN-ROOT V1.0"
+}
