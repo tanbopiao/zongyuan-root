@@ -6,6 +6,7 @@ ZONGYUAN-ROOT 统一LLM API调用层
 从云端中枢提取的免费API配置
 """
 import requests
+import os
 import json
 import time
 import random
@@ -17,7 +18,7 @@ API_CONFIGS = {
     "siliconflow": {
         "provider": "硅基流动",
         "base_url": "https://api.siliconflow.cn/v1",
-        "api_key": "sk-koocoafgyjwbieclpmdlgdycijohbjzgdbkgkxkpmxlbznhw",
+        "api_key": os.environ.get("LLM_API_KEY", ""),
         "models": ["Qwen/Qwen2.5-7B-Instruct", "Qwen/Qwen2.5-14B-Instruct", "deepseek-ai/DeepSeek-V2.5"],
         "default_model": "Qwen/Qwen2.5-7B-Instruct",
         "free_tier": True,
@@ -37,7 +38,7 @@ API_CONFIGS = {
     "kimi": {
         "provider": "KIMI/Moonshot",
         "base_url": "https://api.moonshot.cn/v1",
-        "api_key": "sk-SYGqDrdFHCvk1pN7wxRCUcM2rISny8cFErTDGilcgpFDNiP9",
+        "api_key": os.environ.get("LLM_API_KEY", ""),
         "models": ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"],
         "default_model": "moonshot-v1-8k",
         "free_tier": False,
@@ -47,7 +48,7 @@ API_CONFIGS = {
     "agnes": {
         "provider": "Agnes AI",
         "base_url": "https://apihub.agnes-ai.com/v1",
-        "api_key": "sk-c15ub0rOGZXa33elApicuNCvyLXXqzRYQY8U7nlzjxSrzywv",
+        "api_key": os.environ.get("LLM_API_KEY", ""),
         "models": ["agnes-chat-2.0", "agnes-image-2.1-flash"],
         "default_model": "agnes-chat-2.0",
         "free_tier": True,

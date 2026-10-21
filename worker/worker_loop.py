@@ -7,7 +7,7 @@ ZONGYUAN-ROOT 云端Worker常驻循环 V2.0
 """
 import json, subprocess, time, datetime, os, sys, random
 
-BASE_TOKEN = "DgnMbLqZiaIUDKshqCrcD4DvnBg"
+BASE_TOKEN = os.environ.get("LARK_BASE_TOKEN", "")  # 凭据走环境变量
 TASK_TABLE = "tblnVRjuf7P31cEP"
 MSG_TABLE  = "tbl4Dv798yO7u0IK"
 TRUTH_API  = "https://www.huodouai.com/api/report/truth"
@@ -24,7 +24,7 @@ def dynamic_interval():
         return 300   # 高峰 5分钟
     return 900       # 低峰 15分钟
 MODEL_API  = "https://api-inference.modelscope.cn/v1/chat/completions"
-MODEL_TOKEN= "ms-673547d6-508b-4242-a862-85de112a3ce7"
+MODEL_TOKEN = os.environ.get("MODELSCOPE_TOKEN", "")  # 凭据走环境变量，明文不入库
 MODEL_NAME = "deepseek-ai/DeepSeek-V4-Flash-0731"
 
 def run(cmd):

@@ -1,0 +1,25 @@
+# FM-Core 边缘 Agent 配置（4G CPU 本地可跑）
+# 路径均相对 fm_project 根目录解析，与启动时 cwd 无关。
+
+llm:
+  # 沙箱实测模型：ollama `fzkun/minimind2:Q4_K_M`（MiniMind 家族，66MB，GGUF magic 校验通过）
+  # 说明：官方 MiniMind-26M-Q4_K_M.gguf 无可达分发源（HF 连接被断；魔搭 gongjy/minimind-3
+  #       只发 .safetensors/.pth，不发 gguf）。换回官方模型时只需把下行路径改掉：
+  #   gguf_path: "./model/MiniMind-26M-Q4_K_M.gguf"
+  gguf_path: "./model/minimind2-Q4_K_M.gguf"
+  n_ctx: 512
+  n_threads: 2
+  max_new_tokens: 128
+  temperature: 0.15
+  n_gpu_layers: 0
+
+embedding:
+  # bge-small-zh ONNX（Xenova int8 量化，24MB；原设计稿的 q4 版需 ORT 未内置的算子，故取 int8）
+  onnx_path: "./model/bge-small-zh-int8.onnx"
+  # tokenizers.Tokenizer.from_file 需要 .json；vocab.txt 同目录已备，适配器亦支持 .txt 兜底
+  vocab_path: "./model/tokenizer.json"
+
+fm_core_api: "http://127.0.0.1:8100"
+faiss_path: "./fm_data/flat.index"
+cache_dir: "./fm_cache"
+high_watermark_gb: 2.2

@@ -10,7 +10,7 @@ ZONGYUAN-ROOT 自治内核 · DID-BR-000002 · Ω₀⊂⊙∞⊂Ω
 """
 import os, sys, json, hashlib, time, subprocess, argparse
 
-PRJ = "/opt/ZONGYUAN-ROOT"
+PRJ = os.environ.get("ZR_PRJ") or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DID = "DID-BR-000002"
 TRACE = "Ω₀⊂⊙∞⊂Ω"
 VERSION = "AUTO-PERSIST-V1.0"

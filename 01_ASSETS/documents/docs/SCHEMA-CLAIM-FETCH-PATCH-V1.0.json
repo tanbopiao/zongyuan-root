@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "schema_id": "SCHEMA-CLAIM-FETCH-PATCH-V1.0",
+    "schema_name": "记忆Fetch单条读取+Patch增量更新子Schema",
+    "baseline": "BASELINE-V40",
+    "belong_system": "火斗云智AIOS L4控制层 / 联邦记忆内核",
+    "node_tag": "ZR-NODE-DC2E51C0",
+    "did": "DID-BR-000002",
+    "did_trace": "DID-BR-000002|ZR-NODE-DC2E51C0|BASELINE-V40|MEM-SCHEMA-BUNDLE-V1.0|SCHEMA-CLAIM-FETCH-PATCH-V1.0",
+    "lock_status": "locked",
+    "lock_note": "正式锁定(用户批准执行 2026-10-21); 已注册至MEM-SCHEMA-BUNDLE-V1.0 associated_assets; 后续迭代以补丁卷宗追加 不修改locked基准三Schema",
+    "lock_ts": "2026-10-21T17:05:00+08:00",
+    "create_ts": "2026-10-21T16:45:00+08:00",
+    "sibling_schemas": ["SCHEMA-CLAIM-ATOM-V1.0", "SCHEMA-CLAIM-CONFLICT-MELD-V1.0", "SCHEMA-CLAIM-RETRIEVE-V1.0"],
+    "spec_doc": "01_ASSETS/documents/docs/SCHEMA-CLAIM-FETCH-PATCH-V1.0_记忆Fetch与Patch增量更新子Schema设计_V1.0.md"
+  },
+  "pipeline_slot": {
+    "step_6": "fetch_req/fetch_resp 单条完整读取",
+    "step_6_5": "patch_req/patch_resp 增量更新",
+    "step_7_ref": "审计+工单打包种子真值卷宗上报"
+  },
+  "fetch": {
+    "request": {
+      "msg_type": "claim_fetch_req",
+      "req_id": "UUID",
+      "ts": "ISO8601",
+      "node": "ZR-NODE-DC2E51C0",
+      "agent_id": "organizer | a2a:<agent>",
+      "claim_id": "CLM-...",
+      "version_selector": { "mode": "latest | at_version | at_ts", "at_version": "int?", "at_ts": "ISO8601?" },
+      "content_view": "full | semantic | meta_only",
+      "include_history": "bool",
+      "include_conflict_tickets": "bool",
+      "audit": { "purpose": "string", "trace": "Ω₀⊂⊙∞⊂Ω" }
+    },
+    "response": {
+      "msg_type": "claim_fetch_resp",
+      "req_id": "UUID",
+      "status": "ok | not_found | forbidden | degraded",
+      "claim": {
+        "claim_id": "CLM-...", "version": "int", "rev": "hash12",
+        "subject": "S", "predicate": "P", "object": "O",
+        "invariant_hash": "sha256(S|P|O 口径同Z3校验)",
+        "confidence": "float 0..1",
+        "lock_status": "locked | unlocked | archived | revoked",
+        "meta": "object(白名单元数据)",
+        "created_ts": "ISO8601", "updated_ts": "ISO8601",
+        "prev_claim_ids": ["CLM-..."],
+        "provenance": { "origin_batch": "", "bundle_ref": "" }
+      },
+      "history": "[{version, change, audit_id}]",
+      "conflict_tickets": "[{ticket_id, state}]",
+      "degrade_note": "claim_id直读不经8014向量库; 仅存储整体不可达时 status=degraded",
+      "audit": { "audit_id": "AUD-...", "seq": "int" },
+      "trace": "Ω₀⊂⊙∞⊂Ω"
+    }
+  },
+  "patch": {
+    "modes": {
+      "meta_only": {
+        "allowed_paths": ["/meta/**", "/confidence", "/tags/**", "/meta/node", "/meta/labels/**"],
+        "preconditions": ["expected_version 匹配", "lock_status变更需 approval_ref"],
+        "postconditions": ["invariant_hash 不变", "version+1", "审计真值入链"]
+      },
+      "supersede": {
+        "semantics": "S/P/O语义变更唯一通道 = 新增Claim + 旧条目 archived|revoked",
+        "preconditions": ["携带完整 new_claim", "同S+P他条存在时 meld_ticket_ref 非空或网关自动开MELD工单"],
+        "postconditions": ["新claim_id生成", "旧条目disposition", "工单+前后哈希入审计"]
+      }
+    },
+    "request": {
+      "msg_type": "claim_patch_req",
+      "req_id": "UUID",
+      "ts": "ISO8601", "node": "ZR-NODE-DC2E51C0", "agent_id": "string",
+      "claim_id": "CLM-...",
+      "expected_version": "int",
+      "expected_invariant_hash": "sha256(S|P|O)",
+      "patch_mode": "meta_only | supersede",
+      "ops": [ { "op": "add | replace | remove", "path": "JSON-Pointer(白名单内)", "value": "any" } ],
+      "supersede": {
+        "reason": "string",
+        "new_claim": { "subject": "S", "predicate": "P", "object": "O", "confidence": "float", "meta": "object" },
+        "disposition": "archive | revoke",
+        "meld_ticket_ref": "TCK-... | null"
+      },
+      "approval_ref": "APR-... | null",
+      "audit": { "purpose": "string", "trace": "Ω₀⊂⊙∞⊂Ω" }
+    },
+    "response": {
+      "msg_type": "claim_patch_resp",
+      "req_id": "UUID",
+      "status": "applied | conflict | rejected | routed_to_meld | needs_approval",
+      "new_version": "int?",
+      "new_claim_id": "CLM-...?(supersede时)",
+      "invariant_hash_unchanged": "bool",
+      "old_disposition": "archived | revoked | null",
+      "meld_ticket_id": "TCK-... | null",
+      "error": { "code": "E-FP-...", "detail": "string" },
+      "audit": { "audit_id": "AUD-...", "seq": "int" },
+      "trace": "Ω₀⊂⊙∞⊂Ω"
+    }
+  },
+  "invariants": [
+    { "id": "INV-FP-1", "z3": "fetch通路 ∩ 向量库(8014) = ∅", "on_breach": "存储可达即必答 向量库无关" },
+    { "id": "INV-FP-2", "z3": "meta_only => hash_before(S,P,O)=hash_after(S,P,O)", "on_breach": "E-FP-422" },
+    { "id": "INV-FP-3", "z3": "ops.path ∉ {/subject,/predicate,/object}", "on_breach": "E-FP-423" },
+    { "id": "INV-FP-4", "z3": "supersede => new_record ∧ old∈{archived,revoked} ∧ (∃同S+P他条 => meld_ticket_ref≠null)", "on_breach": "routed_to_meld" },
+    { "id": "INV-FP-5", "z3": "expected_version = 当前version 否则零写入", "on_breach": "E-FP-409" },
+    { "id": "INV-FP-6", "z3": "每次fetch/patch => 存在audit真值 ∧ 随卷宗上报", "on_breach": "拒绝出网关" }
+  ],
+  "error_codes": {
+    "E-FP-404": "条目不存在",
+    "E-FP-409": "版本冲突 零写入 返回当前version供重取",
+    "E-FP-422": "白名单/语义不变量违反",
+    "E-FP-423": "locked目标被改S/P/O",
+    "E-FP-451": "需approval_ref(如unlock)",
+    "E-FP-503": "存储不可达 上层按降级规则不阻塞A2A"
+  },
+  "kernel_rule": {
+    "is_seed_truth": true,
+    "overwrite_policy": "append_patch",
+    "check_invariant": "Z3",
+    "public_visible": true,
+    "baseline_binding": "BASELINE-V40; 迭代仅补丁卷宗追加 不修改locked基准Schema"
+  }
+}

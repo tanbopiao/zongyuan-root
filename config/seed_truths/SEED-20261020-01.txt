@@ -1,0 +1,24 @@
+【种子真值·SEED-20261020-01】火斗云智v5 Agent身份验证(NHI/KYA)设计核心真值
+来源: 用户2026-10-20投喂外部设计稿《火斗云智v5 Agent身份认证NHI-KYA架构设计文档-V1.0.md》(04_PROJECTS/火斗云智v5/), provenance=用户投喂设计稿, 状态=设计未实施。
+
+1. Agent身份验证三段式: 先证明"哪个实例"(实例身份), 再证明"代表谁"(主体委托), 每次调用做"意图+权限+环境"校验——身份≠授权, 登录成功≠可执行。
+
+2. 每实例唯一密码学身份: agent://tenant/org/flow/env/instance; prod/staging/dev不共用身份, 克隆体必带instance_id, 同名≠同身份。
+
+3. 凭证五级递增: API Key(仅测试,禁金融生产) < OAuth2客户端凭证+短TTL JWT < OIDC Workload Identity(无静态密钥) < mTLS/SPIFFE-SVID(双向强认证) < X.509(KMS/HSM托管私钥,证书钉入模型版本/策略版本/scope); 金融默认=Workload发短令牌+关键动作mTLS/X.509+禁长期API Key。
+
+4. 三层主体分离: Human Principal(OIDC登录得sub/tenant/role) + Agent Principal(agent_id+version+instance_id,控制面签发) + Delegation Chain(OBO/token exchange, 权限取交集), 每个请求必须可答"谁在干"。
+
+5. 接入五步(v5控制面): workload attestation → 控制面五项校验(租户/环境/模型白名单/Skill·MCP白名单/策略版本) → 签发1-15分钟短TTL Agent Token → 网关四元校验(身份+scope+audience+行为基线) → 高风险动作human step-up(MFA/双签/工单)。
+
+6. 身份面与策略面分离: Identity Plane答"你是谁", Policy Plane(OPA/Cedar/自研)答"这件事能不能做"; 策略输入含action/object/amount/时段/risk_score, 输出四态 allow/deny/require_human/degrade_to_readonly。
+
+7. 不可信内容边界(防冒充防注入): 邮件/网页/社媒/RAG恒为untrusted, 外部内容不产生身份声明; System prompt里的scope不算数, 证书/PDP里的scope才算数; MCP调用必验 token audience+tool allowlist+parameter schema+输出回写权限。
+
+8. KYA持续验证: 行为基线(调用频次/品种/时段/委托大小)持续画像, 异常分级降级链(频次突增→限流, 新对手方/标的→挂起, 注入特征→切只读, 风险超阈→秒级吊销Token/证书); 审计WORM全链绑定(request_id+agent_cert_fingerprint+模型版本+策略版本+审批人+tool_call)。
+
+9. 金融最低可行身份方案九项: 实例唯一ID+短TTL Token / 用户OIDC-SSO / 代执行OBO取交集 / 内部mTLS·SPIFFE / 密钥进Vault·Connector不碰明文 / 交易网关独立鉴权不信任Agent自述 / 高风险人工双签工单 / 审计四元组(request_id+instance_id+模型版本+策略版本) / 证书Token秒级revoke。
+
+10. 一句话总真值: 火斗云智v5 Agent身份 = Workload身份发短凭证 + 用户委托用OBO + 每次工具调用过策略引擎 + 金融动作人工兜底 + 全链路可审计可吊销。
+
+诚实边界: 以上10条为设计稿提炼, 全部为设计态(design only), 无一条在本仓或火斗云智v5实施; 本轮未上报云端。

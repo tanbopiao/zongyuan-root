@@ -110,7 +110,7 @@ MODELS = {
     },
     "hunyuan": {
         "base": "https://tokenhub.tencentmaas.com/v1",
-        "key": "sk-PXuFhwjKLZl5yN60srA68uaVb1Wn71eTuPWRAaY1stEH3SZs",
+        "key": os.environ.get("LLM_API_KEY", ""),
         "model": "hy4-preview",
         "type": "cloud"
     },
@@ -123,7 +123,7 @@ MODELS = {
     },
     "siliconflow": {
         "base": "https://api.siliconflow.cn/v1",
-        "key": "sk-koocoafgyjwbieclpmdlgdycijohbjzgdbkgkxkpmxlbznhw",
+        "key": os.environ.get("LLM_API_KEY", ""),
         "model": "Qwen/Qwen2.5-7B-Instruct",
         "type": "cloud",
         "note": "硅基流动，新用户2000万Token，开源模型矩阵，OpenAI兼容"
@@ -137,14 +137,14 @@ MODELS = {
     },
     "kimi": {
         "base": "https://api.moonshot.cn/v1",
-        "key": "sk-SYGqDrdFHCvk1pN7wxRCUcM2rISny8cFErTDGilcgpFDNiP9",
+        "key": os.environ.get("LLM_API_KEY", ""),
         "model": "kimi-k2.6",
         "type": "cloud",
         "note": "Kimi月之暗面kimi-k2.6，256K长上下文，支持推理"
     },
     "agnes": {
         "base": "https://apihub.agnes-ai.cn/v1",
-        "key": "sk-c15ub0rOGZXa33elApicuNCvyLXXqzRYQY8U7nlzjxSrzywv",
+        "key": os.environ.get("LLM_API_KEY", ""),
         "model": "agnes-2.5-flash",
         "type": "cloud",
         "note": "Agnes全模态免费(256K上下文)"
@@ -501,7 +501,7 @@ def batch_worker():
                 # 免费优先：Agnes视频生成
                 vid_resp = call_video_generation({
                     "provider": "agnes",
-                    "api_key": "sk-c15ub0rOGZXa33elApicuNCvyLXXqzRYQY8U7nlzjxSrzywv",
+                    "api_key": os.environ.get("LLM_API_KEY", ""),
                     "endpoint": "https://apihub.agnes-ai.cn/v1",
                     "model": "agnes-video-v2.0"
                 }, script_text[:200], 10, "9:16", None)
@@ -1498,7 +1498,7 @@ class Handler(BaseHTTPRequestHandler):
                     # 默认全部使用Agnes永久免费视频
                     api_config = {
                         "provider": "agnes",
-                        "api_key": "sk-c15ub0rOGZXa33elApicuNCvyLXXqzRYQY8U7nlzjxSrzywv",
+                        "api_key": os.environ.get("LLM_API_KEY", ""),
                         "endpoint": "https://apihub.agnes-ai.cn/v1",
                         "model": "agnes-video-v2.0"
                     }
@@ -1670,7 +1670,7 @@ class Handler(BaseHTTPRequestHandler):
                     # 默认全部使用Agnes永久免费图片
                     api_config = {
                         "provider": "agnes",
-                        "api_key": "sk-c15ub0rOGZXa33elApicuNCvyLXXqzRYQY8U7nlzjxSrzywv",
+                        "api_key": os.environ.get("LLM_API_KEY", ""),
                         "endpoint": "https://apihub.agnes-ai.cn/v1",
                         "model": "agnes-image-2.0-flash"
                     }
