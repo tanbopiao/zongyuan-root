@@ -1,0 +1,67 @@
+{
+  "report": "CLOUD-DEPLOYMENT-DEEP-CHECK-20261014",
+  "ts": "2026-10-14T20:30:00+0800",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "target": "云端部署(zhongshu-meta-core / www.huodouai.com)",
+  "basis": "2026-10-14 20:25 实时实测(端点探测/真值流分析/能力快照/告警记录), 非推断",
+  "overall": "状态ONLINE但能力面多为降级态/占位态; 表面高可用, 深层多模块未真正闭环",
+  "findings": {
+    "public_api_surface": {
+      "live": ["/api/status(200)", "/api/truth(200)"],
+      "placeholder_404": ["/api/health", "/api/nodes", "/api/workers", "/api/cron", "/api/decisions", "/api/evolution", "/api/registry", "/api/did", "/api/federation", "/api/metrics", "/api/gateway", "/api/router", "/api/auth"],
+      "verdict": "对外仅状态+真值2端点, 管理/调度/联邦类端点全部未开放(占位态)"
+    },
+    "kernel_subservices": {
+      "reported": "14/14在线 (yuanji-wrapper: chat/image/gov/orch/mon/store/sec等)",
+      "engine": "全部 v9-constrained (约束降级态)",
+      "public_reachability": "14端口(18080-18094)公网HTTP 000全部不可达(仅绑内网/未暴露)",
+      "verdict": "内网健康, 公网不可达; 引擎统一约束模式, 非完整推理"
+    },
+    "evolution_loop": {
+      "status": "LOW降级态",
+      "evidence": "EVOLUTION.LOOP.LOW 每小时固定出现(13:00-20:00共8次), value={\"action\":\"LLM不可用\"}",
+      "verdict": "进化循环实际LLM不可用, 未真正闭环"
+    },
+    "decision_engine": {
+      "declared": "决策引擎15min",
+      "evidence": "drift-patrol(0漂移/扫描962)有实测, 但无独立决策端点",
+      "verdict": "漂移巡检真跑, 决策引擎模块无公网可验证入口"
+    },
+    "federation": {
+      "declared": "8联邦节点(3同源+5外源)",
+      "evidence": "KERNEL.SEED.FEDERATION.CONSENSUS-LOCK: 实际node_count=2 (DID-BR-000002-CLOUD + DID-BR-000002-MODEL)",
+      "verdict": "共识实测为2节点, 与宣称8节点不符(占位/口径漂移)"
+    },
+    "active_alert": {
+      "record": "STATUS.ALERT.20261014 13:45",
+      "content": "[P2] 服务down: zhongshu-scheduler, llama-local, autoupdate | score=49.8 grade=C",
+      "verdict": "存在真实P2告警: 调度器/本地LLM/自动更新 3服务down"
+    },
+    "resource": {
+      "disk": "81%", "memory": "1830i/3655MB", "load": 1.71, "uptime": "~33.7h"
+    },
+    "truth_metrics": {
+      "truth_count": 10258, "seq": 10933, "stored": 7133, "today": 180, "nodes_online": 1
+    }
+  },
+  "module_status_matrix": {
+    "状态/真值接口": "REAL(实测)",
+    "真值上报链路": "REAL(本会话实测seq10929-10931)",
+    "漂移巡检": "REAL(扫描962/0漂移)",
+    "联邦共识": "DEGRADED(实测2节点 vs 宣称8)",
+    "进化循环": "DEGRADED(LLM不可用)",
+    "决策引擎": "PARTIAL(无公网入口)",
+    "14子服务": "INTERNAL_ONLY(公网000)",
+    "调度器/本地LLM/自动更新": "DOWN(P2告警)"
+  },
+  "deepening_priorities": {
+    "P0": "恢复进化循环LLM能力(当前LOW降级, 补LLM即真闭环)",
+    "P0": "处置P2告警(zhongshu-scheduler/llama-local/autoupdate down)",
+    "P1": "决策引擎/联邦对外暴露管理端点(当前404占位)",
+    "P1": "统一真值口径与节点数(8 vs 2口径漂移)",
+    "P2": "14子服务公网暴露策略(当前仅内网, 若需对外需评估)",
+    "P2": "磁盘81%扩容"
+  },
+  "conclusion": "云端Lv10自治内核整体ONLINE且真值上报闭环真实, 但进化循环降级(LLM不可用)+3服务down(P2告警)+管理端点占位(404)+联邦口径漂移(8vs2)+子服务仅内网。深化应优先补齐LLM能力与处置P2告警, 而非在降级模块上加码"
+}

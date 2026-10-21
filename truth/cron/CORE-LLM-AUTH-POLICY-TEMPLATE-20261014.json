@@ -1,0 +1,71 @@
+{
+  "doc": "CORE-LLM-AUTH-POLICY-TEMPLATE-20261014",
+  "ts": "2026-10-14T20:45:00+0800",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "version": "V1.0",
+  "type": "核心LLM调用授权策略模板(人工审批一次, 护栏接管N次)",
+  "approval": {
+    "status": "APPROVED_BY_USER",
+    "approved_at": "2026-10-14",
+    "approver": "主账号(DID-BR-000002)",
+    "note": "用户明确确认审批通过; 本模板为授权契约, 后续云端按护栏自动放行, 不逐次审批"
+  },
+  "principle": "人工审授权规则而非每次调用; 不符合元宪法/元公理的调用无论护栏多完善均保留人工审批(硬边界不妥协)",
+  "governance_levels": {
+    "L0_whitelist_auto": {
+      "desc": "人工预审一次写入策略, 白名单内直接自动",
+      "scope": ["真值上报(api/report/truth)", "心跳注册", "账本登记"],
+      "need_approval": "NEVER(一次授权后)"
+    },
+    "L1_guarded_auto": {
+      "desc": "人工审策略模板, 满足护栏条件即自动放行",
+      "scope": ["外部LLM调用(进化循环推理/决策生成)"],
+      "need_approval": "STRATEGY_ONCE(本模板审批后自动)"
+    },
+    "L2_hard_manual": {
+      "desc": "高影响/不可逆/超预算, 保留逐次人工审批",
+      "scope": ["涉及付费大额操作", "跨节点覆盖冲突", "不符合元宪法/元公理", "生产环境架构变更"],
+      "need_approval": "ALWAYS(逐次)"
+    }
+  },
+  "llm_call_guards": {
+    "endpoint_whitelist": ["待填: 外部LLM API端点(经审批后由主账号配置)"],
+    "model_scope": ["待填: 允许调用的模型范围"],
+    "budget": {
+      "daily_cap": "待填: 每日额度上限(主账号定)",
+      "monthly_cap": "待填: 每月额度上限(主账号定)",
+      "over_budget_action": "eFuse熔断, 自动退回L2人工审批模式"
+    },
+    "frequency": {
+      "cadence": "hourly进化循环(每小时1次), 不做高频轮询",
+      "over_freq_action": "拦截本次调用, 记告警"
+    },
+    "quality_gate": {
+      "threshold": 80,
+      "rule": "仅当进化方案最优稳态评分>=80才允许自动调用LLM; 不达标禁止, 继续推演"
+    },
+    "fuse": {
+      "trigger": ["超预算", "连续失败N次", "返回异常", "越界调用"],
+      "action": "eFuse熔断, 降级L2人工审批, 恢复需主账号确认"
+    },
+    "audit": {
+      "rule": "每次自动调用强制写不可篡改账本(时间戳+seq+DID+调用参数摘要)",
+      "ledger": "HASH-LEDGER.csv(纯增量, 禁止覆盖)"
+    },
+    "zero_cost_priority": "优先零成本通道(本地推理/缓存/复用既有成果), 外部LLM仅当必须"
+  },
+  "hard_boundary_non_negotiable": [
+    "不符合元宪法/元公理的调用: 一律人工审批, 禁止护栏自动放行",
+    "单源真值规范: 冲突以账本时间戳+HASH裁决, 禁止互相覆盖",
+    "豆包官方API: 遵循平台调用规则与授权范围",
+    "超预算/越范围: 熔断回人工, 不静默扩大授权"
+  ],
+  "to_configure_after_approval": [
+    "外部LLM API端点与密钥(仅主账号配置, 不写入本公开模板)",
+    "每日/每月额度上限",
+    "允许模型范围",
+    "连续失败熔断阈值N"
+  ],
+  "acceptance": "本模板审批通过后, 待配置项由主账号填实; 配置完成前云端进化循环维持LOW降级态, 不擅自接API"
+}
