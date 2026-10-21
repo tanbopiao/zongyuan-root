@@ -1,0 +1,51 @@
+{
+  "block_id": "BLK-1792595742-0d5b6036",
+  "block_hash": "0d5b603660c9ed2db0339ab55c008647e0ccb80f4f628cc66236c0e14feeb956",
+  "merkle_root": "0d5b603660c9ed2db0339ab55c008647e0ccb80f4f628cc66236c0e14feeb956",
+  "prev_block_hash": "e381dbfe141af76caf87e86038bf193a6df8df240224d6fcdbe070867442fedd",
+  "entry": {
+    "type": "auto_renew_mechanism_build",
+    "record_id": "ATOMCODE-RENEW-MECH-20261021",
+    "subject": "AtomCode CodingPlan Lite 自动续领机制构建并部署云端中枢",
+    "trigger": "用户提示5小时用量100%即将到期需/login续领",
+    "semantics": {
+      "cmd": "atomcode login (非交互)</dev/null",
+      "idempotent": true,
+      "judge": "输出含Plan:而非退出码(TUI模式rc=1属正常)",
+      "plan": "CodingPlan Lite-体验版",
+      "expires_baseline": "2026-10-25 (4d/7d)",
+      "window_reset": "5h窗口自动重置(实测23:22), 无需干预"
+    },
+    "artifact": {
+      "local": "00_KERNEL/scripts/atomcode_auto_renew.sh",
+      "sha256": "cddb22aaeedfb69adf7b5d08de9bbc7baa9e258b49f12da32d210c8c95c62f15",
+      "remote": "/usr/local/bin/atomcode_auto_renew.sh",
+      "state": "/var/lib/atomcode_renew/state.json",
+      "log": "/var/log/atomcode_renew.log"
+    },
+    "mechanism": {
+      "cron": "17 */6 * * * (6小时一次, 4次/日)",
+      "flock": "/tmp/atomcode_renew.lock 防重入",
+      "backup": "/root/backups/crontab.before-atomcode-renew-20261021 (原91行全保留, diff验证)",
+      "alerts": [
+        "ALERT.ATOMCODE.RENEW.FAIL",
+        "ALERT.ATOMCODE.EXPIRING(≤1d)",
+        "ATOMCODE.PLAN.RENEWED(到期日推进)"
+      ],
+      "gateway": "https://www.huodouai.com/api/report/truth"
+    },
+    "verify": {
+      "manual_run": "RUN=0, OK plan/usage解析, BASELINE固化",
+      "crond": "/usr/sbin/crond -n active, 用户crontab链路既有distill任务今日有产出",
+      "first_fire": "00:17(下个6小时边界)"
+    },
+    "honest": "单次实测通过; cron首跳00:17未及观测, 到期日推进(renewed事件)需到期前后实际发生后方能证实",
+    "timestamp": "2026-10-21T15:15:42+08:00",
+    "truth_type": "config",
+    "axiom_sign": "Ω₀⊂⊙∞⊂Ω"
+  },
+  "sorted_at": "2026-10-21T15:15:42+08:00",
+  "溯源标识": "Ω₀⊂⊙∞⊂Ω",
+  "确权编码": "DID-BR-000002",
+  "体系基线": "ZONGYUAN-ROOT V1.0"
+}
