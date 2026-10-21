@@ -51,44 +51,64 @@ def sha256(p):
     except Exception:
         return None
 
-# ---------------- 1. 任意大模型基座适配器 ----------------
+# ---------------- 1. 任意大模型基座适配器 (多源冗余 failover) ----------------
 class LLMAdapter:
-    """支持任意 OpenAI 兼容基座; 未配置时降级为本地算力痕迹采样(机制仍真实运行)"""
+    """支持任意 OpenAI 兼容基座; 多源冗余自动切换; 未配置任何 key 时降级本地采样"""
     def __init__(self, conf_path=CONF):
         self.cfg = jload(conf_path, {"providers": [], "active": None})
         self.active = self.cfg.get("active")
-        self.provider = None
-        for p in self.cfg.get("providers", []):
-            if p.get("name") == self.active:
-                self.provider = p
+        # 候选 = 所有已配置 api_key 的 provider(配置顺序); active 指向单个时优先
+        all_p = self.cfg.get("providers", [])
+        self.live_providers = [p for p in all_p if p.get("api_key")]
+        self.used = []  # 本次实际命中的 provider
 
     def is_live(self):
-        return bool(self.provider and self.provider.get("api_key"))
+        return bool(self.live_providers)
 
     def chat(self, system, user, max_tokens=512):
-        """实时调用任意基座 /chat/completions"""
+        """多源 failover: 遍历候选基座, 第一个成功返回 (text, provider_name)"""
         if not self.is_live():
             raise RuntimeError("no live provider")
         import urllib.request
-        url = self.provider["base_url"].rstrip("/") + "/chat/completions"
-        body = json.dumps({"model": self.provider.get("model", "default"),
-                           "messages": [{"role": "system", "content": system},
-                                        {"role": "user", "content": user}],
-                           "max_tokens": max_tokens}).encode("utf-8")
-        req = urllib.request.Request(url, data=body, method="POST",
-                                     headers={"Content-Type": "application/json",
-                                              "Authorization": "Bearer " + self.provider["api_key"]})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            d = json.loads(r.read().decode("utf-8"))
-            return d["choices"][0]["message"]["content"]
+        import urllib.error
+        errs = []
+        for prov in self.live_providers:
+            url = prov["base_url"].rstrip("/") + "/chat/completions"
+            body = json.dumps({"model": prov.get("model", "default"),
+                               "messages": [{"role": "system", "content": system},
+                                            {"role": "user", "content": user}],
+                               "max_tokens": max_tokens}).encode("utf-8")
+            try:
+                req = urllib.request.Request(url, data=body, method="POST",
+                                             headers={"Content-Type": "application/json",
+                                                      "Authorization": "Bearer " + prov["api_key"]})
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    d = json.loads(r.read().decode("utf-8"))
+                    msg = d["choices"][0]["message"]
+                    # 兼容 reasoning 模型(reasoning_content)与普通模型(content)
+                    text = msg.get("content") or msg.get("reasoning_content") or ""
+                    return text, prov.get("name", "?")
+            except urllib.error.HTTPError as e:
+                errs.append(f"{prov['name']}:HTTP{e.code}")
+            except Exception as e:
+                errs.append(f"{prov['name']}:{str(e)[:30]}")
+        raise RuntimeError("all providers failed: " + "|".join(errs))
 
     def sample(self, n=6):
-        """采集 N 条原始算力产出: 实时 LLM 或本地真实算力痕迹"""
+        """采集 N 条原始算力产出: 多源实时 LLM(失败自动切源) 或本地真实算力痕迹"""
         if self.is_live():
             sys_p = ("你是算力蒸馏采样器, 对以下领域输出一条高密度结论性经验, "
                      "含机制/参数/最佳实践, 每条约60字, 无冗余.")
-            usr_p = "领域: 自治内核进化 / 记忆蒸馏 / 资源调度"
-            return [self.chat(sys_p, usr_p) for _ in range(n)]
+            usr_p = "领域: 自治内核进化 / 记忆蒸馏 / 资源调度 / 多源冗余"
+            out = []
+            for _ in range(n):
+                try:
+                    text, prov = self.chat(sys_p, usr_p)
+                    self.used.append(prov)
+                    out.append({"raw": text, "provider": prov})
+                except RuntimeError as e:
+                    out.append({"raw": "", "provider": "all-failed", "err": str(e)[:40]})
+            return out
         # 降级: 从联邦记忆池索引读取真实算力痕迹
         led = jload(LEDGER)
         out = []
@@ -134,7 +154,8 @@ class ComputeDistiller:
             for s in hits[:2]:
                 purity = min(95, 60 + len(s) // 4 + sum(1 for k in COG_KEYWORDS if k in s) * 5)
                 self.d1.append({"type": "cognitive", "concept": s[:120],
-                                "purity": purity, "source": item.get("source", "") if isinstance(item, dict) else ""})
+                                "purity": purity,
+                                "source": item.get("provider", item.get("source", "")) if isinstance(item, dict) else ""})
 
     # D2 算力蒸馏: 效能/参数/策略提炼 (σ 收敛)
     def distill_d2(self):
@@ -200,7 +221,7 @@ def write_memory_kernel(distiller):
                "ts": NOW, "raw_sampled": len(distiller.raw),
                "d1_cognitive": len(distiller.d1), "d2_compute": len(distiller.d2),
                "d3_memory_locked": len(distiller.d3),
-               "provider": distiller.ad.active or "local-fallback",
+               "provider": distiller.ad.used or [distiller.ad.active or "local-fallback"],
                "live_llm": distiller.ad.is_live()}
     jdump(os.path.join(RECEIPT_DIR, f"RECEIPT-三维算力蒸馏-{DATE}.json"), receipt)
     stats["receipt"] = 1
@@ -231,7 +252,8 @@ def main():
     n = dist.run(args.n)
     stats = write_memory_kernel(dist)
     print(json.dumps({
-        "ok": True, "provider": ad.active or "local-fallback", "live_llm": ad.is_live(),
+        "ok": True, "provider_used": dist.ad.used or [dist.ad.active or "local-fallback"],
+        "live_llm": ad.is_live(),
         "raw": len(dist.raw), "d1": len(dist.d1), "d2": len(dist.d2), "d3": n,
         "writes": stats, "receipt": f"truth/cron/RECEIPT-三维算力蒸馏-{DATE}.json",
     }, ensure_ascii=False, indent=2))
