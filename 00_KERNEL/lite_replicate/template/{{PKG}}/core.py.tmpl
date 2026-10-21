@@ -1,0 +1,29 @@
+"""{{NAME}} core — 单实现逻辑层 (双视图共享, 零第三方依赖)。"""
+from __future__ import annotations
+
+import json
+
+from . import __version__
+
+
+def describe() -> dict:
+    """复刻件自描述: S4 台账与巡检的最小可核验接口。"""
+    return {
+        "name": "{{NAME}}",
+        "version": __version__,
+        "did": "DID-BR-000002",
+        "anchor": "Ω₀⊂⊙∞⊂Ω",
+        "engine": "LITE-REPLICATE-V1",
+        "zero_deps": True,
+    }
+
+
+def canonical(obj) -> str:
+    """确定性序列化 (同输入同输出, 供哈希/锁档)。"""
+    return json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def smoke() -> bool:
+    """自检: 描述可生成且必备键齐全。"""
+    d = describe()
+    return all(k in d for k in ("name", "version", "did", "zero_deps")) and d["zero_deps"] is True

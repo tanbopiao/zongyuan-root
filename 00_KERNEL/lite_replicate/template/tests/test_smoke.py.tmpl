@@ -1,0 +1,48 @@
+"""{{NAME}} smoke tests (stdlib unittest, 零第三方依赖)."""
+import json
+import os
+import subprocess
+import sys
+import unittest
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from {{PKG}} import core  # noqa: E402
+
+
+class TestCore(unittest.TestCase):
+    def test_describe_keys(self):
+        d = core.describe()
+        for k in ("name", "version", "did", "zero_deps"):
+            self.assertIn(k, d)
+        self.assertEqual(d["name"], "{{NAME}}")
+        self.assertTrue(d["zero_deps"])
+
+    def test_canonical_deterministic(self):
+        a = core.canonical({"b": 1, "a": [1, 2]})
+        b = core.canonical({"a": [1, 2], "b": 1})
+        self.assertEqual(a, b)
+        self.assertEqual(a, json.dumps({"a": [1, 2], "b": 1},
+                                       ensure_ascii=False, sort_keys=True,
+                                       separators=(",", ":")))
+
+    def test_smoke(self):
+        self.assertTrue(core.smoke())
+
+
+class TestCli(unittest.TestCase):
+    def test_cli_smoke_exit0(self):
+        p = subprocess.run([sys.executable, "-m", "{{PKG}}.cli", "smoke"],
+                           capture_output=True, text=True, timeout=30)
+        self.assertEqual(p.returncode, 0)
+        self.assertIn("PASS", p.stdout)
+
+    def test_cli_version(self):
+        p = subprocess.run([sys.executable, "-m", "{{PKG}}.cli", "version"],
+                           capture_output=True, text=True, timeout=30)
+        self.assertEqual(p.returncode, 0)
+        self.assertTrue(p.stdout.strip())
+
+
+if __name__ == "__main__":
+    unittest.main()

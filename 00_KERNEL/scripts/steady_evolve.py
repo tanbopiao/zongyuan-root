@@ -207,6 +207,7 @@ def run_task(defn: dict) -> dict:
                     out = {"ok": True, "skipped": f"requires_bin missing: {bin_req}"}
                 else:
                     cmd = [c.replace("{scripts}", os.path.join(ROOT, "00_KERNEL", "scripts"))
+                             .replace("{root}", ROOT)
                            for c in defn["cmd"]]
                     p = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
                     out = {"ok": p.returncode == 0, "rc": p.returncode,
