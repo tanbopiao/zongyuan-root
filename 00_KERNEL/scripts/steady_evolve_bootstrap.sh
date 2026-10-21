@@ -46,7 +46,12 @@ echo "-- daemon --"
 if [ "$ALIVE" = "1" ]; then
   echo "  alive pid=$PID (noop)"
 else
-  nohup python3 "$SCRIPT" daemon >> "$SDIR/daemon.out" 2>&1 &
+  # setsid 脱离调用会话进程组: 避免工具会话结束时 daemon 被进程组回收(实测 pid 随会话死亡)
+  if command -v setsid >/dev/null 2>&1; then
+    setsid nohup python3 "$SCRIPT" daemon >> "$SDIR/daemon.out" 2>&1 &
+  else
+    nohup python3 "$SCRIPT" daemon >> "$SDIR/daemon.out" 2>&1 &
+  fi
   disown 2>/dev/null || true
   sleep 1
   NEWPID=$(cat "$PIDF" 2>/dev/null || echo "")
