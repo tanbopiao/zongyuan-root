@@ -1,0 +1,47 @@
+{
+  "schema": "periodic-tasks/1.0",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "note": "周期任务唯一事实源(持久层)。沙箱/实例重置后由 steady_evolve_bootstrap.sh 按本文件重建调度; 任务定义只在此处增删, 不散落在内存态调度器。",
+  "updated": "2026-10-22T02:00:00+08:00",
+  "tasks": [
+    {
+      "name": "gateway_steady_probe",
+      "interval_sec": 1800,
+      "enabled": true,
+      "cmd": ["python3", "{scripts}/steady_evolve.py", "run", "gateway_steady_probe"],
+      "desc": "心跳新鲜度+基础状态探针: heartbeat滞后>6h 或 status不可达 → 告警(带去重, 每告警窗最多一次)",
+      "risk": "low"
+    },
+    {
+      "name": "endpoint_contract_check",
+      "interval_sec": 21600,
+      "enabled": true,
+      "cmd": ["python3", "{scripts}/steady_evolve.py", "run", "endpoint_contract_check"],
+      "desc": "端点契约探测: 已文档化端点200/404实测, 漂移写入报告+告警, 消除文档指空路",
+      "risk": "low"
+    },
+    {
+      "name": "atomcode_auto_renew",
+      "interval_sec": 21600,
+      "enabled": true,
+      "cmd": ["/usr/local/bin/atomcode_auto_renew.sh"],
+      "desc": "AtomCode CodingPlan Lite 自动续领(幂等非交互, 以输出含Plan:为成功); 二进制缺失时自检标记skip并上报",
+      "requires_bin": "atomcode",
+      "risk": "low"
+    },
+    {
+      "name": "runstate_selfcheck",
+      "interval_sec": 86400,
+      "enabled": true,
+      "cmd": ["python3", "{scripts}/steady_evolve.py", "run", "runstate_selfcheck"],
+      "desc": "运行态自检: 调度器存活/crontab缺失漂移/日志文件缺失/git工作区漂移汇总, 产出日检JSON",
+      "risk": "low"
+    }
+  ],
+  "alerts": {
+    "gateway_key_prefix": "STEADY.PROBE",
+    "alert_window_sec": 21600,
+    "dedup_state_file": "var/steady_evolve/alert_state.json"
+  }
+}

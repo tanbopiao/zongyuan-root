@@ -70,13 +70,14 @@
 
 ---
 
-## 必做的5步自举（每次对话开始）
+## 必做的自举步骤（每次对话开始，1–6）
 
-1. `curl https://www.huodouai.com/api/report/status` 确认中枢在线
+1. `curl https://www.huodouai.com/api/status` 确认中枢在线（`/api/report/status` 已于 2026-10-22 漂移下线，契约由 steady_evolve 端点探测守护）
 2. 读本文件（你正在读）
 3. 需要详细资产 → 读 `/home/user/ZONGYUAN-ROOT/ASSETS_MAP_20260921.md`
 4. 需要标准流程 → 读 `/home/user/ZONGYUAN-ROOT/STANDARDIZATION_V1.md`
 5. 需要持久层规则 → 读 `/home/user/Doubao/chats/38437458338949122/PERSISTENT_STORAGE_RULE.md`
+6. 实例重建后恢复周期调度（启动自检口令）→ `bash /workspace/atomgit-mirror/zongyuan-root-sync/00_KERNEL/scripts/steady_evolve_bootstrap.sh`（任务定义唯一事实源：`var/periodic-tasks.json`）
 
 ---
 
