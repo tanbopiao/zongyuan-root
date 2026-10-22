@@ -174,10 +174,38 @@ def task_runstate_selfcheck() -> dict:
     return {"ok": True, "checks": checks, "drift": drift}
 
 
+def task_config_registry_drift() -> dict:
+    """配置注册表漂移检测(低危): 读回比对/看门狗端口覆盖/调度盘点陈旧/密钥引用存在性。
+    config_registry drift --auto-fix: 调度盘点陈旧类自动重采集; 其余漂移带时间窗告警。"""
+    candidates = ["/root/zongyuan-yuanji/src/config_registry.py",
+                  os.path.join(ROOT, "zongyuan-yuanji", "src", "config_registry.py")]
+    mod = next((c for c in candidates if os.path.exists(c)), None)
+    if not mod:
+        return {"ok": True, "skipped": "config_registry not on this host"}
+    p = subprocess.run([sys.executable, mod, "drift", "--auto-fix"],
+                       capture_output=True, text=True, timeout=120)
+    if p.returncode != 0:
+        return {"ok": False, "rc": p.returncode, "stderr_tail": (p.stderr or "")[-300:]}
+    try:
+        res = json.loads(p.stdout)
+    except Exception:
+        return {"ok": False, "bad_json": (p.stdout or "")[-300:]}
+    out = {"ok": True, "drift_count": res.get("drift_count", 0),
+           "healed": res.get("healed", []), "drifts": res.get("drifts", []),
+           "version": res.get("version"), "skipped": res.get("skipped")}
+    if out["drift_count"] > 0 and not out["healed"]:
+        alert("STEADY.CONFIG-DRIFT." + datetime.now(CST).strftime("%Y%m%d"),
+              {"drifts": out["drifts"], "version": out["version"],
+               "note": "统一配置台漂移(看门狗端口未覆盖/密钥引用缺失/读回不一致)"},
+              21600)
+    return out
+
+
 BUILTIN = {
     "gateway_steady_probe": task_gateway_steady_probe,
     "endpoint_contract_check": task_endpoint_contract_check,
     "runstate_selfcheck": task_runstate_selfcheck,
+    "config_registry_drift": task_config_registry_drift,
 }
 
 

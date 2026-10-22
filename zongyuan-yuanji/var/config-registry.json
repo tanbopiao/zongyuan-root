@@ -1,0 +1,404 @@
+{
+  "schema": "config-registry/1.0",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "version": 2,
+  "updated": "2026-10-22T12:25:36+08:00",
+  "layers": {
+    "immutable": {
+      "did": {
+        "value": "DID-BR-000002",
+        "type": "str",
+        "risk": "high",
+        "desc": "体系身份锚, 不可变更"
+      },
+      "anchor": {
+        "value": "Ω₀⊂⊙∞⊂Ω",
+        "type": "str",
+        "risk": "high",
+        "desc": "收敛锚, 不可变更"
+      },
+      "gateway_domain": {
+        "value": "www.huodouai.com",
+        "type": "str",
+        "risk": "high",
+        "desc": "对外域锚(网关/资产唯一域名)"
+      }
+    },
+    "steady": {
+      "autonomy_level": {
+        "value": "Lv11",
+        "type": "str",
+        "enum": [
+          "Lv8",
+          "Lv9",
+          "Lv10",
+          "Lv11",
+          "Lv12"
+        ],
+        "risk": "high",
+        "desc": "云端自治权威等级(事实源 autonomy_level.json)",
+        "propagate": {
+          "kind": "json_file",
+          "file": "/opt/ZONGYUAN-ROOT/var/autonomy_level.json",
+          "key": "level"
+        },
+        "readback": {
+          "kind": "json_file",
+          "file": "/opt/ZONGYUAN-ROOT/var/autonomy_level.json",
+          "key": "level"
+        }
+      },
+      "heartbeat_interval_min": {
+        "value": 10,
+        "type": "int",
+        "min": 1,
+        "max": 60,
+        "risk": "medium",
+        "desc": "网关心跳写入周期(分钟, hub_heartbeat_db.py)"
+      },
+      "distill_daily_enabled": {
+        "value": true,
+        "type": "bool",
+        "risk": "medium",
+        "desc": "每日法则蒸馏(daily_distill.py 03:00)"
+      },
+      "schedules": {
+        "value": {
+          "collected_at": "2026-10-22T12:23:45+08:00",
+          "crontab": [
+            "*/5 * * * * flock -xn /tmp/stargate.lock -c '/usr/local/qcloud/stargate/admin/start.sh > /dev/null 2>&1 &'",
+            "29 5,11,17,23 * * * \"/root/.acme.sh\"/acme.sh --cron --home \"/root/.acme.sh\" > /dev/null",
+            "*/5 * * * * /usr/local/bin/zhongshu_health.sh >/dev/null 2>&1",
+            "*/30 * * * * /usr/local/bin/zhongshu_metrics.sh >> /www/wwwroot/huodouai.com/zhongshu/data/metrics/run.log 2>&1",
+            "*/30 * * * * /usr/local/bin/zhongshu_bootstrap.sh",
+            "30 2 * * * /usr/local/bin/zhongshu_evolve.sh",
+            "0 * * * * /usr/local/bin/zhongshu_arbiter.sh",
+            "*/5 * * * * /usr/local/bin/cloud_ssh_audit.sh",
+            "@reboot sleep 10 && /usr/local/nginx/sbin/nginx",
+            "0 3 * * * curl -sS http://127.0.0.1:18080/autoupdate -X POST -H \"Content-Type: application/json\" -d \"{\\\"action\\\":\\\"backup\\\"}\"",
+            "0 4 * * * curl -sS http://127.0.0.1:18080/autoupdate -X POST -H \"Content-Type: application/json\" -d \"{\\\"action\\\":\\\"cleanup\\\"}\"",
+            "*/30 * * * * curl -sS http://127.0.0.1:18080/selfheal -X POST -H \"Content-Type: application/json\" -d \"{\\\"action\\\":\\\"check_mem\\\"}\"",
+            "*/10 * * * * /root/zongyuan-yuanji/scripts/autonomy.sh",
+            "*/5 * * * * /root/zongyuan-yuanji/scripts/alert.sh",
+            "0 5 * * * /root/zongyuan-yuanji/scripts/auto_baseline.sh",
+            "*/30 * * * * /usr/local/bin/zhongshu_sync.sh && /usr/local/nginx/website_auto_evolve.sh >> /var/log/website_auto_evolve.log 2>&1",
+            "0 * * * * python3 /usr/local/nginx/update_homepage_stats.py >> /var/log/homepage_stats.log 2>&1",
+            "0 4 * * * /usr/local/nginx/perf_check.sh >> /var/log/perf_check.log 2>&1",
+            "30 4 * * * /usr/local/nginx/auto_fix_broken.sh >> /var/log/broken_link_fix.log 2>&1",
+            "*/30 * * * * curl -sS -k https://127.0.0.1:18080/nodes/heartbeat -X POST -H \"Content-Type: application/json\" -d \"{\\\"did\\\":\\\"DID-BR-000002-CLOUD\\\",\\\"name\\\":\\\"云端中枢\\\"}\" >/dev/null 2>&1",
+            "30 3 * * * python3 /root/zongyuan-yuanji/scripts/sfmp_gc.py",
+            "0 * * * * cd /root/zongyuan-yuanji && /usr/bin/python3 src/validator.py >> logs/validator.log 2>&1",
+            "0 8 * * * /root/zongyuan-yuanji/scripts/baidu_push.sh >> /root/zongyuan-yuanji/logs/baidu_push.log 2>&1",
+            "0 */6 * * * /usr/bin/python3 /usr/local/bin/self_optimizer.py >> /root/zongyuan-yuanji/logs/self-opt.log 2>&1",
+            "30 4 * * * /usr/bin/python3 /usr/local/bin/meta_learner.py >> /root/zongyuan-yuanji/logs/meta-learner.log 2>&1",
+            "30 3 * * * /root/zongyuan-yuanji/scripts/smart_backup.sh >> /root/zongyuan-yuanji/logs/backup.log 2>&1",
+            "*/5 * * * * /usr/local/bin/gov_watchdog.sh",
+            "0 3 * * * /usr/bin/python3 /root/zongyuan-yuanji/scripts/daily_distill.py >> /root/zongyuan-yuanji/logs/distill.log 2>&1",
+            "0 6 * * * /usr/bin/python3 /root/zongyuan-yuanji/scripts/auto_discover.py >> /www/wwwroot/huodouai.com/zhongshu/data/probe.log 2>&1",
+            "10 * * * * python3 /usr/local/bin/auto_claimer.py >> /var/log/auto_claimer.log 2>&1",
+            "47 3 * * * flock -xn /tmp/embed_build.lock -c \"/usr/local/bin/build_embed_index.py >> /www/wwwroot/huodouai.com/zhongshu/data/truth/embed_build.log 2>&1\"",
+            "*/5 * * * * /usr/local/bin/auto_heal.py >> /var/log/auto_heal.log 2>&1",
+            "30 5 * * * /usr/bin/python3 /usr/local/bin/kernel_score.py >> /www/wwwroot/huodouai.com/zhongshu/data/metrics/kernel-score.log 2>&1",
+            "*/5 * * * * /usr/local/bin/health_check_all.sh >> /var/log/health_check.log 2>&1",
+            "0 6 * * * python3 /root/zongyuan-yuanji/scripts/auto_evolve.py >> /root/zongyuan-yuanji/logs/auto-evolve.log 2>&1",
+            "*/10 * * * * python3 /root/zongyuan-yuanji/scripts/auto_fix.py >> /root/zongyuan-yuanji/logs/auto-fix.log 2>&1",
+            "0 9 * * * python3 /root/zongyuan-yuanji/scripts/auto_suggest.py >> /root/zongyuan-yuanji/logs/auto-suggest.log 2>&1",
+            "0 7 * * 0 python3 /root/zongyuan-yuanji/scripts/self_optimize.py >> /root/zongyuan-yuanji/logs/self-optimize.log 2>&1",
+            "*/30 * * * * python3 /root/zongyuan-yuanji/scripts/predictive.py >> /root/zongyuan-yuanji/logs/predictive.log 2>&1",
+            "0 8 * * * python3 /root/zongyuan-yuanji/scripts/meta_learn.py >> /root/zongyuan-yuanji/logs/meta-learn.log 2>&1",
+            "*/15 * * * * python3 /root/zongyuan-yuanji/scripts/ab_test.py >> /root/zongyuan-yuanji/logs/ab-test.log 2>&1",
+            "*/30 * * * * python3 /root/zongyuan-yuanji/scripts/federate.py >> /root/zongyuan-yuanji/logs/federate.log 2>&1",
+            "0 7 * * 1 python3 /root/zongyuan-yuanji/scripts/arch_refactor.py >> /root/zongyuan-yuanji/logs/arch-refactor.log 2>&1",
+            "0 * * * * python3 /root/zongyuan-yuanji/scripts/cognitive_loop.py >> /root/zongyuan-yuanji/logs/cognitive.log 2>&1",
+            "*/15 * * * * python3 /root/zongyuan-yuanji/scripts/decision_engine.py >> /root/zongyuan-yuanji/logs/decision.log 2>&1",
+            "*/5 * * * * python3 /root/zongyuan-yuanji/scripts/update_autonomy.py",
+            "*/2 * * * * python3 /root/zongyuan-yuanji/scripts/dynamic_dash.py",
+            "0 * * * * python3 /root/zongyuan-yuanji/scripts/evolution_loop.py >> /root/zongyuan-yuanji/logs/evolution-loop.log 2>&1",
+            "*/1 * * * * /usr/local/bin/status_aggregator.py >> /www/wwwroot/huodouai.com/zhongshu/status/aggregator.log 2>&1",
+            "*/5 * * * * /usr/local/bin/model_monitor.sh",
+            "*/30 * * * * python3 /root/zongyuan-yuanji/scripts/auto_extract_all.py",
+            "30 */6 * * * cd /root/zongyuan-yuanji && python3 scripts/auto_seed_refine.py >> /tmp/seed_refine_cron.log 2>&1",
+            "0 4 * * * python3 /root/zongyuan-yuanji/scripts/extract_from_free_llm.py >> /root/zongyuan-yuanji/logs/free_extract.log 2>&1",
+            "20 2 * * * cd /root/zongyuan-yuanji && python3 scripts/truth_snapshot_atomgit.py >> /tmp/truth_snapshot.log 2>&1",
+            "20 3 * * * cd /root/zongyuan-yuanji && python3 scripts/atomgit_patrol.py >> /tmp/atomgit_patrol.log 2>&1",
+            "20 4 * * * cd /root/zongyuan-yuanji && python3 scripts/docs_sync.py >> /tmp/docs_sync.log 2>&1",
+            "20 5 * * * python3 /root/zongyuan-yuanji/scripts/web_patrol.py >> /tmp/web_patrol.log 2>&1",
+            "20 6 * * * python3 /root/zongyuan-yuanji/scripts/sitemap_gen.py >> /tmp/sitemap_gen.log 2>&1",
+            "*/30 * * * * python3 /root/zongyuan-yuanji/scripts/usage_stats.py >> /tmp/usage_stats.log 2>&1",
+            "*/5 * * * * /usr/local/bin/status_sync_api.py >> /www/wwwroot/huodouai.com/zhongshu/status/status-sync.log 2>&1",
+            "*/5 * * * * /usr/local/bin/product_tables_sync.py >> /www/wwwroot/huodouai.com/zhongshu/status/product-sync.log 2>&1",
+            "0 * * * * python3 /opt/ZONGYUAN-ROOT/00_KERNEL/scripts/drift_patrol.py >> /opt/ZONGYUAN-ROOT/logs/drift_patrol.log 2>&1",
+            "*/15 * * * * /root/.octop/zr_monitor.sh >> /root/.octop/logs/monitor.log 2>&1",
+            "30 5 * * * /root/.octop/venv/bin/python3 /root/.octop/zr_truth_pipeline.py >> /root/.octop/logs/truth_pipeline.log 2>&1",
+            "0 5 * * * /root/.octop/zr_backup_sync.sh",
+            "7 */3 * * * python3 /usr/local/bin/zhongshu_seed_gen.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/seed_gen.log 2>&1",
+            "*/2 * * * * bash /usr/local/bin/cloud_heartbeat.sh >> /www/wwwroot/huodouai.com/zhongshu/data/logs/cloud_heartbeat.log 2>&1",
+            "0 9 * * * /root/weekly_truth_inspect.sh # 云端中枢每日巡检 DID-BR-000002",
+            "*/5 * * * * /root/octop_a2a_heartbeat.sh # Octop A2A联邦心跳",
+            "*/2 * * * * flock -x /tmp/zr_worker.lock -c \"/usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/zr_worker.py 2>> /www/wwwroot/huodouai.com/zhongshu/data/logs/worker.err\"",
+            "30 6 * * * bash /www/wwwroot/huodouai.com/zhongshu/scripts/rag_selfcheck.sh",
+            "0 3 * * * /root/auto_extract_rules.sh",
+            "0 9 * * * /root/Omega-Brain-Core/02-Executor/daily-report.sh",
+            "0 8 * * * cd /root/zongyuan-yuanji && /usr/bin/python3 src/gen_regist_gallery.py >> /root/zongyuan-yuanji/logs/gallery.log 2>&1 # gallery自动上架 DID-BR-000002",
+            "10 3 * * * bash /opt/zongyuan-lake/kg_daily.sh >> /tmp/kg_cron.log 2>&1",
+            "0 * * * * /usr/local/bin/zongyuan_hash_check.sh >> /www/wwwroot/huodouai.com/zhongshu/data/audit/hash_check.log 2>&1",
+            "45 3 * * * bash /root/zongyuan-meta-order/scripts/meta_order_tidy_cloud.sh >> /root/zongyuan-meta-order/logs/cron_run.log 2>&1",
+            "0 3 * * * /usr/local/bin/zongyuan_remote_backup.sh >> /var/log/remote_backup.log 2>&1",
+            "0 4 * * * /usr/local/bin/octop_daily_restart.sh",
+            "0 * * * * /usr/bin/python3 /usr/local/bin/zr_auto_archive.py >> /var/log/zr_auto_archive.log 2>&1",
+            "5 * * * * /usr/bin/python3 /usr/local/bin/zr_health_check.py >> /var/log/zr_health.log 2>&1",
+            "0 * * * * /usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/zr_memory_lifecycle.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/memory_lifecycle.log 2>&1",
+            "*/2 * * * * /usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/upstream_event_engine.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/upstream_event.log 2>&1",
+            "*/30 * * * * cd /www/wwwroot/huodouai.com/self-check && python3 engine.py >> cron.log 2>&1",
+            "0 2 * * * cd /www/wwwroot/huodouai.com/architecture && python3 autodiscover.py >> autodiscover.log 2>&1",
+            "0 3 * * * cd /www/wwwroot/huodouai.com/architecture && python3 evolution_chain.py >> evolution_chain.log 2>&1",
+            "20 6 * * * flock -xn /tmp/zr_distill_orch.lock -c \"cd /www/wwwroot/huodouai.com/atomcode-worker && /usr/bin/python3 auto_distill_orchestrator.py >> /www/wwwroot/huodouai.com/atomcode-worker/distill_cron.log 2>&1\"",
+            "17 */3 * * * bash /www/wwwroot/huodouai.com/zhongshu/kernel-evolve/cloud_kernel_evolve.sh >> /www/wwwroot/huodouai.com/zhongshu/kernel-evolve/cloud_evolve.log 2>&1",
+            "27 */3 * * * cd /root/.octop/federation && /root/.octop/venv/bin/python3 heartbeat_failover.py >> /root/.octop/logs/heartbeat_failover.log 2>&1",
+            "50 5 * * * /usr/local/bin/cloud_env_selfheal.sh",
+            "25 */3 * * * /usr/local/bin/executor_sync.sh",
+            "17 */6 * * * /bin/bash /usr/local/bin/atomcode_auto_renew.sh >> /var/log/atomcode_renew.cron.log 2>&1 # ZONGYUAN-ROOT atomcode auto-renew",
+            "*/10 * * * * python3 /usr/local/bin/hub_heartbeat_db.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/hub_heartbeat_db.log 2>&1"
+          ],
+          "octop": [
+            {
+              "id": 4,
+              "name": "论文写作种子真值每日学习",
+              "enabled": true
+            },
+            {
+              "id": 5,
+              "name": "全自动学习进化任务",
+              "enabled": true
+            },
+            {
+              "id": 12,
+              "name": "启动记忆自动刷新",
+              "enabled": true
+            },
+            {
+              "id": 13,
+              "name": "自治进化周期运行",
+              "enabled": true
+            },
+            {
+              "id": 14,
+              "name": "每日内核自检与进化",
+              "enabled": false
+            },
+            {
+              "id": 15,
+              "name": "每周 SOP 优化提炼",
+              "enabled": true
+            },
+            {
+              "id": 16,
+              "name": "每周 Badcase 规则库更新",
+              "enabled": true
+            },
+            {
+              "id": 17,
+              "name": "每日资产台账校验",
+              "enabled": false
+            },
+            {
+              "id": 18,
+              "name": "每周心智模型迭代",
+              "enabled": true
+            },
+            {
+              "id": 19,
+              "name": "API路由低消耗保活",
+              "enabled": true
+            }
+          ],
+          "systemd": [
+            "dal-gateway.service",
+            "octop-register.service",
+            "yuanji-wrapper-18089.service",
+            "yuanji-wrapper-18090.service",
+            "yuanji-wrapper-18091.service",
+            "yuanji-wrapper-18092.service",
+            "yuanji-wrapper-18093.service",
+            "yuanji-wrapper-18094.service",
+            "yuanji-wrapper-backup.service",
+            "yuanji-wrapper-gov.service",
+            "yuanji-wrapper-image.service",
+            "yuanji-wrapper-mon.service",
+            "yuanji-wrapper-orch.service",
+            "yuanji-wrapper-sec.service",
+            "yuanji-wrapper-store.service",
+            "zhongshu-gateway.service",
+            "zhongshu-scheduler.service",
+            "zr-a2a-consumer-octop.service",
+            "zr-a2a-gateway.service"
+          ],
+          "periodic_tasks": [
+            {
+              "name": "gateway_steady_probe",
+              "interval_sec": 1800,
+              "enabled": true
+            },
+            {
+              "name": "endpoint_contract_check",
+              "interval_sec": 21600,
+              "enabled": true
+            },
+            {
+              "name": "atomcode_auto_renew",
+              "interval_sec": 21600,
+              "enabled": true
+            },
+            {
+              "name": "runstate_selfcheck",
+              "interval_sec": 86400,
+              "enabled": true
+            },
+            {
+              "name": "lite_registry_check",
+              "interval_sec": 43200,
+              "enabled": true
+            },
+            {
+              "name": "tri_distill_round",
+              "interval_sec": 86400,
+              "enabled": false
+            },
+            {
+              "name": "config_registry_drift",
+              "interval_sec": 3600,
+              "enabled": true
+            }
+          ],
+          "counts": {
+            "crontab": 93,
+            "octop": 10,
+            "systemd": 19,
+            "periodic_tasks": 7
+          }
+        },
+        "type": "dict",
+        "risk": "low",
+        "auto": true,
+        "desc": "调度三合一盘点(crontab/octop/systemd/periodic-tasks)",
+        "updated": "2026-10-22T12:23:45+08:00"
+      }
+    },
+    "runtime": {
+      "watchdog_ports": {
+        "value": [
+          8780,
+          9001,
+          18080,
+          18081,
+          8766,
+          18900
+        ],
+        "type": "list",
+        "risk": "low",
+        "desc": "看门狗守护端口(rag/status/wrapper/基座/网关)",
+        "check": {
+          "kind": "health_script_contains",
+          "file": "/usr/local/bin/zhongshu_health.sh"
+        }
+      },
+      "gateway_status_url": {
+        "value": "https://www.huodouai.com/api/status",
+        "type": "str",
+        "risk": "low",
+        "desc": "网关状态探针(steady_evolve)"
+      },
+      "kb_rag_url": {
+        "value": "https://www.huodouai.com/kb-rag.html",
+        "type": "str",
+        "risk": "low",
+        "desc": "知识库问答页"
+      }
+    },
+    "secrets": {
+      "ref_agents-a1": {
+        "value": {
+          "file": "provider_keys.json",
+          "field": "agents-a1"
+        },
+        "type": "dict",
+        "risk": "high",
+        "desc": "密钥引用(值仅存600凭据件, 注册表不存值)"
+      },
+      "ref_agnes": {
+        "value": {
+          "file": "provider_keys.json",
+          "field": "agnes"
+        },
+        "type": "dict",
+        "risk": "high",
+        "desc": "密钥引用(值仅存600凭据件, 注册表不存值)"
+      },
+      "ref_config_admin": {
+        "value": {
+          "file": "provider_keys.json",
+          "field": "config_admin"
+        },
+        "type": "dict",
+        "risk": "high",
+        "desc": "密钥引用(值仅存600凭据件, 注册表不存值)"
+      },
+      "ref_intern-s2": {
+        "value": {
+          "file": "provider_keys.json",
+          "field": "intern-s2"
+        },
+        "type": "dict",
+        "risk": "high",
+        "desc": "密钥引用(值仅存600凭据件, 注册表不存值)"
+      },
+      "ref_modelscope-glm": {
+        "value": {
+          "file": "provider_keys.json",
+          "field": "modelscope-glm"
+        },
+        "type": "dict",
+        "risk": "high",
+        "desc": "密钥引用(值仅存600凭据件, 注册表不存值)"
+      },
+      "ref_modelscope-qwen": {
+        "value": {
+          "file": "provider_keys.json",
+          "field": "modelscope-qwen"
+        },
+        "type": "dict",
+        "risk": "high",
+        "desc": "密钥引用(值仅存600凭据件, 注册表不存值)"
+      },
+      "ref_sensenova": {
+        "value": {
+          "file": "provider_keys.json",
+          "field": "sensenova"
+        },
+        "type": "dict",
+        "risk": "high",
+        "desc": "密钥引用(值仅存600凭据件, 注册表不存值)"
+      },
+      "ref_gitcode": {
+        "value": {
+          "file": "octop.db",
+          "field": "providers.api_key[name=升腾大模型]"
+        },
+        "type": "dict",
+        "risk": "high",
+        "desc": "GitCode昇腾key引用(在octop.db)"
+      },
+      "ref_tele": {
+        "value": {
+          "file": "octop.db",
+          "field": "providers.api_key[name=升腾千问图像]"
+        },
+        "type": "dict",
+        "risk": "high",
+        "desc": "天翼星河key引用(在octop.db)"
+      }
+    }
+  },
+  "rolled_back_from": 1
+}

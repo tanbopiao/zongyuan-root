@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZONGYUAN-ROOT 统一配置台 · 火斗云智AIOS</title>
+<style>
+  body{margin:0;background:#0f0e0c;color:#e8e0d0;font-family:"Noto Serif SC",Georgia,serif;line-height:1.7}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 60px}
+  h1{color:#c9a86a;font-size:1.5em;border-bottom:1px solid rgba(201,168,106,.3);padding-bottom:12px}
+  h2{color:#e0c38a;font-size:1.1em;margin:28px 0 10px;border-left:4px solid #c9a86a;padding-left:10px}
+  .meta{color:#8a8478;font-size:.88em}
+  table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:.86em}
+  th,td{border:1px solid #333;padding:7px 9px;text-align:left;vertical-align:top;word-break:break-all}
+  th{background:rgba(201,168,106,.12);color:#f0e6cd}
+  td.v{color:#d8b98a;font-family:Consolas,monospace;font-size:.92em}
+  .risk{display:inline-block;padding:1px 8px;border-radius:12px;font-size:.78em;border:1px solid}
+  .high{color:#e07a6a;border-color:#e07a6a}.medium{color:#e0a35a;border-color:#e0a35a}
+  .low{color:#7bc47f;border-color:#7bc47f}.auto{color:#8ab4e0;border-color:#8ab4e0}
+  .imm{opacity:.72}
+  input,textarea,button{background:#1c1a16;border:1px solid #444;color:#e8e0d0;border-radius:6px;padding:7px 10px;font-size:.9em}
+  textarea{font-family:Consolas,monospace;width:100%;box-sizing:border-box;min-height:56px}
+  input{min-width:260px}
+  button{background:rgba(201,168,106,.15);border-color:#c9a86a;color:#e0c38a;cursor:pointer;margin:3px}
+  button:hover{background:rgba(201,168,106,.3)}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+  .out{background:#1c1a16;border:1px solid #333;border-radius:8px;padding:12px;font-family:Consolas,monospace;font-size:.82em;white-space:pre-wrap;max-height:320px;overflow:auto;color:#b8d8b0}
+  .ok{color:#7bc47f}.err{color:#e07a6a}.tag{display:inline-block;background:rgba(201,168,106,.15);border:1px solid rgba(201,168,106,.3);color:#c9a86a;padding:1px 9px;border-radius:16px;font-size:.78em;margin:2px}
+  .foot{text-align:center;padding:20px;font-size:11px;color:#666;border-top:1px solid #333;margin-top:36px}
+  .warnbar{background:rgba(224,122,106,.1);border:1px solid rgba(224,122,106,.4);color:#e0a35a;padding:8px 12px;border-radius:6px;font-size:.85em;margin:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>ZONGYUAN-ROOT 统一配置台</h1>
+<p class="meta">四层建模：immutable 不可变 · steady 稳态 · runtime 运行态 · secrets 密钥引用（只存指针不存值） · DID-BR-000002 · <span id="ver" class="tag">v?</span></p>
+<div class="warnbar">写操作需要 config_admin token；<b>high</b> 风险条目另需 confirm；immutable 层一律拒绝。每次变更自动：版本快照 → 审计 → 网关真值 → 账本链块。</div>
+
+<div class="row">
+  <button onclick="load()">刷新注册表</button>
+  <button onclick="act({action:'drift',auto_fix:true},'漂移检测(自愈)')">漂移检测·自愈</button>
+  <button onclick="act({action:'sync-schedules'},'调度重盘点')">调度重盘点</button>
+  <button onclick="act({action:'audit'},'审计日志')">审计日志</button>
+</div>
+
+<h2>变更</h2>
+<div class="row">
+  <input id="path" placeholder="路径, 如 steady.autonomy_level">
+  <input id="token" type="password" placeholder="config_admin token">
+  <label><input type="checkbox" id="confirm"> confirm(high风险必勾)</label>
+</div>
+<textarea id="value" placeholder='值(JSON), 如 "Lv11" 或 10 或 true 或 [8780,9001]'></textarea>
+<div class="row">
+  <button onclick="apply(true)">试运行 dry-run</button>
+  <button onclick="apply(false)">提交 apply</button>
+  <input id="rbv" placeholder="回滚目标版本号" style="min-width:150px">
+  <button onclick="rollback()">回滚 rollback</button>
+</div>
+<div id="out" class="out">就绪。</div>
+
+<h2>注册表</h2>
+<div id="reg">加载中…</div>
+
+<div class="foot">ZONGYUAN-ROOT · CONFIG-REGISTRY-V1 · 风险最小 &gt; 成本最小 &gt; 收益最大 · huodouai.com</div>
+</div>
+<script>
+const DID='DID-BR-000002';
+const H={'X-DID':DID,'Content-Type':'application/json'};
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function fmt(v){const s=JSON.stringify(v);return s.length>110?s.slice(0,110)+'…':s}
+function out(x,cls){document.getElementById('out').innerHTML='<span class="'+(cls||'ok')+'">'+
+  esc(typeof x==='string'?x:JSON.stringify(x,null,1))+'</span>'}
+async function load(){
+  try{
+    const r=await (await fetch('/api/config',{headers:H})).json();
+    if(!r.ok){out('读取失败: '+JSON.stringify(r),'err');return}
+    const reg=r.registry;
+    document.getElementById('ver').textContent='v'+reg.version+' · '+reg.updated;
+    let html='';
+    for(const [lname,layer] of Object.entries(reg.layers||{})){
+      html+='<h2>'+lname+' <span class="tag">'+Object.keys(layer).length+' 项</span></h2><table>'+
+        '<tr><th>路径</th><th>值</th><th>风险</th><th>说明</th><th>更新</th></tr>';
+      for(const [k,e] of Object.entries(layer)){
+        if(typeof e!=='object'||e===null||!('value' in e)){
+          html+='<tr class="imm"><td>'+lname+'.'+esc(k)+'</td><td class="v" colspan="4">(命名空间)</td></tr>';continue}
+        const cls=e.risk==='high'?'high':e.risk==='medium'?'medium':e.auto?'auto':'low';
+        html+='<tr class="'+(lname==='immutable'?'imm':'')+'"><td>'+lname+'.'+esc(k)+
+          '</td><td class="v">'+esc(fmt(e.value))+'</td><td><span class="risk '+cls+'">'+(e.risk||'low')+(e.auto?'/auto':'')+
+          '</span></td><td>'+esc(e.desc||'')+'</td><td>'+esc((e.updated||'').slice(5,16))+'</td></tr>';
+      }
+      html+='</table>';
+    }
+    document.getElementById('reg').innerHTML=html;
+  }catch(e){out('网络错误: '+e,'err')}
+}
+async function act(body,label){
+  try{
+    const r=await (await fetch('/api/config',{method:'POST',headers:H,body:JSON.stringify(body)})).json();
+    out(label+': '+(r.ok?r:('['+(r.status||'?')+'] '+r.error||JSON.stringify(r))), r.ok?'ok':'err');
+    if(r.ok&&body.action!=='audit')load();
+  }catch(e){out('网络错误: '+e,'err')}
+}
+async function apply(dry){
+  const body={action:'apply',path:document.getElementById('path').value.trim(),
+    token:document.getElementById('token').value,confirm:document.getElementById('confirm').checked,
+    dry_run:dry};
+  try{body.value=JSON.parse(document.getElementById('value').value)}
+  catch(e){out('值不是合法 JSON','err');return}
+  await act(body,(dry?'dry-run':'apply'));
+}
+async function rollback(){
+  await act({action:'rollback',version:parseInt(document.getElementById('rbv').value),
+    token:document.getElementById('token').value},'rollback');
+}
+load();
+</script>
+</body>
+</html>

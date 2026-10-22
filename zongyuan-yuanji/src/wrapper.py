@@ -225,6 +225,15 @@ class H(BaseHTTPRequestHandler):
             for name,info in api_router.MODELS.items():
                 models.append({"id":name,"type":info.get("type"),"priority":info.get("priority")})
             self._j(200,{"object":"list","data":models})
+        elif self.path.startswith("/api/config"):
+            # 20261022 统一配置台: 只读查询(全量或?path=子集), X-DID门
+            if self.headers.get("X-DID")!="DID-BR-000002":
+                self._j(401,{"ok":False,"error":"X-DID required"}); return
+            from urllib.parse import urlparse as _up, parse_qs as _pq
+            sub = _pq(_up(self.path).query).get("path",[""])[0]
+            import config_registry as _cr
+            try: self._j(200, _cr.get_api(sub or None))
+            except Exception as e: self._j(500,{"ok":False,"error":str(e)[:200]})
         elif self.path.startswith("/v1/video/status") or self.path.startswith("/video/status"):
             # 20261022: GET查询串入口(orchestrator/外部清单用法), 与POST body入口共用逻辑
             from urllib.parse import urlparse, parse_qs
@@ -799,6 +808,37 @@ class H(BaseHTTPRequestHandler):
         _j.dump(rc, open("/tmp/rate_limit.json","w"))
         if rc[k] > 60:
             self._j(429,{"ok":False,"error":"rate limited"}); return
+        if self.path.startswith("/api/config"):
+            # 20261022 统一配置台: action=get/apply/rollback/drift/sync-schedules/audit
+            # apply/rollback 需 token(provider_keys.config_admin); high风险还需confirm; immutable恒403
+            if self.headers.get("X-DID")!="DID-BR-000002":
+                self._j(401,{"ok":False,"error":"X-DID required"}); return
+            import config_registry as _cr
+            act = p.get("action","get")
+            try:
+                if act == "get":
+                    r = _cr.get_api(p.get("path"))
+                elif act == "apply":
+                    r = _cr.apply(p.get("path",""), p.get("value"),
+                                  dry_run=bool(p.get("dry_run")), confirm=bool(p.get("confirm")),
+                                  token=p.get("token",""),
+                                  operator=self.headers.get("X-Operator","?"))
+                elif act == "rollback":
+                    r = _cr.rollback(int(p.get("version",0)), token=p.get("token",""),
+                                     operator=self.headers.get("X-Operator","?"))
+                elif act == "drift":
+                    r = _cr.check_drift(auto_fix=bool(p.get("auto_fix")))
+                elif act == "sync-schedules":
+                    r = _cr.sync_schedules()
+                elif act == "audit":
+                    try: r = {"ok":True,"audit":[json.loads(x) for x in open(_cr.AUDIT).read().splitlines()[-20:]]}
+                    except FileNotFoundError: r = {"ok":True,"audit":[]}
+                else:
+                    r = {"ok":False,"status":400,"error":"unknown action"}
+            except Exception as e:
+                r = {"ok":False,"status":500,"error":str(e)[:200]}
+            self._j(200 if r.get("ok") else int(r.get("status",500)), r)
+            return
         if self.path=="/tasks":
             # 任务队列：魔搭实例拉任务+上报结果
             import os, json as js
