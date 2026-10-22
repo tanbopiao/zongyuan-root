@@ -151,8 +151,9 @@ def task_runstate_selfcheck() -> dict:
                                                capture_output=True).returncode != 0
     renew_log = "/var/log/atomcode_renew.log"
     checks["atomcode_log_missing"] = not os.path.exists(renew_log)
-    checks["atomcode_bin_missing"] = subprocess.run("command -v atomcode", shell=True,
-                                                    capture_output=True).returncode != 0
+    checks["atomcode_bin_missing"] = subprocess.run("command -v atomcode",
+                                                    shell=True, capture_output=True).returncode != 0
+    checks["ssh_key_missing"] = not os.path.exists("/root/.ssh/zongyuan-sh-20261021")
     r = subprocess.run(f"cd {json.dumps(ROOT)} && git status --short | wc -l", shell=True,
                        capture_output=True, text=True)
     try:
@@ -163,11 +164,12 @@ def task_runstate_selfcheck() -> dict:
     state["last_selfcheck"] = datetime.now(CST).isoformat(timespec="seconds")
     state["selfcheck"] = checks
     _save(STATE_FILE, state)
-    drift = [k for k in ("crontab_missing", "atomcode_bin_missing", "atomcode_log_missing")
+    drift = [k for k in ("crontab_missing", "atomcode_bin_missing",
+                         "atomcode_log_missing", "ssh_key_missing")
              if checks.get(k)]
     if drift:
         alert("STEADY.PROBE.RUNSTATE-DRIFT.20261022",
-              {"drift": checks, "note": "运行态漂移(沙箱重建后运行态未恢复), 由bootstrap口令重建"},
+              {"drift": checks, "note": "运行态漂移(沙箱重建后运行态未恢复), 由bootstrap口令重建; ssh_key_missing由zrrsh自愈恢复(persist_snapshot/ssh/zongyuan_new.enc)"},
               86400)
     return {"ok": True, "checks": checks, "drift": drift}
 
