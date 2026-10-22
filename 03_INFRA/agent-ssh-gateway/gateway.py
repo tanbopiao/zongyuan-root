@@ -37,10 +37,14 @@ import sys
 sys.path.insert(0, HERE)
 from precheck import precheck, load_whitelist
 from quota import QuotaController
+from simulate import simulate
+from geo_stability import score as geo_score
+import snapshot as snap
+import approval as approval_gate
 
 DID = "DID-BR-000002"
 ANCHOR = "Ω₀⊂⊙∞⊂Ω"
-GATEWAY_VERSION = "AGS-GATEWAY-PHASE1-V1.0"
+GATEWAY_VERSION = "AGS-GATEWAY-PHASE2-V1.0"
 AUDIT_DIR = os.path.join(ROOT, "ledger", "agent-ssh")
 CHAIN_DIR = os.path.join(ROOT, "ledger", "chain")
 ZRRSH = os.path.join(ROOT, "00_KERNEL", "scripts", "zrrsh.sh")
@@ -131,10 +135,13 @@ class Gateway:
 
         is_mutation = decision == "mutate"
 
-        # ---- ② 变更审批门 (高危强制人工) ----
+        # ---- ② 变更审批门 (高危强制人工: 未审批入队, 不触达仿真/真机) ----
         if is_mutation and not approve:
+            approval_gate.enqueue(agent_id, causal_id, command,
+                                  pc.get("risk", "medium"), pc.get("reasons", []))
             out["risk_tag"] = "PENDING_APPROVAL"
             out["status"] = "pending_approval"
+            out["approval_queue"] = "state/approval_queue.json"
             out["audit_index"] = self._audit(agent_id, causal_id, command, out, task_context)
             return out
 
@@ -147,6 +154,27 @@ class Gateway:
             out["audit_index"] = self._audit(agent_id, causal_id, command, out, task_context)
             return out
 
+        # ---- ④ 隔离沙盘预仿真 (变更类必仿真; 只读跳过省算力) ----
+        sim = None
+        geo = None
+        if is_mutation and not dry_run:
+            sim = simulate(command, timeout=self.exec_cfg.get("timeout_sec", 30))
+            out["simulation"] = {"simulated": sim["simulated"],
+                                 "sim_log": sim["sim_log"],
+                                 "files": sim["files"]["counts"],
+                                 "disk_delta_kb": sim["disk_delta_kb"],
+                                 "net_probe": sim["net_probe"],
+                                 "external_writes": sim.get("external_write_paths", []),
+                                 "rc": sim["rc"], "sandbox_level": sim["sandbox_level"]}
+            # ---- ⑤ GEO 晶格稳态打分 ----
+            geo = geo_score(sim, self.wl.get("geo"), decision)
+            out["geo"] = geo
+            if geo["verdict"] == "reject":
+                out["risk_tag"] = "GEO_REJECT:%.1f" % geo["stability_score"]
+                out["status"] = "rejected_by_geo"
+                out["audit_index"] = self._audit(agent_id, causal_id, command, out, task_context)
+                return out
+
         if dry_run:
             out["risk_tag"] = "DRY_RUN"
             out["status"] = "dry_run_would_execute"
@@ -154,12 +182,18 @@ class Gateway:
             out["audit_index"] = self._audit(agent_id, causal_id, command, out, task_context)
             return out
 
-        # ---- ④ 快照位 (变更类: Phase1 记录回滚锚点指针, Phase2 接快照引擎) ----
+        # ---- ⑥ 快照 (变更类: 执行前建回滚锚点) ----
         snapshot_ref = None
+        snap_meta = None
         if is_mutation:
-            snapshot_ref = "SNAPSHOT-PENDING-PHASE2:%s:%s" % (causal_id, time.strftime("%Y%m%d%H%M%S"))
+            try:
+                snap_meta = snap.create(command, causal_id,
+                                        workdir=self.exec_cfg.get("workdir") or "/tmp")
+                snapshot_ref = snap_meta["snapshot_id"]
+            except Exception as e:
+                snapshot_ref = "SNAPSHOT_FAILED:%s" % e
 
-        # ---- ⑤ 受控执行 ----
+        # ---- ⑦ 受控执行 ----
         if self.mode == "remote":
             res = self._run_remote(self.exec_cfg.get("remote_host", ""), command)
         else:
@@ -167,17 +201,30 @@ class Gateway:
         out["exec"] = res
         out["snapshot_ref"] = snapshot_ref
 
-        # ---- 计量 + ⑥ 账本 ----
+        # ---- ⑧ 异常自动回滚 (变更类 rc != 0) ----
+        if is_mutation and res["rc"] != 0 and snap_meta:
+            rb = snap.rollback(snap_meta["snapshot_id"])
+            out["auto_rollback"] = rb
+            if rb.get("ok"):
+                out["risk_tag"] = "ROLLED_BACK"
+            else:
+                out["risk_tag"] = "ROLLBACK_DEGRADED"
+
+        # ---- 计量 + ⑨ 账本 ----
         self.quota.record(agent_id, is_mutation=is_mutation)
         out["quota"] = self.quota.check(agent_id, is_mutation=is_mutation)
         ok = res["rc"] == 0
-        if not ok:
+        if out.get("auto_rollback") is not None:
+            out["status"] = "executed_with_error_rolled_back"
+        elif not ok:
             out["risk_tag"] = out["risk_tag"] or "EXEC_RC_%s" % res["rc"]
+            out["status"] = "executed_with_error"
         elif is_mutation:
             out["risk_tag"] = "MUTATION_EXECUTED"
+            out["status"] = "executed"
         else:
             out["risk_tag"] = "READONLY_OK"
-        out["status"] = "executed" if ok else "executed_with_error"
+            out["status"] = "executed"
         out["audit_index"] = self._audit(agent_id, causal_id, command, out, task_context)
         return out
 
@@ -192,6 +239,12 @@ class Gateway:
             "exec_rc": (out.get("exec") or {}).get("rc"),
             "stdout_sha256": _sha256((out.get("exec") or {}).get("stdout", "") or ""),
             "snapshot_ref": out.get("snapshot_ref"),
+            "geo": ({k: out["geo"][k] for k in ("stability_score", "threshold",
+                                                "verdict", "drift_reasons")}
+                    if out.get("geo") else None),
+            "sim_log": (out.get("simulation") or {}).get("sim_log"),
+            "sim_files": (out.get("simulation") or {}).get("files"),
+            "auto_rollback": out.get("auto_rollback"),
             "task_context": task_context,
             "gateway": GATEWAY_VERSION, "provenance": "measured",
         }
@@ -233,9 +286,25 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--mode", choices=["local", "remote"], default=None)
     ap.add_argument("--context", default=None, help="任务上下文")
+    ap.add_argument("--approve-replay", metavar="CAUSAL_ID", default=None,
+                    help="审批通过后重放: 标记队列 approved 并以 approve=True 执行")
     a = ap.parse_args()
 
     gw = Gateway(mode=a.mode)
+
+    if a.approve_replay:
+        import approval as ag
+        r0 = ag.approve(a.approve_replay, operator="human_cli")
+        if not r0.get("ok"):
+            print(json.dumps(r0, ensure_ascii=False, indent=2))
+            sys.exit(3)
+        item = r0["item"]
+        r = gw.execute(item["agent_id"], item["command"],
+                       causal_id=a.approve_replay, approve=True, task_context=a.context)
+        print(json.dumps({"replayed": True, "approval": {"operator": item["operator"]},
+                          "result": r}, ensure_ascii=False, indent=2))
+        sys.exit(0 if r["status"] == "executed" else 2)
+
     r = gw.execute(a.agent, a.command, causal_id=a.causal, approve=a.approve,
                    dry_run=a.dry_run, task_context=a.context)
     print(json.dumps(r, ensure_ascii=False, indent=2))
