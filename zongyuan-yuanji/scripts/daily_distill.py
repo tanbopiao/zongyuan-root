@@ -18,7 +18,20 @@ try:
     txt = resp["choices"][0]["message"]["content"]
     laws = json.loads(txt.replace("```json","").replace("```","").strip())
 except Exception as e:
-    print("FAIL:", e); exit(1)
+    print("FAIL:", e)
+    # ARK失败告警(20261022巡检): 单次调用已失败即上报网关, 人工介入换key/下线provider
+    try:
+        abody = json.dumps({"key": "STEADY.DISTILL.ARK-FAIL." + date,
+                            "value": {"script": "daily_distill", "error": str(e), "ark_key": ARK_KEY[:14],
+                                      "action": "ARK403熔断: 需人工换key或下线provider", "date": date},
+                            "source_node": "NODE-DEV-DOUBAO-WORK-001", "confidence": 1.0,
+                            "truth_type": "risk"}, ensure_ascii=False).encode()
+        areq = urllib.request.Request(GATEWAY, data=abody,
+            headers={"X-DID": DID, "Content-Type": "application/json"}, method="POST")
+        print("ALERT:", json.loads(urllib.request.urlopen(areq, timeout=10).read()).get("seq"))
+    except Exception as e2:
+        print("ALERT-ERR:", e2)
+    exit(1)
 results = []
 for i, law in enumerate(laws):
     key = "SFMP.DISTILL." + time.strftime("%Y%m%d") + "." + str(i+1)
