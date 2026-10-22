@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json, urllib.request, time, os, hashlib
-ARK_KEY = "ark-800a6f28-5c7f-4ec5-9766-4b7da1a58f1d-50a70"
+# 20261022: 豆包(ARK)403无额度, 按人工决策切换昇腾免费API(GitCode)
+ARK_KEY = "AAsJAG5ivLaAYrSVu6fTHZxN"
 SFMP_DIR = "/root/zongyuan-yuanji/var/sfmp"
 GATEWAY = "https://www.huodouai.com/api/report/truth"
 DID = "DID-BR-000002"
@@ -10,8 +11,8 @@ day = time.localtime().tm_yday
 theme = themes[day % len(themes)]
 date = time.strftime("%Y-%m-%d")
 template = '你是ZONGYUAN自治内核法则蒸馏器。日期' + date + '。围绕【' + theme + '】提炼3条可执行工程法则，每条含law/rule/effect。返回纯JSON数组格式：[{"law":"法则名","rule":"具体规则","effect":"预期效果"}]'
-req = urllib.request.Request("https://ark.cn-beijing.volces.com/api/v3/chat/completions",
-    data=json.dumps({"model":"ep-20261008171222-97c7z","messages":[{"role":"user","content":template}],"max_tokens":600}).encode(),
+req = urllib.request.Request("https://api-ai.gitcode.com/v1/chat/completions",
+    data=json.dumps({"model":"Qwen/Qwen3-32B","messages":[{"role":"user","content":template}],"max_tokens":2400}).encode(),
     headers={"Authorization":"Bearer "+ARK_KEY,"Content-Type":"application/json"}, method="POST")
 try:
     resp = json.loads(urllib.request.urlopen(req, timeout=30).read())
