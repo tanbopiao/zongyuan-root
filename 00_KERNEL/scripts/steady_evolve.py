@@ -18,9 +18,12 @@ import json
 import os
 import subprocess
 import sys
+import threading
 import time
 import urllib.request
 from datetime import datetime, timezone, timedelta
+
+_STATE_LOCK = threading.Lock()  # state.json 读改写互斥(多线程并发run防丢记录)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 TASKS_DEF = os.path.join(ROOT, "var", "periodic-tasks.json")
@@ -236,24 +239,31 @@ def run_task(defn: dict) -> dict:
                                               capture_output=True).returncode != 0:
                     out = {"ok": True, "skipped": f"requires_bin missing: {bin_req}"}
                 else:
-                    cmd = [c.replace("{scripts}", os.path.join(ROOT, "00_KERNEL", "scripts"))
-                             .replace("{root}", ROOT)
-                           for c in defn["cmd"]]
-                    p = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+                    cwd = defn.get("cwd")
+                    if isinstance(defn.get("cmd"), str):
+                        # 收编的cron任务: shell串保留 原样重定向/cd/flock 语义
+                        p = subprocess.run(defn["cmd"], shell=True, cwd=cwd,
+                                           capture_output=True, text=True, timeout=600)
+                    else:
+                        cmd = [c.replace("{scripts}", os.path.join(ROOT, "00_KERNEL", "scripts"))
+                                 .replace("{root}", ROOT)
+                               for c in defn["cmd"]]
+                        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=600)
                     out = {"ok": p.returncode == 0, "rc": p.returncode,
                            "stdout_tail": (p.stdout or "")[-400:],
                            "stderr_tail": (p.stderr or "")[-400:]}
         except Exception as e:
             out = {"ok": False, "error": str(e)}
-        state = _load(STATE_FILE, {})
-        runs = state.setdefault("runs", {})
-        prev = runs.get(name, {})
-        runs[name] = {"last": datetime.now(CST).isoformat(timespec="seconds"),
-                      "last_ok": bool(out.get("ok")),
-                      "consecutive_fail": (prev.get("consecutive_fail", 0) + 1
-                                           if not out.get("ok") else 0),
-                      "last_result": out}
-        _save(STATE_FILE, state)
+        with _STATE_LOCK:
+            state = _load(STATE_FILE, {})
+            runs = state.setdefault("runs", {})
+            prev = runs.get(name, {})
+            runs[name] = {"last": datetime.now(CST).isoformat(timespec="seconds"),
+                          "last_ok": bool(out.get("ok")),
+                          "consecutive_fail": (prev.get("consecutive_fail", 0) + 1
+                                               if not out.get("ok") else 0),
+                          "last_result": out}
+            _save(STATE_FILE, state)
         log(f"RUN {name} ok={out.get('ok')} {json.dumps(out, ensure_ascii=False)[:300]}")
         return out
 
@@ -265,6 +275,46 @@ def cmd_run(name: str) -> int:
             return 0 if run_task(d).get("ok") else 1
     print(f"unknown task: {name}", file=sys.stderr)
     return 2
+
+
+def _cron_field_match(seg: str, val: int) -> bool:
+    """单个cron字段匹配: * / */n / a-b / a,b / n/step / 数字。"""
+    if seg == "*":
+        return True
+    for item in seg.split(","):
+        step = 1
+        if "/" in item:
+            item, s = item.split("/", 1)
+            step = max(int(s), 1)
+        if item in ("*", ""):
+            if val % step == 0:
+                return True
+        elif "-" in item:
+            a, b = item.split("-", 1)
+            if int(a) <= val <= int(b) and (val - int(a)) % step == 0:
+                return True
+        else:
+            base = int(item)
+            if step > 1:
+                if val >= base and (val - base) % step == 0:
+                    return True
+            elif val == base:
+                return True
+    return False
+
+
+def _cron_due(expr: str, last_ts: float, now: float) -> bool:
+    """标准5段cron(m h dom mon dow)到点判定: 当前分钟全字段匹配且距上次>=59s(防同分钟重发)。"""
+    try:
+        parts = expr.split()
+        if len(parts) != 5 or now - last_ts < 59:
+            return False
+        t = datetime.fromtimestamp(now, CST)
+        fields = [(t.minute, 0), (t.hour, 0), (t.day, 1), (t.month, 1),
+                  (t.isoweekday() % 7, 0)]
+        return all(_cron_field_match(seg, val) for seg, (val, _) in zip(parts, fields))
+    except (ValueError, TypeError):
+        return False
 
 
 def cmd_daemon() -> int:
@@ -279,10 +329,15 @@ def cmd_daemon() -> int:
         for d in defns:
             if not d.get("enabled", True):
                 continue
-            iv = int(d.get("interval_sec", 3600))
-            if now - last.get(d["name"], 0) >= iv:
+            if d.get("cron"):
+                due = _cron_due(d["cron"], last.get(d["name"], 0), now)
+            else:
+                iv = int(d.get("interval_sec", 3600))
+                due = now - last.get(d["name"], 0) >= iv
+            if due:
                 last[d["name"]] = now
-                run_task(d)
+                # 线程执行: 单任务阻塞(最长600s)不拖停全局调度, flock仍防同任务重入
+                threading.Thread(target=run_task, args=(d,), daemon=True).start()
         time.sleep(30)
 
 

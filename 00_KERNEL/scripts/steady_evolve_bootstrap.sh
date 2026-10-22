@@ -29,7 +29,7 @@ try:
     d = json.load(open(sys.argv[1], encoding="utf-8"))
     ts = d.get("tasks", [])
     print(f"  loaded: {len(ts)} tasks ->", ", ".join(
-        f"{t['name']}({t['interval_sec']}s{',off' if not t.get('enabled',True) else ''})" for t in ts))
+        f"{t['name']}({t.get('interval_sec') or t.get('cron','?')}{',off' if not t.get('enabled',True) else ''})" for t in ts))
 except Exception as e:
     print(f"  ERROR: {e}"); sys.exit(3)
 PY

@@ -389,14 +389,15 @@ def collect_schedules() -> dict:
                             "--no-legend", "--no-pager"], capture_output=True, text=True, timeout=15)
         for line in r.stdout.splitlines():
             name = line.split()[0] if line.split() else ""
-            if any(x in name for x in ("octop", "zhongshu", "zr_", "dal", "gateway", "wrapper")):
+            if any(x in name for x in ("octop", "zhongshu", "zr_", "dal", "gateway", "wrapper", "steady")):
                 out["systemd"].append(name)
     except Exception:
         pass
     try:
         tasks = _load(PERIODIC, {}).get("tasks", [])
         out["periodic_tasks"] = [{"name": t.get("name"), "interval_sec": t.get("interval_sec"),
-                                  "enabled": t.get("enabled", True)} for t in tasks]
+                                  "cron": t.get("cron"), "enabled": t.get("enabled", True)}
+                                 for t in tasks]
     except Exception:
         pass
     out["counts"] = {k: len(v) for k, v in out.items() if isinstance(v, list)}

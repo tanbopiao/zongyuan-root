@@ -3,7 +3,7 @@
   "did": "DID-BR-000002",
   "anchor": "Ω₀⊂⊙∞⊂Ω",
   "version": 2,
-  "updated": "2026-10-22T12:25:36+08:00",
+  "updated": "2026-10-22T13:09:41+08:00",
   "layers": {
     "immutable": {
       "did": {
@@ -65,101 +65,15 @@
       },
       "schedules": {
         "value": {
-          "collected_at": "2026-10-22T12:23:45+08:00",
+          "collected_at": "2026-10-22T13:09:41+08:00",
           "crontab": [
             "*/5 * * * * flock -xn /tmp/stargate.lock -c '/usr/local/qcloud/stargate/admin/start.sh > /dev/null 2>&1 &'",
             "29 5,11,17,23 * * * \"/root/.acme.sh\"/acme.sh --cron --home \"/root/.acme.sh\" > /dev/null",
-            "*/5 * * * * /usr/local/bin/zhongshu_health.sh >/dev/null 2>&1",
-            "*/30 * * * * /usr/local/bin/zhongshu_metrics.sh >> /www/wwwroot/huodouai.com/zhongshu/data/metrics/run.log 2>&1",
-            "*/30 * * * * /usr/local/bin/zhongshu_bootstrap.sh",
-            "30 2 * * * /usr/local/bin/zhongshu_evolve.sh",
-            "0 * * * * /usr/local/bin/zhongshu_arbiter.sh",
-            "*/5 * * * * /usr/local/bin/cloud_ssh_audit.sh",
             "@reboot sleep 10 && /usr/local/nginx/sbin/nginx",
-            "0 3 * * * curl -sS http://127.0.0.1:18080/autoupdate -X POST -H \"Content-Type: application/json\" -d \"{\\\"action\\\":\\\"backup\\\"}\"",
-            "0 4 * * * curl -sS http://127.0.0.1:18080/autoupdate -X POST -H \"Content-Type: application/json\" -d \"{\\\"action\\\":\\\"cleanup\\\"}\"",
-            "*/30 * * * * curl -sS http://127.0.0.1:18080/selfheal -X POST -H \"Content-Type: application/json\" -d \"{\\\"action\\\":\\\"check_mem\\\"}\"",
-            "*/10 * * * * /root/zongyuan-yuanji/scripts/autonomy.sh",
-            "*/5 * * * * /root/zongyuan-yuanji/scripts/alert.sh",
-            "0 5 * * * /root/zongyuan-yuanji/scripts/auto_baseline.sh",
             "*/30 * * * * /usr/local/bin/zhongshu_sync.sh && /usr/local/nginx/website_auto_evolve.sh >> /var/log/website_auto_evolve.log 2>&1",
             "0 * * * * python3 /usr/local/nginx/update_homepage_stats.py >> /var/log/homepage_stats.log 2>&1",
             "0 4 * * * /usr/local/nginx/perf_check.sh >> /var/log/perf_check.log 2>&1",
-            "30 4 * * * /usr/local/nginx/auto_fix_broken.sh >> /var/log/broken_link_fix.log 2>&1",
-            "*/30 * * * * curl -sS -k https://127.0.0.1:18080/nodes/heartbeat -X POST -H \"Content-Type: application/json\" -d \"{\\\"did\\\":\\\"DID-BR-000002-CLOUD\\\",\\\"name\\\":\\\"云端中枢\\\"}\" >/dev/null 2>&1",
-            "30 3 * * * python3 /root/zongyuan-yuanji/scripts/sfmp_gc.py",
-            "0 * * * * cd /root/zongyuan-yuanji && /usr/bin/python3 src/validator.py >> logs/validator.log 2>&1",
-            "0 8 * * * /root/zongyuan-yuanji/scripts/baidu_push.sh >> /root/zongyuan-yuanji/logs/baidu_push.log 2>&1",
-            "0 */6 * * * /usr/bin/python3 /usr/local/bin/self_optimizer.py >> /root/zongyuan-yuanji/logs/self-opt.log 2>&1",
-            "30 4 * * * /usr/bin/python3 /usr/local/bin/meta_learner.py >> /root/zongyuan-yuanji/logs/meta-learner.log 2>&1",
-            "30 3 * * * /root/zongyuan-yuanji/scripts/smart_backup.sh >> /root/zongyuan-yuanji/logs/backup.log 2>&1",
-            "*/5 * * * * /usr/local/bin/gov_watchdog.sh",
-            "0 3 * * * /usr/bin/python3 /root/zongyuan-yuanji/scripts/daily_distill.py >> /root/zongyuan-yuanji/logs/distill.log 2>&1",
-            "0 6 * * * /usr/bin/python3 /root/zongyuan-yuanji/scripts/auto_discover.py >> /www/wwwroot/huodouai.com/zhongshu/data/probe.log 2>&1",
-            "10 * * * * python3 /usr/local/bin/auto_claimer.py >> /var/log/auto_claimer.log 2>&1",
-            "47 3 * * * flock -xn /tmp/embed_build.lock -c \"/usr/local/bin/build_embed_index.py >> /www/wwwroot/huodouai.com/zhongshu/data/truth/embed_build.log 2>&1\"",
-            "*/5 * * * * /usr/local/bin/auto_heal.py >> /var/log/auto_heal.log 2>&1",
-            "30 5 * * * /usr/bin/python3 /usr/local/bin/kernel_score.py >> /www/wwwroot/huodouai.com/zhongshu/data/metrics/kernel-score.log 2>&1",
-            "*/5 * * * * /usr/local/bin/health_check_all.sh >> /var/log/health_check.log 2>&1",
-            "0 6 * * * python3 /root/zongyuan-yuanji/scripts/auto_evolve.py >> /root/zongyuan-yuanji/logs/auto-evolve.log 2>&1",
-            "*/10 * * * * python3 /root/zongyuan-yuanji/scripts/auto_fix.py >> /root/zongyuan-yuanji/logs/auto-fix.log 2>&1",
-            "0 9 * * * python3 /root/zongyuan-yuanji/scripts/auto_suggest.py >> /root/zongyuan-yuanji/logs/auto-suggest.log 2>&1",
-            "0 7 * * 0 python3 /root/zongyuan-yuanji/scripts/self_optimize.py >> /root/zongyuan-yuanji/logs/self-optimize.log 2>&1",
-            "*/30 * * * * python3 /root/zongyuan-yuanji/scripts/predictive.py >> /root/zongyuan-yuanji/logs/predictive.log 2>&1",
-            "0 8 * * * python3 /root/zongyuan-yuanji/scripts/meta_learn.py >> /root/zongyuan-yuanji/logs/meta-learn.log 2>&1",
-            "*/15 * * * * python3 /root/zongyuan-yuanji/scripts/ab_test.py >> /root/zongyuan-yuanji/logs/ab-test.log 2>&1",
-            "*/30 * * * * python3 /root/zongyuan-yuanji/scripts/federate.py >> /root/zongyuan-yuanji/logs/federate.log 2>&1",
-            "0 7 * * 1 python3 /root/zongyuan-yuanji/scripts/arch_refactor.py >> /root/zongyuan-yuanji/logs/arch-refactor.log 2>&1",
-            "0 * * * * python3 /root/zongyuan-yuanji/scripts/cognitive_loop.py >> /root/zongyuan-yuanji/logs/cognitive.log 2>&1",
-            "*/15 * * * * python3 /root/zongyuan-yuanji/scripts/decision_engine.py >> /root/zongyuan-yuanji/logs/decision.log 2>&1",
-            "*/5 * * * * python3 /root/zongyuan-yuanji/scripts/update_autonomy.py",
-            "*/2 * * * * python3 /root/zongyuan-yuanji/scripts/dynamic_dash.py",
-            "0 * * * * python3 /root/zongyuan-yuanji/scripts/evolution_loop.py >> /root/zongyuan-yuanji/logs/evolution-loop.log 2>&1",
-            "*/1 * * * * /usr/local/bin/status_aggregator.py >> /www/wwwroot/huodouai.com/zhongshu/status/aggregator.log 2>&1",
-            "*/5 * * * * /usr/local/bin/model_monitor.sh",
-            "*/30 * * * * python3 /root/zongyuan-yuanji/scripts/auto_extract_all.py",
-            "30 */6 * * * cd /root/zongyuan-yuanji && python3 scripts/auto_seed_refine.py >> /tmp/seed_refine_cron.log 2>&1",
-            "0 4 * * * python3 /root/zongyuan-yuanji/scripts/extract_from_free_llm.py >> /root/zongyuan-yuanji/logs/free_extract.log 2>&1",
-            "20 2 * * * cd /root/zongyuan-yuanji && python3 scripts/truth_snapshot_atomgit.py >> /tmp/truth_snapshot.log 2>&1",
-            "20 3 * * * cd /root/zongyuan-yuanji && python3 scripts/atomgit_patrol.py >> /tmp/atomgit_patrol.log 2>&1",
-            "20 4 * * * cd /root/zongyuan-yuanji && python3 scripts/docs_sync.py >> /tmp/docs_sync.log 2>&1",
-            "20 5 * * * python3 /root/zongyuan-yuanji/scripts/web_patrol.py >> /tmp/web_patrol.log 2>&1",
-            "20 6 * * * python3 /root/zongyuan-yuanji/scripts/sitemap_gen.py >> /tmp/sitemap_gen.log 2>&1",
-            "*/30 * * * * python3 /root/zongyuan-yuanji/scripts/usage_stats.py >> /tmp/usage_stats.log 2>&1",
-            "*/5 * * * * /usr/local/bin/status_sync_api.py >> /www/wwwroot/huodouai.com/zhongshu/status/status-sync.log 2>&1",
-            "*/5 * * * * /usr/local/bin/product_tables_sync.py >> /www/wwwroot/huodouai.com/zhongshu/status/product-sync.log 2>&1",
-            "0 * * * * python3 /opt/ZONGYUAN-ROOT/00_KERNEL/scripts/drift_patrol.py >> /opt/ZONGYUAN-ROOT/logs/drift_patrol.log 2>&1",
-            "*/15 * * * * /root/.octop/zr_monitor.sh >> /root/.octop/logs/monitor.log 2>&1",
-            "30 5 * * * /root/.octop/venv/bin/python3 /root/.octop/zr_truth_pipeline.py >> /root/.octop/logs/truth_pipeline.log 2>&1",
-            "0 5 * * * /root/.octop/zr_backup_sync.sh",
-            "7 */3 * * * python3 /usr/local/bin/zhongshu_seed_gen.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/seed_gen.log 2>&1",
-            "*/2 * * * * bash /usr/local/bin/cloud_heartbeat.sh >> /www/wwwroot/huodouai.com/zhongshu/data/logs/cloud_heartbeat.log 2>&1",
-            "0 9 * * * /root/weekly_truth_inspect.sh # 云端中枢每日巡检 DID-BR-000002",
-            "*/5 * * * * /root/octop_a2a_heartbeat.sh # Octop A2A联邦心跳",
-            "*/2 * * * * flock -x /tmp/zr_worker.lock -c \"/usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/zr_worker.py 2>> /www/wwwroot/huodouai.com/zhongshu/data/logs/worker.err\"",
-            "30 6 * * * bash /www/wwwroot/huodouai.com/zhongshu/scripts/rag_selfcheck.sh",
-            "0 3 * * * /root/auto_extract_rules.sh",
-            "0 9 * * * /root/Omega-Brain-Core/02-Executor/daily-report.sh",
-            "0 8 * * * cd /root/zongyuan-yuanji && /usr/bin/python3 src/gen_regist_gallery.py >> /root/zongyuan-yuanji/logs/gallery.log 2>&1 # gallery自动上架 DID-BR-000002",
-            "10 3 * * * bash /opt/zongyuan-lake/kg_daily.sh >> /tmp/kg_cron.log 2>&1",
-            "0 * * * * /usr/local/bin/zongyuan_hash_check.sh >> /www/wwwroot/huodouai.com/zhongshu/data/audit/hash_check.log 2>&1",
-            "45 3 * * * bash /root/zongyuan-meta-order/scripts/meta_order_tidy_cloud.sh >> /root/zongyuan-meta-order/logs/cron_run.log 2>&1",
-            "0 3 * * * /usr/local/bin/zongyuan_remote_backup.sh >> /var/log/remote_backup.log 2>&1",
-            "0 4 * * * /usr/local/bin/octop_daily_restart.sh",
-            "0 * * * * /usr/bin/python3 /usr/local/bin/zr_auto_archive.py >> /var/log/zr_auto_archive.log 2>&1",
-            "5 * * * * /usr/bin/python3 /usr/local/bin/zr_health_check.py >> /var/log/zr_health.log 2>&1",
-            "0 * * * * /usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/zr_memory_lifecycle.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/memory_lifecycle.log 2>&1",
-            "*/2 * * * * /usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/upstream_event_engine.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/upstream_event.log 2>&1",
-            "*/30 * * * * cd /www/wwwroot/huodouai.com/self-check && python3 engine.py >> cron.log 2>&1",
-            "0 2 * * * cd /www/wwwroot/huodouai.com/architecture && python3 autodiscover.py >> autodiscover.log 2>&1",
-            "0 3 * * * cd /www/wwwroot/huodouai.com/architecture && python3 evolution_chain.py >> evolution_chain.log 2>&1",
-            "20 6 * * * flock -xn /tmp/zr_distill_orch.lock -c \"cd /www/wwwroot/huodouai.com/atomcode-worker && /usr/bin/python3 auto_distill_orchestrator.py >> /www/wwwroot/huodouai.com/atomcode-worker/distill_cron.log 2>&1\"",
-            "17 */3 * * * bash /www/wwwroot/huodouai.com/zhongshu/kernel-evolve/cloud_kernel_evolve.sh >> /www/wwwroot/huodouai.com/zhongshu/kernel-evolve/cloud_evolve.log 2>&1",
-            "27 */3 * * * cd /root/.octop/federation && /root/.octop/venv/bin/python3 heartbeat_failover.py >> /root/.octop/logs/heartbeat_failover.log 2>&1",
-            "50 5 * * * /usr/local/bin/cloud_env_selfheal.sh",
-            "25 */3 * * * /usr/local/bin/executor_sync.sh",
-            "17 */6 * * * /bin/bash /usr/local/bin/atomcode_auto_renew.sh >> /var/log/atomcode_renew.cron.log 2>&1 # ZONGYUAN-ROOT atomcode auto-renew",
-            "*/10 * * * * python3 /usr/local/bin/hub_heartbeat_db.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/hub_heartbeat_db.log 2>&1"
+            "30 4 * * * /usr/local/nginx/auto_fix_broken.sh >> /var/log/broken_link_fix.log 2>&1"
           ],
           "octop": [
             {
@@ -216,6 +130,7 @@
           "systemd": [
             "dal-gateway.service",
             "octop-register.service",
+            "steady_evolve.service",
             "yuanji-wrapper-18089.service",
             "yuanji-wrapper-18090.service",
             "yuanji-wrapper-18091.service",
@@ -238,51 +153,568 @@
             {
               "name": "gateway_steady_probe",
               "interval_sec": 1800,
+              "cron": null,
               "enabled": true
             },
             {
               "name": "endpoint_contract_check",
               "interval_sec": 21600,
+              "cron": null,
               "enabled": true
             },
             {
               "name": "atomcode_auto_renew",
               "interval_sec": 21600,
+              "cron": null,
               "enabled": true
             },
             {
               "name": "runstate_selfcheck",
               "interval_sec": 86400,
+              "cron": null,
               "enabled": true
             },
             {
               "name": "lite_registry_check",
               "interval_sec": 43200,
+              "cron": null,
               "enabled": true
             },
             {
               "name": "tri_distill_round",
               "interval_sec": 86400,
+              "cron": null,
               "enabled": false
             },
             {
               "name": "config_registry_drift",
               "interval_sec": 3600,
+              "cron": null,
+              "enabled": true
+            },
+            {
+              "name": "cron_status_aggregator",
+              "interval_sec": null,
+              "cron": "*/1 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_cloud_heartbeat",
+              "interval_sec": null,
+              "cron": "*/2 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zr_worker",
+              "interval_sec": null,
+              "cron": "*/2 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_dynamic_dash",
+              "interval_sec": null,
+              "cron": "*/2 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zhongshu_health",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_alert",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_autonomy",
+              "interval_sec": null,
+              "cron": "*/10 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_nodes_heartbeat",
+              "interval_sec": null,
+              "cron": "*/30 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_selfheal_check_mem",
+              "interval_sec": null,
+              "cron": "*/30 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_hub_heartbeat_db",
+              "interval_sec": null,
+              "cron": "*/10 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_drift_patrol",
+              "interval_sec": null,
+              "cron": "0 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_validator",
+              "interval_sec": null,
+              "cron": "0 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zhongshu_metrics",
+              "interval_sec": null,
+              "cron": "*/30 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zhongshu_bootstrap",
+              "interval_sec": null,
+              "cron": "*/30 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zhongshu_evolve",
+              "interval_sec": null,
+              "cron": "30 2 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zhongshu_arbiter",
+              "interval_sec": null,
+              "cron": "0 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_cloud_ssh_audit",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_autoupdate_backup",
+              "interval_sec": null,
+              "cron": "0 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_autoupdate_cleanup",
+              "interval_sec": null,
+              "cron": "0 4 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_baseline",
+              "interval_sec": null,
+              "cron": "0 5 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_sfmp_gc",
+              "interval_sec": null,
+              "cron": "30 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_baidu_push",
+              "interval_sec": null,
+              "cron": "0 8 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_self_optimizer",
+              "interval_sec": null,
+              "cron": "0 */6 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_meta_learner",
+              "interval_sec": null,
+              "cron": "30 4 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_smart_backup",
+              "interval_sec": null,
+              "cron": "30 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_gov_watchdog",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_daily_distill",
+              "interval_sec": null,
+              "cron": "0 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_discover",
+              "interval_sec": null,
+              "cron": "0 6 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_claimer",
+              "interval_sec": null,
+              "cron": "10 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_build_embed_index",
+              "interval_sec": null,
+              "cron": "47 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_heal",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_kernel_score",
+              "interval_sec": null,
+              "cron": "30 5 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_health_check_all",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_evolve",
+              "interval_sec": null,
+              "cron": "0 6 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_fix",
+              "interval_sec": null,
+              "cron": "*/10 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_suggest",
+              "interval_sec": null,
+              "cron": "0 9 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_self_optimize",
+              "interval_sec": null,
+              "cron": "0 7 * * 0",
+              "enabled": true
+            },
+            {
+              "name": "cron_predictive",
+              "interval_sec": null,
+              "cron": "*/30 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_meta_learn",
+              "interval_sec": null,
+              "cron": "0 8 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_ab_test",
+              "interval_sec": null,
+              "cron": "*/15 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_federate",
+              "interval_sec": null,
+              "cron": "*/30 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_arch_refactor",
+              "interval_sec": null,
+              "cron": "0 7 * * 1",
+              "enabled": true
+            },
+            {
+              "name": "cron_cognitive_loop",
+              "interval_sec": null,
+              "cron": "0 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_decision_engine",
+              "interval_sec": null,
+              "cron": "*/15 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_update_autonomy",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_evolution_loop",
+              "interval_sec": null,
+              "cron": "0 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_model_monitor",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_extract_all",
+              "interval_sec": null,
+              "cron": "*/30 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_seed_refine",
+              "interval_sec": null,
+              "cron": "30 */6 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_extract_from_free_llm",
+              "interval_sec": null,
+              "cron": "0 4 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_truth_snapshot_atomgit",
+              "interval_sec": null,
+              "cron": "20 2 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_atomgit_patrol",
+              "interval_sec": null,
+              "cron": "20 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_docs_sync",
+              "interval_sec": null,
+              "cron": "20 4 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_web_patrol",
+              "interval_sec": null,
+              "cron": "20 5 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_sitemap_gen",
+              "interval_sec": null,
+              "cron": "20 6 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_usage_stats",
+              "interval_sec": null,
+              "cron": "*/30 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_status_sync_api",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_product_tables_sync",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zr_monitor",
+              "interval_sec": null,
+              "cron": "*/15 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zr_truth_pipeline",
+              "interval_sec": null,
+              "cron": "30 5 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zr_backup_sync",
+              "interval_sec": null,
+              "cron": "0 5 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zhongshu_seed_gen",
+              "interval_sec": null,
+              "cron": "7 */3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_weekly_truth_inspect",
+              "interval_sec": null,
+              "cron": "0 9 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_octop_a2a_heartbeat",
+              "interval_sec": null,
+              "cron": "*/5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_rag_selfcheck",
+              "interval_sec": null,
+              "cron": "30 6 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_extract_rules",
+              "interval_sec": null,
+              "cron": "0 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_daily-report",
+              "interval_sec": null,
+              "cron": "0 9 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_gen_regist_gallery",
+              "interval_sec": null,
+              "cron": "0 8 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_kg_daily",
+              "interval_sec": null,
+              "cron": "10 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zongyuan_hash_check",
+              "interval_sec": null,
+              "cron": "0 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_meta_order_tidy_cloud",
+              "interval_sec": null,
+              "cron": "45 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zongyuan_remote_backup",
+              "interval_sec": null,
+              "cron": "0 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_octop_daily_restart",
+              "interval_sec": null,
+              "cron": "0 4 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zr_auto_archive",
+              "interval_sec": null,
+              "cron": "0 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zr_health_check",
+              "interval_sec": null,
+              "cron": "5 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_zr_memory_lifecycle",
+              "interval_sec": null,
+              "cron": "0 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_upstream_event_engine",
+              "interval_sec": null,
+              "cron": "*/2 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_engine",
+              "interval_sec": null,
+              "cron": "*/30 * * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_autodiscover",
+              "interval_sec": null,
+              "cron": "0 2 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_evolution_chain",
+              "interval_sec": null,
+              "cron": "0 3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_auto_distill_orchestrator",
+              "interval_sec": null,
+              "cron": "20 6 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_cloud_kernel_evolve",
+              "interval_sec": null,
+              "cron": "17 */3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_heartbeat_failover",
+              "interval_sec": null,
+              "cron": "27 */3 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_cloud_env_selfheal",
+              "interval_sec": null,
+              "cron": "50 5 * * *",
+              "enabled": true
+            },
+            {
+              "name": "cron_executor_sync",
+              "interval_sec": null,
+              "cron": "25 */3 * * *",
               "enabled": true
             }
           ],
           "counts": {
-            "crontab": 93,
+            "crontab": 7,
             "octop": 10,
-            "systemd": 19,
-            "periodic_tasks": 7
+            "systemd": 20,
+            "periodic_tasks": 92
           }
         },
         "type": "dict",
         "risk": "low",
         "auto": true,
         "desc": "调度三合一盘点(crontab/octop/systemd/periodic-tasks)",
-        "updated": "2026-10-22T12:23:45+08:00"
+        "updated": "2026-10-22T13:09:41+08:00"
       }
     },
     "runtime": {

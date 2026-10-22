@@ -3,13 +3,18 @@
   "did": "DID-BR-000002",
   "anchor": "Ω₀⊂⊙∞⊂Ω",
   "note": "周期任务唯一事实源(持久层)。沙箱/实例重置后由 steady_evolve_bootstrap.sh 按本文件重建调度; 任务定义只在此处增删, 不散落在内存态调度器。",
-  "updated": "2026-10-22T13:30:00+08:00",
+  "updated": "2026-10-22T12:51:49+08:00",
   "tasks": [
     {
       "name": "gateway_steady_probe",
       "interval_sec": 1800,
       "enabled": true,
-      "cmd": ["python3", "{scripts}/steady_evolve.py", "run", "gateway_steady_probe"],
+      "cmd": [
+        "python3",
+        "{scripts}/steady_evolve.py",
+        "run",
+        "gateway_steady_probe"
+      ],
       "desc": "心跳新鲜度+基础状态探针: heartbeat滞后>6h 或 status不可达 → 告警(带去重, 每告警窗最多一次)",
       "risk": "low"
     },
@@ -17,7 +22,12 @@
       "name": "endpoint_contract_check",
       "interval_sec": 21600,
       "enabled": true,
-      "cmd": ["python3", "{scripts}/steady_evolve.py", "run", "endpoint_contract_check"],
+      "cmd": [
+        "python3",
+        "{scripts}/steady_evolve.py",
+        "run",
+        "endpoint_contract_check"
+      ],
       "desc": "端点契约探测: 已文档化端点200/404实测, 漂移写入报告+告警, 消除文档指空路",
       "risk": "low"
     },
@@ -25,7 +35,9 @@
       "name": "atomcode_auto_renew",
       "interval_sec": 21600,
       "enabled": true,
-      "cmd": ["/usr/local/bin/atomcode_auto_renew.sh"],
+      "cmd": [
+        "/usr/local/bin/atomcode_auto_renew.sh"
+      ],
       "desc": "AtomCode CodingPlan Lite 自动续领(幂等非交互, 以输出含Plan:为成功); 二进制缺失时自检标记skip并上报",
       "requires_bin": "atomcode",
       "risk": "low"
@@ -34,7 +46,12 @@
       "name": "runstate_selfcheck",
       "interval_sec": 86400,
       "enabled": true,
-      "cmd": ["python3", "{scripts}/steady_evolve.py", "run", "runstate_selfcheck"],
+      "cmd": [
+        "python3",
+        "{scripts}/steady_evolve.py",
+        "run",
+        "runstate_selfcheck"
+      ],
       "desc": "运行态自检: 调度器存活/crontab缺失漂移/日志文件缺失/git工作区漂移汇总, 产出日检JSON",
       "risk": "low"
     },
@@ -42,7 +59,12 @@
       "name": "lite_registry_check",
       "interval_sec": 43200,
       "enabled": true,
-      "cmd": ["python3", "{root}/00_KERNEL/lite_replicate/lite_replicate.py", "verify", "--all"],
+      "cmd": [
+        "python3",
+        "{root}/00_KERNEL/lite_replicate/lite_replicate.py",
+        "verify",
+        "--all"
+      ],
       "desc": "12h 跑 LITE-REPLICATE-V1 在册工程测试(unittest零依赖), 失败记录last_check_fail并入台账 (S4持久运行)",
       "risk": "low"
     },
@@ -50,8 +72,14 @@
       "name": "tri_distill_round",
       "interval_sec": 86400,
       "enabled": false,
-      "enabled_on": ["cloud-hub"],
-      "cmd": ["python3", "{root}/00_KERNEL/tri_distill/tri_distill.py", "round"],
+      "enabled_on": [
+        "cloud-hub"
+      ],
+      "cmd": [
+        "python3",
+        "{root}/00_KERNEL/tri_distill/tri_distill.py",
+        "round"
+      ],
       "desc": "24h 三维算力蒸馏轮(TRI-DISTILL-V1): Q×C×L 测量全部enabled基座→蒸馏路由→写记忆内核(DISTILL.ROUND/ROUTING键)。执行位=云端daemon(基座127.0.0.1:18081在云端; 本机禁用防127.0.0.1不通污染ROUTING)",
       "risk": "low"
     },
@@ -59,9 +87,779 @@
       "name": "config_registry_drift",
       "interval_sec": 3600,
       "enabled": true,
-      "cmd": ["python3", "{scripts}/steady_evolve.py", "run", "config_registry_drift"],
+      "cmd": [
+        "python3",
+        "{scripts}/steady_evolve.py",
+        "run",
+        "config_registry_drift"
+      ],
       "desc": "统一配置台漂移检测(1h): autonomy读回/看门狗端口覆盖/调度盘点陈旧(自动重采集)/密钥引用存在性; 未自愈类带6h时间窗告警; 非运行态主机自动skip",
       "risk": "low"
+    },
+    {
+      "name": "cron_status_aggregator",
+      "cron": "*/1 * * * *",
+      "cmd": "/usr/local/bin/status_aggregator.py >> /www/wwwroot/huodouai.com/zhongshu/status/aggregator.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#49 */1 * * * * /usr/local/bin/status_aggregator.py >> /www/wwwroot/huodouai.com/zhongshu/status/aggrega"
+    },
+    {
+      "name": "cron_cloud_heartbeat",
+      "cron": "*/2 * * * *",
+      "cmd": "bash /usr/local/bin/cloud_heartbeat.sh >> /www/wwwroot/huodouai.com/zhongshu/data/logs/cloud_heartbeat.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#67 */2 * * * * bash /usr/local/bin/cloud_heartbeat.sh >> /www/wwwroot/huodouai.com/zhongshu/data/logs/c"
+    },
+    {
+      "name": "cron_zr_worker",
+      "cron": "*/2 * * * *",
+      "cmd": "flock -x /tmp/zr_worker.lock -c \"/usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/zr_worker.py 2>> /www/wwwroot/huodouai.com/zhongshu/data/logs/worker.err\"",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#70 */2 * * * * flock -x /tmp/zr_worker.lock -c \"/usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zho"
+    },
+    {
+      "name": "cron_dynamic_dash",
+      "cron": "*/2 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/dynamic_dash.py",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#47 */2 * * * * python3 /root/zongyuan-yuanji/scripts/dynamic_dash.py"
+    },
+    {
+      "name": "cron_zhongshu_health",
+      "cron": "*/5 * * * *",
+      "cmd": "/usr/local/bin/zhongshu_health.sh >/dev/null 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#03 */5 * * * * /usr/local/bin/zhongshu_health.sh >/dev/null 2>&1"
+    },
+    {
+      "name": "cron_alert",
+      "cron": "*/5 * * * *",
+      "cmd": "/root/zongyuan-yuanji/scripts/alert.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#14 */5 * * * * /root/zongyuan-yuanji/scripts/alert.sh"
+    },
+    {
+      "name": "cron_autonomy",
+      "cron": "*/10 * * * *",
+      "cmd": "/root/zongyuan-yuanji/scripts/autonomy.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#13 */10 * * * * /root/zongyuan-yuanji/scripts/autonomy.sh"
+    },
+    {
+      "name": "cron_nodes_heartbeat",
+      "cron": "*/30 * * * *",
+      "cmd": "curl -sS -k https://127.0.0.1:18080/nodes/heartbeat -X POST -H \"Content-Type: application/json\" -d \"{\\\"did\\\":\\\"DID-BR-000002-CLOUD\\\",\\\"name\\\":\\\"云端中枢\\\"}\" >/dev/null 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#20 */30 * * * * curl -sS -k https://127.0.0.1:18080/nodes/heartbeat -X POST -H \"Content-Type: applicati"
+    },
+    {
+      "name": "cron_selfheal_check_mem",
+      "cron": "*/30 * * * *",
+      "cmd": "curl -sSk https://127.0.0.1:18080/selfheal -X POST -H \"Content-Type: application/json\" -d \"{\\\"action\\\":\\\"check_mem\\\"}\"",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#12 */30 * * * * curl -sS http://127.0.0.1:18080/selfheal -X POST -H \"Content-Type: application/json\" -d"
+    },
+    {
+      "name": "cron_hub_heartbeat_db",
+      "cron": "*/10 * * * *",
+      "cmd": "python3 /usr/local/bin/hub_heartbeat_db.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/hub_heartbeat_db.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#93 */10 * * * * python3 /usr/local/bin/hub_heartbeat_db.py >> /www/wwwroot/huodouai.com/zhongshu/data/l"
+    },
+    {
+      "name": "cron_drift_patrol",
+      "cron": "0 * * * *",
+      "cmd": "python3 /opt/ZONGYUAN-ROOT/00_KERNEL/scripts/drift_patrol.py >> /opt/ZONGYUAN-ROOT/logs/drift_patrol.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#62 0 * * * * python3 /opt/ZONGYUAN-ROOT/00_KERNEL/scripts/drift_patrol.py >> /opt/ZONGYUAN-ROOT/logs/dr"
+    },
+    {
+      "name": "cron_validator",
+      "cron": "0 * * * *",
+      "cmd": "cd /root/zongyuan-yuanji && /usr/bin/python3 src/validator.py >> logs/validator.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#22 0 * * * * cd /root/zongyuan-yuanji && /usr/bin/python3 src/validator.py >> logs/validator.log 2>&1"
+    },
+    {
+      "name": "cron_zhongshu_metrics",
+      "cron": "*/30 * * * *",
+      "cmd": "/usr/local/bin/zhongshu_metrics.sh >> /www/wwwroot/huodouai.com/zhongshu/data/metrics/run.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#04 */30 * * * * /usr/local/bin/zhongshu_metrics.sh >> /www/wwwroot/huodouai.com/zhongshu/data/metrics/r"
+    },
+    {
+      "name": "cron_zhongshu_bootstrap",
+      "cron": "*/30 * * * *",
+      "cmd": "/usr/local/bin/zhongshu_bootstrap.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#05 */30 * * * * /usr/local/bin/zhongshu_bootstrap.sh"
+    },
+    {
+      "name": "cron_zhongshu_evolve",
+      "cron": "30 2 * * *",
+      "cmd": "/usr/local/bin/zhongshu_evolve.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#06 30 2 * * * /usr/local/bin/zhongshu_evolve.sh"
+    },
+    {
+      "name": "cron_zhongshu_arbiter",
+      "cron": "0 * * * *",
+      "cmd": "/usr/local/bin/zhongshu_arbiter.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#07 0 * * * * /usr/local/bin/zhongshu_arbiter.sh"
+    },
+    {
+      "name": "cron_cloud_ssh_audit",
+      "cron": "*/5 * * * *",
+      "cmd": "/usr/local/bin/cloud_ssh_audit.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#08 */5 * * * * /usr/local/bin/cloud_ssh_audit.sh"
+    },
+    {
+      "name": "cron_autoupdate_backup",
+      "cron": "0 3 * * *",
+      "cmd": "curl -sSk https://127.0.0.1:18080/autoupdate -X POST -H \"Content-Type: application/json\" -d \"{\\\"action\\\":\\\"backup\\\"}\"",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#10 0 3 * * * curl -sS http://127.0.0.1:18080/autoupdate -X POST -H \"Content-Type: application/json\" -d "
+    },
+    {
+      "name": "cron_autoupdate_cleanup",
+      "cron": "0 4 * * *",
+      "cmd": "curl -sSk https://127.0.0.1:18080/autoupdate -X POST -H \"Content-Type: application/json\" -d \"{\\\"action\\\":\\\"cleanup\\\"}\"",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#11 0 4 * * * curl -sS http://127.0.0.1:18080/autoupdate -X POST -H \"Content-Type: application/json\" -d "
+    },
+    {
+      "name": "cron_auto_baseline",
+      "cron": "0 5 * * *",
+      "cmd": "/root/zongyuan-yuanji/scripts/auto_baseline.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#15 0 5 * * * /root/zongyuan-yuanji/scripts/auto_baseline.sh"
+    },
+    {
+      "name": "cron_sfmp_gc",
+      "cron": "30 3 * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/sfmp_gc.py",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#21 30 3 * * * python3 /root/zongyuan-yuanji/scripts/sfmp_gc.py"
+    },
+    {
+      "name": "cron_baidu_push",
+      "cron": "0 8 * * *",
+      "cmd": "/root/zongyuan-yuanji/scripts/baidu_push.sh >> /root/zongyuan-yuanji/logs/baidu_push.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#23 0 8 * * * /root/zongyuan-yuanji/scripts/baidu_push.sh >> /root/zongyuan-yuanji/logs/baidu_push.log 2"
+    },
+    {
+      "name": "cron_self_optimizer",
+      "cron": "0 */6 * * *",
+      "cmd": "/usr/bin/python3 /usr/local/bin/self_optimizer.py >> /root/zongyuan-yuanji/logs/self-opt.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#24 0 */6 * * * /usr/bin/python3 /usr/local/bin/self_optimizer.py >> /root/zongyuan-yuanji/logs/self-opt"
+    },
+    {
+      "name": "cron_meta_learner",
+      "cron": "30 4 * * *",
+      "cmd": "/usr/bin/python3 /usr/local/bin/meta_learner.py >> /root/zongyuan-yuanji/logs/meta-learner.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#25 30 4 * * * /usr/bin/python3 /usr/local/bin/meta_learner.py >> /root/zongyuan-yuanji/logs/meta-learne"
+    },
+    {
+      "name": "cron_smart_backup",
+      "cron": "30 3 * * *",
+      "cmd": "/root/zongyuan-yuanji/scripts/smart_backup.sh >> /root/zongyuan-yuanji/logs/backup.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#26 30 3 * * * /root/zongyuan-yuanji/scripts/smart_backup.sh >> /root/zongyuan-yuanji/logs/backup.log 2>"
+    },
+    {
+      "name": "cron_gov_watchdog",
+      "cron": "*/5 * * * *",
+      "cmd": "/usr/local/bin/gov_watchdog.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#27 */5 * * * * /usr/local/bin/gov_watchdog.sh"
+    },
+    {
+      "name": "cron_daily_distill",
+      "cron": "0 3 * * *",
+      "cmd": "/usr/bin/python3 /root/zongyuan-yuanji/scripts/daily_distill.py >> /root/zongyuan-yuanji/logs/distill.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#28 0 3 * * * /usr/bin/python3 /root/zongyuan-yuanji/scripts/daily_distill.py >> /root/zongyuan-yuanji/l"
+    },
+    {
+      "name": "cron_auto_discover",
+      "cron": "0 6 * * *",
+      "cmd": "/usr/bin/python3 /root/zongyuan-yuanji/scripts/auto_discover.py >> /www/wwwroot/huodouai.com/zhongshu/data/probe.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#29 0 6 * * * /usr/bin/python3 /root/zongyuan-yuanji/scripts/auto_discover.py >> /www/wwwroot/huodouai.c"
+    },
+    {
+      "name": "cron_auto_claimer",
+      "cron": "10 * * * *",
+      "cmd": "python3 /usr/local/bin/auto_claimer.py >> /var/log/auto_claimer.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#30 10 * * * * python3 /usr/local/bin/auto_claimer.py >> /var/log/auto_claimer.log 2>&1"
+    },
+    {
+      "name": "cron_build_embed_index",
+      "cron": "47 3 * * *",
+      "cmd": "flock -xn /tmp/embed_build.lock -c \"/usr/local/bin/build_embed_index.py >> /www/wwwroot/huodouai.com/zhongshu/data/truth/embed_build.log 2>&1\"",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#31 47 3 * * * flock -xn /tmp/embed_build.lock -c \"/usr/local/bin/build_embed_index.py >> /www/wwwroot/h"
+    },
+    {
+      "name": "cron_auto_heal",
+      "cron": "*/5 * * * *",
+      "cmd": "/usr/local/bin/auto_heal.py >> /var/log/auto_heal.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#32 */5 * * * * /usr/local/bin/auto_heal.py >> /var/log/auto_heal.log 2>&1"
+    },
+    {
+      "name": "cron_kernel_score",
+      "cron": "30 5 * * *",
+      "cmd": "/usr/bin/python3 /usr/local/bin/kernel_score.py >> /www/wwwroot/huodouai.com/zhongshu/data/metrics/kernel-score.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#33 30 5 * * * /usr/bin/python3 /usr/local/bin/kernel_score.py >> /www/wwwroot/huodouai.com/zhongshu/dat"
+    },
+    {
+      "name": "cron_health_check_all",
+      "cron": "*/5 * * * *",
+      "cmd": "/usr/local/bin/health_check_all.sh >> /var/log/health_check.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#34 */5 * * * * /usr/local/bin/health_check_all.sh >> /var/log/health_check.log 2>&1"
+    },
+    {
+      "name": "cron_auto_evolve",
+      "cron": "0 6 * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/auto_evolve.py >> /root/zongyuan-yuanji/logs/auto-evolve.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#35 0 6 * * * python3 /root/zongyuan-yuanji/scripts/auto_evolve.py >> /root/zongyuan-yuanji/logs/auto-ev"
+    },
+    {
+      "name": "cron_auto_fix",
+      "cron": "*/10 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/auto_fix.py >> /root/zongyuan-yuanji/logs/auto-fix.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#36 */10 * * * * python3 /root/zongyuan-yuanji/scripts/auto_fix.py >> /root/zongyuan-yuanji/logs/auto-fi"
+    },
+    {
+      "name": "cron_auto_suggest",
+      "cron": "0 9 * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/auto_suggest.py >> /root/zongyuan-yuanji/logs/auto-suggest.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#37 0 9 * * * python3 /root/zongyuan-yuanji/scripts/auto_suggest.py >> /root/zongyuan-yuanji/logs/auto-s"
+    },
+    {
+      "name": "cron_self_optimize",
+      "cron": "0 7 * * 0",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/self_optimize.py >> /root/zongyuan-yuanji/logs/self-optimize.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#38 0 7 * * 0 python3 /root/zongyuan-yuanji/scripts/self_optimize.py >> /root/zongyuan-yuanji/logs/self-"
+    },
+    {
+      "name": "cron_predictive",
+      "cron": "*/30 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/predictive.py >> /root/zongyuan-yuanji/logs/predictive.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#39 */30 * * * * python3 /root/zongyuan-yuanji/scripts/predictive.py >> /root/zongyuan-yuanji/logs/predi"
+    },
+    {
+      "name": "cron_meta_learn",
+      "cron": "0 8 * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/meta_learn.py >> /root/zongyuan-yuanji/logs/meta-learn.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#40 0 8 * * * python3 /root/zongyuan-yuanji/scripts/meta_learn.py >> /root/zongyuan-yuanji/logs/meta-lea"
+    },
+    {
+      "name": "cron_ab_test",
+      "cron": "*/15 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/ab_test.py >> /root/zongyuan-yuanji/logs/ab-test.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#41 */15 * * * * python3 /root/zongyuan-yuanji/scripts/ab_test.py >> /root/zongyuan-yuanji/logs/ab-test."
+    },
+    {
+      "name": "cron_federate",
+      "cron": "*/30 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/federate.py >> /root/zongyuan-yuanji/logs/federate.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#42 */30 * * * * python3 /root/zongyuan-yuanji/scripts/federate.py >> /root/zongyuan-yuanji/logs/federat"
+    },
+    {
+      "name": "cron_arch_refactor",
+      "cron": "0 7 * * 1",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/arch_refactor.py >> /root/zongyuan-yuanji/logs/arch-refactor.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#43 0 7 * * 1 python3 /root/zongyuan-yuanji/scripts/arch_refactor.py >> /root/zongyuan-yuanji/logs/arch-"
+    },
+    {
+      "name": "cron_cognitive_loop",
+      "cron": "0 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/cognitive_loop.py >> /root/zongyuan-yuanji/logs/cognitive.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#44 0 * * * * python3 /root/zongyuan-yuanji/scripts/cognitive_loop.py >> /root/zongyuan-yuanji/logs/cogn"
+    },
+    {
+      "name": "cron_decision_engine",
+      "cron": "*/15 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/decision_engine.py >> /root/zongyuan-yuanji/logs/decision.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#45 */15 * * * * python3 /root/zongyuan-yuanji/scripts/decision_engine.py >> /root/zongyuan-yuanji/logs/"
+    },
+    {
+      "name": "cron_update_autonomy",
+      "cron": "*/5 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/update_autonomy.py",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#46 */5 * * * * python3 /root/zongyuan-yuanji/scripts/update_autonomy.py"
+    },
+    {
+      "name": "cron_evolution_loop",
+      "cron": "0 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/evolution_loop.py >> /root/zongyuan-yuanji/logs/evolution-loop.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#48 0 * * * * python3 /root/zongyuan-yuanji/scripts/evolution_loop.py >> /root/zongyuan-yuanji/logs/evol"
+    },
+    {
+      "name": "cron_model_monitor",
+      "cron": "*/5 * * * *",
+      "cmd": "/usr/local/bin/model_monitor.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#50 */5 * * * * /usr/local/bin/model_monitor.sh"
+    },
+    {
+      "name": "cron_auto_extract_all",
+      "cron": "*/30 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/auto_extract_all.py",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#51 */30 * * * * python3 /root/zongyuan-yuanji/scripts/auto_extract_all.py"
+    },
+    {
+      "name": "cron_auto_seed_refine",
+      "cron": "30 */6 * * *",
+      "cmd": "cd /root/zongyuan-yuanji && python3 scripts/auto_seed_refine.py >> /tmp/seed_refine_cron.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#52 30 */6 * * * cd /root/zongyuan-yuanji && python3 scripts/auto_seed_refine.py >> /tmp/seed_refine_cro"
+    },
+    {
+      "name": "cron_extract_from_free_llm",
+      "cron": "0 4 * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/extract_from_free_llm.py >> /root/zongyuan-yuanji/logs/free_extract.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#53 0 4 * * * python3 /root/zongyuan-yuanji/scripts/extract_from_free_llm.py >> /root/zongyuan-yuanji/lo"
+    },
+    {
+      "name": "cron_truth_snapshot_atomgit",
+      "cron": "20 2 * * *",
+      "cmd": "cd /root/zongyuan-yuanji && python3 scripts/truth_snapshot_atomgit.py >> /tmp/truth_snapshot.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#54 20 2 * * * cd /root/zongyuan-yuanji && python3 scripts/truth_snapshot_atomgit.py >> /tmp/truth_snaps"
+    },
+    {
+      "name": "cron_atomgit_patrol",
+      "cron": "20 3 * * *",
+      "cmd": "cd /root/zongyuan-yuanji && python3 scripts/atomgit_patrol.py >> /tmp/atomgit_patrol.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#55 20 3 * * * cd /root/zongyuan-yuanji && python3 scripts/atomgit_patrol.py >> /tmp/atomgit_patrol.log "
+    },
+    {
+      "name": "cron_docs_sync",
+      "cron": "20 4 * * *",
+      "cmd": "cd /root/zongyuan-yuanji && python3 scripts/docs_sync.py >> /tmp/docs_sync.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#56 20 4 * * * cd /root/zongyuan-yuanji && python3 scripts/docs_sync.py >> /tmp/docs_sync.log 2>&1"
+    },
+    {
+      "name": "cron_web_patrol",
+      "cron": "20 5 * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/web_patrol.py >> /tmp/web_patrol.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#57 20 5 * * * python3 /root/zongyuan-yuanji/scripts/web_patrol.py >> /tmp/web_patrol.log 2>&1"
+    },
+    {
+      "name": "cron_sitemap_gen",
+      "cron": "20 6 * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/sitemap_gen.py >> /tmp/sitemap_gen.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#58 20 6 * * * python3 /root/zongyuan-yuanji/scripts/sitemap_gen.py >> /tmp/sitemap_gen.log 2>&1"
+    },
+    {
+      "name": "cron_usage_stats",
+      "cron": "*/30 * * * *",
+      "cmd": "python3 /root/zongyuan-yuanji/scripts/usage_stats.py >> /tmp/usage_stats.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#59 */30 * * * * python3 /root/zongyuan-yuanji/scripts/usage_stats.py >> /tmp/usage_stats.log 2>&1"
+    },
+    {
+      "name": "cron_status_sync_api",
+      "cron": "*/5 * * * *",
+      "cmd": "/usr/local/bin/status_sync_api.py >> /www/wwwroot/huodouai.com/zhongshu/status/status-sync.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#60 */5 * * * * /usr/local/bin/status_sync_api.py >> /www/wwwroot/huodouai.com/zhongshu/status/status-sy"
+    },
+    {
+      "name": "cron_product_tables_sync",
+      "cron": "*/5 * * * *",
+      "cmd": "/usr/local/bin/product_tables_sync.py >> /www/wwwroot/huodouai.com/zhongshu/status/product-sync.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#61 */5 * * * * /usr/local/bin/product_tables_sync.py >> /www/wwwroot/huodouai.com/zhongshu/status/produ"
+    },
+    {
+      "name": "cron_zr_monitor",
+      "cron": "*/15 * * * *",
+      "cmd": "/root/.octop/zr_monitor.sh >> /root/.octop/logs/monitor.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#63 */15 * * * * /root/.octop/zr_monitor.sh >> /root/.octop/logs/monitor.log 2>&1"
+    },
+    {
+      "name": "cron_zr_truth_pipeline",
+      "cron": "30 5 * * *",
+      "cmd": "/root/.octop/venv/bin/python3 /root/.octop/zr_truth_pipeline.py >> /root/.octop/logs/truth_pipeline.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#64 30 5 * * * /root/.octop/venv/bin/python3 /root/.octop/zr_truth_pipeline.py >> /root/.octop/logs/trut"
+    },
+    {
+      "name": "cron_zr_backup_sync",
+      "cron": "0 5 * * *",
+      "cmd": "/root/.octop/zr_backup_sync.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#65 0 5 * * * /root/.octop/zr_backup_sync.sh"
+    },
+    {
+      "name": "cron_zhongshu_seed_gen",
+      "cron": "7 */3 * * *",
+      "cmd": "python3 /usr/local/bin/zhongshu_seed_gen.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/seed_gen.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#66 7 */3 * * * python3 /usr/local/bin/zhongshu_seed_gen.py >> /www/wwwroot/huodouai.com/zhongshu/data/l"
+    },
+    {
+      "name": "cron_weekly_truth_inspect",
+      "cron": "0 9 * * *",
+      "cmd": "/root/weekly_truth_inspect.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#68 0 9 * * * /root/weekly_truth_inspect.sh # 云端中枢每日巡检 DID-BR-000002"
+    },
+    {
+      "name": "cron_octop_a2a_heartbeat",
+      "cron": "*/5 * * * *",
+      "cmd": "/root/octop_a2a_heartbeat.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#69 */5 * * * * /root/octop_a2a_heartbeat.sh # Octop A2A联邦心跳"
+    },
+    {
+      "name": "cron_rag_selfcheck",
+      "cron": "30 6 * * *",
+      "cmd": "bash /www/wwwroot/huodouai.com/zhongshu/scripts/rag_selfcheck.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#71 30 6 * * * bash /www/wwwroot/huodouai.com/zhongshu/scripts/rag_selfcheck.sh"
+    },
+    {
+      "name": "cron_auto_extract_rules",
+      "cron": "0 3 * * *",
+      "cmd": "/root/auto_extract_rules.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#72 0 3 * * * /root/auto_extract_rules.sh"
+    },
+    {
+      "name": "cron_daily-report",
+      "cron": "0 9 * * *",
+      "cmd": "/root/Omega-Brain-Core/02-Executor/daily-report.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#73 0 9 * * * /root/Omega-Brain-Core/02-Executor/daily-report.sh"
+    },
+    {
+      "name": "cron_gen_regist_gallery",
+      "cron": "0 8 * * *",
+      "cmd": "cd /root/zongyuan-yuanji && /usr/bin/python3 src/gen_regist_gallery.py >> /root/zongyuan-yuanji/logs/gallery.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#74 0 8 * * * cd /root/zongyuan-yuanji && /usr/bin/python3 src/gen_regist_gallery.py >> /root/zongyuan-y"
+    },
+    {
+      "name": "cron_kg_daily",
+      "cron": "10 3 * * *",
+      "cmd": "bash /opt/zongyuan-lake/kg_daily.sh >> /tmp/kg_cron.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#75 10 3 * * * bash /opt/zongyuan-lake/kg_daily.sh >> /tmp/kg_cron.log 2>&1"
+    },
+    {
+      "name": "cron_zongyuan_hash_check",
+      "cron": "0 * * * *",
+      "cmd": "/usr/local/bin/zongyuan_hash_check.sh >> /www/wwwroot/huodouai.com/zhongshu/data/audit/hash_check.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#76 0 * * * * /usr/local/bin/zongyuan_hash_check.sh >> /www/wwwroot/huodouai.com/zhongshu/data/audit/has"
+    },
+    {
+      "name": "cron_meta_order_tidy_cloud",
+      "cron": "45 3 * * *",
+      "cmd": "bash /root/zongyuan-meta-order/scripts/meta_order_tidy_cloud.sh >> /root/zongyuan-meta-order/logs/cron_run.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#77 45 3 * * * bash /root/zongyuan-meta-order/scripts/meta_order_tidy_cloud.sh >> /root/zongyuan-meta-or"
+    },
+    {
+      "name": "cron_zongyuan_remote_backup",
+      "cron": "0 3 * * *",
+      "cmd": "/usr/local/bin/zongyuan_remote_backup.sh >> /var/log/remote_backup.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#78 0 3 * * * /usr/local/bin/zongyuan_remote_backup.sh >> /var/log/remote_backup.log 2>&1"
+    },
+    {
+      "name": "cron_octop_daily_restart",
+      "cron": "0 4 * * *",
+      "cmd": "/usr/local/bin/octop_daily_restart.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#79 0 4 * * * /usr/local/bin/octop_daily_restart.sh"
+    },
+    {
+      "name": "cron_zr_auto_archive",
+      "cron": "0 * * * *",
+      "cmd": "/usr/bin/python3 /usr/local/bin/zr_auto_archive.py >> /var/log/zr_auto_archive.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#80 0 * * * * /usr/bin/python3 /usr/local/bin/zr_auto_archive.py >> /var/log/zr_auto_archive.log 2>&1"
+    },
+    {
+      "name": "cron_zr_health_check",
+      "cron": "5 * * * *",
+      "cmd": "/usr/bin/python3 /usr/local/bin/zr_health_check.py >> /var/log/zr_health.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#81 5 * * * * /usr/bin/python3 /usr/local/bin/zr_health_check.py >> /var/log/zr_health.log 2>&1"
+    },
+    {
+      "name": "cron_zr_memory_lifecycle",
+      "cron": "0 * * * *",
+      "cmd": "/usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/zr_memory_lifecycle.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/memory_lifecycle.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#82 0 * * * * /usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/zr_memory_lifecycle.py"
+    },
+    {
+      "name": "cron_upstream_event_engine",
+      "cron": "*/2 * * * *",
+      "cmd": "/usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/upstream_event_engine.py >> /www/wwwroot/huodouai.com/zhongshu/data/logs/upstream_event.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#83 */2 * * * * /usr/bin/python3 /www/wwwroot/huodouai.com/zhongshu/zhongshu-server/upstream_event_engin"
+    },
+    {
+      "name": "cron_engine",
+      "cron": "*/30 * * * *",
+      "cmd": "cd /www/wwwroot/huodouai.com/self-check && python3 engine.py >> cron.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#84 */30 * * * * cd /www/wwwroot/huodouai.com/self-check && python3 engine.py >> cron.log 2>&1"
+    },
+    {
+      "name": "cron_autodiscover",
+      "cron": "0 2 * * *",
+      "cmd": "cd /www/wwwroot/huodouai.com/architecture && python3 autodiscover.py >> autodiscover.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#85 0 2 * * * cd /www/wwwroot/huodouai.com/architecture && python3 autodiscover.py >> autodiscover.log 2"
+    },
+    {
+      "name": "cron_evolution_chain",
+      "cron": "0 3 * * *",
+      "cmd": "cd /www/wwwroot/huodouai.com/architecture && python3 evolution_chain.py >> evolution_chain.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#86 0 3 * * * cd /www/wwwroot/huodouai.com/architecture && python3 evolution_chain.py >> evolution_chain"
+    },
+    {
+      "name": "cron_auto_distill_orchestrator",
+      "cron": "20 6 * * *",
+      "cmd": "flock -xn /tmp/zr_distill_orch.lock -c \"cd /www/wwwroot/huodouai.com/atomcode-worker && /usr/bin/python3 auto_distill_orchestrator.py >> /www/wwwroot/huodouai.com/atomcode-worker/distill_cron.log 2>&1\"",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#87 20 6 * * * flock -xn /tmp/zr_distill_orch.lock -c \"cd /www/wwwroot/huodouai.com/atomcode-worker && /"
+    },
+    {
+      "name": "cron_cloud_kernel_evolve",
+      "cron": "17 */3 * * *",
+      "cmd": "bash /www/wwwroot/huodouai.com/zhongshu/kernel-evolve/cloud_kernel_evolve.sh >> /www/wwwroot/huodouai.com/zhongshu/kernel-evolve/cloud_evolve.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#88 17 */3 * * * bash /www/wwwroot/huodouai.com/zhongshu/kernel-evolve/cloud_kernel_evolve.sh >> /www/ww"
+    },
+    {
+      "name": "cron_heartbeat_failover",
+      "cron": "27 */3 * * *",
+      "cmd": "cd /root/.octop/federation && /root/.octop/venv/bin/python3 heartbeat_failover.py >> /root/.octop/logs/heartbeat_failover.log 2>&1",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#89 27 */3 * * * cd /root/.octop/federation && /root/.octop/venv/bin/python3 heartbeat_failover.py >> /r"
+    },
+    {
+      "name": "cron_cloud_env_selfheal",
+      "cron": "50 5 * * *",
+      "cmd": "/usr/local/bin/cloud_env_selfheal.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#90 50 5 * * * /usr/local/bin/cloud_env_selfheal.sh"
+    },
+    {
+      "name": "cron_executor_sync",
+      "cron": "25 */3 * * *",
+      "cmd": "/usr/local/bin/executor_sync.sh",
+      "cwd": "/root",
+      "enabled": true,
+      "risk": "low",
+      "desc": "收编自crontab#91 25 */3 * * * /usr/local/bin/executor_sync.sh"
     }
   ],
   "alerts": {
