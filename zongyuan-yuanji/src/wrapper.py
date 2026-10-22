@@ -39,6 +39,35 @@ def _err500(h, e):
     else:
         h._j(500, {"ok": False, "error": str(e)[:300]})
 
+def _video_status(h, tid):
+    # Agnes检索: video_id+model_name; completed归一为succeeded(下游orchestrator兼容)
+    # 20261022: 抽公共函数, do_POST(工作台body)与do_GET(orchestrator查询串)双入口共用
+    import urllib.request, json as _j, urllib.parse
+    req = urllib.request.Request(
+        "https://apihub.agnes-ai.com/agnesapi?video_id=" + urllib.parse.quote(tid) +
+        "&model_name=agnes-video-2.5-flash",
+        headers={"Authorization": "Bearer " + _pkey("agnes")},
+        method="GET"
+    )
+    try:
+        r = urllib.request.urlopen(req, timeout=15)
+        result = json.loads(r.read())
+        raw_status = result.get("status", "")
+        status = "succeeded" if raw_status == "completed" else raw_status
+        url = result.get("url", "") if raw_status == "completed" else ""
+        if url:
+            try:
+                import os as _os, time as _t
+                _os.makedirs("/www/wwwroot/huodouai.com/kunlun/videos/", exist_ok=True)
+                vname = "video_" + str(int(_t.time())) + ".mp4"
+                urllib.request.urlretrieve(url, "/www/wwwroot/huodouai.com/kunlun/videos/" + vname)
+                url = "https://www.huodouai.com/kunlun/videos/" + vname
+            except Exception: pass
+        h._j(200, {"ok": True, "status": status, "agnes_status": raw_status,
+                  "progress": result.get("progress"), "url": url, "raw": result})
+    except Exception as e:
+        _err500(h, e)
+
 try:
     PRELUDE = open("/root/zongyuan-yuanji/src/system_prompt.txt").read()
 except:
@@ -196,6 +225,13 @@ class H(BaseHTTPRequestHandler):
             for name,info in api_router.MODELS.items():
                 models.append({"id":name,"type":info.get("type"),"priority":info.get("priority")})
             self._j(200,{"object":"list","data":models})
+        elif self.path.startswith("/v1/video/status") or self.path.startswith("/video/status"):
+            # 20261022: GET查询串入口(orchestrator/外部清单用法), 与POST body入口共用逻辑
+            from urllib.parse import urlparse, parse_qs
+            tid = parse_qs(urlparse(self.path).query).get("task_id", [""])[0]
+            if not tid:
+                self._j(400, {"ok": False, "error": "task_id required"}); return
+            _video_status(self, tid)
         else: self._j(404,{"ok":False})
     def do_POST(self):
         n=int(self.headers.get("Content-Length",0))
@@ -293,33 +329,7 @@ class H(BaseHTTPRequestHandler):
             return
 
         if self.path == "/v1/video/status":
-            import urllib.request, json as _j, urllib.parse
-            tid = p.get("task_id", "")
-            # Agnes检索: video_id+model_name; completed归一为succeeded(下游orchestrator兼容)
-            req = urllib.request.Request(
-                "https://apihub.agnes-ai.com/agnesapi?video_id=" + urllib.parse.quote(tid) +
-                "&model_name=agnes-video-2.5-flash",
-                headers={"Authorization": "Bearer " + _pkey("agnes")},
-                method="GET"
-            )
-            try:
-                r = urllib.request.urlopen(req, timeout=15)
-                result = json.loads(r.read())
-                raw_status = result.get("status", "")
-                status = "succeeded" if raw_status == "completed" else raw_status
-                url = result.get("url", "") if raw_status == "completed" else ""
-                if url:
-                    try:
-                        import urllib.request as _ul, os as _os, time as _t
-                        _os.makedirs("/www/wwwroot/huodouai.com/kunlun/videos/", exist_ok=True)
-                        vname = "video_" + str(int(_t.time())) + ".mp4"
-                        _ul.urlretrieve(url, "/www/wwwroot/huodouai.com/kunlun/videos/" + vname)
-                        url = "https://www.huodouai.com/kunlun/videos/" + vname
-                    except: pass
-                self._j(200, {"ok": True, "status": status, "agnes_status": raw_status,
-                              "progress": result.get("progress"), "url": url, "raw": result})
-            except Exception as e:
-                _err500(self, e)
+            _video_status(self, p.get("task_id", ""))
             return
         if self.path == "/v1/image/upload":
             import base64 as _b64, time as _t
