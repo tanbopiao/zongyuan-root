@@ -1,0 +1,69 @@
+{
+  "version": "AGS-WHITELIST-V1.0",
+  "note": "Agent SSH 受控网关指令白名单模板: readonly=直通, mutate=需审批, deny=黑名单拦截; 未知命令一律按 mutate 处理(默认收紧)",
+  "readonly_commands": [
+    "ls", "cat", "head", "tail", "wc", "df", "du", "free", "uptime", "date",
+    "hostname", "id", "whoami", "pwd", "uname", "stat", "file", "md5sum",
+    "sha256sum", "cksum", "ps", "pgrep", "grep", "egrep", "fgrep", "sort",
+    "uniq", "cut", "tr", "tree", "which", "type", "command", "echo", "printf",
+    "env", "printenv", "lsblk", "lscpu", "lsmem", "lsmod", "diff", "readlink",
+    "realpath", "basename", "dirname", "test", "true", "false", "jq", "zcat",
+    "base64", "ping", "dig", "nslookup", "traceroute", "journalctl", "dmesg",
+    "ss", "netstat", "arp", "getent", "timeout"
+  ],
+  "mutate_commands": [
+    "touch", "mkdir", "rmdir", "cp", "mv", "ln", "tee", "truncate", "sed",
+    "find", "xargs", "curl", "wget", "systemctl", "service", "apt", "apt-get",
+    "yum", "dnf", "pip", "pip3", "npm", "gem", "git", "crontab", "at",
+    "echo_write_marker"
+  ],
+  "high_commands": [
+    "rm", "dd", "shutdown", "reboot", "halt", "poweroff", "iptables",
+    "ip6tables", "nft", "ufw", "firewall-cmd", "sysctl", "useradd", "userdel",
+    "usermod", "groupadd", "groupdel", "passwd", "chpasswd", "visudo", "chmod",
+    "chown", "chgrp", "mount", "umount", "swapoff", "swapon", "kill",
+    "killall", "pkill", "ssh", "scp", "rsync", "sudo", "su", "docker",
+    "kubectl", "chroot", "nsenter", "unshare", "fdisk", "parted", "mkfs",
+    "mkswap", "losetup", "insmod", "rmmod", "modprobe"
+  ],
+  "readonly_verbs": {
+    "systemctl": ["status", "show", "list-units", "list-timers", "list-sockets", "is-active", "is-enabled", "is-failed", "cat", "help", "version", "status-preset"],
+    "crontab": ["-l", "--list"],
+    "git": ["status", "log", "diff", "show", "branch"],
+    "ip": ["addr", "link", "route", "neigh"]
+  },
+  "deny_patterns": [
+    ["eval_invoke", "\\beval\\b"],
+    ["shell_dash_c", "(?:^|[\\s;&|])(?:ba|z|da|k)?sh\\s+-c\\b"],
+    ["pipe_to_shell", "\\|\\s*(?:sudo\\s+)?(?:ba|z|da|k)?sh\\b"],
+    ["pipe_to_interpreter", "\\|\\s*(?:python[23]?|perl|ruby|node|lua)\\b"],
+    ["pipe_encoded_exec", "\\|\\s*(?:base64\\s+(?:-d|--decode)|xxd\\s+-r)"],
+    ["nc_shell", "\\bnc\\b[^\\n]*\\s-e\\b"],
+    ["fork_bomb", ":\\s*\\(\\s*\\)\\s*\\{|\\(\\)\\s*\\{[^}]*:\\|:&"],
+    ["raw_disk_write", ">\\s*/dev/(?:sd|nvme|hd|vd|xvd)[a-z0-9]"],
+    ["hist_evasion", "\\bhistory\\s+-c\\b|\\bunset\\s+HISTFILE\\b"],
+    ["awk_system", "\\bawk\\b[^\\n]*\\bsystem\\s*\\("],
+    ["rm_recursive_force_root", "\\brm\\s+(?:-\\S+\\s+)*-\\S+\\s*(?:(?:/|~|\\$HOME)(?=\\s|$|\\*)|/(?:boot|etc|usr|var|bin|sbin|lib|root|home|proc)(?:/|\\s|$))"],
+    ["python_dash_c", "\\bpython[23]?\\s+-[a-zA-Z]*c\\b"]
+  ],
+  "protected_paths": [
+    "/root/.ssh", "/.ssh/", "authorized_keys", "id_rsa", "id_ed25519",
+    "/etc/shadow", "/etc/sudoers", "/etc/ssh/", "/boot/", "/proc/sys/",
+    "/sys/kernel/", "/etc/pam.d/", "known_hosts"
+  ],
+  "quota": {
+    "session_max_cmds": 100,
+    "session_max_mutations": 20,
+    "session_max_disk_mb": 512,
+    "session_max_net_mb": 200,
+    "session_max_disturbance": 100.0,
+    "session_window_sec": 3600
+  },
+  "execution": {
+    "mode": "local",
+    "timeout_sec": 30,
+    "stdout_max_bytes": 8192,
+    "remote_host": "",
+    "zrrsh": "00_KERNEL/scripts/zrrsh.sh"
+  }
+}
