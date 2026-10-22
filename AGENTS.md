@@ -100,23 +100,31 @@
 | GitHub | tanbopiao/kunlun-assets |
 | SSH | `ssh zongyuan-cloud`（root@123.207.202.158） |
 
-### 中枢上报格式（勿用content字段）
+### 中枢上报格式（RULE-005 V3.1，2026-10-22 实测）
+> 必须带 `X-DID` 头；`value` 必须是含 `content` 键的对象。`truth_key`/`truth_value` 已废止（会返回 `empty_value_rejected`）。
+
 ```json
+// Headers: Content-Type: application/json · X-DID: DID-BR-000002
 {
-  "truth_key": "大写点分命名",
-  "truth_value": "内容",
-  "source_node": "NODE-DEV-DOUBAO-WORK-001",
-  "confidence": 1.0,
-  "truth_type": "meta_law|rule|config|decision|data|creative|risk|protocol|unknown"
+  "key": "大写点分命名空间KEY（禁 truth- 前缀）",
+  "value": {
+    "content": "内容",
+    "truth_type": "meta_law|rule|config|decision|data|creative|risk|protocol|unknown",
+    "source_node": "NODE-DEV-DOUBAO-WORK-001",
+    "confidence": 1.0
+  }
 }
 ```
+
+成功回执：`{"ok":true,"message":"真值写入成功","key":...,"truth_count":N,"seq":N,"event_id":"truth-..."}`
+协议事实源：`zongyuan-yuanji/var/docs-sync/boot/kernel-mirror/metalaw/CHANNEL-PROTOCOL-V31-20261010.md`
 
 ---
 
 ## 禁止事项
 
 - ❌ 勿重启 :9120（已废弃）
-- ❌ 勿用 content 字段上报中枢（会落空）
+- ❌ 勿用 `truth_key`/`truth_value` 上报中枢（RULE-005 V3.1 已废止，返回 `empty_value_rejected`；必须用 `key` + `value.content`）
 - ❌ 勿直接rm大文件不采样
 - ❌ 勿重复扫描、重复建目录、重复写报告
 - ❌ 勿说"不能SSH"（直接用 zongyuan-cloud 别名）
