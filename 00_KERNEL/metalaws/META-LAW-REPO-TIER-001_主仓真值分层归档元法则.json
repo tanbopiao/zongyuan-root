@@ -1,0 +1,60 @@
+{
+ "meta_id": "META-LAW-REPO-TIER-001",
+ "name": "主仓真值分层归档元法则",
+ "version": "V1.0",
+ "did": "DID-BR-000002",
+ "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+ "lock_level": 8,
+ "status": "ACTIVE",
+ "created_at": "2026-10-22T20:20:00+08:00",
+ "core_principles": [
+  "主仓只承载核心真值：内核文本、账本、白皮书正文、docs、公钥与索引，永续归档推送",
+  "非核心资产（媒体/运行态/缓存/语料/截图）物理存持久层，不占主仓空间，只在主仓留引用",
+  "git 跟踪态是迁移分界：未跟踪可零风险迁出；跟踪资产需停跟踪裁剪，另行审批",
+  "迁移后原路径必须建符号链接，一切既有引用零断裂",
+  "验收铁律：git status 与迁移前逐行一致、index 指纹不变，否则回滚",
+  "物理文件与归档确权双轨：持久区台账登记 rel_path+size+SHA256，可随时核验回迁"
+ ],
+ "tier_definition": {
+  "core_tier_stay_in_repo": [
+   "00_KERNEL", "meta_truth", "DATA-LAKE-PERSIST", "converge",
+   "var/whitepaper-repo 白皮书正文", "docs", "公钥与索引"
+  ],
+  "non_core_tier_relocate": [
+   "var/inbox 媒体镜像", "zhongshu 运行态", "01_ASSETS 未跟踪项",
+   "04_PROJECTS 数据", "media-gallery", "experience", "__pycache__/.pytest_cache"
+  ],
+  "credentials_never_move": [".env*", ".cred", "*.key", "*.pem"]
+ },
+ "mandatory_exclusions": [
+  "gitlink 子仓（mode 160000）：路径自身即跟踪条目，不可整目录迁移",
+  "活跃运行态目录：迁移中进程写入风险，只迁冷数据",
+  "未 commit 的当日交付物：迁出会使其以软链入仓，正文丢失归档",
+  "凭证与密钥文件：按 SECURITY-NOTE 固定存放，不随批量迁移"
+ ],
+ "procedure": [
+  "S1 只读体检：区分跟踪/未跟踪，按顶级目录量化，输出迁移清单（dry-run）",
+  "S2 白名单收紧：允许域正向清单 + 排除子路径 + 凭证过滤",
+  "S3 执行迁移：整目录优先 rename + 原路径软链，单文件仅处理混合目录中的未跟踪项",
+  "S4 台账登记：持久区 MANIFEST 全量记录 rel_path/size/SHA256（>2MB），标记 reverted 项",
+  "S5 三重验证：status 逐行 diff 为零、跟踪状态零影响、暂存区为空",
+  "S6 软链噪音抹平：目录型 ignore 规则对软链不生效，用 .git/info/exclude 本地排除，永不入仓"
+ ],
+ "evidence_20261022": {
+  "before": "主仓 9.7G = .git 5.3G(pack 3.4G + LFS 1.9G) + 工作区 4.26G(跟踪 2.86G + 未跟踪 1.40G)",
+  "after": "主仓 8.7G = .git 5.3G + 工作区 2.9G；迁出 999.2MB / 1166 文件",
+  "domains": "var 629M, zhongshu 137M, 01_ASSETS 104M, 04_PROJECTS 87M, media-gallery 32M, experience 10M",
+  "manifest": "persistent-layer/MANIFEST-MAINREPO-RELOCATED-20261022.json",
+  "incident_fixes": [
+   "zhongshu/kernel-evolve/zongyuan-kernel (gitlink) 误迁→移回",
+   "ZYZ-KUNLUN-3D-EVOLUTION-V1.0 白皮书核心交付误迁→移回",
+   "var/steady_evolve 活跃运行态误迁→移回"
+  ],
+  "verification": "git status 逐行与迁移前一致；index 指纹未变；暂存区空；核心域与凭证原位"
+ },
+ "boundary": [
+  ".git 历史体积（pack+LFS）属归档本体，非本法则迁移对象，仅历史改写可减且高风险",
+  "跟踪资产裁剪（B档 git rm --cached）须人工审批并单独提交，本法则默认不执行",
+  "回滚路径：软链反向移回原位即可还原，台账为回迁基准"
+ ]
+}
