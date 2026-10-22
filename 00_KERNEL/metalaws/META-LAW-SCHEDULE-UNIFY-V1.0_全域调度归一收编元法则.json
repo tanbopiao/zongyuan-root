@@ -1,0 +1,44 @@
+{
+  "rule_id": "META-LAW-SCHEDULE-UNIFY-V1.0",
+  "rule_name": "全域调度归一收编元法则",
+  "level": "元法则",
+  "version": "V1.0",
+  "description": "全域周期调度唯一事实源=var/periodic-tasks.json，由 steady_evolve daemon(systemd keepalive) 执行；crontab 只允许保留平台位，体系自有任务禁止再直接入 crontab，一切调度增删走注册表-分批-验证-锁档闭环",
+  "clauses": [
+    "唯一事实源：周期任务定义只在 var/periodic-tasks.json 增删(支持 interval_sec 与标准5段 cron)，禁止散落在 crontab/内存态调度器；沙箱重置后由 steady_evolve_bootstrap.sh 按本文件重建",
+    "crontab 收敛边界：crontab 只保留平台位(腾讯云stargate/acme/nginx/@reboot)，基线恒为7条；体系自有任务新增一律入 periodic-tasks.json，违者由 config_registry_drift(1h) 盘点漂移告警",
+    "执行器守护铁律：steady_evolve daemon 必须由 systemd steady_evolve.service 托管(Restart=always, enabled)；bootstrap 只做幂等校验(pid存活即noop)，防双启",
+    "调度语义保真：cron 收编必须原样保留 5段表达式/cwd=/root/引号/flock/重定向语义；线程派发+每任务flock防重入+state写锁，单任务600s超时不拖停全局",
+    "收编四步法(最小犯错)：全量存活扫描(目标文件+日志新鲜度) → 平台/自有/断路分类 → 分批迁移(先低频形态样本后全量) → 每批次调度窗口验证runs",
+    "变更必锁档：调度增删改必须产出 回滚备份文件(sha256) + 网关真值(truth seq) + git commit 三件套，缺一不得宣称完成",
+    "断路即修：curl 本地端点必须 https(自签加-k)，http打TLS端口属隐性断路，发现即修并实测路由",
+    "回滚路径：crontab 回滚=恢复 /root/crontab_full_backup_*.txt；任务回滚=periodic-tasks.json 版本回退+bootstrap 重建；两路径均需重新锁档"
+  ],
+  "baseline": {
+    "date": "2026-10-22",
+    "crontab_before": 93,
+    "crontab_after": 7,
+    "periodic_before": 7,
+    "periodic_after": 92,
+    "migrated": 85,
+    "platform_kept": 7,
+    "dup_dropped": "cron_atomcode_auto_renew(与periodic既有任务重复双跑)",
+    "systemd_units": "19→20(+steady_evolve.service)",
+    "registry": "crontab7/octop10/systemd20/periodic92, drift=0, version=2",
+    "verification": "85/85 runs ok; cron判定器15/15单测; cron_engine rc2=引擎UNHEALTHY信号(收编前后语义一致)",
+    "fixed_endpoints": "autoupdate backup/cleanup + selfheal check_mem: http→https -k",
+    "rollback_shards": {
+      "crontab": "/root/crontab_full_backup_20261022_124617.txt sha=2b49bae1",
+      "periodic": "/root/periodic_tasks_backup_20261022_124617.json sha=656ef6ba",
+      "executor": "/root/steady_evolve_backup_20261022_124617.py sha=909702b7"
+    },
+    "truth_seq": 26745,
+    "truth_key": "CONFIG.CRON.COLLECT.20261022",
+    "git_commit": "f4b2750a"
+  },
+  "enforcement": "config_registry_drift 每小时盘点 crontab/periodic/systemd 三合一计数，漂移自动重采集并告警；bootstrap 启动自检校验任务定义合法性(含cron字段)",
+  "did": "DID-BR-000002",
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "created_at": "2026-10-22T13:20:00+08:00",
+  "status": "LOCKED"
+}
