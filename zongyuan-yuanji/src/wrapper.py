@@ -19,6 +19,26 @@ else: _user_keys = set()
 ARK_MODEL = "Qwen/Qwen3-32B"
 GATEWAY = "https://www.huodouai.com/api/status"
 
+# 20261022: 豆包403无额度 → 图像/视频生成切Agnes全模态免费API(key外置凭据件)
+AGNES_BASE = "https://apihub.agnes-ai.com/v1"
+
+def _pkey(name):
+    try:
+        with open("/root/zongyuan-yuanji/var/provider_keys.json") as _f:
+            return _json.load(_f).get(name, "")
+    except Exception:
+        return ""
+
+def _err500(h, e):
+    # 20261022: 透传上游错误体(如Agnes queue full稍后重试), 不再只回HTTP Error 503
+    import urllib.error as _ue
+    if isinstance(e, _ue.HTTPError):
+        try: body = e.read().decode()[:300]
+        except Exception: body = str(e)
+        h._j(502, {"ok": False, "error": body, "upstream_status": e.code})
+    else:
+        h._j(500, {"ok": False, "error": str(e)[:300]})
+
 try:
     PRELUDE = open("/root/zongyuan-yuanji/src/system_prompt.txt").read()
 except:
@@ -220,18 +240,13 @@ class H(BaseHTTPRequestHandler):
             prompt = p.get("prompt", "")
             full_prompt = "[昆仑洞天] 暗色奇幻国风CG，UE5光追PBR，伦勃朗暗底衬光，纯东方人形容神，冷白瓷肤，额间天元符印，中式织锦鎏金服饰，昆仑玉阶天宫/云海仙峰场景，暗玄黑底，灵炁柔光粒子，电影级景深，8k。反向:机械,兽首,现代服饰,卡通,水印,文字。Ω₀⊂⊙∞⊂Ω。 " + prompt
             body = _j.dumps({
-                "model": "ep-20261008165628-jkjw5",
-                "prompt": full_prompt,
-                "sequential_image_generation": "disabled",
-                "response_format": "url",
-                "size": "2K",
-                "stream": False,
-                "watermark": False
+                "model": "agnes-image-2.5-flash",
+                "prompt": full_prompt
             }).encode()
             req = urllib.request.Request(
-                "https://ark.cn-beijing.volces.com/api/v3/images/generations",
+                AGNES_BASE + "/images/generations",
                 data=body,
-                headers={"Authorization": "Bearer ark-800a6f28-5c7f-4ec5-9766-4b7da1a58f1d-50a70", "Content-Type": "application/json"},
+                headers={"Authorization": "Bearer " + _pkey("agnes"), "Content-Type": "application/json"},
                 method="POST"
             )
             try:
@@ -250,7 +265,7 @@ class H(BaseHTTPRequestHandler):
                     pub_url = url
                 self._j(200, {"ok": True, "image_url": pub_url, "imageUrl": pub_url, "prompt": prompt})
             except Exception as e:
-                self._j(500, {"ok": False, "error": str(e)[:300]})
+                _err500(self, e)
             return
         if self.path == "/v1/video/generate":
             import urllib.request, json as _j
@@ -258,50 +273,53 @@ class H(BaseHTTPRequestHandler):
             image_url = p.get("image_url", "")
             # 天元法则前置约束
             tianyuan_prefix = "[天元法则约束]昆仑洞天世界观，国风玄幻，电影级画质，暗玄黑底+灵炁柔光，伦勃朗光，8k。"
-            full_prompt = tianyuan_prefix + prompt + " --resolution 1080p --duration 5 --watermark false"
-            content = [{"type":"text","text":full_prompt}]
+            # 20261022: Agnes异步视频(结构化参数, 不再拼ARK命令行flag)
+            body_fields = {"model": "agnes-video-2.5-flash",
+                           "prompt": tianyuan_prefix + prompt,
+                           "seconds": "5", "size": "720P", "aspect_ratio": "16:9",
+                           "mode": "keyframe" if image_url else "text"}
             if image_url:
-                content.append({"type":"image_url","image_url":{"url":image_url}})
-            body = _j.dumps({"model":"ep-20261008170446-7wcsp","content":content}).encode()
-            req = urllib.request.Request("https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks", data=body, headers={"Authorization":"Bearer ark-800a6f28-5c7f-4ec5-9766-4b7da1a58f1d-50a70","Content-Type":"application/json"}, method="POST")
+                body_fields["first_frame"] = image_url
+            body = _j.dumps(body_fields).encode()
+            req = urllib.request.Request(AGNES_BASE + "/videos", data=body,
+                headers={"Authorization": "Bearer " + _pkey("agnes"), "Content-Type": "application/json"}, method="POST")
             try:
-                r = urllib.request.urlopen(req, timeout=30)
+                r = urllib.request.urlopen(req, timeout=60)
                 result = json.loads(r.read())
-                self._j(200, {"ok":True,"task_id":result.get("id","")})
+                vid = result.get("video_id") or result.get("id") or result.get("task_id") or ""
+                self._j(200, {"ok":True,"task_id":vid,"video_id":vid,"model":"agnes-video-2.5-flash","prompt":prompt})
             except Exception as e:
-                self._j(500, {"ok":False,"error":str(e)[:200]})
+                _err500(self, e)
             return
 
         if self.path == "/v1/video/status":
-            import urllib.request, json as _j
+            import urllib.request, json as _j, urllib.parse
             tid = p.get("task_id", "")
+            # Agnes检索: video_id+model_name; completed归一为succeeded(下游orchestrator兼容)
             req = urllib.request.Request(
-                "https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks/" + tid,
-                headers={"Authorization": "Bearer ark-800a6f28-5c7f-4ec5-9766-4b7da1a58f1d-50a70"},
+                "https://apihub.agnes-ai.com/agnesapi?video_id=" + urllib.parse.quote(tid) +
+                "&model_name=agnes-video-2.5-flash",
+                headers={"Authorization": "Bearer " + _pkey("agnes")},
                 method="GET"
             )
             try:
                 r = urllib.request.urlopen(req, timeout=15)
                 result = json.loads(r.read())
-                status = result.get("status", "")
-                url = ""
-                if status == "succeeded":
-                    content = result.get("content", {})
-                    if isinstance(content, dict):
-                        url = content.get("video_url", "") or content.get("url", "")
-                    elif isinstance(content, list) and content:
-                        url = content[0].get("video_url", "") or content[0].get("url", "")
-                    if url:
-                        try:
-                            import urllib.request as _ul, os as _os, time as _t
-                            _os.makedirs("/www/wwwroot/huodouai.com/kunlun/videos/", exist_ok=True)
-                            vname = "video_" + str(int(_t.time())) + ".mp4"
-                            _ul.urlretrieve(url, "/www/wwwroot/huodouai.com/kunlun/videos/" + vname)
-                            url = "https://www.huodouai.com/kunlun/videos/" + vname
-                        except: pass
-                self._j(200, {"ok": True, "status": status, "url": url, "raw": result})
+                raw_status = result.get("status", "")
+                status = "succeeded" if raw_status == "completed" else raw_status
+                url = result.get("url", "") if raw_status == "completed" else ""
+                if url:
+                    try:
+                        import urllib.request as _ul, os as _os, time as _t
+                        _os.makedirs("/www/wwwroot/huodouai.com/kunlun/videos/", exist_ok=True)
+                        vname = "video_" + str(int(_t.time())) + ".mp4"
+                        _ul.urlretrieve(url, "/www/wwwroot/huodouai.com/kunlun/videos/" + vname)
+                        url = "https://www.huodouai.com/kunlun/videos/" + vname
+                    except: pass
+                self._j(200, {"ok": True, "status": status, "agnes_status": raw_status,
+                              "progress": result.get("progress"), "url": url, "raw": result})
             except Exception as e:
-                self._j(500, {"ok": False, "error": str(e)[:200]})
+                _err500(self, e)
             return
         if self.path == "/v1/image/upload":
             import base64 as _b64, time as _t
@@ -314,23 +332,37 @@ class H(BaseHTTPRequestHandler):
             self._j(200, {"ok": True, "url": "/kunlun/frames/" + fn})
             return
         if self.path == "/v1/image/edit":
-            import urllib.request, json as _j
+            import urllib.request, json as _j, os as _os, time as _t
             prompt = p.get("prompt", "")
             ref_url = p.get("image_url", "")
-            body = _j.dumps({"model":"ep-20261008165628-jkjw5","prompt":"昆仑洞天暗色奇幻国风CG，UE5光追，纯东方人形容神，冷白瓷肤，中式织锦鎏金，灵炁柔光粒子，电影级8k。"+prompt,"image":ref_url,"size":"2K","watermark":False}).encode()
-            req = urllib.request.Request("https://ark.cn-beijing.volces.com/api/v3/images/generations",data=body,headers={"Authorization":"Bearer ark-800a6f28-5c7f-4ec5-9766-4b7da1a58f1d-50a70","Content-Type":"application/json"},method="POST")
+            # 20261022: 豆包403 → Agnes images/edits(multipart上传参考图)
+            full_prompt = "昆仑洞天暗色奇幻国风CG，UE5光追，纯东方人形容神，冷白瓷肤，中式织锦鎏金，灵炁柔光粒子，电影级8k。" + prompt
+            if ref_url.startswith("/"):
+                raw = open("/www/wwwroot/huodouai.com" + ref_url, "rb").read()
+            else:
+                raw = urllib.request.urlopen(ref_url, timeout=30).read()
+            boundary = "----zrr" + str(int(_t.time()))
+            parts = []
+            parts.append(("--%s\r\nContent-Disposition: form-data; name=\"model\"\r\n\r\nagnes-image-2.5-flash\r\n" % boundary).encode())
+            parts.append(("--%s\r\nContent-Disposition: form-data; name=\"prompt\"\r\n\r\n%s\r\n" % (boundary, full_prompt)).encode())
+            parts.append(("--%s\r\nContent-Disposition: form-data; name=\"image\"; filename=\"ref.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n" % boundary).encode() + raw + b"\r\n")
+            parts.append(("--%s--\r\n" % boundary).encode())
+            req = urllib.request.Request(AGNES_BASE + "/images/edits", data=b"".join(parts),
+                headers={"Authorization": "Bearer " + _pkey("agnes"),
+                         "Content-Type": "multipart/form-data; boundary=" + boundary},
+                method="POST")
             try:
                 r = urllib.request.urlopen(req, timeout=120)
                 result = json.loads(r.read())
                 url = result["data"][0]["url"]
-                import urllib.request as _ul, os as _os, time as _t
                 fname = "frame_" + str(int(_t.time())) + ".jpg"
                 local = "/www/wwwroot/huodouai.com/kunlun/frames/" + fname
+                import urllib.request as _ul
                 _ul.urlretrieve(url, local)
                 pub_url = "https://www.huodouai.com/kunlun/frames/" + fname
                 self._j(200, {"ok": True, "image_url": pub_url, "imageUrl": pub_url, "prompt": prompt})
             except Exception as e:
-                self._j(500, {"ok": False, "error": str(e)[:300]})
+                _err500(self, e)
             return
         if self.path == "/v1/video/generate":
             import urllib.request, json as _j
@@ -355,7 +387,7 @@ class H(BaseHTTPRequestHandler):
                 result = json.loads(r.read())
                 self._j(200, {"ok": True, "id": result.get("id"), "model": "seedance-1.0-pro-fast", "prompt": prompt})
             except Exception as e:
-                self._j(500, {"ok": False, "error": str(e)[:300]})
+                _err500(self, e)
             return
         if self.path=="/v1/ask":
             try:
@@ -547,7 +579,7 @@ class H(BaseHTTPRequestHandler):
                 else:
                     self._j(500, {"ok": False, "error": "concat failed"})
             except Exception as e:
-                self._j(500, {"ok": False, "error": str(e)[:200]})
+                _err500(self, e)
             return
         if self.path == "/v1/merge/status":
             tid = p.get("task_id", "")
