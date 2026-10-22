@@ -2,7 +2,7 @@
   "registry_id": "ZONGYUAN-META-RULE-REGISTRY-V1",
   "version": "1.0.0",
   "created_at": "2026-09-14T12:10:00+08:00",
-  "updated_at": "2026-09-14T15:14:59.425285",
+  "updated_at": "2026-10-22T23:52:11+08:00",
   "description": "元极恒一自治体系全域元规则注册中心。所有试错经验、新增能力、架构原则统一归档，全体智能体共享学习。",
   "governance": {
     "principle": "一次试错，全体学习；一次新增，全域推广",
@@ -450,6 +450,72 @@
         "所有图片生成",
         "所有媒体资产"
       ]
+    },
+    {
+      "rule_id": "RULE-AGENT-BOUNDARY-CONTRACT-20261022",
+      "name": "业务契约前置元规则",
+      "category": "governance",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-10-22",
+      "summary": "智能体开发前必须完成业务契约文档(输入/允许动作/成功判定/人工熔断条件), 评审未过禁止编码; 推理归模型, 强约束归硬编码",
+      "details": {
+        "scope": "联邦记忆内核小程序、WorkBuddy生成流水线、一切Agent/记忆查询入口",
+        "source": "EXT-031 外部真值吸收回执(稳定分92, ≥80自主门)",
+        "implementation": [
+          "需求阶段【业务契约评审】作为代码生成前强制前置交付物",
+          "小程序禁止动作集: 禁发起内核自主进化、禁改锁档资产(对齐L0高危人工审批)",
+          "检索返回必须携带Merkle锚点+DID确权标识"
+        ]
+      },
+      "applicable_to": [
+        "联邦记忆小程序",
+        "Agent开发流水线"
+      ]
+    },
+    {
+      "rule_id": "RULE-DEMO-REALDATA-GATE-20261022",
+      "name": "Demo脏数据门禁元规则",
+      "category": "reliability",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-10-22",
+      "summary": "Demo验收必须混入30%脏样本/异构格式真值; 仅用规整理想数据验收禁止进下一阶段",
+      "details": {
+        "scope": "联邦记忆小程序测试用例包、一切Agent Demo阶段验收",
+        "source": "EXT-031 外部真值吸收回执(稳定分89, ≥80自主门)",
+        "implementation": [
+          "测试集构造: 乱序关键词/残缺指纹/错误DID/格式不统一账本记录",
+          "验证脏输入下的熔断与报错提示, 而非只测标准查询"
+        ]
+      },
+      "applicable_to": [
+        "联邦记忆小程序",
+        "Demo验收流程"
+      ]
+    },
+    {
+      "rule_id": "RULE-RAG-LINK-TRACE-20261022",
+      "name": "检索链路分层埋点元规则",
+      "category": "methodology",
+      "version": "1.0",
+      "status": "active",
+      "created_at": "2026-10-22",
+      "summary": "记忆检索链路每步独立日志留痕写入HASH-LEDGER(解析/切分/召回/rerank/摘要/组装); 答案错误优先溯源链路节点而非改Prompt",
+      "details": {
+        "scope": "记忆网关检索链路、联邦记忆小程序trace展示",
+        "source": "EXT-031 外部真值吸收回执(稳定分91, ≥80自主门)",
+        "implementation": [
+          "记忆网关接口增加trace字段",
+          "小程序展示溯源锚点",
+          "链路: query→检索分片→召回→rerank→组装, 出错直接定位节点"
+        ]
+      },
+      "applicable_to": [
+        "记忆网关",
+        "联邦记忆小程序",
+        "RAG链路"
+      ]
     }
   ],
   "learning_protocol": {
@@ -459,8 +525,8 @@
     "review_cycle": "每周审核元规则有效性，过时规则标记为deprecated"
   },
   "stats": {
-    "total_rules": 15,
-    "active": 15,
+    "total_rules": 18,
+    "active": 18,
     "deprecated": 0,
     "categories": [
       "infrastructure",
