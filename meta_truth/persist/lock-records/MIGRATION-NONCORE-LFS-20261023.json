@@ -1,0 +1,60 @@
+{
+  "record_id": "MIGRATION-NONCORE-LFS-20261023",
+  "record_type": "asset_migration_record",
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "steady_level": "Lv11",
+  "created_at": "2026-10-23T15:35:00+08:00",
+  "trigger": "AtomGit 主仓 LFS 配额告警 1.9 GiB / 2.0 GiB（元宪法：风险最小 > 成本最小 > 收益最大；轻量化最高工程元战略）",
+  "principle": "非核心资产迁出主仓；迁移前先在其他持久层落位并 sha256 逐位核验，主仓仅摘索引不删工作区文件（铁律：勿直接 rm 大文件）",
+  "source_repo": "https://atomgit.com/zongyuangen/zongyuan-root-sync.git",
+  "migrated": [
+    {
+      "path": "zongyuan-yuanji/weights/yuanjihengyi_int4/model.safetensors",
+      "category": "模型权重（非核心真值）",
+      "bytes": 1143327681,
+      "sha256": "2a9b1a3b79de431bf74b568151dec03ffeb879d896e8cfd94e66a1086243fc42",
+      "destinations": [
+        "/workspace/persistent-layer/noncore-migration-20261023/zongyuan-yuanji/weights/yuanjihengyi_int4/model.safetensors",
+        "modelscope datasets/zongyuanroot/qwen-gguf-models @ yuanjihengyi_int4/model.safetensors (commit 02b9092, LFS oid 一致)"
+      ],
+      "worktree_kept": true
+    },
+    {
+      "path": "01_ASSETS/models/embedding/hub/models--minishlab--potion-multilingual-128M/blobs/",
+      "category": "公开 HF embedding 缓存（非核心真值，可再下载）",
+      "tracked_files": 4,
+      "largest_bytes": 512361560,
+      "sha256_of_largest": "14b5eb39cb4ce5666da8ad1f3dc6be4346e9b2d601c073302fa0a31bf7943397",
+      "destinations": [
+        "/workspace/persistent-layer/noncore-migration-20261023/01_ASSETS/models/embedding/hub/models--minishlab--potion-multilingual-128M/blobs/",
+        "modelscope datasets/zongyuanroot/qwen-gguf-models @ 01_ASSETS/embedding-blobs/14b5eb39cb... (commit 02b9092, LFS oid 一致)"
+      ],
+      "worktree_kept": true
+    }
+  ],
+  "measurement": {
+    "before_head": "entries=889 unique_oid=818 unique_size=1.971 GiB（≈服务端配额 1.9/2.0）",
+    "after_head": "entries=887 unique_oid=816 unique_size=0.371 GiB",
+    "freed_in_head": "1.600 GiB（81.2%）",
+    "core_kept": "卷宗 GLOBAL-LOCK 全档（约15×16MB）、central-truths、locks、meta-rules、数学公理两卷 json 本体均留在主仓",
+    "method": "git lfs ls-files -s 解析 + 唯一 oid 去重口径；find/du 复核工作区"
+  },
+  "verification": [
+    "本地持久层副本 sha256 与源逐位一致（diff 全等）",
+    "魔搭 LFS 指针 oid == 源 sha256（2/2）",
+    "魔搭 API tree http=200，Size=1143327681 / 512361560 精确匹配",
+    "AtomGit 主仓两次推送均 [PASSED]，HEAD 摘索引后工作区 du 1.1G + 507M 仍在"
+  ],
+  "commit_chain": {
+    "atomgit": "0a68774d（摘索引+gitignore）、935f9d21（替代锚点记录）",
+    "modelscope_truth_corpus": "c8501de（替代锚点记录）",
+    "modelscope_qwen_gguf_models": "02b9092（迁入 2 大件，走 Git LFS）"
+  },
+  "residual_risk": [
+    "服务端 LFS 配额仍显示 1.9/2.0：配额按历史全部 LFS 对象计，HEAD 摘除不回收；需在 AtomGit 项目设置执行 Compact（Web 人工操作）或改写历史（破坏性，违反非破坏性铁律，须人工审批）",
+    "AtomGit API(v5) 实测 Bearer/PRIVATE-TOKEN 可用，无 compact 端点 → 只能 UI 操作"
+  ],
+  "status": "MIGRATED_AND_VERIFIED",
+  "evidence": "local_persistent_layer + modelscope_qwen-gguf-models + atomgit_HEAD"
+}
