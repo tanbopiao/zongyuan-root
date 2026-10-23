@@ -101,9 +101,10 @@
 | Step4 信封/RefSet/Payload | `emit_envelope()` 八要素（含 DID_Sig）+ 未注册主键澄清回执不送 LLM | ✅ T7（6 断言） |
 | Step6.2 冲突三策略 | `reject`（per-EID 版本判定）/ `rollback`（丢弃后发+历史链回退稳定版）/ `merge`（无冲突字段合并，冲突字段 `__divergence` 标记人工接管）三策略全实现 | ✅ 已补齐（2026-10-23 增量，selftest T6 九断言） |
 | Step4.3 DID 签名绑定 | `DidSigner`：HMAC-SHA256(did\|state_version\|truth_root)→base85，密钥走 `DATAGATE_DID_KEY` 环境/600 密钥文件（L0 域外置不入码）；验签+篡改检测入测 | ✅ 已补齐（selftest T7：验签通过/篡改失败/无 signer 不伪造） |
+| Step6 灰度基线（6.1~6.4） | `--step6` 模式 18 断言：G1 单实体小流量（EID 稳定/掩码/指代信封/StateVersion 回退）+ G2 三策略 + G3 坏例注入（越界/无权限/过期三熔断留痕）+ G4 审计链（`audit` hash 链重放校验、read/fuse/envelope/ingest/conflict_reject/rollback/merge 八类动作覆盖、篡改条目负向可检） | ✅ 本地灰度已验（2026-10-23，rc=0） |
 | Step2 CDC/Kafka、Step7 监控大盘、定期对账 | 依赖真实中间件与运维环境，非本仓可仿真 | ⚠ 部署侧环境项 |
 | Step5.4 写回审批流 | 实现**结构性只读**（无任何写回路径）；变更申请单/审批节点为 Agent 侧流程 | ℹ 按设计不实现于网关内 |
 
-**差距处置记录**：rollback/merge 与 DID_Sig 已于 2026-10-23 以增量提交补齐（selftest 20→28 断言，冲突判定修正为 per-EID 版本口径——协议 2.4「同一 EID 并发写」，全局 StateVersion 仅作协议头版本不参与冲突判定）；剩余仅 CDC 实链与监控大盘为**部署侧环境项**，不阻塞 Step1-5。
+**差距处置记录**：rollback/merge 与 DID_Sig 已于 2026-10-23 以增量提交补齐（selftest 20→28 断言，冲突判定修正为 per-EID 版本口径——协议 2.4「同一 EID 并发写」，全局 StateVersion 仅作协议头版本不参与冲突判定）；同日补齐 **audit 动作审计 hash 链**（读取/熔断/信封/决策动作全留痕，可重放核验+篡改负向检测），Step6 四子项本地灰度全过（`--step6` 18 断言）；剩余仅 CDC 实链与监控大盘为**部署侧环境项**，不阻塞 Step1-5。
 
 **种子真值引用核验**：文中 `SEED-Ω-REFER-DATA-GATE-001` 即云端 `SEED.OMEGA.DATAGATE.001`（seq 28551）content 内 `seed_id`，键名按 RULE-005 V3.1 点分规范转换，同一真值。

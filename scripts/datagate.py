@@ -20,6 +20,7 @@
 
 零第三方依赖（hashlib/json/re/sqlite3/hmac/base64/argparse 标准库）。
 运行：python3 datagate.py --selftest   # 仿真自测（rc=0 全过）
+      python3 datagate.py --step6      # Step6 灰度基线验证（坏例注入+审计链闭环）
 """
 from __future__ import annotations
 
@@ -127,6 +128,11 @@ class DataGate:
                 eid_version INTEGER NOT NULL, state_version INTEGER NOT NULL,
                 event TEXT NOT NULL, ts REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS meta(k TEXT PRIMARY KEY, v INTEGER NOT NULL);
+            CREATE TABLE IF NOT EXISTS audit(            -- 动作审计（Step6.4，hash链）
+                seq INTEGER PRIMARY KEY AUTOINCREMENT,
+                ts REAL NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL,
+                eid TEXT NOT NULL, detail TEXT NOT NULL,
+                prev TEXT NOT NULL, hash TEXT NOT NULL);
         """)
         # 旧结构迁移：snapshots 补 per-EID 版本列（冲突判定=同一EID并发写）
         try:
@@ -150,6 +156,7 @@ class DataGate:
         eid = f"{EID_PREFIX[entity_type]}{n:05d}"            # 分段序列铸造
         self.db.execute("INSERT INTO eid_registry VALUES(?,?)", (reg_key, eid))
         self.db.commit()
+        self._audit("eid_mint", actor="datagate", eid=eid, detail=reg_key)
         return eid
 
     # ---------- 2. Schema 值域校验（越界 → param_invalid） ----------
@@ -209,27 +216,37 @@ class DataGate:
     # ---------- 3. 接入写入：三策略冲突原语（协议 2.4） ----------
     def ingest(self, entity_type: str, biz_key: str, raw: dict,
                base_version: int | None = None,
-               policy: str = "reject") -> dict:
+               policy: str = "reject", actor: str = "ingest_worker") -> dict:
         if policy not in ("reject", "rollback", "merge"):
             raise DataGateFused("param_invalid", f"unknown policy {policy}")
-        self._validate(entity_type, raw,
-                       strict=(policy != "merge"))
+        try:
+            self._validate(entity_type, raw, strict=(policy != "merge"))
+        except DataGateFused as e:
+            self._audit("fuse", actor=actor, detail=str(e))     # 坏例留痕（Step6.3）
+            raise
         eid = self.mount_eid(entity_type, biz_key)
         snap = self._snap(eid)
         cur_fields_s, cur_ev = (snap if snap else ("{}", 0))
 
         if policy == "merge":
-            return self._merge(eid, entity_type, raw, base_version,
-                               cur_fields_s, cur_ev)
+            r = self._merge(eid, entity_type, raw, base_version,
+                            cur_fields_s, cur_ev)
+            self._audit("merge", actor=actor, eid=eid,
+                        detail=f"manual_takeover={r['manual_takeover']}")
+            return r
 
         conflict = base_version is not None and base_version != cur_ev
         if conflict:
             if policy == "reject":
+                self._audit("conflict_reject", actor=actor, eid=eid,
+                            detail=f"base={base_version} eid_version={cur_ev}")
                 raise ConflictRejected(          # 同一EID并发写 → 拒后发（协议2.4）
                     f"eid={eid} base={base_version} eid_version={cur_ev}")
             # policy == "rollback"：丢弃后发变更，回退至 base 稳定版本
             stable_f, stable_ev = self._stable_state(eid, base_version)
             nv = self._commit(eid, entity_type, stable_f, stable_ev, "rollback")
+            self._audit("rollback", actor=actor, eid=eid,
+                        detail=f"restored_eid_version={stable_ev}")
             return {"eid": eid, "state_version": nv, "policy": "rollback",
                     "action": "dropped_incoming_and_restored_stable",
                     "restored_eid_version": stable_ev,
@@ -238,6 +255,8 @@ class DataGate:
 
         new_ev = cur_ev + 1
         nv = self._commit(eid, entity_type, canonical(raw), new_ev, "ingest")
+        self._audit("ingest", actor=actor, eid=eid,
+                    detail=f"eid_version={new_ev} state_version={nv}")
         return {"eid": eid, "state_version": nv, "policy": policy,
                 "eid_version": new_ev}
 
@@ -273,24 +292,65 @@ class DataGate:
     def state_version(self) -> int:
         return self.db.execute("SELECT v FROM meta WHERE k='state_version'").fetchone()[0]
 
+    # ---------- 审计链（Step6.4：读取/熔断/决策动作入 hash 链，可重放核验） ----------
+    def _audit(self, action: str, actor: str = "-", eid: str = "-",
+               detail: str = "-") -> None:
+        prev_row = self.db.execute("SELECT hash FROM audit ORDER BY seq DESC LIMIT 1").fetchone()
+        prev = prev_row[0] if prev_row else "0" * 64
+        ts = time.time()
+        h = sha256_hex(prev + canonical({"ts": round(ts, 6), "actor": actor,
+                                         "action": action, "eid": eid, "detail": detail}))
+        self.db.execute("INSERT INTO audit(ts,actor,action,eid,detail,prev,hash) "
+                        "VALUES(?,?,?,?,?,?,?)", (ts, actor, action, eid, detail, prev, h))
+        self.db.commit()
+
+    def audit_root(self) -> str:
+        row = self.db.execute("SELECT hash FROM audit ORDER BY seq DESC LIMIT 1").fetchone()
+        return row[0] if row else sha256_hex("")
+
+    def audit_verify(self) -> bool:
+        """重放全链：每条 hash = sha256(prev + entry)，prev 接链首尾一致。"""
+        prev = "0" * 64
+        for ts, actor, action, eid, detail, stored_prev, stored_hash in self.db.execute(
+                "SELECT ts,actor,action,eid,detail,prev,hash FROM audit ORDER BY seq"):
+            if stored_prev != prev:
+                return False
+            calc = sha256_hex(prev + canonical({"ts": round(ts, 6), "actor": actor,
+                                                "action": action, "eid": eid,
+                                                "detail": detail}))
+            if calc != stored_hash:
+                return False
+            prev = stored_hash
+        return True
+
     # ---------- 4. 行级裁剪 + TTL 时效熔断（方案二4、第五章3） ----------
-    def fetch(self, eid: str, role: str, now: float | None = None) -> dict:
-        if role not in ROLE_WHITELIST:
-            raise DataGateFused("permission_deny", f"unknown role {role}")  # 越界不出网关
-        row = self.db.execute("SELECT etype, fields, version, eid_version, updated_at "
-                              "FROM snapshots WHERE eid=?", (eid,)).fetchone()
-        if row is None:
-            raise DataGateFused("param_invalid", f"eid {eid} not registered")
-        etype, fields_s, version, eid_version, updated_at = row
-        now = time.time() if now is None else now
-        if now - updated_at > self.ttl:
-            raise DataGateFused("data_stale", f"{eid} ttl={self.ttl}s exceeded")  # 禁用于决策
-        view = json.loads(fields_s)
-        for f in ROLE_MASK[role] & set(view):
-            view.pop(f)                                     # 敏感字段按角色裁剪
-        view["__entity_type"] = etype
-        view["__version"] = version
-        view["__eid_version"] = eid_version
+    def fetch(self, eid: str, role: str, now: float | None = None,
+              actor: str = "-") -> dict:
+        try:
+            if role not in ROLE_WHITELIST:
+                raise DataGateFused("permission_deny",
+                                    f"unknown role {role}")    # 越界不出网关
+            row = self.db.execute(
+                "SELECT etype, fields, version, eid_version, updated_at "
+                "FROM snapshots WHERE eid=?", (eid,)).fetchone()
+            if row is None:
+                raise DataGateFused("param_invalid", f"eid {eid} not registered")
+            etype, fields_s, version, eid_version, updated_at = row
+            now = time.time() if now is None else now
+            if now - updated_at > self.ttl:
+                raise DataGateFused(                  # 过期实体禁止用于工具决策
+                    "data_stale", f"{eid} ttl={self.ttl}s exceeded")
+            view = json.loads(fields_s)
+            for f in ROLE_MASK[role] & set(view):
+                view.pop(f)                                     # 敏感字段按角色裁剪
+            view["__entity_type"] = etype
+            view["__version"] = version
+            view["__eid_version"] = eid_version
+        except DataGateFused as e:
+            self._audit("fuse", actor=actor, eid=eid, detail=str(e))
+            raise
+        self._audit("read", actor=actor, eid=eid,            # 读取动作入审计（Step6.4）
+                    detail=f"role={role} masked={sorted(ROLE_MASK[role]) or '-'}")
         return view
 
     # ---------- 5. TruthRootHash（协议2.1：canonical 叶哈希 → Merkle 根） ----------
@@ -319,7 +379,7 @@ class DataGate:
         try:
             for etype, key in queries:
                 eid = self.mount_eid(etype, key)            # 先锁 EID（仲裁层先行）
-                view = self.fetch(eid, role)                # 裁剪+stale 熔断
+                view = self.fetch(eid, role, actor=caller_did)  # 裁剪+stale 熔断
                 entities.append((eid, view))
                 refset.append({"eid": eid, "entity_type": view["__entity_type"],
                                "label": key})
@@ -333,6 +393,9 @@ class DataGate:
             return {"status": "clarify", "reason": "empty query"}
         state_v = self.state_version
         root = self.truth_root_hash(entities)
+        self._audit("envelope", actor=caller_did,           # 信封签发决策入审计
+                    eid=",".join(e for e, _ in entities),
+                    detail=f"state_version={state_v} root={root[:16]}…")
         return {
             "Ω_PROTO_VER": "1.0",
             "DID": caller_did,
@@ -492,14 +555,125 @@ def selftest() -> int:
     return 0 if failed == 0 else 1
 
 
+def grayscale_test() -> int:
+    """Step6 灰度基线验证：单实体小流量 → 冲突策略 → 坏例注入 → 审计链核验。"""
+    import os
+    import tempfile
+    failed = 0
+    def check(name, cond):
+        nonlocal failed
+        print(f"  [{'PASS' if cond else 'FAIL'}] {name}")
+        if not cond:
+            failed += 1
+
+    DID = "did:zongyuan:gray_op01"
+    signer = DidSigner(key=os.urandom(32))
+    db = os.path.join(tempfile.mkdtemp(), "gray.db")
+    g = DataGate(db_path=db, ttl_sec=300)
+    wo = {"order_no": "WO20261023001", "line_code": "L010", "status": "生产中",
+          "qty_plan": 100, "qty_finish": 37, "cost": 998.5}
+
+    print("== G1 单实体小流量 (1产线+2工单) ==")
+    r_line = g.ingest("line", "L010", {"line_code": "L010", "state": "运行"},
+                      actor=DID)
+    r_w1 = g.ingest("work_order", "WO20261023001|灰度A", wo, actor=DID)
+    r_w2 = g.ingest("work_order", "WO20261023002|灰度A",
+                    {**wo, "order_no": "WO20261023002"}, actor=DID)
+    check("3实体入仓(1线2工单)",
+          r_line["eid"].startswith("E-L") and r_w1["eid"].startswith("E-M")
+          and r_w2["eid"].startswith("E-M") and r_w1["eid"] != r_w2["eid"])
+    e_ref = g.mount_eid("work_order", "WO20261023001|灰度A")
+    check("EID稳定(3次mount同值)",
+          all(g.mount_eid("work_order", "WO20261023001|灰度A") == e_ref for _ in range(3)))
+    check("权限掩码(operator无cost)",
+          "cost" not in g.fetch(e_ref, "operator", actor=DID))
+    env = g.emit_envelope([("work_order", "WO20261023001|灰度A")],
+                          DID, "manager", signer=signer)
+    check("指代查询信封: RefSet持稳定EID+DID_Sig验签",
+          env["RefSet"][0]["eid"] == e_ref and signer.verify(
+              env["DID"], env["StateVersion"], env["TruthRootHash"], env["DID_Sig"]))
+    g.ingest("work_order", "WO20261023001|灰度A",
+             {**wo, "status": "完工"}, base_version=1, actor=DID)   # ev2
+    rb = g.ingest("work_order", "WO20261023001|灰度A",
+                  {**wo, "status": "作废"}, base_version=1,
+                  policy="rollback", actor=DID)
+    check("StateVersion回退至稳定版(完工→生产中)",
+          rb["policy"] == "rollback"
+          and g.fetch(e_ref, "manager", actor=DID)["status"] == "生产中")
+
+    print("== G2 冲突三策略 ==")
+    try:
+        g.ingest("work_order", "WO20261023002|灰度A",
+                 {**wo, "order_no": "WO20261023002", "status": "作废"},
+                 base_version=99, policy="reject", actor=DID)
+        check("reject: 落后base拒后发", False)
+    except ConflictRejected:
+        check("reject: 落后base拒后发", True)
+    g.ingest("work_order", "WO20261023002|灰度A",
+             {**wo, "order_no": "WO20261023002", "status": "完工",
+              "qty_finish": 99}, actor=DID)                            # ev2 并发改 finish
+    m = g.ingest("work_order", "WO20261023002|灰度A",
+                 {"qty_finish": 88, "line_code": "L011"},
+                 base_version=1, policy="merge", actor=DID)            # 落后base=1
+    check("merge: 无冲突字段合入+冲突字段标分歧人工接管",
+          m["applied_fields"] == ["line_code"] and m["manual_takeover"]
+          and g.fetch(r_w2["eid"], "manager", actor=DID)["qty_finish"] == 99)
+    check("rollback: 见G1(稳定版恢复)", True)
+
+    print("== G3 坏例注入 (熔断+日志留存) ==")
+    try:
+        g.ingest("work_order", "WO20261023003|灰度A", {**wo, "qty_plan": -1},
+                 actor=DID)
+        check("坏例: 越界参数 param_invalid", False)
+    except DataGateFused as e:
+        check("坏例: 越界参数 param_invalid", e.fuse == "param_invalid")
+    try:
+        g.fetch(e_ref, "root_admin", actor="did:zongyuan:intruder")
+        check("坏例: 无权限角色 permission_deny", False)
+    except DataGateFused as e:
+        check("坏例: 无权限角色 permission_deny", e.fuse == "permission_deny")
+    stale_gate = DataGate(ttl_sec=1)
+    stale_gate.ingest("line", "L020", {"line_code": "L020", "state": "运行"}, actor=DID)
+    time.sleep(1.1)
+    try:
+        stale_gate.emit_envelope([("line", "L020")], DID, "manager")
+        check("坏例: 过期快照 data_stale 拦截信封", False)
+    except DataGateFused as e:
+        check("坏例: 过期快照 data_stale 拦截信封", e.fuse == "data_stale")
+
+    print("== G4 审计链核验 (Step6.4) ==")
+    check("audit链重放校验通过", g.audit_verify())
+    check("audit_root为链尾哈希(64)", len(g.audit_root()) == 64)
+    acts = {r[0] for r in g.db.execute("SELECT DISTINCT action FROM audit")}
+    check("动作覆盖: read/fuse/envelope/ingest/conflict_reject/rollback/merge",
+          {"read", "fuse", "envelope", "ingest", "conflict_reject",
+           "rollback", "merge"} <= acts)
+    check("读取动作留痕(含actor与role)",
+          g.db.execute("SELECT COUNT(*) FROM audit WHERE action='read' AND actor=?",
+                       (DID,)).fetchone()[0] >= 3)
+    n_before = g.db.execute("SELECT COUNT(*) FROM audit").fetchone()[0]
+    g.db.execute("UPDATE audit SET detail='tampered' WHERE seq=1")
+    g.db.commit()
+    check("篡改审计条目→链校验失败(负向,临时库用后即弃)",
+          not g.audit_verify())
+    check(f"审计条目总数({n_before})动作类型({len(acts)})",
+          n_before >= 10 and len(acts) >= 7)
+
+    print(f"\nStep6 grayscale: {'ALL PASS' if failed == 0 else f'{failed} FAILED'}")
+    return 0 if failed == 0 else 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="DataGate 生产数据网关")
     ap.add_argument("--selftest", action="store_true", help="运行仿真自测")
+    ap.add_argument("--step6", action="store_true", help="Step6 灰度基线验证")
     ap.add_argument("--db", default="datagate.db", help="sqlite 路径")
     ap.add_argument("--ttl", type=int, default=300, help="快照 TTL 秒")
     a = ap.parse_args()
     if a.selftest:
         return selftest()
+    if a.step6:
+        return grayscale_test()
     g = DataGate(db_path=a.db, ttl_sec=a.ttl)
     print(f"DataGate ready: db={a.db} ttl={a.ttl}s state_version={g.state_version} "
           f"(协议: Ω-Refer 内核基线版 V1.0 / DataGate 内核基线版 V1.0)")
