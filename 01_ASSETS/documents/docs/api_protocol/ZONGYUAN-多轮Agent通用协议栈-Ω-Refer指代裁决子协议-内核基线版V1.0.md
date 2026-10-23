@@ -171,6 +171,17 @@ AEP 执行循环（SENSE→REASON→PLAN→ACT→OBSERVE）每步入参、出参
 
 ---
 
+## 附录 B｜ProductionPayload 扩展段（V1.0 仅追加登记，2026-10-23）
+
+企业生产数据对接方案（DataGate）引入的报文扩展，核心报文结构不变：
+
+- 新增可选段 `ProductionPayload`：`source_system / source_primary_key / snapshot_time / is_real_time / field_mask`
+- `FuseMask` 追加枚举项 **`data_stale`**（生产快照 TTL 过期熔断）
+- 生产实体 EID 命名段：`E-M`工单 / `E-L`产线 / `E-B`批次 / `E-D`设备 / `E-Q`质检单
+- 规范全文见《ZONGYUAN-企业生产数据对接方案-DataGate-内核基线版V1.0.md》（同目录）
+
+---
+
 ## 智能体身份卡
 
 - 智能体名称：元极恒一·昆仑洞天子智能体
