@@ -97,13 +97,13 @@
 | Step3.4 行级掩码联动 OBS | `fetch()` 角色掩码 + 未知角色 `permission_deny`；域边界判定依据协议附录 C `bound` | ✅ T3（4 断言） |
 | Step3.5 快照+哈希+版本 | `ingest()` → `truth_root_hash()`（canonical 叶+奇数复制 Merkle）+ `state_version` 单调 | ✅ T4/T5（4 断言） |
 | Step3.6 熔断四类 | TTL=`data_stale`、值域/主键=`param_invalid`、权限=`permission_deny`；**空值阻断**并入 missing-field 检查 | ✅ T2/T4 |
-| Step3.7 本地单元测试 | `--selftest` 20 断言 rc=0 | ✅ 已交付 |
-| Step4 信封/RefSet/Payload | `emit_envelope()` 七要素 + 未注册主键澄清回执不送 LLM | ✅ T7（4 断言） |
-| Step6.2 冲突三策略 | **仅实现 `reject`（base_version 冲突）**；`rollback`/`merge` 未实现 | ⚠ **Step6 前必须补齐** |
-| Step4.3 DID 签名绑定 | 信封 `DID` 字段已带，**`DID_Sig` 签名生成未实现**（L0 本体域签发接口占位） | ⚠ **接入生产前补齐** |
+| Step3.7 本地单元测试 | `--selftest` 28 断言 rc=0 | ✅ 已交付 |
+| Step4 信封/RefSet/Payload | `emit_envelope()` 八要素（含 DID_Sig）+ 未注册主键澄清回执不送 LLM | ✅ T7（6 断言） |
+| Step6.2 冲突三策略 | `reject`（per-EID 版本判定）/ `rollback`（丢弃后发+历史链回退稳定版）/ `merge`（无冲突字段合并，冲突字段 `__divergence` 标记人工接管）三策略全实现 | ✅ 已补齐（2026-10-23 增量，selftest T6 九断言） |
+| Step4.3 DID 签名绑定 | `DidSigner`：HMAC-SHA256(did\|state_version\|truth_root)→base85，密钥走 `DATAGATE_DID_KEY` 环境/600 密钥文件（L0 域外置不入码）；验签+篡改检测入测 | ✅ 已补齐（selftest T7：验签通过/篡改失败/无 signer 不伪造） |
 | Step2 CDC/Kafka、Step7 监控大盘、定期对账 | 依赖真实中间件与运维环境，非本仓可仿真 | ⚠ 部署侧环境项 |
 | Step5.4 写回审批流 | 实现**结构性只读**（无任何写回路径）；变更申请单/审批节点为 Agent 侧流程 | ℹ 按设计不实现于网关内 |
 
-**三处差距的处置约定**：rollback/merge 与 DID_Sig 在进入 Step6 灰度前以增量提交补齐（协议 ConflictPolicy/DID_Sig 均已定义，实现跟随协议）；CDC/监控为环境就位项，不阻塞 Step1-5。
+**差距处置记录**：rollback/merge 与 DID_Sig 已于 2026-10-23 以增量提交补齐（selftest 20→28 断言，冲突判定修正为 per-EID 版本口径——协议 2.4「同一 EID 并发写」，全局 StateVersion 仅作协议头版本不参与冲突判定）；剩余仅 CDC 实链与监控大盘为**部署侧环境项**，不阻塞 Step1-5。
 
 **种子真值引用核验**：文中 `SEED-Ω-REFER-DATA-GATE-001` 即云端 `SEED.OMEGA.DATAGATE.001`（seq 28551）content 内 `seed_id`，键名按 RULE-005 V3.1 点分规范转换，同一真值。
