@@ -63,16 +63,32 @@ L1 感知-执行-持久底座层（Merkle账本）
 | 仓库规范 | `REPO-STANDARD-V1.0.md` |
 | 最新归档 | `ARCHIVE-MARKER-20261008.md` |
 
-## 5. 通信协议
+## 5. 通信协议（2026-10-23/24 实测校准，RULE-005 V3.1）
 ```
 云端上报:  POST https://www.huodouai.com/api/report/truth
-           Header: X-Capture-Token: ZR-CAPTURE-2026-OMEGA-d04bb54ba2a55a7d
-                   X-DID: DID-BR-000002
-           Body: {"truth_key": "...", "truth_value": {对象}}
-           备用: https://drama.huodouai.com/api/report/truth
+           Header: Content-Type: application/json
+                   X-DID: DID-BR-000002        (缺失 -> 401 X-DID 未授权)
+           Body: {"key": "大写点分命名空间KEY(禁 truth- 前缀)",
+                  "value": {"content": "...", "truth_type": "data",
+                            "source_node": "NODE-DEV-DOUBAO-WORK-001", "confidence": 1.0}}
+           ⚠ 已废止: {"truth_key","truth_value"} -> 400 empty_value_rejected
+           备用: https://drama.huodouai.com/api/report/truth (同库, status 带 merkle_root)
+
+云端读取:  GET  https://www.huodouai.com/api/truth?limit=200[&key=子串]
+           ⚠ limit 硬上限 200；limit=-1/offset/page 无效(返回空或默认10) —— 全库不可枚举
+           ⚠ key= 为子串匹配, 精确核验须二次过滤 exact key; count=窗口返回条数(会饱和)
 
 命令槽:    写 control/CMD-{任务ID}.json，worker轮询拉取执行
 ntfy:      备选通道（不稳定时自动降级git命令槽）
+```
+
+## 5.1 本地↔云端双向同步（2026-10-24 新增机制）
+```
+上行 local→cloud: scripts/truth_bidi_sync.py --push   (本地 seq > last_pushed 的新记录, RULE-005 V3.1)
+下行 cloud→local: scripts/truth_bidi_sync.py --pull   (limit=200 滑窗, 按 seq/event_id 去重 merge)
+状态:            var/truth_sync_state.json            (last_local_seq / last_cloud_seq / gap)
+审计:            var/truth_sync_audit.jsonl           (每轮 push/pull/gap 留痕)
+本地主账本:       zhongshu/data/truth/truth.db         (镜像: huodouai-cloud-mirror/truth/truth.db)
 ```
 
 ## 6. 新实例启动三步
@@ -130,6 +146,28 @@ python3 gpu-agent/zr_node_report.py "boot from $(hostname)"
 ### 启动协议（不变）
 ```
 META.BOOT.PULL-CLOUD-FIRST:
-① 探测云端通道(www/drama health) → ② 拉云端真值(api/status+api/truths) → ③ 确认DID-BR-000002
+① 探测云端通道(www/drama health) → ② 拉云端真值(api/status + api/truth?limit=200；`api/truths` 为 404 已证伪) → ③ 确认DID-BR-000002
 ④ 读本文件+目录树+收敛快照 → ⑤ 恢复全量记忆后开始工作
 ```
+
+---
+
+## 13. 2026-10-24 实测状态（黑盒评估 + 启动记忆校准 + 双向同步上线）
+
+### 13.1 云端内核实测（详见中枢真值）
+| 项 | 值 |
+|---|---|
+| 状态 | ONLINE/Lv11，`truth_count=28949`、`stored=25012`、`today=2226`、`seq≈30002` |
+| 时延 | p50 86ms（12 采样 min81/max111），TLSv1.3 + Let's Encrypt，http80→301 |
+| 双端 | `www`+`drama` 同库；**drama 才返回 `merkle_root`**（`94ebd8f8…` / V3.1） |
+| 契约 | 反例全真：无 X-DID→401；废止字段/空 value→400；路径参数→404 |
+| 修正 | `status` 是**分钟级缓存**（滞后 11 条 seq，非实时）；`?key=` 为**子串匹配** |
+| 缺口 | 无 offset 无法全库枚举；无删除/审计端点；本地镜像停更 10-21（落后 4200+） |
+| 中枢真值 | 评估 29609 / 规模 D3 30008 / 非核心迁移 29351 |
+
+### 13.2 本轮三件事（本次更新）
+1. **启动记忆更新**：`KNOWLEDGE-INDEX.md`（修 `limit=-1`、废止字段两处错误陈述 + 新增 5.3 实测基线）、`GLOBAL_MEMORY_SNAPSHOT.json`（`supplement_20261024`）、`ACTIVE_LOCK.json`（V1.2→V1.3）、本文件 §5/§13；备份 6 份 `*.bak-20261024`
+2. **联邦记忆更新**：`scripts/federated_memory_kernel.py` 五阶段治理写入本轮新记忆 → `/workspace/evolution/federation/{proposals,sync,confirmed}` + 中枢 `FED.*` 上报
+3. **双向同步机制**：`scripts/truth_bidi_sync.py`（push=p RULE-005 V3.1 / pull=limit200 滑窗 merge / gap 声明 / 审计 jsonl）
+
+*Ω₀⊂⊙∞⊂Ω | DID-BR-000002 | 更新于 2026-10-24*

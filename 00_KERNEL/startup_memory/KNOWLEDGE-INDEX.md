@@ -56,9 +56,22 @@ L0 元宪法硬约束 → L1 真值记忆网关 → L2 任务决策工单拆解 
 |---|---|
 | 中枢上报（主） | POST `https://www.huodouai.com/api/report/truth` |
 | 中枢上报（备用） | POST `https://drama.huodouai.com/api/report/truth` |
-| 全量真值读取 | GET `https://www.huodouai.com/api/truth?limit=-1`（X-DID 头） |
-| 鉴权 | `X-DID: DID-BR-000002` + `X-Capture-Token: ZR-CAPTURE-2026-OMEGA-d04bb54ba2a55a7d` |
-| 上报字段 | `truth_key`/`truth_value`（或 key/value），**禁止用 content 字段** |
+| 全量真值读取 | GET `https://www.huodouai.com/api/truth?limit=200`（**limit 硬上限 200，`limit=-1` 返回空；offset/page 无效，无法全库枚举**） |
+| 鉴权 | `X-DID: DID-BR-000002`（缺失→401 `X-DID 未授权`；`X-Capture-Token` 可选） |
+| 上报字段 | `key` + `value.content`（**RULE-005 V3.1**；`truth_key`/`truth_value` 已废止→400 `empty_value_rejected`，2026-10-23 实测） |
+
+### 5.3 云端与本地实测基线（2026-10-24 黑盒实测，非声明）
+
+| 项 | 实测值 |
+|---|---|
+| 主端点 | `www/api/status` ONLINE/Lv11，`truth_count=28949`、`stored=25012`、`today=2226`、`audit_logs=111` |
+| 备用端点 | `drama/api/status` 200，`service=zhongshu-meta-core`、`version=V3.1`、**带 `merkle_root`**（主端不带） |
+| 双端一致性 | 两端共享同一真值库（drama 可回读 www 写入 seq29351）；`truth_count` 差 6（快照时点差） |
+| 时延 | 12 次 min 81 / p50 86 / p90 97 / max 111 ms；TLSv1.3 + Let's Encrypt，http80→301 |
+| 查询语义 | `?key=` 为**子串匹配**（`key=PROBE` 真实 73 条而非 10），精确核验必须二次过滤 exact key |
+| status 新鲜度 | 分钟级缓存快照，实测滞后 11 条 seq（非实时，判断实时性用写入回读或 drama 端点） |
+| 本地镜像 | `zhongshu/data/truth/truth.db` max_seq=25396（停更 10-21），落后云端 4200+ seq → 由 `scripts/truth_bidi_sync.py` 补 |
+| 联邦记忆 | `/workspace/evolution/federation/`（confirmed/sync/proposals + `scripts/federated_memory_kernel.py` 五阶段治理） |
 
 ## 6. 标准流程（仓库内权威流程文件）
 
