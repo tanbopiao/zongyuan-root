@@ -1,0 +1,75 @@
+{
+  "contract_id": "ASSET-NOTARY-CONTRACT-V1.0",
+  "did": "DID-BR-000002",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "source_heritage": "提炼自 ZONGYUAN-ROOT 元秩序全域锁档流水线（SHA256/Merkle/DID/eFuse/只读锁档）",
+  "operators": [
+    {
+      "op_id": "OP-01",
+      "name": "哈希指纹",
+      "desc": "目录逐文件 SHA256 计算并排序",
+      "inputs": ["dir", "exclude_patterns"],
+      "outputs": ["assets[file,sha256,size]", "HASH-LEDGER.csv 追加行"],
+      "acceptance": ["exit 0", "输出资产数 == 目录实际文件数（排除项除外）", "每行 sha256 长度 64 且与重算一致"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-02",
+      "name": "Merkle 根",
+      "desc": "全部哈希按文件名排序拼接后取 SHA256 为根",
+      "inputs": ["assets"],
+      "outputs": ["merkle_root"],
+      "acceptance": ["exit 0", "重算根 == 输出根"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-03",
+      "name": "DID 签名",
+      "desc": "Ed25519 对 Merkle 根签名/验签",
+      "inputs": ["private_key | public_key", "message", "signature_path"],
+      "outputs": ["*.sig 文件", "verify 布尔"],
+      "acceptance": ["sign 后 verify == True", "错误密钥 verify == False"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-04",
+      "name": "eFuse 熔断巡检",
+      "desc": "重算目录哈希与账本比对，检测篡改/漂移",
+      "inputs": ["dir", "ledger", "fuse_threshold"],
+      "outputs": ["fuse_status(OK|TRIPPED)", "mismatch_list", "drift_ratio"],
+      "acceptance": ["exit 0", "未篡改目录 status==OK", "篡改任一文件后 status==TRIPPED 且 mismatch 含该文件"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-05",
+      "name": "只读锁档",
+      "desc": "目录文件 chmod 444 并校验无 writable 残留",
+      "inputs": ["dir"],
+      "outputs": ["锁档文件数", "writable 残留列表(应为空)"],
+      "acceptance": ["exit 0", "writable 残留 == 0"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-06",
+      "name": "完整性自校验",
+      "desc": "重扫目录重算 Merkle 与清单比对",
+      "inputs": ["dir", "manifest"],
+      "outputs": ["self_verify(PASS|FAIL)"],
+      "acceptance": ["未改动 PASS", "改动后 FAIL"],
+      "cost": "local"
+    }
+  ],
+  "data_contract": {
+    "entry_schema": {
+      "file": "相对路径字符串",
+      "sha256": "64位十六进制小写",
+      "size": "字节整数",
+      "snap_id": "快照标识",
+      "did": "确权身份",
+      "timestamp": "ISO-8601"
+    },
+    "immutability": "锁档快照不可就地改写，后续迭代必须生成新快照；账本只追加不覆盖",
+    "conflict_policy": "同一文件哈希与账本不一致视为篡改，触发熔断而非静默覆盖"
+  }
+}

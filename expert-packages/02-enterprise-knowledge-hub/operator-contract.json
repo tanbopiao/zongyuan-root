@@ -1,0 +1,78 @@
+{
+  "contract_id": "ENTERPRISE-KNOWLEDGE-HUB-CONTRACT-V1.0",
+  "did": "DID-BR-000002",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "source_heritage": "提炼自联邦记忆池体系：结构化条目模型 + 索引池账本 + 跨节点检索网关 + 记忆契约分层 + 条目不可变与冲突消解",
+  "operators": [
+    {
+      "op_id": "OP-01",
+      "name": "知识条目入库",
+      "desc": "对知识根目录逐文件计算 SHA256，生成结构化条目并写入索引账本",
+      "inputs": ["knowledge_root", "node_id", "did", "entry_prefix", "exclude_patterns"],
+      "outputs": ["entries[entry_id,department,did,sha256,timestamp,tags,path,size,title]", "index_ledger.json"],
+      "acceptance": ["exit 0", "entry_count == 实际纳入文件数", "每条 sha256 长度 64 且与重算一致"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-02",
+      "name": "索引构建",
+      "desc": "按 search_fields 构建可检索索引（tags/path/title 倒排）并落盘",
+      "inputs": ["ledger_path", "search_fields"],
+      "outputs": ["index_ledger.json (含 entries 与倒排索引)", "entry_count"],
+      "acceptance": ["exit 0", "重跑幂等：相同根目录生成相同条目哈希集合"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-03",
+      "name": "跨节点检索",
+      "desc": "经 DID 同源校验后，在全域索引池中按关键词检索条目元信息（不回传原文）",
+      "inputs": ["did", "keyword", "ledger_path", "search_fields"],
+      "outputs": ["hit_list[entry_id,path,sha256_prefix,timestamp,tags]"],
+      "acceptance": ["错误/缺失 DID 拒绝访问 exit 2", "正确 DID exit 0", "命中条目均出现在 search_fields 之一"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-04",
+      "name": "同源身份校验",
+      "desc": "校验调用方 DID 与账本归属 DID 一致，不一致即拒绝",
+      "inputs": ["caller_did", "ledger_did"],
+      "outputs": ["auth_pass(布尔)", "reject_reason"],
+      "acceptance": ["did 相同 auth_pass=True", "did 不同 auth_pass=False 且 exit 2"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-05",
+      "name": "冲突消解",
+      "desc": "同路径出现不同 sha256 视为冲突；按时间戳新者保留、旧者标记 conflict，不静默覆盖",
+      "inputs": ["ledger_path", "conflict_policy"],
+      "outputs": ["conflict_list", "resolved_count", "kept_entry_id"],
+      "acceptance": ["exit 0", "同路径双哈希必产生 conflict 记录", "账本不被静默改写"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-06",
+      "name": "账本导出",
+      "desc": "导出索引池摘要（条目数/部门分布/最近更新/冲突数）供审计与同步",
+      "inputs": ["ledger_path"],
+      "outputs": ["stats{entry_count,departments,updated,conflict_count}", "摘要 JSON"],
+      "acceptance": ["exit 0", "输出 JSON 含 entry_count 字段"],
+      "cost": "local"
+    }
+  ],
+  "data_contract": {
+    "entry_schema": {
+      "entry_id": "K<seq>",
+      "department": "部门/团队标识字符串",
+      "did": "知识归属身份（采用方 DID）",
+      "sha256": "64位十六进制小写文件指纹",
+      "timestamp": "ISO-8601 时间戳",
+      "tags": ["字符串数组"],
+      "path": "相对知识根目录的路径",
+      "size": "字节整数",
+      "title": "条目标题（可选，取首行或文件名）"
+    },
+    "immutability": "条目入库后禁止就地改写；内容变更必须生成新条目，旧条目永久保留；账本只追加不覆盖",
+    "conflict_policy": "同路径出现不同 SHA256 即判定冲突：时间戳较新者保留为当前条目，较旧者标记 conflict=true 并保留溯源；绝不静默覆盖历史条目"
+  }
+}

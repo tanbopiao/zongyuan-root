@@ -1,0 +1,29 @@
+{
+  "plan_id": "ORCH-PLAN-SELFCHECK-001",
+  "generated_at": "2026-10-24T10:00:00+0800",
+  "strategy": "source-channel",
+  "shard_count": 3,
+  "shards": [
+    {
+      "shard_id": "shard-1",
+      "scope": "企业网盘文件盘点",
+      "channel": "nas",
+      "dependencies": [],
+      "pipeline": ["只读清单检索", "统计数量", "识别缺口", "标准化输出"]
+    },
+    {
+      "shard_id": "shard-2",
+      "scope": "知识库与文档库盘点",
+      "channel": "wiki",
+      "dependencies": [],
+      "pipeline": ["只读清单检索", "统计数量", "识别缺口", "标准化输出"]
+    },
+    {
+      "shard_id": "shard-3",
+      "scope": "业务数据库表盘点",
+      "channel": "db",
+      "dependencies": ["shard-1"],
+      "pipeline": ["元数据读取", "统计行数", "识别缺口", "标准化输出"]
+    }
+  ]
+}

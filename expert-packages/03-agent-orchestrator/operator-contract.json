@@ -1,0 +1,87 @@
+{
+  "contract_id": "AGENT-ORCHESTRATOR-CONTRACT-V1.0",
+  "did": "<YOUR_DID>",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "source_heritage": "提炼自企业级多智能体并行编排体系（主→编排→并行子任务→统一台账，R1-R7 调度规则）",
+  "operators": [
+    {
+      "op_id": "OP-01",
+      "name": "规模门槛评估",
+      "desc": "按对象数/维度数/通道数/流水线单元数/记录量判定是否达到并行编排门槛",
+      "inputs": ["objects", "dims", "channels", "units", "records", "size_gb", "high_stakes"],
+      "outputs": ["should_delegate", "triggers[]", "reasons[]", "suggest"],
+      "acceptance": ["exit 0", "高门槛输入时 should_delegate==true", "低门槛输入时 should_delegate==false"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-02",
+      "name": "分片计划生成",
+      "desc": "把互不依赖的流水线单元均衡分到 2-4 个端到端自持分片，可选按权重加权",
+      "inputs": ["units[]", "shards", "weights[]?", "max_share"],
+      "outputs": ["plan_id", "shards[shard_id,units,estimated_weight,share]", "balance_ok"],
+      "acceptance": ["exit 0", "分片数落在 2-4", "全部分片单元并集 == 输入单元"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-03",
+      "name": "负载均衡校验",
+      "desc": "R3：单分片权重占比不得超过阈值（默认 40%）",
+      "inputs": ["weights[]", "shards", "max_share"],
+      "outputs": ["per-shard share", "overall_pass"],
+      "acceptance": ["exit 0 当全部 share<=max_share", "exit 1 当任一分片 share>max_share"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-04",
+      "name": "依赖合法性校验",
+      "desc": "R2：计划内分片依赖不得自指、不得指向不存在的分片、不得成环",
+      "inputs": ["plan.json"],
+      "outputs": ["errors[]", "overall_pass"],
+      "acceptance": ["合法计划 pass==true", "含自依赖/悬空依赖/环的计划 pass==false 且 errors 列名"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-05",
+      "name": "统一schema一致性校验",
+      "desc": "R4：所有分片输出必须使用同一 schema，否则聚合失败",
+      "inputs": ["schemas[]", "shards"],
+      "outputs": ["consistent", "differing[]"],
+      "acceptance": ["schema 数==分片数", "全部一致时 consistent==true"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-06",
+      "name": "台账合并schema",
+      "desc": "生成跨分片统一回收台账骨架：items/by_source/gaps/duplicates/failed_shards/provenance",
+      "inputs": [],
+      "outputs": ["merge_schema"],
+      "acceptance": ["exit 0", "输出含 ledger_version/items/gaps/duplicates/provenance 字段"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-07",
+      "name": "确权档案校验",
+      "desc": "R7：聚合台账必须绑定 plan_id 与 did，关键字段齐全方可归档",
+      "inputs": ["ledger.json"],
+      "outputs": ["missing_fields[]", "provenance.has_did/has_plan_id", "overall_pass"],
+      "acceptance": ["合法台账 exit 0", "缺 did 或 plan_id 时 exit 1"],
+      "cost": "local"
+    }
+  ],
+  "data_contract": {
+    "entry_schema": {
+      "id": "条目唯一ID",
+      "name": "条目名称",
+      "source": "来源通道（nas/wiki/db/...）",
+      "type": "条目类型",
+      "location": "可定位路径/URL",
+      "size_bytes": "整数",
+      "last_updated": "日期",
+      "status": "ok|gap|failed",
+      "gaps": "缺口列表"
+    },
+    "immutability": "分片计划与聚合台账归档后不可就地改写；变更须生成新 plan_id 并重跑",
+    "conflict_policy": "同名/同源条目按来源+最后更新时间裁定，无法裁定时并列标记待人工，不静默合并"
+  }
+}
