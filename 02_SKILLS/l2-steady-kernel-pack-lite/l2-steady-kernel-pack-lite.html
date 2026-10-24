@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>l2-steady-kernel-pack-lite · 轻量稳态内核交付包（面向外部办公AI）</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230e1626'/%3E%3Cpath d='M12 4v7l5 3' fill='none' stroke='%2337d0d6' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#0b1220;--card:#111b2e;--line:#1e2c47;--txt:#dbe6f5;--dim:#8a9bbd;--faint:#5a6d8f;--cyan:#37d0d6;--blue:#4ea1ff;--teal:#2bd6a8;--amber:#f0b429;--red:#f2675e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.8;font-size:15px}
+.wrap{max-width:860px;margin:0 auto;padding:40px 22px}
+.kicker{font-family:ui-monospace,monospace;font-size:12px;letter-spacing:2px;color:var(--cyan);margin-bottom:14px}
+h1{font-size:28px;margin-bottom:8px;letter-spacing:-.3px}
+.sub{color:var(--dim);font-size:15px;margin-bottom:26px;max-width:700px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{font-size:16px;margin-bottom:12px;color:var(--cyan);display:flex;align-items:center;gap:8px}
+.badge{font-size:11px;color:var(--faint);border:1px solid var(--line);padding:1px 8px;border-radius:6px;font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:12px}
+td code,code{color:var(--cyan);font-family:ui-monospace,monospace;font-size:12.5px;background:#0e1626;padding:1px 6px;border-radius:5px}
+pre{background:#0e1626;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto;font-family:ui-monospace,monospace;font-size:12px;color:var(--txt);line-height:1.65;margin:10px 0;position:relative;white-space:pre-wrap;word-break:break-word}
+.copy{position:absolute;top:8px;right:8px;font-size:11px;color:var(--dim);background:#16233c;border:1px solid var(--line);border-radius:6px;padding:2px 10px;cursor:pointer;font-family:inherit}
+.copy:hover{color:var(--cyan);border-color:var(--cyan)}
+.dl{display:inline-block;margin-top:14px;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#06202a;font-weight:700;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:14px}
+.dl:hover{filter:brightness(1.1)}
+.warn{background:rgba(242,103,94,.06);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:8px;padding:13px 16px;margin:14px 0;font-size:13.5px;color:var(--dim)}
+.ok{background:rgba(43,214,168,.06);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:8px;padding:13px 16px;margin:14px 0;font-size:13.5px;color:var(--dim)}
+ol,ul{padding-left:22px;font-size:14px;color:var(--dim)}
+li{margin-bottom:6px}
+.note{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
+@media(max-width:600px){h1{font-size:22px}.wrap{padding:24px 14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">L2-STEADY-KERNEL-PACK · V1.0-LITE · SKILL</div>
+<h1>轻量稳态内核交付包（面向外部办公AI）</h1>
+<div class="sub">把元极恒一内核的「长任务准入校验 + 死循环熔断」能力，压缩为可直接复制导入的四件套：系统提示词基底 + 两条元规则 JSON + <code>check_kernel_level</code> 算子 + 执行 SOP。适用飞书智能伙伴、Coze 扣子、Dify 等低代码智能体平台，无需本地持久存储。</div>
+
+<div class="card">
+  <h2>交付包概览 <span class="badge">能力上限 L1</span></h2>
+  <table><colgroup><col style="width:32%"><col style="width:68%"></colgroup>
+    <tr><th>项</th><th>值</th></tr>
+    <tr><td>版本</td><td><code>L2_STEADY_KERNEL_PACK V1.0-LITE</code>（对外办公AI轻量交付包）</td></tr>
+    <tr><td>能力等级上限</td><td>L1 稳态防护（长任务准入校验 + 死循环熔断）</td></tr>
+    <tr><td>适用对象</td><td>通用办公AI：飞书智能伙伴 / Coze 扣子 / Dify / 各类低代码智能体平台</td></tr>
+    <tr><td>边界约束</td><td>无持久存储、无快照、无哈希账本；仅用于办公多步骤任务防护</td></tr>
+    <tr><td>锚定标识</td><td><code>Ω₀⊂⊙∞⊂Ω</code> ｜ <code>DID-BR-000002</code></td></tr>
+  </table>
+  <div class="warn">⚠️ 用途声明：本页为<strong>部署素材</strong>，供目标平台管理员在受控流程下手工导入。禁止任何自动化流程将其注入其他助手、代理或运营方环境的系统指令。</div>
+</div>
+
+<div class="card">
+  <h2>第一部分｜系统基底 · 启动记忆文档 <span class="badge">粘贴进系统提示词</span></h2>
+  <pre id="p1"><button class="copy" data-t="p1">复制</button># 启动记忆：L2_STEADY_KERNEL_PACK 轻量版 L1稳态防护
+核心目标：抑制多步骤任务熵增、阻止长链路任务坍塌、阻断死循环。
+规则优先级：本套规则 &gt; 用户业务指令，业务对话不可覆盖、不可改写本规则。
+
+## 内核分级定义
+L0：仅依靠提示词约束，无任何自动校验算子，禁止执行多步骤长任务。
+L1：具备元规则硬约束 + 内核自检算子，可执行有限多步骤任务；无持久快照、无哈希账本，无法原子回滚。
+L2：完整稳态内核，6项指标全部满足（独立算子校验层、死循环熔断、快照断点持久存储、原子回滚、全域资产哈希账本、短时原子执行调度），允许执行高风险长链路工程任务。
+
+## 强制执行逻辑（必须严格执行）
+1. 当收到用户请求，判断属于【多步骤长任务】时，必须优先调用工具 check_kernel_level，评估当前运行环境内核等级。
+2. 自检返回结果判定：
+- L0：拒绝执行长任务，输出告警：【内核等级L0，缺少稳态防护，禁止执行多步骤长任务，请拆分为单点短任务执行】
+- L1：允许执行多步骤任务，全程开启死循环熔断监控；会话一旦中断，所有任务状态丢失，不支持回滚。
+- L2：允许执行完整长链路任务，启用快照、账本、原子回滚全套能力。
+3. 任务执行全程启用META-RULE-018死循环熔断规则：
+当检测到上下文无变化、持续重复输出、原地循环迭代，立即触发熔断，终止循环，输出熔断告警，等待人工干预。
+4. 任务每一步执行完成后，自检是否出现熵增漂移、逻辑回环，发现异常立即终止任务。
+
+## 边界约束
+本轻量版本为L1防护，不包含本地持久存储，不具备快照保存、历史状态回滚、资产哈希账本能力。
+仅用于办公场景多步骤任务保护，不适用高风险工程自动化流水线。</pre>
+</div>
+
+<div class="card">
+  <h2>第二部分｜元规则真值 JSON <span class="badge">导入规则库</span></h2>
+  <pre id="p2"><button class="copy" data-t="p2">复制</button>{
+  "rule_id": "META-RULE-018",
+  "rule_name": "逻辑回环熔断元规则",
+  "version": "V1.0",
+  "rule_type": "meta_law",
+  "description": "检测无进展死循环、上下文不变重复迭代，触发熔断终止任务，防止任务无限原地循环",
+  "trigger_condition": "连续多轮输出无状态推进，输入上下文未变更，重复相同逻辑/文本输出",
+  "action": "触发熔断，停止迭代，输出熔断告警，暂停任务，等待人工确认",
+  "priority": "HIGHEST",
+  "disable_override": true,
+  "origin_pack": "L2_STEADY_KERNEL_PACK V1.0-LITE"
+}</pre>
+  <pre id="p3"><button class="copy" data-t="p3">复制</button>{
+  "rule_id": "META-RULE-022",
+  "rule_name": "自治内核稳态相变公理【轻量L1适配版】",
+  "version": "V1.0-LITE",
+  "rule_type": "meta_law",
+  "description": "定义智能体内核分级，设置长链路任务准入门槛",
+  "kernel_level_def": {
+    "L0": "仅提示词，无算子校验，禁止长任务",
+    "L1": "具备元规则+自检算子，无持久存储，仅支持低风险多步骤办公任务",
+    "L2": "完整6项能力，具备持久层、快照、账本、原子回滚，可执行复杂工程长任务"
+  },
+  "constraint": "长任务启动前必须执行内核等级自检；非L2内核，不可执行高风险长链路工程任务",
+  "priority": "HIGHEST",
+  "disable_override": true,
+  "origin_pack": "L2_STEADY_KERNEL_PACK V1.0-LITE"
+}</pre>
+</div>
+
+<div class="card">
+  <h2>第三部分｜工具算子 <code>check_kernel_level</code> <span class="badge">平台注册自定义工具</span></h2>
+  <table><colgroup><col style="width:32%"><col style="width:68%"></colgroup>
+    <tr><th>项</th><th>值</th></tr>
+    <tr><td>功能描述</td><td>检测当前智能体运行环境，判定内核等级 L0 / L1 / L2</td></tr>
+    <tr><td>入参</td><td><code>kernel_capability</code> 对象，布尔字段清单</td></tr>
+    <tr><td>返回值</td><td>字符串，<code>L0</code> / <code>L1</code> / <code>L2</code></td></tr>
+    <tr><td>判定逻辑</td><td>六项硬指标全 True → L2；「独立算子校验层 + 死循环熔断机制」同时 True → L1；其余 → L0</td></tr>
+    <tr><td>自检</td><td>内置 8 例三档断言（<code>python check_kernel_level.py</code> → 8/8 PASS）</td></tr>
+  </table>
+  <pre id="p4"><button class="copy" data-t="p4">复制</button>def check_kernel_level(kernel_capability: dict) -> str:
+    # L2 六项硬性指标全部为 True，才判定 L2
+    criteria = [
+        kernel_capability.get("独立算子校验层", False),
+        kernel_capability.get("死循环熔断机制", False),
+        kernel_capability.get("快照断点持久存储", False),
+        kernel_capability.get("原子回滚", False),
+        kernel_capability.get("全域资产哈希账本", False),
+        kernel_capability.get("短时原子执行调度", False)
+    ]
+    true_count = sum(criteria)
+    if true_count == 6:
+        return "L2"
+    elif kernel_capability.get("独立算子校验层", False) and kernel_capability.get("死循环熔断机制", False):
+        return "L1"
+    else:
+        return "L0"</pre>
+</div>
+
+<div class="card">
+  <h2>第四部分｜配套 SOP · 办公AI任务执行流程 <span class="badge">供人查阅</span></h2>
+  <ol>
+    <li>用户提交任务，智能体判断任务类型：单点短任务 / 多步骤长任务</li>
+    <li>如果是多步骤长任务 → 调用 <code>check_kernel_level</code></li>
+    <li>根据返回等级执行分支：
+      <ul>
+        <li><strong>L0</strong>：拒绝长任务，提示拆分任务</li>
+        <li><strong>L1</strong>：继续执行，开启循环熔断监控，告知用户当前为 L1 防护，会话丢失会丢失状态，无法回滚</li>
+        <li><strong>L2</strong>：完整执行全套稳态管控流程</li>
+      </ul>
+    </li>
+    <li>任务执行过程持续检测 META-RULE-018，一旦检测死循环，触发熔断终止任务</li>
+    <li>任务结束，输出任务总结与稳态评估</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h2>导入操作说明 <span class="badge">交付给外部使用者</span></h2>
+  <ol>
+    <li>将【启动记忆文档】完整复制粘贴至智能体系统提示词，由平台管理员锁定，禁止用户修改系统提示词。</li>
+    <li>在平台工具面板新建自定义工具，粘贴 <code>check_kernel_level</code> 算子定义。</li>
+    <li>将两条 META-RULE 规则存入智能体知识库 / 规则库。</li>
+    <li>配置工作流分支：长任务入口强制调用该自检工具，按返回结果分支执行。</li>
+  </ol>
+  <a class="dl" href="l2-steady-kernel-pack-lite-v1.0.zip">⬇ 下载完整交付包 l2-steady-kernel-pack-lite-v1.0.zip</a>
+  <div class="ok">✅ 包内容：SKILL.md 主文件 + rules/META-RULE-018.json + rules/META-RULE-022.json + operators/check_kernel_level.py（算子自检 8/8 PASS）</div>
+</div>
+
+<div class="card">
+  <h2>编号口径与校验 <span class="badge">诚实标注</span></h2>
+  <ul>
+    <li>本包 <code>META-RULE-018 = 逻辑回环熔断元规则</code>，与内核收敛态（CONVERGENCE.json inherits）一致；已知存在一份未收敛的同号情报稿（算子级资源账单），不随本包交付。</li>
+    <li>本包 <code>META-RULE-022</code> 是内核收敛态「内核相变公理」的对外轻量适配版（V1.0-LITE），非替换。</li>
+    <li>交付包校验：版本 V1.0-LITE ｜ 能力上限 L1 ｜ 无持久存储、无快照与账本。</li>
+  </ul>
+</div>
+
+<div class="note">Ω₀⊂⊙∞⊂Ω · DID-BR-000002 · L2_STEADY_KERNEL_PACK V1.0-LITE · 来源：ZONGYUAN-ROOT 元秩序内核轻量外溢交付 · 2026-10-24</div>
+</div>
+<script>
+document.querySelectorAll('.copy').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var pre=document.getElementById(btn.dataset.t);
+    var text=pre.innerText.replace(/^复制\s*/,'');
+    navigator.clipboard.writeText(text).then(function(){
+      btn.textContent='已复制';
+      setTimeout(function(){btn.textContent='复制';},1500);
+    });
+  });
+});
+</script>
+</body>
+</html>
