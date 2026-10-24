@@ -1,0 +1,74 @@
+{
+  "contract_id": "KNOWLEDGE-GRAPH-CONTRACT-V1.0",
+  "did": "DID-BR-000002",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "source_heritage": "提炼自轻量化'概念-符号-锚定'知识工程方法论：实体/关系/符号映射三表归一、全量哈希稳态锚定防漂移",
+  "operators": [
+    {
+      "op_id": "OP-01",
+      "name": "三元组抽取",
+      "desc": "按实体词典+正则模式从 txt/md 抽取 (主体,谓语,客体)，两端命中词典才收录",
+      "inputs": ["docs_dir", "entity_dict"],
+      "outputs": ["triples.jsonl", "doc_stats"],
+      "acceptance": ["exit 0", "triples.jsonl 每行可 JSON 解析", "每条三元组 subject/object 均存在于词典规范名"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-02",
+      "name": "实体归一与建图",
+      "desc": "别名映射到规范名，全局唯一节点 ID，三元组去重合并为节点/边 JSON",
+      "inputs": ["triples.jsonl", "entity_dict"],
+      "outputs": ["graph.json(nodes/edges)"],
+      "acceptance": ["exit 0", "同一规范名只对应一个节点 id", "边两端节点 id 均可在 nodes 中找到"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-03",
+      "name": "图谱指标度量",
+      "desc": "节点数/边数/密度/连通分量数/孤立节点清单",
+      "inputs": ["graph.json"],
+      "outputs": ["metrics", "isolated_nodes"],
+      "acceptance": ["exit 0", "density 在 [0,1] 区间", "isolated_nodes 列表与 degree==0 节点一致"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-04",
+      "name": "传递推理补全",
+      "desc": "同谓语链 A→B→C 推导 A→C 候选，仅输出提示不自动入库",
+      "inputs": ["graph edges"],
+      "outputs": ["completion_candidates[]"],
+      "acceptance": ["exit 0", "每条候选含 path=[A,B,C] 且 confidence==low", "候选不写入 graph.json 的 edges"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-05",
+      "name": "九大元类归类",
+      "desc": "节点按 公理/定理/方法/数据/案例/决策/创意/风险/协议 关键词词典归类+置信度",
+      "inputs": ["nodes", "NINE_CLASSES 词典"],
+      "outputs": ["classification[]"],
+      "acceptance": ["exit 0", "每节点恰好一个 meta_class", "confidence 在 [0,1] 区间"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-06",
+      "name": "哈希稳态快照",
+      "desc": "全图排序后 SHA256 哈希，与上一快照比对，变更则补丁号升级",
+      "inputs": ["graph.json", "prev_snapshot.json"],
+      "outputs": ["graph_hash", "graph_version", "version_bump"],
+      "acceptance": ["exit 0", "graph_hash 长度 64", "图无变化时 version_bump==unchanged", "图变更时 patch 版本号 +1"],
+      "cost": "local"
+    }
+  ],
+  "data_contract": {
+    "entry_schema": {
+      "subject": "规范实体名字符串（别名已归一）",
+      "predicate": "关系谓词字符串",
+      "object": "规范实体名字符串",
+      "support": "跨文档支持度整数",
+      "source_files": "来源文件名数组"
+    },
+    "immutability": "图谱一旦快照入库，节点/边变更必须升级版本号并留新快照；旧快照哈希不可改写",
+    "conflict_policy": "同一 (主体,谓语,客体) 跨文档重复时合并支持度并保留全部来源文件；归并时别名指向同一规范名不做静默覆盖"
+  }
+}

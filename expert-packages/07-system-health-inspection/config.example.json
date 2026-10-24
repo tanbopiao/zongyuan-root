@@ -1,0 +1,54 @@
+{
+  "did": "<YOUR_DID>",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "pass_threshold": 80.0,
+  "fail_threshold": 50.0,
+  "stall_threshold": 3,
+  "report_webhook": "",
+  "probes": [
+    {
+      "name": "web-frontend",
+      "type": "http",
+      "url": "https://<YOUR_DOMAIN>/health",
+      "expect_status": 200,
+      "max_latency_ms": 2000,
+      "timeout_sec": 5,
+      "weight": 3.0,
+      "severity": "critical"
+    },
+    {
+      "name": "api-gateway-port",
+      "type": "tcp_port",
+      "host": "<YOUR_HOST>",
+      "port": 8080,
+      "timeout_sec": 3,
+      "weight": 2.0,
+      "severity": "high"
+    },
+    {
+      "name": "app-log-errors",
+      "type": "log_scan",
+      "path": "/var/log/app/app.log",
+      "error_keywords": ["ERROR", "CRITICAL", "Traceback"],
+      "max_errors": 5,
+      "weight": 1.0,
+      "severity": "medium"
+    },
+    {
+      "name": "data-volume-disk",
+      "type": "disk_watermark",
+      "path": "/data",
+      "max_used_percent": 85.0,
+      "weight": 1.0,
+      "severity": "high"
+    },
+    {
+      "name": "etl-pipeline-freshness",
+      "type": "data_freshness",
+      "path": "/data/etl/last_success.txt",
+      "max_age_sec": 3600,
+      "weight": 2.0,
+      "severity": "high"
+    }
+  ]
+}

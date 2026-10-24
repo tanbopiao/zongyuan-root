@@ -1,0 +1,75 @@
+{
+  "contract_id": "DATA-RECONCILIATION-CONTRACT-V1.0",
+  "did": "DID-BR-000002",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "source_heritage": "提炼自 ZONGYUAN-ROOT 体系三层对账流水线（reconcile 清单复核 / heartbeat 心跳对账 / truth_store append-only 账本与 Merkle 基线）",
+  "operators": [
+    {
+      "op_id": "OP-01",
+      "name": "目录指纹扫描",
+      "desc": "目录逐文件 SHA256 + 大小，生成 {rel: {sha256,size}} 清单",
+      "inputs": ["target_dir", "exclude_patterns"],
+      "outputs": ["assets 清单", "asset_count"],
+      "acceptance": ["exit 0", "清单条目数 == 目录实际文件数（排除项除外）", "每项 sha256 长度 64"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-02",
+      "name": "基线对账",
+      "desc": "当前清单 vs 基线清单，输出新增/删除/变更 + 漂移率",
+      "inputs": ["current_assets", "baseline_assets"],
+      "outputs": ["added/removed/changed", "drift", "drift_ratio", "status(CONVERGED|DRIFT)"],
+      "acceptance": ["exit 0", "无变化时 drift==0 且 status==CONVERGED", "新增1文件后 drift==1 且 added 含该文件"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-03",
+      "name": "Merkle 账本校验",
+      "desc": "append-only 账本逐行累积哈希重算，比对存储根",
+      "inputs": ["ledger_path", "state_path"],
+      "outputs": ["computed_root", "stored_root", "consistent", "ledger_lines"],
+      "acceptance": ["exit 0", "未篡改 consistent==true", "篡改任一行后 consistent==false"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-04",
+      "name": "双向溯源对账",
+      "desc": "本地清单 vs 远端权威 API 双向核对，标记本地缺失/远端缺失",
+      "inputs": ["manifest", "remote_audit_url", "remote_headers"],
+      "outputs": ["scanned", "matched", "pushed", "remaining"],
+      "acceptance": ["exit 0", "远端不可达时 status==REMOTE_UNAVAILABLE 不崩溃", "dry-run 不产生实际写入"],
+      "cost": "local | free-api"
+    },
+    {
+      "op_id": "OP-05",
+      "name": "增量补推",
+      "desc": "远端缺失项按批次幂等补推，游标持久化断点续跑",
+      "inputs": ["manifest", "batch_size", "state_path"],
+      "outputs": ["pushed", "remaining", "state(processed 游标)"],
+      "acceptance": ["exit 0", "重复执行不重复推送（幂等）", "补推成功后 remaining 递减"],
+      "cost": "local | free-api"
+    },
+    {
+      "op_id": "OP-06",
+      "name": "健康档案",
+      "desc": "连续正常/异常轮次 + 停滞检测 + 巡检频率自适应建议",
+      "inputs": ["ok", "delta", "stall_threshold"],
+      "outputs": ["consecutive_ok/anomaly", "stall", "recommendation", "history"],
+      "acceptance": ["exit 0", "连续 N 轮 delta<=0 且 N>=阈值 时 stall==true", "档案可 JSON 解析且持久化"],
+      "cost": "local"
+    }
+  ],
+  "data_contract": {
+    "entry_schema": {
+      "file": "相对路径字符串",
+      "sha256": "64位十六进制小写",
+      "size": "字节整数",
+      "did": "确权身份",
+      "ts": "ISO-8601 时间戳",
+      "status": "CONVERGED|DRIFT|REMOTE_UNAVAILABLE|SKIPPED"
+    },
+    "immutability": "账本只追加不覆盖不修改；基线清单重新生成必须显式 --init-baseline；补推游标只前进不回退",
+    "conflict_policy": "同一文件哈希与基线不一致视为变更计入漂移并告警，不做静默覆盖；远端已存在与本地描述冲突时以远端为准并标记"
+  }
+}

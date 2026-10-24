@@ -1,0 +1,76 @@
+{
+  "contract_id": "FEISHU-GOVERNANCE-CONTRACT-V1.0",
+  "did": "DID-BR-000002",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "source_heritage": "提炼自 ZONGYUAN-ROOT 体系飞书四端同步引擎（Wiki 节点创建 / Drive Markdown 上传 / Base 快照注册表批量写入）",
+  "operators": [
+    {
+      "op_id": "OP-01",
+      "name": "本地 Markdown 文本库扫描",
+      "desc": "递归扫描本地 .md 目录，提取标题/标签/SHA256/mtime 生成统一资产清单",
+      "inputs": ["local_md_dir"],
+      "outputs": ["{rel_path: {sha256,size,mtime,title,tags,type}}"],
+      "acceptance": ["exit 0", "扫描条数 == 目录内 .md 文件数", "每项 sha256 长度 64"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-02",
+      "name": "四端资产双向比对",
+      "desc": "以 title 为主键对齐本地与远端（Wiki/Drive/Base）三端，输出 push/pull/conflict/unchanged 四桶",
+      "inputs": ["local_assets", "remote_assets", "conflict_policy"],
+      "outputs": ["push_to_remote", "pull_to_local", "conflicts", "drift", "status"],
+      "acceptance": ["exit 0", "双端 title 完全一致且 sha256 相同 → status==CONVERGED", "本地新增 1 文件后 push_to_remote 含该 title"],
+      "cost": "local | free-api"
+    },
+    {
+      "op_id": "OP-03",
+      "name": "统一资产索引构建",
+      "desc": "按 title/tag/channel 三维聚合本地+远端资产，输出 by_title/by_tag/by_type 索引",
+      "inputs": ["local_inventory", "remote_sim"],
+      "outputs": ["index.json", "stats.titles/tags/channels"],
+      "acceptance": ["exit 0", "index.json 可 JSON 解析", "by_tag 至少含 1 个标签桶"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-04",
+      "name": "Base 注册表对账",
+      "desc": "本地资产清单 vs Base 多维表格记录比对，标记待补录/待归档/已漂移",
+      "inputs": ["local_inventory", "base_records", "title_field", "sha_field"],
+      "outputs": ["matched", "only_local_pending_push", "only_base_pending_archive", "changed"],
+      "acceptance": ["exit 0", "双端一致 → status==CONVERGED", "本地多 1 条 → only_local_pending_push 长度 +1"],
+      "cost": "local | free-api"
+    },
+    {
+      "op_id": "OP-05",
+      "name": "同步游标持久化与断点续跑",
+      "desc": "已处理 title 集合落 state.json，下一轮跳过已收敛项，仅处理新增/漂移",
+      "inputs": ["state_file", "processed_titles"],
+      "outputs": ["last_run", "last_drift", "processed_keys"],
+      "acceptance": ["exit 0", "重复执行 state 中 processed_keys 单调增长不丢失", "state.json 可 JSON 解析"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-06",
+      "name": "冲突裁决",
+      "desc": "同 title 双端 sha256 不一致时按 newer_wins/local_wins/remote_wins 三策略裁决",
+      "inputs": ["local_mtime", "remote_mtime", "conflict_policy"],
+      "outputs": ["winner(local|remote)", "conflict 记录"],
+      "acceptance": ["exit 0", "newer_wins 策略下 mtime 较新者为 winner", "冲突条目必须入 report.conflicts 不静默覆盖"],
+      "cost": "local"
+    }
+  ],
+  "data_contract": {
+    "entry_schema": {
+      "title": "文档标题（对齐主键）",
+      "sha256": "64位十六进制小写",
+      "size": "字节整数",
+      "mtime": "epoch 秒",
+      "tags": "字符串数组（小写、去重、≤10）",
+      "channel": "local|wiki|drive|base",
+      "did": "确权身份（采用方参数化）"
+    },
+    "immutability": "已收敛（unchanged）条目不重复推送；游标只前进不回退；冲突条目必须显式标记 winner 不做静默覆盖",
+    "conflict_policy": "默认 newer_wins（按 mtime 较新者为准）；可切换 local_wins/remote_wins；未裁决前不得双端写入"
+  }
+}

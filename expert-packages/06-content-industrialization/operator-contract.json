@@ -1,0 +1,80 @@
+{
+  "contract_id": "CONTENT-INDUSTRIALIZATION-CONTRACT-V1.0",
+  "did": "DID-BR-000002",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "source_heritage": "提炼自七阶段内容生产流水线（企划→剧本→视觉→音频→合成→质检→归档）与声画合一校验、免费额度调度、关键资产哈希锚定稳态治理的通用工程化经验",
+  "operators": [
+    {
+      "op_id": "OP-01",
+      "name": "阶段看板状态机",
+      "desc": "七阶段状态机推进/回退，登记剧本/分镜/画面/音频/成片等生产资产",
+      "inputs": ["ledger_path", "asset_id", "type", "stage", "version", "owner", "deps", "hash"],
+      "outputs": ["ledger 事件流", "by_stage 资产分组"],
+      "acceptance": ["exit 0", "登记 N 条后 board 输出 asset_count == N", "STAGE_ADVANCED 事件可改变 current_stage"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-02",
+      "name": "资产台账登记",
+      "desc": "生产环节产物统一登记，含状态/版本/负责人/依赖/SHA256 锚定",
+      "inputs": ["asset_id", "type", "stage", "version", "owner", "deps", "hash"],
+      "outputs": ["append-only 台账记录"],
+      "acceptance": ["exit 0", "重复 asset_id 新版本不覆盖历史记录", "未提供 hash 时自动由 asset_id+version+desc 派生"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-03",
+      "name": "声画合一校验",
+      "desc": "视频/音频时长对齐、字幕 cue 不重叠且可读时长充足；ffprobe 缺失时降级为声明值",
+      "inputs": ["manifest", "media(可选)", "tolerance_sec", "min_cps"],
+      "outputs": ["passed", "issues[]", "degraded 标志"],
+      "acceptance": ["时长一致且字幕合规时 exit 0", "时长漂移 > tolerance 时 exit 1 且 issues 含时长漂移描述", "未装 ffprobe 时打印降级提示且不崩溃"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-04",
+      "name": "免费额度预算管控",
+      "desc": "各供应商日额度本地记账、剩余预警、免费优先调度排序",
+      "inputs": ["state", "provider", "n", "warn_ratio"],
+      "outputs": ["used/remaining/level", "recommendation_order"],
+      "acceptance": ["exit 0", "register 后 used 累加", "remaining/quota < warn_ratio 时 level==WARN", "耗尽供应商不进入 recommend 列表"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-05",
+      "name": "稳态治理哈希锚定",
+      "desc": "剧本/角色设定/风格基准等关键资产哈希锚定，变更必须版本升级而非覆盖",
+      "inputs": ["asset_id", "hash", "version"],
+      "outputs": ["锚定哈希", "版本号"],
+      "acceptance": ["同一 asset_id 新版本生成新记录而不是改写旧记录", "QC 门禁 G1 要求 script 资产必须带 hash"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-06",
+      "name": "质检门禁",
+      "desc": "成片归档前六道门禁（剧本锚定/视觉登记/音频完整/音画对齐/owner+version/阶段到位），未过禁止归档",
+      "inputs": ["ledger", "manifest", "min_audio_sec", "tolerance", "min_cps"],
+      "outputs": ["gates[]", "passed", "verdict(GO_TO_ARCHIVE|BLOCK_ARCHIVE)"],
+      "acceptance": ["六门全过 exit 0 verdict==GO_TO_ARCHIVE", "任一失败 exit 1 verdict==BLOCK_ARCHIVE 并列出失败 gate"],
+      "cost": "local"
+    }
+  ],
+  "data_contract": {
+    "entry_schema": {
+      "event": "ASSET_REGISTERED|STAGE_ADVANCED",
+      "ts": "ISO-8601",
+      "project": "项目标识字符串",
+      "asset_id": "资产唯一 ID",
+      "type": "script|storyboard|visual|audio|subtitle|final",
+      "stage": "PLANNING|SCRIPT|VISUAL|AUDIO|SYNTH|QC|ARCHIVED",
+      "version": "语义版本字符串",
+      "owner": "负责人",
+      "deps": "依赖 asset_id 列表",
+      "hash": "64 位十六进制 SHA256",
+      "did": "确权身份"
+    },
+    "immutability": "台账 append-only，同一 asset_id 新版本追加新记录而不是覆盖；关键资产（剧本/角色设定/风格基准）必须带 hash 锚定",
+    "conflict_policy": "同一 asset_id 出现不同 hash 视为变更，强制版本号升级；质检门禁未通过时禁止进入 ARCHIVED 阶段"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "contract_id": "SYSTEM-HEALTH-INSPECTION-CONTRACT-V1.0",
+  "did": "DID-BR-000002",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "source_heritage": "提炼自多算子分层巡检 + 风险门禁 + 质量评分 + 告警上报的巡检范式（健康档案连续轮次/停滞检测/自适应建议）",
+  "operators": [
+    {
+      "op_id": "OP-01",
+      "name": "HTTP 端点探测",
+      "desc": "GET 探测端点，校验状态码与延迟阈值",
+      "inputs": ["url", "expect_status", "max_latency_ms", "timeout_sec"],
+      "outputs": ["status(PASS|FAIL|SKIPPED)", "detail", "latency_ms"],
+      "acceptance": ["exit 0", "url 未配置时 status==SKIPPED", "状态码不符或超时 status==FAIL"],
+      "cost": "local | free-api"
+    },
+    {
+      "op_id": "OP-02",
+      "name": "TCP 端口存活检查",
+      "desc": "建立 TCP 连接探测端口可达性",
+      "inputs": ["host", "port", "timeout_sec"],
+      "outputs": ["status(PASS|FAIL|SKIPPED)", "detail"],
+      "acceptance": ["exit 0", "host/port 未配置时 status==SKIPPED", "连接拒绝 status==FAIL"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-03",
+      "name": "日志异常扫描",
+      "desc": "扫描日志文件中错误关键字计数，与阈值比对",
+      "inputs": ["path", "error_keywords", "max_errors"],
+      "outputs": ["status(PASS|FAIL|SKIPPED)", "detail", "error_count"],
+      "acceptance": ["exit 0", "错误数<=阈值 PASS，否则 FAIL", "文件不存在 SKIPPED"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-04",
+      "name": "磁盘水位检查",
+      "desc": "statvfs 计算磁盘使用百分比，与阈值比对",
+      "inputs": ["path", "max_used_percent"],
+      "outputs": ["status(PASS|FAIL|SKIPPED)", "detail", "used_percent"],
+      "acceptance": ["exit 0", "used<=阈值 PASS，否则 FAIL"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-05",
+      "name": "数据新鲜度检查",
+      "desc": "读取时间戳文件，计算距今秒数与阈值比对",
+      "inputs": ["path", "max_age_sec"],
+      "outputs": ["status(PASS|FAIL|SKIPPED)", "detail", "age_sec"],
+      "acceptance": ["exit 0", "age<=阈值 PASS，否则 FAIL", "时间戳不可解析 FAIL"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-06",
+      "name": "风险分级门禁与加权评分",
+      "desc": "按探针权重加权评分(0-100)，按 severity 分级判定 PASS/FAIL/WARN",
+      "inputs": ["probe_results", "pass_threshold", "fail_threshold"],
+      "outputs": ["score", "verdict(PASS|WARN|FAIL)", "critical_failed", "high_failed"],
+      "acceptance": ["exit 0", "任一 critical 探针失败 verdict==FAIL", "score>=pass 且无 high 失败 verdict==PASS"],
+      "cost": "local"
+    },
+    {
+      "op_id": "OP-07",
+      "name": "健康档案与停滞检测",
+      "desc": "连续正常/异常轮次计数，评分停滞检测，巡检频率自适应建议",
+      "inputs": ["verdict", "score", "stall_threshold"],
+      "outputs": ["consecutive_ok/anomaly", "stall", "recommendation", "history"],
+      "acceptance": ["exit 0", "连续 N 轮评分不提升且 N>=阈值 stall==true", "档案可 JSON 解析且持久化"],
+      "cost": "local"
+    }
+  ],
+  "data_contract": {
+    "entry_schema": {
+      "probe_name": "探针字符串标识",
+      "type": "http|tcp_port|log_scan|disk_watermark|data_freshness",
+      "status": "PASS|FAIL|SKIPPED",
+      "severity": "low|medium|high|critical",
+      "weight": "正浮点权重",
+      "did": "巡检确权身份",
+      "ts": "ISO-8601 时间戳",
+      "verdict": "PASS|WARN|FAIL"
+    },
+    "immutability": "健康档案只追加历史窗口（保留最近24轮），不修改历史条目；评分每次运行覆盖更新但不删除",
+    "conflict_policy": "探针失败按 severity 就高原则判定门禁：critical 一票否决；high 触发 WARN 或 FAIL 取决于总分阈值；低 severity 失败仅影响加权分"
+  }
+}

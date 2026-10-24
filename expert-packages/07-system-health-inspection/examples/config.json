@@ -1,0 +1,45 @@
+{
+  "did": "SELFCHECK-001",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "pass_threshold": 80.0,
+  "fail_threshold": 50.0,
+  "stall_threshold": 3,
+  "report_webhook": "",
+  "probes": [
+    {
+      "name": "app-log-errors",
+      "type": "log_scan",
+      "path": "examples/mock_targets/app.log",
+      "error_keywords": ["ERROR", "CRITICAL", "Traceback"],
+      "max_errors": 0,
+      "weight": 1.0,
+      "severity": "high"
+    },
+    {
+      "name": "etl-freshness",
+      "type": "data_freshness",
+      "path": "examples/mock_targets/last_success.txt",
+      "max_age_sec": 600,
+      "weight": 2.0,
+      "severity": "critical"
+    },
+    {
+      "name": "data-volume-disk",
+      "type": "disk_watermark",
+      "path": "examples/mock_targets/data_volume",
+      "max_used_percent": 95.0,
+      "weight": 1.0,
+      "severity": "medium"
+    },
+    {
+      "name": "optional-http-probe",
+      "type": "http",
+      "url": "",
+      "expect_status": 200,
+      "max_latency_ms": 2000,
+      "timeout_sec": 3,
+      "weight": 1.0,
+      "severity": "low"
+    }
+  ]
+}
