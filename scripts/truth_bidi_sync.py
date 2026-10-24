@@ -5,7 +5,11 @@ truth_bidi_sync.py — 本地 ↔ 云端中枢 真值双向同步引擎 V1.0
 DID-BR-000002 | Ω₀⊂⊙∞⊂Ω | 2026-10-24
 
 契约（RULE-005 V3.1，2026-10-23/24 黑盒实测，勿凭文档假设）：
-  上行 POST /api/report/truth  header X-DID 必带(否则401)
+  上行 POST /api/report/truth  header X-DID + X-Signature + X-Signature-Timestamp
+       (2026-10-24 实测: 仅 X-DID -> 401 signature_required, 签名已强制)
+       签名 = HMAC-SHA256(PBKDF2(passphrase, salt="yuanji-signing-salt", 100000, 32),
+                          f"POST|/api/report/truth|{ts}|{sha256('')}")  空body_hash, ±300s
+       passphrase: env MEMORY_GATEWAY_PASSPHRASE 或 REPO/var/yuanji_signing_passphrase
        body {"key","value":{"content","truth_type","source_node","confidence"}}
        废止 truth_key/truth_value -> 400 empty_value_rejected
   下行 GET  /api/truth?limit=200  limit 硬上限200；offset/page/limit=-1 无效
@@ -27,6 +31,7 @@ import os
 import sys
 import json
 import time
+import hmac
 import sqlite3
 import hashlib
 import urllib.request
@@ -89,6 +94,37 @@ def audit(rec):
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
 
+# ---------------------------------------------------------------- signing (2026-10-24 签名强制)
+SIGN_SALT = b"yuanji-signing-salt"
+SIGN_ITERS = 100000
+SIGN_PATH = "/api/report/truth"
+PASSPHRASE_FILE = REPO / "var/yuanji_signing_passphrase"
+_SIGN_SECRET_CACHE = {}
+
+
+def sign_secret():
+    """PBKDF2 派生签名密钥：env 优先，其次本地 passphrase 副本（.gitignore 已排除）。"""
+    if "secret" in _SIGN_SECRET_CACHE:
+        return _SIGN_SECRET_CACHE["secret"]
+    pp = os.environ.get("MEMORY_GATEWAY_PASSPHRASE", "").strip()
+    if not pp and PASSPHRASE_FILE.exists():
+        pp = PASSPHRASE_FILE.read_text().strip()
+    if not pp:
+        raise RuntimeError("missing passphrase: set MEMORY_GATEWAY_PASSPHRASE or var/yuanji_signing_passphrase")
+    secret = hashlib.pbkdf2_hmac("sha256", pp.encode(), SIGN_SALT, SIGN_ITERS, dklen=32)
+    _SIGN_SECRET_CACHE["secret"] = secret
+    return secret
+
+
+def sign_headers():
+    """X-Signature + X-Signature-Timestamp（空 body_hash，与云端 guard_request 口径一致）。"""
+    ts = int(time.time())
+    body_hash = hashlib.sha256(b"").hexdigest()
+    msg = f"POST|{SIGN_PATH}|{ts}|{body_hash}"
+    sig = hmac.new(sign_secret(), msg.encode(), hashlib.sha256).hexdigest()
+    return {"X-Signature": sig, "X-Signature-Timestamp": str(ts)}
+
+
 # ---------------------------------------------------------------- cloud transport
 class CloudTransport:
     """默认实现走真实 HTTP；selftest 注入 mock。"""
@@ -105,10 +141,12 @@ class CloudTransport:
 
     def push(self, key, value, timeout=25):
         body = json.dumps({"key": key, "value": value}, ensure_ascii=False).encode("utf-8")
+        headers = {"Content-Type": "application/json", "X-DID": DID}
+        headers.update(sign_headers())   # 2026-10-24 起签名强制, 缺失 -> 401 signature_required
         req = urllib.request.Request(
             self.base + "/api/report/truth",
             data=body,
-            headers={"Content-Type": "application/json", "X-DID": DID},
+            headers=headers,
             method="POST",
         )
         with urllib.request.urlopen(req, timeout=timeout) as r:

@@ -57,7 +57,7 @@ L0 元宪法硬约束 → L1 真值记忆网关 → L2 任务决策工单拆解 
 | 中枢上报（主） | POST `https://www.huodouai.com/api/report/truth` |
 | 中枢上报（备用） | POST `https://drama.huodouai.com/api/report/truth` |
 | 全量真值读取 | GET `https://www.huodouai.com/api/truth?limit=200`（**limit 硬上限 200，`limit=-1` 返回空；offset/page 无效，无法全库枚举**） |
-| 鉴权 | `X-DID: DID-BR-000002`（缺失→401 `X-DID 未授权`；`X-Capture-Token` 可选） |
+| 鉴权 | 读取：`X-DID: DID-BR-000002`（缺失→401）。**上报：2026-10-24 实测已升级为签名强制**——`X-DID` + `X-Signature` + `X-Signature-Timestamp` 三头（仅 X-DID→401 `signature_required`）；签名=`HMAC-SHA256(PBKDF2(passphrase, salt=b"yuanji-signing-salt", 100000, dklen=32), "POST\|/api/report/truth\|{ts}\|{sha256(\\"\")}")`（空 body_hash，±300s 窗口；passphrase 云端 `/root/zongyuan-yuanji/config/.yuanji_passphrase`，本地副本 `var/yuanji_signing_passphrase` 已 .gitignore；契约源 `www.huodouai.com/memory-gateway-report.html`） |
 | 上报字段 | `key` + `value.content`（**RULE-005 V3.1**；`truth_key`/`truth_value` 已废止→400 `empty_value_rejected`，2026-10-23 实测） |
 
 ### 5.3 云端与本地实测基线（2026-10-24 黑盒实测，非声明）
