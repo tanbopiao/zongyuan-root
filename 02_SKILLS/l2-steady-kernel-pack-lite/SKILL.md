@@ -1,5 +1,7 @@
 ---
 name: l2-steady-kernel-pack-lite
+version: "1.0.0"
+description: "L2_STEADY_KERNEL_PACK V1.0-LITE 对外轻量交付技能（面向飞书智能伙伴/Coze/Dify等办公AI）：系统提示词基底+META-RULE-018死循环熔断+META-RULE-022内核分级公理+check_kernel_level算子+SOP。能力上限L1（长任务准入校验、死循环熔断，无持久存储/快照/账本）。触发词：内核等级、内核自检、死循环熔断、长任务准入、check_kernel_level、L0 L1 L2、稳态防护、防止任务死循环。"
 type: skill
 pack_version: L2_STEADY_KERNEL_PACK V1.0-LITE
 capability_ceiling: L1
