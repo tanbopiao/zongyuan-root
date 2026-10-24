@@ -1,0 +1,120 @@
+{
+  "package_name": "guofeng-ip-audio-studio",
+  "version": "1.0.0",
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "sop_origin": "昆仑洞天音视频混流SOP v1.0.0",
+
+  "audio_channel_priority": [
+    {
+      "channel": "app_builtin_tts",
+      "priority": 0,
+      "cost": "free",
+      "note": "豆包APP内置text_to_audio，消耗会话免费额度"
+    },
+    {
+      "channel": "edge_tts_server",
+      "priority": 1,
+      "cost": "free",
+      "host_env": "AUDIO_HOST",
+      "tts_endpoint": "/tts/generate",
+      "bgm_endpoint": "/bgm/match",
+      "merge_endpoint": "/video/merge-audio",
+      "note": "服务器edge-tts，完全免费零成本"
+    },
+    {
+      "channel": "paid_api",
+      "priority": 9,
+      "cost": "paid",
+      "note": "付费API兜底，需人工审批，最高优先级号"
+    }
+  ],
+
+  "voice_profiles": {
+    "default": {
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "speed": 0.92,
+      "pitch": -3,
+      "volume": 1.0,
+      "emotion": "solemn_cold",
+      "use_case": "昆仑洞天神女系列默认沉稳女声"
+    },
+    "narrator_epic": {
+      "voice": "zh-CN-YunjianNeural",
+      "speed": 0.9,
+      "pitch": 0,
+      "volume": 1.0,
+      "emotion": "epic_grand",
+      "use_case": "史诗战斗旁白备选"
+    }
+  },
+
+  "pause_marks": ["（0.3s停顿）", "（0.5s停顿）", "（1.0s停顿）"],
+
+  "bgm_library": {
+    "default": "oriental_ancient_epic",
+    "emotion_mapping": {
+      "tension": "dark_low_drone",
+      "epic": "grand_orchestral",
+      "sorrow": "melancholy_zither",
+      "awakening": "rising_harp_strings"
+    },
+    "style_constraint": "东方古风，严禁西式管弦/电子/异质风格"
+  },
+
+  "three_layer_mix": {
+    "layer_1_ambient": {
+      "volume": 0.15,
+      "position": "bottom",
+      "note": "环境音底层：风声/云雾/远处钟声"
+    },
+    "layer_2_bgm": {
+      "volume": 0.35,
+      "position": "middle",
+      "duck_when_voice": true,
+      "duck_factor": 0.3,
+      "restore_delay_ms": 200,
+      "note": "BGM中层，人声出现时自动避让压低"
+    },
+    "layer_3_narration": {
+      "volume": 1.0,
+      "position": "top",
+      "compression": true,
+      "note": "旁白顶层，动态压缩保证清晰度"
+    }
+  },
+
+  "subtitle_spec": {
+    "enabled": true,
+    "format": "srt",
+    "single_line_max_chars": 16,
+    "min_display_ms": 800,
+    "position": "bottom_safe_zone",
+    "avoid_key_subjects": ["玄女主体", "金赤双翼", "关键符文"],
+    "toggle_support": true,
+    "font_size": 48,
+    "color": "#E8D5B7",
+    "stroke": "#1A1A2E"
+  },
+
+  "sync_spec": {
+    "max_av_offset_ms": 100,
+    "note": "音画同步误差<100ms"
+  },
+
+  "output_spec": {
+    "audio_formats": ["mp3", "wav"],
+    "audio_codec": "aac",
+    "audio_bitrate": "192k",
+    "sample_rate": 44100,
+    "channels": 2
+  },
+
+  "l0_laws": [
+    "中文配音，东方古风BGM",
+    "音频资产带溯源标识Ω₀⊂⊙∞⊂Ω",
+    "人声不被BGM淹没",
+    "字幕不遮挡主体视觉",
+    "纯东方语境，严禁外文配音/异质音乐风格"
+  ]
+}

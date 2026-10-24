@@ -1,0 +1,72 @@
+{
+  "merge_version": "1.0.0",
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+
+  "service": {
+    "mode": "local_ffmpeg",
+    "host_placeholder": "{HOST}",
+    "merge_endpoint": "/video/merge-audio",
+    "note": "默认使用本地FFmpeg零成本；远端合流服务地址用 {HOST}/config 占位，仅在本地ffmpeg不可用时启用，需人工审批。"
+  },
+
+  "pipeline_architecture": {
+    "layer_1_video": "无声视频轨，严格对齐分镜时间轴",
+    "layer_2_narration": "配音/旁白轨(顶层)，动态压缩，音量1.0",
+    "layer_3_bgm": "BGM轨(中层)，旁白出现时自动duck至0.3",
+    "layer_4_env": "环境音轨(底层)，音量0.15",
+    "layer_5_subtitle": "SRT字幕轨，绑定镜头时间点，可开关显示",
+    "layer_6_mux": "FFmpeg合并视频+多轨音频+字幕，输出成片MP4"
+  },
+
+  "audio_mix": {
+    "original_video_track_volume": 0.3,
+    "narration_volume": 1.0,
+    "bgm_volume": 0.35,
+    "bgm_duck_factor": 0.3,
+    "bgm_duck_when_voice": true,
+    "env_ambient_volume": 0.15,
+    "amix_normalize": false,
+    "sync_tolerance_ms": 100
+  },
+
+  "output_spec": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "video_preset": "medium",
+    "video_crf": 20,
+    "audio_codec": "aac",
+    "audio_bitrate": "192k",
+    "sample_rate": 44100,
+    "channels": 2
+  },
+
+  "subtitle": {
+    "enabled": true,
+    "format": "srt",
+    "position": "bottom_safe_zone",
+    "font_size": 48,
+    "color": "#E8D5B7",
+    "stroke_color": "#1A1A2E",
+    "single_line_max_chars": 16,
+    "min_display_ms": 800,
+    "avoid_subject": true,
+    "avoid_key_subjects": ["玄女主体", "金赤双翼", "关键符文"],
+    "toggle_support": true
+  },
+
+  "quality_check": {
+    "duration_tolerance_sec": 0.5,
+    "expect_audio_stream": true,
+    "expect_resolution_unchanged": true,
+    "expect_video_codec": "h264",
+    "expect_audio_codec": "aac"
+  },
+
+  "compliance": {
+    "release_ready": true,
+    "portrait_strictly_local_only": true,
+    "portrait_note": "人像/写真类成片仅本地归档锁档，不对外展示、不推公开湖",
+    "metadata_tag": ["DID-BR-000002", "Ω₀⊂⊙∞⊂Ω"]
+  }
+}

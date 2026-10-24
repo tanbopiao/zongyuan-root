@@ -1,0 +1,73 @@
+{
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "ledger": {
+    "format": "csv",
+    "base_dir": "./ledger",
+    "tables": {
+      "projects": {
+        "file": "projects.csv",
+        "description": "项目表",
+        "fields": ["project_id", "name", "topic", "episodes", "status", "owner", "created_at", "updated_at", "did", "trace"]
+      },
+      "storyboards": {
+        "file": "storyboards.csv",
+        "description": "分镜表",
+        "fields": ["storyboard_id", "project_id", "episode", "shot_no", "visual", "narration", "duration_sec", "keyframe_url", "video_url", "status", "updated_at", "did", "trace"]
+      },
+      "assets": {
+        "file": "assets.csv",
+        "description": "资产表",
+        "fields": ["asset_id", "type", "storyboard_id", "file_token", "sha256", "quality_score", "lock_status", "updated_at", "did", "trace"]
+      },
+      "progress": {
+        "file": "progress.csv",
+        "description": "进度表",
+        "fields": ["project_id", "stage", "completed", "total", "percentage", "updated_at", "did", "trace"]
+      }
+    }
+  },
+  "status_flow": {
+    "stages": ["pending", "scripted", "keyframed", "videoed", "audioed", "merged", "locked"],
+    "allowed_transitions": {
+      "pending": ["scripted"],
+      "scripted": ["keyframed"],
+      "keyframed": ["videoed"],
+      "videoed": ["audioed"],
+      "audioed": ["merged"],
+      "merged": ["locked"],
+      "locked": []
+    },
+    "stage_order_index": {
+      "pending": 0,
+      "scripted": 1,
+      "keyframed": 2,
+      "videoed": 3,
+      "audioed": 4,
+      "merged": 5,
+      "locked": 6
+    }
+  },
+  "reconcile": {
+    "on_mismatch": "flag_only",
+    "auto_fix": false,
+    "note": "对账差异显式标记，禁止虚构补全；SHA256以实算为准"
+  },
+  "feishu": {
+    "enabled": false,
+    "base_token_env": "FEISHU_BASE_TOKEN",
+    "base_token_placeholder": "{FEISHU_BASE_TOKEN}",
+    "base_url_template": "https://my.feishu.cn/base/{FEISHU_BASE_TOKEN}",
+    "tables": {
+      "projects": "{FEISHU_TABLE_PROJECTS}",
+      "storyboards": "{FEISHU_TABLE_STORYBOARDS}",
+      "assets": "{FEISHU_TABLE_ASSETS}",
+      "progress": "{FEISHU_TABLE_PROGRESS}"
+    },
+    "note": "飞书Base为可选增强（免费额度）；默认CSV本地落账零成本。token一律环境变量注入，禁止硬编码"
+  },
+  "export": {
+    "csv": {"enabled": true, "cost": "free", "encoding": "utf-8-sig"},
+    "json": {"enabled": true, "cost": "free"}
+  }
+}

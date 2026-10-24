@@ -1,0 +1,69 @@
+{
+  "project": {
+    "name": "",
+    "topic": "",
+    "ratio": "9:16",
+    "language": "zh-CN",
+    "quality_target": 4.5,
+    "max_degrade_times": 3,
+    "max_retry_times": 3
+  },
+  "stage_graph": {
+    "stages": [
+      {"id": "script",     "package": "guofeng-ip-scriptmaster",        "name_cn": "剧本大师",   "mode": "serial",   "depends_on": []},
+      {"id": "keyframe",   "package": "guofeng-ip-keyframe-artist",     "name_cn": "关键帧画师", "mode": "serial",   "depends_on": ["script"]},
+      {"id": "video",      "package": "guofeng-ip-video-director",      "name_cn": "视频导演",   "mode": "serial",   "depends_on": ["keyframe"]},
+      {"id": "audio",      "package": "guofeng-ip-audio-studio",        "name_cn": "音频工坊",   "mode": "parallel", "depends_on": ["script"], "note": "音频可与视频并行，只需分镜narration即可启动"},
+      {"id": "merge",      "package": "guofeng-ip-merge-studio",        "name_cn": "合流工坊",   "mode": "serial",   "depends_on": ["video", "audio"]},
+      {"id": "ledger",     "package": "guofeng-ip-production-ledger",  "name_cn": "生产台账管家", "mode": "贯穿",   "depends_on": ["script"], "note": "台账贯穿全程，每阶段回写状态"},
+      {"id": "lock",       "package": "guofeng-ip-lock-archiver",       "name_cn": "锁档归档使", "mode": "serial",   "depends_on": ["merge", "ledger"]}
+    ]
+  },
+  "quota_strategy": {
+    "text": [
+      {"channel": "app_builtin",        "priority": 0, "cost": "free",     "note": "豆包APP会话内置文本"},
+      {"channel": "doubao_lite_api",    "priority": 1, "cost": "free_tier","model": "doubao-seed-2-0-lite-260215", "api_key_env": "DOUBAO_API_KEY"},
+      {"channel": "zhipu_flash_api",    "priority": 2, "cost": "free_tier","model": "glm-4-flash", "api_key_env": "ZHIPU_API_KEY"},
+      {"channel": "paid_api",           "priority": 9, "cost": "paid",     "note": "仅前三级不可用兜底，需人工审批"}
+    ],
+    "image": [
+      {"channel": "app_builtin_image",  "priority": 0, "cost": "free",     "note": "豆包APP内置 image_gen"},
+      {"channel": "seedream_free",     "priority": 1, "cost": "free_tier","model": "seedream-4-5", "api_key_env": "DOUBAO_API_KEY"},
+      {"channel": "paid_api",           "priority": 9, "cost": "paid",     "note": "需人工审批"}
+    ],
+    "video": [
+      {"channel": "app_builtin_video",  "priority": 0, "cost": "free",     "note": "豆包APP内置图生视频"},
+      {"channel": "seedance_free",      "priority": 1, "cost": "free_tier","model": "seedance-2-0", "api_key_env": "DOUBAO_API_KEY"},
+      {"channel": "paid_api",           "priority": 9, "cost": "paid",     "note": "视频额度最贵，需人工审批+最小化策略"}
+    ],
+    "audio": [
+      {"channel": "app_builtin_audio",  "priority": 0, "cost": "free",     "note": "豆包APP内置文生音频"},
+      {"channel": "edge_tts_free",      "priority": 1, "cost": "free",     "voice": "zh-CN-XiaoxiaoNeural", "note": "edge-tts本地免费神经配音"},
+      {"channel": "paid_api",           "priority": 9, "cost": "paid",     "note": "需人工审批"}
+    ]
+  },
+  "degrade_rules": {
+    "on_quota_exhausted": "按 priority 升序自动降级到下一通道",
+    "max_retry": 3,
+    "on_low_quality": "质量低于阈值时升级到更高优先级通道重生成",
+    "max_degrade": 3,
+    "on_fail_after_max": "显式标记 failed 并中断流水线，禁止虚构补全"
+  },
+  "quality_gates": {
+    "keyframe_l0_check": "必须通过 L0-MORPH-001 形态定序校验",
+    "video_quality_min": 4.5,
+    "av_sync_max_ms": 100,
+    "merge_duration_tolerance_sec": 0.5,
+    "character_consistency": "角色形象/服饰/色调与关键帧母版一致"
+  },
+  "data_contract": {
+    "visual":   "script.episodes[].scenes[].visual  →  keyframe 绘图提示词输入",
+    "narration":"script.episodes[].scenes[].narration →  audio 配音文本输入",
+    "duration": "script.episodes[].scenes[].duration →  merge 时间轴对齐基准",
+    "scene_id":"script.episodes[].scenes[].scene_id →  ledger 分镜表主键",
+    "sha256":  "各阶段产物实算 SHA256 →  lock 账本入账"
+  },
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "photo_policy": "人像/写真类仅本地锁档，不推公开湖、不对外展示"
+}

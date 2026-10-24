@@ -1,0 +1,114 @@
+{
+  "package_version": "1.0.0",
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "model": {
+    "provider": "doubao",
+    "model": "seedance_2.5",
+    "default_duration_sec": 10,
+    "ratio": "9:16",
+    "resolution": "1152x2048",
+    "fps": 24,
+    "supported_duration_range_sec": [5, 30]
+  },
+  "video_channel_priority": [
+    {
+      "channel": "doubao_app_video_gen",
+      "priority": 0,
+      "type": "app_tool",
+      "tool": "image_to_video",
+      "quota": "session_quota",
+      "cost": "free",
+      "status": "available",
+      "note": "豆包APP内置视频生成工具，完全免费会话额度，首选通道"
+    },
+    {
+      "channel": "seedance_api_free_tier",
+      "priority": 1,
+      "type": "api",
+      "provider": "volcengine_ark",
+      "model": "seedance_2.5",
+      "quota": "free_tier",
+      "cost": "free_tier",
+      "status": "available",
+      "api_key_env": "ARK_API_KEY",
+      "base_url_env": "ARK_BASE_URL",
+      "note": "火山方舟seedance免费额度，次选通道"
+    },
+    {
+      "channel": "seedance_api_paid",
+      "priority": 9,
+      "type": "api",
+      "provider": "volcengine_ark",
+      "model": "seedance_2.5",
+      "quota": "paid",
+      "cost": "paid",
+      "status": "pending_human_approval",
+      "api_key_env": "ARK_API_KEY",
+      "note": "付费API最高优先级号，必须人工审批后方可调用"
+    }
+  ],
+  "degradation_rules": {
+    "on_quota_exceeded": "auto_downgrade_to_next_priority",
+    "on_api_error": "retry_3_times_then_downgrade",
+    "on_quality_below_threshold": "regenerate_with_next_channel_and_stronger_prompt",
+    "max_downgrade_attempts": 3
+  },
+  "quality": {
+    "min_score": 4.5,
+    "drift_threshold": 0.88,
+    "l0_check": true,
+    "dimensions": [
+      {"key": "consistency", "weight": 0.30, "label": "角色/场景与关键帧一致性", "desc": "角色形象、服饰、色调、构图与关键帧严格一致，防概率采样漂移"},
+      {"key": "motion_naturalness", "weight": 0.25, "label": "运动自然度", "desc": "镜头运动与人物动作流畅，无抽搐、跳变、物理穿模"},
+      {"key": "lighting", "weight": 0.15, "label": "光影流动", "desc": "光影过渡自然，伦勃朗侧光/霞光/轮廓光保持一致，无冗余光效"},
+      {"key": "composition", "weight": 0.15, "label": "构图", "desc": "9:16竖屏主体居中偏上，安全框内，关键视觉不裁切"},
+      {"key": "compliance", "weight": 0.15, "label": "合规与东方审美", "desc": "无西方铠甲/畸形肢体/性别混杂/外源化内容，带Ω₀⊂⊙∞⊂Ω溯源"}
+    ]
+  },
+  "camera_movement_lexicon": {
+    "slow_push_in": "缓慢推近镜头，主体逐渐占据画面，情绪递进",
+    "slow_pull_out": "缓慢拉远镜头，揭示环境与主体关系",
+    "pan_left": "水平左摇，跟随主体视线或横向动作",
+    "pan_right": "水平右摇，跟随主体视线或横向动作",
+    "tilt_up": "垂直上摇，仰视揭示高度/气势",
+    "tilt_down": "垂直下摇，俯视揭示地面/落点",
+    "static_breath": "固定机位，仅人物呼吸与衣袂飘动，氛围镜头",
+    "tracking": "跟拍，随主体移动保持相对距离",
+    "crane_up": "升镜，视角抬升，情绪升华",
+    "dolly_arc": "弧线环绕运镜，展现主体立体轮廓"
+  },
+  "aesthetics": {
+    "paradigm": ["纯东方神女", "女帝", "少年武侠", "山海经萌宠"],
+    "hair": "纯乌黑长发",
+    "body_proportion": "九头/8.5头身超模体态，绝对去雄性化（神女类）",
+    "costume": "华夏正统汉服/素青武侠长衫，玄鸟图腾，天书符文",
+    "palette": ["冷蓝青黑", "勃艮第红", "黑金"],
+    "texture": ["水墨画", "OC渲染", "Portra400胶片质感", "UE5.7光追"],
+    "lighting": "伦勃朗侧光/霞光/强烈轮廓光，深空青黑背景",
+    "ratio": "9:16竖屏电影级",
+    "banned": [
+      "西方铠甲",
+      "畸形肢体",
+      "多手多颅",
+      "冗余光影特效",
+      "白发",
+      "性别混杂",
+      "外源化内容",
+      "西方奇幻符号"
+    ],
+    "trace_watermark": "右下角隐秘镌刻Ω₀⊂⊙∞⊂Ω"
+  },
+  "portrait_policy": {
+    "portrait_vs_photo_video": "人像/写真类视频仅本地归档锁档，不推公开湖、不对外展示",
+    "public_channels_allowed": ["剧情向国风短剧", "IP宣传片", "角色PV（非写真）"]
+  },
+  "concurrency": {
+    "video": 1,
+    "note": "视频生成串行，避免并发触发限流与漂移"
+  },
+  "cost_tracking": {
+    "enabled": true,
+    "log_dir": "./audit/video_quota_usage"
+  }
+}

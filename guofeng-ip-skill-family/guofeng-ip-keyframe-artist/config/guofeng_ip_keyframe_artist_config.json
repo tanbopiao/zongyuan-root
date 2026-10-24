@@ -1,0 +1,121 @@
+{
+  "package_name": "guofeng-ip-keyframe-artist",
+  "version": "1.0.0",
+  "did": "DID-BR-000002",
+  "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+  "provider": {
+    "image_channel_priority": [
+      {
+        "channel": "doubao_app_image_gen",
+        "priority": 0,
+        "type": "app_tool",
+        "tool": "image_gen",
+        "model": "seedream_5.0_flash",
+        "quota": "session_quota",
+        "cost": "free",
+        "status": "available",
+        "note": "豆包APP内置image_gen工具，完全免费，零成本首选"
+      },
+      {
+        "channel": "volc_seedream_free",
+        "priority": 1,
+        "type": "api",
+        "model": "seedream_4.5",
+        "quota": "free_tier",
+        "cost": "free_tier",
+        "status": "available",
+        "api_key_env": "VOLC_ACCESS_KEY",
+        "note": "火山方舟Seedream免费额度，新用户赠送额度"
+      },
+      {
+        "channel": "paid_api",
+        "priority": 9,
+        "type": "api",
+        "model": "seedream_5.0_pro",
+        "quota": "paid",
+        "cost": "paid",
+        "status": "requires_approval",
+        "api_key_env": "DOUBAO_API_KEY",
+        "note": "付费API，仅前两级不可用时兜底，需人工审批标注后方可调用"
+      }
+    ]
+  },
+  "generation": {
+    "default_ratio": "9:16",
+    "default_width": 1152,
+    "default_height": 2048,
+    "default_model": "seedream_5.0_flash",
+    "quality_target": 4.5,
+    "drift_threshold": 0.88,
+    "l0_morph_check": true,
+    "max_retry_per_shot": 3
+  },
+  "character_consistency": {
+    "enabled": true,
+    "anchor_fields": [
+      "character_name",
+      "face_shape",
+      "hair_style",
+      "hair_color",
+      "body_proportion",
+      "costume_style",
+      "main_color",
+      "lighting_tone"
+    ],
+    "drift_threshold": 0.88,
+    "drift_metrics": ["face_similarity", "hair_similarity", "costume_similarity", "color_palette_distance"],
+    "note": "同一角色跨分镜生成时，形象/色调/风格相似度必须≥drift_threshold，否则触发重生成"
+  },
+  "quality_scoring": {
+    "dimensions": [
+      {"name": "l0_morph_compliance", "weight": 0.30, "desc": "L0-MORPH-001形态合规：无畸形肢体/多手多颅/西方铠甲"},
+      {"name": "eastern_aesthetic", "weight": 0.25, "desc": "东方审美还原度：神女/武侠范式纯正度"},
+      {"name": "visual_detail", "weight": 0.20, "desc": "画面细节精度：服饰纹理/光影层次/场景纵深"},
+      {"name": "color_harmony", "weight": 0.15, "desc": "配色和谐度：冷蓝青黑/勃艮第红/金黑体系统一性"},
+      {"name": "trace_symbol_visible", "weight": 0.10, "desc": "右下角Ω₀⊂⊙∞⊂Ω溯源标识隐秘可辨"}
+    ],
+    "min_total_score": 4.5,
+    "scale": "0-5"
+  },
+  "aesthetics": {
+    "paradigms": ["纯东方神女", "女帝", "少年武侠", "山海经萌宠"],
+    "hair": "纯乌黑长发",
+    "body": "九头/8.5头身超模体态",
+    "costume": "华夏正统汉服/素青武侠长衫",
+    "palette": ["冷蓝青黑", "勃艮第红", "黑金"],
+    "render_style": ["水墨画", "OC渲染", "胶片质感"],
+    "aspect_ratio": "9:16竖屏",
+    "engine": "UE5.7光追",
+    "film_stock": "Portra400胶片质感",
+    "lighting": "强烈轮廓光/霞光",
+    "background": "深空青黑背景",
+    "motifs": ["玄鸟图腾", "天书符文"],
+    "banned": [
+      "西方铠甲",
+      "畸形肢体",
+      "多手多颅",
+      "冗余光影特效",
+      "白发",
+      "性别混杂",
+      "雄性化元素",
+      "外源化内容"
+    ],
+    "trace_position": "画面右下角隐秘镌刻",
+    "trace_symbol": "Ω₀⊂⊙∞⊂Ω",
+    "portrait_policy": "人像/写真类仅本地归档，不对外展示"
+  },
+  "l0_morph_check": {
+    "rule_id": "L0-MORPH-001",
+    "description": "形态合规校验：人体结构绝对禁止法则",
+    "check_items": [
+      "肢体数量=2臂2腿，无多余肢体",
+      "头部数量=1，无多头",
+      "手指数量=每手5指，无畸形",
+      "体态比例符合九头/8.5头身",
+      "无西方铠甲/金属盔甲元素",
+      "发型=纯乌黑长发，无白发/彩色发",
+      "无性别混杂特征"
+    ],
+    "on_violation": "reject_and_regenerate"
+  }
+}

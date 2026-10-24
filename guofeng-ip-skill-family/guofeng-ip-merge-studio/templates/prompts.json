@@ -1,0 +1,35 @@
+{
+  "ffmpeg_template": {
+    "name": "base_merge_with_bgm_subtitle",
+    "description": "视频轨 + 配音轨 + BGM轨 + SRT字幕轨 → 成片MP4。原视频音轨降0.3为背景；amix三轨音频；字幕烧录到画面底部安全区。",
+    "command": "ffmpeg -y -i {VIDEO} -i {NARRATION} -i {BGM} -filter_complex \"[0:a]volume=0.3[bg];[1:a]volume=1.0[vo];[2:a]volume=0.35,asetrate=44100*atempo=1[bm];[bg][vo][bm]amix=inputs=3:normalize=0[aout];[0:v]subtitles={SRT}:force_style='FontSize=48,PrimaryColour=&H00B7D5E8,OutlineColour=&H002E1A1A,Alignment=2,MarginV=80'[vout]\" -map \"[vout]\" -map \"[aout]\" -c:v h264 -preset medium -crf 20 -c:a aac -b:a 192k -ar 44100 -ac 2 {OUTPUT}",
+    "placeholders": {
+      "VIDEO": "无声/原声视频MP4路径",
+      "NARRATION": "配音/旁白WAV或MP3路径",
+      "BGM": "BGM音频路径",
+      "SRT": "SRT字幕文件路径(需与视频同目录或绝对路径)",
+      "OUTPUT": "输出成片MP4路径"
+    }
+  },
+  "ffmpeg_template_no_subtitle": {
+    "name": "merge_without_subtitle",
+    "description": "仅视频+配音+BGM三轨合流，不烧录字幕(字幕轨可外挂)。",
+    "command": "ffmpeg -y -i {VIDEO} -i {NARRATION} -i {BGM} -filter_complex \"[0:a]volume=0.3[bg];[1:a]volume=1.0[vo];[2:a]volume=0.35[bm];[bg][vo][bm]amix=inputs=3:normalize=0[aout]\" -map 0:v -map \"[aout]\" -c:v copy -c:a aac -b:a 192k -ar 44100 -ac 2 {OUTPUT}"
+  },
+  "ffmpeg_template_env_layer": {
+    "name": "merge_with_env_four_tracks",
+    "description": "四轨混音：原视频音(0.3)+环境音(0.15)+BGM(0.35)+旁白(1.0)。",
+    "command": "ffmpeg -y -i {VIDEO} -i {NARRATION} -i {BGM} -i {ENV} -filter_complex \"[0:a]volume=0.3[bg];[1:a]volume=1.0[vo];[2:a]volume=0.35[bm];[3:a]volume=0.15[en];[bg][en][bm][vo]amix=inputs=4:normalize=0[aout]\" -map 0:v -map \"[aout]\" -c:v h264 -crf 20 -c:a aac -b:a 192k -ar 44100 -ac 2 {OUTPUT}"
+  },
+  "ffmpeg_template_subtitle_soft": {
+    "name": "soft_subtitle_track",
+    "description": "字幕作为外挂/软字幕轨封装进MP4，不烧录到画面，播放器可开关。",
+    "command": "ffmpeg -y -i {VIDEO} -i {NARRATION} -i {BGM} -i {SRT} -filter_complex \"[0:a]volume=0.3[bg];[1:a]volume=1.0[vo];[2:a]volume=0.35[bm];[bg][vo][bm]amix=inputs=3:normalize=0[aout]\" -map 0:v -map \"[aout]\" -map 3:s -c:v h264 -c:a aac -b:a 192k -ar 44100 -ac 2 -c:s mov_text -metadata:s:s:0 title=\"中文字幕\" {OUTPUT}"
+  },
+  "quality_check_tips": {
+    "duration": "ffprobe -v error -show_entries format=duration -of csv=p=0 {OUTPUT}  ≈ 分镜总时长(误差<0.5s)",
+    "audio_stream": "ffprobe -v error -select_streams a -show_entries stream=codec_name -of csv=p=0 {OUTPUT}  应返回 aac",
+    "resolution": "ffprobe -v error -select_streams v -show_entries stream=width,height -of csv=p=0 {OUTPUT}  应与原视频一致",
+    "sync": "试听口型/旁白对齐，音画同步误差应 < 100ms"
+  }
+}
