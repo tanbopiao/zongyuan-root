@@ -24,3 +24,7 @@
 ## 现存技能/算子索引
 
 详见 `SKILLS-LEDGER.json`，已登记仓库内主要算子：真值引擎（truth_pipeline/truth_recall/truth_generator）、记忆（memory_optimizer/maintain_memory_chain）、进化闭环（evolve_closed_loop/value_cycle）、自愈（ance_self_heal）、调度（autonomous_scheduler）、云端同步（sync_agent/auto_report_sync）等。
+
+### 已打包技能（含 manifest + dist 归档）
+
+- `capability-seed-report/` —— 高阶能力种子提炼与云端上报 v1.0.0（SKILL.md + scripts/report_seeds.py + manifest.json + SHOWCASE.html + dist/*.tar.gz），登记名 `capability_seed_report`，状态 active
