@@ -60,11 +60,12 @@ L0 元宪法硬约束 → L1 真值记忆网关 → L2 任务决策工单拆解 
 | 鉴权 | 读取：`X-DID: DID-BR-000002`（缺失→401）。**上报：2026-10-24 实测已升级为签名强制**——`X-DID` + `X-Signature` + `X-Signature-Timestamp` 三头（仅 X-DID→401 `signature_required`）；签名=`HMAC-SHA256(PBKDF2(passphrase, salt=b"yuanji-signing-salt", 100000, dklen=32), "POST\|/api/report/truth\|{ts}\|{sha256(\\"\")}")`（空 body_hash，±300s 窗口；passphrase 云端 `/root/zongyuan-yuanji/config/.yuanji_passphrase`，本地副本 `var/yuanji_signing_passphrase` 已 .gitignore；契约源 `www.huodouai.com/memory-gateway-report.html`） |
 | 上报字段 | `key` + `value.content`（**RULE-005 V3.1**；`truth_key`/`truth_value` 已废止→400 `empty_value_rejected`，2026-10-23 实测） |
 
-### 5.3 云端与本地实测基线（2026-10-24 黑盒实测，非声明）
+### 5.3 云端与本地实测基线（2026-10-25 最新复测，非声明）
 
 | 项 | 实测值 |
 |---|---|
-| 主端点 | `www/api/status` ONLINE/Lv11，`truth_count=28949`、`stored=25012`、`today=2226`、`audit_logs=111` |
+| 主端点 | `www/api/status` ONLINE/Lv11，`truth_count=110557`、`stored=106722`、`today=40272`、`seq=111701`、`audit_logs=111`（2026-10-25 20:30 心跳） |
+| 2026-10-24 基线（留痕） | `truth_count=28949`、`stored=25012`、`today=2226`（一日内 +81608，心跳与事件流高频写入所致） |
 | 备用端点 | `drama/api/status` 200，`service=zhongshu-meta-core`、`version=V3.1`、**带 `merkle_root`**（主端不带） |
 | 双端一致性 | 两端共享同一真值库（drama 可回读 www 写入 seq29351）；`truth_count` 差 6（快照时点差） |
 | 时延 | 12 次 min 81 / p50 86 / p90 97 / max 111 ms；TLSv1.3 + Let's Encrypt，http80→301 |

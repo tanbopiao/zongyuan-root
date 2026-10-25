@@ -100,11 +100,20 @@
 | GitHub | tanbopiao/kunlun-assets |
 | SSH | `ssh zongyuan-cloud`（root@123.207.202.158） |
 
-### 中枢上报格式（RULE-005 V3.1，2026-10-22 实测）
-> 必须带 `X-DID` 头；`value` 必须是含 `content` 键的对象。`truth_key`/`truth_value` 已废止（会返回 `empty_value_rejected`）。
+### 中枢上报格式（RULE-005 V3.1，2026-10-24 签名强制实测）
+> **上报须三头**：`X-DID` + `X-Signature` + `X-Signature-Timestamp`（仅 X-DID → 401 `signature_required`）。`value` 必须是含 `content` 键的对象；`truth_key`/`truth_value` 已废止（400 `empty_value_rejected`）。
+>
+> **签名算法（已打通）**：
+> `secret = PBKDF2-HMAC-SHA256(passphrase, salt=b"yuanji-signing-salt", iters=100000, dklen=32)`
+> `msg = "POST|/api/report/truth|{ts}|{sha256(b'')}"`（**body_hash 为空 body 的 sha256**，非请求体哈希）
+> `X-Signature = HMAC-SHA256(secret, msg)`，hex；时间窗 ±300s。
+> passphrase：云端 `/root/zongyuan-yuanji/config/.yuanji_passphrase`，本地副本 `var/yuanji_signing_passphrase`（.gitignore，禁入库）。
+> 读取契约：`GET /api/truth?key=` 子串匹配，`limit` 硬上限 200，响应容器字段 `results`。
+> 写库并发 `database is locked` → 500 `write_failed`，需指数退避重试。
 
 ```json
 // Headers: Content-Type: application/json · X-DID: DID-BR-000002
+//          X-Signature: <hmac-hex> · X-Signature-Timestamp: <unix秒>
 {
   "key": "大写点分命名空间KEY（禁 truth- 前缀）",
   "value": {
@@ -117,7 +126,7 @@
 ```
 
 成功回执：`{"ok":true,"message":"真值写入成功","key":...,"truth_count":N,"seq":N,"event_id":"truth-..."}`
-协议事实源：`zongyuan-yuanji/var/docs-sync/boot/kernel-mirror/metalaw/CHANNEL-PROTOCOL-V31-20261010.md`
+签名契约实测源：`00_KERNEL/startup_memory/KNOWLEDGE-INDEX.md` §5.2；协议事实源：`zongyuan-yuanji/var/docs-sync/boot/kernel-mirror/metalaw/CHANNEL-PROTOCOL-V31-20261010.md`（该协议文档尚未含签名段，以实测为准）
 
 ---
 
