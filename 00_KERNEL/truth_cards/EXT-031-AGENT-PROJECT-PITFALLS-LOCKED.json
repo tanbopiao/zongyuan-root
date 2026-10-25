@@ -1,0 +1,101 @@
+{
+  "card_id": "EXT-031-AGENT-PROJECT-PITFALLS-LOCKED",
+  "state": "LOCKED",
+  "lock_status": "FINAL_LOCK",
+  "lock_timestamp": "2026-10-22T23:31:24+08:00",
+  "locked_into_kernel_at": "2026-10-22T23:31:24+08:00",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "baseline": "V11.0-Lv11",
+  "classification": "external-truth-absorption-receipt",
+  "parent_arch": "META-7LAYER-STEADY-LV11-20261022",
+  "doc_sha256": "2360932a179300f4cdeec9565d39164685201133f8ec0b71b43f69d0a2c5523f",
+  "hash_note": "doc_sha256 = SHA256(canonical JSON of doc body, sort_keys, separators=(',',':'))",
+  "document": {
+    "receipt_id": "EXT-031",
+    "title": "外部真值吸收回执｜Agent项目落地痛点",
+    "alignment": "对齐ZONGYUAN-ROOT自治体系，映射联邦记忆内核小程序开发风控体系",
+    "original_two_pits": [
+      {
+        "seq": 1,
+        "pit": "需求前置缺失，业务边界模糊就开工",
+        "detail": "先搭环境调模型，未明确输入/允许动作/结果判定/权限边界/转人工场景；边界不清开发越多返工越高",
+        "correct": "先梳理业务契约，区分「大模型负责推理」与「传统硬编码负责强约束、权限、校验」"
+      },
+      {
+        "seq": 2,
+        "pit": "Demo美化数据，上真实业务即失效",
+        "detail": "真实场景文档杂乱、信息分散、提问发散；知识库链路(解析→分块→向量检索→Rerank)任一环出错即答案错误",
+        "correct": "只改Prompt解决不了链路问题，需链路级修复"
+      }
+    ],
+    "new_rules": [
+      {
+        "rule_id": "RULE-AGENT-BOUNDARY-CONTRACT",
+        "content": "开发前必须输出业务契约文档(输入/允许动作/成功判定/人工熔断条件)，未完成契约评审禁止启动编码",
+        "score": 92
+      },
+      {
+        "rule_id": "RULE-DEMO-REALDATA-GATE",
+        "content": "Demo必须混入30%脏样本/异构格式真值验证，禁止仅用规整数据验收，不通过禁止下一阶段",
+        "score": 89
+      },
+      {
+        "rule_id": "RULE-RAG-LINK-TRACE",
+        "content": "检索链路分层埋点(解析/切分/召回/rerank/摘要)，答案错误优先溯源链路而非改Prompt",
+        "score": 91
+      }
+    ],
+    "sop_reform": [
+      {
+        "seq": 1,
+        "item": "需求阶段新增【业务契约评审卡点】",
+        "detail": "允许动作: 检索记忆/校验哈希/查看规则/提交冲突上报；禁止: 小程序端发起内核自主进化、修改锁档资产；结果判定: 检索必携Merkle锚点+DID，含失败兑底"
+      },
+      {
+        "seq": 2,
+        "item": "Demo测试规范升级",
+        "detail": "测试集含乱序关键词/残缺指纹/错误DID/格式不统一账本，验证脏输入熔断与报错"
+      },
+      {
+        "seq": 3,
+        "item": "检索链路可观测埋点",
+        "detail": "query→检索分片→召回→rerank→组装逐层留日志入HASH-LEDGER，直接定位故障节点"
+      }
+    ],
+    "closure_decision": "三条规则稳态分全部≥80自主门，不违背L0元宪法，批准固化入库，追加元规则库，写入HASH-LEDGER，同步Gitee converge分支",
+    "action_checklist": [
+      "【业务契约评审】作为WorkBuddy生成代码前强制前置交付物",
+      "小程序测试用例包批量构造脏测试样本",
+      "记忆网关接口增加链路trace字段，小程序展示溯源锚点"
+    ],
+    "anchor": "Ω₀⊂⊙∞⊂Ω",
+    "did": "DID-BR-000002",
+    "create_time": "20261022"
+  },
+  "ingestion": {
+    "rules_written": [
+      "RULE-AGENT-BOUNDARY-CONTRACT-20261022",
+      "RULE-DEMO-REALDATA-GATE-20261022",
+      "RULE-RAG-LINK-TRACE-20261022"
+    ],
+    "registry": "00_KERNEL/metalaws/meta_rule_registry.json (17→20 active)",
+    "gate": "全部≥80 AUTO-APPROVE，L0无违背"
+  },
+  "sync_chain": {
+    "autonomy_kernel": {
+      "status": "done",
+      "file": "00_KERNEL/truth_cards/EXT-031-AGENT-PROJECT-PITFALLS-LOCKED.json"
+    },
+    "huodouai_truth_gateway": {
+      "status": "script_once"
+    },
+    "hash_ledger": {
+      "status": "script_once"
+    },
+    "gitee_converge": {
+      "status": "pending_user_auth"
+    }
+  },
+  "modify_rule": "锁档主体禁止就地改写；修订以 PATCH 编号追加"
+}

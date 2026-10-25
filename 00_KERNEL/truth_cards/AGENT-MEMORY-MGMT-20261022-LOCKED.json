@@ -1,0 +1,137 @@
+{
+  "card_id": "AGENT-MEMORY-MGMT-20261022-LOCKED",
+  "state": "LOCKED",
+  "lock_status": "FINAL_LOCK",
+  "lock_timestamp": "2026-10-22T12:35:26+08:00",
+  "locked_into_kernel_at": "2026-10-22T12:35:26+08:00",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "baseline": "V11.0-Lv11",
+  "doc_sha256": "f3cc16bca643265591a021de2731498ce2321e078b28cc570225ded25c26650f",
+  "hash_note": "doc_sha256 = SHA256(canonical JSON of doc body, sort_keys, separators=(',',':'))",
+  "document": {
+    "meta": {
+      "doc_name": "Agent记忆管理核心体系（生产级架构）",
+      "doc_id": "AGENT-MEMORY-MGMT-20261022",
+      "lock_status": "FINAL_LOCK",
+      "lock_timestamp": "2026-10-22T12:35:26+08:00",
+      "signer_did": "DID-BR-000002",
+      "anchor": "Ω₀⊂⊙∞⊂Ω",
+      "baseline": "V11.0-Lv11",
+      "classification": "agent-memory-architecture",
+      "related_cards": [
+        "FEDMEMORY-KERNEL-PRODUCT-DOC-20261022"
+      ],
+      "fidelity_note": "按投递原文逐字结构化，未增删"
+    },
+    "section_1_demo_problem": "仅用「历史对话→向量数据库→RAG检索→拼接Prompt」的模式只能满足Demo级需求，生产环境会出现旧信息与新信息同时被召回的问题，导致Agent基于过期状态做出错误决策",
+    "section_2_essence": "生产级Agent的记忆系统不是单一存储桶，而是由分层记忆、显式读写、时间治理、经验沉淀组成的完整体系",
+    "section_3_four_layers": [
+      {
+        "seq": 1,
+        "layer": "Layer1：会话元数据",
+        "store": "当前任务、会话ID、过期时间",
+        "rule": "用完即清理，无需长期保留"
+      },
+      {
+        "seq": 2,
+        "layer": "Layer2：结构化用户档案",
+        "store": "用户身份、偏好、当前状态",
+        "storage": "JSON或关系型数据库",
+        "rule": "走主键查询，不依赖向量相似度"
+      },
+      {
+        "seq": 3,
+        "layer": "Layer3：近期会话摘要",
+        "store": "仅保留对后续任务有价值的事实",
+        "rule": "提炼核心信息，减少冗余"
+      },
+      {
+        "seq": 4,
+        "layer": "Layer4：滑动上下文窗口",
+        "store": "当前轮次对话",
+        "rule": "超过容量上限时，淘汰最老内容"
+      }
+    ],
+    "section_4_time_governance": [
+      {
+        "seq": 1,
+        "name": "时间记录",
+        "detail": "同时记录信息的现实世界有效时间和系统写入时间"
+      },
+      {
+        "seq": 2,
+        "name": "状态更新",
+        "detail": "更新旧状态时标记为「失效」，而非物理删除"
+      },
+      {
+        "seq": 3,
+        "name": "隐私保护",
+        "detail": "对敏感数据提供「用户可见、可修改、可撤回」的遗忘策略"
+      }
+    ],
+    "section_5_three_components": [
+      {
+        "seq": 1,
+        "name": "Ledger",
+        "detail": "保存不可篡改的原始事件记录"
+      },
+      {
+        "seq": 2,
+        "name": "Views",
+        "detail": "根据任务生成适合模型阅读的派生视图"
+      },
+      {
+        "seq": 3,
+        "name": "Policy",
+        "detail": "定义记忆的读取、写入、淘汰规则"
+      }
+    ],
+    "section_6_advanced": [
+      {
+        "seq": 1,
+        "name": "按需调用",
+        "detail": "Agent不自动读取全部记忆，通过记忆工具按需获取"
+      },
+      {
+        "seq": 2,
+        "name": "经验沉淀",
+        "detail": "将高频验证过的成功路径沉淀为程序性Skill，避免每次从零规划"
+      }
+    ],
+    "section_7_interview_closing": "向量库+RAG只是语义记忆的一部分，生产设计需要：结构化事实、近期摘要、上下文窗口、长期经验分层；用时间有效性、版本控制、审计记录解决状态冲突",
+    "section_8_core_laws": {
+      "premise": "Agent记忆的核心不是“记得越多越好”",
+      "laws": [
+        "记的准确：高信噪比",
+        "忘的及时：生命周期管理",
+        "来源可释：每次调用都能解释来源"
+      ]
+    },
+    "entitlement": {
+      "体系确权标识": "Ω₀⊂⊙∞⊂Ω",
+      "唯一合规DID": "DID-BR-000002"
+    },
+    "constraint": {
+      "modify_rule": "锁档后仅允许增量补丁追加，禁止改写主体真值",
+      "sync_target": [
+        "autonomy_kernel",
+        "huodouai.com truth gateway",
+        "HASH-LEDGER"
+      ]
+    }
+  },
+  "sync_chain": {
+    "autonomy_kernel": {
+      "status": "done",
+      "file": "00_KERNEL/truth_cards/AGENT-MEMORY-MGMT-20261022-LOCKED.json"
+    },
+    "huodouai_truth_gateway": {
+      "status": "script_once"
+    },
+    "hash_ledger": {
+      "status": "script_once"
+    }
+  },
+  "modify_rule": "锁档主体禁止就地改写；修订以 PATCH 编号追加"
+}

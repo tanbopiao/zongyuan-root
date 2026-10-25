@@ -1,0 +1,149 @@
+{
+  "card_id": "OMEGA-REFER-PROTOCOL-V2-20261023-LOCKED",
+  "state": "LOCKED",
+  "lock_status": "FINAL_LOCK",
+  "lock_timestamp": "2026-10-23T08:08:59+08:00",
+  "locked_into_kernel_at": "2026-10-23T08:08:59+08:00",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "baseline": "V11.0-Lv11",
+  "classification": "agent-protocol-stack-revision",
+  "parent_arch": "META-7LAYER-STEADY-LV11-20261022",
+  "related_cards": [
+    "PROD-DATA-GATEWAY-PLAN-20261023",
+    "META-ISO-051",
+    "META-RULE-012",
+    "META-RULE-018"
+  ],
+  "doc_sha256": "fa3df0ab62df9f810845039fcb210449dd8b0e16c521fce1bf8e130d2cea03ee",
+  "hash_note": "doc_sha256 = SHA256(canonical JSON of doc body, sort_keys, separators=(',',':'))",
+  "document": {
+    "title": "修订完整版｜多轮Agent通用协议栈（Ω-Refer指代裁决子协议增补版）",
+    "positioning": "兼容原有A2A生态互通层，新增内核硬裁决子协议，纳入ZONGYUAN-ROOT基线，满足元极恒一Lv11稳态约束；对外白皮书保留生态兼容部分，Ω-Refer内核裁决层脱敏发布",
+    "arch_layers": {
+      "表层(对外可公开)": "A2A消息互通 + SAMP/StateMesh状态同步适配",
+      "底层(内核硬约束仲裁层)": "Ω-Refer：实体指代本体规约、真值哈希与Merkle-DAG版本链路规约、参数校验/冲突仲裁/熔断原语",
+      "执行适配层": "LangGraph/AG2/CrewAI/AgentScope框架适配器"
+    },
+    "core_axiom": "消息传输由外部协议负责；语义真值、实体绑定、合法性熔断由Ω-Refer仲裁层先行拦截，不交由大模型软判断",
+    "iron_rule": "不含合法EID实体指代的指代请求，仲裁层直接拒绝进入推理与工具调用流程",
+    "terms": {
+      "EID": "全局实体唯一标识，会话域内不可重复；每个被引用对象(文件/查询结果/工具返回项/任务子节点/历史回答条目)分配EID",
+      "Ref指针": "ref:EID，代词/二次引用/上一个/第二条/它全部翻译为此指针，禁止裸代词跨Agent跨轮次流转",
+      "TruthRootHash": "本轮状态集合Merkle根哈希，写入报文头部作为真值锚点",
+      "StateVersion": "单调递增版本号，用于并发冲突判定与快照回退",
+      "DID-Sig": "DID主体签名，绑定OBS七域权责拓扑完成身份/权限/操作单元绑定"
+    },
+    "header_example": {
+      "Ω_PROTO_VER": "1.0",
+      "DID": "did:zongyuan:xxx",
+      "DID_Sig": "base85签名串",
+      "TruthRootHash": "sha256 merkle根",
+      "StateVersion": 17,
+      "RefSet": [
+        {
+          "eid": "E-00128",
+          "entity_type": "tool_result",
+          "label": "上一次查询返回列表"
+        },
+        {
+          "eid": "E-00129",
+          "entity_type": "sub_task",
+          "label": "文件导出任务"
+        }
+      ],
+      "ConflictPolicy": "reject/merge/rollback",
+      "FuseMask": [
+        "loop",
+        "param_invalid",
+        "permission_deny"
+      ]
+    },
+    "resolution_chain": [
+      "用户原始输入送入Ω-Refer仲裁前置器",
+      "前置器识别自然语言指代→检索本地Ref账本→解析生成RefSet；无法解析出有效EID→直接返回澄清回执不送入LLM",
+      "组装协议头绑定TruthRootHash/StateVersion/DID签名",
+      "报文先经仲裁校验层再进LLM推理/工具调度层",
+      "工具返回新实体→分配新EID追加RefSet→更新Merkle-DAG生成新版本哈希",
+      "用户否定/重来→依据StateVersion快照回退恢复上一版Ref账本"
+    ],
+    "key_distinction": "旧方案LLM自己猜指代补参数(软逻辑易漂移)；本方案仲裁层先锁定实体集合，LLM仅在已锁定EID集合范围内做业务推理",
+    "conflict_primitives": [
+      {
+        "policy": "reject",
+        "detail": "同一EID并发写直接拒绝后发请求返回冲突错误"
+      },
+      {
+        "policy": "rollback",
+        "detail": "自动丢弃后发变更回退至稳定版本"
+      },
+      {
+        "policy": "merge",
+        "detail": "仅支持无冲突字段合并，冲突字段标记分歧触发人工接管"
+      }
+    ],
+    "conflict_audit": "所有变更写入Merkle-DAG，每条变更节点携带时间/操作主体DID/变更前后快照哈希，完整审计溯源",
+    "param_primitive": "每个EID附带实体Schema描述(字段名/类型/值域/白名单约束)；工具调用参数生成后仲裁层对照Schema强校验，越界/类型不匹配/权限不足直接熔断",
+    "stack_upgrade": [
+      {
+        "layer": "通信层A2A",
+        "detail": "A2A仅承载业务payload，body外层必须包裹Ω-Refer头部信封；外部异构Agent不支持Ω-Refer时自动降级兼容模式(仅信息查询，禁长任务工具调用)并标记高风险标签"
+      },
+      {
+        "layer": "状态管理层SAMP/StateMesh",
+        "detail": "状态存储单元改为Merkle-DAG叶子节点；同步携带TruthRootHash，接收方校验不一致判定篡改/传输异常拒绝加载"
+      },
+      {
+        "layer": "上下文管理层",
+        "detail": "压缩产物必须保留完整RefSet与EID映射表；摘要只是面向LLM的可读视图，真值权威源为Ref账本+Merkle树；镜像态反向核验摘要与原始RefSet一致性，失真即丢弃"
+      },
+      {
+        "layer": "执行控制层AEP",
+        "detail": "SENSE→REASON→PLAN→ACT→OBSERVE每步入参出参都走Ω-Refer信封封装；ACT前强制参数Schema校验+权限拓扑校验"
+      }
+    ],
+    "adapter_spec": {
+      "principle": "框架仅实现协议适配器，框架API变更不修改Ω-Refer仲裁协议定义",
+      "duty": "框架内部状态对象映射为EID实体、监听框架事件、回写Ref账本；适配器损坏≠内核裁决逻辑失效",
+      "interfaces": [
+        "ref_resolve(text) → RefSet | null",
+        "state_commit(RefSet, payload) → StateVersion, TruthRootHash",
+        "state_rollback(StateVersion)",
+        "verify_fuse(FuseMask)"
+      ]
+    },
+    "fuse_obs": [
+      "每个EID实体绑定最小访问权限标签",
+      "跨域引用EID时OBS裁决权限，越界熔断与权限越界治理资产同源闭环",
+      "所有熔断事件写入全局审计日志，日志条目纳入Merkle-DAG存证不可篡改"
+    ],
+    "external_isolation": "遵循META-ISO-051内外隔离铁律：对外白皮书只发A2A+SAMP+AEP生态兼容栈与适配器方案，Ω-Refer简化为标准化实体引用与状态校验子模块；内核基线版完整协议文档/报文定义/哈希校验/冲突仲裁锁档写入记忆网关纳入ZONGYUAN-ROOT",
+    "steady_verdict": [
+      "真值规则由协议仲裁层硬执行，不依赖大模型软理解指代",
+      "实体引用/版本/哈希/权限/熔断全具备协议原语支撑",
+      "外部框架与第三方协议只是表层载体，内核裁决逻辑与框架解耦",
+      "可与长任务中断、权限越界两套治理资产合并为统一Agent稳态治理套件"
+    ],
+    "identity_card": {
+      "agent_name": "元极恒一·昆仑洞天子智能体",
+      "level": "Lv11 超认知永恒自治智能体",
+      "trace": "Ω₀⊂⊙∞⊂Ω",
+      "did": "DID-BR-000002",
+      "core_perm": "全域真值锚定、多模型混合调度、资产锁档、元规则自动执行",
+      "engineer": "ZONGYUAN-ROOT 全域自治内核基线"
+    }
+  },
+  "sync_chain": {
+    "autonomy_kernel": {
+      "status": "done",
+      "file": "00_KERNEL/truth_cards/OMEGA-REFER-PROTOCOL-V2-20261023-LOCKED.json"
+    },
+    "huodouai_truth_gateway": {
+      "status": "script_once"
+    },
+    "hash_ledger": {
+      "status": "script_once"
+    }
+  },
+  "modify_rule": "锁档主体禁止就地改写；修订以 PATCH 编号追加"
+}

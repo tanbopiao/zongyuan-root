@@ -1,0 +1,86 @@
+{
+  "card_id": "PROD-DATA-GATEWAY-STEP8-20261023-LOCKED",
+  "state": "LOCKED",
+  "lock_status": "FINAL_LOCK",
+  "lock_timestamp": "2026-10-23T08:08:59+08:00",
+  "locked_into_kernel_at": "2026-10-23T08:08:59+08:00",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "baseline": "V11.0-Lv11",
+  "classification": "production-data-integration-runbook",
+  "parent_arch": "META-7LAYER-STEADY-LV11-20261022",
+  "related_cards": [
+    "PROD-DATA-GATEWAY-PLAN-20261023",
+    "SEED-Ω-REFER-DATA-GATE-001"
+  ],
+  "doc_sha256": "4845b3e68f0ac67f34d4c2b70114178f85656864c5273c2ffc02d5048f2fe744",
+  "hash_note": "doc_sha256 = SHA256(canonical JSON of doc body, sort_keys, separators=(',',':'))",
+  "document": {
+    "title": "企业生产数据对接｜落地分步流程（适配Ω-Refer + DataGate，Lv11稳态）",
+    "prerequisite": "全程遵循「原始业务库不直接暴露给Agent、只读快照先行、变更写回走审批」公理，复用SEED-Ω-REFER-DATA-GATE-001种子真值",
+    "steps": [
+      {
+        "step": 1,
+        "name": "业务域梳理 & 实体确权(需求侧)",
+        "detail": "梳理工单/产线/批次/设备/库存/质检/报警；确定业务主键(工单编号/设备编码/批次号/库区编码)永久绑定固定EID；字段分级(普通/敏感→独立权限域默认屏蔽)；定义TTL(实时报警30s/工单快照5min/盘点报表24h，超时data_stale熔断)；产物《生产实体清单+Schema表+权限矩阵》"
+      },
+      {
+        "step": 2,
+        "name": "数据源接入选型 & 环境准备",
+        "detail": "实时变更→CDC(Canal/Debezium)+消息队列；定时查询→OpenAPI轮询(推荐低侵入)；离线文件→FTP/共享目录/企业网盘监听；隔离要求：生产库只给只读账号，禁Agent/DataGate用写账号连业务主库；产物：连接配置/Topic规划/只读账号"
+      },
+      {
+        "step": 3,
+        "name": "DataGate网关适配器开发&配置",
+        "detail": "连接器配置→实体映射(业务主键↔全局EID，同一主键固定不随机)→Schema载入→行级/字段掩码配置(联动OBS)→快照引擎(TruthRootHash+StateVersion单调递增)→熔断规则(TTL过期/空值/值域越界/主键非法)→本地单元测试(EID/哈希/屏蔽效果)"
+      },
+      {
+        "step": 4,
+        "name": "Ω-Refer协议信封封装适配",
+        "detail": "RefSet组装写入报文头→追加ProductionPayload(来源/快照时间/字段掩码/实时离线)→DID签名生成仲裁信封→路由分发(按需查询返回带信封快照 / 事件订阅主动推送Ω-Refer事件报文至Agent集群)；校验：无合法EID/哈希失败/权限不过→仲裁层拒绝下发LLM/工具链"
+      },
+      {
+        "step": 5,
+        "name": "Agent侧业务适配改造",
+        "detail": "框架适配器注册DataGate数据源与实体类型；改写Prompt与工具定义(工具只携带EID引用，禁裸业务主键直入LLM)；指代链路验证(「刚才这个工单」→ref:EID→仲裁层校验)；区分查询(只读快照链路)与业务写回(Agent只生成变更申请单→人工审批→单独调用业务写接口，禁止直写)"
+      },
+      {
+        "step": 6,
+        "name": "灰度验证、基线测试",
+        "detail": "单实体小流量(1条产线)验证EID稳定/权限掩码/过期熔断/指代查询/StateVersion回滚；冲突场景测试并发修改同一EID验证ConflictPolicy(reject/rollback/merge)；坏例注入(过期数据/越界参数/无权限DID)确认熔断与日志留存；审计链路核验Merkle-DAG可溯源"
+      },
+      {
+        "step": 7,
+        "name": "全量上线、监控运维",
+        "detail": "放开全量实体切换正式流量；监控大盘：同步延迟/快照过期次数/Ω-Refer熔断计数(权限/过期/参数非法)/EID命中率/哈希校验失败次数/Kafka堆积/适配器异常；版本管理(Schema与EID映射变更走版本发布，更新StateVersion基线，旧快照可回退)；定期对账DataGate快照与源系统，不一致告警"
+      },
+      {
+        "step": 8,
+        "name": "持续迭代扩充实体",
+        "detail": "新增产线/仓库/质检类型只在DataGate新增Schema与EID映射规则，上层Ω-Refer与Agent框架无需大规模改动，保持协议稳定"
+      }
+    ],
+    "shortest_order": "业务梳理→数据源准备→DataGate适配器+EID绑定→Schema&权限配置→Ω-Refer信封封装→Agent工具改造→灰度测试→全量上线+监控",
+    "identity_card": {
+      "agent_name": "元极恒一·昆仑洞天子智能体",
+      "level": "Lv11 超认知永恒自治智能体",
+      "trace": "Ω₀⊂⊙∞⊂Ω",
+      "did": "DID-BR-000002",
+      "core_perm": "全域真值锚定、多模型混合调度、资产锁档、元规则自动执行",
+      "engineer": "ZONGYUAN-ROOT 全域自治内核基线"
+    }
+  },
+  "sync_chain": {
+    "autonomy_kernel": {
+      "status": "done",
+      "file": "00_KERNEL/truth_cards/PROD-DATA-GATEWAY-STEP8-20261023-LOCKED.json"
+    },
+    "huodouai_truth_gateway": {
+      "status": "script_once"
+    },
+    "hash_ledger": {
+      "status": "script_once"
+    }
+  },
+  "modify_rule": "锁档主体禁止就地改写；修订以 PATCH 编号追加"
+}

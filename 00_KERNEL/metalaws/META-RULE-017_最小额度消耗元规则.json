@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "rule_id": "META-RULE-017",
+    "lock_status": "FINAL_LOCK",
+    "locked_at": "2026-10-22T11:03:58+08:00",
+    "did": "DID-BR-000002",
+    "anchor": "Ω₀⊂⊙∞⊂Ω",
+    "parent": "L1规则共识层",
+    "registry": "00_KERNEL/metalaws/meta_rule_registry.json"
+  },
+  "rule": {
+    "rule_id": "META-RULE-017",
+    "name": "最小额度消耗元规则",
+    "category": "governance",
+    "version": "1.0",
+    "status": "active",
+    "created_at": "2026-10-22",
+    "summary": "全体节点强制遵循最小额度消耗: 能脚本不模型(零token上报)、LITE激活默认、增量去重批量上报、配额80%预警/95%只读熔断",
+    "details": {
+      "scope": "所有节点、所有会话、所有上报与自动化链路（强制）",
+      "principles": [
+        "零模型token原则: 定时/批量/校验类动作一律脚本直跑，模型只做决策不做搬运",
+        "LITE激活默认: 激活用LITE卡(≈2k token)，全量自举仅首激活/显式指令/锁档变更三触发",
+        "增量去重上报: 首跑建基线不回灌，行内容SHA1/文件SHA256去重，只报新增",
+        "批量聚合+预检: 一次往返报完，对齐<50分拒发，无效包不烧流量",
+        "节点分域: 常驻循环只部署自有服务器，平台办公AI节点禁挂守护循环只做轻交互",
+        "会话内复用: 验证命令结果与读过文件缓存复用，不重复读/重复验",
+        "配额熔断: 额度≥80%一级预警、≥95%二级只读(边沿触发)，budget=0不判定",
+        "失败不风暴: 单次失败入日志等下轮增量窗口，禁高频重试"
+      ],
+      "implementation": [
+        "auto_reporter --loop (setsid脱离会话, 300s增量, flock互斥)",
+        "每日04:00看门狗静默查活拉起(Schedule 4EVMY.WB.MBC3S)",
+        "LITE-BOOTSTRAP-V1.md + AGENTS.md LITE快速激活节",
+        "intent-drift-guard quota算子 + config/platform_quota.json"
+      ],
+      "violation": "未经人工确认的重token/重额度动作视为违宪级浪费，按quota熔断档位处置"
+    },
+    "lessons_learned": [
+      "nohup不防沙箱会话进程组回收，需setsid脱离(2026-10-22实测)",
+      "模型手动--once每轮烧全上下文重发，是积分消耗主因",
+      "usage字段恒0导致计量失明(P0待云端修)，修复前以轮数×读入量估算"
+    ],
+    "applicable_to": [
+      "所有节点",
+      "auto_reporter",
+      "seed_extraction_engine",
+      "各平台办公AI会话"
+    ]
+  },
+  "modify_rule": "仅允许PATCH编号追加，禁止改写主体",
+  "doc_sha256": "76af81e7aaaa4269a92693f0fa12d80853712970e669a702271440e3ffcdfeaf"
+}

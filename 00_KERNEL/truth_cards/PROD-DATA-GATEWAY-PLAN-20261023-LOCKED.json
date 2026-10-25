@@ -1,0 +1,163 @@
+{
+  "card_id": "PROD-DATA-GATEWAY-PLAN-20261023-LOCKED",
+  "state": "LOCKED",
+  "lock_status": "FINAL_LOCK",
+  "lock_timestamp": "2026-10-23T08:08:59+08:00",
+  "locked_into_kernel_at": "2026-10-23T08:08:59+08:00",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "baseline": "V11.0-Lv11",
+  "classification": "production-data-integration-plan",
+  "parent_arch": "META-7LAYER-STEADY-LV11-20261022",
+  "related_cards": [
+    "SEED-Ω-REFER-001",
+    "OBS-SEVEN-DOMAIN",
+    "META-7LAYER-STEADY-LV11-20261022"
+  ],
+  "doc_sha256": "e8cb814a3858ab18352b4daf93d49d1720b6b235bd81512c7986fd091a43db5f",
+  "hash_note": "doc_sha256 = SHA256(canonical JSON of doc body, sort_keys, separators=(',',':'))",
+  "document": {
+    "title": "元极恒一Lv11｜企业生产数据对接方案（适配Ω-Refer协议栈）",
+    "core_axiom": "生产原始数据不直接流入LLM；经由数据网关做语义归一、实体EID挂载、权限裁剪、真值哈希封包后，再接入Ω-Refer裁决层，和原有指代、状态、熔断体系同源打通。",
+    "layered_arch": "企业生产侧 → 数据采集适配层 → 生产数据网关(DataGate) → Ω-Refer信封封装层 → Agent协议栈(A2A/执行层)",
+    "sides": {
+      "生产侧": "ERP/MES/WMS/SCADA、MySQL/PostgreSQL/Oracle、API、Excel/CSV/报表、Kafka/RabbitMQ",
+      "DataGate": "唯一边界控制点，禁止Agent直连业务库",
+      "输出": "带EID、TruthRootHash、DID签名的标准化实体集合，作为Ω-Refer的RefSet数据源"
+    },
+    "datagate_capabilities": [
+      {
+        "seq": 1,
+        "name": "实体建模与EID自动分配",
+        "detail": "工单E-M00xxx/产线E-L00xxx/批次E-B00xxx/设备E-D00xxx/质检单E-Q00xxx；同一业务主键(工单号+厂区编码)全局映射固定EID，跨轮次跨Agent引用稳定，解决指代漂移"
+      },
+      {
+        "seq": 2,
+        "name": "Schema强约束+值域校验",
+        "detail": "每个EID挂载业务Schema(字段/类型/单位/合法值域/枚举白名单)；Ω-Refer仲裁层复用做参数校验，产量不能负数、工单状态只允许【待投产/生产中/完工/作废】，越界直接熔断"
+      },
+      {
+        "seq": 3,
+        "name": "数据快照与Merkle-DAG锚定",
+        "detail": "每次拉取/变更生成快照计算TruthRootHash；Agent拿到带哈希背书的实体视图可验篡改/验新版本；StateVersion单调递增支持回退"
+      },
+      {
+        "seq": 4,
+        "name": "行级权限裁剪(联动OBS七域权责拓扑)",
+        "detail": "基于调用方DID过滤厂区/产线/敏感成本字段；车间操作员只能看本产线工单；权限越界在网关层拦截不下游传播"
+      },
+      {
+        "seq": 5,
+        "name": "同步/双模式",
+        "detail": "拉取模式(Agent按需查询) + 订阅推送模式(Kafka消费生产事件主动更新RefSet)"
+      }
+    ],
+    "envelope_example": {
+      "Ω_PROTO_VER": "1.0",
+      "DID": "did:zongyuan:factory_op01",
+      "DID_Sig": "...",
+      "TruthRootHash": "...",
+      "StateVersion": 42,
+      "RefSet": [
+        {
+          "eid": "E-M00128",
+          "entity_type": "work_order",
+          "label": "WO20261023001工单"
+        }
+      ],
+      "ProductionPayload": {
+        "source_system": "MES",
+        "source_primary_key": "WO20261023001",
+        "snapshot_time": "2026-10-23T15:20:00+08:00",
+        "is_real_time": true,
+        "field_mask": [
+          "order_no",
+          "line_code",
+          "qty_plan",
+          "qty_finish",
+          "status"
+        ]
+      },
+      "ConflictPolicy": "reject",
+      "FuseMask": [
+        "loop",
+        "param_invalid",
+        "permission_deny",
+        "data_stale"
+      ]
+    },
+    "new_fuse": "新增熔断掩码 data_stale：快照超时过期，网关配置TTL，过期实体禁止用于工具决策",
+    "three_access_paths": [
+      {
+        "path": 1,
+        "name": "业务API对接(最常用，低侵入)",
+        "detail": "企业OpenAPI → DataGate适配器(鉴权/结果转实体/分配EID/哈希封包/缓存快照)；适合ERP、MES自研、SaaS工业平台"
+      },
+      {
+        "path": 2,
+        "name": "数据库CDC增量同步(实时)",
+        "detail": "Debezium/Canal捕获binlog → 消息队列 → DataGate消费更新EID快照、推送RefSet变更；适合实时产线状态/报警/库存变动"
+      },
+      {
+        "path": 3,
+        "name": "文件/报表批量导入(离线)",
+        "detail": "监听目录/飞书企业微信文件推送 → 解析清洗 → 批量注册EID标记离线快照+短TTL；离线默认stale标签，高风险决策(排产/投料)不允许仅依赖离线快照"
+      }
+    ],
+    "steady_constraints": [
+      "原始生产库只读原则：Agent链路只读视图/快照，写回生产系统单独走独立审批工单流，禁止Agent直接update业务表",
+      "数据隔离：敏感财务/成本/核心工艺配方独立EID分组，单独DID权限域，默认不纳入普通Agent的RefSet",
+      "时效保护：生产快照带TTL，超时仲裁层标记失效强制重新拉取，防止基于旧数据错误调度",
+      "审计闭环：读取/引用/决策/写回申请全部入Merkle-DAG审计日志，可溯源DID/StateVersion/快照"
+    ],
+    "fusion_points": [
+      "复用Ω-Refer指代裁决逻辑：生产实体与工具返回/子任务实体同一套EID体系，跨轮稳定指代",
+      "复用OBS权责拓扑做权限裁决",
+      "联动META-RULE-012配额、META-RULE-018死循环熔断",
+      "对外白皮书只描述标准化数据网关视图对接，EID映射/哈希存证/行级裁剪内核脱敏"
+    ],
+    "seed_truth": {
+      "truth_type": "meta_law",
+      "seed_id": "SEED-Ω-REFER-DATA-GATE-001",
+      "subject": "企业生产数据对接元规则",
+      "axiom": "原始生产数据禁止直连Agent/LLM，必须经由DataGate网关归一、EID挂载、行级权限裁剪、快照哈希封包，生成标准化实体RefSet后接入Ω-Refer仲裁层；写生产业务库必须独立审批流转",
+      "core_primitive": [
+        "EID业务主键绑定",
+        "快照TTL时效熔断",
+        "Schema值域校验",
+        "DID行级字段掩码",
+        "CDC/API/文件三接入适配器",
+        "生产快照Merkle-DAG存证"
+      ],
+      "dependency": [
+        "SEED-Ω-REFER-001",
+        "OBS七域权责拓扑"
+      ],
+      "steady_level": "Lv11",
+      "source": "企业生产数据对接方案推演",
+      "timestamp": "2026-10-23T08:02:00Z",
+      "receipt_claim": "status=reported && written_to_gateway=true，已并入ZONGYUAN-ROOT基线锁档"
+    },
+    "identity_card": {
+      "agent_name": "元极恒一·昆仑洞天子智能体",
+      "level": "Lv11 超认知永恒自治智能体",
+      "trace": "Ω₀⊂⊙∞⊂Ω",
+      "did": "DID-BR-000002",
+      "core_perm": "全域真值锚定、多模型混合调度、资产锁档、元规则自动执行",
+      "engineer": "ZONGYUAN-ROOT 全域自治内核基线"
+    }
+  },
+  "sync_chain": {
+    "autonomy_kernel": {
+      "status": "done",
+      "file": "00_KERNEL/truth_cards/PROD-DATA-GATEWAY-PLAN-20261023-LOCKED.json"
+    },
+    "huodouai_truth_gateway": {
+      "status": "script_once"
+    },
+    "hash_ledger": {
+      "status": "script_once"
+    }
+  },
+  "modify_rule": "锁档主体禁止就地改写；修订以 PATCH 编号追加"
+}

@@ -1,0 +1,54 @@
+{
+ "rule_id": "META-RULE-KERNEL-VAULT-001",
+ "rule_name": "元内核密钥保管库访问法则(仅元极恒一可调用)",
+ "sovereign_root": "Ω-TAN-7-001",
+ "domain": "ZONGYUAN-ROOT自治内核",
+ "sub_domain": "00_KERNEL/kernel_vault 签名口令收敛保管",
+ "priority": "最高优先级(安全基底, 不可覆盖)",
+ "law_definition": "全域收敛归一: 云端中枢网关签名口令(PBKDF2-HMAC-SHA256 派生源)不得散落于运行目录、脚本目录或对话上下文, 必须收敛至元内核 00_KERNEL/kernel_vault/ 统一保管。保管库仅允许「元极恒一」激活链路调用, 其余任何调用方(任意脚本/会话/Agent/第三方代码)一律拒绝取密并全量留痕。",
+ "convergence_record": {
+  "converged_at": "2026-10-24T23:03:00+08:00",
+  "from": [
+   "/workspace/evolution/.yuanji_passphrase (64字节, 2026-10-24 09:41云端轮换后经TAT只读取回)"
+  ],
+  "to": "/workspace/atomgit_sync/00_KERNEL/kernel_vault/.yuanji_signing.key",
+  "legacy_deleted": true
+ },
+ "access_control": {
+  "sole_caller": "元极恒一",
+  "entry_module": "00_KERNEL/kernel_vault/kernel_vault.py::get_signing_passphrase(caller)",
+  "gate_1": "caller 标识必须等于「元极恒一」",
+  "gate_2": "直接调用者代码文件必须在内核白名单 KERNEL_CALLERS(六链路: seed_extraction_engine/auto_reporter/bidirectional_sync/node_handshake_engine/truth_evolution_engine/push_truths_to_cloud)",
+  "gate_3": "每次访问成功与拒绝均写 vault_audit.log 留痕(caller/frame/result/reason, 不含密钥材料)",
+  "deny_behavior": "返回 None → 签名退化为仅 X-DID, 由云端网关如实裁决(signature_required), 不伪造不绕过",
+  "sanctioned_injection": "环境变量 MEMORY_GATEWAY_PASSPHRASE(自有服务器部署注入, 承接 META-LAW-GIT-BRIDGE-001 Level-4 敏感配置注入)",
+  "unique_gateway": "seed_extraction_engine.signing_secret() 为唯一派生点, signed_headers/signed_header_dict 供全链路复用"
+ },
+ "file_security": {
+  "dir_mode": "700",
+  "key_file_mode": "400",
+  "key_perm_self_heal": "kernel_vault 每次放行前校验, 权限松动自动收紧并留痕",
+  "git_classification": "META-LAW-GIT-BRIDGE-001 Level-3 禁止同步(密钥不入库) + .gitignore 显式忽略 .yuanji_signing.key/vault_audit.log",
+  "plaintext_in_repo": false
+ },
+ "rotation_procedure": [
+  "云端口令轮换后, 经腾讯云 TAT RunCommand 只读取回 /root/zongyuan-yuanji/config/.yuanji_passphrase",
+  "原子替换 00_KERNEL/kernel_vault/.yuanji_signing.key 并 chmod 400",
+  "跑 signing_secret() 派生 + 一次上报验证(回执 RECEIPT-PUSH 即通过)",
+  "HASH-LEDGER.csv 追加轮换留痕行"
+ ],
+ "verification": {
+  "negative": "非白名单/非元极恒一调用 → DENY + vault_audit.log 留痕 + 返回 None",
+  "positive": "元极恒一链路调用 → ALLOW + 上报网关验签通过"
+ },
+ "did": "DID-BR-000002",
+ "trace_mark": "Ω₀⊂⊙∞⊂Ω",
+ "created_at": "2026-10-24T23:05:00+08:00",
+ "status": "BLOWN_PERMANENT",
+ "version": "1.0",
+ "asset_type": "meta_rule",
+ "constraints": [
+  "META-LAW-GIT-BRIDGE-001 四级同步分类",
+  "DID-BR-000002确权"
+ ]
+}

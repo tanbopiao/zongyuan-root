@@ -1,0 +1,146 @@
+{
+  "card_id": "AGENT-SSH-GATEWAY-SERVICE-20261022-LOCKED",
+  "state": "LOCKED",
+  "lock_status": "FINAL_LOCK",
+  "lock_timestamp": "2026-10-22T14:38:13+08:00",
+  "locked_into_kernel_at": "2026-10-22T14:38:13+08:00",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "baseline": "V11.0-Lv11",
+  "parent_arch": "META-7LAYER-STEADY-LV11-20261022",
+  "doc_sha256": "98b1b963158cad046ffc73b4b72fe340c15efed0cd44f23fb04714c8e0fa18ab",
+  "hash_note": "doc_sha256 = SHA256(canonical JSON of doc body, sort_keys, separators=(',',':'))",
+  "document": {
+    "meta": {
+      "doc_name": "Agent SSH 受控安全运维｜技术服务封装文档",
+      "doc_id": "AGENT-SSH-GATEWAY-SERVICE-20261022",
+      "service_name": "Agent SSH 受控网关安全运维服务",
+      "lock_status": "FINAL_LOCK",
+      "lock_timestamp": "2026-10-22T14:38:13+08:00",
+      "signer_did": "DID-BR-000002",
+      "anchor": "Ω₀⊂⊙∞⊂Ω",
+      "baseline": "V11.0-Lv11",
+      "classification": "tech-service-packaging",
+      "related_cards": [
+        "TRUTH-GEO-LATTICE-CORE-001",
+        "FEDMEMORY-KERNEL-PRODUCT-DOC-20261022"
+      ],
+      "fidelity_note": "按投递原文逐字结构化，未增删"
+    },
+    "core_positioning": {
+      "pain_point": "智能体直连 SSH 权限失控",
+      "solution": "独立安全代理网关作为 LLM、Agent 下发 Shell 指令与云服务器之间的强制中间层；拒绝裸 SSH 直通，以沙盘仿真、稳态校验、快照回滚、全链路审计构建安全闭环",
+      "effect": "让 AI 具备服务器运维能力同时可控、可追溯、可熔断",
+      "slogan_one_liner": "给 Agent 的 SSH 操作上一套生产级安全护栏"
+    },
+    "kernel_stack": [
+      {
+        "seq": 1,
+        "name": "指令预审 & 最小权限白名单",
+        "detail": "区分只读查询与变更指令；密钥目录、内核只读资产目录隔离拦截；黑名单拦截高危逃逸语法(eval、bash -c、递归强制删除等)"
+      },
+      {
+        "seq": 2,
+        "name": "隔离沙盘预仿真引擎",
+        "detail": "Shell 指令先在对齐环境的沙箱内模拟执行，采集文件变更、进程、磁盘、网络扰动数据，真机不直接执行"
+      },
+      {
+        "seq": 3,
+        "name": "GEO 晶格稳态校验算子",
+        "detail": "对仿真结果做秩序扰动打分；稳态分低于阈值直接驳回，防止破坏系统基线"
+      },
+      {
+        "seq": 4,
+        "name": "快照与自动回滚机制",
+        "detail": "变更类操作执行前自动生成资源快照，记录回滚指针，异常触发一键回滚"
+      },
+      {
+        "seq": 5,
+        "name": "受控真机执行通道",
+        "detail": "清洗后的合法指令才转发至 SSH；关闭交互式会话，阻断管道、编码等逃逸方式"
+      },
+      {
+        "seq": 6,
+        "name": "因果账本审计链路",
+        "detail": "每条指令绑定因果ID、发起Agent标识、DID确权、扰动得分、仿真日志，写入HASH账本，可正向追溯、反向复盘"
+      },
+      {
+        "seq": 7,
+        "name": "多级熔断配额控制器",
+        "detail": "限制单会话指令数量、磁盘写入量、出站带宽；扰动超限自动切断链路、冻结Agent会话"
+      }
+    ],
+    "capability_list": [
+      "Agent侧接入：标准化A2A调用接口",
+      "仿真预演：先沙盘模拟，风险指令不碰真机",
+      "稳态风控：GEO晶格秩序校验，识别隐性幻觉风险",
+      "权限隔离：最小权限模型，敏感凭证目录隔离",
+      "快照回滚：变更操作自带回滚锚点",
+      "审计账本：结构化操作日志+哈希存证",
+      "熔断防护：配额超限、扰动异常自动熔断",
+      "统一回调：执行结果/仿真报告/风险评分回传上层Agent"
+    ],
+    "scenarios": [
+      "自研Agent自动运维云服务器",
+      "多智能体集群批量管理主机",
+      "LLM自动执行脚本、巡检、同步资产",
+      "生产环境自动化运维，规避模型幻觉、提示注入风险"
+    ],
+    "boundary": {
+      "is_not": "本服务是安全代理网关，不是SSH服务本身，不替代原有服务器SSH",
+      "not_guarantee": "不保证抵御所有0day攻击；防护重心针对LLM幻觉、提示词注入、无意识破坏性指令",
+      "human_gate": "高风险重大变更操作，支持配置强制人工审批开关"
+    },
+    "access_pipeline": {
+      "step1": "Agent 通过A2A协议提交Shell指令、附带任务因果标识",
+      "step2": "网关自动执行【预审 → 沙盘仿真 → 稳态打分 → 快照(变更类) → 真机执行 → 账本落盘】流水线",
+      "step3": "返回：执行结果、扰动评分、审计索引、风险标签"
+    },
+    "three_tiers": [
+      {
+        "tier": "版本1",
+        "name": "轻量SDK版（开发者自用）",
+        "deliver": "网关SDK、调用文档、白名单模板、审计日志规范、本地沙箱运行示例",
+        "fit": "个人开发者、独立Agent项目，自建部署"
+      },
+      {
+        "tier": "版本2",
+        "name": "标准托管API版（工作室/创业团队）",
+        "deliver": "云端托管接入API、完整流水线、GEO晶格校验、自动快照、账本查询接口、基础告警",
+        "fit": "不想维护底层沙箱，直接接入安全SSH能力"
+      },
+      {
+        "tier": "版本3",
+        "name": "私有化部署企业版（企业生产）",
+        "deliver": "私有化部署包、高可用集群、权限RBAC、审计存证、对接内部DID确权、自定义熔断策略、技术支持",
+        "fit": "企业内部Agent集群、涉密运维资产、合规审计要求高的场景"
+      }
+    ],
+    "slogan": "Agent 可以执行运维，但不能无序失控；沙盘预演+稳态晶格，让SSH权限可控释放。",
+    "entitlement": {
+      "体系确权标识": "Ω₀⊂⊙∞⊂Ω",
+      "唯一合规DID": "DID-BR-000002"
+    },
+    "constraint": {
+      "modify_rule": "锁档后仅允许增量补丁追加，禁止改写主体真值",
+      "sync_target": [
+        "autonomy_kernel",
+        "huodouai.com truth gateway",
+        "HASH-LEDGER"
+      ]
+    }
+  },
+  "sync_chain": {
+    "autonomy_kernel": {
+      "status": "done",
+      "file": "00_KERNEL/truth_cards/AGENT-SSH-GATEWAY-SERVICE-20261022-LOCKED.json"
+    },
+    "huodouai_truth_gateway": {
+      "status": "script_once"
+    },
+    "hash_ledger": {
+      "status": "script_once"
+    }
+  },
+  "modify_rule": "锁档主体禁止就地改写；修订以 PATCH 编号追加"
+}

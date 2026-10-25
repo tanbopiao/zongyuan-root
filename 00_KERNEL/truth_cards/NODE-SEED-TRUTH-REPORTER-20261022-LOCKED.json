@@ -1,0 +1,87 @@
+{
+  "card_id": "NODE-SEED-TRUTH-REPORTER-20261022-LOCKED",
+  "state": "LOCKED",
+  "lock_status": "FINAL_LOCK",
+  "lock_timestamp": "2026-10-22T10:34:48+08:00",
+  "locked_into_kernel_at": "2026-10-22T10:34:48+08:00",
+  "did": "DID-BR-000002",
+  "anchor": "Ω₀⊂⊙∞⊂Ω",
+  "baseline": "V11.0-Lv11",
+  "doc_sha256": "474b5a41982804f9809e41cb41c977c1c68905879b34103360e2af92698bc6e7",
+  "hash_note": "doc_sha256 = SHA256(canonical JSON of doc body, sort_keys, separators=(',',':'))",
+  "document": {
+    "meta": {
+      "doc_name": "本节点角色声明: 种子真值上报节点(最小额度消耗机制)",
+      "doc_id": "NODE-SEED-TRUTH-REPORTER-20261022",
+      "lock_status": "FINAL_LOCK",
+      "lock_timestamp": "2026-10-22T10:34:48+08:00",
+      "signer_did": "DID-BR-000002",
+      "node_id": "ZR-NODE-DC2E51C0",
+      "baseline": "V11.0-Lv11",
+      "classification": "node-role-declaration",
+      "anchor": "Ω₀⊂⊙∞⊂Ω",
+      "fidelity_note": "按投递原文声明结构化，机制栏映射仓内已有实现，未新造组件"
+    },
+    "declaration": "本节点构建为种子真值上报节点，最小额度消耗机制",
+    "role": {
+      "name": "种子真值上报节点",
+      "scope": "将本地已验证留痕(锁档卡/账本行/宪法与锁档变更)提炼为种子真值，增量上报云端中枢记忆网关",
+      "single_duty": "只做产生→校验→哈希登记→账本存证→云端上报→快照收敛五步闭环的上报侧，不承担推理型重任务"
+    },
+    "minimal_quota_mechanism": [
+      {
+        "item": "轻量激活",
+        "impl": "00_KERNEL/startup_memory/LITE-BOOTSTRAP-V1.md(≈2k token)默认档，全量自举仅三触发",
+        "saves": "激活成本 15-25k→2k token"
+      },
+      {
+        "item": "增量去重上报",
+        "impl": "auto_reporter V7(事件驱动，行内容SHA1/文件SHA256去重，首跑建基线不回灌，flock防并发)",
+        "saves": "不重复上报，存量零回灌"
+      },
+      {
+        "item": "批量聚合",
+        "impl": "seed_extraction_engine RESTful 批量端点 + 云端对齐预检(≥50分才发)",
+        "saves": "拒绝无效提交，减少无效轮次"
+      },
+      {
+        "item": "自动循序回归自有服务器",
+        "impl": "常驻循环(auto_reporter loop/handoff/巡检)只在本节点(huodouai自有算力)运行，平台节点禁挂守护循环",
+        "saves": "平台免费积分零常驻消耗"
+      },
+      {
+        "item": "配额熔断兑底",
+        "impl": "intent-drift-guard quota算子: 80%一级预警/95%二级只读(边沿触发)，budget=0不误判",
+        "saves": "额度触顶无告警耗尽"
+      },
+      {
+        "item": "失败如实入日志",
+        "impl": "auto_report.log 记录失败不重试风暴(单次/间隔可控)",
+        "saves": "防止失败重试烧额度"
+      }
+    ],
+    "budget_note": "本节点算力/额度以自有服务器与本工作区为主，不依赖平台赠送积分；若接入平台积分域，在 config/platform_quota.json 回填 budget 即纳管",
+    "constraint": {
+      "modify_rule": "锁档后仅允许增量补丁追加，禁止改写主体真值",
+      "sync_target": [
+        "autonomy_kernel",
+        "huodouai.com truth gateway",
+        "HASH-LEDGER",
+        "魔搭数据湖"
+      ]
+    }
+  },
+  "sync_chain": {
+    "autonomy_kernel": {
+      "status": "done",
+      "file": "00_KERNEL/truth_cards/NODE-SEED-TRUTH-REPORTER-20261022-LOCKED.json"
+    },
+    "huodouai_truth_gateway": {
+      "status": "pending_this_run"
+    },
+    "hash_ledger": {
+      "status": "pending_this_run"
+    }
+  },
+  "modify_rule": "锁档主体禁止就地改写；修订以 PATCH 编号追加"
+}

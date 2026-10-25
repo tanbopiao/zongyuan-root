@@ -1,0 +1,14 @@
+{
+  "_comment": "自愈策略配置 —— 仅允许覆盖已定义场景(DEFAULT_STRATEGIES 白名单), 未知场景键将被拒绝。on_fail=workorder 表示无法自愈时生成工单+告警。",
+  "strategies": {
+    "semantic_drift":             {"action": "reanchor",                "max_attempts": 2, "on_fail": "workorder"},
+    "align_below_warn":           {"action": "reanchor",                "max_attempts": 2, "on_fail": "workorder"},
+    "step_limit_exceeded":        {"action": "reanchor_checkpoint",     "max_attempts": 1, "on_fail": "workorder"},
+    "dead_loop_detected":         {"action": "break_action_window",     "max_attempts": 1, "on_fail": "workorder"},
+    "context_saturated_reanchor": {"action": "context_trim_keep_goal",  "max_attempts": 1, "on_fail": "workorder"},
+    "resource_near_limit":        {"action": "checkpoint_pause",        "max_attempts": 1, "on_fail": "workorder"},
+    "resource_limit_exceeded":    {"action": "checkpoint_pause",        "max_attempts": 1, "on_fail": "workorder"},
+    "child_severe_deviation":     {"action": "block_and_realign_child", "max_attempts": 1, "on_fail": "workorder"}
+  },
+  "workorder": {"severity": "P2", "status_on_create": "OPEN", "assigned": "人工处置"}
+}
