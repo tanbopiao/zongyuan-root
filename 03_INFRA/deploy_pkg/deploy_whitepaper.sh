@@ -11,3 +11,17 @@ chown -R www:www "$WEBROOT/whitepaper"
 echo "=== 验证 ==="
 curl -s -o /dev/null -w "whitepaper/: %{http_code}\n" https://www.huodouai.com/whitepaper/
 echo "=== 部署完成 ==="
+
+# === 双向同步引擎白皮书 V1.0 (2026-10-26) ===
+echo "--- 双向同步引擎白皮书 ---"
+mkdir -p "$WEBROOT/whitepaper/bidir-sync-whitepaper/_shared/js" "$WEBROOT/whitepaper/bidir-sync-whitepaper/_shared/fonts"
+cp -r "whitepaper/bidir-sync-whitepaper/"* "$WEBROOT/whitepaper/bidir-sync-whitepaper/"
+cp -r "whitepaper/bidir-sync-whitepaper/_shared/"* "$WEBROOT/whitepaper/bidir-sync-whitepaper/_shared/" 2>/dev/null || true
+chown -R www:www "$WEBROOT/whitepaper/bidir-sync-whitepaper"
+curl -s -o /dev/null -w "bidir-sync-whitepaper: %{http_code}\n" "https://www.huodouai.com/whitepaper/bidir-sync-whitepaper/bidir-sync-whitepaper.html"
+
+# === 双向同步交付包 ===
+echo "--- 交付包 tarball ---"
+cp bidir-sync-v1.0.tar.gz "$WEBROOT/whitepaper/" 2>/dev/null || cp 03_INFRA/deploy_pkg/bidir-sync-v1.0.tar.gz "$WEBROOT/whitepaper/"
+chown www:www "$WEBROOT/whitepaper/bidir-sync-v1.0.tar.gz" 2>/dev/null || true
+curl -s -o /dev/null -w "bidir-sync-v1.0.tar.gz: %{http_code}\n" "https://www.huodouai.com/whitepaper/bidir-sync-v1.0.tar.gz"
