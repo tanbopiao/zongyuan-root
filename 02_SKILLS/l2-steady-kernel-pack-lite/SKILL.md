@@ -22,7 +22,7 @@ registered_at: "2026-10-24"
 
 ## 编号口径说明（诚实标注）
 
-- 本包 `META-RULE-018 = 逻辑回环熔断元规则` 与内核收敛态一致（证据：`kernel/zongyuan-ops/CONVERGENCE.json` inherits 行、`01_ASSETS/documents/docs/api_protocol/` Ω-Refer 与 DataGate 内核基线版联动表述、`zongyuan-yuanji/var/docs-sync/**/rules/META-RULE-018.json`）。
+- 本包 `META-RULE-018 = 逻辑回环熔断元规则` 与内核收敛态一致（证据：`kernel/zongyuan-ops/CONVERGENCE.json` inherits 行、`01_ASSETS/documents/docs/api_protocol/` Ω-Refer 与 DataGate 内核基线版联动表述、`00_KERNEL/shared_brain/zongyuan-yuanji/var/docs-sync/**/rules/META-RULE-018.json`）。
 - 已知撞号：`var/inbox/dl-index-v2/meta-rules/META-RULE-018-算子级资源账单.md`（未收敛情报稿，来源 WorkBuddy 情报转化）占用了同号但语义不同，**未入收敛态，不随本包交付**。
 - 本包 `META-RULE-022 = 内核稳态相变公理【轻量L1适配版】`（V1.0-LITE），是收敛态「META-RULE-022 内核相变公理」的对外精简适配，非替换。
 
@@ -106,9 +106,9 @@ L2：完整稳态内核，6项指标全部满足（独立算子校验层、死�
 | 技能主文件 | `02_SKILLS/l2-steady-kernel-pack-lite/SKILL.md` | 本文件 |
 | 规则 JSON | `02_SKILLS/l2-steady-kernel-pack-lite/rules/*.json` | 2 条 |
 | 算子 | `02_SKILLS/l2-steady-kernel-pack-lite/operators/check_kernel_level.py` | 含自测 |
-| 既有同源（不移动） | `zongyuan-yuanji/var/docs-sync/shared-brain/skills/l2-steady-kernel-pack-lite/SKILL.md` | 子模块共享大脑版 |
-| 既有同源（不移动） | `zongyuan-yuanji/var/docs-sync/kernel/zongyuan-ops/v1.4.3-archive-update/docs/delivery-pack-v1.0-lite.md` | 归档文档版 |
-| 内核收敛参照 | `zongyuan-yuanji/var/docs-sync/kernel/zongyuan-ops/CONVERGENCE.json` | rules+operators 收敛清单 |
+| 既有同源（不移动） | `00_KERNEL/shared_brain/zongyuan-yuanji/var/docs-sync/shared-brain/skills/l2-steady-kernel-pack-lite/SKILL.md` | 子模块共享大脑版 |
+| 既有同源（不移动） | `00_KERNEL/shared_brain/zongyuan-yuanji/var/docs-sync/kernel/zongyuan-ops/v1.4.3-archive-update/docs/delivery-pack-v1.0-lite.md` | 归档文档版 |
+| 内核收敛参照 | `00_KERNEL/shared_brain/zongyuan-yuanji/var/docs-sync/kernel/zongyuan-ops/CONVERGENCE.json` | rules+operators 收敛清单 |
 
 ---
 

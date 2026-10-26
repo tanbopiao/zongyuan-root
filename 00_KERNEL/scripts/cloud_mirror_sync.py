@@ -24,8 +24,8 @@ AUDIT = os.path.join(PRJ, "var", "inbox", "audit.jsonl")
 
 ROUTES = [
     {"name": "zongyuan_root", "src": "/opt/ZONGYUAN-ROOT/", "dst": PRJ + "/", "opts": ["--exclude=.git"]},
-    {"name": "zongyuan_yuanji", "src": "/root/zongyuan-yuanji/", "dst": PRJ + "/zongyuan-yuanji/", "opts": []},
-    {"name": "zhongshu", "src": "/www/wwwroot/huodouai.com/zhongshu/", "dst": PRJ + "/zhongshu/", "opts": []},
+    {"name": "zongyuan_yuanji", "src": "/root/zongyuan-yuanji/", "dst": PRJ + "/00_KERNEL/shared_brain/zongyuan-yuanji/", "opts": []},
+    {"name": "zhongshu", "src": "/www/wwwroot/huodouai.com/zhongshu/", "dst": PRJ + "/00_KERNEL/shared_brain/zhongshu/", "opts": []},
 ]
 
 def now(): return time.strftime("%Y-%m-%dT%H:%M:%S+0800", time.localtime())

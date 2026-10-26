@@ -47,7 +47,7 @@ L0 元宪法硬约束 → L1 真值记忆网关 → L2 任务决策工单拆解 
 | 告警 | `alert_monitor.py` + `alerts/` + `00_KERNEL/monitoring/` | 高阶监控标准 |
 | 自治协议链 | `autonomous_kernel_protocol/` | AUTOKERN-PROTO V2.0~V9.8 约90份 |
 | 审计/账本 | `HASH-LEDGER.csv` | 哈希链账本 |
-| 数据湖持久层 | `DATA-LAKE-PERSIST/` | MANIFEST/REGISTRY/BINDING |
+| 数据湖持久层 | `00_KERNEL/shared_brain/data-lake-persist/` | MANIFEST/REGISTRY/BINDING |
 | 外部服务清单 | `AGENTS.md` 外部服务表 | 中枢上报/备用通道/SSH |
 
 ### 5.2 外部服务
@@ -71,7 +71,7 @@ L0 元宪法硬约束 → L1 真值记忆网关 → L2 任务决策工单拆解 
 | 时延 | 12 次 min 81 / p50 86 / p90 97 / max 111 ms；TLSv1.3 + Let's Encrypt，http80→301 |
 | 查询语义 | `?key=` 为**子串匹配**（`key=PROBE` 真实 73 条而非 10），精确核验必须二次过滤 exact key |
 | status 新鲜度 | 分钟级缓存快照，实测滞后 11 条 seq（非实时，判断实时性用写入回读或 drama 端点） |
-| 本地镜像 | `zhongshu/data/truth/truth.db` max_seq=25396（停更 10-21），落后云端 4200+ seq → 由 `scripts/truth_bidi_sync.py` 补 |
+| 本地镜像 | `00_KERNEL/shared_brain/zhongshu/data/truth/truth.db` max_seq=25396（停更 10-21），落后云端 4200+ seq → 由 `scripts/truth_bidi_sync.py` 补 |
 | 联邦记忆 | `/workspace/evolution/federation/`（confirmed/sync/proposals + `scripts/federated_memory_kernel.py` 五阶段治理） |
 
 ## 6. 标准流程（仓库内权威流程文件）
@@ -90,5 +90,5 @@ L0 元宪法硬约束 → L1 真值记忆网关 → L2 任务决策工单拆解 
 |---|---|
 | 资产本地持久 | `00_KERNEL/metarules/RULE-ASSET-LOCAL-PERSIST*` |
 | 钩子自启动恢复 | `00_KERNEL/metarules/META-RULE-HOOK-AUTOSTART-V1.0*` |
-| 数据湖持久索引 | `DATA-LAKE-PERSIST/03-index/MANIFEST-LAKE.json` |
+| 数据湖持久索引 | `00_KERNEL/shared_brain/data-lake-persist/03-index/MANIFEST-LAKE.json` |
 | 真值持久层 | `meta_truth/persist/` |

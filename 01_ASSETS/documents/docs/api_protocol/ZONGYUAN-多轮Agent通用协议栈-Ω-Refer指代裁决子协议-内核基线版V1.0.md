@@ -137,7 +137,7 @@ AEP 执行循环（SENSE→REASON→PLAN→ACT→OBSERVE）每步入参、出参
 - 跨域引用 EID 时，权责拓扑裁决权限；越界直接熔断——与权限越界治理资产（META-LAW-007 中枢主窗口星型协同架构法则）同源闭环
 - 所有熔断事件写入全局审计日志，日志条目本身纳入 Merkle-DAG 存证，不可篡改
 
-> **对齐闭合（2026-10-23）**：「OBS 七域权责拓扑」已对齐权威真值 **TR-PK-020**（`rule.obs_tr-pk-020`，seq 3702，`DATA-LAKE/all_truths.json`，hash_lock `5193134…`），完整七域清单见**附录 C**；跨域 EID 引用裁决以附录 C 各域 `bound` 为准。
+> **对齐闭合（2026-10-23）**：「OBS 七域权责拓扑」已对齐权威真值 **TR-PK-020**（`rule.obs_tr-pk-020`，seq 3702，`00_KERNEL/shared_brain/data-lake/all_truths.json`，hash_lock `5193134…`），完整七域清单见**附录 C**；跨域 EID 引用裁决以附录 C 各域 `bound` 为准。
 
 ---
 
@@ -162,11 +162,11 @@ AEP 执行循环（SENSE→REASON→PLAN→ACT→OBSERVE）每步入参、出参
 | 引用项 | 仓内真值 | 核验结果 |
 |---|---|---|
 | META-RULE-012 配额稳态 | `config/meta_laws/META-RULE-012.json` 定时任务配额稳态保护元规则 | ✅ 引用有效 |
-| META-RULE-018 死循环熔断 | `zongyuan-yuanji/.../rules/META-RULE-018.json` 逻辑回环熔断元规则 | ✅ 语义等价 |
+| META-RULE-018 死循环熔断 | `00_KERNEL/shared_brain/zongyuan-yuanji/.../rules/META-RULE-018.json` 逻辑回环熔断元规则 | ✅ 语义等价 |
 | META-ISO-051 内外隔离 | 19 处 / 6 文件 | ✅ 引用有效 |
 | A2A 通信层 | 兼容白皮书 V2.3 十协议族 #5，`/v1/a2a/kunlun/dispatch` LIVE | ✅ 引用有效 |
 | 权限越界治理同源 | `00_KERNEL/metalaws/META-LAW-007.md` 中枢主窗口星型协同架构法则 | ✅ 同源闭环成立 |
-| OBS 七域权责拓扑 | `DATA-LAKE/all_truths.json` seq 3702 `rule.obs_tr-pk-020`（TR-PK-020，hash_lock 5193134…）；初核仅扫 md 漏检 json，2026-10-23 二次核验命中 | ✅ 已闭合 → 附录 C |
+| OBS 七域权责拓扑 | `00_KERNEL/shared_brain/data-lake/all_truths.json` seq 3702 `rule.obs_tr-pk-020`（TR-PK-020，hash_lock 5193134…）；初核仅扫 md 漏检 json，2026-10-23 二次核验命中 | ✅ 已闭合 → 附录 C |
 | SAMP / StateMesh / 语义压缩协议 / AEP | 无仓内更早初版 | ℹ 随本版首次定义入基线（见三章版本注记） |
 
 ---
@@ -184,7 +184,7 @@ AEP 执行循环（SENSE→REASON→PLAN→ACT→OBSERVE）每步入参、出参
 
 ## 附录 C｜OBS 七域权责拓扑清单（仅追加，对齐 TR-PK-020，2026-10-23 闭合）
 
-**权威来源**：`rule.obs_tr-pk-020`（TR-PK-020「元极恒一体系 OBS 组织分解结构公理」，seq 3702，`DATA-LAKE/all_truths.json`，hash_lock `5193134100e0087748284217420892701429185723610041747129384627192`）。
+**权威来源**：`rule.obs_tr-pk-020`（TR-PK-020「元极恒一体系 OBS 组织分解结构公理」，seq 3702，`00_KERNEL/shared_brain/data-lake/all_truths.json`，hash_lock `5193134100e0087748284217420892701429185723610041747129384627192`）。
 
 **定义**：OBS = Organizational Breakdown Structure 组织分解结构，在元极恒一体系内定义为权责拓扑治理树，解决「谁管什么」，属治理骨架非技术运行组件；WBS（做什么）× OBS（谁来做）= RAM/RACI 矩阵。
 
@@ -207,7 +207,7 @@ AEP 执行循环（SENSE→REASON→PLAN→ACT→OBSERVE）每步入参、出参
 
 **同源对齐链**（TR-PK-020 legacy_align）：TR-PK-002 持久层/执行隔离、TR-PK-005 四层分层（L0~L3）、TR-PK-012 三分职责、TR-PK-016 认知锁自纠（审计跨层）、TR-PK-019 数学锚与实例解耦——与本协议「仲裁层先行、框架无感」设计同源。
 
-**核验说明（诚实记录）**：本清单初版核验（2026-10-22）仅检索 `*.md` 漏检 json 真值缓存，误判「无仓内真值」；2026-10-23 二次核验在 `DATA-LAKE/all_truths.json` / `node-mi-v5-001/truth-all.json` / `CLOUD-TRUTH-FULL-20261009.json` 三处命中同源记录，现闭合。
+**核验说明（诚实记录）**：本清单初版核验（2026-10-22）仅检索 `*.md` 漏检 json 真值缓存，误判「无仓内真值」；2026-10-23 二次核验在 `00_KERNEL/shared_brain/data-lake/all_truths.json` / `node-mi-v5-001/truth-all.json` / `CLOUD-TRUTH-FULL-20261009.json` 三处命中同源记录，现闭合。
 
 ---
 

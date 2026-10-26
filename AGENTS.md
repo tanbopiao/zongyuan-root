@@ -126,7 +126,7 @@
 ```
 
 成功回执：`{"ok":true,"message":"真值写入成功","key":...,"truth_count":N,"seq":N,"event_id":"truth-..."}`
-签名契约实测源：`00_KERNEL/startup_memory/KNOWLEDGE-INDEX.md` §5.2；协议事实源：`zongyuan-yuanji/var/docs-sync/boot/kernel-mirror/metalaw/CHANNEL-PROTOCOL-V31-20261010.md`（该协议文档尚未含签名段，以实测为准）
+签名契约实测源：`00_KERNEL/startup_memory/KNOWLEDGE-INDEX.md` §5.2；协议事实源：`00_KERNEL/shared_brain/zongyuan-yuanji/var/docs-sync/boot/kernel-mirror/metalaw/CHANNEL-PROTOCOL-V31-20261010.md`（该协议文档尚未含签名段，以实测为准）
 
 ---
 
