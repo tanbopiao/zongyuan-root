@@ -25,3 +25,17 @@ echo "--- 交付包 tarball ---"
 cp bidir-sync-v1.0.tar.gz "$WEBROOT/whitepaper/" 2>/dev/null || cp 03_INFRA/deploy_pkg/bidir-sync-v1.0.tar.gz "$WEBROOT/whitepaper/"
 chown www:www "$WEBROOT/whitepaper/bidir-sync-v1.0.tar.gz" 2>/dev/null || true
 curl -s -o /dev/null -w "bidir-sync-v1.0.tar.gz: %{http_code}\n" "https://www.huodouai.com/whitepaper/bidir-sync-v1.0.tar.gz"
+
+# === 联邦记忆内核产品白皮书 V1.0 (2026-10-26) ===
+echo "--- 联邦记忆内核白皮书 ---"
+mkdir -p "$WEBROOT/whitepaper/federated-memory-kernel-whitepaper/_shared/js" "$WEBROOT/whitepaper/federated-memory-kernel-whitepaper/_shared/fonts"
+cp -r "04_PROJECTS/docs/whitepaper/federated-memory-kernel-whitepaper/"* "$WEBROOT/whitepaper/federated-memory-kernel-whitepaper/"
+chown -R www:www "$WEBROOT/whitepaper/federated-memory-kernel-whitepaper"
+curl -s -o /dev/null -w "federated-memory-kernel-whitepaper: %{http_code}\n" "https://www.huodouai.com/whitepaper/federated-memory-kernel-whitepaper/federated-memory-kernel-whitepaper.html"
+
+# === 联邦记忆内核产品落地页 ===
+echo "--- 联邦记忆内核产品页 ---"
+mkdir -p "$WEBROOT/products/federated-memory-kernel/_shared/js" "$WEBROOT/products/federated-memory-kernel/_shared/fonts"
+cp -r "04_PROJECTS/website/federated-memory-kernel/"* "$WEBROOT/products/federated-memory-kernel/"
+chown -R www:www "$WEBROOT/products/federated-memory-kernel"
+curl -s -o /dev/null -w "federated-memory-kernel product page: %{http_code}\n" "https://www.huodouai.com/products/federated-memory-kernel/federated-memory-kernel.html"
