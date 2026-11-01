@@ -19,7 +19,7 @@ def now(): return time.strftime("%Y-%m-%dT%H:%M:%S+0800", time.localtime())
 
 DIRS = {
     "constitution": PRJ + "/00_KERNEL/constitution",
-    "metarules": PRJ + "/00_KERNEL/metarules",
+    "metarules": PRJ + "/00_KERNEL/metalaws",
     "metalaws": PRJ + "/00_KERNEL/metalaws",
 }
 

@@ -27,7 +27,7 @@
 - L1 元公理【只读】：永久归档不删除；SHA256+Merkle-DAG 锁档；记忆网关全域锚定
 - L2 元法则【可业务调整】：云端变更人工审批；本地内核=只读容灾备份
 - L3 元规则【动态配置】：路径/Webhook/优先级/超时/巡检周期
-- 载体：`00_KERNEL/constitution/` + `00_KERNEL/metalaws/`（元法则库）+ `00_KERNEL/metarules/`（元规则库）+ `meta_laws/`
+- 载体：`00_KERNEL/constitution/` + `00_KERNEL/metalaws/`（元法则库）+ `00_KERNEL/metalaws/`（元规则库）+ 
 
 ## 4. 七层稳态自治架构（自底向上）
 
@@ -88,7 +88,7 @@ L0 元宪法硬约束 → L1 真值记忆网关 → L2 任务决策工单拆解 
 
 | 规则 | 载体 |
 |---|---|
-| 资产本地持久 | `00_KERNEL/metarules/RULE-ASSET-LOCAL-PERSIST*` |
-| 钩子自启动恢复 | `00_KERNEL/metarules/META-RULE-HOOK-AUTOSTART-V1.0*` |
+| 资产本地持久 | `00_KERNEL/metalaws/RULE-ASSET-LOCAL-PERSIST*` |
+| 钩子自启动恢复 | `00_KERNEL/metalaws/META-RULE-HOOK-AUTOSTART-V1.0*` |
 | 数据湖持久索引 | `00_KERNEL/shared_brain/data-lake-persist/03-index/MANIFEST-LAKE.json` |
 | 真值持久层 | `meta_truth/persist/` |

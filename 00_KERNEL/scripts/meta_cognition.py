@@ -16,7 +16,7 @@ VERSION = "META-COGNITION-V1.0"
 
 RULE_DIRS = {
     "metalaws": PRJ + "/00_KERNEL/metalaws",
-    "metarules": PRJ + "/00_KERNEL/metarules",
+    "metarules": PRJ + "/00_KERNEL/metalaws",
     "constitution": PRJ + "/00_KERNEL/constitution",
     "wrk_meta": WRK + "/meta-rules",
 }
