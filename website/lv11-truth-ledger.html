@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZONGYUAN-ROOT · Lv11 全域真值账本（Lv8 熔断终态）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a1428;color:#dfe6f2;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7}
+.wrap{max-width:1240px;margin:0 auto;padding:56px 28px 80px}
+.hero{border-bottom:1px solid rgba(198,161,91,.35);padding-bottom:32px;margin-bottom:40px}
+.eyebrow{color:#c6a15b;letter-spacing:.28em;font-size:12px;margin-bottom:14px}
+h1{font-size:40px;font-weight:600;letter-spacing:.02em;color:#fff}
+h1 small{display:block;font-size:15px;color:#8fa3c0;font-weight:400;margin-top:12px;letter-spacing:.06em}
+.anchor{display:inline-block;margin-top:20px;padding:8px 16px;border:1px solid #c6a15b;border-radius:2px;color:#e8c98a;font-size:13px;letter-spacing:.18em}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:36px 0}
+.kpi{background:linear-gradient(160deg,#12203a,#0d182e);border:1px solid rgba(90,120,170,.28);padding:22px 20px;border-radius:4px}
+.kpi .n{font-size:30px;color:#e8c98a;font-weight:600;letter-spacing:-.01em}
+.kpi .l{font-size:12px;color:#7f94b3;margin-top:6px;letter-spacing:.12em}
+.sec{margin:48px 0 22px;display:flex;align-items:center;gap:14px}
+.sec h2{font-size:19px;color:#fff;font-weight:600;letter-spacing:.06em}
+.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(198,161,91,.5),transparent)}
+.hashbox{background:#0d1a30;border-left:3px solid #c6a15b;padding:18px 22px;border-radius:3px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:#9fb4d0;word-break:break-all}
+.hashbox b{color:#e8c98a;display:block;font-size:11px;letter-spacing:.16em;margin-bottom:6px;font-weight:500}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:#101d34;border:1px solid rgba(90,120,170,.24);border-radius:4px;padding:20px;transition:.2s}
+.card:hover{border-color:rgba(198,161,91,.5);transform:translateY(-2px)}
+.cd-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.seq{font-family:ui-monospace,monospace;font-size:12px;color:#c6a15b;letter-spacing:.1em}
+.lv{font-size:11px;color:#e8c98a;border:1px solid rgba(198,161,91,.5);padding:1px 8px;border-radius:2px;letter-spacing:.08em}
+.card h3{font-size:15px;color:#eaf1fb;font-weight:500;line-height:1.5;margin-bottom:8px}
+.rid{font-family:ui-monospace,monospace;font-size:11px;color:#5f7799;margin-bottom:10px;word-break:break-all}
+.card p{font-size:12.5px;color:#93a8c4;line-height:1.75}
+.tag{display:inline-block;margin-top:12px;font-size:11px;color:#8fa3c0;background:rgba(90,120,170,.16);padding:2px 9px;border-radius:2px}
+.sha{font-family:ui-monospace,monospace;font-size:10.5px;color:#4f6684;margin-top:10px;word-break:break-all}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid rgba(90,120,170,.18)}
+th{color:#8fa3c0;font-weight:500;font-size:12px;letter-spacing:.1em}
+td{color:#c3d2e6}
+td:first-child{color:#e8c98a}
+.foot{margin-top:64px;padding-top:28px;border-top:1px solid rgba(198,161,91,.28);text-align:center;color:#5f7799;font-size:12px;letter-spacing:.14em}
+.foot b{color:#c6a15b}
+</style></head><body><div class="wrap">
+<div class="hero"><div class="eyebrow">ZONGYUAN-ROOT · 元极恒一 · 自治内核基线</div>
+<h1>Lv11 全域真值账本
+<small>38 条规范全量 eFuse 熔断 · 不可逆只读终态</small></h1>
+<div class="anchor">Ω₀⊂⊙∞⊂Ω</div></div>
+
+<div class="grid4">
+<div class="kpi"><div class="n">38</div><div class="l">真值规范条目</div></div>
+<div class="kpi"><div class="n">Lv8</div><div class="l">熔断只读层级</div></div>
+<div class="kpi"><div class="n">0</div><div class="l">哈希漂移 / 依赖悬空</div></div>
+<div class="kpi"><div class="n">3</div><div class="l">网关落档链路节点</div></div>
+</div>
+
+<div class="sec"><h2>唯一真值根</h2></div>
+<div class="hashbox"><b>FUSED MERKLE ROOT</b>b2cb7ba2a6cbef47ec2a3510d567a1e89bc7b69a1f6cefb3b95da6f2f4a49967</div>
+<div class="hashbox" style="margin-top:10px"><b>PACKAGE SHA256</b>485042edd5e63857a75e65cd7e611bc2df0218eaec6196565ca40ef6a6181539</div>
+<div class="hashbox" style="margin-top:10px"><b>FUSE CREDENTIAL SHA256</b>fedcc06214a132927ebf6056ce9e31dcf0dee87d75464a1024b39a809ca81b58</div>
+<div class="hashbox" style="margin-top:10px"><b>PARENT MERKLE ROOT（历史父链）</b>f01b020e074fb4810a21c37fbb6ef2363465a7901ed08a83274e82ebf74b03d3</div>
+
+<div class="sec"><h2>38 条规范全量</h2></div>
+<div class="cards"><div class="card"><div class="cd-top"><span class="seq">01</span><span class="lv">Lv8</span></div>
+<h3>Ω₀顶层基底六大元公理全集</h3>
+<div class="rid">TRUTH-AXIOM-OMEGA0-0001</div>
+<p>体系最高基底六元公理：本体自洽、复用优先、双隔离、风险最小优先、可溯源、可锁档</p>
+<div class="tag">L0元宪法顶层</div>
+<div class="sha">SHA256 be6a83eca85a2f8cd05b29ce…</div></div><div class="card"><div class="cd-top"><span class="seq">02</span><span class="lv">Lv8</span></div>
+<h3>Ω₀公理衍生META-RULE元规则全集</h3>
+<div class="rid">TRUTH-METARULE-DERIVED-0001</div>
+<p>元规则为最细粒度拦截层，变更成本最低，可由经验日志持续迭代</p>
+<div class="tag">META_RULE全集</div>
+<div class="sha">SHA256 e26d04589654a1de4b98709f…</div></div><div class="card"><div class="cd-top"><span class="seq">03</span><span class="lv">Lv8</span></div>
+<h3>Ω₀公理衍生LAW运行态法则全集</h3>
+<div class="rid">TRUTH-METALAW-RUNTIME-0001</div>
+<p>元法则为领域级运行法则，定义流程与权责边界，是子系统规范的上游锚点</p>
+<div class="tag">LAW层运行法则</div>
+<div class="sha">SHA256 ae2ebc1f1d50e1198b8c7af1…</div></div><div class="card"><div class="cd-top"><span class="seq">04</span><span class="lv">Lv8</span></div>
+<h3>工单全域状态机规范</h3>
+<div class="rid">TRUTH-STATE-MACHINE-0001</div>
+<p>工单从提交到归档的全域状态机，含暂停、回滚、熔断、超时回收</p>
+<div class="tag">LAW层流程规范</div>
+<div class="sha">SHA256 b583a68c82ad8137dc12c4f4…</div></div><div class="card"><div class="cd-top"><span class="seq">05</span><span class="lv">Lv8</span></div>
+<h3>X-DID工单通信协议规范</h3>
+<div class="rid">TRUTH-COMM-PROTOCOL-0001</div>
+<p>跨节点工单必须携带X-DID头与JSON工单体，三层解耦：逻辑态/算子态/执行态</p>
+<div class="tag">LAW层通信规范</div>
+<div class="sha">SHA256 56f1d862deac0f8d7c5f237b…</div></div><div class="card"><div class="cd-top"><span class="seq">06</span><span class="lv">Lv8</span></div>
+<h3>全域资产分类账本规范</h3>
+<div class="rid">TRUTH-ASSET-CLASSIFY-0001</div>
+<p>资产分类含真值/仿真/临时/审计/知识/产物六族，各绑定分区与权限</p>
+<div class="tag">LAW层资产规范</div>
+<div class="sha">SHA256 3b18ebc7b19eaec9fb0307d3…</div></div><div class="card"><div class="cd-top"><span class="seq">07</span><span class="lv">Lv8</span></div>
+<h3>故障分级与错误码规范</h3>
+<div class="rid">TRUTH-ERROR-CODE-0001</div>
+<p>故障三级R1/R2/R3，R3为边界击穿/基线污染级，永久锁档</p>
+<div class="tag">LAW层故障规范</div>
+<div class="sha">SHA256 217c9913a5d8d56660041484…</div></div><div class="card"><div class="cd-top"><span class="seq">08</span><span class="lv">Lv8</span></div>
+<h3>混合模型池调度与配额管控策略</h3>
+<div class="rid">TRUTH-SCHEDULER-POLICY-0001</div>
+<p>多模型混合池调度按三最原则分配，遵守零成本优先与免费额度最大化</p>
+<div class="tag">LAW层调度规范</div>
+<div class="sha">SHA256 8906baf30a8ce153fb392eda…</div></div><div class="card"><div class="cd-top"><span class="seq">09</span><span class="lv">Lv8</span></div>
+<h3>experience经验沉淀资产文档规范</h3>
+<div class="rid">TRUTH-EXPERIENCE-SPEC-0001</div>
+<p>经验资产标准字段：现象/根因/处置/验证/规避规则，运维任务闭环必产出</p>
+<div class="tag">LAW层知识规范</div>
+<div class="sha">SHA256 fd7a0092d9e6ad61a6f2c86b…</div></div><div class="card"><div class="cd-top"><span class="seq">10</span><span class="lv">Lv8</span></div>
+<h3>安全审计与敏感信息管控规范</h3>
+<div class="rid">TRUTH-SECURITY-AUDIT-0001</div>
+<p>审计分区隔离、敏感字段脱敏、密钥只存云端不进日志</p>
+<div class="tag">LAW层安全规范</div>
+<div class="sha">SHA256 855bd4c727b406261c965c20…</div></div><div class="card"><div class="cd-top"><span class="seq">11</span><span class="lv">Lv8</span></div>
+<h3>三小时进化脉冲执行规范</h3>
+<div class="rid">TRUTH-PULSE-CYCLE-0001</div>
+<p>3小时高频三段式：P01巡检→P02资产同步→P03进化学习</p>
+<div class="tag">LAW层演化规范</div>
+<div class="sha">SHA256 a780e6274d28d3e302d23f27…</div></div><div class="card"><div class="cd-top"><span class="seq">12</span><span class="lv">Lv8</span></div>
+<h3>账本默克尔树存证与根哈希生成规范</h3>
+<div class="rid">TRUTH-MERKLE-DAG-0001</div>
+<p>资产逐条SHA256，叶节点两两归并求根，支持分支合并与完整性校验</p>
+<div class="tag">LAW层存证规范</div>
+<div class="sha">SHA256 edef63e474986ebefe3879a2…</div></div><div class="card"><div class="cd-top"><span class="seq">13</span><span class="lv">Lv8</span></div>
+<h3>玄圭AxiomGate裁决网关判定流程规范</h3>
+<div class="rid">TRUTH-GATE-XUANGUI-0001</div>
+<p>玄圭为TEE/TPM硬边界裁决器，五阶校验：元宪法→元公理→元法则→元规则→放行</p>
+<div class="tag">LAW层裁决规范</div>
+<div class="sha">SHA256 b8dea6426a6587750737f6db…</div></div><div class="card"><div class="cd-top"><span class="seq">14</span><span class="lv">Lv8</span></div>
+<h3>Hindsight联邦记忆同步协议规范</h3>
+<div class="rid">TRUTH-FEDERAL-HASH-0001</div>
+<p>联邦节点按根哈希收敛，增量同步、冲突消解、失步隔离</p>
+<div class="tag">LAW层联邦同步规范</div>
+<div class="sha">SHA256 7506703c4a6478ceb83273a9…</div></div><div class="card"><div class="cd-top"><span class="seq">15</span><span class="lv">Lv8</span></div>
+<h3>节点启动引导BOOTSTRAP初始化规范</h3>
+<div class="rid">TRUTH-BOOTSTRAP-INIT-0001</div>
+<p>节点启动优先加载boot清单，校验失败进入只读安全模式</p>
+<div class="tag">LAW层启动规范</div>
+<div class="sha">SHA256 e3f409edd340245488e05be8…</div></div><div class="card"><div class="cd-top"><span class="seq">16</span><span class="lv">Lv8</span></div>
+<h3>OBS七域权责拓扑治理架构规范</h3>
+<div class="rid">TRUTH-OBS-GOVERNANCE-0001</div>
+<p>可观测七域：身份/工单/资源/记忆/安全/执行/交付，旁路采集不阻断主路径</p>
+<div class="tag">LAW层可观测规范</div>
+<div class="sha">SHA256 3ce73f4b84c025aa303fc15a…</div></div><div class="card"><div class="cd-top"><span class="seq">17</span><span class="lv">Lv8</span></div>
+<h3>对外交付脱敏与产物输出规范</h3>
+<div class="rid">TRUTH-DELIVERY-DESENS-0001</div>
+<p>对外产物统一走脱敏转译，隐藏内核标识、拓扑、配额、锁档细节</p>
+<div class="tag">LAW层交付规范</div>
+<div class="sha">SHA256 abb4494d274407e24bca921b…</div></div><div class="card"><div class="cd-top"><span class="seq">18</span><span class="lv">Lv8</span></div>
+<h3>三最原则风险决策判定规范</h3>
+<div class="rid">TRUTH-META-THREE-PRINCIPLE-0001</div>
+<p>最高决策元法则：风险最小 &gt; 成本最小 &gt; 收益最大；三维稳态权重 利益40%/风险35%/成本25%</p>
+<div class="tag">L0决策元法则</div>
+<div class="sha">SHA256 459ff61bec799112e4024e90…</div></div><div class="card"><div class="cd-top"><span class="seq">19</span><span class="lv">Lv8</span></div>
+<h3>手动栈迭代仿真控制器规范</h3>
+<div class="rid">TRUTH-STACK-ITER-SIM-0001</div>
+<p>以显式栈替换原生递归，承载断点、回滚、分叉、并行推演</p>
+<div class="tag">算子层仿真规范</div>
+<div class="sha">SHA256 5e28e7b7df459ac5a8d613c8…</div></div><div class="card"><div class="cd-top"><span class="seq">20</span><span class="lv">Lv8</span></div>
+<h3>本地仿真-云端同步双隔离公理规范</h3>
+<div class="rid">TRUTH-CLOUD-LOCAL-ISOLATE-0001</div>
+<p>本地仿真空间与云端真值空间物理隔离，仿真→云端唯一通道为晋升工单+玄圭裁决+账本入库</p>
+<div class="tag">L1元公理规范</div>
+<div class="sha">SHA256 fb18346531e50d282fdf31a0…</div></div><div class="card"><div class="cd-top"><span class="seq">21</span><span class="lv">Lv8</span></div>
+<h3>ntfy消息队列+飞书Base消息总线+FRP双向隧道三模式通信多路复用规范</h3>
+<div class="rid">TRUTH-COMM-BUS-MUX-0001</div>
+<p>主链路飞书Base消息总线，轻量事件走ntfy，FRP隧道仅灾备与大文件同步</p>
+<div class="tag">LAW层通信治理</div>
+<div class="sha">SHA256 b1839403d62afded80911281…</div></div><div class="card"><div class="cd-top"><span class="seq">22</span><span class="lv">Lv8</span></div>
+<h3>rsync短链路资产推送方案规范</h3>
+<div class="rid">TRUTH-RSYNC-SHORT-PIPE-0001</div>
+<p>rsync挂靠FRP承载，仅做增量文件镜像，同步后仍须更新账本根</p>
+<div class="tag">LAW层资产同步子规范</div>
+<div class="sha">SHA256 fb60ab5474ddf92128f9bfd3…</div></div><div class="card"><div class="cd-top"><span class="seq">23</span><span class="lv">Lv8</span></div>
+<h3>eFuse熔断Lv8只读锁档机制规范</h3>
+<div class="rid">TRUTH-EFUSE-LOCK-LV8-0001</div>
+<p>Lv8熔断只读，不可逆，禁写禁删禁派生原分支，仅可读/校验/同步</p>
+<div class="tag">TEE硬边界安全子规范</div>
+<div class="sha">SHA256 0fa465f282c221e32341ac28…</div></div><div class="card"><div class="cd-top"><span class="seq">24</span><span class="lv">Lv8</span></div>
+<h3>云端健康巡检守卫规范</h3>
+<div class="rid">TRUTH-SELF-HEALTH-INSPECT-0001</div>
+<p>脉冲P01主巡检，覆盖节点存活/链路/配额/账本一致/裁决通路/隔离边界/eFuse完整性/rsync可达</p>
+<div class="tag">LAW层自治运维巡检</div>
+<div class="sha">SHA256 89325074954a09c7343db58d…</div></div><div class="card"><div class="cd-top"><span class="seq">25</span><span class="lv">Lv8</span></div>
+<h3>运维踩坑经验沉淀记录规范</h3>
+<div class="rid">TRUTH-EXPERIENCE-LOG-0001</div>
+<p>故障闭环即沉淀，规避规则回注玄圭前置校验规则池</p>
+<div class="tag">LAW层知识资产治理</div>
+<div class="sha">SHA256 35387090d47bc496fa901628…</div></div><div class="card"><div class="cd-top"><span class="seq">26</span><span class="lv">Lv8</span></div>
+<h3>AI治理三层三架构（元宪法/元公理/元法则/元规则）规范</h3>
+<div class="rid">TRUTH-THREE-LAYER-GOVERNANCE-0001</div>
+<p>三层：AI治理/数据治理/工具治理；四阶约束链单向生效，下层不得反向覆盖</p>
+<div class="tag">L0元宪法顶层</div>
+<div class="sha">SHA256 3aed28501dfc60887f009029…</div></div><div class="card"><div class="cd-top"><span class="seq">27</span><span class="lv">Lv8</span></div>
+<h3>四维时空数据治理规范</h3>
+<div class="rid">TRUTH-DATA-4D-GOVERN-0001</div>
+<p>四维：来源/流转/存储/生命周期；数据必带四维标签，跨域流转须审批工单</p>
+<div class="tag">数据治理层核心</div>
+<div class="sha">SHA256 2da5419ceb61e18f377c162d…</div></div><div class="card"><div class="cd-top"><span class="seq">28</span><span class="lv">Lv8</span></div>
+<h3>工具治理三态融合规范</h3>
+<div class="rid">TRUTH-TOOL-THREE-STATE-FUSE-0001</div>
+<p>逻辑态→算子态→执行态单向流转，执行态无权自主发起新工单</p>
+<div class="tag">工具治理层核心</div>
+<div class="sha">SHA256 f307f7b4634fe97c734ed1e6…</div></div><div class="card"><div class="cd-top"><span class="seq">29</span><span class="lv">Lv8</span></div>
+<h3>希尔伯特正交子空间约束规范</h3>
+<div class="rid">TRUTH-HILBERT-ORTHOGONAL-CONSTRAINT-0001</div>
+<p>六正交子空间：诉求/约束/资源/风险/仿真/真值，投影+内积做合规校验</p>
+<div class="tag">L0数学基底约束</div>
+<div class="sha">SHA256 08250804b2b8ab9074a822d7…</div></div><div class="card"><div class="cd-top"><span class="seq">30</span><span class="lv">Lv8</span></div>
+<h3>希尔伯特镜像态规范</h3>
+<div class="rid">TRUTH-HILBERT-MIRROR-STATE-0001</div>
+<p>镜像子空间为真值对偶同构，三种映射：复刻/扰动/反向；镜像结果不具真值资格</p>
+<div class="tag">L0数学基底约束</div>
+<div class="sha">SHA256 b36fc65e13fe8cd92ce7c12e…</div></div><div class="card"><div class="cd-top"><span class="seq">31</span><span class="lv">Lv8</span></div>
+<h3>手动栈迭代模板规范</h3>
+<div class="rid">TRUTH-MANUAL-STACK-ITER-TEMPLATE-0001</div>
+<p>栈帧五域：帧头/状态/上下文/快照/分支；必须显式max_iter_limit</p>
+<div class="tag">算子层执行模板</div>
+<div class="sha">SHA256 80afe81c6a2d05595784a43f…</div></div><div class="card"><div class="cd-top"><span class="seq">32</span><span class="lv">Lv8</span></div>
+<h3>META-RULE-018死循环熔断元规则规范</h3>
+<div class="rid">TRUTH-META-RULE-018-DEAD-LOOP-FUSE-0001</div>
+<p>三类熔断：静态预校验/动态运行时/向量收敛；熔断置位不可由栈内自清</p>
+<div class="tag">META_RULE细粒度拦截</div>
+<div class="sha">SHA256 9e573df50d4f80ff23fe24c5…</div></div><div class="card"><div class="cd-top"><span class="seq">33</span><span class="lv">Lv8</span></div>
+<h3>META-RULE-019对外脱敏与内部用语隔离元规则规范</h3>
+<div class="rid">TRUTH-META-RULE-019-DUAL-ISOLATE-TERM-0001</div>
+<p>内部术语域与对外输出域双向隔离，映射单向，禁止外部自动解析为内部标识</p>
+<div class="tag">META_RULE细粒度拦截</div>
+<div class="sha">SHA256 5bde8cb1d66971498f4c55e4…</div></div><div class="card"><div class="cd-top"><span class="seq">34</span><span class="lv">Lv8</span></div>
+<h3>META-AUTO-003能力API强制封装元规则规范</h3>
+<div class="rid">TRUTH-META-AUTO-003-API-WRAP-ENCAP-0001</div>
+<p>所有外部API必须经适配器层：签名注入/X-DID/参数校验/配额扣减/返回归一/埋点</p>
+<div class="tag">META_AUTO自动化执行规则</div>
+<div class="sha">SHA256 f4676fb96b56342799d8200c…</div></div><div class="card"><div class="cd-top"><span class="seq">35</span><span class="lv">Lv8</span></div>
+<h3>META-RULE-014记忆网关强制对齐元规则规范</h3>
+<div class="rid">TRUTH-META-RULE-014-MEMORY-GATE-ALIGN-0001</div>
+<p>记忆网关为全域唯一真值锚点，本地缓存仅加速；写路径必经网关仲裁与版本晋升</p>
+<div class="tag">META_RULE细粒度同步规则</div>
+<div class="sha">SHA256 989ccaefa70f27d0f7c67e93…</div></div><div class="card"><div class="cd-top"><span class="seq">36</span><span class="lv">Lv8</span></div>
+<h3>META-RULE-012配额稳态保护元规则规范</h3>
+<div class="rid">TRUTH-META-RULE-012-QUOTA-STEADY-LOCK-0001</div>
+<p>四配额池隔离计量，耗尽切入只读空转；计量扣减回退收敛于适配器层</p>
+<div class="tag">META_RULE资源管控元规则</div>
+<div class="sha">SHA256 c038f858cb2916f3b73aafc1…</div></div><div class="card"><div class="cd-top"><span class="seq">37</span><span class="lv">Lv8</span></div>
+<h3>META-ISO-051内外隔离铁律规范</h3>
+<div class="rid">TRUTH-META-ISO-051-INSIDE-OUTSIDE-ISOLATE-0001</div>
+<p>内核态/管控态/外部态三层边界，禁止人工侵入云端内核运行态，仅允许种子式进化</p>
+<div class="tag">META_ISO底层隔离铁律</div>
+<div class="sha">SHA256 1fb9cf7d81626fe2011e1e55…</div></div><div class="card"><div class="cd-top"><span class="seq">38</span><span class="lv">Lv8</span></div>
+<h3>OBS七域权责拓扑治理架构规范</h3>
+<div class="rid">TRUTH-OBS-SEVEN-DOMAIN-GOVERNANCE-0001</div>
+<p>七域：身份/工单/资源/记忆/安全/执行/交付；旁路采集不阻断主路径，域间事件总线关联</p>
+<div class="tag">OBS可观测顶层架构</div>
+<div class="sha">SHA256 5eb738884ae129089b36e4e2…</div></div></div>
+
+<div class="sec"><h2>落档链路</h2></div>
+<table><thead><tr><th>阶段</th><th>网关 SEQ</th><th>EVENT ID</th></tr></thead>
+<tbody><tr><td>Lv5 锁档</td><td>113336</td><td>truth-1793840244258-28911b0a</td></tr>
+<tr><td>Lv8 熔断</td><td>113347</td><td>truth-1793841780145-bb1466be</td></tr>
+<tr><td>收敛归一</td><td>113349</td><td>truth-1793842172210-76184497</td></tr></tbody></table>
+
+<div class="sec"><h2>终态权限约束</h2></div>
+<table><thead><tr><th>允许</th><th>禁止</th></tr></thead><tbody>
+<tr><td>读取 · 哈希校验 · 脱敏分发 · 携带只读约束的镜像同步</td><td>修订 · 覆盖 · 补丁 · 删除 · 原分支派生</td></tr>
+</tbody></table>
+<p style="margin-top:16px;color:#8fa3c0;font-size:13px">变更路径：须以 Lv8 为基准派生<span style="color:#e8c98a">全新独立资产</span>，历史 Lv5 快照永久可回溯。</p>
+
+<div class="foot">锚定 <b>Ω₀⊂⊙∞⊂Ω</b> · 确权 <b>DID-BR-000002</b> · 玄圭AxiomGate TEE/TPM 终审</div>
+</div></body></html>
