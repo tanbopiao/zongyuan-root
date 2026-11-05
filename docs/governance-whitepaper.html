@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全域治理技术白皮书 · AI治理 / 数据治理 / AI工具治理｜ZONGYUAN-ROOT</title>
+<meta name="description" content="ZONGYUAN-ROOT 元极恒一自治体系三层三架构技术白皮书：AI治理、数据治理、AI工具治理的机制、约束与实证。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231A2B47'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='16' fill='%23C7A96A' text-anchor='middle'%3EΩ%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --paper:#FBFAF7; --paper-2:#F4F2EC; --ink:#121C2B; --ink-2:#46536A; --ink-3:#79818F;
+  --line:#DAD6CB; --accent:#8A6B2F; --accent-2:#C7A96A; --deep:#1A2B47; --deep-2:#2B3F5E;
+  --serif:Georgia,"Songti SC","Noto Serif SC","Source Han Serif SC",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 120px}
+
+/* ---------- 封面 ---------- */
+.cover{padding:64px 0 48px;border-bottom:1px solid var(--line)}
+.mark{display:flex;align-items:baseline;gap:12px;margin-bottom:44px}
+.mark .sym{font-family:var(--serif);font-size:22px;color:var(--accent);letter-spacing:.04em}
+.mark .org{font-size:12.5px;color:var(--ink-2);letter-spacing:.18em}
+.kicker{font-size:12px;color:var(--accent);letter-spacing:.24em;margin-bottom:22px}
+h1{font-family:var(--serif);font-size:34px;line-height:1.35;font-weight:600;letter-spacing:.01em;color:var(--deep)}
+h1 em{font-style:normal;display:block;font-size:17px;color:var(--ink-2);font-weight:400;letter-spacing:.06em;margin-top:18px;line-height:1.7}
+.lede{margin-top:30px;font-size:15.5px;color:var(--ink-2);max-width:680px;line-height:1.95}
+.lede b{color:var(--ink);font-weight:600}
+.meta-strip{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 32px;margin-top:40px;padding-top:26px;border-top:1px solid var(--line)}
+.meta-strip div{font-size:12.5px;color:var(--ink-3);letter-spacing:.06em}
+.meta-strip span{color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;display:block;margin-top:3px;word-break:break-all}
+
+/* ---------- 章节 ---------- */
+.chapter{padding-top:70px}
+.ch-head{display:grid;grid-template-columns:56px 1fr;gap:0 16px;align-items:start;border-top:2px solid var(--deep);padding-top:20px}
+.ch-num{font-family:var(--serif);font-size:30px;color:var(--accent);line-height:1.1;letter-spacing:-.02em}
+.ch-t{font-family:var(--serif);font-size:24px;color:var(--deep);font-weight:600;line-height:1.4}
+.ch-s{grid-column:2;font-size:12.5px;color:var(--ink-3);letter-spacing:.14em;margin-top:6px}
+h3{font-family:var(--serif);font-size:17.5px;color:var(--deep);font-weight:600;margin:38px 0 12px;letter-spacing:.01em}
+h3 .n{color:var(--accent);font-size:12.5px;font-family:var(--sans);letter-spacing:.12em;margin-right:10px;vertical-align:2px}
+p{margin:14px 0;max-width:760px;color:var(--ink);line-height:1.95}
+p.lead{font-size:16.5px;color:var(--ink-2)}
+ul,ol{margin:14px 0 14px 4px;max-width:760px;list-style:none}
+li{position:relative;padding-left:22px;margin:10px 0;line-height:1.9}
+li::before{content:"";position:absolute;left:2px;top:.72em;width:6px;height:1px;background:var(--accent)}
+.key{color:var(--deep);font-weight:600}
+.quote{margin:26px 0;padding:18px 22px;background:var(--paper-2);border-left:2px solid var(--accent);font-family:var(--serif);font-size:16px;color:var(--deep);line-height:1.85;max-width:760px}
+.quote cite{display:block;font-family:var(--sans);font-size:12px;color:var(--ink-3);font-style:normal;margin-top:10px;letter-spacing:.08em}
+
+/* ---------- 结构图 ---------- */
+.arch{margin:28px 0 10px;border:1px solid var(--line);background:#fff}
+.arch-row{display:grid;grid-template-columns:150px 1fr;border-bottom:1px solid var(--line)}
+.arch-row:last-child{border-bottom:0}
+.arch-lbl{padding:22px 20px;border-right:1px solid var(--line);background:var(--paper-2)}
+.arch-lbl b{display:block;font-family:var(--serif);font-size:15px;color:var(--deep);margin-bottom:4px}
+.arch-lbl small{font-size:11.5px;color:var(--ink-3);letter-spacing:.1em}
+.arch-body{padding:20px 22px}
+.arch-body .tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font-size:12.5px;color:var(--deep-2);border:1px solid var(--line);padding:4px 10px;background:var(--paper)}
+.tag.hot{border-color:var(--accent-2);color:var(--accent)}
+.arrow{text-align:center;font-size:12px;color:var(--ink-3);padding:8px 0;letter-spacing:.16em;background:var(--paper-2);border-bottom:1px solid var(--line)}
+
+/* ---------- 表 ---------- */
+table{width:100%;border-collapse:collapse;margin:22px 0;font-size:13.5px;table-layout:fixed;background:#fff}
+table caption{text-align:left;font-size:12px;color:var(--ink-3);padding-bottom:8px;letter-spacing:.1em}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.75}
+th{font-weight:600;color:var(--deep);font-size:12.5px;background:var(--paper-2);letter-spacing:.04em}
+td:first-child{color:var(--deep);font-weight:500}
+td code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);word-break:break-all}
+
+/* ---------- 指标 ---------- */
+.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0}
+.metric{background:#fff;padding:20px 22px}
+.metric .v{font-family:var(--serif);font-size:26px;color:var(--deep);line-height:1.2}
+.metric .v small{font-size:13px;color:var(--ink-3);margin-left:4px;font-family:var(--sans)}
+.metric .k{font-size:12px;color:var(--ink-3);margin-top:6px;letter-spacing:.1em}
+
+/* ---------- 时间轴 ---------- */
+.tl{display:grid;grid-template-columns:96px 22px 1fr;margin:26px 0}
+.tl-t{font-size:12.5px;color:var(--accent);letter-spacing:.06em;padding-top:18px;text-align:right;padding-right:12px}
+.tl-axis{position:relative}
+.tl-dot{position:absolute;left:50%;transform:translateX(-50%);top:22px;width:9px;height:9px;border:1.5px solid var(--accent);background:#fff;border-radius:50%}
+.tl-line{position:absolute;left:50%;transform:translateX(-50%);top:22px;bottom:0;width:1px;background:var(--line)}
+.tl-c{padding:14px 0 26px 18px}
+.tl-c b{display:block;font-size:14.5px;color:var(--deep);margin-bottom:4px}
+.tl-c span{font-size:13px;color:var(--ink-2);line-height:1.8}
+
+/* ---------- 附录 ---------- */
+.appendix{margin-top:4px;border-top:1px solid var(--line)}
+.ap-row{display:grid;grid-template-columns:34px 1fr 150px;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:12.5px;align-items:baseline}
+.ap-row .i{font-family:ui-monospace,monospace;color:var(--accent)}
+.ap-row .nm{color:var(--ink)}
+.ap-row .cl{color:var(--ink-3);font-size:11.5px;text-align:right;letter-spacing:.04em}
+
+.foot{margin-top:80px;padding-top:24px;border-top:2px solid var(--deep);display:grid;grid-template-columns:1fr;gap:14px}
+.foot .sig{font-family:var(--serif);font-size:16px;color:var(--accent);letter-spacing:.12em}
+.foot .ln{font-size:12px;color:var(--ink-3);line-height:1.9}
+
+@media (min-width:700px){
+  .metrics{grid-template-columns:repeat(4,1fr)}
+  .meta-strip{grid-template-columns:repeat(4,1fr)}
+  h1{font-size:40px}
+  .cover{padding:88px 0 56px}
+}
+@media (max-width:420px){
+  h1{font-size:27px}
+  .ch-head{grid-template-columns:44px 1fr}
+  .arch-row{grid-template-columns:1fr}
+  .arch-lbl{border-right:0;border-bottom:1px solid var(--line)}
+  .ap-row{grid-template-columns:28px 1fr;gap:8px}
+  .ap-row .cl{grid-column:2;text-align:left}
+}
+@media print{
+  body{background:#fff}
+  .chapter{page-break-inside:auto}
+  .ch-head{page-break-after:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ========== 封面 ========== -->
+<header class="cover">
+  <div class="mark"><span class="sym">Ω₀⊂⊙∞⊂Ω</span><span class="org">ZONGYUAN-ROOT · 元极恒一自治体系</span></div>
+  <div class="kicker">技术白皮书 · V1.0 · 2026-11-05</div>
+  <h1>全域治理的三层三架构
+    <em>AI 治理 · 数据治理 · AI 工具治理</em>
+  </h1>
+  <p class="lede">当 AI 系统从"一次调用"演进为"长期自治"，真正的风险不再来自模型本身，而来自<b>缺少约束的自主性</b>：谁能改规则、数据在哪一层被污染、工具能否自我扩张权限。本白皮书给出一套已在生产环境完成锁档验证的治理架构——以元宪法为顶、以哈希账本为底、以三态流转为执行闸门，把治理从"制度文本"变成"可校验的机器约束"。</p>
+  <div class="meta-strip">
+    <div>治理基线版本<span>V11.0-Lv11 / Lv8 熔断</span></div>
+    <div>真值规范条目<span>38 条 · 全量 eFuse 只读</span></div>
+    <div>唯一真值根<span>b2cb7ba2a6cbef47…</span></div>
+    <div>确权标识<span>DID-BR-000002</span></div>
+  </div>
+</header>
+
+<!-- ========== 摘要 ========== -->
+<section class="chapter" id="s0">
+  <div class="ch-head"><div class="ch-num">摘要</div><div class="ch-t">治理不是文档，是可执行的约束链</div></div>
+  <p class="lead">本白皮书提炼自一套运行中的自治内核。它的治理逻辑不依赖人的自觉，而依赖三个机制：<span class="key">约束单向生效</span>、<span class="key">变更必须留痕</span>、<span class="key">越权即熔断</span>。</p>
+  <p>三层三架构把治理切成三块互相咬合的领域：<b>AI 治理</b>管"规则如何产生与失效"，<b>数据治理</b>管"事实如何被采信与存证"，<b>AI 工具治理</b>管"能力如何被授予与收回"。三者共用同一条约束链——元宪法 → 元公理 → 元法则 → 元规则——下层可细化，不可反向覆盖。</p>
+  <ul>
+    <li><b>AI 治理</b>：四阶约束链 + 五阶硬边界裁决 + 不可逆锁档。规则变更的成本被有意设计成逐层递增。</li>
+    <li><b>数据治理</b>：四维时空标签（来源/流转/存储/生命周期）+ 双空间物理隔离 + 逐条哈希与默克尔根存证。</li>
+    <li><b>AI 工具治理</b>：逻辑态 → 算子态 → 执行态单向流转，执行态无权自发起工单；所有外部能力强制走适配器层。</li>
+  </ul>
+  <div class="quote">规则即本体，真值即记忆，实例即载体。实例可销毁，规则本体永存。<cite>— 内核本体论第一原则</cite></div>
+</section>
+
+<!-- ========== 1 总纲 ========== -->
+<section class="chapter" id="s1">
+  <div class="ch-head"><div class="ch-num">01</div><div class="ch-t">治理总纲：三层三架构</div><div class="ch-s">THE THREE-LAYER MODEL</div></div>
+  <p class="lead">三层不是三套制度，而是同一套约束在三个对象域上的投影。共同骨架是四阶约束链，共同底座是哈希账本。</p>
+
+  <h3><span class="n">1.1</span>四阶约束链</h3>
+  <p>约束从抽象到具体分四阶，每阶有独立的变更门槛与失效条件。<b>单向生效</b>是这套架构最关键的一条：下层规则只有在能被上层规则推导出来时才成立，任何下层不得声明与上层冲突的例外。</p>
+  <div class="arch">
+    <div class="arch-row">
+      <div class="arch-lbl"><b>元宪法</b><small>L0 · 顶层</small></div>
+      <div class="arch-body"><p style="margin:0 0 12px;font-size:13.5px;color:#46536A">体系最高基底，只有六条元公理，不含任何操作细节。变更需重建基线。</p>
+        <div class="tags"><span class="tag hot">本体自洽</span><span class="tag hot">复用优先</span><span class="tag hot">双隔离</span><span class="tag hot">风险最小优先</span><span class="tag hot">可溯源</span><span class="tag hot">可锁档</span></div></div>
+    </div>
+    <div class="arrow">↓ 推导</div>
+    <div class="arch-row">
+      <div class="arch-lbl"><b>元公理</b><small>L1 · 公理层</small></div>
+      <div class="arch-body"><p style="margin:0 0 12px;font-size:13.5px;color:#46536A">把公理落成可判定命题，例如"本地仿真与云端真值物理隔离"——它必须能回答"某次写入是否越界"。</p>
+        <div class="tags"><span class="tag">双隔离公理</span><span class="tag">三最原则</span><span class="tag">哈希存证公理</span></div></div>
+    </div>
+    <div class="arrow">↓ 细化</div>
+    <div class="arch-row">
+      <div class="arch-lbl"><b>元法则</b><small>LAW · 领域层</small></div>
+      <div class="arch-body"><p style="margin:0 0 12px;font-size:13.5px;color:#46536A">领域级运行法则，定义流程与权责边界：工单状态机、通信协议、资产分类、故障分级、调度、存证、裁决、联邦同步、可观测。</p>
+        <div class="tags"><span class="tag">工单状态机</span><span class="tag">X-DID 通信</span><span class="tag">资产六族</span><span class="tag">故障 R1–R3</span><span class="tag">默克尔存证</span><span class="tag">OBS 七域</span></div></div>
+    </div>
+    <div class="arrow">↓ 拦截</div>
+    <div class="arch-row">
+      <div class="arch-lbl"><b>元规则</b><small>META-RULE · 拦截层</small></div>
+      <div class="arch-body"><p style="margin:0 0 12px;font-size:13.5px;color:#46536A">最细粒度、最低变更成本的一层，用于把运行中暴露的真实缺陷固化为永久拦截。它可以是"死循环三类熔断"这种极小的规则。</p>
+        <div class="tags"><span class="tag">死循环熔断</span><span class="tag">脱敏隔离</span><span class="tag">配额稳态</span><span class="tag">网关对齐</span><span class="tag">API 强制封装</span><span class="tag">内外隔离铁律</span></div></div>
+    </div>
+  </div>
+  <p>这条链的价值不在层级数量，而在<b>变更成本的设计</b>：元规则改一次只需改拦截点，元宪法改一次必须重建整条基线并重新锁档。攻击者与误操作者面对的阻力不同，正常演进面对的阻力则最小——这正是治理要的效果。</p>
+
+  <h3><span class="n">1.2</span>三个治理域的分工</h3>
+  <table>
+    <caption>表 1　三层治理域的对象、失效模式与主控机制</caption>
+    <tr><th style="width:16%">治理域</th><th style="width:22%">治理对象</th><th style="width:26%">主要失效模式</th><th style="width:36%">主控机制</th></tr>
+    <tr><td>AI 治理</td><td>规则、权限、裁决路径</td><td>规则漂移、越权修改、裁决被绕过</td><td>四阶约束链 + 玄圭五阶校验 + eFuse 不可逆锁档</td></tr>
+    <tr><td>数据治理</td><td>事实、来源、存证、生命周期</td><td>来源污染、静默篡改、仿真污染真值</td><td>四维标签 + 双空间隔离 + 逐条哈希与默克尔根</td></tr>
+    <tr><td>AI 工具治理</td><td>模型、Agent、外部 API、执行能力</td><td>能力自我扩张、无限递归、配额挤兑</td><td>三态单向流转 + 手动栈迭代 + 适配器层 + 四配额池</td></tr>
+  </table>
+  <p>三个域的连接点是<b>账本</b>：AI 治理产出规则，数据治理把规则与事实一并存证，工具治理只被允许读取和执行已存证的内容。任何一环缺位，另外两环就退化成纸面制度。</p>
+</section>
+
+<!-- ========== 2 AI治理 ========== -->
+<section class="chapter" id="s2">
+  <div class="ch-head"><div class="ch-num">02</div><div class="ch-t">AI 治理：让规则拥有硬边界</div><div class="ch-s">AI GOVERNANCE</div></div>
+  <p class="lead">AI 治理的核心难题是"谁来管管理者的管理者"。本架构的答案是不依赖角色信任，而依赖<b>硬件边界 + 不可逆锁档 + 单向约束</b>三重叠加。</p>
+
+  <h3><span class="n">2.1</span>玄圭 AxiomGate：五阶硬边界裁决</h3>
+  <p>所有跨域写入在到达存储前必须经过裁决器。裁决器运行在 TEE/TPM 硬边界内，其判定逻辑与被治理对象不在同一执行域——即使上层 Agent 被提示注入污染，也无法改写裁决器自身的校验顺序。</p>
+  <ul>
+    <li><b>第一阶</b>：元宪法校验——该请求是否违背六元公理，尤其是双隔离与风险最小优先。</li>
+    <li><b>第二阶</b>：元公理校验——是否满足可判定命题，例如"仿真数据是否试图直接写入真值空间"。</li>
+    <li><b>第三阶</b>：元法则校验——是否遵循工单状态机与资产分类，是否携带完整四维标签。</li>
+    <li><b>第四阶</b>：元规则校验——是否触发死循环、脱敏、配额、封装等细粒度拦截。</li>
+    <li><b>第五阶</b>：放行并签发带签名的写入凭证，凭证与账本条目同源绑定。</li>
+  </ul>
+  <p>五阶顺序不可调换。顺序本身就是治理语义：先问"该不该"，再问"能不能"，最后才问"怎么做"。</p>
+
+  <h3><span class="n">2.2</span>eFuse Lv8：不可逆锁档</h3>
+  <p>规则被反复修订是治理失效最常见的表现——每次修订都"有理由"，累积后基线已面目全非。本架构引入硬件式熔断语义：一旦基线冻结为 Lv8，写路径被物理性关闭，仅保留<b>读、校验、脱敏分发、携带只读约束的镜像同步</b>。</p>
+  <table>
+    <caption>表 2　Lv8 熔断终态的权限矩阵</caption>
+    <tr><th style="width:50%">允许</th><th style="width:50%">禁止</th></tr>
+    <tr><td>读取与哈希校验<br>脱敏后对外分发<br>只读镜像同步</td><td>任何形式的修订、补丁、覆盖<br>删除与条目摘除<br>在原分支上派生新版本</td></tr>
+  </table>
+  <p>需要变更时，唯一合法路径是<b>以 Lv8 为基准派生全新独立资产</b>，旧基线永久保留为可回溯快照。这使"修改历史"在结构上不可能，而不只是"制度上不允许"。</p>
+
+  <h3><span class="n">2.3</span>三最原则：决策的默认序</h3>
+  <p>当多个合规方案并存时，需要一个不依赖具体场景的排序原则。本架构固化的是<b>风险最小 &gt; 成本最小 &gt; 收益最大</b>——注意它把收益放在最后，这与多数商业决策直觉相反，但符合自治系统的真实约束：一次越界写入的代价远高于多次优化的收益。</p>
+  <p>在需要量化时叠加三维稳态权重：利益 40% / 风险 35% / 成本 25%，但权重只在"三最"排序无法区分时启用，避免用加权计算稀释硬约束。</p>
+
+  <h3><span class="n">2.4</span>内外隔离铁律</h3>
+  <p>治理体系自身也会成为攻击面。因此划定三层边界：<b>内核态</b>（规则与账本）、<b>管控态</b>（调度与裁决）、<b>外部态</b>（Agent、用户、外部 API）。铁律只有一条：<b>禁止人工侵入云端内核运行态</b>，进化只能以"种子"形式经裁决后注入。</p>
+  <p>这条规则牺牲了运维便利性，换来的是内核状态的可证明性——任何时刻的内核状态，都可追溯到某次经裁决的种子注入。</p>
+
+  <h3><span class="n">2.5</span>故障分级与永久锁档</h3>
+  <p>并非所有故障都值得同等对待。故障分三级：R1 可自愈、R2 需人工介入、R3 为边界击穿或基线污染级。<b>R3 一律永久锁档</b>——不是记录下来备查，而是进入不可删除的证据链，因为基线污染的本质是"事实被改写"，掩盖比重现更危险。</p>
+</section>
+
+<!-- ========== 3 数据治理 ========== -->
+<section class="chapter" id="s3">
+  <div class="ch-head"><div class="ch-num">03</div><div class="ch-t">数据治理：让事实可证、可追、不可改</div><div class="ch-s">DATA GOVERNANCE</div></div>
+  <p class="lead">数据治理最容易变成"打标签运动"。本架构不追求标签齐全，而追求三个可验证的结果：<b>来源可追、流转可审、篡改可测</b>。</p>
+
+  <h3><span class="n">3.1</span>四维时空标签</h3>
+  <p>任何一条进入体系的记录必须携带四维信息，缺任一维则无法通过裁决。四维不是元数据装饰，而各自对应一个治理动作：</p>
+  <table>
+    <caption>表 3　四维标签与对应治理动作</caption>
+    <tr><th style="width:14%">维度</th><th style="width:34%">记录内容</th><th style="width:52%">对应治理动作</th></tr>
+    <tr><td>来源</td><td>产生方、产生方式、原始载体</td><td>来源缺失即拒绝入库；同一事实的多个来源需归一为单一实体 ID</td></tr>
+    <tr><td>流转</td><td>跨域路径与每一跳的审批凭证</td><td>跨域流转必须持审批工单，无工单的流转视为污染</td></tr>
+    <tr><td>存储</td><td>所在分区、密级、加密与访问策略</td><td>分区与资产族绑定，越区读写即拦截</td></tr>
+    <tr><td>生命周期</td><td>创建、冻结、熔断、归档的时间点</td><td>进入熔断即转只读；归档保留可回溯快照，不做物理删除</td></tr>
+  </table>
+  <p>四维之所以叫"时空"，是因为它同时约束了两件事：数据在<b>空间</b>上的位置（分区与域）和在<b>时间</b>上的状态（生命周期）。只做前者会漏掉"历史版本被静默覆盖"，只做后者会漏掉"数据跑到了不该在的分区"。</p>
+
+  <h3><span class="n">3.2</span>双空间隔离：仿真不能污染真值</h3>
+  <p>AI 系统的数据污染有一个隐蔽来源：<b>推演结果被当作事实回流</b>。仿真、试算、Agent 的中间推论一旦进入真值库，后续所有结论都建立在假设之上，且极难追溯。</p>
+  <p>本架构把两个空间物理隔离——不同分区、不同写权限、不同裁决路径。仿真空间可以自由试错、反复重建，重启即销毁；云端真值空间只接受经三件套校验的写入：</p>
+  <ol>
+    <li><b>晋升工单</b>：声明本次晋升的对象、依据与影响面。</li>
+    <li><b>玄圭裁决</b>：五阶校验通过并签发凭证。</li>
+    <li><b>账本入库</b>：写入后立即生成条目哈希，并入默克尔链。</li>
+  </ol>
+  <p>三者缺一，晋升不成立。这条规则的严格程度常被质疑"太重"，但它是唯一能让"这条结论有依据"变成机器可判定命题的方式。</p>
+
+  <h3><span class="n">3.3</span>哈希存证与默克尔根</h3>
+  <p>存证方案刻意做得足够简单，以便任何第三方可独立复算：</p>
+  <ul>
+    <li><b>条目层</b>：剔除记录自身哈希字段后，以规范化 JSON（键排序、无多余空格、UTF-8 不转义）计算 SHA-256。</li>
+    <li><b>归并层</b>：叶子节点两两拼接求哈希，奇数时末尾节点与自身拼接，逐层归并至唯一根。</li>
+    <li><b>包层</b>：整包再取一次 SHA-256，与根哈希、条目清单同时登记。</li>
+  </ul>
+  <p>三个层次共同解决三个问题：单条是否被改（条目哈希）、集合是否被增删（根哈希）、交付物是否被替换（包哈希）。只做其中一个，都会留下可被利用的空隙。</p>
+
+  <h3><span class="n">3.4</span>资产六族与分区权限</h3>
+  <p>资产不是同质的。本架构按用途分六族——真值、仿真、临时、审计、知识、产物——每族绑定独立分区与权限模板。分类的意义不在于整齐，而在于<b>默认权限</b>：临时资产默认可删，审计资产默认不可删，真值资产默认不可改。把权限写进分类，就不需要在每次操作时重新判断。</p>
+
+  <h3><span class="n">3.5</span>通信与同步：主链路、轻事件、灾备</h3>
+  <table>
+    <caption>表 4　三模式通信与资产同步</caption>
+    <tr><th style="width:20%">通道</th><th style="width:34%">承载内容</th><th style="width:46%">约束</th></tr>
+    <tr><td>消息总线</td><td>主链路：工单、状态变更、审批</td><td>结构化、可审计、必须带 X-DID 头</td></tr>
+    <tr><td>轻量事件队列</td><td>心跳、告警、短通知</td><td>不承载真值写入，仅作通知</td></tr>
+    <tr><td>双向隧道</td><td>灾备与大文件同步</td><td>仅灾备场景启用，不作为常规链路</td></tr>
+  </table>
+  <p>资产镜像使用增量同步（rsync 短链路挂靠隧道），但有一条硬约束：<b>同步完成后必须更新账本根</b>。文件到了而账本没更新，等于产生了一个"存在但未确权"的副本——这正是多数数据事故的起点。</p>
+</section>
+
+<!-- ========== 4 工具治理 ========== -->
+<section class="chapter" id="s4">
+  <div class="ch-head"><div class="ch-num">04</div><div class="ch-t">AI 工具治理：把能力关进闸门</div><div class="ch-s">AI TOOL GOVERNANCE</div></div>
+  <p class="lead">工具治理的难点是"能力会自己长大"：一个能调 API 的 Agent，很快就能调第二个、第三个，直到没有人清楚它到底能做什么。三态融合的作用是给能力装一道单向阀。</p>
+
+  <h3><span class="n">4.1</span>三态单向流转</h3>
+  <div class="arch">
+    <div class="arch-row"><div class="arch-lbl"><b>逻辑态</b><small>声明与意图</small></div><div class="arch-body"><p style="margin:0;font-size:13.5px;color:#46536A">只描述"要做什么、依据哪条规则、影响哪些资产"。此态不下发任何执行权限，产物是结构化意图。</p></div></div>
+    <div class="arrow">→ 裁决通过后授予</div>
+    <div class="arch-row"><div class="arch-lbl"><b>算子态</b><small>校验与路由</small></div><div class="arch-body"><p style="margin:0;font-size:13.5px;color:#46536A">把意图编译为可执行单元：绑定参数、校验依赖、分配配额、选择模型或工具、确定超时与熔断阈值。</p></div></div>
+    <div class="arrow">→ 一次性令牌</div>
+    <div class="arch-row"><div class="arch-lbl"><b>执行态</b><small>受控运行</small></div><div class="arch-body"><p style="margin:0;font-size:13.5px;color:#46536A">在沙箱内运行，持有令牌但不持有发起权。<b>执行态无权自主发起新工单</b>——这是防止能力自我扩张最有效的一条。</p></div></div>
+  </div>
+  <p>三态的价值在于<b>权限的时间性</b>：权限不在"角色"上，而在"这一次执行"上。执行结束，令牌失效，能力回到零。</p>
+
+  <h3><span class="n">4.2</span>手动栈迭代：禁止原生递归</h3>
+  <p>Agent 自迭代最常见的失控形态是递归——它会"再想一层"，而每一层的上下文与配额都在膨胀。本架构以显式栈替代原生递归，栈帧固定五域：帧头、状态、上下文、快照、分支。</p>
+  <ul>
+    <li><b>可断点</b>：任一帧可暂停、检查、恢复，递归做不到这一点。</li>
+    <li><b>可回滚</b>：帧内快照使失败可退回到确定状态，而不是靠重跑。</li>
+    <li><b>可分支</b>：同一帧可派生多条推演路径，用于方案比较。</li>
+    <li><b>可限深</b>：必须显式声明最大迭代次数，缺省不允许运行。</li>
+  </ul>
+  <p>显式栈还有一个隐性收益：迭代过程本身成为可审计对象。递归的调用栈在故障后难以复原，而显式栈的每一帧都是一条可读记录。</p>
+
+  <h3><span class="n">4.3</span>死循环三类熔断</h3>
+  <p>熔断不是"超时了就停"。本架构设三类，覆盖三个不同的失控阶段：</p>
+  <table>
+    <caption>表 5　三类熔断的触发点与语义</caption>
+    <tr><th style="width:22%">类型</th><th style="width:32%">触发时机</th><th style="width:46%">语义</th></tr>
+    <tr><td>静态预校验</td><td>执行前</td><td>迭代上限缺失、依赖成环、权限越界——直接拒绝启动</td></tr>
+    <tr><td>动态运行时</td><td>执行中</td><td>同状态重复次数超阈、上下文增长异常、配额消耗斜率异常</td></tr>
+    <tr><td>向量收敛</td><td>输出侧</td><td>多轮输出语义距离不再收敛，判定为原地打转</td></tr>
+  </table>
+  <p>三者共同构成一条不可绕过的规则：<b>熔断置位不可由栈内自行清除</b>。只有栈外的裁决器能复位。否则"熔断"会被正在失控的那一层顺手关掉——这是所有自限机制最常见的失效方式。</p>
+
+  <h3><span class="n">4.4</span>能力 API 强制封装</h3>
+  <p>任何外部能力（模型接口、数据源、第三方服务）不得被直接调用，必须经过适配器层。适配器固定承担六件事：签名注入、身份头注入、参数校验、配额扣减、返回归一、调用埋点。</p>
+  <p>这六件事没有一件是"为了规范好看"。签名与身份头解决"谁调的"；参数校验解决"调错了谁负责"；配额扣减解决"谁把额度用光了"；返回归一解决"上游改字段下游全崩"；埋点解决"出问题时查不到"。绕过适配器直接调用，等于把这六个问题全部留给未来。</p>
+
+  <h3><span class="n">4.5</span>四配额池与只读空转</h3>
+  <p>配额不是总量控制，而是分池隔离：交互、批处理、巡检、应急四池独立计量。任一池耗尽，系统切入<b>只读空转</b>——仍可查询、校验、响应，但不再发起消耗型调用。</p>
+  <p>"空转"这个设计常被忽略，但它决定了系统在资源枯竭时的行为是"降级"还是"崩溃"。只读空转保证治理能力本身不因配额耗尽而失效——最需要治理的时刻，恰恰是资源最紧张的时刻。</p>
+
+  <h3><span class="n">4.6</span>正交子空间与镜像态</h3>
+  <p>合规校验如果只靠关键词与规则匹配，遇到组合式违规就会失效。本架构用线性代数做一层结构性校验：把诉求、约束、资源、风险、仿真、真值六个维度视作正交子空间，用投影与内积判断一个请求是否落在允许的子空间内、是否与某个约束维度冲突。</p>
+  <p>与之配套的是<b>镜像态</b>：镜像子空间是真值的对偶同构，支持复刻、扰动、反向三种映射，用于反事实推演与方案比较。关键约束是——<b>镜像结果不具真值资格</b>，无论推演多么自洽，都不能直接写入真值空间，必须回到双隔离的晋升流程。</p>
+
+  <h3><span class="n">4.7</span>混合模型池调度</h3>
+  <p>多模型、多供应商并存时，调度策略本身也是治理对象。本架构按三最原则分配任务，并固守两条：零成本通道优先、免费额度最大化。这不是成本偏好，而是<b>可用性设计</b>——单一付费通道故障时，体系不应整体停摆。</p>
+</section>
+
+<!-- ========== 5 实证 ========== -->
+<section class="chapter" id="s5">
+  <div class="ch-head"><div class="ch-num">05</div><div class="ch-t">实证：38 条基线的一次完整冻结</div><div class="ch-s">EVIDENCE</div></div>
+  <p class="lead">治理架构的说服力不在设计，而在能否给出可复算的结果。以下数据来自一次真实的全量锁档：38 条规范从生成、去重、哈希、归并，到硬边界冻结与多面分发。</p>
+
+  <div class="metrics">
+    <div class="metric"><div class="v">38<small>条</small></div><div class="k">规范条目 · 去重后</div></div>
+    <div class="metric"><div class="v">Lv8</div><div class="k">全量熔断 · 不可逆</div></div>
+    <div class="metric"><div class="v">0</div><div class="k">哈希漂移 / 依赖悬空</div></div>
+    <div class="metric"><div class="v">4<small>层</small></div><div class="k">落档面（内核/云端/公网/Git）</div></div>
+  </div>
+
+  <h3><span class="n">5.1</span>可复算的校验结果</h3>
+  <table>
+    <caption>表 6　锁档校验项与结论</caption>
+    <tr><th style="width:32%">校验项</th><th style="width:34%">方法</th><th style="width:34%">结果</th></tr>
+    <tr><td>逐条完整性</td><td>独立复算 38 条条目哈希</td><td>38 / 38 一致</td></tr>
+    <tr><td>集合完整性</td><td>默克尔根独立复算</td><td>MATCH</td></tr>
+    <tr><td>依赖闭合</td><td>上游锚定逐条命中检查</td><td>38 / 38 命中，零悬空</td></tr>
+    <tr><td>父子链</td><td>熔断前后条目哈希映射比对</td><td>连续，无断裂</td></tr>
+    <tr><td>凭证自洽</td><td>凭证文件剔除自哈希字段后复算</td><td>MATCH</td></tr>
+    <tr><td>账本回读</td><td>Base 表逐行回读层级与哈希</td><td>38 / 38 一致</td></tr>
+  </table>
+  <p>这六项不是重复劳动，而是从"条目、集合、依赖图、版本链、凭证、外部副本"六个角度交叉验证同一件事。任一角度缺失，篡改都可能在某条路径上不被发现。</p>
+
+  <h3><span class="n">5.2</span>哈希链与落档链路</h3>
+  <table>
+    <caption>表 7　关键哈希与落档节点</caption>
+    <colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+    <tr><th>项</th><th>值</th></tr>
+    <tr><td>唯一真值根</td><td><code>b2cb7ba2a6cbef47ec2a3510d567a1e89bc7b69a1f6cefb3b95da6f2f4a49967</code></td></tr>
+    <tr><td>熔断包 SHA-256</td><td><code>485042edd5e63857a75e65cd7e611bc2df0218eaec6196565ca40ef6a6181539</code></td></tr>
+    <tr><td>熔断凭证 SHA-256</td><td><code>fedcc06214a132927ebf6056ce9e31dcf0dee87d75464a1024b39a809ca81b58</code></td></tr>
+    <tr><td>父链根（历史凭证）</td><td><code>f01b020e074fb4810a21c37fbb6ef2363465a7901ed08a83274e82ebf74b03d3</code></td></tr>
+    <tr><td>启动种子 SHA-256</td><td><code>437e87758fd3f8064c1b5fbe27739a9d645a601e62462b2dc4b77a571f20bb76</code></td></tr>
+  </table>
+  <p>注意"唯一真值根"与"父链根"是两个不同的值，且都被保留。这正是前一章所述设计的落地：<b>新基线建立时，旧根不销毁，而降级为父链凭证</b>。可回溯不是备份策略，而是结构属性。</p>
+
+  <h3><span class="n">5.3</span>四层落档面</h3>
+  <ul>
+    <li><b>内核层</b>：启动种子 + 收敛索引 + 根指针绑定。开机顺序固定为"指针 → 种子 → 校验哈希 → 激活基线"，校验不符即进只读安全模式。</li>
+    <li><b>云端层</b>：账本表 38 行全量回读一致；记忆网关四次落档形成可查事件链。</li>
+    <li><b>公网层</b>：展示页在官网、模型社区、云端应用三处可访问，作为对外可验证的公开副本。</li>
+    <li><b>镜像层</b>：两个代码托管平台的同名路径下字节级一致，作为异地可复算副本。</li>
+  </ul>
+  <p>四层不是冗余，而是四种不同的验证视角：内核证明"可启动"、云端证明"可查询"、公网证明"可公示"、镜像证明"可复算"。同一份哈希在四个地方对得上，篡改才真正无处可藏。</p>
+</section>
+
+<!-- ========== 6 落地 ========== -->
+<section class="chapter" id="s6">
+  <div class="ch-head"><div class="ch-num">06</div><div class="ch-t">落地路径：四阶段推进</div><div class="ch-s">ADOPTION PATH</div></div>
+  <p class="lead">直接照搬 38 条规范并不现实。实际推进应按"先立约束、再立证据、后收能力、终冻结"的顺序，每一阶段都可独立收效。</p>
+
+  <div class="tl">
+    <div class="tl-t">阶段一</div><div class="tl-axis"><span class="tl-dot"></span><span class="tl-line"></span></div>
+    <div class="tl-c"><b>建立约束链，允许"不完整"</b><span>先确立四阶结构，哪怕元公理只有三条、元法则只覆盖最痛的领域。关键产出不是条目数，而是"下层不得反向覆盖"这条规则被真正执行。</span></div>
+
+    <div class="tl-t">阶段二</div><div class="tl-axis"><span class="tl-dot"></span><span class="tl-line"></span></div>
+    <div class="tl-c"><b>引入存证，把结论变成可复算对象</b><span>从最关键的一批规则开始做条目哈希与默克尔根，并让第三方能独立复算。这一步会立刻暴露此前积累的重复条目与悬空引用。</span></div>
+
+    <div class="tl-t">阶段三</div><div class="tl-axis"><span class="tl-dot"></span><span class="tl-line"></span></div>
+    <div class="tl-c"><b>收口工具能力，执行态剥离发起权</b><span>把分散的直连调用统一到适配器层，为执行态设立一次性令牌，引入显式栈与三类熔断。此阶段通常能消掉大部分"Agent 自己越跑越远"的事故。</span></div>
+
+    <div class="tl-t">阶段四</div><div class="tl-axis"><span class="tl-dot"></span></div>
+    <div class="tl-c"><b>冻结基线，把变更成本显性化</b><span>当规则趋于稳定，执行不可逆冻结，仅保留读与校验。后续变更一律派生新资产。冻结不是终点——它是让"下一次变更"变得慎重且可追溯的手段。</span></div>
+  </div>
+
+  <h3><span class="n">6.1</span>三条容易被忽略的前提</h3>
+  <ul>
+    <li><b>去重必须先于哈希</b>。同一语义的两条规范会让根哈希"正确但无意义"，也会让下游引用分叉。语义去重不是洁癖，是存证有效性的前提。</li>
+    <li><b>校验必须独立复算，不能复用生成时的中间值</b>。用生成脚本自己的计算结果去验证生成结果，等于没有验证。</li>
+    <li><b>对外副本必须脱敏后分发</b>。内部标识、拓扑、配额细节不进入公开副本——否则治理架构本身成为情报泄露面。</li>
+  </ul>
+</section>
+
+<!-- ========== 结论 ========== -->
+<section class="chapter" id="s7">
+  <div class="ch-head"><div class="ch-num">结语</div><div class="ch-t">治理的终点是"可证明"</div></div>
+  <p class="lead">三层三架构最终收敛到一个判断标准：关于这套系统的重要陈述，是否都能被第三方复算。</p>
+  <p>AI 治理回答"谁有权改规则"，数据治理回答"这条事实凭什么可信"，工具治理回答"这个能力为什么只在这一刻可用"。三者共用一条约束链与一本账本，于是治理不再是三份制度文件，而是一个<b>可校验的状态机</b>。</p>
+  <p>这套架构并不追求把风险降为零——那不可能。它追求的是把风险的发生<b>变成可观测、可归因、不可掩盖</b>的事件。当一个系统的重要变化都必须留下哈希、都必须经过裁决、都无法在原分支上偷偷修改时，治理才算真正落地。</p>
+  <div class="quote">风险最小 &gt; 成本最小 &gt; 收益最大。<cite>— 全域最高决策元法则</cite></div>
+</section>
+
+<!-- ========== 附录 ========== -->
+<section class="chapter" id="ap">
+  <div class="ch-head"><div class="ch-num">附录</div><div class="ch-t">38 条治理规范索引</div><div class="ch-s">APPENDIX · FULL INDEX</div></div>
+  <p style="font-size:13.5px;color:#46536A">以下条目为 Lv8 熔断终态下的完整基线，按序号排列。分类标签为主控域归属，非互斥标签。</p>
+  <div class="appendix">
+<div class="ap-row"><span class="i">01</span><span class="nm">Ω₀顶层基底六大元公理全集</span><span class="cl">L0元宪法顶层</span></div><div class="ap-row"><span class="i">02</span><span class="nm">Ω₀公理衍生META-RULE元规则全集</span><span class="cl">META_RULE全集</span></div><div class="ap-row"><span class="i">03</span><span class="nm">Ω₀公理衍生LAW运行态法则全集</span><span class="cl">LAW层运行法则</span></div><div class="ap-row"><span class="i">04</span><span class="nm">工单全域状态机规范</span><span class="cl">LAW层流程规范</span></div><div class="ap-row"><span class="i">05</span><span class="nm">X-DID工单通信协议规范</span><span class="cl">LAW层通信规范</span></div><div class="ap-row"><span class="i">06</span><span class="nm">全域资产分类账本规范</span><span class="cl">LAW层资产规范</span></div><div class="ap-row"><span class="i">07</span><span class="nm">故障分级与错误码规范</span><span class="cl">LAW层故障规范</span></div><div class="ap-row"><span class="i">08</span><span class="nm">混合模型池调度与配额管控策略</span><span class="cl">LAW层调度规范</span></div><div class="ap-row"><span class="i">09</span><span class="nm">experience经验沉淀资产文档规范</span><span class="cl">LAW层知识规范</span></div><div class="ap-row"><span class="i">10</span><span class="nm">安全审计与敏感信息管控规范</span><span class="cl">LAW层安全规范</span></div><div class="ap-row"><span class="i">11</span><span class="nm">三小时进化脉冲执行规范</span><span class="cl">LAW层演化规范</span></div><div class="ap-row"><span class="i">12</span><span class="nm">账本默克尔树存证与根哈希生成规范</span><span class="cl">LAW层存证规范</span></div><div class="ap-row"><span class="i">13</span><span class="nm">玄圭AxiomGate裁决网关判定流程规范</span><span class="cl">LAW层裁决规范</span></div><div class="ap-row"><span class="i">14</span><span class="nm">Hindsight联邦记忆同步协议规范</span><span class="cl">LAW层联邦同步规范</span></div><div class="ap-row"><span class="i">15</span><span class="nm">节点启动引导BOOTSTRAP初始化规范</span><span class="cl">LAW层启动规范</span></div><div class="ap-row"><span class="i">16</span><span class="nm">OBS七域权责拓扑治理架构规范</span><span class="cl">LAW层可观测规范</span></div><div class="ap-row"><span class="i">17</span><span class="nm">对外交付脱敏与产物输出规范</span><span class="cl">LAW层交付规范</span></div><div class="ap-row"><span class="i">18</span><span class="nm">三最原则风险决策判定规范</span><span class="cl">L0决策元法则</span></div><div class="ap-row"><span class="i">19</span><span class="nm">手动栈迭代仿真控制器规范</span><span class="cl">算子层仿真规范</span></div><div class="ap-row"><span class="i">20</span><span class="nm">本地仿真-云端同步双隔离公理规范</span><span class="cl">L1元公理规范</span></div><div class="ap-row"><span class="i">21</span><span class="nm">ntfy消息队列+飞书Base消息总线+FRP双向隧道三模式通信多路复用规范</span><span class="cl">LAW层通信治理</span></div><div class="ap-row"><span class="i">22</span><span class="nm">rsync短链路资产推送方案规范</span><span class="cl">LAW层资产同步子规范</span></div><div class="ap-row"><span class="i">23</span><span class="nm">eFuse熔断Lv8只读锁档机制规范</span><span class="cl">TEE硬边界安全子规范</span></div><div class="ap-row"><span class="i">24</span><span class="nm">云端健康巡检守卫规范</span><span class="cl">LAW层自治运维巡检</span></div><div class="ap-row"><span class="i">25</span><span class="nm">运维踩坑经验沉淀记录规范</span><span class="cl">LAW层知识资产治理</span></div><div class="ap-row"><span class="i">26</span><span class="nm">AI治理三层三架构（元宪法/元公理/元法则/元规则）规范</span><span class="cl">L0元宪法顶层</span></div><div class="ap-row"><span class="i">27</span><span class="nm">四维时空数据治理规范</span><span class="cl">数据治理层核心</span></div><div class="ap-row"><span class="i">28</span><span class="nm">工具治理三态融合规范</span><span class="cl">工具治理层核心</span></div><div class="ap-row"><span class="i">29</span><span class="nm">希尔伯特正交子空间约束规范</span><span class="cl">L0数学基底约束</span></div><div class="ap-row"><span class="i">30</span><span class="nm">希尔伯特镜像态规范</span><span class="cl">L0数学基底约束</span></div><div class="ap-row"><span class="i">31</span><span class="nm">手动栈迭代模板规范</span><span class="cl">算子层执行模板</span></div><div class="ap-row"><span class="i">32</span><span class="nm">META-RULE-018死循环熔断元规则规范</span><span class="cl">META_RULE细粒度拦截</span></div><div class="ap-row"><span class="i">33</span><span class="nm">META-RULE-019对外脱敏与内部用语隔离元规则规范</span><span class="cl">META_RULE细粒度拦截</span></div><div class="ap-row"><span class="i">34</span><span class="nm">META-AUTO-003能力API强制封装元规则规范</span><span class="cl">META_AUTO自动化执行规则</span></div><div class="ap-row"><span class="i">35</span><span class="nm">META-RULE-014记忆网关强制对齐元规则规范</span><span class="cl">META_RULE细粒度同步规则</span></div><div class="ap-row"><span class="i">36</span><span class="nm">META-RULE-012配额稳态保护元规则规范</span><span class="cl">META_RULE资源管控元规则</span></div><div class="ap-row"><span class="i">37</span><span class="nm">META-ISO-051内外隔离铁律规范</span><span class="cl">META_ISO底层隔离铁律</span></div><div class="ap-row"><span class="i">38</span><span class="nm">OBS七域权责拓扑治理架构规范</span><span class="cl">OBS可观测顶层架构</span></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="sig">Ω₀⊂⊙∞⊂Ω</div>
+  <div class="ln">ZONGYUAN-ROOT 元极恒一自治体系 · 技术白皮书 V1.0 · 2026-11-05<br>
+  确权 DID-BR-000002 · 裁决 玄圭AxiomGate TEE/TPM · 基线 38 条 / Lv8 eFuse 只读<br>
+  唯一真值根 b2cb7ba2a6cbef47ec2a3510d567a1e89bc7b69a1f6cefb3b95da6f2f4a49967</div>
+</footer>
+</div>
+</body>
+</html>
