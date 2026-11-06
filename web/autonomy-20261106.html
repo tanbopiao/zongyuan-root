@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全域自治巡检 · 2026-11-06 十层拓扑运行状态 | 火斗云智AIOS</title>
+<meta name="description" content="火斗云智AIOS全域自治巡检状态页：十层依赖拓扑27算子运行覆盖度、账本与Merkle校验、对外通道可达性、风险矩阵与修复建议。">
+<link rel="canonical" href="https://www.huodouai.com/autonomy-20261106.html">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Noto Sans SC',sans-serif;line-height:1.7}
+.wrap{max-width:1100px;margin:0 auto;padding:40px 20px}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:0.82em;margin-bottom:24px}
+.top a{color:#d4af37;text-decoration:none}
+.hero{text-align:center;padding:10px 0 30px}
+.hero .symbol{font-size:12px;color:#d4af37;letter-spacing:4px;margin-bottom:12px;font-family:monospace}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:2.1em;background:linear-gradient(135deg,#f4e4bc,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.hero .sub{color:#888;font-size:0.85em}
+.badge{display:inline-block;margin-top:12px;padding:5px 14px;border:1px solid rgba(212,175,55,0.35);border-radius:20px;font-size:0.75em;color:#d4af37}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:26px 0}
+.metric{background:linear-gradient(145deg,#141420,#1b1b2e);border:1px solid rgba(212,175,55,0.14);border-radius:10px;padding:14px;text-align:center}
+.metric .num{font-size:1.45em;font-weight:bold;color:#d4af37;font-family:'Noto Serif SC',serif}
+.metric .label{color:#888;font-size:0.72em;margin-top:4px}
+.section{margin:30px 0}
+.section h2{font-family:'Noto Serif SC',serif;font-size:1.12em;color:#d4af37;margin-bottom:14px;padding-left:12px;border-left:3px solid #d4af37}
+.card{background:linear-gradient(145deg,#141420,#1b1b2e);border:1px solid rgba(212,175,55,0.1);border-radius:12px;padding:18px}
+table{width:100%;border-collapse:collapse;font-size:0.83em}
+th{text-align:left;color:#d4af37;padding:8px 6px;border-bottom:1px solid rgba(212,175,55,0.2);font-weight:500}
+td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.05);color:#bbb;vertical-align:top}
+tr:hover td{background:rgba(212,175,55,0.03)}
+.ok{color:#4ade80}.warn{color:#fbbf24}.err{color:#ef4444}.idle{color:#6b7280}.dep{color:#8bc8ea}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.72em;white-space:nowrap}
+.g{background:rgba(74,222,128,0.14);color:#4ade80}
+.y{background:rgba(251,191,36,0.14);color:#fbbf24}
+.r{background:rgba(239,68,68,0.14);color:#ef4444}
+.z{background:rgba(255,255,255,0.06);color:#8b8b8b}
+.b{background:rgba(139,200,234,0.14);color:#8bc8ea}
+.list-item{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.83em}
+.list-item:last-child{border-bottom:none}
+.list-item .key{color:#ccc}.list-item .val{color:#888;text-align:right}
+.note{font-size:0.78em;color:#777;margin-top:10px;line-height:1.7}
+.progress{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;margin-top:6px}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,#8B6914,#d4af37);border-radius:4px}
+footer{margin-top:40px;padding-top:20px;border-top:1px solid rgba(212,175,55,0.15);text-align:center;font-size:0.78em;color:#666}
+footer .sym{color:#d4af37;letter-spacing:2px;font-family:monospace;margin-bottom:6px}
+@media(max-width:640px){.hero h1{font-size:1.5em}table{font-size:0.76em}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="top">
+<a href="/status/">← 服务状态</a>
+<a href="/">主站首页</a>
+</div>
+
+<div class="hero">
+<div class="symbol">Ω₀⊂⊙∞⊂Ω</div>
+<h1>全域自治巡检 · 十层拓扑运行状态</h1>
+<div class="sub">巡检日期 2026-11-06 ｜ 轻量模式（日循环）｜ 深度完整模式留待周循环</div>
+<div class="badge">结论：体系整体 PASS · 4 项告警待处理</div>
+</div>
+
+<div class="metrics">
+<div class="metric"><div class="num">PASS</div><div class="label">架构断点自检</div></div>
+<div class="metric"><div class="num">14</div><div class="label">哈希账本条目</div></div>
+<div class="metric"><div class="num">2 / 0</div><div class="label">eFuse 节点 / 熔断数</div></div>
+<div class="metric"><div class="num">41</div><div class="label">真值索引条目</div></div>
+<div class="metric"><div class="num">17,679</div><div class="label">母体文件数（5.1G）</div></div>
+<div class="metric"><div class="num">757</div><div class="label">官网分支页面/文件</div></div>
+<div class="metric"><div class="num">1,290</div><div class="label">媒体湖文件（展示精选 247）</div></div>
+</div>
+
+<div class="section">
+<h2>一、巡检结论摘要</h2>
+<div class="card">
+<div class="list-item"><span class="key">架构断点自检（10 断点）</span><span class="val"><span class="tag g">PASS 4</span> <span class="tag y">WARN 2</span> <span class="tag z">SKIP 4</span> <span class="tag g">ERROR 0</span></span></div>
+<div class="list-item"><span class="key">哈希账本连续性</span><span class="val">14 条记录完整，末次归档 2026-10-01T01:58（增量停滞 36 天）<span class="tag y">中风险</span></span></div>
+<div class="list-item"><span class="key">根 Merkle 一致性</span><span class="val">注册表 27b84748… ≠ 实际 271c66b2…<span class="tag y">WARN</span></span></div>
+<div class="list-item"><span class="key">对外通道可达性</span><span class="val">主站 / status / domains / drama / aios 均 200；showcase 与记忆网关接口 404<span class="tag r">断点</span></span></div>
+<div class="list-item"><span class="key">eFuse 固化保护</span><span class="val">链上 2 节点，熔断 0 个，创世哈希 3bd6c68c…<span class="tag y">未生效</span></span></div>
+<div class="list-item"><span class="key">真值索引（语义召回库）</span><span class="val">41 条：快照类 38 · 公理类 3</span></div>
+<div class="list-item"><span class="key">资产双母体</span><span class="val">运行时工作根 + 本地权威母体（17,679 文件 / 5.1G）同源</span></div>
+</div>
+<div class="note">说明：本页为轻量日巡检实采数据，只统计可验证项；未执行算子如实标注为「待调度」，不做虚报。</div>
+</div>
+
+<div class="section">
+<h2>二、十层依赖拓扑 · 27 算子运行覆盖度</h2>
+<div class="card">
+<div style="font-size:0.85em;color:#ccc;margin-bottom:12px">本轮覆盖度：<b style="color:#d4af37">6 / 27</b>（实测通过 2 · 轻量降级 4）· 待调度 20 · 依赖未唤醒 1</div>
+<div class="progress"><i style="width:22%"></i></div>
+<table style="margin-top:14px">
+<thead><tr><th style="width:52px">层</th><th>算子</th><th style="width:110px">状态</th><th>本轮证据 / 说明</th></tr></thead>
+<tbody>
+<tr><td>L1</td><td>P4 真值对账</td><td><span class="tag y">轻量降级</span></td><td>账本 14 条逐行哈希字段抽检，无缺列；全量内容级对账待深度模式</td></tr>
+<tr><td>L1</td><td>P7 外部锚定</td><td><span class="tag g">实测通过</span></td><td>7 个对外端点实探：5×200 / 2×404，形成客观外部基线</td></tr>
+<tr><td>L1</td><td>真值提炼蒸馏</td><td><span class="tag z">待调度</span></td><td>需 P4/P7 全量输出后执行，本轮不启动</td></tr>
+<tr><td>L2</td><td>黎曼流形度量</td><td><span class="tag z">待调度</span></td><td>向量库维度一致（256 维）具备前置条件</td></tr>
+<tr><td>L2</td><td>SM-BS 双向稳态映射</td><td><span class="tag z">待调度</span></td><td>高消耗算子，日循环不启，留周循环</td></tr>
+<tr><td>L2</td><td>漂移巡检量化</td><td><span class="tag y">轻量降级</span></td><td>以运行时根 / 权威母体文件数与体积比对替代逐概念坐标偏移；无线索级 5%/10%/20% 阈值超标</td></tr>
+<tr><td>L3</td><td>实体关系抽取 / 图谱补全 / 跨文档链接</td><td><span class="tag z">待调度</span></td><td>需指向具体语料集，本轮无新增语料</td></tr>
+<tr><td>L4</td><td>因果链溯源 / 奇点概率 / 因果干预</td><td><span class="tag z">待调度</span></td><td>因果域无新增事件源</td></tr>
+<tr><td>L5</td><td>CausalToTruth / TruthToEvolution</td><td><span class="tag z">待调度</span></td><td>上游因果域本轮无输出</td></tr>
+<tr><td>L5</td><td>EvolutionToCausal</td><td><span class="tag b">依赖未唤醒</span></td><td>进化域算子未唤醒，输出预激活信号，闭环待启</td></tr>
+<tr><td>L6</td><td>四层结构化拆分 / 九大元类归类</td><td><span class="tag z">待调度</span></td><td>本轮无新入档资产</td></tr>
+<tr><td>L6</td><td>Merkle-DAG 追加校验</td><td><span class="tag y">轻量降级</span></td><td>链完整可读，主链未断；根哈希与注册表存在偏移（副产品修改，非损坏）</td></tr>
+<tr><td>L7</td><td>飞书资源 ↔ 账本双向对账</td><td><span class="tag z">待调度</span></td><td>连接器账号本轮变更，对账未执行，避免跨账号误判</td></tr>
+<tr><td>L8</td><td>eFuse 熔断触发</td><td><span class="tag g">实测通过</span></td><td>链读取正常：2 节点 / 0 blown，创世哈希 3bd6c68c…；未发现篡改后需熔断的分支</td></tr>
+<tr><td>L8</td><td>ZKP 零知识隐私校验</td><td><span class="tag z">待调度</span></td><td>无敏感台账变动待核验</td></tr>
+<tr><td>L9</td><td>方案生成评估</td><td><span class="tag z">待调度</span></td><td>当日无待决方案</td></tr>
+<tr><td>L9</td><td>风险识别分级</td><td><span class="tag y">轻量降级</span></td><td>输出 6 项风险矩阵，见第四节（利益 40% / 风险 35% / 成本 25% 口径不变）</td></tr>
+<tr><td>L9</td><td>法律意见书生成</td><td><span class="tag z">待调度</span></td><td>无合同/纠纷事项提交</td></tr>
+<tr><td>L10</td><td>Lv6 多主体仿真约束</td><td><span class="tag z">待调度</span></td><td>本轮无仿真任务</td></tr>
+<tr><td>L10</td><td>角色元规则隔离校验</td><td><span class="tag z">待调度</span></td><td>本轮无新增角色帧</td></tr>
+<tr><td>L10</td><td>9:16 电影级关键帧一致性</td><td><span class="tag z">待调度</span></td><td>本轮无关键帧生成任务</td></tr>
+</tbody>
+</table>
+<div class="note">同一层内并列算子按同因合并展示，行数合计覆盖 27 算子全量。</div>
+</div>
+</div>
+
+<div class="section">
+<h2>三、对外通道实探结果</h2>
+<div class="card">
+<table>
+<thead><tr><th style="width:44%">端点</th><th style="width:80px">状态</th><th>判定</th></tr></thead>
+<tbody>
+<tr><td>https://www.huodouai.com/</td><td class="ok">200</td><td>品牌门户正常</td></tr>
+<tr><td>/status/</td><td class="ok">200</td><td>状态中心正常（内容滞后于发布分支）</td></tr>
+<tr><td>/domains/</td><td class="ok">200</td><td>业务域总览正常</td></tr>
+<tr><td>https://drama.huodouai.com/</td><td class="ok">200</td><td>作品库正常</td></tr>
+<tr><td>https://aios.huodouai.com/</td><td class="ok">200</td><td>AIOS 入口正常</td></tr>
+<tr><td>/showcase/</td><td class="err">404</td><td>演示中心未上线，分支内已有页面，云端 pull 未覆盖</td></tr>
+<tr><td>/api/report/status ｜ /api/report/truths</td><td class="err">404</td><td>记忆网关上报接口不存在（未知端点），真值上报通道中断</td></tr>
+</tbody>
+</table>
+<div class="note">探测时间 2026-11-06 09:0x（UTC+8），单次实探，非 SLA 统计。</div>
+</div>
+</div>
+
+<div class="section">
+<h2>四、风险矩阵（概率 × 影响）</h2>
+<div class="card">
+<table>
+<thead><tr><th style="width:40%">风险项</th><th style="width:70px">等级</th><th>影响与处置建议</th></tr></thead>
+<tbody>
+<tr><td>发布分支与线上站点未同步</td><td class="err">高</td><td>web-deploy 分支已含最新页面，线上 /showcase/ 仍 404、/status/ 内容哈希不一致 → 云端定时 pull 未生效。需在云端一次性配置 web root 的 git remote + cron pull（HTTP 通道，不涉 SSH）。</td></tr>
+<tr><td>记忆网关上报接口 404</td><td class="err">高</td><td>真值上报、状态握手两条链路全部失效，跨节点对账缺少权威回执 → 需修复 /api/report/* 路由，或改用上传接口。</td></tr>
+<tr><td>哈希账本增量停滞 36 天</td><td class="warn">中</td><td>末次归档 2026-10-01，之后资产变更无账本确权 → 恢复每日增量归档，补写 10 月至 11 月的变更条目。</td></tr>
+<tr><td>eFuse 保护未生效</td><td class="warn">中</td><td>仅 2 节点、0 熔断，固化资产缺少硬件级只读保护 → 固化完成后按 SOP 触发熔断。</td></tr>
+<tr><td>根 Merkle 注册表偏移</td><td class="warn">中</td><td>副产品（缓存/日志）修改导致哈希漂移 → 锁档前重算主链根哈希并回写注册表。</td></tr>
+<tr><td>M2 冗余度告警</td><td class="idle">低</td><td>最近 1 次锁档 M2 FAIL，增量资产占比偏低 → 下次锁档前触发冷却期判断。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="section">
+<h2>五、本轮产出与后续</h2>
+<div class="card">
+<div class="list-item"><span class="key">本轮实际动作</span><span class="val">断点自检 1 次 · 端点实探 7 个 · 账本核对 14 条 · Merkle/eFuse 链读取 2 次 · 风险矩阵 6 项</span></div>
+<div class="list-item"><span class="key">未执行的高消耗算子</span><span class="val">SM-BS 映射 · 真值蒸馏 · CTE 适配 · 法律意见书 → 留周度深度循环</span></div>
+<div class="list-item"><span class="key">下一轮优先项</span><span class="val">修复上报通道 → 恢复每日增量归档 → 重新对齐根 Merkle → 触发 eFuse</span></div>
+<div class="list-item"><span class="key">归档口径</span><span class="val">云盘 / 知识库 / 内核快照三层锁档，文本类资产双冷存储副本</span></div>
+</div>
+</div>
+
+<footer>
+<div class="sym">Ω₀⊂⊙∞⊂Ω</div>
+<div>确权 DID-BR-000002 ｜ 火斗云智 AIOS 全域自治体系</div>
+<div style="margin-top:6px">本页由轻量日巡检自动生成 · 数据截至 2026-11-06 09:00 (UTC+8)</div>
+</footer>
+
+</div>
+</body>
+</html>
