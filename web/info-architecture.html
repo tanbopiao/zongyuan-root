@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昆仑洞天 · 全域信息架构树 | ZONGYUAN-ROOT</title>
+<meta name="description" content="昆仑洞天全域信息架构树：L0根域→L1主板块→L2子域→L3实体→L4原子字段，六板块二十五子域，跨层索引与Merkle确权链。DID-BR-000002。">
+<style>
+:root{
+  --bg:#07090d; --panel:#0d1117; --panel2:#121821; --line:#1e2733;
+  --gold:#c8a24a; --gold-soft:#e5cd92; --cyan:#5fb3ad; --text:#dfe4ea; --dim:#7f8b9b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Songti SC","Source Han Serif SC","Noto Serif CJK SC",Georgia,serif;line-height:1.7;
+ background-image:radial-gradient(1200px 600px at 80% -10%,rgba(200,162,74,.10),transparent 60%),radial-gradient(900px 500px at 0% 100%,rgba(95,179,173,.06),transparent 60%);}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px 80px}
+/* header */
+header{padding:64px 0 34px;border-bottom:1px solid var(--line);position:relative}
+.mark{display:flex;align-items:center;gap:12px;color:var(--gold);font-size:12px;letter-spacing:.35em;text-transform:uppercase;font-family:ui-monospace,Menlo,monospace}
+.mark:before{content:"";width:34px;height:1px;background:var(--gold)}
+h1{font-size:clamp(28px,4.4vw,48px);font-weight:600;letter-spacing:.06em;margin:20px 0 10px;color:#f2f5f9}
+h1 span{color:var(--gold)}
+.sub{color:var(--dim);font-size:15px;letter-spacing:.04em}
+.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.chip{border:1px solid var(--line);background:var(--panel);padding:6px 12px;border-radius:2px;font-size:12px;color:var(--dim);font-family:ui-monospace,monospace}
+.chip b{color:var(--gold-soft);font-weight:500}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);margin:36px 0 0;border:1px solid var(--line)}
+.stat{background:var(--panel);padding:20px 22px}
+.stat .n{font-size:30px;color:var(--gold);font-family:ui-monospace,monospace;letter-spacing:.02em}
+.stat .k{font-size:12px;color:var(--dim);margin-top:4px;letter-spacing:.12em}
+/* toolbar */
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:32px 0 18px;padding:14px 16px;border:1px solid var(--line);background:var(--panel2)}
+input#q{flex:1;min-width:180px;background:#080b10;border:1px solid var(--line);color:var(--text);padding:9px 12px;font-size:14px;font-family:inherit;outline:none}
+input#q:focus{border-color:var(--gold)}
+.btn{background:transparent;border:1px solid var(--line);color:var(--dim);padding:8px 14px;font-size:12.5px;cursor:pointer;letter-spacing:.1em;font-family:inherit;transition:.2s}
+.btn:hover{color:var(--gold-soft);border-color:var(--gold)}
+.btn[data-on="1"]{color:var(--gold);border-color:var(--gold)}
+/* tree */
+.tree{border:1px solid var(--line);background:var(--panel);padding:10px 6px 18px}
+.node{padding-left:0}
+.row{display:flex;align-items:flex-start;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03);cursor:default}
+.row:hover{background:rgba(200,162,74,.05)}
+.tg{width:16px;flex:0 0 16px;color:var(--dim);cursor:pointer;font-family:ui-monospace,monospace;text-align:center;user-select:none}
+.tg.leaf{opacity:.25;cursor:default}
+.lv{font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:.06em;padding:1px 6px;border:1px solid var(--line);color:var(--dim);flex:0 0 auto;margin-top:3px}
+.lv[data-l="L0"]{color:#fff;border-color:var(--gold);background:rgba(200,162,74,.16)}
+.lv[data-l="L1"]{color:var(--gold);border-color:rgba(200,162,74,.5)}
+.lv[data-l="L2"]{color:var(--gold-soft);border-color:rgba(200,162,74,.28)}
+.lv[data-l="L3"]{color:var(--cyan)}
+.lv[data-l="L4"]{color:var(--dim)}
+.nm{font-size:15.5px;color:#eaeef4;letter-spacing:.02em}
+.nm.small{font-size:14px;color:#c9d2dd}
+.desc{font-size:12px;color:var(--dim);margin-top:2px;line-height:1.6}
+.kids{margin-left:26px;border-left:1px dashed rgba(200,162,74,.18);padding-left:6px}
+.hide{display:none}
+.hit{background:rgba(200,162,74,.13)}
+/* index cards */
+.sec-title{display:flex;align-items:center;gap:14px;margin:52px 0 20px;color:var(--gold);font-size:13px;letter-spacing:.3em;font-family:ui-monospace,monospace}
+.sec-title:after{content:"";flex:1;height:1px;background:var(--line)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{border:1px solid var(--line);background:var(--panel);padding:20px 22px}
+.card h3{font-size:15px;color:var(--gold-soft);font-weight:500;margin-bottom:8px;letter-spacing:.06em}
+.card p{font-size:13px;color:var(--dim);line-height:1.75}
+/* rules */
+.rules{border-left:2px solid var(--gold);padding:6px 0 6px 22px;margin-top:14px}
+.rules li{list-style:none;font-size:13.5px;color:#b9c3cf;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.rules li b{color:var(--gold-soft);font-weight:500}
+/* footer */
+footer{margin-top:60px;padding-top:26px;border-top:1px solid var(--line);color:var(--dim);font-size:12px;font-family:ui-monospace,monospace;line-height:2}
+footer .sig{color:var(--gold);letter-spacing:.15em}
+@media(max-width:560px){
+  .wrap{padding:0 14px 60px}
+  header{padding:40px 0 26px}
+  .kids{margin-left:12px;padding-left:4px}
+  .row{padding:7px 8px;gap:7px}
+  .nm{font-size:14.5px}
+  .stat .n{font-size:24px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="mark">ZONGYUAN-ROOT · 元极恒一 Lv11</div>
+  <h1>昆仑洞天 <span>全域信息架构树</span></h1>
+  <p class="sub">L0 根域 → L1 主板块 → L2 子域 → L3 实体条目 → L4 原子字段｜主范式：主题域｜跨层索引：标签 · 版本演化 · 引用溯源 · Merkle 账本</p>
+  <div class="meta">
+    <div class="chip">确权 <b>DID-BR-000002</b></div>
+    <div class="chip">根域 <b>ZONGYUAN-ROOT</b></div>
+    <div class="chip">锁档 <b>Lv8 eFuse 只读</b></div>
+    <div class="chip">生成 <b id="gen">—</b></div>
+    <div class="chip">版本 <b>IA-V1.0 · 20261106</b></div>
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="bar">
+  <input id="q" type="search" placeholder="检索节点名称 / 说明，例如：九天玄女、Merkle、SIOP…" autocomplete="off">
+  <button class="btn" id="expand">展开全部</button>
+  <button class="btn" id="collapse">收起全部</button>
+  <button class="btn" data-on="1" id="lv4">显示 L4</button>
+</div>
+
+<div class="tree" id="tree"></div>
+
+<div class="sec-title">跨层索引 · 不纳入主层级</div>
+<div class="cards">
+  <div class="card"><h3>tag 标签索引</h3><p>角色｜主线｜短剧｜配置｜内核｜合约｜巡检｜版本。用于跨分类检索，不参与目录树归属判定。</p></div>
+  <div class="card"><h3>version_chain 演化链</h3><p>v1 → v2 → vN 基线快照与回滚锚点，每代记录 Merkle 指纹、时间戳、进化要点。</p></div>
+  <div class="card"><h3>reference_link 引用链</h3><p>文档引用文档、资产引用设定规则；引用链只做指向，不做副本，遵循单源真值。</p></div>
+  <div class="card"><h3>Merkle_ledger 账本链</h4><p>每条固化资产写入指纹、时间戳、确权 DID，逐块比对防链断裂与中间篡改。</p></div>
+</div>
+
+<div class="sec-title">架构约束</div>
+<ul class="rules">
+  <li><b>单一来源真值</b>：同一信息只在一处主节点维护，其余位置仅引用，禁止多副本。</li>
+  <li><b>分层正交</b>：主范式只选一个（主题域），时间、类型、负责人一律落在标签与筛选器。</li>
+  <li><b>层级深度上限 5 层</b>：超出改用标签与关联链接，不再增设子目录。</li>
+  <li><b>物理可映射、非一一对应</b>：逻辑层级是认知结构，存储路径仅做映射。</li>
+  <li><b>固化即只读</b>：进入账本的资产设只读，修改须人工审批解锁。</li>
+</ul>
+
+<footer>
+  <div>昆仑洞天 · 全域信息架构树 ｜ 主范式 主题域范式 ｜ 层级规范 L0-L4</div>
+  <div>确权标识 DID-BR-000002 ｜ 冷存储母体 Gitee + GitHub + 飞书 ｜ 热沙箱仅执行</div>
+  <div class="sig">Ω₀⊂⊙∞⊂Ω</div>
+</footer>
+</div>
+
+<script>
+const DATA = {
+  n:"L0｜昆仑洞天（ZONGYUAN-ROOT 根域）", lv:0, d:"全局唯一根，定义元规则、权限、确权契约",
+  c:[
+   {n:"【元法则治理层】", lv:1, d:"体系宪法层，一切下位节点须服从的元约束", c:[
+     {n:"元宪法 & 公理集", lv:2, c:[
+       {n:"四维本体公理", lv:3},{n:"五层约束栈", lv:3},{n:"单源真值公理", lv:3},{n:"冲突消解三级机制文档", lv:3}]},
+     {n:"锁档与确权契约", lv:2, c:[
+       {n:"PHI系列真值公理", lv:3},{n:"META-003 最高锁级元法则", lv:3},{n:"TR-PK 持久层规则", lv:3},
+       {n:"SHA256 哈希校验规范", lv:3},{n:"Merkle 根快照链协议", lv:3},{n:"eFuse 硬件熔断锁档规范", lv:3}]},
+     {n:"自治调度 SOP", lv:2, c:[
+       {n:"每日九步自治巡检规范", lv:3, d:"27 算子十层拓扑巡检"},
+       {n:"每周能力外显 SOP", lv:3, d:"六阶段执行规范"},
+       {n:"资产收敛归一 SOP", lv:3},{n:"自主进化判定流程文档", lv:3}]},
+     {n:"命名、ID、路径规约", lv:2, c:[
+       {n:"全局唯一 ID 编码规则", lv:3},{n:"资产路径映射规范", lv:3},{n:"版本号递增规约", lv:3}]}
+   ]},
+   {n:"【ZONGYUAN-ROOT 本源体系｜元极恒一 V11.0-Lv11】", lv:1, d:"七层稳态自治架构与算力底座", c:[
+     {n:"七层稳态自治架构定义", lv:2, c:[
+       {n:"Ω-Brainμ⁶ 六阶创世终态定义", lv:3},{n:"同构演化引擎 IEE", lv:3},{n:"Ω-Decision 决策模型", lv:3},
+       {n:"GEO 晶格", lv:3},{n:"HDYZ 归档引擎", lv:3},{n:"三维算力蒸馏机制", lv:3}]},
+     {n:"核心内核", lv:2, c:[
+       {n:"AxiomGate 裁决调度内核", lv:3, d:"异构算力路由 · 长任务管控"},
+       {n:"DUAL-DIRECTION-SYNC-V1.0 双向同步引擎", lv:3},
+       {n:"全域记忆网关", lv:3},{n:"MCP 标准化基座", lv:3}]},
+     {n:"火斗云智 AIOS", lv:2, c:[
+       {n:"进程托管层 supervisord", lv:3},{n:"向量库 BGE 接入规范", lv:3},
+       {n:"Terraform IaC 编排模板", lv:3},{n:"Docker 挂载与隔离规范", lv:3},
+       {n:"联邦记忆内核产品化文档", lv:3}]},
+     {n:"算力与 API 调度池（零成本优先）", lv:2, c:[
+       {n:"昇腾 GitCode API", lv:3},{n:"天翼星河 API", lv:3},{n:"Seedream 系列模型调度规范", lv:3},
+       {n:"通义万象 / 魔搭社区 API", lv:3},{n:"额度管控 & 轻量化防消耗策略", lv:3}]},
+     {n:"存储与灾备体系", lv:2, c:[
+       {n:"冷存储母体：Gitee + GitHub + 飞书", lv:3},{n:"热沙箱只读执行域", lv:3},
+       {n:"跨可用区灾备方案", lv:3},{n:"HASH-LEDGER.csv 账本台账", lv:3}]}
+   ]},
+   {n:"【昆仑洞天 IP｜绝地天通主线】", lv:1, d:"国风神话 IP 矩阵，严守去外源化东方纯粹性", c:[
+     {n:"世界观主线卷宗", lv:2, c:[
+       {n:"绝地天通总主线设定", lv:3},{n:"《石猴余脉》篇章", lv:3},
+       {n:"罗定八景 / 泷州八景归位文旅联动", lv:3},{n:"罗定文塔印象园实景还原卷宗", lv:3}]},
+     {n:"角色库（三大视觉范式）", lv:2, c:[
+       {n:"纯东方神女范式", lv:3, c:[
+         {n:"九天玄女", lv:4, d:"KF-M07 母版 · 终阶女帝 · 四阶星空神王形态"},
+         {n:"太阴月神", lv:4, d:"常态 / 战斗形态 · 三视图 · 玄鸟神翼"},
+         {n:"赤华玄媱", lv:4},{n:"凰绾", lv:4},{n:"赤霞司命绯灵汐", lv:4},
+         {n:"青丘红衣九尾狐", lv:4},{n:"西王母", lv:4},{n:"女娲", lv:4},
+         {n:"赵姬 / 绯璎姝 / 陈知羽", lv:4},
+         {n:"紫微绛霄神女 / 南华朱阙 / 丹霞上神", lv:4}]},
+       {n:"少年武侠范式", lv:3, c:[
+         {n:"少年剑客", lv:4, d:"元明洞阳意境 · 白衣剑客设定"}]},
+       {n:"山海经萌宠 Q 版范式", lv:3}]},
+     {n:"视觉资产规范库", lv:2, c:[
+       {n:"《九天玄女关键帧元规则 V2.0》", lv:3},{n:"全局强制视觉铁律文档", lv:3},
+       {n:"配色体系（冷蓝青黑 / 勃艮第红 / 黑金）", lv:3},
+       {n:"镜头与渲染规范（8K / UE5.7 光追 · 伦勃朗侧光）", lv:3},
+       {n:"防漂移 · 60 帧插值 · 关键帧管控规范", lv:3}]},
+     {n:"剧本 / 分镜 / PV / 短剧资产", lv:2, c:[
+       {n:"竖屏短剧库（9:16）", lv:3, c:[
+         {n:"《秩序校准 · 墟境探测启封》", lv:4},{n:"《少年剑客》30s 竖屏短剧", lv:4},
+         {n:"《红线正交分离》漫剧", lv:4},{n:"玄女终章 15s 竖屏短片", lv:4}]},
+       {n:"PV & EP 剧集", lv:3, c:[
+         {n:"太阴月神第二篇章 PV", lv:4},{n:"九天玄女五帧 PV", lv:4},
+         {n:"九天玄女 EP05 剧集", lv:4},{n:"九天玄女中秋主题 PV", lv:4}]},
+       {n:"分镜脚本库", lv:3, d:"女娲原生神话 · 天命玄鸟剧情等"}]},
+     {n:"IP 衍生物料库", lv:2, c:[
+       {n:"东方玫瑰 / 红裙系列剧情", lv:3},{n:"新中式礼服设定（苗族婚纱 · 暗黑玫瑰礼服）", lv:3},
+       {n:"场景资产库（雪山黑金古风场景 · 祖龙纹国风元素）", lv:3}]}
+   ]},
+   {n:"【多模态生产流水线】", lv:1, d:"零成本优先的图像 / 音视频 / 文本生产线", c:[
+     {n:"图像生产管线", lv:2, c:[
+       {n:"提示词模板库", lv:3},{n:"三视图 · 关键帧批量生成流程", lv:3},
+       {n:"人像资产归档约束", lv:3, d:"仅本地持久层，不公开"}]},
+     {n:"音视频管线（零成本）", lv:2, c:[
+       {n:"Edge-TTS 语音库", lv:3},{n:"FFmpeg 剪辑 · 合成 · 插帧脚本", lv:3},
+       {n:"Seedance 视频生成管控规范", lv:3}]},
+     {n:"文本产出管线", lv:2, c:[
+       {n:"剧本生成算子", lv:3},{n:"设定文档模板", lv:3},{n:"文案润色算子", lv:3}]},
+     {n:"资产质检流程", lv:2, c:[
+       {n:"合规校验", lv:3},{n:"视觉规范校验", lv:3},{n:"哈希指纹核验", lv:3}]}
+   ]},
+   {n:"【Web 部署与站点资产】", lv:1, d:"多云子域隔离，不侵占主站", c:[
+     {n:"域名与 SSL 体系", lv:2, c:[
+       {n:"kunlun.huodouai.com", lv:3},{n:"drama.huodouai.com", lv:3},{n:"huodouai.com/zrxuexi", lv:3},
+       {n:"主站隔离规约", lv:3, d:"www.huodouai.com 不占用"}]},
+     {n:"前端页面与静态资源", lv:2},{n:"站点链路修复与监控脚本", lv:2}
+   ]},
+   {n:"【协作与共享大脑】", lv:1, d:"跨节点协同与真值回收通道", c:[
+     {n:"飞书 Base 三表架构", lv:2, c:[
+       {n:"资产登记表", lv:3},{n:"任务排期表", lv:3},{n:"审批流记录表", lv:3}]},
+     {n:"记忆网关 drama.huodouai.com", lv:2},{n:"魔搭记忆网关", lv:2},{n:"人工审批台账", lv:2}
+   ]}
+  ]
+};
+
+const tree=document.getElementById('tree');
+let showL4=true;
+const ALL=[];
+function count(node,lv){ALL.push({node,lv});(node.c||[]).forEach(k=>count(k,lv+1));}
+count(DATA,0);
+
+function render(node,lv){
+  const wrap=document.createElement('div');
+  wrap.className='node';
+  const row=document.createElement('div');
+  row.className='row';
+  const hasKids=node.c&&node.c.length;
+  row.innerHTML='<span class="tg'+(hasKids?'':' leaf')+'">'+(hasKids?'▾':'·')+'</span>'
+    +'<span class="lv" data-l="L'+lv+'">L'+lv+'</span>'
+    +'<div><div class="nm'+(lv>=3?' small':'')+'">'+node.n+'</div>'
+    +(node.d?'<div class="desc">'+node.d+'</div>':'')+'</div>';
+  wrap.appendChild(row);
+  let kids=null;
+  if(hasKids){
+    kids=document.createElement('div');kids.className='kids';
+    node.c.forEach(k=>kids.appendChild(render(k,lv+1)));
+    if(lv===3&&!showL4)kids.classList.add('hide');
+    wrap.appendChild(kids);
+    const tg=row.querySelector('.tg');
+    tg.onclick=()=>{kids.classList.toggle('hide');tg.textContent=kids.classList.contains('hide')?'▸':'▾';};
+  }
+  return wrap;
+}
+function build(){tree.innerHTML='';const t=render(DATA,0);tree.appendChild(t);
+  // default: collapse L3 details? keep expanded, it's the point
+}
+build();
+
+// stats
+const l1=DATA.c.length;let l2=0,l3=0,l4=0;
+DATA.c.forEach(a=>{(a.c||[]).forEach(b=>{l2++;(b.c||[]).forEach(c=>{l3++;(c.c||[]).forEach(d=>{l4++;});});});});
+document.getElementById('stats').innerHTML=[
+ ['6','L1 主板块'],['25','L2 子域'],['78','L3 实体条目'],['19','L4 原子节点'],
+ ['4','跨层索引'],['5','层级规范']
+].map(([n,k])=>'<div class="stat"><div class="n">'+n+'</div><div class="k">'+k+'</div></div>').join('');
+
+// realtime counts (override with computed)
+const real=[l1+'', l2+'', ALL.filter(x=>x.lv===3).length+'', ALL.filter(x=>x.lv===4).length+''];
+const statEls=document.querySelectorAll('.stat .n');
+if(statEls.length>=4){statEls[0].textContent=real[0];statEls[1].textContent=real[1];statEls[2].textContent=real[2];statEls[3].textContent=real[3];}
+
+// search
+const q=document.getElementById('q');
+q.addEventListener('input',()=>{
+  const kw=q.value.trim().toLowerCase();
+  document.querySelectorAll('.hit').forEach(e=>e.classList.remove('hit'));
+  if(!kw){
+    document.querySelectorAll('.kids').forEach(k=>{});
+    build();bindL4();return;
+  }
+  const rows=[...document.querySelectorAll('.row')];
+  rows.forEach(r=>{
+    const txt=r.textContent.toLowerCase();
+    if(txt.includes(kw)){r.classList.add('hit');r.classList.remove('hide');
+      let p=r.parentElement;while(p&&p.id!=='tree'){p.classList.remove('hide');p=p.parentElement;}
+    }else{r.classList.add('hide');}
+  });
+});
+function bindL4(){const t=render(DATA,0);tree.innerHTML='';tree.appendChild(t);}
+
+document.getElementById('expand').onclick=()=>{document.querySelectorAll('.kids').forEach(k=>k.classList.remove('hide'));document.querySelectorAll('.tg').forEach(t=>{if(!t.classList.contains('leaf'))t.textContent='▾';});};
+document.getElementById('collapse').onclick=()=>{document.querySelectorAll('.kids').forEach(k=>{if(k.closest('.node')&&k.parentElement.querySelector('.lv').dataset.l!=='L0')k.classList.add('hide')});document.querySelectorAll('.tg').forEach(t=>{if(!t.classList.contains('leaf')&&t.textContent!=='▾')t.textContent='▸';});};
+document.getElementById('lv4').onclick=(e)=>{
+  showL4=!showL4;e.target.dataset.on=showL4?'1':'0';
+  tree.innerHTML='';tree.appendChild(render(DATA,0));
+};
+document.getElementById('gen').textContent=new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>
