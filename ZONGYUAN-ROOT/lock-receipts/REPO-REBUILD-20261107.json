@@ -1,0 +1,69 @@
+{
+ "receipt_id": "REPO-REBUILD-20261107",
+ "did": "DID-BR-000002",
+ "root": "ZONGYUAN-ROOT",
+ "anchor": "Ω0⊂⊙∞⊂Ω",
+ "trigger": "Gitee 报 repository size 923.910MB 超 819MB；服务端GC无API且需网页登录，登录接管被跳过",
+ "diagnosis": "9个分支中5个仍指向≥1MiB大文件(master598MB/ia-tree-v1.0 595MB/main335MB/archive134MB/incremental114MB)；converge-20260928为0大文件。体积统计含不可达对象，删ref后仍报923.910MB，必须GC才降",
+ "actions": [
+  {
+   "step": 1,
+   "action": "mirror备份全部9分支",
+   "artifact": "backup/cold/pre-rebuild-20261107.bundle",
+   "bytes": "793MB"
+  },
+  {
+   "step": 2,
+   "action": "删除5个重磅分支",
+   "method": "git push --delete",
+   "result": "master/ia-tree-v1.0/main/zr-archive-gen20260929/zr-incremental-20260929-B 全部删除"
+  },
+  {
+   "step": 3,
+   "action": "删除后体积仍923.910MB",
+   "conclusion": "Gitee体积统计包含未回收对象"
+  },
+  {
+   "step": 4,
+   "action": "旧库改名归档",
+   "from": "ZONGYUAN-ROOT",
+   "to": "ZONGYUAN-ROOT-ARCHIVE-20261107",
+   "note": "未销毁仓库,issue/PR等元数据保留"
+  },
+  {
+   "step": 5,
+   "action": "新建同名空库",
+   "repo": "huodou-cloud-intelligence-aios/ZONGYUAN-ROOT",
+   "http": "201"
+  },
+  {
+   "step": 6,
+   "action": "推送净历史4个分支",
+   "branches": [
+    "converge-20260928",
+    "dev",
+    "staging",
+    "web-deploy"
+   ]
+  }
+ ],
+ "result": {
+  "new_repo_size": "105.37MiB",
+  "quota": "819MB",
+  "within_quota": true,
+  "tree_files": 3480,
+  "kernel_sha256_prefix": "2dd6b1a81e86be66",
+  "converge_tip": "e129c2af2c70"
+ },
+ "preserved": {
+  "archive_repo": "gitee.com/huodou-cloud-intelligence-aios/ZONGYUAN-ROOT-ARCHIVE-20261107",
+  "archive_size": "~924MB(仍超其自身配额,仅归档不再推送)",
+  "bundle": "backup/cold/pre-rebuild-20261107.bundle(793MB,含全部9分支及已拆分支tip)"
+ },
+ "followup": [
+  "本地 remote gitee 已指向新库",
+  "旧库建议保留30天后单独确认是否删除",
+  "GitHub 分支结构未动,仍为converge全历史"
+ ],
+ "timestamp": "2026-11-07T15:04:51+08:00"
+}
