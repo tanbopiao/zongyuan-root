@@ -1,0 +1,218 @@
+{
+  "id": "CLOUD-RULES-V1.0",
+  "source": "https://www.huodouai.com",
+  "did": "DID-BR-000002",
+  "captured_at": "2026-11-07T08:40:00+08:00",
+  "endpoints": {
+    "status": {
+      "path": "/api/status",
+      "method": "GET",
+      "auth": "none"
+    },
+    "truth_report": {
+      "path": "/api/report/truth",
+      "method": "POST",
+      "auth": [
+        "X-DID",
+        "X-Capture-Token"
+      ]
+    },
+    "truth_query": {
+      "path": "/api/truth",
+      "method": "GET",
+      "params": [
+        "key",
+        "search",
+        "k",
+        "limit<=200"
+      ],
+      "ignored_params": [
+        "level",
+        "prefix",
+        "ns"
+      ]
+    },
+    "try_chat": {
+      "path": "/try/chat",
+      "method": "POST",
+      "limit": "5/10min per IP"
+    },
+    "dal_health": {
+      "path": "/dal/health",
+      "method": "GET"
+    },
+    "dal_deploy": {
+      "path": "/dal/deploy",
+      "method": "POST"
+    }
+  },
+  "truth_contract": {
+    "required": [
+      "key",
+      "value",
+      "truth_type",
+      "DID"
+    ],
+    "key_rule": "命名空间.key，禁止 truth- 前缀",
+    "value_rule": "必须为 JSON 对象",
+    "truth_type_enum": [
+      "meta_law",
+      "rule",
+      "config",
+      "decision",
+      "data",
+      "creative",
+      "risk",
+      "protocol",
+      "unknown"
+    ],
+    "deprecated_fields": [
+      "content",
+      "truth_value"
+    ],
+    "errors": {
+      "401": "缺少/错误 X-DID 或签名通道",
+      "empty_value_rejected": "扁平结构",
+      "value_must_be_object": "value 非对象"
+    }
+  },
+  "memory_gateway_thresholds": {
+    "recall_topk": 6,
+    "final_inject_max": 4,
+    "min_confidence": 0.6,
+    "dup_threshold": 0.85,
+    "conflict_threshold": 0.92,
+    "default_ttl_days": 90,
+    "archive_unused_days": 30,
+    "archive_retention_days": 30,
+    "soft_delete_window_days": 7,
+    "snapshot_ttl_days": 30,
+    "single_user_hot_max": 400,
+    "permanent_max": 20,
+    "audit_ttl_days": 90
+  },
+  "memory_gateway_rules": {
+    "essence": [
+      "原生窗口=工作内存非持久",
+      "记忆库独立于权重,靠检索注入生效",
+      "持久化≠写进权重"
+    ],
+    "pipeline": [
+      "提取",
+      "编码",
+      "存储ANN",
+      "检索注入"
+    ],
+    "categories": [
+      "fact",
+      "preference",
+      "experience",
+      "episodic"
+    ],
+    "write_sop": [
+      "前置过滤",
+      "LLM提炼",
+      "查重合并",
+      "分层打标",
+      "权限校验",
+      "入热库",
+      "审计"
+    ],
+    "retrieval_sop": [
+      "命名空间隔离",
+      "ANN召回",
+      "Rerank",
+      "注入<=4",
+      "审计召回ID"
+    ],
+    "hard_constraints": [
+      "PII脱敏",
+      "高敏感禁持久化",
+      "置信<0.6拒入",
+      "闲聊不入库",
+      "冲突不覆盖",
+      "禁止只存向量"
+    ],
+    "audit": {
+      "retention_days": 90,
+      "alarm": [
+        "5分钟新增>20",
+        "冲突>10",
+        "连续5次拦截",
+        "越权检索",
+        "硬删失败"
+      ]
+    },
+    "launch_gate_items": 11
+  },
+  "kernel": {
+    "stages": [
+      "Ω1参数迭代",
+      "Ω2算子生长",
+      "Ω3拓扑重构",
+      "Ω4同构集群",
+      "Ω5异构博弈",
+      "Ω6因果宇宙"
+    ],
+    "governance_laws": 5,
+    "axioms": 5,
+    "l0_rules": [
+      "风险最小>成本最小>收益最大",
+      "L5硬隔离",
+      "真值不可侵",
+      "全行为可溯"
+    ],
+    "risk_levels": [
+      "P0",
+      "P1",
+      "P2",
+      "P3"
+    ],
+    "red_lines": 6,
+    "comm": {
+      "header": "X-DID",
+      "time_anchor": "X-TIME",
+      "storage": "append-only"
+    }
+  },
+  "channel_decision": {
+    "id": "META.DECISION.CHANNEL-STEADY-STATE.20261107",
+    "recommended": "S2 双源稳态",
+    "scores": {
+      "S1": 5.75,
+      "S2": 8.6,
+      "S3": 6.45,
+      "S4": 5.15
+    },
+    "insight": "风险本质是发布源不可替代, token 降级为可选增强",
+    "layers": [
+      "L0 CDN权威发布",
+      "L1 平台镜像回补",
+      "L2 发布注册表",
+      "L3 回补队列",
+      "L4 可见性"
+    ]
+  },
+  "deviations_fixed": [
+    {
+      "local": "truth_type=operation_log",
+      "cloud": "非法枚举值",
+      "action": "后续用 meta_law/rule"
+    },
+    {
+      "local": "/api/rules 存在",
+      "cloud": "404",
+      "action": "走 /api/truth"
+    },
+    {
+      "local": "level 参数可过滤",
+      "cloud": "被忽略",
+      "action": "用 limit<=200 + key/search"
+    },
+    {
+      "local": "drama 网关可列清单",
+      "cloud": "404",
+      "action": "统一 www 域"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "spec_id": "NODE-HOMOLOGOUS-ISSUANCE-SPEC-20261107",
+  "version": "1.0",
+  "target_node": {
+    "node_id": "NODE-DEV-DOUBAO-WORK-001",
+    "did": "DID-BR-000002",
+    "platform": "Doubao",
+    "current_role": "admin",
+    "current_status": "online",
+    "current_homologous_id": null
+  },
+  "issuance_procedure": [
+    {
+      "step": 1,
+      "action": "校验节点归属",
+      "check": "DID-BR-000002 与 node_id 绑定关系；节点已在 homologous 清单且 role=admin"
+    },
+    {
+      "step": 2,
+      "action": "生成 ZR-HID",
+      "rule": "ZR-HID-{16 HEX}，输入规范字符串 'ZR-HOMOLOGOUS|{DID}|{node_id}' 取 SHA256 前16位大写"
+    },
+    {
+      "step": 3,
+      "action": "写入 node_registry",
+      "field": "homologous[NODE-DEV-DOUBAO-WORK-001].homologous_id = ZR-HID-xxxxxxxxxxxxxxxx"
+    },
+    {
+      "step": 4,
+      "action": "回执",
+      "return": "ZR-HID 值 + issued_at + issued_by=CLOUD-HUB"
+    },
+    {
+      "step": 5,
+      "action": "生效校验",
+      "verify": "GET /a2a/peers 中该节点出现 homologous_id 字段"
+    }
+  ],
+  "deterministic_candidate": {
+    "seed_string": "ZR-HOMOLOGOUS|DID-BR-000002|NODE-DEV-DOUBAO-WORK-001",
+    "sha256": "94a7e5c9ea37ed6cb4b2dad65bdd129507e2dfa57dbcac66ce854d17c9d62d06",
+    "proposed_zr_hid": "ZR-HID-94A7E5C9EA37ED6C",
+    "note": "候选值由规范字符串确定性推导，中枢可直接采纳或另签发；采纳后本地方可离线复核"
+  },
+  "peer_id_format_reference": "现有同源号 ZR-HID-85F2DE2652C109F2 / ZR-HID-CE022BD938DE971F 均为 ZR-HID + 16 位大写十六进制",
+  "post_issuance_local_actions": [
+    "写入 ZONGYUAN-ROOT/node/node_registry.json",
+    "重算节点身份清单 Merkle",
+    "生成锁档回执",
+    "上报 truth_type=protocol 的签发确认"
+  ],
+  "blocker": "公开接口无签发端点；/a2a/register 属外部轨（自动铸 EXT-NODE），不能替代",
+  "trace": "Ω₀⊂⊙∞⊂Ω"
+}

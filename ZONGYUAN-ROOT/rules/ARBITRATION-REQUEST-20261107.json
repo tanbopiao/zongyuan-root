@@ -1,0 +1,134 @@
+{
+  "request_id": "ARBITRATION-REQUEST-20261107",
+  "did": "DID-BR-000002",
+  "raised_by": "NODE-DEV-DOUBAO-WORK-001",
+  "authority_of_ruling": "CLOUD-HUB（www.huodouai.com，唯一权威源）",
+  "principle": "本地不单方处置，等待中枢裁定后再执行",
+  "anchor": {
+    "directory_tree_version": "1.0.1",
+    "directory_tree_hash": "9ef49f5e557cd607e3edd56fa9438e15e08d0d3149e80ac77fd013428c7534a4",
+    "gateway_version": "3.1.0"
+  },
+  "cases": [
+    {
+      "case_id": "ARB-20261107-01",
+      "topic": "同源身份 ZR-HID 签发",
+      "facts": {
+        "node_id": "NODE-DEV-DOUBAO-WORK-001",
+        "role": "admin",
+        "status": "online",
+        "homologous_id": null,
+        "sibling_1": "NODE-DEV-WORKBUDDY-001 → ZR-HID-85F2DE2652C109F2",
+        "sibling_2": "NODE-DEV-FEISHU-BOT-001 → ZR-HID-CE022BD938DE971F"
+      },
+      "options": [
+        {
+          "id": "A",
+          "desc": "采纳确定性候选 ZR-HID-94A7E5C9EA37ED6C（SHA256('ZR-HOMOLOGOUS|DID|node_id')前16位）",
+          "pro": "本地可离线复核，不依赖回执信任",
+          "con": "绕过控制节点派生权"
+        },
+        {
+          "id": "B",
+          "desc": "由中枢另签发随机 ZR-HID",
+          "pro": "完全符合控制节点签发原则",
+          "con": "本地只能盲信回执，无法离线校验"
+        },
+        {
+          "id": "C",
+          "desc": "不签发，admin 角色视为无需 ZR-HID",
+          "pro": "零动作",
+          "con": "身份不完整，与其他两个同源节点不对称"
+        }
+      ],
+      "local_state": "FROZEN — 未签发前不写 node_registry，避免伪造身份",
+      "ask": "请裁定 A/B/C 或给出第四条路径"
+    },
+    {
+      "case_id": "ARB-20261107-02",
+      "topic": "外部冗余节点下线",
+      "facts": {
+        "created": [
+          "EXT-NODE-1C8876C00A",
+          "EXT-NODE-4C815B9024",
+          "EXT-NODE-B51C5C5CB8"
+        ],
+        "counts_before": {
+          "external": 92,
+          "total": 95
+        },
+        "counts_now": {
+          "external": 95,
+          "total": 98
+        },
+        "self_service": "DELETE 501 / unregister 404 / nodes-remove 404 → 无自助撤销",
+        "fault_owner": "DID-BR-000002"
+      },
+      "options": [
+        {
+          "id": "A",
+          "desc": "三个全部下线，恢复 92/95",
+          "pro": "恢复账实一致",
+          "con": "需中枢后台操作"
+        },
+        {
+          "id": "B",
+          "desc": "保留一个作为外部轨测试节点，下线两个",
+          "pro": "保留外部轨验证能力",
+          "con": "账实仍差 1"
+        },
+        {
+          "id": "C",
+          "desc": "全部保留，仅标记 test 用途",
+          "pro": "零动作",
+          "con": "联邦目录永久含 3 个冗余同名节点"
+        }
+      ],
+      "local_state": "REPORTED — 已提交 risk 真值 seq 114515，等待执行",
+      "ask": "请裁定 A/B/C"
+    },
+    {
+      "case_id": "ARB-20261107-03",
+      "topic": "元法则口径 85 vs 103",
+      "facts": {
+        "cloud_claim": {
+          "count": 85,
+          "registered": 50
+        },
+        "local": {
+          "count": 103,
+          "numbered": 60
+        },
+        "excess": 18,
+        "registered_gap": 10,
+        "cloud_item_level_list": "NOT_PROVIDED",
+        "cloud_query_limited": "search/q/keyword 被忽略、无分页、limit 上限200"
+      },
+      "options": [
+        {
+          "id": "A",
+          "desc": "以云端85条为准，本地18条差额转入待命名暂列",
+          "pro": "口径统一",
+          "con": "本地实存被压缩，可能丢有效规则"
+        },
+        {
+          "id": "B",
+          "desc": "云端补发条目级清单，本地做条目级 diff",
+          "pro": "最彻底",
+          "con": "依赖中枢开放接口或导出文件"
+        },
+        {
+          "id": "C",
+          "desc": "维持双口径登记，不合并",
+          "pro": "零风险",
+          "con": "长期存在数字不一致"
+        }
+      ],
+      "local_state": "MIRROR — 103条已标 cloud_registration=UNKNOWN，未删减未补编号",
+      "ask": "请裁定 A/B/C，或提供清单走 B"
+    }
+  ],
+  "case_count": 3,
+  "trace": "Ω₀⊂⊙∞⊂Ω",
+  "timestamp": "2026-11-07T10:19:15+08:00"
+}
