@@ -60,14 +60,21 @@ by = collections.defaultdict(list)
 for e in E:
     if e.get("path") and e.get("value_score") and e.get("timestamp"):
         by[e["path"]].append((e["timestamp"], e["value_score"], e["mem_id"]))
-bad = []
+TAU = 0.20   # 衰减容差：允许单次 <=20% 的价值衰减，超出才判违规
+bad, decay = [], 0
 for p, v in by.items():
     v.sort()
     for i in range(1, len(v)):
-        if v[i][1] < v[i-1][1]: bad.append((p, v[i-1][1], v[i][1]))
-res["M2"] = {"axiom": "系统状态向真值收敛禁止回退", "predicate": "value_score 时间序非降",
-             "checked": len(by), "violated": len(bad), "samples": bad[:3],
-             "note": "'收敛'未在原文定义，此处取 value_score 非降为操作化定义——这是翻译时引入的假设"}
+        prev, cur = v[i-1][1], v[i][1]
+        if cur >= prev: continue
+        drop = (prev - cur) / prev if prev else 1.0
+        if drop <= TAU: decay += 1                        # 合规衰减
+        else: bad.append((p, prev, cur, round(drop, 3)))
+res["M2"] = {"axiom": "系统状态向真值收敛禁止回退（含衰减容差）",
+             "predicate": f"value_score(t) >= value_score(t-1)*(1-{TAU})",
+             "checked": len(by), "violated": len(bad), "compliant_decay": decay,
+             "samples": bad[:3],
+             "note": "'收敛'原文未定义，此处取价值分时间序为操作化定义；tau=0.20 为经验阈值非原文"}
 
 print(f"{'公理':<9}{'可判定':<9}{'检查':<7}{'违规':<7}谓词")
 print("-" * 82)

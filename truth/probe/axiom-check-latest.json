@@ -2,70 +2,39 @@
  "M1": {
   "axiom": "已锁档内容不可篡改",
   "predicate": "ledger_sha == disk_sha",
-  "checked": 550,
-  "violated": 16,
-  "compliant_version_evolution": 3,
-  "samples": [
-   {
-    "mem_id": "M479",
-    "path": "scripts/auto_recall.sh",
-    "note": "文件已变更但无新版本记录"
-   },
-   {
-    "mem_id": "M487",
-    "path": "scripts/heartbeat_alert.py",
-    "note": "文件已变更但无新版本记录"
-   },
-   {
-    "mem_id": "M488",
-    "path": "scripts/heartbeat_v2.py",
-    "note": "文件已变更但无新版本记录"
-   },
-   {
-    "mem_id": "M525",
-    "path": "truth/seed/SEED-TRUTH-三维算力蒸馏-20261022-4eee629c.json",
-    "note": "文件已变更但无新版本记录"
-   },
-   {
-    "mem_id": "M526",
-    "path": "truth/seed/SEED-TRUTH-三维算力蒸馏-20261022-203cfac1.json",
-    "note": "文件已变更但无新版本记录"
-   }
-  ]
+  "checked": 569,
+  "violated": 0,
+  "compliant_version_evolution": 21,
+  "samples": []
  },
  "M3": {
   "axiom": "所有变更写入不可篡改账本",
   "predicate": "has(sha256) AND has(timestamp)",
-  "checked": 550,
+  "checked": 569,
   "violated": 0,
   "samples": []
  },
  "M4": {
   "axiom": "规则即本体/轨迹即经验/事实即记忆/噪声即边界样本",
   "predicate": "type ∈ {rule,experience,fact,noise,poison}",
-  "checked": 550,
+  "checked": 569,
   "violated": 0,
   "samples": []
  },
  "AVT-002": {
   "axiom": "索引是价值地图非目录",
   "predicate": "has(type,value_score,bytes,reuse_hint)",
-  "checked": 550,
-  "violated": 540,
-  "samples": [
-   "M1",
-   "M2",
-   "M3",
-   "M4",
-   "M5"
-  ]
+  "checked": 569,
+  "violated": 0,
+  "samples": []
  },
  "M2": {
-  "axiom": "系统状态向真值收敛禁止回退",
-  "predicate": "value_score 时间序非降",
-  "checked": 547,
+  "axiom": "系统状态向真值收敛禁止回退（含衰减容差）",
+  "predicate": "value_score(t) >= value_score(t-1)*(1-0.2)",
+  "checked": 548,
   "violated": 0,
+  "compliant_decay": 1,
   "samples": [],
-  "note": "'收敛'未在原文定义，此处取 value_score 非降为操作化定义——这是翻译时引入的假设"
+  "note": "'收敛'原文未定义，此处取价值分时间序为操作化定义；tau=0.20 为经验阈值非原文"
  }
 }
