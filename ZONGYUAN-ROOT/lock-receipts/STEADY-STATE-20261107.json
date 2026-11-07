@@ -1,0 +1,64 @@
+{
+ "receipt_id": "STEADY-STATE-20261107",
+ "did": "DID-BR-000002",
+ "root": "ZONGYUAN-ROOT",
+ "anchor": "Ω0⊂⊙∞⊂Ω",
+ "question": "归档库 ZONGYUAN-ROOT-ARCHIVE-20261107(~924MB) 的处置方案",
+ "weights": {
+  "benefit": 0.4,
+  "risk": 0.35,
+  "cost": 0.25
+ },
+ "options": [
+  {
+   "id": "A",
+   "name": "归档库保留30天(只读,零推送)",
+   "benefit": 0.85,
+   "risk": 0.15,
+   "cost": 1.0,
+   "note": "双回滚通道: 远端归档+本地793MB bundle; 30天后单独确认是否删除",
+   "score": 0.8875
+  },
+  {
+   "id": "B",
+   "name": "立即删除归档库",
+   "benefit": 0.5,
+   "risk": 0.55,
+   "cost": 1.0,
+   "note": "回滚仅剩本地bundle单副本; 丢失仓库侧issue/PR元数据",
+   "score": 0.6075
+  },
+  {
+   "id": "C",
+   "name": "保留但转私有+降为只读",
+   "benefit": 0.8,
+   "risk": 0.25,
+   "cost": 0.85,
+   "note": "降低暴露面但改变可见性,可能影响既有引用",
+   "score": 0.795
+  }
+ ],
+ "decision": "A",
+ "decision_score": 0.8875,
+ "threshold": 0.8,
+ "autonomous_executable": true,
+ "executed": {
+  "archive": "保留30天, 不做任何推送, 作为回滚通道之一",
+  "guard": "回滚靠远端归档 + backup/cold/pre-rebuild-20261107.bundle(793MB, 已验证完整)",
+  "review_at": "2026-12-07"
+ },
+ "residual_risks": [
+  {
+   "item": "本地工作区有393个文件在远端存在但本地缺失",
+   "impact": "若执行 git add -A 后提交,会把远端393个文件删除",
+   "mitigation": "提交时按路径选择性 git add,禁用 -A; 其中含37个 ZONGYUAN-ROOT 下核心文件"
+  },
+  {
+   "item": "本地1个已跟踪文件≥1MiB",
+   "path": "DATA-LAKE-PERSIST/04-media-registry/MEDIA-REGISTRY-V2.json",
+   "bytes": 1233067,
+   "impact": "轻微,远低于单文件上限"
+  }
+ ],
+ "timestamp": "2026-11-07T15:57:56+08:00"
+}
