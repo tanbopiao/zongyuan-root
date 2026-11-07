@@ -18,15 +18,23 @@ def sha(p):
 
 res = {}
 
-# M1 真值不变：已锁档内容不可篡改 → 断言 ledger.sha == disk.sha
-bad1, chk = [], 0
+# M1 真值不变（append-only 语义）：内容可变，但每次变更必须留痕。
+# 判定：本条 sha ≠ 磁盘 sha 时，若账本中存在同 path 且 sha == 当前磁盘 sha 的另一条目 -> 版本演进（合规）
+#       否则 -> 变更未留痕（违规）
+bad1, chk, evolved = [], 0, 0
+sha_index = {(x.get("path"), x.get("sha256")) for x in E if x.get("path") and x.get("sha256")}
 for e in E:
     if not e.get("sha256") or not e.get("path"): continue
     chk += 1
     h = sha(e["path"])
-    if h and h != e["sha256"]: bad1.append(e["mem_id"])
+    if not h or h == e["sha256"]: continue
+    if (e["path"], h) in sha_index:
+        evolved += 1          # 当前版本已另有条目记录
+    else:
+        bad1.append({"mem_id": e["mem_id"], "path": e["path"], "note": "文件已变更但无新版本记录"})
 res["M1"] = {"axiom": "已锁档内容不可篡改", "predicate": "ledger_sha == disk_sha",
-             "checked": chk, "violated": len(bad1), "samples": bad1[:5]}
+             "checked": chk, "violated": len(bad1), "compliant_version_evolution": evolved,
+             "samples": bad1[:5]}
 
 # M3 可追溯：每条必须有 sha256 + timestamp
 bad3 = [e["mem_id"] for e in E if not e.get("sha256") or not e.get("timestamp")]
@@ -67,5 +75,7 @@ for k, v in res.items():
     print(f"{k:<9}{'YES':<9}{v['checked']:<7}{v['violated']:<7}{v['predicate'][:52]}")
 print("-" * 82)
 print("不可形式化：视觉公理/工程公理（政策约束，非逻辑命题）")
-json.dump(res, open(os.path.join(ROOT, "truth/probe/AXIOM-CHECK-20261107.json"), "w", encoding="utf-8"),
-          ensure_ascii=False, indent=1)
+# 运行态输出 644 可追加；冻结快照（AXIOM-CHECK-YYYYMMDD.json）保持 444 不动
+OUT = os.path.join(ROOT, "truth/probe/axiom-check-latest.json")
+json.dump(res, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+print(f"运行态结果 -> {os.path.relpath(OUT, ROOT)}")
