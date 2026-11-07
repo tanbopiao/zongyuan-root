@@ -1,0 +1,105 @@
+{
+ "plan_id": "META-ORDER-OPT-20261107",
+ "did": "DID-BR-000002",
+ "root": "ZONGYUAN-ROOT",
+ "anchor": "Ω0⊂⊙∞⊂Ω",
+ "scope": "全域 35 项冻结资产 + 账本 + 注册表 + 冷备/湖状态",
+ "findings": [
+  {
+   "id": "MO-01",
+   "level": "P0",
+   "title": "账本双向分叉",
+   "evidence": "本地非空337行 / 远端340行；本地独有1条(FEDERATED-MEM-20261023)，远端独有4条(EXT-031系列)",
+   "status": "已生成并集结果",
+   "artifact": "lock-receipts/HASH-LEDGER-UNION-20261107.csv(341行)",
+   "action_needed": "替换只读HASH-LEDGER.csv需审批"
+  },
+  {
+   "id": "MO-02",
+   "level": "P0",
+   "title": "冻结资产账本覆盖率为0",
+   "evidence": "35个资产的sha256在账本中命中0条",
+   "status": "已修复",
+   "artifact": "lock-receipts/ASSET-HASH-REGISTER-20261107.csv(35行)"
+  },
+  {
+   "id": "MO-03",
+   "level": "P0",
+   "title": "本地分支滞后于改写后历史",
+   "evidence": "本地converge=18c13d4，远端=214d699；本地提交会把旧历史与大文件带回",
+   "status": "未处理",
+   "action_needed": "切换本地分支到214d699（工作区272项变更会显示为删除，需你确认）"
+  },
+  {
+   "id": "MO-04",
+   "level": "P1",
+   "title": "注册表merkle口径未定义且与全目录复算不一致",
+   "evidence": "全目录复算f20e06538304ebc1 vs 注册表a28f94c39faaf435；version6/snapshot_count2",
+   "status": "已记录口径差异",
+   "action_needed": "升version7并在注册表中写死merkle计算口径（444只读，需审批）"
+  },
+  {
+   "id": "MO-05",
+   "level": "P1",
+   "title": "PIPELINE-SUMMARY字段过期",
+   "evidence": "feishu_drive/wiki/base 均为SKIP/FAIL，实际Base已建(C7SCbBdaqatqrfs8ZJsc3lqJnug,2条真实记录)",
+   "status": "未处理",
+   "action_needed": "回填需解444锁，且属改写回执内容，需审批"
+  },
+  {
+   "id": "MO-06",
+   "level": "P1",
+   "title": "Gitee配额仍超",
+   "evidence": "服务端报923.176MB/819MB，强推后未GC",
+   "status": "已记录",
+   "action_needed": "等平台GC或删除重建仓库（会清元数据）"
+  },
+  {
+   "id": "MO-07",
+   "level": "P2",
+   "title": "账本格式6种并存",
+   "evidence": "136条sha+文件名 / 81条事件CSV / 71条4逗号 / 24条3逗号 / 21条自由文本 / 4条2逗号",
+   "recommendation": "新行统一事件CSV；历史行不改（append-only），另出解析适配层"
+  },
+  {
+   "id": "MO-08",
+   "level": "P2",
+   "title": "元法则条目差异未消解",
+   "evidence": "本地103条 vs 云端85条(+18/-10)，云端从未给条目级清单",
+   "recommendation": "以本地V2注册表为准逐年比对，差异入仲裁"
+  },
+  {
+   "id": "MO-09",
+   "level": "P2",
+   "title": "3个冗余外部节点无撤销口",
+   "evidence": "EXT-NODE-1C8876C00A/4C815B9024/B51C5C5CB8，外部95/总98",
+   "recommendation": "维持冻结，走ARB-02报备提裁，不重复试撤销端点"
+  },
+  {
+   "id": "MO-10",
+   "level": "P3",
+   "title": "设计系统生成物缺失",
+   "evidence": "tokens/build未产出；lint-no-hardcode.js / audit-tokens.js 为TODO；package.json脚本为占位echo",
+   "recommendation": "补生成器与校验脚本，先出build产物再谈CI"
+  },
+  {
+   "id": "MO-11",
+   "level": "P3",
+   "title": "出题包三块素材缺口",
+   "evidence": "附件2标准库需扩到24条/附件3图纸包/附件5迭代窗口说明缺失",
+   "recommendation": "按提交要求补齐，缺料不得用虚构数据填充"
+  }
+ ],
+ "executed_this_round": [
+  "生成账本并集(341行)",
+  "生成资产哈希登记(35行,覆盖率0→100%)",
+  "生成全域状态快照(含逐件sha256)"
+ ],
+ "pending_approval": [
+  "MO-01 替换只读账本",
+  "MO-04 注册表升v7并定义merkle口径",
+  "MO-05 回填流水线摘要字段",
+  "MO-03 切换本地分支"
+ ],
+ "timestamp": "2026-11-07T14:22:04+08:00"
+}
